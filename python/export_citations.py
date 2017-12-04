@@ -4,8 +4,11 @@ import pandas as pd
 from datetime import datetime 
 import subprocess
 
-#data_dir = '/Users/xlx/Downloads/graph-data'
-data_dir = '/home/xlx/d2/MicrosoftAcademicGraph'
+# Input data directory
+data_dir = '/mnt/data/MicrosoftAcademicGraph'
+
+# Output data directory
+out_dir = '/localdata/u5642715/influenceMapOut'
 
 paper_ref_file = os.path.join(data_dir, 'data_txt', 'PaperReferences.txt')
 print( '{} start reading {} ... '.format(datetime.now(), paper_ref_file))
@@ -18,7 +21,7 @@ conf_file = os.path.join(data_dir, 'data_txt', 'Conferences.txt')
 conf_df = pd.read_table(conf_file, header=None, names=['ConfID', 'Abbrv', 'FullName'])
 
 c = sys.argv[1]
-output_dir = os.path.join(data_dir, 'out', c)
+output_dir = os.path.join(out_dir, c)
 if not os.path.exists(output_dir):
     os.makedirs(output_dir)
 

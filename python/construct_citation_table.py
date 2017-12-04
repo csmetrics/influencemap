@@ -6,8 +6,11 @@ import numpy as np
 import pickle
 import warnings
 
-#data_dir = '/Users/xlx/Downloads/graph-data'
-data_dir = '/home/xlx/d2/MicrosoftAcademicGraph'
+# Input data directory
+data_dir = '/mnt/data/MicrosoftAcademicGraph'
+
+# Output data directory
+out_dir = '/localdata/u5642715/influenceMapOut'
 
 paper_db = os.path.join(data_dir, 'Paper.db')
 
@@ -30,7 +33,8 @@ c = sys.argv[1] #conf_list[0]
 row = conf_df.loc[conf_df['Abbrv'] == c]
 conf_id = list(row['ConfID'])[0]
 
-output_dir = os.path.join(data_dir, 'out', c)
+output_dir = os.path.join(out_dir, c)
+print(output_dir)
 
 conf_paper_file = os.path.join(output_dir, 'papers.'+ c +'.txt')
 df_paper = pd.read_table(conf_paper_file, header=None, 
