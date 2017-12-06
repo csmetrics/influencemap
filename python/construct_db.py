@@ -19,7 +19,7 @@ cur = conn.cursor()
 ref_name = "paper_ref"
 ref_colname = ["paper_id text", "paper_ref_id text"]
 ref_fileidx = [0, 1]
-ref_datapath = os.path.join(data_dir, 'data_txt/Paperreferences.txt')
+ref_datapath = os.path.join(data_dir, 'data_txt/PaperReferences.txt')
 
 # Create table
 construct_table(conn, ref_name, ref_colname)

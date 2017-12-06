@@ -8,15 +8,26 @@ scheme as a list of strings in order
 
 will delete and remake the specified table if it already exists
 """
-def construct_table(conn, name, scheme):
+def construct_table(conn, name, scheme, override=False):
     try:
         cur = conn.cursor()
+
+        # check if override option is True
+        if override:
+            print('{} removing table {}'.format(datetime.now(), name))
+            cur.execute('DROP TABLE IF EXISTS {};'.format(name))
+            print('{} removed table {}'.format(datetime.now(), name))
+
         print('{} creating table {}'.format(datetime.now(), name))
-        cur.execute('DROP TABLE IF EXISTS {};'.format(name))
         cur.execute('CREATE TABLE {} ({});'.format(name, ",".join(scheme)))
         print('{} created table {}'.format(datetime.now(), name))
     except Error as e:
         print(e)
+
+def remove_outer_quotes(string):
+    if string.startswith in quotes and stringendswith in quotes and string.startswith == stringendswith:
+        return string[1:-1]
+    return string
 
 """
 Imports data from f into the table given by name
@@ -24,7 +35,7 @@ Imports data from f into the table given by name
 dataidx is a list of int which specify to columns in the data which correspond
 to colname in order. First column is col 0
 """
-def import_to_table(conn, name, f, colname, dataidx, delimitor='\t'):
+def import_to_table(conn, name, f, colname, dataidx, delimitor='\t', rmquotes=False):
     try:
         cur = conn.cursor()
         cur.execute("SELECT name FROM sqlite_master WHERE type='table' AND name='{}'".format(name))
@@ -40,6 +51,11 @@ def import_to_table(conn, name, f, colname, dataidx, delimitor='\t'):
                 cnt += 1
                 # reorder file data with respect to dataidx
                 vals = [line.strip().split(delimitor)[i] for i in dataidx]
+
+                # remove quotes if option
+                if rmquotes:
+                    vals = map(remove_outer_quotes, vals)
+
                 cur.execute('INSERT INTO {} ({}) VALUES (?, ?);'.format(name, ",".join(colname)), vals)
                 if cnt%1e7 == 0:
                     print('{} {:9.0f} lines of data imported into {}'.format(datetime.now(), cnt, name))
