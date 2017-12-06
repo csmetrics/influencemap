@@ -7,8 +7,8 @@ import construct_db_func
 # Input data directory
 data_dir = '/mnt/data/MicrosoftAcademicGraph'
 
-# Output data directory
-out_dir = '/localdata/u5642715/influenceMapOut'
+# database output directory
+db_dir = '/localdata/common'
 
 db_path = os.path.join(out_dir, 'paper.db')
 
@@ -19,7 +19,7 @@ cur = conn.cursor()
 ref_name = "paper_ref"
 ref_colname = ["paper_id text", "paper_ref_id text"]
 ref_fileidx = [0, 1]
-ref_datapath = os.path.join(out_dir, 'paper_ref_test.db')
+ref_datapath = os.path.join(data_dir, 'data_txt/Paperreferences.txt')
 
 # Create table
 construct_table(conn, ref_name, ref_colname)
