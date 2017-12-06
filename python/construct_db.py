@@ -10,11 +10,12 @@ data_dir = '/mnt/data/MicrosoftAcademicGraph'
 # Output data directory
 out_dir = '/localdata/u5642715/influenceMapOut'
 
-ref_db_path = os.path.join(out_dir, 'paper_ref.db')
+db_path = os.path.join(out_dir, 'paper.db')
 
-conn = sqlite3.connect(ref_db_path)
+conn = sqlite3.connect(db_path)
 cur = conn.cursor()
 
+# paper reference information
 ref_name = "paper_ref"
 ref_colname = ["paper_id text", "paper_ref_id text"]
 ref_fileidx = [0, 1]
