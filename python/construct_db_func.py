@@ -19,7 +19,7 @@ def construct_table(conn, name, scheme, override=False):
             print('{} removed table {}'.format(datetime.now(), name))
 
         print('{} creating table {}'.format(datetime.now(), name))
-        cur.execute('CREATE TABLE {} ({});'.format(name, ",".join(scheme)))
+        cur.execute('CREATE TABLE IF NOT EXISTS {} ({});'.format(name, ",".join(scheme)))
         print('{} created table {}'.format(datetime.now(), name))
     except Error as e:
         print(e)
