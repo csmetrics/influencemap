@@ -29,7 +29,7 @@ for table in table_names:
 
 # get author ids and published papers
 print("{} finding authorIDs associated with {}".format(datetime.now(), author_name))
-cur.execute("CREATE TABLE authIDs AS SELECT authorID FROM authors WHERE authorName LIKE '?'", (author_name))
+cur.execute("CREATE TABLE authIDs AS SELECT authorID FROM authors WHERE authorName LIKE '{}'".format(author_name))
 print("{} finding papers published by {}".format(datetime.now(), author_name))
 cur.execute("CREATE TABLE publishedPapers AS SELECT paperID FROM PAA WHERE authorID IN authIDs")
 print("{} dropping authID table".format(datetime.now()))
