@@ -30,7 +30,7 @@ for table in table_names:
 
 # get author ids and published papers
 print("{} finding authorIDs associated with {}".format(datetime.now(), author_names[0]))
-cur.execute("CREATE TABLE authIDs AS SELECT authorID FROM authors WHERE authorName IN '{}'".format(tuple(author_names)))
+cur.execute("CREATE TABLE authIDs AS SELECT authorID FROM authors WHERE authorName IN {}".format(tuple(author_names)))
 print("{} finding papers published by {}".format(datetime.now(), author_names[0]))
 cur.execute("CREATE TABLE publishedPapers AS SELECT paperID FROM PAA WHERE authorID IN authIDs")
 print("{} dropping authID table".format(datetime.now()))
@@ -77,6 +77,11 @@ for table in table_names[:-2]:
 with open('authors_cited.txt', 'w') as fh:
 	for key in citedDictionary.keys():
 		fh.write("{}\t{}".format(key, citedDictionary[key]))
+
+with open('authors_citing.txt', 'w') as fh:
+	for key in citingDictionary.keys():
+		fh.write("{}\t{}".format(key, citingDictionary[key]))
+
 
 
 # close database connection
