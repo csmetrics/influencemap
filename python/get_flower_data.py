@@ -56,9 +56,9 @@ print("{} dropping citedPapers and citedPaperWeights tables".format(datetime.now
 print("{} connecting papers cited by {} to their respective authors".format(datetime.now(), author_name))
 cur.execute("CREATE TABLE citingPapersAuthors AS SELECT paperID, authorID FROM reducedPAA WHERE paperID IN citingPapers")
 print("{} weighting papers that cite {}".format(datetime.now(), author_name))
-cur.execute("CREATE TABLE citingPaperWeights AS SELECT paperID, (CAST(1 AS float) / CAST(COUNT(authorID) AS float)) AS weightPerAuthor FROM citingPapers GROUP BY authorID")
+cur.execute("CREATE TABLE citingPaperWeights AS SELECT paperID, (CAST(1 AS float) / CAST(COUNT(authorID) AS float)) AS weightPerAuthor FROM citingPapersAuthors GROUP BY authorID")
 print("{} summing weighted scores for authors that cite {}".format(datetime.now(), author_name))
-cur.execute("CREATE TABLE citingAuthorScores AS SELECT authorID, CAST(SUM(weightPerAuthor) as float)  AS weightedScore FROM (citingPapers INNER JOIN citingPaperWeights) GROUP BY authorID")
+cur.execute("CREATE TABLE citingAuthorScores AS SELECT authorID, CAST(SUM(weightPerAuthor) as float)  AS weightedScore FROM (citingPapersAuthors INNER JOIN citingPaperWeights) GROUP BY authorID")
 print("{} dropping citingPapers, citingPaperWeights and publishedPapers tables".format(datetime.now()))
 
 for table in table_names:
