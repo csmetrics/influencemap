@@ -1,14 +1,18 @@
 import sqlite3
+import math
 import os
 import csv
 from datetime import datetime 
+from sqlite3 import Error
+
+chunk_size = 1e7
 
 """
 scheme as a list of strings in order
 
 will delete and remake the specified table if it already exists
 """
-def construct_table(conn, name, scheme, override=False):
+def construct_table(conn, name, scheme, override=False, primary=[]):
     try:
         cur = conn.cursor()
 
@@ -17,6 +21,9 @@ def construct_table(conn, name, scheme, override=False):
             print('{} removing table {}'.format(datetime.now(), name))
             cur.execute('DROP TABLE IF EXISTS {};'.format(name))
             print('{} removed table {}'.format(datetime.now(), name))
+
+        if primary:
+            scheme.append('PRIMARY KEY ({})'.format(",".join(primary)))
 
         print('{} creating table {}'.format(datetime.now(), name))
         cur.execute('CREATE TABLE IF NOT EXISTS {} ({});'.format(name, ",".join(scheme)))
@@ -29,13 +36,22 @@ def remove_outer_quotes(string):
         return string[1:-1]
     return string
 
+def gen_chunks(reader):
+    chunk = []
+    for i, line in enumerate(reader):
+        if (i % chunk_size == 0 and i > 0):
+            yield chunk
+            del chunk[:]
+        chunk.append(line)
+    yield(chunk)
+
 """
 Imports data from f into the table given by name
 
 dataidx is a list of int which specify to columns in the data which correspond
 to colname in order. First column is col 0
 """
-def import_to_table(conn, name, f, colname, dataidx, delimitor='\t', rmquotes=False):
+def import_to_table(conn, name, f, colname, dataidx, delim='\t', rmquotes=False, fmap=id):
     try:
         cur = conn.cursor()
         cur.execute("SELECT name FROM sqlite_master WHERE type='table' AND name='{}'".format(name))
@@ -44,45 +60,37 @@ def import_to_table(conn, name, f, colname, dataidx, delimitor='\t', rmquotes=Fa
 
         # Import table data from file f
         print("{} starting reading data from {}".format(datetime.now(), f))
-        with open(f) as data:
-            line = data.readline()
-            cnt = 0
-            while line:
+        data = csv.reader(open(f, 'r'), delimiter=delim)
+        print("{} finish reading data from {}".format(datetime.now(), f))
+
+        chunk_count = 0
+        cnt = 0
+
+        for chunk in gen_chunks(data):
+            chunk_count += 1
+
+            print("{} begin preprocessing for chunk {}".format(datetime.now(), chunk_count))
+
+            if rmquotes:
+                chunk = list(map(lambda line : list(map(remove_outer_quotes, line)), chunk))
+
+            chunk = list(map(lambda line : list(map(fmap, line)), chunk))
+            print("{} finish preprocessing for chunk {}".format(datetime.now(), chunk_count))
+
+            print("{} begin transaction for chunk {}".format(datetime.now(), chunk_count))
+            cur.execute('BEGIN TRANSACTION')
+
+            for line in chunk:
                 cnt += 1
-                # reorder file data with respect to dataidx
-                vals = [line.strip().split(delimitor)[i] for i in dataidx]
 
-                # remove quotes if option
-                if rmquotes:
-                    vals = map(remove_outer_quotes, vals)
-
-                cur.execute('INSERT INTO {} ({}) VALUES (?, ?);'.format(name, ",".join(colname)), vals)
+                cur.execute('INSERT INTO {} ({}) VALUES (?, ?);'.format(name, ",".join(colname)), line)
                 if cnt%1e7 == 0:
                     print('{} {:9.0f} lines of data imported into {}'.format(datetime.now(), cnt, name))
-                line = data.readline()
 
-            print('{} finished importing {:9.0f} lines of data {}'.format(datetime.now(), cnt, name))
+            cur.execute('COMMIT')
+            print("{} finished transaction for chunk {}".format(datetime.now(), chunk_count))
+
+        print('{} finished importing {:9.0f} lines of data {}'.format(datetime.now(), cnt, name))
+
     except Error as e:
         print(e)
-
-"""
-EXAMPLE
-
-# Input data directory
-data_dir = '/mnt/data/MicrosoftAcademicGraph'
-
-# Output data directory
-out_dir = '/localdata/u5642715/influenceMapOut'
-
-ref_db_path = os.path.join(out_dir, 'paper_ref_test.db')
-
-conn = sqlite3.connect(ref_db_path)
-cur = conn.cursor()
-filepath = os.path.join(data_dir, 'data_txt/PaperReferences.txt')
-
-construct_table(conn, "test", ["a1", "b2"])
-import_to_table(conn, "test", filepath, ["a1", "b2"], [1, 0])
-
-conn.commit()
-conn.close()
-"""
