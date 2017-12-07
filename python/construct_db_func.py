@@ -1,11 +1,12 @@
 import sqlite3
 import math
+import itertools
 import os
 import csv
 from datetime import datetime 
 from sqlite3 import Error
 
-chunk_size = 1e7
+chunk_limit = 999
 
 """
 scheme as a list of strings in order
@@ -36,14 +37,25 @@ def remove_outer_quotes(string):
         return string[1:-1]
     return string
 
-def gen_chunks(reader):
+def gen_chunks(reader, chunk_size, idx):
     chunk = []
     for i, line in enumerate(reader):
         if (i % chunk_size == 0 and i > 0):
             yield chunk
             del chunk[:]
-        chunk.append(line)
+        chunk.append([line[i] for i in idx])
     yield(chunk)
+
+def do_insert(cur, chunk, name, colname):
+    num_cols = len(colname)
+    vals = list(map(lambda line : '({})'.format(','.join(line)), chunk))
+    num_ins = len(vals)
+    # ins_string = ','.join(['({})'.format(','.join((['?'] * num_cols)))] * num_ins)
+    ins_string = ','.join(['({})'.format(','.join((['?'] * num_cols)))] * num_ins)
+    # print(list(itertools.chain.from_iterable((chunk))))
+
+    cur.execute('INSERT INTO {} ({}) VALUES {};'.format(name, ",".join(colname), ins_string), list(itertools.chain.from_iterable((chunk))))
+
 
 """
 Imports data from f into the table given by name
@@ -63,34 +75,30 @@ def import_to_table(conn, name, f, colname, dataidx, delim='\t', rmquotes=False,
         data = csv.reader(open(f, 'r'), delimiter=delim)
         print("{} finish reading data from {}".format(datetime.now(), f))
 
+        chunk_size = math.floor(chunk_limit / len(colname))
         chunk_count = 0
-        cnt = 0
 
-        for chunk in gen_chunks(data):
+        for chunk in gen_chunks(data, chunk_size, dataidx):
             chunk_count += 1
 
-            print("{} begin preprocessing for chunk {}".format(datetime.now(), chunk_count))
+            #print("{} begin preprocessing for chunk {}".format(datetime.now(), chunk_count))
 
             if rmquotes:
                 chunk = list(map(lambda line : list(map(remove_outer_quotes, line)), chunk))
 
             chunk = list(map(lambda line : list(map(fmap, line)), chunk))
-            print("{} finish preprocessing for chunk {}".format(datetime.now(), chunk_count))
+            chunk = list(map(lambda line : list(map(lambda s : str(s), line)), chunk))
+            #print("{} finish preprocessing for chunk {}".format(datetime.now(), chunk_count))
 
-            print("{} begin transaction for chunk {}".format(datetime.now(), chunk_count))
+            #print("{} begin transaction for chunk {}".format(datetime.now(), chunk_count))
             cur.execute('BEGIN TRANSACTION')
 
-            for line in chunk:
-                cnt += 1
-
-                cur.execute('INSERT INTO {} ({}) VALUES (?, ?);'.format(name, ",".join(colname)), line)
-                if cnt%1e7 == 0:
-                    print('{} {:9.0f} lines of data imported into {}'.format(datetime.now(), cnt, name))
+            # cur.executemany('INSERT INTO {} ({}) VALUES (?, ?);'.format(name, ",".join(colname)), chunk)
+            do_insert(cur, chunk, name, colname)
 
             cur.execute('COMMIT')
-            print("{} finished transaction for chunk {}".format(datetime.now(), chunk_count))
-
-        print('{} finished importing {:9.0f} lines of data {}'.format(datetime.now(), cnt, name))
+            if chunk_count % 1e4 == 0:
+                print("{} finished transaction for chunk {}".format(datetime.now(), chunk_count))
 
     except Error as e:
         print(e)
