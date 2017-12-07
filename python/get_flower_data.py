@@ -76,11 +76,11 @@ for table in table_names[:-2]:
 
 with open('authors_cited.txt', 'w') as fh:
 	for key in citedDictionary.keys():
-		fh.write("{}\t{}".format(key, citedDictionary[key]))
+		fh.write("{}\t{}\n".format(key, citedDictionary[key]))
 
 with open('authors_citing.txt', 'w') as fh:
 	for key in citingDictionary.keys():
-		fh.write("{}\t{}".format(key, citingDictionary[key]))
+		fh.write("{}\t{}\n".format(key, citingDictionary[key]))
 
 
 
