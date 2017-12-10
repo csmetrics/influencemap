@@ -3,6 +3,7 @@ import os, sys
 import pandas as pd
 from datetime import datetime 
 import subprocess
+from extractPub import name_to_papers
 
 # Input data directory
 data_dir = '/mnt/data/MicrosoftAcademicGraph'
@@ -11,12 +12,12 @@ data_dir = '/mnt/data/MicrosoftAcademicGraph'
 out_dir = '/localdata/u5642715/influenceMapOut'
 
 # database output directory
-# db_dir = '/localdata/common'
-db_dir = '/localdata/u5642715/influenceMapOut'
+db_dir = '/localdata/common'
+# db_dir = '/localdata/u5642715/influenceMapOut'
 
 # Limit number of query
-#batch_size = 800 # MAX=999
-batch_size = int(sys.argv[2])
+batch_size = 999 # MAX=999
+#batch_size = int(sys.argv[2])
 
 # Need a function which will give a list of papers associated to something
 def construct_cite_db(idsearch, paperlist):
@@ -55,6 +56,13 @@ def construct_cite_db(idsearch, paperlist):
 
     print('---\n{} end query\n---\n'.format(datetime.now()))
 
+    return citing_records, cited_records
+
+    """
+    output_dir = os.path.join(out_dir, idsearch)
+    if not os.path.exists(output_dir):
+        os.makedirs(output_dir)
+
     # Output to a file
     citing_file = os.path.join(output_dir, 'citing.'+idsearch+'.txt')
     with open(citing_file, 'wt') as fh:
@@ -65,36 +73,11 @@ def construct_cite_db(idsearch, paperlist):
         fh.write('\n'.join(['\t'.join(s) for s in cited_records] ))
 
     print('saved to {} and {}'.format(citing_file, cited_file))
+    """
 
-# OLD GREP
-conf_file = os.path.join(data_dir, 'data_txt', 'Conferences.txt')
-conf_df = pd.read_table(conf_file, header=None, names=['ConfID', 'Abbrv', 'FullName'])
+if __name__ = '__main__':
+    user_in = sys.argv[1]
 
-c = sys.argv[1]
-output_dir = os.path.join(out_dir, c)
-if not os.path.exists(output_dir):
-    os.makedirs(output_dir)
+    associated_papers = name_to_papers(user_in)
 
-row = conf_df.loc[conf_df['Abbrv'] == c]
-conf_id = list(row['ConfID'])[0]
-#conf_id = '43AA5802' # "43AA5802	MM	ACM Multimedia"
-conf_paper_file = os.path.join(output_dir, 'papers.'+ c +'.txt')
-#print( conf_id)
-#print(conf_paper_file)
-
-if not os.path.exists(conf_paper_file):
-    paper_file = os.path.join(data_dir, 'data_txt', 'Papers.txt')
-    cmd = "grep " + conf_id +' '+ paper_file + ' > ' + conf_paper_file
-    print("{} {}".format(datetime.now(), cmd) )
-    os.system(cmd)
-
-df_paper = pd.read_table(conf_paper_file, header=None, 
-                         names=['PaperID', 'TitleOrig', 'TitleNorm', 'PubYear', 'PubDate', 
-                               'DOI', 'VenueOrig', 'VenueNorm', 'JournalID', 'ConfID', 'PaperRank' ],
-                         dtype={'PaperID': str})
-df_paper.head()
-set_paper = list(df_paper['PaperID'])
-
-#print(set_paper[0])
-
-construct_cite_db(c, set_paper)
+    construct_cite_db(user_in, associated_papers)

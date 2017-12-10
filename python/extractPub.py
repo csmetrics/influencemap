@@ -1,21 +1,30 @@
 import sys
 import sqlite3
+from datetime import datetime
 
 data_read_autID = '/localdata/common/authors_test.db'
 data_read_paa ='/localdata/u5798145/influencemap/paper.db'
-data_write = '/localdata/u6363358/data/MicrosoftAcademicGraph/foo1.txt'
-db = sqlite3.connect(data_read_autID)
-cur = db.cursor()
-dbPAA = sqlite3.connect(data_read_paa)
-fileW = open(data_write,'w')
+data_dest = '/localdata/u6363358/data/MicrosoftAcademicGraph/foo.txt'
 
-results = []
+db = sqlite3.connect(data_read_autID)
+
+cur = db.cursor()
+
+dbPAA = sqlite3.connect(data_read_paa)
+
+fileW = open(data_dest,'w')
+
+resultPaperID = []
+
 temp = []
+
 name = (sys.argv[1]).lower()
+
 lstname = name.split(' ')[-1]
 
 #This file produce bunch od tuples (paperID, authorID) where authorID are the IDs of the authors that match the given name
 
+#Matching the names given and the authorName
 def isSame(name1, name2):
     ls2 = name2.split(' ')
     ls1 = name1.split(' ')
@@ -46,52 +55,37 @@ def compareMiddle(middle1,middle2):
 
 
 ###Get the tuples whose authorName contains the last name of the given argv
-
-print("SELECT * FROM authors WHERE authorName LIKE " + '\"' + '%' + lstname + '%' + '\"' + ';')
-
+print("{} Getting the (authorID, authorName) tuples".format(datetime.now()))
 cur.execute("SELECT * FROM authors WHERE authorName LIKE " + '\"' + '%' + lstname + '%' + '\"' + ';')
 temp = cur.fetchall()
+cur.close()
 
 cursor = dbPAA.cursor()
 ids =  []
 for tuples in temp:
     if isSame(tuples[-1], name):
-          print(tuples)
           ids.append(tuples[0])
 
 ids = list(set(ids))
 
-### WHERE condition for getting paperID
+#Get the paperID from these authorIDs
 
-num_IDs = len(ids)
-print(num_IDs)
-def getCond():
-##    if num >= 1:
-#        return "authorID == '" + ids[num] + "\' or " + getCond(num - 1)
-#    else:
-#        return "authorID == '" + ids[num] + "\';"
-      res = ''
-      for id in ids:
-         res = res + "authorID == '" + id + "\' or "
-      res = res + ";"
-      return res
+print("{} Getting the (paperID, authorID) tuples".format(datetime.now()))
+cursor.execute("SELECT * FROM PAA WHERE authorID IN {}".format(tuple(ids)))
+resultPaperID = cursor.fetchall()
+cursor.close()
 
-
-count = 0
-#cursor.execute('PRAGMA synchronous = OFF')
-while count < num_IDs:
-    cursor.execute("SELECT * FROM PAA WHERE authorID == " + "'" + ids[count] + "\'" + ";")
-    temp1 = []
-    temp1 = cursor.fetchall()
-    results = results + temp1
-    count += 1
-
-###Write the tuples (paperID, authorID) on a file
-
-for tuples in results:
-    print(tuples[0] + ' ' + tuples[1])
-    fileW.write(tuples[0] + ' ' + tuples[1] + '\n')
+#Writting down the (paperID, authorID) tuples
+print("Writting down (paperID, authorID) to {}".format(data_dest))
+for tuples in resultPaperID:
+    fileW.write(tuples[0] + "	" + tuples[1] + '\n')
 
 fileW.close()
-print('done')
+print("{} done".format(datetime.now()))
+
+
+
+
+
+
 
