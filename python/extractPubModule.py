@@ -17,13 +17,7 @@ def isSame(name1, name2):
          if ls2[0] == ls1[0]:
              return compareMiddle(middle1, middle2)
          else:
-             if len(ls2[0]) == 1 or len(ls1[0]) == 1:
-                  if ls2[0][0] == ls1[0][0]:
-                      return compareMiddle(middle1,middle2)
-                  else:
-                      return False
-             else:
-                  return False
+             return False
     else:
         return False
 
