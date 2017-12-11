@@ -5,7 +5,29 @@ from datetime import datetime
 from extractPubModule import name_to_papers
 from export_citations_author import construct_cite_db
 
-print("gothere, ln 6")
+CHUNK_SIZE = 999
+
+def gen_chunk(rlist):
+    chunk = []
+    for i, line in enumerate(rlist):
+        if (i % CHUNK_SIZE == 0 and i > 0):
+            yield chunk
+            del chunk[:]
+        chunk.append(line)
+    yield(chunk)
+
+def do_insert(cur, tname, chunk):
+    ins_string = ','.join(['(?)'] * len(chunk))
+    cur.execute('INSERT INTO {} VALUES {};'.format(tname, ins_string), chunk)
+
+def cite_table(cur, tname, rlist):
+    for chunk in gen_chunk(rlist):
+        cur.execute('BEGIN TRANSACTION')
+
+        do_insert(cur, tname, chunk)
+
+        cur.execute('COMMIT')
+    
 
 # set database location
 #data_dir = "/localdata/u5798145/influencemap"
@@ -44,11 +66,17 @@ citing_records, cited_records = construct_cite_db(name, associated_papers)
 cur.execute("CREATE TABLE citedPapers (paperID text);")
 cur.execute("CREATE TABLE citingPapers (paperID text);")
 
-for paper_id in citing_records:
-    cur.execute('INSERT INTO citingPapers VALUES (?);', (paper_id,))
+cite_table(cur, 'citedPapers', cited_records)
+cite_table(cur, 'citingPapers', citing_records)
 
-for paper_id in cited_records:
-    cur.execute('INSERT INTO citedPapers VALUES (?);', (paper_id,))
+# print(len(citing_records))
+# print(len(cited_records))
+# 
+# for paper_id in citing_records:
+#     cur.execute('INSERT INTO citingPapers VALUES (?);', (paper_id,))
+# 
+# for paper_id in cited_records:
+#     cur.execute('INSERT INTO citedPapers VALUES (?);', (paper_id,))
 
 # create reduced database
 cur.execute("CREATE TABLE reducedPAA AS SELECT * FROM PAA WHERE paperID IN (SELECT paperID FROM citedPapers UNION SELECT paperID FROM citingPapers)")
