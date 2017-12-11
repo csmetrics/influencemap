@@ -42,6 +42,10 @@ print('{} indexing paper_ref_id in paper_ref'.format(datetime.now()))
 cur.execute('CREATE INDEX idx_paper_ref_id ON paper_ref (paper_ref_id);')
 print('{} indexed paper_ref_id in paper_ref'.format(datetime.now()))
 
+# Other pragmas
+cur.execute('PRAGMA count_changes=OFF;')
+
+
 # Save
 conn.commit()
 conn.close()

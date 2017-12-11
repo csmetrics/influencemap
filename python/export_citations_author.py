@@ -3,7 +3,6 @@ import os, sys
 import pandas as pd
 from datetime import datetime 
 import subprocess
-from extractPub import name_to_papers
 
 # Input data directory
 data_dir = '/mnt/data/MicrosoftAcademicGraph'
@@ -39,22 +38,25 @@ def construct_cite_db(idsearch, paperlist):
     print('\n---\n{} starting query\n---'.format(datetime.now()))
     for chunk in paper_chunks:
         print('{} start query of paper chunk of size {}'.format(datetime.now(), len(chunk)))
-        citing_query = 'SELECT * FROM paper_ref WHERE paper_id IN ({})'.format(','.join(['?'] * len(chunk)))
-        cited_query = 'SELECT * FROM paper_ref WHERE paper_ref_id IN ({})'.format(','.join(['?'] * len(chunk)))
+        citing_query = 'SELECT paper_ref_id FROM paper_ref WHERE paper_ref_id IN ({})'.format(','.join(['?'] * len(chunk)))
+        cited_query = 'SELECT paper_id FROM paper_ref WHERE paper_id IN ({})'.format(','.join(['?'] * len(chunk)))
         
         
         print('{} citing query'.format(datetime.now()))
         cur.execute(citing_query, chunk)
-        citing_records += cur.fetchall()
+        citing_records += list(map(lambda t : t[0], cur.fetchall()))
 
         print('{} cited query'.format(datetime.now()))
         cur.execute(cited_query, chunk)
-        cited_records += cur.fetchall()
+        cited_records += list(map(lambda t : t[0], cur.fetchall()))
 
         total_prog += len(chunk)
         print('{} finish query of paper chunk, total prog {:.2f}%'.format(datetime.now(), total_prog/total * 100))
 
     print('---\n{} end query\n---\n'.format(datetime.now()))
+
+    cur.close()
+    conn.close()
 
     return citing_records, cited_records
 
@@ -75,7 +77,9 @@ def construct_cite_db(idsearch, paperlist):
     print('saved to {} and {}'.format(citing_file, cited_file))
     """
 
-if __name__ = '__main__':
+if __name__ == '__main__':
+    from extractPub import name_to_papers
+
     user_in = sys.argv[1]
 
     associated_papers = name_to_papers(user_in)
