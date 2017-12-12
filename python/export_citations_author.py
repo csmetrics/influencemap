@@ -78,7 +78,7 @@ def construct_cite_db(idsearch, paperlist):
     """
 
 if __name__ == '__main__':
-    from extractPub import name_to_papers
+    from extract_papers import name_to_papers
 
     user_in = sys.argv[1]
 
