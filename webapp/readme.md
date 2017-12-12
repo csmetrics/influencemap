@@ -3,5 +3,5 @@
 This project is written in python3 with the Django web framework.
 
 1. Install Django and other requirements `pip install django`
-2. Run the server: `$python manage.py runserver [port_id]`
-3. Access your local server: http://localhost:8000 or on server: http://server_ip:port_id
+2. Run on local machine `$python manage.py runserver`, then access your local server: http://localhost:8000
+3. Run the app from the server `$python manage.py runserver server_ip:port_id` then access here: http://server_ip:port_id
