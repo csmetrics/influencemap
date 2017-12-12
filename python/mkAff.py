@@ -9,7 +9,7 @@ dbPAA = sqlite3.connect(db_PAA)
 
 dbA = sqlite3.connect(db_Authors)
 
-name = 'steve m blackburn'
+name = 'stephen m blackburn'
 
 #Get all the (name, authodID, number of paper, normalised affiliation name)
 curP = dbPAA.cursor()
@@ -51,10 +51,6 @@ def compareMiddle(middle1, middle2):
     return (middleShort2 in middleShort1) or (middleShort1 in middleShort2)
     
 
-
-
-
-
 print("{} matching the right name".format(datetime.now()))
 for a in allAuthor:
     if isSame(a[1],name):
@@ -66,33 +62,25 @@ aID = []
 for a in author:
    aID.append(a)
 
-curP.execute("SELECT authorID, paperID, affiliationNameOriginal FROM paperAuthorAffiliations WHERE authorID IN {} ".format(tuple(aID)))
+print("SELECT authorID, COUNT(*), affiliationNameOriginal FROM paperAuthorAffiliations WHERE authorID IN {}".format(tuple(aID)) + " GROUP BY authorID")
+curP.execute("SELECT authorID, COUNT(*), affiliationNameOriginal FROM paperAuthorAffiliations WHERE authorID IN {}".format(tuple(aID)) + " GROUP BY authorID")
 
 result = curP.fetchall()
 
-
 finalres = []
 
-for tup in result: 
-    finalres.append((author[tup[0]], tup[0], tup[1], tup[2]))
-
-finalresult = []
-
-for tup in finalres:
-    currentA = tup[0]
-    count = 0
-    for tups in finalres:
-        if tups[0] == curentA:
-             count += 1
-    finalresult.append(tup[0],tup[1],count,tup[2])
-
+for tuples in result:
+   finalres.append((author[tuples[0]], tuples[0], tuples[1], tuples[2]))
+  # print((author[tuples[0]], tuples[0], tuples[1], tuples[2]))
 
 curP.close()
+
+finalres = sorted(finalres,key=lambda x: x[2],reverse=True)
+
+for tuples in finalres:
+   print(tuples)
+
 print("{} done".format(datetime.now()))
-
-for tup in finalresult:
-    print(tup)
-
 
 
 
