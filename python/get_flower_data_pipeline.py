@@ -69,15 +69,6 @@ cur.execute("CREATE TABLE citingPapers (paperID text);")
 cite_table(cur, 'citedPapers', cited_records)
 cite_table(cur, 'citingPapers', citing_records)
 
-# print(len(citing_records))
-# print(len(cited_records))
-# 
-# for paper_id in citing_records:
-#     cur.execute('INSERT INTO citingPapers VALUES (?);', (paper_id,))
-# 
-# for paper_id in cited_records:
-#     cur.execute('INSERT INTO citedPapers VALUES (?);', (paper_id,))
-
 # create reduced database
 cur.execute("CREATE TABLE reducedPAA AS SELECT * FROM PAA WHERE paperID IN (SELECT paperID FROM citedPapers UNION SELECT paperID FROM citingPapers)")
 

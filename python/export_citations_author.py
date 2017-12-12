@@ -15,8 +15,8 @@ db_dir = '/localdata/common'
 # db_dir = '/localdata/u5642715/influenceMapOut'
 
 # Limit number of query
-batch_size = 999 # MAX=999
-#batch_size = int(sys.argv[2])
+BATCH_SIZE = 999 # MAX=999
+#BATCH_SIZE = int(sys.argv[2])
 
 # Need a function which will give a list of papers associated to something
 def construct_cite_db(idsearch, paperlist):
@@ -27,7 +27,7 @@ def construct_cite_db(idsearch, paperlist):
     cited_records = list()
     citing_records = list()
     # paper_string = ",".join(['"' + paper + '"' for paper in paperlist])
-    paper_chunks = [paperlist[x:x+batch_size] for x in range(0, len(paperlist), batch_size)]
+    paper_chunks = [paperlist[x:x+BATCH_SIZE] for x in range(0, len(paperlist), BATCH_SIZE)]
 
     conn = sqlite3.connect(db_path)
     cur = conn.cursor()
