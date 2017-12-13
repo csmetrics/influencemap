@@ -5,11 +5,19 @@ db_PAA = '/localdata/u5798145/influencemap/paper.db'
 
 db_Authors = '/localdata/common/authors_test.db'
 
+db_key = '/localdata/u6363358/data/PaperKeywords.db'
+
+db_FName = '/localdata/u6363358/data/FieldOfStudy.db'
+
 dbPAA = sqlite3.connect(db_PAA)
 
 dbA = sqlite3.connect(db_Authors)
 
-name = 'stephen m blackburn'
+dbK = sqlite3.connect(db_key)
+
+dbN = sqlite3.connect(db_FName)
+
+name = 'antony l hosking'
 
 #Get all the (name, authodID, number of paper, normalised affiliation name)
 curP = dbPAA.cursor()
@@ -26,6 +34,12 @@ allAuthor = curA.fetchall()
 curA.close()
 
 author = {}
+
+def removeCon(lst):
+   if lst[-2] == ",":
+       return lst[:-2] + ")"
+   else: 
+       return lst
 
 def isSame(name1, name2):
    ls2 = name2.split(' ')
@@ -62,8 +76,8 @@ aID = []
 for a in author:
    aID.append(a)
 
-print("SELECT authorID, paperID, affiliationNameOriginal FROM paperAuthorAffiliations WHERE authorID IN {}".format(tuple(aID)))
-curP.execute("SELECT authorID, paperID, affiliationNameOriginal FROM paperAuthorAffiliations WHERE authorID IN {}".format(tuple(aID)))
+print(removeCon("SELECT authorID, paperID, affiliationNameOriginal FROM paperAuthorAffiliations WHERE authorID IN {}".format(tuple(aID))))
+curP.execute(removeCon("SELECT authorID, paperID, affiliationNameOriginal FROM paperAuthorAffiliations WHERE authorID IN {}".format(tuple(aID))))
 
 result = curP.fetchall()
 
@@ -81,20 +95,39 @@ finalresult = []
 def mostCommon(lst):
     return max(set(lst),key=lst.count)
 
+curK = dbK.cursor()
+curFN = dbN.cursor()
+
+def getField(pID):
+    curK.execute(removeCon("SELECT FieldID FROM PaperKeywords WHERE PaperID IN {}".format(tuple(pID))))
+    res = curK.fetchall()
+    res[:] = [x for x in res if x != '']
+    mostFreq = ''
+    if len(res) > 0:
+        mostFreq = mostCommon(res)[0]
+        print("SELECT FieldName FROM FieldOfStudy WHERE FieldID == '" + mostFreq + "'")
+        curFN.execute("SELECT FieldName FROM FieldOfStudy WHERE FieldID == '" + mostFreq + "'")
+        fname = curFN.fetchall()[0][0]
+        return fname
+    else:
+        return ''
+
 for tuples in finalres:
     currentID = tuples[1]
     if currentID not in list(map(lambda x: x[1],finalresult)):
         count = 0
         tep = []
+        pID = []
         for tup in finalres:
            if tup[1] == currentID:
               count += 1
+              pID.append(tup[-2])  
               tep.append(tup[-1])
         tep[:] = [x for x in tep if x != '']
         if len(tep) > 0:
-            finalresult.append((tuples[0],tuples[1],count,mostCommon(tep)))
+            finalresult.append((tuples[0],tuples[1],count,mostCommon(tep),getField(pID)))
         else:
-            finalresult.append((tuples[0],tuples[1],count,''))
+            finalresult.append((tuples[0],tuples[1],count,'',getField(pID)))
 
 finalresult = sorted(finalresult,key=lambda x: x[2],reverse=True)
 
@@ -102,22 +135,10 @@ print("{} finished counting".format(datetime.now()))
 for tuples in finalresult:
    print(tuples)
 
+curK.close()
+curFN.close()
+
 print("{} done".format(datetime.now()))
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 
 
