@@ -4,7 +4,7 @@ Goal: Constructing maps of intellectual influence using academic data.
 
 Make it searchable and visualisable on the web.
 
-## methodologyit cites
+## methodology
 The influence of a person, institution or conference (an entity) on and from other entities is measured using citations. The influence flowers show a normalised influence score meaning that flowers for two different entities cannot be directly compared. The underlying influence scores depend on the number of citations to and from an entity and the number of authors involved in the publications recieving the citations.
 ### calculating the influence one entity has on another entity
 Influence on an entity is calculated as the sum of the per author weight for each of the citations to a paper written by that entity, as shown below.
