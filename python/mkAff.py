@@ -62,32 +62,47 @@ aID = []
 for a in author:
    aID.append(a)
 
-print("SELECT authorID, COUNT(*), affiliationNameOriginal FROM paperAuthorAffiliations WHERE authorID IN {}".format(tuple(aID)) + " GROUP BY authorID")
-curP.execute("SELECT authorID, COUNT(*), affiliationNameOriginal FROM paperAuthorAffiliations WHERE authorID IN {}".format(tuple(aID)) + " GROUP BY authorID")
+print("SELECT authorID, paperID, affiliationNameOriginal FROM paperAuthorAffiliations WHERE authorID IN {}".format(tuple(aID)))
+curP.execute("SELECT authorID, paperID, affiliationNameOriginal FROM paperAuthorAffiliations WHERE authorID IN {}".format(tuple(aID)))
 
 result = curP.fetchall()
 
 finalres = []
 
+print("{} start counting".format(datetime.now()))
 for tuples in result:
    finalres.append((author[tuples[0]], tuples[0], tuples[1], tuples[2]))
   # print((author[tuples[0]], tuples[0], tuples[1], tuples[2]))
 
 curP.close()
 
-finalres = sorted(finalres,key=lambda x: x[2],reverse=True)
+finalresult = []
+
+def mostCommon(lst):
+    return max(set(lst),key=lst.count)
 
 for tuples in finalres:
+    currentID = tuples[1]
+    if currentID not in list(map(lambda x: x[1],finalresult)):
+        count = 0
+        tep = []
+        for tup in finalres:
+           if tup[1] == currentID:
+              count += 1
+              tep.append(tup[-1])
+        tep[:] = [x for x in tep if x != '']
+        if len(tep) > 0:
+            finalresult.append((tuples[0],tuples[1],count,mostCommon(tep)))
+        else:
+            finalresult.append((tuples[0],tuples[1],count,''))
+
+finalresult = sorted(finalresult,key=lambda x: x[2],reverse=True)
+
+print("{} finished counting".format(datetime.now()))
+for tuples in finalresult:
    print(tuples)
 
 print("{} done".format(datetime.now()))
-
-
-
-
-
-
-
 
 
 
