@@ -5,7 +5,7 @@ BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 PYTHON_DIR = os.path.join(os.path.dirname(BASE_DIR), 'python')
 sys.path.insert(0, PYTHON_DIR)
 
-# from mkAff import getAuthor
+from mkAff import getAuthor
 
 def main(request):
     optionlist = [  # option list
@@ -16,18 +16,14 @@ def main(request):
     keyword = ""
     option = optionlist[0] # default selection
     inflflower = None
-    authors = [
-        {"id": 111, "name": "steve", "numpaper": 23, "affiliation":"anu", "field":["f1", "f2"], "mostWeightedPaper":"test", "publishedDate":"2017/8"},
-        {"id": 222, "name": "stev2222e", "numpaper": 11, "affiliation":"anu", "field":["f1", "f2"], "mostWeightedPaper":"test", "publishedDate":"2017/8"},
-    ]
-
+    authors = []
     # get user input from main.html page
     if request.method == "GET":
         print(request.GET)
         if "search" in request.GET:
             keyword = request.GET.get("keyword")
-            # if keyword != "":
-            #     authors =  getAuthor(keyword)
+            if keyword != "":
+                authors =  getAuthor(keyword)
             option = [x for x in optionlist if x.get('id', '') == request.GET.get("option")][0]
             print(keyword, option)
 
