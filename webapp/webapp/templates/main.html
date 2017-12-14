@@ -62,6 +62,45 @@
         </div>
       </div>
       {% endif %}
+      {% if authors %}
+        <form>
+          <table border="1">
+            <thead>
+              <th>Name</th>
+              <th>Number of papers</th>
+              <th>Affiliations</th>
+              <th>Fields</th>
+              <th>Papers</th>
+              <th>Include</th>
+            </thead>    
+          {% for auth in authors %}
+            <tr>
+              <td>{{auth.name}}</td>
+              <td>{{auth.numpaper}}</td>
+              <td>
+                <ul>
+                {% for i in auth.affiliation %}
+                  <li>{{i}}
+                {% endfor %}
+                </ul>
+              </td>
+              <td>
+                <ol>
+                {% for i in auth.field %}
+                  <li>{{i}}</li>
+                {% endfor %}
+                </ol>
+              </td>
+              <td>
+                {{auth.mostWeightedPaper}}, {{auth.publishedDate}}
+              </td>
+              <td><input type="checkbox" name={{auth.id}}></td>
+            </tr>
+          {% endfor %}
+        </table>
+        <input type="submit" name="submit">
+      </form>
+    {% endif %}
     </div>
   </body>
 </html>

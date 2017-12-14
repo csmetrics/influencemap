@@ -136,7 +136,7 @@ def getAuthor(name):
    
     for tuples in tempres:
         mostWeight = getPaperName(max(tuples[4],key=lambda x: x[1])[0])
-        finalresult.append({'name':tuples[0],'authorID':tuples[1],'#paper':tuples[2],'affiliation':tuples[3],'field':getField(list(map(lambda x: x[0],tuples[4]))),'mostWeightedPaper':mostWeight[0],'publishedDate':mostWeight[1]})
+        finalresult.append({'name':tuples[0],'authorID':tuples[1],'numpaper':tuples[2],'affiliation':tuples[3],'field':getField(list(map(lambda x: x[0],tuples[4]))),'mostWeightedPaper':mostWeight[0],'publishedDate':mostWeight[1]})
     print("{} done".format(datetime.now()))
       
     curK.close()
@@ -147,4 +147,4 @@ def getAuthor(name):
    
     return finalresult 
 
-trial = getAuthor('stephen m blackburn')
+# trial = getAuthor('stephen m blackburn')
