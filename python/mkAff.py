@@ -1,5 +1,6 @@
 import sqlite3
 from datetime import datetime
+from collections import Counter
 
 db_PAA = '/localdata/u5798145/influencemap/paper.db'
 
@@ -20,6 +21,10 @@ dbN = sqlite3.connect(db_FName)
 curK = dbK.cursor()
 
 curFN = dbN.cursor()
+
+curP = dbPAA.cursor()
+
+curA = dbA.cursor()
 
 def removeCon(lst):
    if lst[-2] == ",":
@@ -59,15 +64,24 @@ def getField(pID):
     curK.execute(removeCon("SELECT FieldID FROM PaperKeywords WHERE PaperID IN {}".format(tuple(pID))))
     res = list(map(lambda x: x[0],curK.fetchall()))
     if len(res) > 0:
-         curFN.execute("SELECT FieldName FROM FieldOfStudy WHERE FieldID == '" + mostCommon(res) + "'")
-         return curFN.fetchall()[0][0]
+         res = sorted(res,key=Counter(res).get,reverse=True)
+         topThree = []
+         for element in res:
+             if len(topThree) < 3 and element not in topThree:
+                 topThree.append(element)
+             elif len(topThree) >= 3: break
+         curFN.execute(removeCon("SELECT FieldName FROM FieldOfStudy WHERE FieldID IN {}".format(tuple(topThree))))
+         return list(map(lambda x: x[0],curFN.fetchall()))
     else:
-         return ''
+         return []
+
+def getPaperName(pID):
+    curP.execute("SELECT paperTitle,publishedDate FROM papers WHERE paperID == '" + pID + "'")
+    title = curP.fetchall()[0]
+    return title
 
 
-def name_to_papers(name):
-    curP = dbPAA.cursor()
-    curA = dbA.cursor()
+def getAuthor(name):
     #Extracting al the authorID whose name matches
 
     allAuthor = []
@@ -75,7 +89,6 @@ def name_to_papers(name):
     curA.execute("SELECT * FROM authors WHERE authorName LIKE" + "'%" + name.split(' ')[-1] + "%'")
     allAuthor = curA.fetchall()
     print("{} finished getting all the aID".format(datetime.now()))
-    curA.close()
    
     author = {} #authorID is the key and authorName is the value
     print("{} matching the right name".format(datetime.now()))
@@ -89,7 +102,6 @@ def name_to_papers(name):
     print("{} getting all the (authorID, paperID, affiliationName, paperWeight)".format(datetime.now()))
     curP.execute(removeCon("SELECT authorID, paperID, affiliationNameOriginal, paperWeight FROM weightedPaperAuthorAffiliations WHERE authorID IN {}".format(tuple(aID))))
     result = curP.fetchall()
-    curP.close()
  
     finalres = []
     
@@ -123,15 +135,16 @@ def name_to_papers(name):
     print("{} finish counting, getting the fieldName".format(datetime.now()))
    
     for tuples in tempres:
-        finalresult.append((tuples[0],tuples[1],tuples[2],tuples[3],getField(list(map(lambda x: x[0],tuples[4]))),max(tuples[4],key=lambda x: x[1])[0]))
+        mostWeight = getPaperName(max(tuples[4],key=lambda x: x[1])[0])
+        finalresult.append({'name':tuples[0],'authorID':tuples[1],'#paper':tuples[2],'affiliation':tuples[3],'field':getField(list(map(lambda x: x[0],tuples[4]))),'mostWeightedPaper':mostWeight[0],'publishedDate':mostWeight[1]})
     print("{} done".format(datetime.now()))
       
     curK.close()
     curFN.close()
    
-    for tuples in finalresult:
-        print(tuples)
+    for dic in finalresult:
+        print(dic)
    
-    return list(map(lambda x: x[1],result)) 
+    return finalresult 
 
-x = name_to_papers('stephen m blackburn')
+trial = getAuthor('stephen m blackburn')
