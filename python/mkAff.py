@@ -3,28 +3,10 @@ from datetime import datetime
 from collections import Counter
 
 db_PAA = '/localdata/u5798145/influencemap/paper.db'
-
 db_Authors = '/localdata/common/authors_test.db'
-
 db_key = '/localdata/u6363358/data/PaperKeywords.db'
-
 db_FName = '/localdata/u6363358/data/FieldOfStudy.db'
 
-dbPAA = sqlite3.connect(db_PAA)
-
-dbA = sqlite3.connect(db_Authors)
-
-dbK = sqlite3.connect(db_key)
-
-dbN = sqlite3.connect(db_FName)
-
-curK = dbK.cursor()
-
-curFN = dbN.cursor()
-
-curP = dbPAA.cursor()
-
-curA = dbA.cursor()
 
 def removeCon(lst):
    if lst[-2] == ",":
@@ -61,6 +43,10 @@ def mostCommon(lst):
 
 
 def getField(pID):
+    dbK = sqlite3.connect(db_key, check_same_thread = False)
+    dbN = sqlite3.connect(db_FName, check_same_thread = False)
+    curK = dbK.cursor()
+    curFN = dbN.cursor()
     curK.execute(removeCon("SELECT FieldID FROM PaperKeywords WHERE PaperID IN {}".format(tuple(pID))))
     res = list(map(lambda x: x[0],curK.fetchall()))
     if len(res) > 0:
@@ -71,17 +57,35 @@ def getField(pID):
                  topThree.append(element)
              elif len(topThree) >= 3: break
          curFN.execute(removeCon("SELECT FieldName FROM FieldOfStudy WHERE FieldID IN {}".format(tuple(topThree))))
-         return list(map(lambda x: x[0],curFN.fetchall()))
+         output = list(map(lambda x: x[0],curFN.fetchall())) 
+         dbK.commit()
+         dbN.commit()
+         dbK.close()
+         dbN.close()
+         return output
     else:
+         dbK.commit()
+         dbN.commit()
+         dbK.close()
+         dbN.close()
          return []
 
 def getPaperName(pID):
+    dbPAA = sqlite3.connect(db_PAA, check_same_thread = False)
+    curP = dbPAA.cursor()
     curP.execute("SELECT paperTitle,publishedDate FROM papers WHERE paperID == '" + pID + "'")
     title = curP.fetchall()[0]
+    dbPAA.commit()
+    dbPAA.close()
     return title
 
 
 def getAuthor(name):
+    dbPAA = sqlite3.connect(db_PAA, check_same_thread = False)
+    dbA = sqlite3.connect(db_Authors, check_same_thread = False)
+    curP = dbPAA.cursor()
+    curA = dbA.cursor()
+
     #Extracting al the authorID whose name matches
 
     allAuthor = []
@@ -138,13 +142,14 @@ def getAuthor(name):
         mostWeight = getPaperName(max(tuples[4],key=lambda x: x[1])[0])
         finalresult.append({'name':tuples[0],'authorID':tuples[1],'numpaper':tuples[2],'affiliation':tuples[3],'field':getField(list(map(lambda x: x[0],tuples[4]))),'mostWeightedPaper':mostWeight[0],'publishedDate':mostWeight[1]})
     print("{} done".format(datetime.now()))
-      
-    curK.close()
-    curFN.close()
+    
+    dbPAA.commit()
+    dbA.commit()  
+    dbPAA.close()
+    dbA.close()
    
     for dic in finalresult:
         print(dic)
    
     return finalresult 
 
-# trial = getAuthor('stephen m blackburn')
