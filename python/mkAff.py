@@ -1,5 +1,6 @@
 import sqlite3
 from datetime import datetime
+from collections import Counter
 
 db_PAA = '/localdata/u5798145/influencemap/paper.db'
 
@@ -17,23 +18,13 @@ dbK = sqlite3.connect(db_key)
 
 dbN = sqlite3.connect(db_FName)
 
-name = 'antony l hosking'
+curK = dbK.cursor()
 
-#Get all the (name, authodID, number of paper, normalised affiliation name)
+curFN = dbN.cursor()
+
 curP = dbPAA.cursor()
 
 curA = dbA.cursor()
-
-allAuthor = []
-print("{} getting all the aID".format(datetime.now()))
-print("SELECT * FROM authors WHERE authorName LIKE" + "'%" + name.split(' ')[-1] + "%'")
-curA.execute("SELECT * FROM authors WHERE authorName LIKE" + "'%" + name.split(' ')[-1] + "%'")
-print("{} finished getting all the aID".format(datetime.now()))
-allAuthor = curA.fetchall()
-
-curA.close()
-
-author = {}
 
 def removeCon(lst):
    if lst[-2] == ",":
@@ -65,93 +56,95 @@ def compareMiddle(middle1, middle2):
     return (middleShort2 in middleShort1) or (middleShort1 in middleShort2)
     
 
-print("{} matching the right name".format(datetime.now()))
-for a in allAuthor:
-    if isSame(a[1],name):
-          author[a[0]] = a[1]      
-
-result = []
-
-aID = []
-for a in author:
-   aID.append(a)
-
-print(removeCon("SELECT authorID, paperID, affiliationNameOriginal FROM paperAuthorAffiliations WHERE authorID IN {}".format(tuple(aID))))
-curP.execute(removeCon("SELECT authorID, paperID, affiliationNameOriginal FROM paperAuthorAffiliations WHERE authorID IN {}".format(tuple(aID))))
-
-result = curP.fetchall()
-
-finalres = []
-
-print("{} start counting".format(datetime.now()))
-for tuples in result:
-   finalres.append((author[tuples[0]], tuples[0], tuples[1], tuples[2]))
-  # print((author[tuples[0]], tuples[0], tuples[1], tuples[2]))
-
-curP.close()
-
-finalresult = []
-
 def mostCommon(lst):
     return max(set(lst),key=lst.count)
 
-curK = dbK.cursor()
-curFN = dbN.cursor()
 
 def getField(pID):
     curK.execute(removeCon("SELECT FieldID FROM PaperKeywords WHERE PaperID IN {}".format(tuple(pID))))
-    res = curK.fetchall()
-    res[:] = [x for x in res if x != '']
-    mostFreq = ''
+    res = list(map(lambda x: x[0],curK.fetchall()))
     if len(res) > 0:
-        mostFreq = mostCommon(res)[0]
-        print("SELECT FieldName FROM FieldOfStudy WHERE FieldID == '" + mostFreq + "'")
-        curFN.execute("SELECT FieldName FROM FieldOfStudy WHERE FieldID == '" + mostFreq + "'")
-        fname = curFN.fetchall()[0][0]
-        return fname
+         res = sorted(res,key=Counter(res).get,reverse=True)
+         topThree = []
+         for element in res:
+             if len(topThree) < 3 and element not in topThree:
+                 topThree.append(element)
+             elif len(topThree) >= 3: break
+         curFN.execute(removeCon("SELECT FieldName FROM FieldOfStudy WHERE FieldID IN {}".format(tuple(topThree))))
+         return list(map(lambda x: x[0],curFN.fetchall()))
     else:
-        return ''
+         return []
 
-for tuples in finalres:
-    currentID = tuples[1]
-    if currentID not in list(map(lambda x: x[1],finalresult)):
-        count = 0
-        tep = []
-        pID = []
-        for tup in finalres:
-           if tup[1] == currentID:
-              count += 1
-              pID.append(tup[-2])  
-              tep.append(tup[-1])
-        tep[:] = [x for x in tep if x != '']
-        if len(tep) > 0:
-            finalresult.append((tuples[0],tuples[1],count,mostCommon(tep),getField(pID)))
-        else:
-            finalresult.append((tuples[0],tuples[1],count,'',getField(pID)))
-
-finalresult = sorted(finalresult,key=lambda x: x[2],reverse=True)
-
-print("{} finished counting".format(datetime.now()))
-for tuples in finalresult:
-   print(tuples)
-
-curK.close()
-curFN.close()
-
-print("{} done".format(datetime.now()))
+def getPaperName(pID):
+    curP.execute("SELECT paperTitle,publishedDate FROM papers WHERE paperID == '" + pID + "'")
+    title = curP.fetchall()[0]
+    return title
 
 
+def getAuthor(name):
+    #Extracting al the authorID whose name matches
 
+    allAuthor = []
+    print("{} getting all the aID".format(datetime.now()))
+    curA.execute("SELECT * FROM authors WHERE authorName LIKE" + "'%" + name.split(' ')[-1] + "%'")
+    allAuthor = curA.fetchall()
+    print("{} finished getting all the aID".format(datetime.now()))
+   
+    author = {} #authorID is the key and authorName is the value
+    print("{} matching the right name".format(datetime.now()))
+    for a in allAuthor:
+       if isSame(a[1],name):
+           author[a[0]] = a[1]
+    print("{} finished matching".format(datetime.now()))
+    
+    aID = list(author.keys())
+    result = []
+    print("{} getting all the (authorID, paperID, affiliationName, paperWeight)".format(datetime.now()))
+    curP.execute(removeCon("SELECT authorID, paperID, affiliationNameOriginal, paperWeight FROM weightedPaperAuthorAffiliations WHERE authorID IN {}".format(tuple(aID))))
+    result = curP.fetchall()
+ 
+    finalres = []
+    
+    #Putting the authorName into the tuples
+    for tuples in result:
+       finalres.append((author[tuples[0]],tuples[0],tuples[1],tuples[2],tuples[3]))
 
+    #Getting the most frequently appeared affiliation
+    tempres = []
+    finalresult = []
+   
+    print("{} counting the number of paper published by an author".format(datetime.now()))
+    for tuples in finalres:
+        currentID = tuples[1]
+        if currentID not in list(map(lambda x:x[1], tempres)):
+            count = 0
+            tep = []
+            pID = []
+            for tup in finalres:
+                if tup[1] == currentID:
+                    count += 1
+                    pID.append((tup[-3],tup[-1]))
+                    tep.append(tup[-2])
+            tep[:] = [x for x in tep if x != '']
+            if len(tep) > 0:
+                tempres.append((tuples[0],tuples[1],count,mostCommon(tep),pID))
+            else:
+                tempres.append((tuples[0],tuples[1],count,'',pID))
+    
+    tempres = sorted(tempres,key=lambda x: x[2],reverse=True)
+    print("{} finish counting, getting the fieldName".format(datetime.now()))
+   
+    for tuples in tempres:
+        mostWeight = getPaperName(max(tuples[4],key=lambda x: x[1])[0])
+        finalresult.append({'name':tuples[0],'authorID':tuples[1],'#paper':tuples[2],'affiliation':tuples[3],'field':getField(list(map(lambda x: x[0],tuples[4]))),'mostWeightedPaper':mostWeight[0],'publishedDate':mostWeight[1]})
+    print("{} done".format(datetime.now()))
+      
+    curK.close()
+    curFN.close()
+   
+    for dic in finalresult:
+        print(dic)
+   
+    return finalresult 
 
-
-
-
-
-
-
-
-
-
-
-
+trial = getAuthor('stephen m blackburn')
