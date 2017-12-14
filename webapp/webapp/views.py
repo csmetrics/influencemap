@@ -5,7 +5,7 @@ BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 PYTHON_DIR = os.path.join(os.path.dirname(BASE_DIR), 'python')
 sys.path.insert(0, PYTHON_DIR)
 
-from mkAff import getAuthors 
+from mkAff import getAuthor 
 
 def main(request):
     optionlist = [  # option list
@@ -22,7 +22,7 @@ def main(request):
     if request.method == "POST":
         keyword = request.POST.get("keyword")
         if keyword != "":
-            authors =  getAuthors(keyword)
+            authors =  getAuthor(keyword)
         option = [x for x in optionlist if x.get('id', '') == request.POST.get("option")][0]
         print(keyword, option)
 
