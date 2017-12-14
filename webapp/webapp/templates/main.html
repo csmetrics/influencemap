@@ -76,13 +76,7 @@
             <tr>
               <td>{{auth.name}}</td>
               <td>{{auth.numpaper}}</td>
-              <td>
-                <ul>
-                {% for i in auth.affiliation %}
-                  <li>{{i}}
-                {% endfor %}
-                </ul>
-              </td>
+              <td>{{auth.affiliation}}</td>
               <td>
                 <ol>
                 {% for i in auth.field %}
