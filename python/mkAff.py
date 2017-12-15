@@ -55,7 +55,7 @@ def getField(pID):
          topThree = {}
          for i in res:
              if len(topThree) < 3:
-                 topThree[i[0]] = i[1]
+                 topThree[i[0]] = i[1] #topthree contains {fieldID, numPaper}
              else: break
          curFN.execute(removeCon("SELECT FieldName, FieldID FROM FieldOfStudy WHERE FieldID IN {}".format(tuple(map(lambda x: x,topThree)))))
          output = list(map(lambda x: (x[0],topThree[x[1]]),curFN.fetchall())) 
@@ -74,12 +74,34 @@ def getField(pID):
 def getPaperName(pID):
     dbPAA = sqlite3.connect(db_PAA, check_same_thread = False)
     curP = dbPAA.cursor()
-    curP.execute("SELECT paperTitle,publishedDate FROM papers WHERE paperID == '" + pID + "'")
-    title = curP.fetchall()[0]
+    curP.execute(removeCon("SELECT paperTitle,publishedDate FROM papers WHERE paperID IN {}".format(tuple(pID))))
+    title = curP.fetchall()
+    date = ''
+    currentT = ''
+    for p in title:
+       if compareDate(p[1],date): #if the current date is greater
+           date = p[1]
+           currentT = p[0]
     dbPAA.commit()
     dbPAA.close()
-    return title
+    return (currentT,date)
 
+def compareDate(currentT, date):
+    if currentT != '':
+       if date != '':
+          if currentT[:4] > date[:4]: 
+              return True
+          elif currentT[:4] == date[:4]:
+              if currentT[5:7] > date[5:7]:
+                   return True
+              elif currentT[5:7] == date[5:7]:
+                  if currentT[-2:] > date[-2:]:
+                      return True
+                  else: return False
+              else: return False
+          else: return False
+       else: return True
+    else: return False
 
 def getAuthor(name):
     dbPAA = sqlite3.connect(db_PAA, check_same_thread = False)
@@ -104,15 +126,15 @@ def getAuthor(name):
     
     aID = list(author.keys())
     result = []
-    print("{} getting all the (authorID, paperID, affiliationName, paperWeight)".format(datetime.now()))
-    curP.execute(removeCon("SELECT authorID, paperID, affiliationNameOriginal, paperWeight FROM weightedPaperAuthorAffiliations WHERE authorID IN {}".format(tuple(aID))))
+    print("{} getting all the (authorID, paperID, affiliationName)".format(datetime.now()))
+    curP.execute(removeCon("SELECT authorID, paperID, affiliationNameOriginal FROM weightedPaperAuthorAffiliations WHERE authorID IN {}".format(tuple(aID))))
     result = curP.fetchall()
  
     finalres = []
     
     #Putting the authorName into the tuples
     for tuples in result:
-       finalres.append((author[tuples[0]],tuples[0],tuples[1],tuples[2],tuples[3]))
+       finalres.append((author[tuples[0]],tuples[0],tuples[1],tuples[2]))
 
     #Getting the most frequently appeared affiliation
     tempres = []
@@ -128,8 +150,8 @@ def getAuthor(name):
             for tup in finalres:
                 if tup[1] == currentID:
                     count += 1
-                    pID.append((tup[-3],tup[-1]))
-                    tep.append(tup[-2])
+                    pID.append(tup[-2]) #pID contains paperID
+                    tep.append(tup[-1]) #tep contatins affiliationNameOriginal
             tep[:] = [x for x in tep if x != '']
             if len(tep) > 0:
                 tempres.append((tuples[0],tuples[1],count,mostCommon(tep),pID))
@@ -140,8 +162,8 @@ def getAuthor(name):
     print("{} finish counting, getting the fieldName".format(datetime.now()))
    
     for tuples in tempres:
-        mostWeight = getPaperName(max(tuples[4],key=lambda x: x[1])[0])
-        finalresult.append({'name':tuples[0],'authorID':tuples[1],'numpaper':tuples[2],'affiliation':tuples[3],'field':getField(list(map(lambda x: x[0],tuples[4]))),'mostWeightedPaper':mostWeight[0],'publishedDate':mostWeight[1]})
+        recent = getPaperName(tuples[-1]) #a tuple (paperName, date)
+        finalresult.append({'name':tuples[0],'authorID':tuples[1],'numpaper':tuples[2],'affiliation':tuples[3],'field':getField(tuples[4]),'recentPaper':recent[0],'publishedDate':recent[1]})
     print("{} done".format(datetime.now()))
     
     dbPAA.commit()

@@ -7,6 +7,7 @@
     <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0-beta.2/css/bootstrap.min.css" integrity="sha384-PsH8R72JQ3SOdhVi3uxftmaW6Vc51MKb0q5P2rRUpPvrszuE4W1povHYgTpBfshb" crossorigin="anonymous">
     <link href="https://maxcdn.bootstrapcdn.com/font-awesome/4.7.0/css/font-awesome.min.css" rel="stylesheet" integrity="sha384-wvfXpqpZZVQGK6TAh5PVlGOfQNHSoD2xbE+QkPxCAFlNEevoEH3Sl0sibVcOQVnN" crossorigin="anonymous">
     <link rel="stylesheet" href="{% static 'css/AdminLTE.css' %}" />
+    <link rel="stylesheet" href="{% static 'css/auto-complete.css' %}" />
     <link rel="stylesheet" href="{% static 'css/webapp.css' %}" />
 
     <script src="https://code.jquery.com/jquery-3.2.1.slim.min.js" integrity="sha384-KJ3o2DKtIkvYIK3UENzmM7KCkRr/rE9/Qpg6aAZGJwFDMVNA/GpGFF93hXpG5KkN" crossorigin="anonymous"></script>
@@ -26,7 +27,7 @@
           <form action="." method="get">
             <div class="search-bar">
               <div class="input-group input-group-sm" style="width: 300px">
-                <input type="text" name="keyword" class="form-control" {% if selectedKeyword %} value="{{ selectedKeyword }}" {% endif %}>
+                <input id="name-search-bar" type="text" name="keyword" class="form-control" {% if selectedKeyword %} value="{{ selectedKeyword }}" {% endif %}>
                 <span class="input-group-btn">
                   <button type="submit" name="search" value="search" class="btn btn-flat"><i class="fa fa-search"></i></button>
                 </span>
@@ -63,7 +64,7 @@
       {% endif %}
       {% if authors %}
         <form>
-          <table border="1">
+          <table class="table table-condensed table-bordered table-hover">
             <thead>
               <th>Name</th>
               <th>Number of papers</th>
@@ -78,7 +79,7 @@
               <td>{{auth.numpaper}}</td>
               <td>{{auth.affiliation}}</td>
               <td>
-                <ol>
+                <ol style="margin:0">
                 {% for i in auth.field %}
                   <li>{{i}}</li>
                 {% endfor %}
@@ -97,3 +98,22 @@
     </div>
   </body>
 </html>
+<script src="{% static 'js/auto-complete.min.js' %}"></script>
+<script>
+var autoCompleteAuthorList = {{ autoCompleteAuthor | safe }}
+var searchAutoComplete = new autoComplete({
+    selector: '#name-search-bar',
+    minChars: 2,
+    source: function(term, suggest){
+        term = term.toLowerCase();
+        var choices = autoCompleteAuthorList;
+        var suggestions = [];
+        var maxSuggest = 10;
+        for (i = 0; i < choices.length && suggestions.length < maxSuggest; i++) {
+            if (~choices[i].toLowerCase().indexOf(term))
+              suggestions.push(choices[i]);
+        }
+        suggest(suggestions);
+    }
+});
+</script>
