@@ -1,6 +1,7 @@
 import sqlite3
 from datetime import datetime
 from collections import Counter
+import operator
 
 db_PAA = '/localdata/u5798145/influencemap/paper.db'
 db_Authors = '/localdata/common/authors_test.db'
@@ -50,14 +51,14 @@ def getField(pID):
     curK.execute(removeCon("SELECT FieldID FROM PaperKeywords WHERE PaperID IN {}".format(tuple(pID))))
     res = list(map(lambda x: x[0],curK.fetchall()))
     if len(res) > 0:
-         res = sorted(res,key=Counter(res).get,reverse=True)
-         topThree = []
-         for element in res:
-             if len(topThree) < 3 and element not in topThree:
-                 topThree.append(element)
-             elif len(topThree) >= 3: break
-         curFN.execute(removeCon("SELECT FieldName FROM FieldOfStudy WHERE FieldID IN {}".format(tuple(topThree))))
-         output = list(map(lambda x: x[0],curFN.fetchall())) 
+         res = sorted(dict(Counter(res)).items(),key=operator.itemgetter(1),reverse=True)
+         topThree = {}
+         for i in res:
+             if len(topThree) < 3:
+                 topThree[i[0]] = i[1]
+             else: break
+         curFN.execute(removeCon("SELECT FieldName, FieldID FROM FieldOfStudy WHERE FieldID IN {}".format(tuple(map(lambda x: x,topThree)))))
+         output = list(map(lambda x: (x[0],topThree[x[1]]),curFN.fetchall())) 
          dbK.commit()
          dbN.commit()
          dbK.close()
@@ -153,3 +154,4 @@ def getAuthor(name):
    
     return finalresult 
 
+trial = getAuthor('stephen m blackburn')
