@@ -12,17 +12,17 @@ db_dir = cfg.data_dir
 db_path = os.path.join(db_dir, 'paper_info.db')
 
 # Table details
-table_name = 'authname'
-table_col = ['auth_id', 'auth_name']
-table_type = ['text', 'text']
+table_name = 'confname'
+table_col = ['conf_id', 'conf_abv', 'conf_name']
+table_type = ['text', 'text', 'text']
 table_coltype = build_coltype(table_col, table_type)
 
 # Data file details
-data_file = 'Authors.txt'
-data_ids = [0, 1]
+data_file = 'ConferenceSeries.txt'
+data_ids = [0, 1, 2]
 data_path = os.path.join(data_dir, data_file)
 
-def construct_authname():
+def construct_confname():
     conn = sqlite3.connect(db_path)
     cur = conn.cursor()
 
@@ -34,10 +34,10 @@ def construct_authname():
 
     # Index first column
     create_index(table_name, table_col[0])
-
+         
     # Save
     conn.commit()
     conn.close()
 
 if __name__ == '__main__':
-    construct_authname()
+    construct_confname()

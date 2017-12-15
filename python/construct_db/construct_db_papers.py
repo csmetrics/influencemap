@@ -1,43 +1,43 @@
-import sqlite3
-import os
-import csv
-from datetime import datetime 
-import re
-# from construct_db_func import *
+import sqlite3, os
+from datetime import datetime
+from construct_db_func import build_coltype, construct_table, import_to_table
+import construct_db_config as cfg
 
 # Input data directory
-data_dir = '/mnt/data/MicrosoftAcademicGraph'
+data_dir = cfg.data_dir
 
 # database output directory
-db_dir = '/localdata/u5798145/influencemap'
+db_dir = cfg.data_dir
 
-db_path = os.path.join(db_dir, 'paper.db')
+db_path = os.path.join(db_dir, 'paper_info.db')
 
-conn = sqlite3.connect(db_path)
-cur = conn.cursor()
+# Table details
+table_name = 'papers'
+table_col = ['paper_id', 'conf_id']
+table_type = ['text', 'text']
+table_coltype = build_coltype(table_col, table_type)
 
-print("{}\tconnected to {}.".format(db_path, datetime.now()))
+# Data file details
+data_file = 'Papers.txt'
+data_ids = [0, 9]
+data_path = os.path.join(data_dir, data_file)
 
-# paper reference information
-ref_name = "paperAuthorAffiliations"
-ref_colname = ["paperID text", "authorID text", "affiliationID text", "affiliationNameOriginal text", "affiliationName text", "authorSeqNumber text"]
-ref_fileidx = range(6)
-ref_datapath = os.path.join(data_dir, 'data_txt/PaperAuthorAffiliations.txt')
+def construct_papers():
+    conn = sqlite3.connect(db_path)
+    cur = conn.cursor()
 
-cur.execute('drop table if exists {}'.format(ref_name))
-cur.execute('create table {} ({})'.format(ref_name,", ".join(ref_colname)))
+    # Construct table
+    construct_table(conn, name, coltype, override=True)
 
-count = 0
+    # Import data to table
+    import_to_table(conn, name, data_path, table_col, data_ids)
 
-for line in open(ref_datapath, 'r'):
-    tokens = line.split('\t')
-    tokens = ['"{}"'.format(re.sub('[\'\" ]', '', token)) for token in tokens]
-    query = "insert into paperAuthorAffiliations (paperID, authorID, affiliationID, affiliationNameOriginal, affiliationName, authorSeqNumber) values ({})".format(",".join([tokens[i] for i in ref_fileidx]))
-    cur.execute(query)
-    count += 1
-    if count % 100000 == 0:
-        print("{}\tinserted {} lines into {}".format(datetime.now(), count, ref_name))
+    # Index first column
+    create_index(table_name, table_col[0])
+         
+    # Save
+    conn.commit()
+    conn.close()
 
-# Save
-conn.commit()
-conn.close()
+if __name__ == '__main__':
+    construct_papers()
