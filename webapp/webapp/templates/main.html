@@ -63,9 +63,9 @@
       </div>
       {% endif %}
       {% if authors %}
-        <form>
-          <table class="table table-condensed table-bordered table-hover">
-            <thead>
+      <div class="container"><form>
+          <table class="table table-condensed table-bordered table-hover" style="table-layout: fixed; width: 100%">
+           <thead>
               <th>Name</th>
               <th>Number of papers</th>
               <th>Affiliations</th>
@@ -77,7 +77,7 @@
             <tr>
               <td>{{auth.name}}</td>
               <td>{{auth.numpaper}}</td>
-              <td>{{auth.affiliation}}</td>
+              <td style="word-wrap: break-word">{{auth.affiliation}}</td>
               <td>
                 <ol style="margin:0">
                 {% for i in auth.field %}
@@ -85,15 +85,15 @@
                 {% endfor %}
                 </ol>
               </td>
-              <td>
+              <td style="word-wrap: break-word">
                 {{auth.mostWeightedPaper}}, {{auth.publishedDate}}
               </td>
-              <td><input type="checkbox" name="authorlist" value={{auth.id}}></td>
+              <td><input type="checkbox" name="authorlist" value={{auth.authorID}}></td>
             </tr>
           {% endfor %}
         </table>
         <input type="submit" name="submit">
-      </form>
+    </div></form>
     {% endif %}
     </div>
   </body>
