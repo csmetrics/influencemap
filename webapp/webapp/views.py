@@ -7,6 +7,16 @@ sys.path.insert(0, PYTHON_DIR)
 
 from mkAff import getAuthor
 
+AuthorList = []
+def loadAuthorList():
+    global AuthorList
+    path = os.path.join(BASE_DIR, "webapp/cache/AuthorList.txt")
+    if len(AuthorList) == 0:
+        with open(path, "r") as f:
+            AuthorList = [name.strip() for name in f]
+    return AuthorList
+
+
 def main(request):
     optionlist = [  # option list
         {"id":"author", "name":"Author"},
@@ -17,6 +27,7 @@ def main(request):
     option = optionlist[0] # default selection
     inflflower = None
     authors = []
+
     # get user input from main.html page
     if request.method == "GET":
         print(request.GET)
@@ -35,6 +46,7 @@ def main(request):
 
     # render page with data
     return render(request, "main.html", {
+        "autoCompleteAuthor": loadAuthorList(),
         "optionlist": optionlist,
         "selectedKeyword": keyword,
         "selectedOption": option,
