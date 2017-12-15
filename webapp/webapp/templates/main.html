@@ -64,7 +64,7 @@
       {% endif %}
       {% if authors %}
         <form>
-          <table border="1">
+          <table class="table table-condensed table-bordered table-hover">
             <thead>
               <th>Name</th>
               <th>Number of papers</th>
@@ -79,7 +79,7 @@
               <td>{{auth.numpaper}}</td>
               <td>{{auth.affiliation}}</td>
               <td>
-                <ol>
+                <ol style="margin:0">
                 {% for i in auth.field %}
                   <li>{{i}}</li>
                 {% endfor %}
@@ -103,7 +103,7 @@
 var autoCompleteAuthorList = {{ autoCompleteAuthor | safe }}
 var searchAutoComplete = new autoComplete({
     selector: '#name-search-bar',
-    minChars: 3,
+    minChars: 2,
     source: function(term, suggest){
         term = term.toLowerCase();
         var choices = autoCompleteAuthorList;
