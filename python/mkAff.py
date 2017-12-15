@@ -22,23 +22,19 @@ def isSame(name1, name2):
    middle2 = ls2[1:-1]
    if ls2[-1] == ls1[-1]:
        if ls2[0] == ls1[0]:
-           return compareMiddle(middle1, middle2)
+           middleShort1 = ''
+           middleShort2 = ''
+           for char in middle1:
+               middleShort1 = middleShort1 + char[0]
+           for char in middle2:
+               middleShort2 = middleShort2 + char[0]
+           return (middleShort2 in middleShort1) or (middleShort1 in middleShort2)
        else:
            return False
    else:
       return False
 
-
-def compareMiddle(middle1, middle2):
-    middleShort1 = ''
-    middleShort2 = ''
-    for char in middle1:
-       middleShort1 = middleShort1 + char[0]
-    for char in middle2:
-       middleShort2 = middleShort2 + char[0]
-    return (middleShort2 in middleShort1) or (middleShort1 in middleShort2)
-    
-
+   
 def mostCommon(lst):
     return max(set(lst),key=lst.count)
 
@@ -106,6 +102,7 @@ def compareDate(currentT, date):
 def getAuthor(name):
     dbPAA = sqlite3.connect(db_PAA, check_same_thread = False)
     dbA = sqlite3.connect(db_Authors, check_same_thread = False)
+    dbA.create_function("isSame",2,isSame)
     curP = dbPAA.cursor()
     curA = dbA.cursor()
 
@@ -113,16 +110,15 @@ def getAuthor(name):
 
     allAuthor = []
     print("{} getting all the aID".format(datetime.now()))
-    curA.execute("SELECT * FROM authors WHERE authorName LIKE" + "'%" + name.split(' ')[-1] + "%'")
+    curA.execute("SELECT * FROM authors WHERE authorName LIKE + '%" + name.split(' ')[-1] + "%' AND " + "isSame(authorName," + "'" + name + "')")
     allAuthor = curA.fetchall()
     print("{} finished getting all the aID".format(datetime.now()))
    
     author = {} #authorID is the key and authorName is the value
-    print("{} matching the right name".format(datetime.now()))
+    #print("{} matching the right name".format(datetime.now()))
     for a in allAuthor:
-       if isSame(a[1],name):
-           author[a[0]] = a[1]
-    print("{} finished matching".format(datetime.now()))
+         author[a[0]] = a[1]
+    #print("{} finished matching".format(datetime.now()))
     
     aID = list(author.keys())
     result = []
@@ -180,4 +176,4 @@ def getAuthor(name):
    
     return (finalresult,aIDpIDDict)  
 
-trial = getAuthor('antony l hosking')
+trial = getAuthor('stephen m blackburn')
