@@ -129,6 +129,9 @@ def getAuthor(name):
     print("{} getting all the (authorID, paperID, affiliationName)".format(datetime.now()))
     curP.execute(removeCon("SELECT authorID, paperID, affiliationNameOriginal FROM weightedPaperAuthorAffiliations WHERE authorID IN {}".format(tuple(aID))))
     result = curP.fetchall()
+
+    aIDpIDDict = {}
+    
  
     finalres = []
     
@@ -153,6 +156,7 @@ def getAuthor(name):
                     pID.append(tup[-2]) #pID contains paperID
                     tep.append(tup[-1]) #tep contatins affiliationNameOriginal
             tep[:] = [x for x in tep if x != '']
+            aIDpIDDict[currentID] = pID
             if len(tep) > 0:
                 tempres.append((tuples[0],tuples[1],count,mostCommon(tep),pID))
             else:
@@ -173,7 +177,9 @@ def getAuthor(name):
    
     for dic in finalresult:
         print(dic)
+    for t in aIDpIDDict:
+        print(t, aIDpIDDict[t])
    
-    return finalresult 
+    return (finalresult,aIDpIDDict)  
 
-trial = getAuthor('stephen m blackburn')
+trial = getAuthor('antony l hosking')
