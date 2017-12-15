@@ -5,7 +5,7 @@ import operator
 
 db_PAA = '/localdata/u5798145/influencemap/paper.db'
 db_Authors = '/localdata/common/authors_test.db'
-db_key = '/localdata/u6363358/data/PaperKeywords.db'
+db_key = '/localdata/u6363358/data/paperKeywords.db'
 db_FName = '/localdata/u6363358/data/FieldOfStudy.db'
 
 
@@ -48,7 +48,7 @@ def getField(pID):
     dbN = sqlite3.connect(db_FName, check_same_thread = False)
     curK = dbK.cursor()
     curFN = dbN.cursor()
-    curK.execute(removeCon("SELECT FieldID FROM PaperKeywords WHERE PaperID IN {}".format(tuple(pID))))
+    curK.execute(removeCon("SELECT FieldID FROM paperKeywords WHERE PaperID IN {}".format(tuple(pID))))
     res = list(map(lambda x: x[0],curK.fetchall()))
     if len(res) > 0:
          res = sorted(dict(Counter(res)).items(),key=operator.itemgetter(1),reverse=True)
@@ -177,8 +177,6 @@ def getAuthor(name):
    
     for dic in finalresult:
         print(dic)
-    for t in aIDpIDDict:
-        print(t, aIDpIDDict[t])
    
     return (finalresult,aIDpIDDict)  
 
