@@ -10,17 +10,17 @@ data_dir = cfg.data_dir
 db_path = cfg.db_path
 
 # Table details
-table_name = 'paa'
-table_col = ['paper_id', 'auth_id', 'affi_id']
-table_type = ['text', 'text', 'text']
+table_name = 'paper_ref'
+table_col = ['paper_id', 'paper_ref_id']
+table_type = ['text', 'text']
 table_coltype = build_coltype(table_col, table_type)
 
 # Data file details
-data_file = 'PaperAuthorAffiliations.txt'
-data_ids = [0, 1, 2]
+data_file = 'PaperReferences.txt'
+data_ids = [0, 1]
 data_path = os.path.join(data_dir, data_file)
 
-def construct_paa():
+def construct_ref():
     conn = sqlite3.connect(db_path)
 
     # Construct table
@@ -29,12 +29,13 @@ def construct_paa():
     # Import data to table
     import_to_table(conn, table_name, data_path, table_col, data_ids)
 
-    # Index first column
+    # Index both column
     create_index(conn, table_name, table_col[0])
+    create_index(conn, table_name, table_col[1])
 
     # Save
     conn.commit()
     conn.close()
 
 if __name__ == '__main__':
-    construct_paa()
+    construct_ref()
