@@ -7,6 +7,7 @@ from construct_db_paa import construct_paa
 from construct_db_authname import construct_authname
 from construct_db_confname import construct_confname
 from construct_db_affiname import construct_affiname
+from construct_db_ref import construct_ref
 import construct_db_config as cfg
 
 # Input data directory
@@ -18,12 +19,20 @@ db_path = cfg.db_path
 conn = sqlite3.connect(db_path)
 cur = conn.cursor()
 
+# Pragmas to go fast
+#cur.execute('PRAGMA journal_mode = OFF')
+cur.execute('PRAGMA cache_size = 1000000000')
+cur.execute('PRAGMA page_size = 65536')
+#cur.execute('PRAGMA synchronous = OFF')
+#cur.execute('PRAGMA journal_mode = MEMORY')
+
 construct_confname()
 construct_affiname()
 construct_authname()
 
 construct_papers()
 construct_paa()
+construct_ref()
 
 # Save
 conn.commit()

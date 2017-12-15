@@ -43,11 +43,6 @@ def construct_table(conn, name, scheme, override=False, primary=[]):
     except Error as e:
         print(e)
 
-def remove_outer_quotes(string):
-    if string.startswith in quotes and stringendswith in quotes and string.startswith == stringendswith:
-        return string[1:-1]
-    return string
-
 def gen_chunks(reader, chunk_size, idx):
     chunk = []
     for i, line in enumerate(reader):
@@ -73,7 +68,7 @@ Imports data from f into the table given by name
 dataidx is a list of int which specify to columns in the data which correspond
 to colname in order. First column is col 0
 """
-def import_to_table(conn, name, f, colname, dataidx, delim='\t', rmquotes=False, fmap=None, transaction=True):
+def import_to_table(conn, name, f, colname, dataidx, delim='\t', fmap=None, transaction=True):
     try:
         cur = conn.cursor()
         cur.execute("SELECT name FROM sqlite_master WHERE type='table' AND name='{}'".format(name))
@@ -96,9 +91,6 @@ def import_to_table(conn, name, f, colname, dataidx, delim='\t', rmquotes=False,
                 row_count += len(chunk)
 
                 #print("{} begin preprocessing for chunk {}".format(datetime.now(), chunk_count))
-
-                if rmquotes:
-                    chunk = map(lambda line : list(map(remove_outer_quotes, line)), chunk)
 
                 if fmap:
                     chunk = map(lambda line : list(map(fmap, line)), chunk)
@@ -127,6 +119,8 @@ def import_to_table(conn, name, f, colname, dataidx, delim='\t', rmquotes=False,
                 cur.execute('INSERT INTO {} ({}) VALUES {};'.format(name, ",".join(colname), ins_string), list(iline))
                 if line_count % 1e6 == 0:
                     print("{} finished inserting {} rows".format(datetime.now(), row_count))
+
+        cur.close()
 
     except Error as e:
         print(e)
