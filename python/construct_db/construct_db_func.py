@@ -38,6 +38,8 @@ def construct_table(conn, name, scheme, override=False, primary=[]):
         print('{} creating table {}'.format(datetime.now(), name))
         cur.execute('CREATE TABLE IF NOT EXISTS {} ({});'.format(name, ",".join(scheme)))
         print('{} created table {}'.format(datetime.now(), name))
+
+        cur.close()
     except Error as e:
         print(e)
 
@@ -129,8 +131,12 @@ def import_to_table(conn, name, f, colname, dataidx, delim='\t', rmquotes=False,
     except Error as e:
         print(e)
 
-def create_index(table, col):
+def create_index(conn, table, col):
+    cur = conn.cursor()
+
     idx_name = 'indx_{}_{}'.format(table, col)
     print('{} indexing {} in {}'.format(datetime.now(), col, table))
     cur.execute('CREATE INDEX {} ON {} ({});'.format(idx_name, table, col))
     print('{} indexed {} in {}'.format(datetime.now(), col, table))
+
+    cur.close()

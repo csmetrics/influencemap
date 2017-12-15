@@ -1,15 +1,13 @@
 import sqlite3, os
 from datetime import datetime
-from construct_db_func import build_coltype, construct_table, import_to_table
+from construct_db_func import build_coltype, construct_table, import_to_table, create_index
 import construct_db_config as cfg
 
 # Input data directory
 data_dir = cfg.data_dir
 
-# database output directory
-db_dir = cfg.data_dir
-
-db_path = os.path.join(db_dir, 'paper_info.db')
+# database path
+db_path = cfg.db_path
 
 # Table details
 table_name = 'papers'
@@ -24,16 +22,15 @@ data_path = os.path.join(data_dir, data_file)
 
 def construct_papers():
     conn = sqlite3.connect(db_path)
-    cur = conn.cursor()
 
     # Construct table
-    construct_table(conn, name, coltype, override=True)
+    construct_table(conn, table_name, table_coltype, override=True)
 
     # Import data to table
-    import_to_table(conn, name, data_path, table_col, data_ids)
+    import_to_table(conn, table_name, data_path, table_col, data_ids)
 
     # Index first column
-    create_index(table_name, table_col[0])
+    create_index(conn, table_name, table_col[0])
          
     # Save
     conn.commit()
