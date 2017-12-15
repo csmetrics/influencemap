@@ -21,18 +21,24 @@ def isSame(name1, name2):
    middle1 = ls1[1:-1]
    middle2 = ls2[1:-1]
    if ls2[-1] == ls1[-1]:
-       if ls2[0] == ls1[0]:
-           middleShort1 = ''
-           middleShort2 = ''
-           for char in middle1:
-               middleShort1 = middleShort1 + char[0]
-           for char in middle2:
-               middleShort2 = middleShort2 + char[0]
-           return (middleShort2 in middleShort1) or (middleShort1 in middleShort2)
+       if len(ls2[0]) == 1 or len(ls1[0]) == 1:
+            if ls2[0][0] == ls1[0][0]:
+                return compareMiddle(middle1, middle2)
+            else:return False
        else:
-           return False
+           if ls2[0] == ls1[0]: return compareMiddle(middle1, middle2)
+           else: return False
    else:
       return False
+
+def compareMiddle(m1,m2):
+   ms1 = ''
+   ms2 = ''
+   for char in m1:
+      ms1 = ms1 + char[0]
+   for char in m2:
+      ms2 = ms2 + char[0]
+   return (ms1 in ms2) or (ms2 in ms1) 
 
    
 def mostCommon(lst):
@@ -176,4 +182,4 @@ def getAuthor(name):
    
     return (finalresult,aIDpIDDict)  
 
-trial = getAuthor('stephen m blackburn')
+trial = getAuthor('brian p schmidt')
