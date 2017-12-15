@@ -14,6 +14,7 @@ def loadAuthorList():
     if len(AuthorList) == 0:
         with open(path, "r") as f:
             AuthorList = [name.strip() for name in f]
+    AuthorList = list(set(AuthorList))
     return AuthorList
 
 
