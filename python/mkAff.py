@@ -7,6 +7,7 @@ db_PAA = '/localdata/u5798145/influencemap/paper.db'
 db_Authors = '/localdata/common/authors_test.db'
 db_key = '/localdata/u6363358/data/paperKeywords.db'
 db_FName = '/localdata/u6363358/data/FieldOfStudy.db'
+db_Jour = '/localdata/u6363358/data/Journals.db'
 
 
 def removeCon(lst):
@@ -182,4 +183,40 @@ def getAuthor(name):
    
     return (finalresult,aIDpIDDict)  
 
-trial = getAuthor('brian p schmidt')
+def getJournal(name):
+    dbPAA = sqlite3.connect(db_PAA, check_same_thread = False)
+    dbJ = sqlite3.connect(db_Jour, check_same_thread = False)
+    curP = dbPAA.cursor()
+    curJ = dbJ.cursor()
+    print("{} getting the journalIDs".format(datetime.now()))
+    curJ.execute("SELECT * FROM Journals WHERE JournalName LIKE '%" + name +"%'")
+    jID = list(map(lambda x: x[0],curJ.fetchall()))
+    journals = curJ.fetchall()
+    print("{} finished getting jID".format(datetime.now()))
+    print("{} getting the paper published".format(datetime.now()))
+    curP.execute(removeCon("SELECT paperID, paperTitle, publishedDate, journalID FROM papers WHERE journalID IN {}".format(tuple(jID))))
+    papers = curP.fetchall()
+    print("{} finished getting paper".format(datetime.now()))
+    
+    #grouping tuples by journalID
+    jID_papers = {}
+    for tuples in papers:
+       currentJID = tuples[3]
+       p = []
+       for tup in papers:
+           if tup[3] == currentJID:
+               p.append((tup[0],tup[1],tup[2]))
+       jID_papers[currentJID] = p
+
+    for k in jID_papers:
+        print(jID_papers[k])
+
+    #jID_papers is a dict {jID, [(pID,pTitle,publishedDate)]}, journal is a list
+    #[journalID, journalName]
+    return (jID_papers, journals)
+              
+
+
+   
+
+trial = getJournal('Canadian Poetry')
