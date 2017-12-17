@@ -176,4 +176,4 @@ def getAuthor(name):
    
     return (finalresult,aIDpIDDict)  
 
-trial = getAuthor('stephen m blackburn')
+# trial = getAuthor('stephen m blackburn')
