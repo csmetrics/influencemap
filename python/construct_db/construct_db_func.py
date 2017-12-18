@@ -68,7 +68,7 @@ Imports data from f into the table given by name
 dataidx is a list of int which specify to columns in the data which correspond
 to colname in order. First column is col 0
 """
-def import_to_table(conn, name, f, colname, dataidx, delim='\t', fmap=None, transaction=True):
+def import_to_table(conn, name, f, colname, dataidx, delim='\t', fmap=None, transaction=False):
     try:
         cur = conn.cursor()
         cur.execute("SELECT name FROM sqlite_master WHERE type='table' AND name='{}'".format(name))
@@ -120,6 +120,7 @@ def import_to_table(conn, name, f, colname, dataidx, delim='\t', fmap=None, tran
                 cur.execute('INSERT INTO {} ({}) VALUES {};'.format(name, ",".join(colname), ins_string), list(iline))
                 if row_count % 1e6 == 0:
                     print("{} finished inserting {} rows".format(datetime.now(), row_count))
+            print("{} finished inserting {} rows".format(datetime.now(), row_count))
 
         cur.close()
 
