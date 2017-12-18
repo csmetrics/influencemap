@@ -205,6 +205,7 @@ def getJournal(name):
     #jID_papers is a dict {jID, [(pID,pTitle,publishedDate)]}, journal is a list
     #[journalID, journalName]
     return (jID_papers, journals)
+<<<<<<< HEAD
  
 def getConf(name):
     dbConf = sqlite3.connect(db_conf, check_same_thread = False)
@@ -238,5 +239,6 @@ def getConf(name):
 
 
 
-
+if __name__ == '__main__':
+    trial = getAuthor('j eliot b moss')
 
