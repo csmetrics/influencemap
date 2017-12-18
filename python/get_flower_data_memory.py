@@ -4,6 +4,7 @@ import sys
 from datetime import datetime
 from extract_papers import name_to_papers
 from export_citations_author import construct_cite_db
+from entity_type import *
 
 # Limit number of query
 BATCH_SIZE = 999 # MAX=999
@@ -14,8 +15,16 @@ db_dir = "/localdata/u5642715/influenceMapOut"
 # output directory
 dir_out = "/localdata/u5642715/influenceMapOut/out"
 
+def get_weight(etype, qline):
+    if etype == Entity.AUTH:
+        auth_name, auth_count = qline
+        return auth_name, 1 / auth_count
+    else:
+        e_name, = qline
+        return e_name, 1
+
 # for authors
-def gen_score(conn, plist):
+def gen_score(conn, etype, plist):
     res = dict()
     id_to_name = dict()
 
@@ -28,7 +37,7 @@ def gen_score(conn, plist):
 
     for chunk in paper_chunks:
         # query plan for this
-        output_scheme = ",".join(['auth_id', 'auth_count'])
+        output_scheme = ",".join(etype.get_scheme())
         targets = ','.join(['?'] * len(chunk))
         query = 'SELECT {} FROM paper_info WHERE paper_id IN ({})'.format(output_scheme, targets)
 
@@ -36,26 +45,27 @@ def gen_score(conn, plist):
 
         # iterate through query results
         for line in cur.fetchall():
-            auth_id, auth_count = line
+            e_id, weight = get_weight(etype, line)
 
             # check ids_to_name dictionary
             try:
-                auth_name = id_to_name[auth_id]
+                e_name = id_to_name[e_id]
             except KeyError:
-                key_scheme = 'auth_id'
-                id_query = 'SELECT * FROM authname WHERE {} = ? LIMIT 1'.format(key_scheme)
+                key_scheme = etype.get_keyn()
+                table_map = etype.get_nmap()
+                id_query = 'SELECT * FROM {} WHERE {} = ? LIMIT 1'.format(table_map, key_scheme)
                 
-                cur.execute(id_query, (auth_id, ))
+                cur.execute(id_query, (e_id, ))
                 _, name = cur.fetchone()
-                auth_name = ' '.join(name.split())
+                e_name = ' '.join(name.split())
 
-                id_to_name[auth_id] = auth_name
+                id_to_name[e_id] = e_name
 
             # Add to score
             try:
-                res[auth_name] += 1 / auth_count
+                res[e_name] += weight
             except KeyError:
-                res[auth_name] = 1 / auth_count
+                res[e_name] = weight
 
         # progression
         total_prog += len(chunk)
@@ -66,33 +76,7 @@ def gen_score(conn, plist):
     # return dict results
     return res
 
-'''
-def gen_citing_score(cur, emap, plist):
-    res = {}
 
-    # split papers into chunks
-    paper_chunks = [plist[x:x+BATCH_SIZE] for x in range(0, len(plist), BATCH_SIZE)]
-    total_prog = 0
-    total = len(paperlist)
-
-    # query papers per chunk
-    for chunk in paper_chunks:
-        # paperid | authorid | authorname | numauthors
-        query = 'SELECT * FROM PAA WHERE paper_id IN ({})'.format(','.join(['?'] * len(chunk)))
-
-        print('{} start query of paper chunk of size {}'.format(datetime.now(), len(chunk)))
-
-        cur.execute(query, chunk)
-
-        # turn query results into scores per author id
-        for paper_id, author_id, author_name, score in cur.fetchall():
-            res[author_name] += score
-        total_prog += len(chunk)
-
-        print('{} finish query of paper chunk, total prog {:.2f}%'.format(datetime.now(), total_prog/total * 100))
-
-    return res
-'''
 
 if __name__ == "__main__":
 
@@ -113,8 +97,8 @@ if __name__ == "__main__":
     conn = sqlite3.connect(db_path)
 
     # Generate associated author scores for citing and cited
-    citing_records = gen_score(conn, citing_papers)
-    cited_records = gen_score(conn, cited_papers)
+    citing_records = gen_score(conn, Entity.AUTH,citing_papers)
+    cited_records = gen_score(conn, Entity.AUTH, cited_papers)
 
     # Print to file (Do we really need this?
     with open(os.path.join(dir_out, 'authors_citing.txt'), 'w') as fh:

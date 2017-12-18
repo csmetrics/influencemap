@@ -1,9 +1,23 @@
-from enum import Enum, auto
+from enum import Enum
 
 class Entity(Enum):
-    AUTH = auto()
-    CONF = auto()
-    AFFI = cuto()
+    AUTH = (['auth_id', 'auth_count'], 'authname')
+    CONF = (['conf_id'], 'confname')
+    AFFI = (['affi_id'], 'affiname')
+
+    def __init__(self, fields, nmap):
+        self.keyn = fields[0]
+        self.scheme = fields
+        self.nmap = nmap
+
+    def get_keyn(self):
+        return self.keyn
+
+    def get_scheme(self):
+        return self.scheme
+
+    def get_nmap(self):
+        return self.nmap
 
 class Entity_map:
     def __init__(self, domain, codomain):
@@ -11,10 +25,10 @@ class Entity_map:
         self.codomain = codomain
 
     def get_map(self):
-        return domain, codomain
+        return self.domain, self.codomain
 
     def get_domain(self):
-        return domain
+        return self.domain
 
     def get_codomain(self):
-        return codomain
+        return self.codomain
