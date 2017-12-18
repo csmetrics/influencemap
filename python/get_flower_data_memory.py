@@ -2,7 +2,7 @@ import sqlite3
 import os
 import sys
 from datetime import datetime
-from extract_papers import name_to_papers
+from mkAff import getAuthor
 from export_citations_author import construct_cite_db
 from entity_type import *
 
@@ -15,6 +15,45 @@ db_dir = "/localdata/u5642715/influenceMapOut"
 # output directory
 dir_out = "/localdata/u5642715/influenceMapOut/out"
 
+def get_papers(pdict):
+    values = list()
+    for key in pdict.keys():
+        values += pdict[key]
+    return values
+
+def self_dict(pdict):
+    res = dict()
+    for key in pdict.keys():
+        res[key] = True
+
+    return res
+
+def coauthors_dict(conn, pdict, my_etype, fdict=dict()):
+    e_id = pdict.keys()
+    paper_ids = get_papers(pdict)
+    coauth_dict = fdict
+
+    cur = conn.cursor()
+
+    for paper in paper_ids:
+        query = 'SELECT {} FROM paper_info WHERE paper_id = ?'.format(my_etype.get_keyn())
+        
+        cur.execute(query, (paper, ))
+
+        e_list = list()
+        filter_flag = False
+
+        for line in cur.fetchall():
+            key, = line
+            e_list.append(key)
+            if key in e_id:
+                filter_flag = True
+
+        for val in e_list:
+            coauth_dict[val] = True
+
+    return coauth_dict
+
 def get_weight(etype, qline):
     if etype == Entity.AUTH:
         auth_name, auth_count = qline
@@ -23,8 +62,7 @@ def get_weight(etype, qline):
         e_name, = qline
         return e_name, 1
 
-# for authors
-def gen_score(conn, etype, plist):
+def gen_score(conn, etype, plist, fdict=dict()):
     res = dict()
     id_to_name = dict()
 
@@ -46,6 +84,10 @@ def gen_score(conn, etype, plist):
         # iterate through query results
         for line in cur.fetchall():
             e_id, weight = get_weight(etype, line)
+
+            # If id is in the filter map, don't add
+            if fdict.get(e_id, False):
+                break
 
             # check ids_to_name dictionary
             try:
@@ -76,8 +118,6 @@ def gen_score(conn, etype, plist):
     # return dict results
     return res
 
-
-
 if __name__ == "__main__":
 
     # input
@@ -85,8 +125,11 @@ if __name__ == "__main__":
 
     # get paper ids associated with input name
     print('{} start get associated papers to input name {}'.format(datetime.now(), name))
-    associated_papers = name_to_papers(name)
+    _, id_2_paper_id = getAuthor(name)
     print('{} finish get associated papers to input name {}'.format(datetime.now(), name))
+
+    associated_papers = get_papers(id_2_paper_id)
+    print(associated_papers)
 
     # filter ref papers
     print('{} start filter paper references'.format(datetime.now()))
@@ -96,9 +139,15 @@ if __name__ == "__main__":
     db_path = os.path.join(db_dir, 'paper_info.db')
     conn = sqlite3.connect(db_path)
 
+    # Generate a self filter dictionary
+    filter_dict = self_dict(id_2_paper_id)
+
+    # Add coauthors to filter
+    filter_dict = coauthors_dict(conn, id_2_paper_id, Entity.AUTH, filter_dict)
+
     # Generate associated author scores for citing and cited
-    citing_records = gen_score(conn, Entity.AUTH,citing_papers)
-    cited_records = gen_score(conn, Entity.AUTH, cited_papers)
+    citing_records = gen_score(conn, Entity.AUTH, citing_papers, fdict=filter_dict)
+    cited_records = gen_score(conn, Entity.AUTH, cited_papers, fdict=filter_dict)
 
     # Print to file (Do we really need this?
     with open(os.path.join(dir_out, 'authors_citing.txt'), 'w') as fh:
