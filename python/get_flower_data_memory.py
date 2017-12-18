@@ -15,6 +15,12 @@ db_dir = "/localdata/u5642715/influenceMapOut"
 # output directory
 dir_out = "/localdata/u5642715/influenceMapOut/out"
 
+def ids_dict(pdict):
+    res = dict()
+    for key in pdict.keys():
+        res[key] = True
+    return res
+
 def get_papers(pdict):
     values = list()
     for key in pdict.keys():
@@ -62,33 +68,46 @@ def get_weight(etype, qline):
         e_name, = qline
         return e_name, 1
 
-def gen_score(conn, etype, plist, fdict=dict()):
+def gen_score(conn, etype, plist, iddict, fdict=dict(), selfcite=False):
     res = dict()
     id_to_name = dict()
 
     # split papers into chunks
     total_prog = 0
     total = len(plist)
-    paper_chunks = [plist[x:x+BATCH_SIZE] for x in range(0, total, BATCH_SIZE)]
+    # paper_chunks = [plist[x:x+BATCH_SIZE] for x in range(0, total, BATCH_SIZE)]
 
     cur = conn.cursor()
 
-    for chunk in paper_chunks:
+    for paper in plist:
         # query plan for this
         output_scheme = ",".join(etype.get_scheme())
-        targets = ','.join(['?'] * len(chunk))
-        query = 'SELECT {} FROM paper_info WHERE paper_id IN ({})'.format(output_scheme, targets)
+        #targets = ','.join(['?'] * len(chunk))
+        query = 'SELECT {} FROM paper_info WHERE paper_id = ?'.format(output_scheme)
 
-        cur.execute(query, chunk)
+        cur.execute(query, (paper, ))
+
+        qlines = list()
+        self_cite = False
 
         # iterate through query results
         for line in cur.fetchall():
             e_id, weight = get_weight(etype, line)
 
-            # If id is in the filter map, don't add
-            if fdict.get(e_id, False):
+            # check if self cite
+            if not selfcite and iddict.get(e_id, False):
+                self_cite = True
                 break
 
+            # If id is in the filter map, don't add
+            if not fdict.get(e_id, False):
+                qlines.append((e_id, weight))
+
+        if self_cite:
+            continue
+
+        # Add scores
+        for e_id, weight in qlines:
             # check ids_to_name dictionary
             try:
                 e_name = id_to_name[e_id]
@@ -110,8 +129,8 @@ def gen_score(conn, etype, plist, fdict=dict()):
                 res[e_name] = weight
 
         # progression
-        total_prog += len(chunk)
-        print('{} finish query of paper chunk, total prog {:.2f}%'.format(datetime.now(), total_prog/total * 100))
+        # total_prog += 1
+        # print('{} finish query of paper chunk, total prog {:.2f}%'.format(datetime.now(), total_prog/total * 100))
 
     cur.close()
 
@@ -129,7 +148,7 @@ if __name__ == "__main__":
     print('{} finish get associated papers to input name {}'.format(datetime.now(), name))
 
     associated_papers = get_papers(id_2_paper_id)
-    print(associated_papers)
+    my_ids = ids_dict(id_2_paper_id)
 
     # filter ref papers
     print('{} start filter paper references'.format(datetime.now()))
@@ -143,11 +162,11 @@ if __name__ == "__main__":
     filter_dict = self_dict(id_2_paper_id)
 
     # Add coauthors to filter
-    filter_dict = coauthors_dict(conn, id_2_paper_id, Entity.AUTH, filter_dict)
+    # filter_dict = coauthors_dict(conn, id_2_paper_id, Entity.AUTH, filter_dict)
 
     # Generate associated author scores for citing and cited
-    citing_records = gen_score(conn, Entity.AUTH, citing_papers, fdict=filter_dict)
-    cited_records = gen_score(conn, Entity.AUTH, cited_papers, fdict=filter_dict)
+    citing_records = gen_score(conn, Entity.AUTH, citing_papers, my_ids, fdict=filter_dict)
+    cited_records = gen_score(conn, Entity.AUTH, cited_papers, my_ids, fdict=filter_dict)
 
     # Print to file (Do we really need this?
     with open(os.path.join(dir_out, 'authors_citing.txt'), 'w') as fh:
