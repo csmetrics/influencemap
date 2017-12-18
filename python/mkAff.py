@@ -10,6 +10,8 @@ db_FName = '/localdata/u6363358/data/FieldOfStudy.db'
 db_Jour = '/localdata/u6363358/data/Journals.db'
 db_conf = '/localdata/u6363358/data/Conference.db'
 
+load = {}
+
 def removeCon(lst):
    if lst[-2] == ",":
        return lst[:-2] + ")"
@@ -17,20 +19,32 @@ def removeCon(lst):
        return lst
 
 def isSame(name1, name2):
-   ls2 = name2.split(' ')
-   ls1 = name1.split(' ')
-   middle1 = ls1[1:-1]
-   middle2 = ls2[1:-1]
-   if ls2[-1] == ls1[-1]:
-      if len(ls2[0]) == 1 or len(ls1[0]) == 1:
-          if ls2[0][0] == ls1[0][0]:
-              return compareMiddle(middle1, middle2)
-          else:return False
-      else:
-          if ls2[0] == ls1[0]: return compareMiddle(middle1, middle2)
-          else: return False
-   else:return False
+    ls2 = name2.split(' ')
+    ls1 = name1.split(' ')
+    middle1 = ls1[1:-1]
+    middle2 = ls2[1:-1]
+    if ls2[-1] == ls1[-1]:
+         if len(ls2[0]) == 1 or len(ls1[0]) == 1:
+             if ls2[0][0] == ls1[0][0]:
+                 b = compareMiddle(middle1, middle2)
+                 load[name1] = b
+                 return b
+             else:
+                 load[name1] = False
+                 return False
+         else:
+             if ls2[0] == ls1[0]:
+                 b = compareMiddle(middle1, middle2)
+                 load[name1] = b
+                 return b
+             else: 
+                 load[name1] = False
+                 return False
+    else:   
+         load[name1] = False 
+         return False
 
+  
 
 def compareMiddle(m1,m2):
    ms1 = ''
@@ -87,7 +101,6 @@ def getAuthor(name):
     dbPAA = sqlite3.connect(db_PAA, check_same_thread = False)
     dbA = sqlite3.connect(db_Authors, check_same_thread = False)
     dbA.create_function("isSame",2,isSame)
-    #dbA.create_function("getLastName",1,getLastName)
     curP = dbPAA.cursor()
     curA = dbA.cursor()
     name = name.lower()
@@ -95,8 +108,10 @@ def getAuthor(name):
     #Extracting al the authorID whose name matches
 
     allAuthor = []
+    lstN = name.split(' ')[-1]
     print("{} getting all the aID".format(datetime.now()))
-    curA.execute("SELECT * FROM authors WHERE authorName LIKE '%" + name.split(' ')[-1] + "' AND isSame(authorName,'" + name + "')")
+    curA.execute("SELECT * FROM authors WHERE authorName LIKE '%" + lstN + "' AND isSame(authorName,'" + name + "')")
+ 
     allAuthor = curA.fetchall()
     print("{} finished getting all the aID".format(datetime.now()))
    
@@ -114,7 +129,6 @@ def getAuthor(name):
 
     aIDpIDDict = {}
     
- 
     finalres = []
     
     #Putting the authorName into the tuples
@@ -168,6 +182,7 @@ def getAuthor(name):
     for dic in finalresult:
         print(dic)
     print(str(len(finalresult)))
+    
    
     return (finalresult,aIDpIDDict)  
 
@@ -205,7 +220,6 @@ def getJournal(name):
     #jID_papers is a dict {jID, [(pID,pTitle,publishedDate)]}, journal is a list
     #[journalID, journalName]
     return (jID_papers, journals)
-<<<<<<< HEAD
  
 def getConf(name):
     dbConf = sqlite3.connect(db_conf, check_same_thread = False)
@@ -240,5 +254,5 @@ def getConf(name):
 
 
 if __name__ == '__main__':
-    trial = getAuthor('j eliot b moss')
+    trial = getAuthor('antony l hosking')
 
