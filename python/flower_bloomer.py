@@ -1,20 +1,26 @@
+# standard python imports
 import sqlite3
 import os, sys
 from datetime import datetime
-from get_flower_data_memory import gen_score
-from export_citations_author import construct_cite_db
 import pandas as pd
 import numpy as np
 import networkx as nx
-from draw_egonet import draw_halfcircle
 import seaborn as sns
 import matplotlib.pyplot as plt
 sns.set()
 plt.switch_backend('agg')
 
+# local module imports
+from get_flower_data_memory import *
+from export_citations_author import construct_cite_db
+from draw_egonet import draw_halfcircle
+from entity_type import Entity
 
-def getFlower(papers, name):
-    print("papers {}, name {}".format(papers, name))
+
+entity_type_dict = {'author': Entity.AUTH, 'conference': Entity.CONF, 'institution': Entity.AFFI}
+
+
+def getFlower(id_2_paper_id, name, ent_type):
     # db_dir = '/localdata/u5/influencemap'
     db_dir = "/localdata/u5642715/influenceMapOut"
     #db_name = 'paper.db'
@@ -22,16 +28,29 @@ def getFlower(papers, name):
     db_path = os.path.join(db_dir, 'paper_info.db')
     dir_out = '/localdata/u5798145/influencemap/out'
 
-    paperIDs = list(set(papers))
 
-    citing_papers, cited_papers = construct_cite_db(name, paperIDs)
-    
+    # get paper ids associated with input name
+
+    associated_papers = get_papers(id_2_paper_id)
+    my_ids = ids_dict(id_2_paper_id)
+
+    # filter ref papers
+    print('{} start filter paper references'.format(datetime.now()))
+    citing_papers, cited_papers = construct_cite_db(name, associated_papers)
+    print('{} finish filter paper references'.format(datetime.now()))
+
+    db_path = os.path.join(db_dir, 'paper_info.db')
     conn = sqlite3.connect(db_path)
 
+    # Generate a self filter dictionary
+    filter_dict = self_dict(id_2_paper_id)
+
+    # Add coauthors to filter
+    # filter_dict = coauthors_dict(conn, id_2_paper_id, Entity.AUTH, filter_dict)
+
     # Generate associated author scores for citing and cited
-    citing_records = gen_score(conn, citing_papers)
-    cited_records = gen_score(conn, cited_papers)
-    print(citing_records)
+    citing_records = gen_score(conn, Entity.AUTH, citing_papers, my_ids, fdict=filter_dict)
+    cited_records = gen_score(conn, Entity.AUTH, cited_papers, my_ids, fdict=filter_dict)
 
     # Print to file (Do we really need this?
     with open(os.path.join(dir_out, 'authors_citing.txt'), 'w') as fh:
@@ -43,10 +62,9 @@ def getFlower(papers, name):
             fh.write("{}\t{}\n".format(key, cited_records[key]))
 
     conn.close()
-
-    #### START PRODUCING GRAPH
  
 
+    #### START PRODUCING GRAPH
     plot_dir = os.path.join(dir_out, 'figures')
 
     for dir in [dir_out, plot_dir]:

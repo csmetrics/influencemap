@@ -44,7 +44,6 @@ def main(request):
             keyword = request.GET.get("keyword")
             if keyword != "":
                 authors, aid_pid_dict =  getAuthor(keyword) #(authors_testing, dict()) # getAuthor(keyword)
-                print(keyword, option, aid_pid_dict)
             option = [x for x in optionlist if x.get('id', '') == request.GET.get("option")][0]
 
             # path to the influence flowers
@@ -52,14 +51,11 @@ def main(request):
             inflby = os.path.join(BASE_DIR, "output/flower2.png")
             inflflower = []#[inflin, inflby]
         if "submit" in request.GET:
-            print(type(request.GET.get("authorlist")))
-            authorIDs = request.GET.getlist("authorlist")
-            print("\n\n\n{}\n\n\n\n\n\n{}\n\n\n\n\n\n\n\n\n".format(authorIDs, aid_pid_dict))
-            papers = []
-            for aid in authorIDs:
-                papers.extend(aid_pid_dict[aid])
-            inflflower = getFlower(papers, keyword)
-            print("authorIDs: "+str(authorIDs))
+            selected_ids = request.GET.getlist("authorlist")
+            id_2_paper_id = dict()
+            for aid in selected_ids:
+                id_2_paper_id[aid] = aid_pid_dict[aid]
+            inflflower = getFlower(id_2_paper_id, keyword, 'author')
 
     # render page with data
     return render(request, "main.html", {
