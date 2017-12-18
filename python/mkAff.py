@@ -77,17 +77,11 @@ def getField(pID):
 def getPaperName(pID):
     dbPAA = sqlite3.connect(db_PAA, check_same_thread = False)
     curP = dbPAA.cursor()
-    curP.execute(removeCon("SELECT paperTitle,publishedDate FROM papers WHERE paperID IN {}".format(tuple(pID))))
+    curP.execute(removeCon("SELECT paperTitle, MAX(publishedDate) FROM papers WHERE paperID IN {}".format(tuple(pID))))
     title = curP.fetchall()
-    date = ''
-    currentT = ''
-    for p in title:
-       if compareDate(p[1],date): #if the current date is greater
-           date = p[1]
-           currentT = p[0]
     dbPAA.commit()
     dbPAA.close()
-    return (currentT,date)
+    return (title[0][0], title[0][1])
 
 def compareDate(currentT, date):
     if currentT != '':
@@ -117,7 +111,7 @@ def getAuthor(name):
 
     allAuthor = []
     print("{} getting all the aID".format(datetime.now()))
-    curA.execute("SELECT * FROM authors WHERE authorName LIKE + '%" + name.split(' ')[-1] + "%' AND " + "isSame(authorName," + "'" + name + "')")
+    curA.execute("SELECT * FROM authors WHERE authorName LIKE '%" + name.split(' ')[-1] + "%' AND " + "isSame(authorName,'" + name + "')")
     allAuthor = curA.fetchall()
     print("{} finished getting all the aID".format(datetime.now()))
    
@@ -166,7 +160,7 @@ def getAuthor(name):
                 tempres.append((tuples[0],tuples[1],count,'',pID))
     
     tempres = sorted(tempres,key=lambda x: x[2],reverse=True)
-    print("{} finish counting, getting the fieldName".format(datetime.now()))
+    print("{} finish counting, getting the fieldName and recent paper".format(datetime.now()))
    
     for tuples in tempres:
         recent = getPaperName(tuples[-1]) #a tuple (paperName, date)
@@ -208,6 +202,9 @@ def getJournal(name):
                p.append((tup[0],tup[1],tup[2]))
        jID_papers[currentJID] = p
 
+    curP.close()
+    curJ.close()
+
     for k in jID_papers:
         print(jID_papers[k])
 
@@ -219,4 +216,4 @@ def getJournal(name):
 
    
 
-trial = getJournal('Canadian Poetry')
+trial = getAuthor('j eliot b moss')
