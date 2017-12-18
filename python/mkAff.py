@@ -8,7 +8,7 @@ db_Authors = '/localdata/common/authors_test.db'
 db_key = '/localdata/u6363358/data/paperKeywords.db'
 db_FName = '/localdata/u6363358/data/FieldOfStudy.db'
 db_Jour = '/localdata/u6363358/data/Journals.db'
-
+db_conf = '/localdata/u6363358/data/Conference.db'
 
 def removeCon(lst):
    if lst[-2] == ",":
@@ -22,15 +22,15 @@ def isSame(name1, name2):
    middle1 = ls1[1:-1]
    middle2 = ls2[1:-1]
    if ls2[-1] == ls1[-1]:
-       if len(ls2[0]) == 1 or len(ls1[0]) == 1:
-            if ls2[0][0] == ls1[0][0]:
-                return compareMiddle(middle1, middle2)
-            else:return False
-       else:
-           if ls2[0] == ls1[0]: return compareMiddle(middle1, middle2)
-           else: return False
-   else:
-      return False
+      if len(ls2[0]) == 1 or len(ls1[0]) == 1:
+          if ls2[0][0] == ls1[0][0]:
+              return compareMiddle(middle1, middle2)
+          else:return False
+      else:
+          if ls2[0] == ls1[0]: return compareMiddle(middle1, middle2)
+          else: return False
+   else:return False
+
 
 def compareMiddle(m1,m2):
    ms1 = ''
@@ -40,7 +40,6 @@ def compareMiddle(m1,m2):
    for char in m2:
       ms2 = ms2 + char[0]
    return (ms1 in ms2) or (ms2 in ms1) 
-
    
 def mostCommon(lst):
     return max(set(lst),key=lst.count)
@@ -77,47 +76,27 @@ def getField(pID):
 def getPaperName(pID):
     dbPAA = sqlite3.connect(db_PAA, check_same_thread = False)
     curP = dbPAA.cursor()
-    curP.execute(removeCon("SELECT paperTitle,publishedDate FROM papers WHERE paperID IN {}".format(tuple(pID))))
+    curP.execute(removeCon("SELECT paperTitle, MAX(publishedDate) FROM papers WHERE paperID IN {}".format(tuple(pID))))
     title = curP.fetchall()
-    date = ''
-    currentT = ''
-    for p in title:
-       if compareDate(p[1],date): #if the current date is greater
-           date = p[1]
-           currentT = p[0]
     dbPAA.commit()
     dbPAA.close()
-    return (currentT,date)
+    return (title[0][0], title[0][1])
 
-def compareDate(currentT, date):
-    if currentT != '':
-       if date != '':
-          if currentT[:4] > date[:4]: 
-              return True
-          elif currentT[:4] == date[:4]:
-              if currentT[5:7] > date[5:7]:
-                   return True
-              elif currentT[5:7] == date[5:7]:
-                  if currentT[-2:] > date[-2:]:
-                      return True
-                  else: return False
-              else: return False
-          else: return False
-       else: return True
-    else: return False
 
 def getAuthor(name):
     dbPAA = sqlite3.connect(db_PAA, check_same_thread = False)
     dbA = sqlite3.connect(db_Authors, check_same_thread = False)
     dbA.create_function("isSame",2,isSame)
+    #dbA.create_function("getLastName",1,getLastName)
     curP = dbPAA.cursor()
     curA = dbA.cursor()
+    name = name.lower()
 
     #Extracting al the authorID whose name matches
 
     allAuthor = []
     print("{} getting all the aID".format(datetime.now()))
-    curA.execute("SELECT * FROM authors WHERE authorName LIKE + '%" + name.split(' ')[-1] + "%' AND " + "isSame(authorName," + "'" + name + "')")
+    curA.execute("SELECT * FROM authors WHERE authorName LIKE '%" + name.split(' ')[-1] + "' AND isSame(authorName,'" + name + "')")
     allAuthor = curA.fetchall()
     print("{} finished getting all the aID".format(datetime.now()))
    
@@ -166,7 +145,15 @@ def getAuthor(name):
                 tempres.append((tuples[0],tuples[1],count,'',pID))
     
     tempres = sorted(tempres,key=lambda x: x[2],reverse=True)
-    print("{} finish counting, getting the fieldName".format(datetime.now()))
+    
+    same = []
+    for tuples in tempres:
+        if tuples[0] == name:
+            same.append(tuples)
+            tempres.remove(tuples)
+    tempres = same + tempres
+    
+    print("{} finish counting, getting the fieldName and recent paper".format(datetime.now()))
    
     for tuples in tempres:
         recent = getPaperName(tuples[-1]) #a tuple (paperName, date)
@@ -180,6 +167,7 @@ def getAuthor(name):
    
     for dic in finalresult:
         print(dic)
+    print(str(len(finalresult)))
    
     return (finalresult,aIDpIDDict)  
 
@@ -208,15 +196,49 @@ def getJournal(name):
                p.append((tup[0],tup[1],tup[2]))
        jID_papers[currentJID] = p
 
+    curP.close()
+    curJ.close()
+
     for k in jID_papers:
         print(jID_papers[k])
 
     #jID_papers is a dict {jID, [(pID,pTitle,publishedDate)]}, journal is a list
     #[journalID, journalName]
     return (jID_papers, journals)
-              
+<<<<<<< HEAD
+ 
+def getConf(name):
+    dbConf = sqlite3.connect(db_conf, check_same_thread = False)
+    dbP = sqlite3.connect(db_PAA, check_same_thread = False)
+    curC = dbConf.cursor()
+    curP = dbP.cursor()
+    print("{} getting conferenceID".format(datetime.now()))
+    print("SELECT * FROM ConferenceSeries WHERE ShortName == '" + name + "' OR Fullname == '" + name + "'")
+    curC.execute("SELECT * FROM ConferenceSeries WHERE ShortName == '" + name + "' OR Fullname == '" + name + "'")
+    conference = list(map(lambda x: (x[0],x[2]),curC.fetchall()))
+    print("{} finished getting cID".format(datetime.now()))
+    cID = conference[0][0]
+    print("{} getting papers published".format(datetime.now()))
+    
+    #print(removeCon("SELECT paperID, paperTitle, publishedDate, conferenceID FROM papers WHERE conferenceID IN {}".format(tuple(cID))))
+    curP.execute("SELECT paperID, paperTitle, publishedDate, conferenceID FROM papers WHERE conferenceID == '" + cID + "'")
+    papers = curP.fetchall()
+    print("{} finished getting paper".format(datetime.now()))
+    cID_papers = {}
+    for tuples in papers:
+       currentCID = tuples[3]
+       p = []
+       for tup in papers:
+            if tup[3] == currentCID:
+               p.append((tup[0],tup[1],tup[2]))                              
+       cID_papers[currentCID] = p
+            
+    for k in cID_papers:
+        print(cID_papers[k])
+    return (cID_papers, conference)
 
 
-   
 
-trial = getJournal('Canadian Poetry')
+if __name__ == '__main__':
+    trial = getAuthor('j eliot b moss')
+
