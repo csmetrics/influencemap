@@ -8,7 +8,7 @@ db_Authors = '/localdata/common/authors_test.db'
 db_key = '/localdata/u6363358/data/paperKeywords.db'
 db_FName = '/localdata/u6363358/data/FieldOfStudy.db'
 db_Jour = '/localdata/u6363358/data/Journals.db'
-
+db_conf = '/localdata/u6363358/data/Conference.db'
 
 def removeCon(lst):
    if lst[-2] == ",":
@@ -21,13 +21,15 @@ def isSame(name1, name2):
    ls1 = name1.split(' ')
    middle1 = ls1[1:-1]
    middle2 = ls2[1:-1]
-   if len(ls2[0]) == 1 or len(ls1[0]) == 1:
-       if ls2[0][0] == ls1[0][0]:
-           return compareMiddle(middle1, middle2)
-       else:return False
-   else:
-       if ls2[0] == ls1[0]: return compareMiddle(middle1, middle2)
-       else: return False
+   if ls2[-1] == ls1[-1]:
+      if len(ls2[0]) == 1 or len(ls1[0]) == 1:
+          if ls2[0][0] == ls1[0][0]:
+              return compareMiddle(middle1, middle2)
+          else:return False
+      else:
+          if ls2[0] == ls1[0]: return compareMiddle(middle1, middle2)
+          else: return False
+   else:return False
 
 
 def compareMiddle(m1,m2):
@@ -38,9 +40,6 @@ def compareMiddle(m1,m2):
    for char in m2:
       ms2 = ms2 + char[0]
    return (ms1 in ms2) or (ms2 in ms1) 
-
-def getLastName(n):
-   return n.split(' ')[-1]
    
 def mostCommon(lst):
     return max(set(lst),key=lst.count)
@@ -88,9 +87,10 @@ def getAuthor(name):
     dbPAA = sqlite3.connect(db_PAA, check_same_thread = False)
     dbA = sqlite3.connect(db_Authors, check_same_thread = False)
     dbA.create_function("isSame",2,isSame)
-    dbA.create_function("getLastName",1,getLastName)
+    #dbA.create_function("getLastName",1,getLastName)
     curP = dbPAA.cursor()
     curA = dbA.cursor()
+    name = name.lower()
 
     #Extracting al the authorID whose name matches
 
@@ -205,6 +205,40 @@ def getJournal(name):
     #jID_papers is a dict {jID, [(pID,pTitle,publishedDate)]}, journal is a list
     #[journalID, journalName]
     return (jID_papers, journals)
+<<<<<<< HEAD
+ 
+def getConf(name):
+    dbConf = sqlite3.connect(db_conf, check_same_thread = False)
+    dbP = sqlite3.connect(db_PAA, check_same_thread = False)
+    curC = dbConf.cursor()
+    curP = dbP.cursor()
+    print("{} getting conferenceID".format(datetime.now()))
+    print("SELECT * FROM ConferenceSeries WHERE ShortName == '" + name + "' OR Fullname == '" + name + "'")
+    curC.execute("SELECT * FROM ConferenceSeries WHERE ShortName == '" + name + "' OR Fullname == '" + name + "'")
+    conference = list(map(lambda x: (x[0],x[2]),curC.fetchall()))
+    print("{} finished getting cID".format(datetime.now()))
+    cID = conference[0][0]
+    print("{} getting papers published".format(datetime.now()))
+    
+    #print(removeCon("SELECT paperID, paperTitle, publishedDate, conferenceID FROM papers WHERE conferenceID IN {}".format(tuple(cID))))
+    curP.execute("SELECT paperID, paperTitle, publishedDate, conferenceID FROM papers WHERE conferenceID == '" + cID + "'")
+    papers = curP.fetchall()
+    print("{} finished getting paper".format(datetime.now()))
+    cID_papers = {}
+    for tuples in papers:
+       currentCID = tuples[3]
+       p = []
+       for tup in papers:
+            if tup[3] == currentCID:
+               p.append((tup[0],tup[1],tup[2]))                              
+       cID_papers[currentCID] = p
+            
+    for k in cID_papers:
+        print(cID_papers[k])
+    return (cID_papers, conference)
+
+
 
 if __name__ == '__main__':
     trial = getAuthor('j eliot b moss')
+
