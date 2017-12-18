@@ -5,7 +5,9 @@ BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 PYTHON_DIR = os.path.join(os.path.dirname(BASE_DIR), 'python')
 sys.path.insert(0, PYTHON_DIR)
 
+from flower_bloomer import getFlower
 from mkAff import getAuthor
+
 
 AuthorList = []
 def loadAuthorList():
@@ -17,6 +19,11 @@ def loadAuthorList():
     AuthorList = list(set(AuthorList))
     return AuthorList
 
+def getFlowerTest(aids):
+    inflin = os.path.join(BASE_DIR, "output/flower1.png")
+    inflby = os.path.join(BASE_DIR, "output/flower2.png")
+    inflflower = [inflin, inflby]
+    return inflflower
 
 def main(request):
     optionlist = [  # option list
@@ -35,7 +42,7 @@ def main(request):
         if "search" in request.GET:
             keyword = request.GET.get("keyword")
             if keyword != "":
-                authors =  getAuthor(keyword)
+                authors, aid_pid_dict =  getAuthor(keyword) #(authors_testing, dict()) # getAuthor(keyword)
             option = [x for x in optionlist if x.get('id', '') == request.GET.get("option")][0]
             print(keyword, option)
 
@@ -43,7 +50,10 @@ def main(request):
             inflin = os.path.join(BASE_DIR, "output/flower1.png")
             inflby = os.path.join(BASE_DIR, "output/flower2.png")
             inflflower = []#[inflin, inflby]
-
+        if "submit" in request.GET:
+            authorIDs = [auth["authorID"] for auth in authors if auth["authorID"] in request.GET.get("authorList")]
+            inflflower = getFlower(authorIDs)
+            print("authorIDs: "+str(authorIDs))
 
     # render page with data
     return render(request, "main.html", {
