@@ -2,6 +2,7 @@ import sqlite3
 from datetime import datetime
 from collections import Counter
 import operator
+import sys
 
 db_PAA = '/localdata/u5798145/influencemap/paper.db'
 db_Authors = '/localdata/common/authors_test.db'
@@ -204,8 +205,7 @@ def getJournal(name):
 
     #jID_papers is a dict {jID, [(pID,pTitle,publishedDate)]}, journal is a list
     #[journalID, journalName]
-    return (jID_papers, journals)
-<<<<<<< HEAD
+    return (journals, jID_papers)
  
 def getConf(name):
     dbConf = sqlite3.connect(db_conf, check_same_thread = False)
@@ -235,7 +235,7 @@ def getConf(name):
             
     for k in cID_papers:
         print(cID_papers[k])
-    return (cID_papers, conference)
+    return (conference, cID_papers)
 
 
 
