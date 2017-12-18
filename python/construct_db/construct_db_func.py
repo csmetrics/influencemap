@@ -75,12 +75,12 @@ def import_to_table(conn, name, f, colname, dataidx, delim='\t', fmap=None, tran
         if not cur.fetchone:
             raise Exception("Table {} does not exist".format(name))
 
-        # Import table data from file f
-        print("{} starting reading data from {}".format(datetime.now(), f))
-        data = csv.reader(open(f, 'r'), delimiter=delim)
-        print("{} finish reading data from {}".format(datetime.now(), f))
-                
         if transaction:
+            # Import table data from file f
+            print("{} starting reading data from {}".format(datetime.now(), f))
+            data = csv.reader(open(f, 'r', encoding='utf-8'), delimiter=delim)
+            print("{} finish reading data from {}".format(datetime.now(), f))
+                
             # chunk + transactions
             chunk_size = math.floor(chunk_limit / len(colname))
             chunk_count = 0
@@ -110,14 +110,15 @@ def import_to_table(conn, name, f, colname, dataidx, delim='\t', fmap=None, tran
 
         else:
             # line by line
-            ins_string = '({})'.format(','.join((['?'] * num_cols)))
+            ins_string = '({})'.format(','.join((['?'] * len(colname))))
             row_count = 0
 
-            for line in data:
+            for line in open(f, 'r'):
+                tokens = line.split('\t')
                 row_count += 1
-                iline = map(lambda s : str(s), [line[i] for i in idx])
+                iline = map(lambda s : str(s), [tokens[i] for i in dataidx])
                 cur.execute('INSERT INTO {} ({}) VALUES {};'.format(name, ",".join(colname), ins_string), list(iline))
-                if line_count % 1e6 == 0:
+                if row_count % 1e6 == 0:
                     print("{} finished inserting {} rows".format(datetime.now(), row_count))
 
         cur.close()

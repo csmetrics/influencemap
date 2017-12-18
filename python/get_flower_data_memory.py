@@ -14,7 +14,7 @@ db_dir = "/localdata/u5642715/influenceMapOut"
 # output directory
 dir_out = "/localdata/u5642715/influenceMapOut/out"
 
-def gen_score(cur, plist):
+def gen_citing_score(cur, emap, plist):
     res = {}
 
     # split papers into chunks
