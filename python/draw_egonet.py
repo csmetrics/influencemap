@@ -1,3 +1,8 @@
+import matplotlib.pyplot as plt
+import seaborn as sns
+import pandas as pd
+import numpy as np
+import networkx as nx
 
 def draw_egocircle(graph=None, ego=None, ax=None, direction="out", renorm_weights='lin', 
                    plot_setting={'max_marker':30, 'max_line': 4., 'min_line': .5, 
@@ -104,7 +109,7 @@ def draw_egocircle(graph=None, ego=None, ax=None, direction="out", renorm_weight
 def draw_halfcircle(graph=None, ego=None, ax=None, direction="out", renorm_weights='lin', 
                    plot_setting={'max_marker':30, 'max_line': 4., 'min_line': .5, 
                                  "sns_palette": "RdBu", "out_palette": "Reds", "in_palette": "Blues", 
-                                 "num_colors": 100, "delta_text":0.02}):
+                                 "num_colors": 100, "delta_text":0.02}, filename=None):
     ps = plot_setting
     if not ax:
         fig = plt.figure(figsize=(12, 8))
@@ -187,4 +192,5 @@ def draw_halfcircle(graph=None, ego=None, ax=None, direction="out", renorm_weigh
     ax.set_xlim((-1.2, 1.2))
     ax.set_ylim((-.1, 1.1))
     ax.axis('off')
-    
+    if filename != None:
+        plt.savefig(filename)

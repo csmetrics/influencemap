@@ -8,7 +8,6 @@ sys.path.insert(0, PYTHON_DIR)
 from flower_bloomer import getFlower
 from mkAff import getAuthor
 
-
 AuthorList = []
 def loadAuthorList():
     global AuthorList
@@ -31,6 +30,7 @@ def main(request):
         {"id":"conf", "name":"Conf/Journal"},
         {"id":"inst", "name":"Institution"},
     ]
+    global keyword
     keyword = ""
     option = optionlist[0] # default selection
     inflflower = None
@@ -40,19 +40,25 @@ def main(request):
     if request.method == "GET":
         print(request.GET)
         if "search" in request.GET:
+            global aid_pid_dict
             keyword = request.GET.get("keyword")
             if keyword != "":
                 authors, aid_pid_dict =  getAuthor(keyword) #(authors_testing, dict()) # getAuthor(keyword)
+                print(keyword, option, aid_pid_dict)
             option = [x for x in optionlist if x.get('id', '') == request.GET.get("option")][0]
-            print(keyword, option)
 
             # path to the influence flowers
             inflin = os.path.join(BASE_DIR, "output/flower1.png")
             inflby = os.path.join(BASE_DIR, "output/flower2.png")
             inflflower = []#[inflin, inflby]
         if "submit" in request.GET:
-            authorIDs = [auth["authorID"] for auth in authors if auth["authorID"] in request.GET.get("authorList")]
-            inflflower = getFlower(authorIDs)
+            print(type(request.GET.get("authorlist")))
+            authorIDs = request.GET.getlist("authorlist")
+            print("\n\n\n{}\n\n\n\n\n\n{}\n\n\n\n\n\n\n\n\n".format(authorIDs, aid_pid_dict))
+            papers = []
+            for aid in authorIDs:
+                papers.extend(aid_pid_dict[aid])
+            inflflower = getFlower(papers, keyword)
             print("authorIDs: "+str(authorIDs))
 
     # render page with data
