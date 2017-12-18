@@ -211,9 +211,6 @@ def getJournal(name):
     #jID_papers is a dict {jID, [(pID,pTitle,publishedDate)]}, journal is a list
     #[journalID, journalName]
     return (jID_papers, journals)
-              
 
-
-   
-
-trial = getAuthor('j eliot b moss')
+if __name__ == '__main__':
+    trial = getAuthor('j eliot b moss')
