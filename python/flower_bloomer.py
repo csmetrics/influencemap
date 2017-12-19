@@ -19,6 +19,62 @@ from entity_type import Entity
 
 entity_type_dict = {'author': Entity.AUTH, 'conf': Entity.CONF, 'institution': Entity.AFFI}
 
+def drawFlower(conn, ent_type, citing_papers, cited_papers, my_ids,filter_dict, dir_out, name):   
+    # Generate associated author scores for citing and cited
+    citing_records = gen_score(conn, entity_type_dict[ent_type], citing_papers, my_ids, fdict=filter_dict)
+    cited_records = gen_score(conn, entity_type_dict[ent_type], cited_papers, my_ids, fdict=filter_dict)
+
+    # Print to file (Do we really need this?
+    with open(os.path.join(dir_out, 'authors_citing.txt'), 'w') as fh:
+        for key in citing_records.keys():
+            fh.write("{}\t{}\n".format(key, citing_records[key]))
+
+    with open(os.path.join(dir_out, 'authors_cited.txt'), 'w') as fh:
+        for key in cited_records.keys():
+            fh.write("{}\t{}\n".format(key, cited_records[key]))
+    print("finished writing files")
+
+
+    #### START PRODUCING GRAPH
+    plot_dir = os.path.join(dir_out, 'figures')
+
+    for dir in [dir_out, plot_dir]:
+      if not os.path.exists(dir):
+          os.makedirs(dir)
+
+
+    # load data into dataframe
+    cited_df = pd.read_csv(os.path.join(dir_out, 'authors_cited.txt'), sep='\t', header=None, names=['authorName', 'citedScore'])
+
+    citing_df = pd.read_csv(os.path.join(dir_out, 'authors_citing.txt'), sep='\t', header=None, names=['authorName', 'citingScore'])
+
+    # get the top x influencersdrawFlower(conn, Entity.AUTH, citing_papers, cited_papers, my_ids, filter_dict, dir_out)
+
+    n = 25
+    cited_df = cited_df.sort_values(by=['citedScore'], ascending=False)
+    top_n_cited = list(cited_df.head(n))
+
+    citing_df = citing_df.sort_values(by=['citingScore'], ascending=False)
+    top_n_citing = list(citing_df.head(n))
+
+    # build a graph structure for the top data
+    personG = nx.DiGraph()
+
+    for index, row in cited_df.head(n).iterrows():
+      # note that edge direction is with respect to influence, not citation i.e. for add_edge(a,b,c) it means a influenced b with a weight of c 
+      personG.add_edge(row['authorName'], name, weight=float(row['citedScore']))
+
+    for index, row in citing_df.head(n).iterrows():
+      personG.add_edge(name, row['authorName'], weight=float(row['citingScore']))
+
+    influencedby_filename = os.path.join(plot_dir, 'influencedby_{}.png'.format(ent_type))
+    influencedto_filename = os.path.join(plot_dir, 'influencedto_{}.png'.format(ent_type))
+    print("drawing graphs")
+    draw_halfcircle(graph=personG, ego=name, renorm_weights='log', direction='in', filename = influencedby_filename)
+    draw_halfcircle(graph=personG, ego=name, renorm_weights='log', direction='out', filename = influencedto_filename)
+    print("finished graphs")
+    return influencedby_filename, influencedto_filename
+
 
 def getFlower(id_2_paper_id, name, ent_type):
     # db_dir = '/localdata/u5/influencemap'
@@ -48,64 +104,12 @@ def getFlower(id_2_paper_id, name, ent_type):
     # Generate a self filter dictionary
     filter_dict = self_dict(id_2_paper_id)
 
-    # Add coauthors to filter
-    # filter_dict = coauthors_dict(conn, id_2_paper_id, Entity.AUTH, filter_dict)
-
-    # Generate associated author scores for citing and cited
-    citing_records = gen_score(conn, entity_type_dict[ent_type], citing_papers, my_ids, fdict=filter_dict)
-    cited_records = gen_score(conn, entity_type_dict[ent_type], cited_papers, my_ids, fdict=filter_dict)
-
-    # Print to file (Do we really need this?
-    with open(os.path.join(dir_out, 'authors_citing.txt'), 'w') as fh:
-        for key in citing_records.keys():
-            fh.write("{}\t{}\n".format(key, citing_records[key]))
-
-    with open(os.path.join(dir_out, 'authors_cited.txt'), 'w') as fh:
-        for key in cited_records.keys():
-            fh.write("{}\t{}\n".format(key, cited_records[key]))
-    print("finished writing files")
+    entity_to_author = drawFlower(conn, "author" , citing_papers, cited_papers, my_ids, filter_dict, dir_out, name)
+    entity_to_conference = drawFlower(conn, "conf", citing_papers, cited_papers, my_ids, filter_dict, dir_out, name)
+    entity_to_affiliation = drawFlower(conn, "institution" , citing_papers, cited_papers, my_ids, filter_dict, dir_out, name)
     conn.close()
- 
-
-    #### START PRODUCING GRAPH
-    plot_dir = os.path.join(dir_out, 'figures')
-
-    for dir in [dir_out, plot_dir]:
-      if not os.path.exists(dir):
-          os.makedirs(dir)
-
-
-    # load data into dataframe
-    cited_df = pd.read_csv(os.path.join(dir_out, 'authors_cited.txt'), sep='\t', header=None, names=['authorName', 'citedScore'])
-
-    citing_df = pd.read_csv(os.path.join(dir_out, 'authors_citing.txt'), sep='\t', header=None, names=['authorName', 'citingScore'])
-
-    # get the top x influencers
-    n = 25
-    cited_df = cited_df.sort_values(by=['citedScore'], ascending=False)
-    top_n_cited = list(cited_df.head(n))
-
-    citing_df = citing_df.sort_values(by=['citingScore'], ascending=False)
-    top_n_citing = list(citing_df.head(n))
-
-    # build a graph structure for the top data
-    personG = nx.DiGraph()
-
-    for index, row in cited_df.head(n).iterrows():
-      # note that edge direction is with respect to influence, not citation i.e. for add_edge(a,b,c) it means a influenced b with a weight of c 
-      personG.add_edge(row['authorName'], name, weight=float(row['citedScore']))
-
-    for index, row in citing_df.head(n).iterrows():
-      personG.add_edge(name, row['authorName'], weight=float(row['citingScore']))
-    
-    influencedby_filename = os.path.join(plot_dir, 'influencedby.png')
-    influencedto_filename = os.path.join(plot_dir, 'influencedto.png')
-    print("drawing graphs")
-    draw_halfcircle(graph=personG, ego=name, renorm_weights='log', direction='in', filename = influencedby_filename)
-    draw_halfcircle(graph=personG, ego=name, renorm_weights='log', direction='out', filename = influencedto_filename)
-    print("finished graphs")
-    return influencedby_filename, influencedto_filename
-
-
-
+    file_names = []
+    for ls in [entity_to_author, entity_to_conference, entity_to_affiliation]:
+        file_names.extend(ls)
+    return file_names
 
