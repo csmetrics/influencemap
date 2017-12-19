@@ -38,6 +38,7 @@ def construct_cite_db(idsearch, paperlist):
         
         
         print('{} papers_citing_me'.format(datetime.now()))
+        print(chunk)
         cur.execute(papers_citing_me_q, chunk)
         papers_citing_me_records += list(map(lambda t : t[0], cur.fetchall()))
 

@@ -17,7 +17,7 @@ from draw_egonet import draw_halfcircle
 from entity_type import Entity
 
 
-entity_type_dict = {'author': Entity.AUTH, 'conference': Entity.CONF, 'institution': Entity.AFFI}
+entity_type_dict = {'author': Entity.AUTH, 'conf': Entity.CONF, 'institution': Entity.AFFI}
 
 
 def getFlower(id_2_paper_id, name, ent_type):
@@ -30,10 +30,13 @@ def getFlower(id_2_paper_id, name, ent_type):
 
 
     # get paper ids associated with input name
+    print("\n\nid_to_paper_id\n\n\n\n\n\n{}".format(id_2_paper_id))
 
+    #if ent_type == "conf":
+    #    associated_papers = 
     associated_papers = get_papers(id_2_paper_id)
     my_ids = ids_dict(id_2_paper_id)
-
+    print("\n\nassociated papers\n\n\n\n\n\n{}".format(associated_papers))
     # filter ref papers
     print('{} start filter paper references'.format(datetime.now()))
     citing_papers, cited_papers = construct_cite_db(name, associated_papers)
@@ -49,8 +52,8 @@ def getFlower(id_2_paper_id, name, ent_type):
     # filter_dict = coauthors_dict(conn, id_2_paper_id, Entity.AUTH, filter_dict)
 
     # Generate associated author scores for citing and cited
-    citing_records = gen_score(conn, Entity.AUTH, citing_papers, my_ids, fdict=filter_dict)
-    cited_records = gen_score(conn, Entity.AUTH, cited_papers, my_ids, fdict=filter_dict)
+    citing_records = gen_score(conn, entity_type_dict[ent_type], citing_papers, my_ids, fdict=filter_dict)
+    cited_records = gen_score(conn, entity_type_dict[ent_type], cited_papers, my_ids, fdict=filter_dict)
 
     # Print to file (Do we really need this?
     with open(os.path.join(dir_out, 'authors_citing.txt'), 'w') as fh:
@@ -60,7 +63,7 @@ def getFlower(id_2_paper_id, name, ent_type):
     with open(os.path.join(dir_out, 'authors_cited.txt'), 'w') as fh:
         for key in cited_records.keys():
             fh.write("{}\t{}\n".format(key, cited_records[key]))
-
+    print("finished writing files")
     conn.close()
  
 
@@ -89,17 +92,18 @@ def getFlower(id_2_paper_id, name, ent_type):
     personG = nx.DiGraph()
 
     for index, row in cited_df.head(n).iterrows():
-      personG.add_edge(name, row['authorName'], weight=float(row['citedScore']))
+      # note that edge direction is with respect to influence, not citation i.e. for add_edge(a,b,c) it means a influenced b with a weight of c 
+      personG.add_edge(row['authorName'], name, weight=float(row['citedScore']))
 
     for index, row in citing_df.head(n).iterrows():
-      personG.add_edge(row['authorName'], name, weight=float(row['citingScore']))
+      personG.add_edge(name, row['authorName'], weight=float(row['citingScore']))
     
     influencedby_filename = os.path.join(plot_dir, 'influencedby.png')
     influencedto_filename = os.path.join(plot_dir, 'influencedto.png')
-
+    print("drawing graphs")
     draw_halfcircle(graph=personG, ego=name, renorm_weights='log', direction='in', filename = influencedby_filename)
     draw_halfcircle(graph=personG, ego=name, renorm_weights='log', direction='out', filename = influencedto_filename)
-
+    print("finished graphs")
     return influencedby_filename, influencedto_filename
 
 

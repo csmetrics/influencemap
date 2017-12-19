@@ -230,7 +230,7 @@ def getConf(name):
        p = []
        for tup in papers:
             if tup[3] == currentCID:
-               p.append((tup[0],tup[1],tup[2]))                              
+               p.append((tup[0]))                              
        cID_papers[currentCID] = p
             
     for k in cID_papers:
