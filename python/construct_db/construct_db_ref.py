@@ -61,6 +61,7 @@ def construct_ref():
 
     # Join tables together with count
     print('{} start join paper_ref with authcount'.format(datetime.now()))
+    cur.execute('DROP TABLE IF EXISTS paa_ref_tmp;')
     cur.execute('CREATE TABLE paper_ref_tmp AS SELECT a.paper_id, paper_ref_id, ref_count FROM ref_count a INNER JOIN paper_ref b ON a.paper_id = b.paper_id;')
 
     # construct combined table
