@@ -11,8 +11,6 @@ db_FName = '/localdata/u6363358/data/FieldOfStudy.db'
 db_Jour = '/localdata/u6363358/data/Journals.db'
 db_conf = '/localdata/u6363358/data/Conference.db'
 
-load = {}
-
 def removeCon(lst):
    if lst[-2] == ",":
        return lst[:-2] + ")"
@@ -20,29 +18,22 @@ def removeCon(lst):
        return lst
 
 def isSame(name1, name2):
-    ls2 = name2.split(' ')
     ls1 = name1.split(' ')
-    middle1 = ls1[1:-1]
-    middle2 = ls2[1:-1]
+    ls2 = name2.split(' ')           
     if ls2[-1] == ls1[-1]:
+         middle1 = ls1[1:-1]
+         middle2 = ls2[1:-1]
          if len(ls2[0]) == 1 or len(ls1[0]) == 1:
              if ls2[0][0] == ls1[0][0]:
-                 b = compareMiddle(middle1, middle2)
-                 load[name1] = b
-                 return b
+                  return compareMiddle(middle1, middle2)
              else:
-                 load[name1] = False
                  return False
          else:
              if ls2[0] == ls1[0]:
-                 b = compareMiddle(middle1, middle2)
-                 load[name1] = b
-                 return b
+                 return compareMiddle(middle1, middle2)
              else: 
-                 load[name1] = False
                  return False
-    else:   
-         load[name1] = False 
+    else:  
          return False
 
   
@@ -160,12 +151,10 @@ def getAuthor(name):
                 tempres.append((tuples[0],tuples[1],count,'',pID))
     
     tempres = sorted(tempres,key=lambda x: x[2],reverse=True)
-    
+        
     same = []
-    for tuples in tempres:
-        if tuples[0] == name:
-            same.append(tuples)
-            tempres.remove(tuples)
+    same[:] = [x for x in tempres if x[0] == name]
+    tempres[:] = [x for x in tempres if x[0] != name]
     tempres = same + tempres
     
     print("{} finish counting, getting the fieldName and recent paper".format(datetime.now()))
@@ -182,8 +171,7 @@ def getAuthor(name):
    
     for dic in finalresult:
         print(dic)
-    print(str(len(finalresult)))
-    
+    print(str(len(finalresult))) 
    
     return (finalresult,aIDpIDDict)  
 
@@ -240,19 +228,14 @@ def getConf(name):
     papers = curP.fetchall()
     print("{} finished getting paper".format(datetime.now()))
     cID_papers = {}
-    for tuples in papers:
-       currentCID = tuples[3]
-       p = []
-       for tup in papers:
-            if tup[3] == currentCID:
-               p.append((tup[0]))                              
-       cID_papers[currentCID] = p
+    cID_papers[cID] = papers
             
     for k in cID_papers:
         print(cID_papers[k])
     return (conference, cID_papers)
 
-
+    curP.close()
+    curC.close()
 
 if __name__ == '__main__':
     trial = getAuthor('antony l hosking')
