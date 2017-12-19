@@ -94,6 +94,9 @@ def gen_score(conn, etype, plist, iddict, fdict=dict(), selfcite=False):
         for line in cur.fetchall():
             e_id, weight = get_weight(etype, line)
 
+            if e_id == '':
+                continue
+
             # check if self cite
             if not selfcite and iddict.get(e_id, False):
                 self_cite = True
@@ -115,9 +118,9 @@ def gen_score(conn, etype, plist, iddict, fdict=dict(), selfcite=False):
                 key_scheme = etype.get_keyn()
                 table_map = etype.get_nmap()
                 id_query = 'SELECT * FROM {} WHERE {} = ? LIMIT 1'.format(table_map, key_scheme)
-                
+                print("id: {}, paper: {}".format(e_id, paper))
                 cur.execute(id_query, (e_id, ))
-                _, name = cur.fetchone()
+                name = cur.fetchone()[1]
                 e_name = ' '.join(name.split())
 
                 id_to_name[e_id] = e_name
