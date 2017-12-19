@@ -1,13 +1,13 @@
 from enum import Enum
 
 class Entity(Enum):
-    AUTH = (['auth_id', 'auth_count'], 'authname')
-    CONF = (['conf_id'], 'confname')
-    AFFI = (['affi_id'], 'affiname')
+    AUTH = (['auth_id'], ['auth_id', 'auth_count'], 'authname')
+    CONF = (['conf_id', 'journ_id'], ['conf_id', 'journ_id'], 'confname')
+    AFFI = (['affi_id'], ['affi_id'], 'affiname')
 
-    def __init__(self, fields, nmap):
-        self.keyn = fields[0]
-        self.scheme = fields
+    def __init__(self, keyn, scheme, nmap):
+        self.keyn = keyn
+        self.scheme = scheme
         self.nmap = nmap
 
     def get_keyn(self):

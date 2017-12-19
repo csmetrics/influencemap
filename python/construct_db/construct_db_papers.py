@@ -11,13 +11,13 @@ db_path = cfg.db_path
 
 # Table details
 table_name = 'papers'
-table_col = ['paper_id', 'conf_id']
-table_type = ['text', 'text']
+table_col = ['paper_id', 'conf_id', 'journ_id']
+table_type = ['text', 'text', 'text']
 table_coltype = build_coltype(table_col, table_type)
 
 # Data file details
 data_file = 'Papers.txt'
-data_ids = [0, 9]
+data_ids = [0, 9, 8]
 data_path = os.path.join(data_dir, data_file)
 
 def construct_papers():
