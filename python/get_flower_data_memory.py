@@ -31,9 +31,9 @@ def self_dict(pdict):
     res = dict()
     for key in pdict.keys():
         res[key] = True
-
     return res
 
+'''
 def coauthors_dict(conn, pdict, my_etype, fdict=dict()):
     e_id = pdict.keys()
     paper_ids = get_papers(pdict)
@@ -58,15 +58,17 @@ def coauthors_dict(conn, pdict, my_etype, fdict=dict()):
         for val in e_list:
             coauth_dict[val] = True
 
+    cur.close()
     return coauth_dict
+'''
 
-def get_weight(etype, qline):
+def get_weight(etype, qline, ref_count):
     if etype == Entity.AUTH:
         auth_name, auth_count = qline
-        return auth_name, 1 / auth_count
+        return auth_name, (1 / auth_count) * (1 / ref_count)
     else:
         e_name, = qline
-        return e_name, 1
+        return e_name, 1 / ref_count
 
 def gen_score(conn, etype, plist, iddict, fdict=dict(), selfcite=False):
     res = dict()
@@ -79,7 +81,7 @@ def gen_score(conn, etype, plist, iddict, fdict=dict(), selfcite=False):
 
     cur = conn.cursor()
 
-    for paper in plist:
+    for paper, ref_count in plist:
         # query plan for this
         output_scheme = ",".join(etype.get_scheme())
         #targets = ','.join(['?'] * len(chunk))
@@ -92,7 +94,7 @@ def gen_score(conn, etype, plist, iddict, fdict=dict(), selfcite=False):
 
         # iterate through query results
         for line in cur.fetchall():
-            e_id, weight = get_weight(etype, line)
+            e_id, weight = get_weight(etype, line, ref_count)
 
             # check if self cite
             if not selfcite and iddict.get(e_id, False):
@@ -150,13 +152,14 @@ if __name__ == "__main__":
     associated_papers = get_papers(id_2_paper_id)
     my_ids = ids_dict(id_2_paper_id)
 
-    # filter ref papers
-    print('{} start filter paper references'.format(datetime.now()))
-    citing_papers, cited_papers = construct_cite_db(name, associated_papers)
-    print('{} finish filter paper references'.format(datetime.now()))
-
+    # sqlite connection
     db_path = os.path.join(db_dir, 'paper_info.db')
     conn = sqlite3.connect(db_path)
+
+    # filter ref papers
+    print('{} start filter paper references'.format(datetime.now()))
+    citing_papers, cited_papers = construct_cite_db(conn, associated_papers)
+    print('{} finish filter paper references'.format(datetime.now()))
 
     # Generate a self filter dictionary
     filter_dict = self_dict(id_2_paper_id)
