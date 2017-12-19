@@ -5,6 +5,7 @@ from construct_db_func import build_coltype, construct_table, import_to_table, c
 from construct_db_authname import construct_authname
 from construct_db_confname import construct_confname
 from construct_db_affiname import construct_affiname
+from construct_db_affiname import construct_journname
 from construct_db_ref import construct_ref
 from construct_db_info import construct_db_info
 import construct_db_config as cfg
@@ -28,6 +29,7 @@ cur.execute('PRAGMA page_size = 65536')
 construct_confname()
 construct_affiname()
 construct_authname()
+construct_journname()
 
 construct_db_info()
 construct_ref()
