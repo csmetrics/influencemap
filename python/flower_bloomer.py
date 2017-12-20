@@ -65,7 +65,7 @@ def getFlower(id_2_paper_id, name, ent_type):
     #db_path = os.path.join(db_dir, db_name)
     dir_out = '/localdata/u5798145/influencemap/out'
 
-    db_path = os.path.join(db_dir, 'paper_info2.db')
+    db_path = os.path.join(db_dir, 'paper_info.db')
     conn = sqlite3.connect(db_path)
 
     # get paper ids associated with input name
