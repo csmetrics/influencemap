@@ -13,12 +13,12 @@ plt.switch_backend('agg')
 # local module imports
 from get_flower_data_memory import *
 from export_citations_author import construct_cite_db
-from entity_type import Entity, EntityMap
+from entity_type import Entity, Entity_map
 from draw_egonet import draw_halfcircle
 
 def getEntityMap(ego, outer):
     e = {'author': Entity.AUTH, 'conf': Entity.CONF, 'institution': Entity.AFFI}
-    return EntityMap(e[ego], e[outer])
+    return Entity_map(e[ego], e[outer])
 
 def drawFlower(conn, ent_type, ent_type2, citing_papers, cited_papers, filter_dict, dir_out, name):   
     # Generate associated author scores for citing and cited
@@ -68,8 +68,8 @@ def drawFlower(conn, ent_type, ent_type2, citing_papers, cited_papers, filter_di
     for index, row in citing_df.head(n).iterrows():
       personG.add_edge(name, row['authorName'], weight=float(row['citingScore']))
 
-    influencedby_filename = os.path.join(plot_dir, 'influencedby_{}.png'.format(ent_type))
-    influencedto_filename = os.path.join(plot_dir, 'influencedto_{}.png'.format(ent_type))
+    influencedby_filename = os.path.join(plot_dir, 'influencedby_{}.png'.format(ent_type2))
+    influencedto_filename = os.path.join(plot_dir, 'influencedto_{}.png'.format(ent_type2))
     print("drawing graphs")
     draw_halfcircle(graph=personG, ego=name, renorm_weights='log', direction='in', filename = influencedby_filename)
     draw_halfcircle(graph=personG, ego=name, renorm_weights='log', direction='out', filename = influencedto_filename)

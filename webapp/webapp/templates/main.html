@@ -31,13 +31,12 @@
                 <span class="input-group-btn">
                   <button type="submit" name="search" value="search" class="btn btn-flat"><i class="fa fa-search"></i></button>
                 </span>
-                  <button type="radio" id="test" onclick="test2('author')"</button>
               </div>
               <div class="form-group search-option">
                 {% for opt in optionlist %}
                 <div class="radio">
                   <label>
-                    <input class="entity-option" type="radio" name="option" id="{{opt.id}}" value="{{opt.id}}" {% if opt.id == selectedOption.id %} checked {% endif %}>
+                    <input onclick="test2(this)" class="entity-option" type="radio" name="option" id="{{opt.id}}" value="{{opt.id}}" {% if opt.id == selectedOption.id %} checked {% endif %}>
                     {{opt.name}}
                   </label>
                 </div>
@@ -134,13 +133,11 @@ function test2(obj){
 var lists = Object()
   {% for opt in optionlist %}
   lists["{{opt.id}}"]= {{opt.list | safe}}
-alert("{{opt.id}}")
 {% endfor %}
 
 
 alert(obj.id)    
 console.log(lists[obj.id])
-a.destroy()
 a = new autoComplete({
     selector: '#name-search-bar',
     minChars: 2,
@@ -151,10 +148,7 @@ a = new autoComplete({
         var maxSuggest = 10;
         for (i = 0; i < choices.length && suggestions.length < maxSuggest; i++) {
             if (~choices[i].toLowerCase().indexOf(term))
-              suggestions.push(choices[i]);<span class="input-group-btn">
-                  <button type="submit" name="search" value="search" class="btn btn-flat"><i class="fa fa-search"></i></button>
-                </span>
-
+              suggestions.push(choices[i]);
         }
         suggest(suggestions);
     }
