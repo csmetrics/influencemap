@@ -10,6 +10,7 @@ db_key = '/localdata/u6363358/data/paperKeywords.db'
 db_FName = '/localdata/u6363358/data/FieldOfStudy.db'
 db_Jour = '/localdata/u6363358/data/Journals.db'
 db_conf = '/localdata/u6363358/data/Conference.db'
+db_aff = '/localdata/u6363358/data/Affiliations.db'
 
 def removeCon(lst):
    if lst[-2] == ",":
@@ -237,6 +238,51 @@ def getConf(name):
     curP.close()
     curC.close()
 
+def getAff(aff):
+    dbP = sqlite3.connect(db_PAA, check_same_thread = False)
+    dbA = sqlite3.connect(db_aff, check_same_thread = False)
+    curP = dbP.cursor()
+    curA = dbA.cursor()
+    ls = aff.split(' ')
+    ls = list(map(lambda x: x.lower(), ls))
+    #remove irrelevant keyword
+    ls = [x for x in ls if x != 'the' and x != 'college' and x != 'department' and x != 'of' and x != 'and'] 
+    print(ls)
+    #Generate query condition
+    cond = ''
+    for words in ls: #words are the keywords in the user input
+        cond = cond + " AND AffiliationName LIKE '%" + words + "%'"
+    cond = cond[4:]
+    print("{} getting affiliationID".format(datetime.now()))
+    print("SELECT AffiliationID FROM Affiliations WHERE" + cond)
+    curA.execute("SELECT AffiliationID FROM Affiliations WHERE" + cond)
+    affID = list(map(lambda x: x[0], curA.fetchall()))
+    print(affID)
+  
+    print("{} getting related papers".format(datetime.now()))
+    curP.execute(removeCon("SELECT paperID, affiliationNameOriginal FROM weightedPaperAuthorAffiliations WHERE affiliationID IN {}".format(tuple(affID))))
+    #Form a dict of affiliationName, pID
+    aName_pID = {}
+    res = curP.fetchall()
+    print("{} finished getting papers".format(datetime.now()))
+    for tup in res:
+        currentAName = tup[1]
+        pID = []
+        for t in res:
+           if t[1] == currentAName:
+                pID.append(t[0])
+        aName_pID[currentAName] = pID
+    curA.close()
+    curP.close() 
+
+    for key in aName_pID:
+       print((key, aName_pID[key]))
+    
+    return(aName_pID)
+
+
+
+
 if __name__ == '__main__':
-    trial = getAuthor('antony l hosking')
+    trial = getAff('The Australian National University')
 
