@@ -76,7 +76,7 @@ def get_weight(e_type, qline, ref_count):
     return res
 
 def gen_score(conn, e_map, plist, fdict=dict(), inc_self=False):
-    e_type, my_type = e_map.get_map()
+    my_type, e_type = e_map.get_map()
 
     res = dict()
     id_to_name = dict([(tname, dict()) for tname in e_type.keyn])

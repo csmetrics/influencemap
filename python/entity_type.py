@@ -13,6 +13,7 @@ class Entity(Enum):
         self.keyn = key
         self.scheme = key + add
 
+# Defines the type of the flower. (Center, Leaves)
 class Entity_map:
     def __init__(self, domain, codomain):
         self.domain = domain
