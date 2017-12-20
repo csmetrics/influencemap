@@ -1,24 +1,19 @@
 from enum import Enum
 
 class Entity(Enum):
-    AUTH = (['auth_id', 'auth_count'], 'authname')
-    CONF = (['conf_id'], 'confname')
-    AFFI = (['affi_id'], 'affiname')
+    AUTH = ({'auth_id': 'authname'}, ['auth_id'], ['auth_count'])
+    CFJN = ({'conf_id': 'confname', 'journ_id': 'journname'}, ['conf_id', 'journ_id'], [])
+    AFFI = ({'affi_id': 'affiname'}, ['affi_id'], [])
+    CONF = ({'conf_id': 'confname'}, ['conf_id'], [])
+    JOURN = ({'journ_id': 'journname'}, ['journ_id'], [])
 
-    def __init__(self, fields, nmap):
-        self.keyn = fields[0]
-        self.scheme = fields
-        self.nmap = nmap
 
-    def get_keyn(self):
-        return self.keyn
+    def __init__(self, edict, key, add):
+        self.edict = edict
+        self.keyn = key
+        self.scheme = key + add
 
-    def get_scheme(self):
-        return self.scheme
-
-    def get_nmap(self):
-        return self.nmap
-
+# Defines the type of the flower. (Center, Leaves)
 class Entity_map:
     def __init__(self, domain, codomain):
         self.domain = domain
@@ -26,9 +21,3 @@ class Entity_map:
 
     def get_map(self):
         return self.domain, self.codomain
-
-    def get_domain(self):
-        return self.domain
-
-    def get_codomain(self):
-        return self.codomain

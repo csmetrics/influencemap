@@ -36,6 +36,7 @@ ctable_coltype = build_coltype(ctable_col, ctable_type)
 
 def construct_ref():
     conn = sqlite3.connect(db_path)
+    cur = conn.cursor()
 
     # Construct table
     construct_table(conn, table_name, table_coltype, override=True)
@@ -60,6 +61,7 @@ def construct_ref():
 
     # Join tables together with count
     print('{} start join paper_ref with authcount'.format(datetime.now()))
+    cur.execute('DROP TABLE IF EXISTS paa_ref_tmp;')
     cur.execute('CREATE TABLE paper_ref_tmp AS SELECT a.paper_id, paper_ref_id, ref_count FROM ref_count a INNER JOIN paper_ref b ON a.paper_id = b.paper_id;')
 
     # construct combined table
@@ -68,8 +70,13 @@ def construct_ref():
     cur.execute('INSERT INTO paper_ref_count (paper_id, paper_ref_id, paper_rc, paper_ref_rc) AS SELECT a.paper_id, paper_ref_id, b.ref_count, a.ref_count FROM ref_count a INNER JOIN paper_ref_tmp b ON a.paper_id = b.paper_ref_id;')
     print('{} finish join paper_ref with authcount'.format(datetime.now()))
 
+    # index final table
+    create_index(conn, ctable_name, ctable_col[0])
+    create_index(conn, ctable_name, ctable_col[1])
+
     # Save
     conn.commit()
+    cur.close()
     conn.close()
 
 if __name__ == '__main__':

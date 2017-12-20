@@ -17,14 +17,11 @@ db_dir = '/localdata/common'
 BATCH_SIZE = 999 # MAX=999
 
 # Need a function which will give a list of papers associated to something
-def construct_cite_db(idsearch, paperlist):
-    db_path = os.path.join(out_dir, 'paper_ref.db')
-
+def construct_cite_db(conn, paperlist):
     papers_citing_me_records = list()
     papers_cited_by_me_records = list()
     paper_chunks = [paperlist[x:x+BATCH_SIZE] for x in range(0, len(paperlist), BATCH_SIZE)]
 
-    conn = sqlite3.connect(db_path)
     cur = conn.cursor()
     total_prog = 0
     total = len(paperlist)
@@ -33,18 +30,22 @@ def construct_cite_db(idsearch, paperlist):
     print('\n---\n{} starting query\n---'.format(datetime.now()))
     for chunk in paper_chunks:
         print('{} start query of paper chunk of size {}'.format(datetime.now(), len(chunk)))
-        papers_citing_me_q = 'SELECT paper_id FROM paper_ref WHERE paper_ref_id IN ({})'.format(','.join(['?'] * len(chunk)))
-        papers_cited_by_me_q = 'SELECT paper_ref_id FROM paper_ref WHERE paper_id IN ({})'.format(','.join(['?'] * len(chunk)))
+        # papers_citing_me_q = 'SELECT paper_id, paper_ref_rc, paper_ref_id FROM paper_ref_count WHERE paper_ref_id IN ({})'.format(','.join(['?'] * len(chunk)))
+        # papers_cited_by_me_q = 'SELECT paper_ref_id, paper_rc, paper_id FROM paper_ref_count WHERE paper_id IN ({})'.format(','.join(['?'] * len(chunk)))
+        papers_citing_me_q = 'SELECT paper_id, paper_ref_id FROM paper_ref WHERE paper_ref_id IN ({})'.format(','.join(['?'] * len(chunk)))
+        papers_cited_by_me_q = 'SELECT paper_ref_id, paper_id FROM paper_ref WHERE paper_id IN ({})'.format(','.join(['?'] * len(chunk)))
         
         
         print('{} papers_citing_me'.format(datetime.now()))
-        print(chunk)
         cur.execute(papers_citing_me_q, chunk)
-        papers_citing_me_records += list(map(lambda t : t[0], cur.fetchall()))
+        # papers_citing_me_records += cur.fetchall()
+        t = cur.fetchall()
+        papers_citing_me_records += map(lambda r : (r[0], 1, r[1]), t)
 
         print('{} papers_cited_by_me_q'.format(datetime.now()))
         cur.execute(papers_cited_by_me_q, chunk)
-        papers_cited_by_me_records += list(map(lambda t : t[0], cur.fetchall()))
+        # papers_cited_by_me_records += cur.fetchall()
+        papers_cited_by_me_records += map(lambda r : (r[0], 1, r[1]), cur.fetchall())
 
         total_prog += len(chunk)
         print('{} finish query of paper chunk, total prog {:.2f}%'.format(datetime.now(), total_prog/total * 100))
@@ -63,4 +64,7 @@ if __name__ == '__main__':
 
     associated_papers = name_to_papers(user_in)
 
-    construct_cite_db(user_in, associated_papers)
+    db_path = os.path.join(db_dir, 'paper_ref.db')
+    conn = sqlite3.connect(db_path)
+
+    construct_cite_db(conn, associated_papers)

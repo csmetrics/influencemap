@@ -10,17 +10,17 @@ data_dir = cfg.data_dir
 db_path = cfg.db_path
 
 # Table details
-table_name = 'papers'
-table_col = ['paper_id', 'conf_id', 'journ_id']
-table_type = ['text', 'text', 'text']
+table_name = 'journname'
+table_col = ['journ_id', 'journ_name']
+table_type = ['text', 'text']
 table_coltype = build_coltype(table_col, table_type)
 
 # Data file details
-data_file = 'Papers.txt'
-data_ids = [0, 9, 8]
+data_file = 'Journals.txt'
+data_ids = [0, 1]
 data_path = os.path.join(data_dir, data_file)
 
-def construct_papers():
+def construct_journname():
     conn = sqlite3.connect(db_path)
 
     # Construct table
@@ -37,4 +37,4 @@ def construct_papers():
     conn.close()
 
 if __name__ == '__main__':
-    construct_papers()
+    construct_confname()

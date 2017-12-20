@@ -10,8 +10,7 @@ db_key = '/localdata/u6363358/data/paperKeywords.db'
 db_FName = '/localdata/u6363358/data/FieldOfStudy.db'
 db_Jour = '/localdata/u6363358/data/Journals.db'
 db_conf = '/localdata/u6363358/data/Conference.db'
-
-load = {}
+db_aff = '/localdata/u6363358/data/Affiliations.db'
 
 def removeCon(lst):
    if lst[-2] == ",":
@@ -20,29 +19,22 @@ def removeCon(lst):
        return lst
 
 def isSame(name1, name2):
-    ls2 = name2.split(' ')
     ls1 = name1.split(' ')
-    middle1 = ls1[1:-1]
-    middle2 = ls2[1:-1]
+    ls2 = name2.split(' ')           
     if ls2[-1] == ls1[-1]:
+         middle1 = ls1[1:-1]
+         middle2 = ls2[1:-1]
          if len(ls2[0]) == 1 or len(ls1[0]) == 1:
              if ls2[0][0] == ls1[0][0]:
-                 b = compareMiddle(middle1, middle2)
-                 load[name1] = b
-                 return b
+                  return compareMiddle(middle1, middle2)
              else:
-                 load[name1] = False
                  return False
          else:
              if ls2[0] == ls1[0]:
-                 b = compareMiddle(middle1, middle2)
-                 load[name1] = b
-                 return b
+                 return compareMiddle(middle1, middle2)
              else: 
-                 load[name1] = False
                  return False
-    else:   
-         load[name1] = False 
+    else:  
          return False
 
   
@@ -160,12 +152,10 @@ def getAuthor(name):
                 tempres.append((tuples[0],tuples[1],count,'',pID))
     
     tempres = sorted(tempres,key=lambda x: x[2],reverse=True)
-    
+        
     same = []
-    for tuples in tempres:
-        if tuples[0] == name:
-            same.append(tuples)
-            tempres.remove(tuples)
+    same[:] = [x for x in tempres if x[0] == name]
+    tempres[:] = [x for x in tempres if x[0] != name]
     tempres = same + tempres
     
     print("{} finish counting, getting the fieldName and recent paper".format(datetime.now()))
@@ -182,8 +172,7 @@ def getAuthor(name):
    
     for dic in finalresult:
         print(dic)
-    print(str(len(finalresult)))
-    
+    print(str(len(finalresult))) 
    
     return (finalresult,aIDpIDDict)  
 
@@ -198,19 +187,14 @@ def getJournal(name):
     journals = curJ.fetchall()
     print("{} finished getting jID".format(datetime.now()))
     print("{} getting the paper published".format(datetime.now()))
-    curP.execute(removeCon("SELECT paperID, paperTitle, publishedDate, journalID FROM papers WHERE journalID IN {}".format(tuple(jID))))
+    curP.execute(removeCon("SELECT paperID, journalID FROM papers WHERE journalID IN {}".format(tuple(jID))))
     papers = curP.fetchall()
     print("{} finished getting paper".format(datetime.now()))
     
     #grouping tuples by journalID
     jID_papers = {}
-    for tuples in papers:
-       currentJID = tuples[3]
-       p = []
-       for tup in papers:
-           if tup[3] == currentJID:
-               p.append((tup[0],tup[1],tup[2]))
-       jID_papers[currentJID] = p
+    for pID,jID in papers:
+        jID_papers.setdefault(jID,[]).append(pID)
 
     curP.close()
     curJ.close()
@@ -240,20 +224,65 @@ def getConf(name):
     papers = curP.fetchall()
     print("{} finished getting paper".format(datetime.now()))
     cID_papers = {}
-    for tuples in papers:
-       currentCID = tuples[3]
-       p = []
-       for tup in papers:
-            if tup[3] == currentCID:
-               p.append((tup[0]))                              
-       cID_papers[currentCID] = p
+    cID_papers[cID] = papers
             
     for k in cID_papers:
         print(cID_papers[k])
     return (conference, cID_papers)
 
+    curP.close()
+    curC.close()
 
+def getAff(aff):
+    dbP = sqlite3.connect(db_PAA, check_same_thread = False)
+    dbA = sqlite3.connect(db_aff, check_same_thread = False)
+    curP = dbP.cursor()
+    curA = dbA.cursor()
+    aff = aff.lower()
+    dbA.create_function("match",2,match)
+    print("{} getting affiliationID".format(datetime.now())) #get affiliationID that match the given institution
+    print("SELECT AffiliationID FROM Affiliations WHERE match(AffiliationName, '"+ aff + "')" )
+    curA.execute("SELECT AffiliationID FROM Affiliations WHERE match(AffiliationName, '" + aff + "')")
+    affID = list(map(lambda x: x[0], curA.fetchall()))
+    print(affID)
+  
+    print("{} getting related papers".format(datetime.now())) #get papers related 
+    curP.execute(removeCon("SELECT paperID, affiliationNameOriginal FROM weightedPaperAuthorAffiliations WHERE affiliationID IN {}".format(tuple(affID))))
+    #Form a dict of affiliationName, pID
+    aName_pID = {}
+    res = curP.fetchall()
+    print("{} finished getting papers".format(datetime.now()))
+    for pID, aN in res:
+        aName_pID.setdefault(aN,[]).append(pID)
+  
+    #get papers related to the specified department
+    aName_pID = {aN:pIDs for (aN,pIDs) in aName_pID.items() if contains(aff,aN)}
+    
+    curA.close()
+    curP.close() 
+
+    for key in aName_pID:
+       print((key, aName_pID[key]))
+    
+    return(aName_pID) #A dict of aName, [pID]
+
+def match(name1, name2):
+    ls1 = name1.split(' ')
+    ls2 = name2.split(' ')
+    ls1 = [x for x in ls1 if x != 'the' and x != 'college' and x != 'department' and x != 'of' and x != 'and']
+    ls2 = [x for x in ls2 if x != 'the' and x != 'college' and x != 'department' and x != 'of' and x != 'and']
+    for word in ls1:
+        if word not in ls2: return False
+    return True
+
+def contains(name1, name2):
+    name2 = name2.lower()
+    ls1 = name1.split(' ')
+    ls1 = [x for x in ls1 if x != 'the' and x != 'college' and x != 'department' and x != 'of' and x != 'and']
+    for word in ls1:
+        if word not in name2:
+             return False
+    return True
 
 if __name__ == '__main__':
-    trial = getAuthor('antony l hosking')
-
+    trial = getAff('Computer Science The Australian National University')
