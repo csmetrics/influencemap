@@ -25,16 +25,6 @@ def drawFlower(conn, ent_type, ent_type2, citing_papers, cited_papers, filter_di
     citing_records = gen_score(conn, getEntityMap(ent_type,ent_type2), citing_papers, fdict=filter_dict)
     cited_records = gen_score(conn, getEntityMap(ent_type, ent_type2), cited_papers, fdict=filter_dict)
 
-    # Print to file (Do we really need this?
-    with open(os.path.join(dir_out, 'authors_citing.txt'), 'w') as fh:
-        for key in citing_records.keys():
-            fh.write("{}\t{}\n".format(key, citing_records[key]))
-
-    with open(os.path.join(dir_out, 'authors_cited.txt'), 'w') as fh:
-        for key in cited_records.keys():
-            fh.write("{}\t{}\n".format(key, cited_records[key]))
-    print("finished writing files")
-
 
     #### START PRODUCING GRAPH
     plot_dir = os.path.join(dir_out, 'figures')
@@ -43,30 +33,21 @@ def drawFlower(conn, ent_type, ent_type2, citing_papers, cited_papers, filter_di
       if not os.path.exists(dir):
           os.makedirs(dir)
 
-
-    # load data into dataframe
-    cited_df = pd.read_csv(os.path.join(dir_out, 'authors_cited.txt'), sep='\t', header=None, names=['authorName', 'citedScore'])
-
-    citing_df = pd.read_csv(os.path.join(dir_out, 'authors_citing.txt'), sep='\t', header=None, names=['authorName', 'citingScore'])
-
     # get the top x influencersdrawFlower(conn, Entity.AUTH, citing_papers, cited_papers, my_ids, filter_dict, dir_out)
-
     n = 25
-    cited_df = cited_df.sort_values(by=['citedScore'], ascending=False)
-    top_n_cited = list(cited_df.head(n))
-
-    citing_df = citing_df.sort_values(by=['citingScore'], ascending=False)
-    top_n_citing = list(citing_df.head(n))
+    top_entities_influenced_by_poi = [(k, citing_records[k]) for k in sorted(citing_records, key=citing_records.get, reverse = True)][:n]
+    top_entities_that_influenced_poi = [(k, cited_records[k]) for k in sorted(cited_records, key=cited_records.get, reverse = True)][:n]
+    
 
     # build a graph structure for the top data
     personG = nx.DiGraph()
 
-    for index, row in cited_df.head(n).iterrows():
+    for entity in top_entities_that_influenced_poi:
       # note that edge direction is with respect to influence, not citation i.e. for add_edge(a,b,c) it means a influenced b with a weight of c 
-      personG.add_edge(row['authorName'], name, weight=float(row['citedScore']))
+      personG.add_edge(entity[0], name, weight=float(entity[1]))
 
-    for index, row in citing_df.head(n).iterrows():
-      personG.add_edge(name, row['authorName'], weight=float(row['citingScore']))
+    for entity in top_entities_influenced_by_poi:
+      personG.add_edge(name, entity[0], weight=float(entity[1]))
 
     influencedby_filename = os.path.join(plot_dir, 'influencedby_{}.png'.format(ent_type2))
     influencedto_filename = os.path.join(plot_dir, 'influencedto_{}.png'.format(ent_type2))
