@@ -34,7 +34,7 @@ def self_dict(pdict):
     return res
 
 '''
-def coauthors_dict(conn, pdict, my_etype, fdict=dict()):
+def coauthors_dict(conn, pdict, my_e_type, fdict=dict()):
     e_id = pdict.keys()
     paper_ids = get_papers(pdict)
     coauth_dict = fdict
@@ -42,7 +42,7 @@ def coauthors_dict(conn, pdict, my_etype, fdict=dict()):
     cur = conn.cursor()
 
     for paper in paper_ids:
-        query = 'SELECT {} FROM paper_info WHERE paper_id = ?'.format(my_etype.get_keyn())
+        query = 'SELECT {} FROM paper_info WHERE paper_id = ?'.format(my_e_type.get_keyn())
         
         cur.execute(query, (paper, ))
 
@@ -62,61 +62,74 @@ def coauthors_dict(conn, pdict, my_etype, fdict=dict()):
     return coauth_dict
 '''
 
-def get_weight(etype, qline, ref_count):
-    if etype == Entity.AUTH:
+def get_weight(e_type, qline, ref_count):
+    if e_type == Entity.AUTH:
         auth_id, auth_count = qline
         if not auth_id == '':
-            return [(auth_id, (1 / auth_count) * (1 / ref_count), etype.keyn[0])]
+            return [(auth_id, (1 / auth_count) * (1 / ref_count), e_type.keyn[0])]
 
     res = list()
-    for idx, key in enumerate(etype.keyn):
+    for idx, key in enumerate(e_type.keyn):
         e_id = qline[idx]
         if not e_id == '':
             res.append((e_id, 1 / ref_count, key))
     return res
 
-def gen_score(conn, etype, plist, iddict, fdict=dict(), selfcite=False):
+def gen_score(conn, e_map, plist, fdict=dict(), inc_self=False):
+    e_type, my_type = e_map.get_map()
+
     res = dict()
-    id_to_name = dict([(tname, dict()) for tname in etype.keyn])
+    id_to_name = dict([(tname, dict()) for tname in e_type.keyn])
+    sc_id_to_name = dict([(tname, dict()) for tname in my_type.keyn])
 
     # split papers into chunks
     total_prog = 0
     total = len(plist)
-    # paper_chunks = [plist[x:x+BATCH_SIZE] for x in range(0, total, BATCH_SIZE)]
 
     cur = conn.cursor()
 
-    for paper, ref_count in plist:
-        # query plan for this
-        output_scheme = ",".join(etype.scheme)
-        #targets = ','.join(['?'] * len(chunk))
+    for paper, ref_count, my_paper in plist:
+        # Determine if the paper is a self-citation of the orig paper
+        if not inc_self:
+            for key in my_type.keyn:
+                sc_query = 'SELECT {} FROM paper_info WHERE paper_id = ?'.format(key)
+
+                # Find the entities (and cache to dictioanry)
+                try:
+                    my_e = sc_id_to_name[key][my_paper]
+                except KeyError:
+                    cur.execute(sc_query, (my_paper, ))
+                    my_e = map(lambda r : r[0], cur.fetchall())
+                    sc_id_to_name[key][my_paper] = my_e
+                    
+                try:
+                    their_e = sc_id_to_name[key][paper]
+                except KeyError:
+                    cur.execute(sc_query, (paper, ))
+                    their_e = map(lambda r : r[0], cur.fetchall())
+                    sc_id_to_name[key][paper] = their_e
+
+                # Check if author overlap ie selfcite
+                if not set(my_e).isdisjoint(their_e):
+                    continue
+
+        # query plan finding paper weights
+        output_scheme = ",".join(e_type.scheme)
         query = 'SELECT {} FROM paper_info WHERE paper_id = ?'.format(output_scheme)
 
         cur.execute(query, (paper, ))
 
         qlines = list()
-        self_cite = False
 
         # iterate through query results
         for line in cur.fetchall():
             # iterate over different table types
-            for wline in get_weight(etype, line, ref_count):
+            for wline in get_weight(e_type, line, ref_count):
                 e_id, weight, tkey = wline
-                # check if self cite
-                if not selfcite and iddict.get(e_id, False):
-                    self_cite = True
-                    break
 
                 # If id is in the filter map, don't add
                 if not fdict.get(e_id, False):
                     qlines.append((e_id, weight, tkey))
-
-            # If self_cite break out of outer loop
-            if self_cite:
-                break
-
-        if self_cite:
-            continue
 
         # Add scores
         for e_id, weight, tkey in qlines:
@@ -124,7 +137,7 @@ def gen_score(conn, etype, plist, iddict, fdict=dict(), selfcite=False):
             try:
                 e_name = id_to_name[tkey][e_id]
             except KeyError:
-                id_query = 'SELECT * FROM {} WHERE {} = ? LIMIT 1'.format(etype.edict[tkey], tkey)
+                id_query = 'SELECT * FROM {} WHERE {} = ? LIMIT 1'.format(e_type.edict[tkey], tkey)
                 cur.execute(id_query, (e_id, ))
                 name = cur.fetchone()[1]
                 e_name = ' '.join(name.split())
@@ -136,10 +149,6 @@ def gen_score(conn, etype, plist, iddict, fdict=dict(), selfcite=False):
                 res[e_name] += weight
             except KeyError:
                 res[e_name] = weight
-
-        # progression
-        # total_prog += 1
-        # print('{} finish query of paper chunk, total prog {:.2f}%'.format(datetime.now(), total_prog/total * 100))
 
     cur.close()
 
@@ -178,8 +187,8 @@ if __name__ == "__main__":
     # filter_dict = coauthors_dict(conn, id_2_paper_id, Entity.AUTH, filter_dict)
 
     # Generate associated author scores for citing and cited
-    citing_records = gen_score(conn, Entity.CONF, citing_papers, my_ids, fdict=filter_dict)
-    cited_records = gen_score(conn, Entity.CONF, cited_papers, my_ids, fdict=filter_dict)
+    citing_records = gen_score(conn, Entity_map(Entity.AUTH, Entity.AUTH), citing_papers, fdict=filter_dict)
+    cited_records = gen_score(conn, Entity_map(Entity.AUTH, Entity.AUTH), cited_papers, fdict=filter_dict)
 
     # Print to file (Do we really need this?
     with open(os.path.join(dir_out, 'authors_citing.txt'), 'w') as fh:

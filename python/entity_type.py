@@ -20,9 +20,3 @@ class Entity_map:
 
     def get_map(self):
         return self.domain, self.codomain
-
-    def get_domain(self):
-        return self.domain
-
-    def get_codomain(self):
-        return self.codomain
