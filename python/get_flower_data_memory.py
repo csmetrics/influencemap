@@ -173,15 +173,12 @@ if __name__ == "__main__":
     my_ids = ids_dict(id_2_paper_id)
 
     # sqlite connection
-    db_path = os.path.join(db_dir, 'paper_info.db')
+    db_path = os.path.join(db_dir, 'paper_info2.db')
     conn = sqlite3.connect(db_path)
-
-    db_path2 = os.path.join(db_dir, 'paper_ref.db')
-    conn2 = sqlite3.connect(db_path2)
 
     # filter ref papers
     print('{} start filter paper references'.format(datetime.now()))
-    citing_papers, cited_papers = construct_cite_db(conn2, associated_papers)
+    citing_papers, cited_papers = construct_cite_db(conn, associated_papers)
     print('{} finish filter paper references'.format(datetime.now()))
 
     # Generate a self filter dictionary
