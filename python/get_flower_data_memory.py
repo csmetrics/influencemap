@@ -101,7 +101,6 @@ def gen_score(conn, etype, plist, iddict, fdict=dict(), selfcite=False):
         for line in cur.fetchall():
             # iterate over different table types
             for wline in get_weight(etype, line, ref_count):
-                print(wline)
                 e_id, weight, tkey = wline
                 # check if self cite
                 if not selfcite and iddict.get(e_id, False):
