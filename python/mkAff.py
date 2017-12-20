@@ -187,20 +187,14 @@ def getJournal(name):
     journals = curJ.fetchall()
     print("{} finished getting jID".format(datetime.now()))
     print("{} getting the paper published".format(datetime.now()))
-    curP.execute(removeCon("SELECT paperID, paperTitle, publishedDate, journalID FROM papers WHERE journalID IN {}".format(tuple(jID))))
+    curP.execute(removeCon("SELECT paperID, journalID FROM papers WHERE journalID IN {}".format(tuple(jID))))
     papers = curP.fetchall()
     print("{} finished getting paper".format(datetime.now()))
     
     #grouping tuples by journalID
     jID_papers = {}
-    for tuples in papers:
-       currentJID = tuples[3]
-       if currentJID not in jID_papers:
-          p = []
-          for tup in papers:
-              if tup[3] == currentJID:
-                  p.append((tup[0],tup[1],tup[2]))
-          jID_papers[currentJID] = p
+    for pID,jID in papers:
+        jID_papers.setdefault(jID,[]).append(pID)
 
     curP.close()
     curJ.close()
@@ -244,47 +238,51 @@ def getAff(aff):
     dbA = sqlite3.connect(db_aff, check_same_thread = False)
     curP = dbP.cursor()
     curA = dbA.cursor()
-    ls = aff.split(' ')
-    ls = list(map(lambda x: x.lower(), ls))
-    #remove irrelevant keyword
-    ls = [x for x in ls if x != 'the' and x != 'college' and x != 'department' and x != 'of' and x != 'and'] 
-    print(ls)
-    #Generate query condition
-    cond = ''
-    for words in ls: #words are the keywords in the user input
-        cond = cond + " AND AffiliationName LIKE '%" + words + "%'"
-    cond = cond[4:]
-    print("{} getting affiliationID".format(datetime.now()))
-    print("SELECT AffiliationID FROM Affiliations WHERE" + cond)
-    curA.execute("SELECT AffiliationID FROM Affiliations WHERE" + cond)
+    aff = aff.lower()
+    dbA.create_function("match",2,match)
+    print("{} getting affiliationID".format(datetime.now())) #get affiliationID that match the given institution
+    print("SELECT AffiliationID FROM Affiliations WHERE match(AffiliationName, '"+ aff + "')" )
+    curA.execute("SELECT AffiliationID FROM Affiliations WHERE match(AffiliationName, '" + aff + "')")
     affID = list(map(lambda x: x[0], curA.fetchall()))
     print(affID)
   
-    print("{} getting related papers".format(datetime.now()))
+    print("{} getting related papers".format(datetime.now())) #get papers related 
     curP.execute(removeCon("SELECT paperID, affiliationNameOriginal FROM weightedPaperAuthorAffiliations WHERE affiliationID IN {}".format(tuple(affID))))
     #Form a dict of affiliationName, pID
     aName_pID = {}
     res = curP.fetchall()
     print("{} finished getting papers".format(datetime.now()))
-    for tup in res:
-        currentAName = tup[1]
-        if currentAName not in aName_pID:
-           pID = []
-           for t in res:
-              if t[1] == currentAName:
-                  pID.append(t[0])
-           aName_pID[currentAName] = pID
+    for pID, aN in res:
+        aName_pID.setdefault(aN,[]).append(pID)
+  
+    #get papers related to the specified department
+    aName_pID = {aN:pIDs for (aN,pIDs) in aName_pID.items() if contains(aff,aN)}
+    
     curA.close()
     curP.close() 
 
     for key in aName_pID:
        print((key, aName_pID[key]))
     
-    return(aName_pID)
+    return(aName_pID) #A dict of aName, [pID]
 
+def match(name1, name2):
+    ls1 = name1.split(' ')
+    ls2 = name2.split(' ')
+    ls1 = [x for x in ls1 if x != 'the' and x != 'college' and x != 'department' and x != 'of' and x != 'and']
+    ls2 = [x for x in ls2 if x != 'the' and x != 'college' and x != 'department' and x != 'of' and x != 'and']
+    for word in ls1:
+        if word not in ls2: return False
+    return True
 
-
+def contains(name1, name2):
+    name2 = name2.lower()
+    ls1 = name1.split(' ')
+    ls1 = [x for x in ls1 if x != 'the' and x != 'college' and x != 'department' and x != 'of' and x != 'and']
+    for word in ls1:
+        if word not in name2:
+             return False
+    return True
 
 if __name__ == '__main__':
-    trial = getAff('The Australian National University')
-
+    trial = getAff('Computer Science The Australian National University')
