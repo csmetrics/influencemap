@@ -11,6 +11,9 @@ from mkAff import getAuthor, getJournal, getConf
 entity_of_interest = {'author': getAuthor, 'conf': getConf}
 
 AuthorList = []
+ConferenceList = []
+JournalList = []
+InstitutionList = []
 def loadAuthorList():
     global AuthorList
     path = os.path.join(BASE_DIR, "webapp/cache/AuthorList.txt")
@@ -20,17 +23,40 @@ def loadAuthorList():
     AuthorList = list(set(AuthorList))
     return AuthorList
 
-def getFlowerTest(aids):
-    inflin = os.path.join(BASE_DIR, "output/flower1.png")
-    inflby = os.path.join(BASE_DIR, "output/flower2.png")
-    inflflower = [inflin, inflby]
-    return inflflower
+def loadConferenceList():
+    global ConferenceList
+    path = os.path.join(BASE_DIR, "webapp/cache/ConferenceList.txt")
+    if len(ConferenceList) == 0:
+        with open(path, "r") as f:
+            ConferenceList = [conf.strip() for conf in f]
+        ConferenceList = list(set(ConferenceList))
+    return ConferenceList
+
+def loadJournalList():
+    global JournalList
+    path = os.path.join(BASE_DIR, "webapp/cache/JournalList.txt")
+    if len(JournalList) == 0:
+        with open(path, "r") as f:
+            JournalList = [journ.strip() for journ in f]
+        JournaList = list(set(JournalList))
+    return JournalList
+
+def loadInstitutionList():
+    global InstitutionList
+    path = os.path.join(BASE_DIR, "webapp/cache/InstitutionList.txt")
+    if len(InstitutionList) == 0:
+        with open(path, "r") as f:
+            InstitutionList = [journ.strip() for journ in f]
+        Institutionist = list(set(InstitutionList))
+    return InstitutionList
+
 
 def main(request):
     optionlist = [  # option list
-        {"id":"author", "name":"Author"},
-        {"id":"conf", "name":"Conf/Journal"},
-        {"id":"inst", "name":"Institution"},
+        {"id":"author", "name":"Author", "list": loadAuthorList()},
+        {"id":"conf", "name":"Conference", "list": loadConferenceList()},
+        {"id":"journal", "name":"Journal", "list": loadJournalList()},
+        {"id":"inst", "name":"Institution", "list": loadInstitutionList()}
     ]
     global keyword, option
     keyword = ""
@@ -65,10 +91,10 @@ def main(request):
 
     # render page with data
     return render(request, "main.html", {
-        "autoCompleteAuthor": loadAuthorList(),
         "optionlist": optionlist,
         "selectedKeyword": keyword,
         "selectedOption": option,
         "inflflower": inflflower,
-        "authors": entities
+        "authors": entities,
+        "temp": loadAuthorList()
     })

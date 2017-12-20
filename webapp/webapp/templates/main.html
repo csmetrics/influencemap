@@ -31,12 +31,13 @@
                 <span class="input-group-btn">
                   <button type="submit" name="search" value="search" class="btn btn-flat"><i class="fa fa-search"></i></button>
                 </span>
+                  <button type="radio" id="test" onclick="test2('author')"</button>
               </div>
               <div class="form-group search-option">
                 {% for opt in optionlist %}
                 <div class="radio">
                   <label>
-                    <input type="radio" name="option" id="{{opt.id}}" value="{{opt.id}}" {% if opt.id == selectedOption.id %} checked {% endif %}>
+                    <input class="entity-option" type="radio" name="option" id="{{opt.id}}" value="{{opt.id}}" {% if opt.id == selectedOption.id %} checked {% endif %}>
                     {{opt.name}}
                   </label>
                 </div>
@@ -62,7 +63,7 @@
           <img class="fit-wrapper" src="{% static inflflower.1 %}"/>
         </div>
       </div>
-       <span>To conference</span>
+      <span>To conference</span>
       <div class="row">
         <div class="col-md-6">
           <img class="fit-wrapper" src="{% static inflflower.2 %}"/>
@@ -120,20 +121,45 @@
 </html>
 <script src="{% static 'js/auto-complete.min.js' %}"></script>
 <script>
-var autoCompleteAuthorList = {{ autoCompleteAuthor | safe }}
-var searchAutoComplete = new autoComplete({
+
+var lists = Object()
+  {% for opt in optionlist %}
+  lists["{{opt.id}}"]= {{opt.list | safe}}
+{% endfor %}
+
+
+function test2(obj){
+
+
+var lists = Object()
+  {% for opt in optionlist %}
+  lists["{{opt.id}}"]= {{opt.list | safe}}
+alert("{{opt.id}}")
+{% endfor %}
+
+
+alert(obj.id)    
+console.log(lists[obj.id])
+a.destroy()
+a = new autoComplete({
     selector: '#name-search-bar',
     minChars: 2,
     source: function(term, suggest){
         term = term.toLowerCase();
-        var choices = autoCompleteAuthorList;
+        var choices = lists[obj.id];
         var suggestions = [];
         var maxSuggest = 10;
         for (i = 0; i < choices.length && suggestions.length < maxSuggest; i++) {
             if (~choices[i].toLowerCase().indexOf(term))
-              suggestions.push(choices[i]);
+              suggestions.push(choices[i]);<span class="input-group-btn">
+                  <button type="submit" name="search" value="search" class="btn btn-flat"><i class="fa fa-search"></i></button>
+                </span>
+
         }
         suggest(suggestions);
     }
 });
+}
+
+
 </script>
