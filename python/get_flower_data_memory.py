@@ -90,6 +90,7 @@ def gen_score(conn, e_map, plist, fdict=dict(), inc_self=False):
 
     for paper, ref_count, my_paper in plist:
         # Determine if the paper is a self-citation of the orig paper
+        skip = False
         if not inc_self:
             for key in my_type.keyn:
                 sc_query = 'SELECT {} FROM paper_info WHERE paper_id = ?'.format(key)
@@ -111,7 +112,10 @@ def gen_score(conn, e_map, plist, fdict=dict(), inc_self=False):
 
                 # Check if author overlap ie selfcite
                 if not set(my_e).isdisjoint(their_e):
-                    continue
+                    skip = True
+                    break
+            if skip:
+                continue
 
         # query plan finding paper weights
         output_scheme = ",".join(e_type.scheme)
