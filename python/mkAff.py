@@ -195,11 +195,12 @@ def getJournal(name):
     jID_papers = {}
     for tuples in papers:
        currentJID = tuples[3]
-       p = []
-       for tup in papers:
-           if tup[3] == currentJID:
-               p.append((tup[0],tup[1],tup[2]))
-       jID_papers[currentJID] = p
+       if currentJID not in jID_papers:
+          p = []
+          for tup in papers:
+              if tup[3] == currentJID:
+                  p.append((tup[0],tup[1],tup[2]))
+          jID_papers[currentJID] = p
 
     curP.close()
     curJ.close()
@@ -267,11 +268,12 @@ def getAff(aff):
     print("{} finished getting papers".format(datetime.now()))
     for tup in res:
         currentAName = tup[1]
-        pID = []
-        for t in res:
-           if t[1] == currentAName:
-                pID.append(t[0])
-        aName_pID[currentAName] = pID
+        if currentAName not in aName_pID:
+           pID = []
+           for t in res:
+              if t[1] == currentAName:
+                  pID.append(t[0])
+           aName_pID[currentAName] = pID
     curA.close()
     curP.close() 
 
