@@ -13,16 +13,17 @@ plt.switch_backend('agg')
 # local module imports
 from get_flower_data_memory import *
 from export_citations_author import construct_cite_db
+from entity_type import Entity, EntityMap
 from draw_egonet import draw_halfcircle
-from entity_type import Entity
 
+def getEntityMap(ego, outer):
+    e = {'author': Entity.AUTH, 'conf': Entity.CONF, 'institution': Entity.AFFI}
+    return EntityMap(e[ego], e[outer])
 
-entity_type_dict = {'author': Entity.AUTH, 'conf': Entity.CONF, 'institution': Entity.AFFI}
-
-def drawFlower(conn, ent_type, citing_papers, cited_papers, my_ids,filter_dict, dir_out, name):   
+def drawFlower(conn, ent_type, ent_type2, citing_papers, cited_papers, filter_dict, dir_out, name):   
     # Generate associated author scores for citing and cited
-    citing_records = gen_score(conn, entity_type_dict[ent_type], citing_papers, my_ids, fdict=filter_dict)
-    cited_records = gen_score(conn, entity_type_dict[ent_type], cited_papers, my_ids, fdict=filter_dict)
+    citing_records = gen_score(conn, getEntityMap(ent_type,ent_type2), citing_papers, fdict=filter_dict)
+    cited_records = gen_score(conn, getEntityMap(ent_type, ent_type2), cited_papers, fdict=filter_dict)
 
     # Print to file (Do we really need this?
     with open(os.path.join(dir_out, 'authors_citing.txt'), 'w') as fh:
@@ -84,6 +85,9 @@ def getFlower(id_2_paper_id, name, ent_type):
     db_path = os.path.join(db_dir, 'paper_info.db')
     dir_out = '/localdata/u5798145/influencemap/out'
 
+    db_path_2 = os.path.join(db_dir, 'paper_ref.db')
+    conn2 = sqlite3.connect(db_path_2)
+
 
     # get paper ids associated with input name
     print("\n\nid_to_paper_id\n\n\n\n\n\n{}".format(id_2_paper_id))
@@ -91,11 +95,10 @@ def getFlower(id_2_paper_id, name, ent_type):
     #if ent_type == "conf":
     #    associated_papers = 
     associated_papers = get_papers(id_2_paper_id)
-    my_ids = ids_dict(id_2_paper_id)
     print("\n\nassociated papers\n\n\n\n\n\n{}".format(associated_papers))
     # filter ref papers
     print('{} start filter paper references'.format(datetime.now()))
-    citing_papers, cited_papers = construct_cite_db(name, associated_papers)
+    citing_papers, cited_papers = construct_cite_db(conn2, associated_papers)
     print('{} finish filter paper references'.format(datetime.now()))
 
     db_path = os.path.join(db_dir, 'paper_info.db')
@@ -104,9 +107,9 @@ def getFlower(id_2_paper_id, name, ent_type):
     # Generate a self filter dictionary
     filter_dict = self_dict(id_2_paper_id)
 
-    entity_to_author = drawFlower(conn, "author" , citing_papers, cited_papers, my_ids, filter_dict, dir_out, name)
-    entity_to_conference = drawFlower(conn, "conf", citing_papers, cited_papers, my_ids, filter_dict, dir_out, name)
-    entity_to_affiliation = drawFlower(conn, "institution" , citing_papers, cited_papers, my_ids, filter_dict, dir_out, name)
+    entity_to_author = drawFlower(conn, ent_type,  "author" , citing_papers, cited_papers, filter_dict, dir_out, name)
+    entity_to_conference = drawFlower(conn, ent_type, "conf", citing_papers, cited_papers, filter_dict, dir_out, name)
+    entity_to_affiliation = drawFlower(conn, ent_type, "institution" , citing_papers, cited_papers, filter_dict, dir_out, name)
     conn.close()
     file_names = []
     for ls in [entity_to_author, entity_to_conference, entity_to_affiliation]:
