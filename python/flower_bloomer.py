@@ -63,12 +63,10 @@ def getFlower(id_2_paper_id, name, ent_type):
     db_dir = "/localdata/u5642715/influenceMapOut"
     #db_name = 'paper.db'
     #db_path = os.path.join(db_dir, db_name)
-    db_path = os.path.join(db_dir, 'paper_info.db')
     dir_out = '/localdata/u5798145/influencemap/out'
 
-    db_path_2 = os.path.join(db_dir, 'paper_ref.db')
-    conn2 = sqlite3.connect(db_path_2)
-
+    db_path = os.path.join(db_dir, 'paper_info2.db')
+    conn = sqlite3.connect(db_path)
 
     # get paper ids associated with input name
     print("\n\nid_to_paper_id\n\n\n\n\n\n{}".format(id_2_paper_id))
@@ -79,11 +77,8 @@ def getFlower(id_2_paper_id, name, ent_type):
     print("\n\nassociated papers\n\n\n\n\n\n{}".format(associated_papers))
     # filter ref papers
     print('{} start filter paper references'.format(datetime.now()))
-    citing_papers, cited_papers = construct_cite_db(conn2, associated_papers)
+    citing_papers, cited_papers = construct_cite_db(conn, associated_papers)
     print('{} finish filter paper references'.format(datetime.now()))
-
-    db_path = os.path.join(db_dir, 'paper_info.db')
-    conn = sqlite3.connect(db_path)
 
     # Generate a self filter dictionary
     filter_dict = self_dict(id_2_paper_id)
