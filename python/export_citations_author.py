@@ -18,6 +18,7 @@ BATCH_SIZE = 999 # MAX=999
 
 # Need a function which will give a list of papers associated to something
 def construct_cite_db(conn, paperlist):
+    print('\n---\n{} start filtering paper references\n---'.format(datetime.now()))
     papers_citing_me_records = list()
     papers_cited_by_me_records = list()
     paper_chunks = [paperlist[x:x+BATCH_SIZE] for x in range(0, len(paperlist), BATCH_SIZE)]
@@ -27,7 +28,6 @@ def construct_cite_db(conn, paperlist):
     total = len(paperlist)
 
     # Gets the paper references the idsearch has referenced (their paper to other papers)
-    print('\n---\n{} starting query\n---'.format(datetime.now()))
     for chunk in paper_chunks:
         print('{} start query of paper chunk of size {}'.format(datetime.now(), len(chunk)))
        # papers_citing_me_q = 'SELECT paper_id, paper_ref_rc, paper_ref_id FROM paper_ref_count WHERE paper_ref_id IN ({})'.format(','.join(['?'] * len(chunk)))
@@ -48,7 +48,7 @@ def construct_cite_db(conn, paperlist):
         total_prog += len(chunk)
         print('{} finish query of paper chunk, total prog {:.2f}%'.format(datetime.now(), total_prog/total * 100))
 
-    print('---\n{} end query\n---\n'.format(datetime.now()))
+    print('---\n{} finish filtering paper references\n---\n'.format(datetime.now()))
 
     cur.close()
 

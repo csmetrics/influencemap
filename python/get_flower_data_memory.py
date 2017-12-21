@@ -75,12 +75,10 @@ def get_weight(e_type, qline, ref_count):
             res.append((e_id, 1 / ref_count, key))
     return res
 
-def gen_score(conn, e_map, plist, fdict=dict(), inc_self=False):
+def gen_score(conn, e_map, plist, id_to_name, sc_dict, inc_self=False):
     my_type, e_type = e_map.get_map()
 
     res = dict()
-    id_to_name = dict([(tname, dict()) for tname in e_type.keyn])
-    sc_id_to_name = dict([(tname, dict()) for tname in my_type.keyn])
 
     # split papers into chunks
     total_prog = 0
@@ -97,22 +95,21 @@ def gen_score(conn, e_map, plist, fdict=dict(), inc_self=False):
 
                 # Find the entities (and cache to dictioanry)
                 try:
-                    my_e = sc_id_to_name[key][my_paper]
+                    my_e = sc_dict[key][my_paper]
                 except KeyError:
                     cur.execute(sc_query, (my_paper, ))
                     my_e = set(map(lambda r : r[0], cur.fetchall()))
-                    sc_id_to_name[key][my_paper] = my_e
+                    sc_dict[key][my_paper] = my_e
                     
                 try:
-                    their_e = sc_id_to_name[key][paper]
+                    their_e = sc_dict[key][paper]
                 except KeyError:
                     cur.execute(sc_query, (paper, ))
                     their_e = set(map(lambda r : r[0], cur.fetchall()))
-                    sc_id_to_name[key][paper] = their_e
+                    sc_dict[key][paper] = their_e
 
                 # Check if author overlap ie selfcite
                 if not my_e.isdisjoint(their_e):
-                    print(my_paper, my_e, paper, their_e)
                     skip = True
                     break
 
@@ -125,41 +122,56 @@ def gen_score(conn, e_map, plist, fdict=dict(), inc_self=False):
 
         cur.execute(query, (paper, ))
 
-        qlines = list()
-
         # iterate through query results
         for line in cur.fetchall():
             # iterate over different table types
             for wline in get_weight(e_type, line, ref_count):
                 e_id, weight, tkey = wline
 
-                # If id is in the filter map, don't add
-                if not fdict.get(e_id, False):
-                    qlines.append((e_id, weight, tkey))
+                # check ids_to_name dictionary
+                try:
+                    e_name = id_to_name[tkey][e_id]
+                except KeyError:
+                    id_query = 'SELECT * FROM {} WHERE {} = ? LIMIT 1'.format(e_type.edict[tkey], tkey)
+                    cur.execute(id_query, (e_id, ))
+                    name = cur.fetchone()[1]
+                    e_name = ' '.join(name.split())
 
-        # Add scores
-        for e_id, weight, tkey in qlines:
-            # check ids_to_name dictionary
-            try:
-                e_name = id_to_name[tkey][e_id]
-            except KeyError:
-                id_query = 'SELECT * FROM {} WHERE {} = ? LIMIT 1'.format(e_type.edict[tkey], tkey)
-                cur.execute(id_query, (e_id, ))
-                name = cur.fetchone()[1]
-                e_name = ' '.join(name.split())
+                    id_to_name[tkey][e_id] = e_name
 
-                id_to_name[tkey][e_id] = e_name
-
-            # Add to score
-            try:
-                res[e_name] += weight
-            except KeyError:
-                res[e_name] = weight
+                # Add to score
+                try:
+                    res[e_name] += weight
+                except KeyError:
+                    res[e_name] = weight
 
     cur.close()
 
     # return dict results
-    return res
+    return res, id_to_name, sc_dict
+
+# Generate the scores
+def generate_scores(conn, e_map, citing_p, cited_p, inc_self=False):
+    print('\n---\n{} start generating scores\n---'.format(datetime.now()))
+
+    my_type, e_type = e_map.get_map()
+
+    # initial id to name dictionaries 
+    id_to_name = dict([(tname, dict()) for tname in e_type.keyn])
+    sc_dict = dict([(tname, dict()) for tname in my_type.keyn])
+
+    # Generate scores
+    print('{} start generate cited scores'.format(datetime.now()))
+    citing_score, id_to_name, sc_dict = gen_score(conn, e_map, citing_p, id_to_name, sc_dict, inc_self=False)
+    print('{} finish generate cited scores'.format(datetime.now()))
+
+    print('{} start generate citing scores'.format(datetime.now()))
+    cited_score, _, _ = gen_score(conn, e_map, cited_p, id_to_name, sc_dict, inc_self=False)
+    print('{} finish generate citing scores'.format(datetime.now()))
+
+    print('---\n{} finish generating scores\n---\n'.format(datetime.now()))
+
+    return citing_score, cited_score
 
 if __name__ == "__main__":
 
@@ -182,9 +194,7 @@ if __name__ == "__main__":
     conn2 = sqlite3.connect(db_path2)
 
     # filter ref papers
-    print('{} start filter paper references'.format(datetime.now()))
     citing_papers, cited_papers = construct_cite_db(conn2, associated_papers)
-    print('{} finish filter paper references'.format(datetime.now()))
 
     # Generate a self filter dictionary
     filter_dict = self_dict(id_2_paper_id)
@@ -193,8 +203,7 @@ if __name__ == "__main__":
     # filter_dict = coauthors_dict(conn, id_2_paper_id, Entity.AUTH, filter_dict)
 
     # Generate associated author scores for citing and cited
-    citing_records = gen_score(conn, Entity_map(Entity.AUTH, Entity.AUTH), citing_papers, fdict=filter_dict)
-    cited_records = gen_score(conn, Entity_map(Entity.AUTH, Entity.AUTH), cited_papers, fdict=filter_dict)
+    citing_records, cited_records = generate_scores(conn, Entity_map(Entity.AUTH, Entity.AUTH), citing_papers, cited_papers)
 
     # Print to file (Do we really need this?
     with open(os.path.join(dir_out, 'authors_citing.txt'), 'w') as fh:
