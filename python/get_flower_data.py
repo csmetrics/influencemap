@@ -171,6 +171,7 @@ def generate_scores(conn, e_map, citing_p, cited_p, inc_self=False):
 
     print('---\n{} finish generating scores\n---\n'.format(datetime.now()))
 
+    # return sorted dictionaries
     return citing_score, cited_score
 
 if __name__ == "__main__":
@@ -205,13 +206,16 @@ if __name__ == "__main__":
     # Generate associated author scores for citing and cited
     citing_records, cited_records = generate_scores(conn, Entity_map(Entity.AUTH, Entity.AUTH), citing_papers, cited_papers)
 
-    # Print to file (Do we really need this?
+    # sorter
+    sort_by_value = lambda d : sorted(d.items(), key=lambda kv : (kv[1] ,kv[0]), reverse=True)
+
+    # Print to file (Do we really need this?)
     with open(os.path.join(dir_out, 'authors_citing.txt'), 'w') as fh:
-        for key in citing_records.keys():
-            fh.write("{}\t{}\n".format(key, citing_records[key]))
+        for key, val in sort_by_value(citing_records):
+            fh.write("{}\t{}\n".format(key, val))
 
     with open(os.path.join(dir_out, 'authors_cited.txt'), 'w') as fh:
-        for key in cited_records.keys():
-            fh.write("{}\t{}\n".format(key, cited_records[key]))
+        for key, val in sort_by_value(cited_records):
+            fh.write("{}\t{}\n".format(key, val))
 
     conn.close()
