@@ -73,10 +73,9 @@ def getFlower(id_2_paper_id, name, ent_type):
     #    associated_papers = 
     associated_papers = get_papers(id_2_paper_id)
     print("\n\nassociated papers\n\n\n\n\n\n{}".format(associated_papers))
+
     # filter ref papers
-    print('{} start filter paper references'.format(datetime.now()))
     citing_papers, cited_papers = filter_references(conn, associated_papers)
-    print('{} finish filter paper references'.format(datetime.now()))
 
     # Generate a self filter dictionary
     filter_dict = self_dict(id_2_paper_id)
