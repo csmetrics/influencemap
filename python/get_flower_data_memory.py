@@ -100,22 +100,24 @@ def gen_score(conn, e_map, plist, fdict=dict(), inc_self=False):
                     my_e = sc_id_to_name[key][my_paper]
                 except KeyError:
                     cur.execute(sc_query, (my_paper, ))
-                    my_e = map(lambda r : r[0], cur.fetchall())
+                    my_e = set(map(lambda r : r[0], cur.fetchall()))
                     sc_id_to_name[key][my_paper] = my_e
                     
                 try:
                     their_e = sc_id_to_name[key][paper]
                 except KeyError:
                     cur.execute(sc_query, (paper, ))
-                    their_e = map(lambda r : r[0], cur.fetchall())
+                    their_e = set(map(lambda r : r[0], cur.fetchall()))
                     sc_id_to_name[key][paper] = their_e
 
                 # Check if author overlap ie selfcite
-                if not set(my_e).isdisjoint(their_e):
+                if not my_e.isdisjoint(their_e):
+                    print(my_paper, my_e, paper, their_e)
                     skip = True
                     break
-            if skip:
-                continue
+
+        if skip:
+            continue
 
         # query plan finding paper weights
         output_scheme = ",".join(e_type.scheme)
@@ -173,12 +175,15 @@ if __name__ == "__main__":
     my_ids = ids_dict(id_2_paper_id)
 
     # sqlite connection
-    db_path = os.path.join(db_dir, 'paper_info2.db')
+    db_path = os.path.join(db_dir, 'paper_info.db')
     conn = sqlite3.connect(db_path)
+
+    db_path2 = os.path.join(db_dir, 'paper_ref.db')
+    conn2 = sqlite3.connect(db_path2)
 
     # filter ref papers
     print('{} start filter paper references'.format(datetime.now()))
-    citing_papers, cited_papers = construct_cite_db(conn, associated_papers)
+    citing_papers, cited_papers = construct_cite_db(conn2, associated_papers)
     print('{} finish filter paper references'.format(datetime.now()))
 
     # Generate a self filter dictionary
