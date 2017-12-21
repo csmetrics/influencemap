@@ -22,9 +22,7 @@ def getEntityMap(ego, outer):
 
 def drawFlower(conn, ent_type, ent_type2, citing_papers, cited_papers, filter_dict, dir_out, name):   
     # Generate associated author scores for citing and cited
-    citing_records = gen_score(conn, getEntityMap(ent_type,ent_type2), citing_papers, fdict=filter_dict)
-    cited_records = gen_score(conn, getEntityMap(ent_type, ent_type2), cited_papers, fdict=filter_dict)
-
+    citing_records, cited_records = generate_scores(conn, Entity_map(ent_type, ent_type2), citing_papers, cited_papers)
 
     #### START PRODUCING GRAPH
     plot_dir = os.path.join(dir_out, 'figures')
