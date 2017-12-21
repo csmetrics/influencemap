@@ -65,7 +65,7 @@ def getFlower(id_2_paper_id, name, ent_type):
     #db_path = os.path.join(db_dir, db_name)
     dir_out = '/localdata/u5798145/influencemap/out'
 
-    db_path = os.path.join(db_dir, 'paper_info.db')
+    db_path = os.path.join(db_dir, 'paper_ref.db')
     conn = sqlite3.connect(db_path)
 
     # get paper ids associated with input name
@@ -82,6 +82,9 @@ def getFlower(id_2_paper_id, name, ent_type):
 
     # Generate a self filter dictionary
     filter_dict = self_dict(id_2_paper_id)
+
+    db_path = os.path.join(db_dir, 'paper_info.db')
+    conn = sqlite3.connect(db_path)
 
     entity_to_author = drawFlower(conn, ent_type,  "author" , citing_papers, cited_papers, filter_dict, dir_out, name)
     entity_to_conference = drawFlower(conn, ent_type, "conf", citing_papers, cited_papers, filter_dict, dir_out, name)
