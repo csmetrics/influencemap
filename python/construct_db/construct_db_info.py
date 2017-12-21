@@ -42,10 +42,10 @@ def construct_paper_info():
     print('{} finish join paa with authcount'.format(datetime.now()))
 
     # Join the two constructed tables to make required paper_info table
-    print('{} start joining papers and paa by paper_id'.format(datetime.now()))
+    print('{} start joining papers and paa_count by paper_id'.format(datetime.now()))
     cur.execute('DROP TABLE IF EXISTS paper_info;')
     cur.execute('CREATE TABLE paper_info AS SELECT a.paper_id, auth_id, auth_count, conf_id, journ_id, affi_id FROM papers a INNER JOIN paa_count b ON a.paper_id = b.paper_id;')
-    print('{} finish joining papers and paa by paper_id'.format(datetime.now()))
+    print('{} finish joining papers and paa_count by paper_id'.format(datetime.now()))
 
     # Index paper_info wrt paper_id
     create_index(conn, 'paper_info', table_col[0])
