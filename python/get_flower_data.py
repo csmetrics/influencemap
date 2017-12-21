@@ -157,11 +157,11 @@ def generate_scores(conn, e_map, citing_p, cited_p, inc_self=False):
 
     # Generate scores
     print('{} start generate cited scores'.format(datetime.now()))
-    citing_score, id_to_name, sc_dict = gen_score(conn, e_map, citing_p, id_to_name, sc_dict, inc_self=False)
+    citing_score, id_to_name, sc_dict = gen_score(conn, e_map, citing_p, id_to_name, sc_dict, inc_self=inc_self)
     print('{} finish generate cited scores'.format(datetime.now()))
 
     print('{} start generate citing scores'.format(datetime.now()))
-    cited_score, _, _ = gen_score(conn, e_map, cited_p, id_to_name, sc_dict, inc_self=False)
+    cited_score, _, _ = gen_score(conn, e_map, cited_p, id_to_name, sc_dict, inc_self=inc_self)
     print('{} finish generate citing scores'.format(datetime.now()))
 
     print('---\n{} finish generating scores\n---\n'.format(datetime.now()))
@@ -199,7 +199,7 @@ if __name__ == "__main__":
     # filter_dict = coauthors_dict(conn, id_2_paper_id, Entity.AUTH, filter_dict)
 
     # Generate associated author scores for citing and cited
-    citing_records, cited_records = generate_scores(conn, Entity_map(Entity.AUTH, Entity.AUTH), citing_papers, cited_papers)
+    citing_records, cited_records = generate_scores(conn, Entity_map(Entity.AUTH, Entity.AUTH), citing_papers, cited_papers, inc_self=True)
 
     # sorter
     sort_by_value = lambda d : sorted(d.items(), key=lambda kv : (kv[1] ,kv[0]), reverse=True)
