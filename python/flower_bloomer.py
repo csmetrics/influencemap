@@ -11,8 +11,8 @@ sns.set()
 plt.switch_backend('agg')
 
 # local module imports
-from get_flower_data_memory import *
-from export_citations_author import construct_cite_db
+from get_flower_data import *
+from export_citations import filter_references
 from entity_type import Entity, Entity_map
 from draw_egonet import draw_halfcircle
 
@@ -75,7 +75,7 @@ def getFlower(id_2_paper_id, name, ent_type):
     print("\n\nassociated papers\n\n\n\n\n\n{}".format(associated_papers))
     # filter ref papers
     print('{} start filter paper references'.format(datetime.now()))
-    citing_papers, cited_papers = construct_cite_db(conn, associated_papers)
+    citing_papers, cited_papers = filter_references(conn, associated_papers)
     print('{} finish filter paper references'.format(datetime.now()))
 
     # Generate a self filter dictionary

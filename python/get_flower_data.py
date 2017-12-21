@@ -1,121 +1,217 @@
-import sqlite3 as sql
+import sqlite3
 import os
 import sys
 from datetime import datetime
-from extract_papers import name_to_papers
-from export_citations_author import construct_cite_db
+from mkAff import getAuthor
+from export_citations import filter_references
+from entity_type import *
 
-CHUNK_SIZE = 999
+# Limit number of query
+BATCH_SIZE = 999 # MAX=999
 
-def gen_chunk(rlist):
-    chunk = []
-    for i, line in enumerate(rlist):
-        if (i % CHUNK_SIZE == 0 and i > 0):
-            yield chunk
-            del chunk[:]
-        chunk.append(line)
-    yield(chunk)
+# database location
+db_dir = "/localdata/u5642715/influenceMapOut"
 
-def do_insert(cur, tname, chunk):
-    ins_string = ','.join(['(?)'] * len(chunk))
-    cur.execute('INSERT INTO {} VALUES {};'.format(tname, ins_string), chunk)
-
-def cite_table(cur, tname, rlist):
-    for chunk in gen_chunk(rlist):
-        cur.execute('BEGIN TRANSACTION')
-
-        do_insert(cur, tname, chunk)
-
-        cur.execute('COMMIT')
-    
-
-# set database location
-#data_dir = "/localdata/u5798145/influencemap"
-data_dir = "/localdata/u5642715/influenceMapOut"
-db_name = "paper.db"
-db_path = os.path.join(data_dir,db_name)
-#dir_out = "/localdata/u5798145/influencemap/out"
+# output directory
 dir_out = "/localdata/u5642715/influenceMapOut/out"
 
-if not os.path.exists(dir_out):
-    os.makedirs(dir_out)
+def ids_dict(pdict):
+    res = dict()
+    for key in pdict.keys():
+        res[key] = True
+    return res
 
-# get name of interest
-# author_names = sys.argv[1:]
-name = sys.argv[1]
-citedDictionary = {}
-citingDictionary = {}
+def get_papers(pdict):
+    values = list()
+    for key in pdict.keys():
+        values += pdict[key]
+    return values
 
-# open database connection
-conn = sql.connect(db_path)
-cur = conn.cursor()
-# print("{} input query: {}. Connected to {}".format(datetime.now(), author_names, db_path))
+def self_dict(pdict):
+    res = dict()
+    for key in pdict.keys():
+        res[key] = True
+    return res
 
-# drop existing any remaining temporary tables
-table_names = ["authIDs", "publishedPapers", "citedPapers","citingPapers","reducedPAA",
-				"citedPapersAuthors", "citedPaperWeights", "citingPaperWeights", "citingPapersAuthors", "citedAuthorIDs", "citingAuthorIDs"]
+'''
+def coauthors_dict(conn, pdict, my_e_type, fdict=dict()):
+    e_id = pdict.keys()
+    paper_ids = get_papers(pdict)
+    coauth_dict = fdict
 
-for table in table_names:
-	print("{} dropping {}".format(datetime.now(), table))
-	q = "DROP TABLE IF EXISTS {}".format(table)
-	cur.execute(q)
+    cur = conn.cursor()
 
-associated_papers = name_to_papers(name)
-citing_records, cited_records = construct_cite_db(name, associated_papers)
+    for paper in paper_ids:
+        query = 'SELECT {} FROM paper_info WHERE paper_id = ?'.format(my_e_type.get_keyn())
+        
+        cur.execute(query, (paper, ))
 
-cur.execute("CREATE TABLE citedPapers (paperID text);")
-cur.execute("CREATE TABLE citingPapers (paperID text);")
+        e_list = list()
+        filter_flag = False
 
-cite_table(cur, 'citedPapers', cited_records)
-cite_table(cur, 'citingPapers', citing_records)
+        for line in cur.fetchall():
+            key, = line
+            e_list.append(key)
+            if key in e_id:
+                filter_flag = True
 
-# create reduced database
-cur.execute("CREATE TABLE reducedPAA AS SELECT * FROM PAA WHERE paperID IN (SELECT paperID FROM citedPapers UNION SELECT paperID FROM citingPapers)")
+        for val in e_list:
+            coauth_dict[val] = True
 
-# get cited author scores
-print("{} connecting papers cited by {} to their respective authors".format(datetime.now(), name))
-cur.execute("CREATE TABLE citedPapersAuthors AS SELECT paperID, authorID FROM reducedPAA WHERE paperID IN citedPapers")
-print("{} weighting papers cited by {}".format(datetime.now(), name))
-cur.execute("CREATE TABLE citedAuthorIDs AS SELECT * FROM authors WHERE authorID IN (SELECT authorID FROM citedPapersAuthors)")
-cur.execute("CREATE TABLE citedPaperWeights AS SELECT paperID, (CAST(1 AS float) / CAST(COUNT(authorID) AS float)) AS weightPerAuthor FROM citedPapersAuthors GROUP BY paperID")
-print("{} summing weighted scores for authors cited  by {}".format(datetime.now(), name))
-cur.execute("SELECT authorName, weightedScore FROM (citedAuthorIDs INNER JOIN (SELECT authorID, CAST(SUM(weightPerAuthor) as float) AS weightedScore  FROM (citedPapersAuthors INNER JOIN citedPaperWeights) GROUP BY authorID) AS authorWeights ON citedAuthorIDs.authorID =authorWeights.authorID)")
+    cur.close()
+    return coauth_dict
+'''
 
-print("{} dropping citedPapers and citedPaperWeights tables".format(datetime.now()))
+def get_weight(e_type, qline, ref_count):
+    if e_type == Entity.AUTH:
+        auth_id, auth_count = qline
+        if not auth_id == '':
+            return [(auth_id, (1 / auth_count) * (1 / ref_count), e_type.keyn[0])]
 
-for row in cur.fetchall():
-	citedDictionary[row[0]] = row[1]
+    res = list()
+    for idx, key in enumerate(e_type.keyn):
+        e_id = qline[idx]
+        if not e_id == '':
+            res.append((e_id, 1 / ref_count, key))
+    return res
 
-# get citing author scores
-print("{} connecting papers cited by {} to their respective authors".format(datetime.now(), name))
-cur.execute("CREATE TABLE citingPapersAuthors AS SELECT paperID, authorID FROM reducedPAA WHERE paperID IN citingPapers")
-cur.execute("CREATE TABLE citingAuthorIDs AS SELECT * FROM authors WHERE authorID IN (SELECT authorID FROM citingPapersAuthors)")
-print("{} weighting papers that cite {}".format(datetime.now(), name))
-cur.execute("CREATE TABLE citingPaperWeights AS SELECT paperID, (CAST(1 AS float) / CAST(COUNT(authorID) AS float)) AS weightPerAuthor FROM citingPapersAuthors GROUP BY paperID")
-print("{} summing weighted scores for authors that cite {}".format(datetime.now(), name))
-cur.execute("SELECT authorName, weightedScore FROM (citingAuthorIDs INNER JOIN (SELECT authorID, CAST(SUM(weightPerAuthor) as float) AS weightedScore  FROM (citingPapersAuthors INNER JOIN citingPaperWeights) GROUP BY authorID) AS authorWeights ON citingAuthorIDs.authorID =authorWeights.authorID)")
+def gen_score(conn, e_map, plist, id_to_name, sc_dict, inc_self=False):
+    my_type, e_type = e_map.get_map()
 
+    res = dict()
 
-print("{} dropping citingPapers, citingPaperWeights and publishedPapers tables".format(datetime.now()))
+    # split papers into chunks
+    total_prog = 0
+    total = len(plist)
 
-for row in cur.fetchall():
-	citingDictionary[row[0]] = row[1]
+    cur = conn.cursor()
 
-for table in table_names:
-	print("{} dropping {}".format(datetime.now(), table))
-	q = "DROP TABLE IF EXISTS {}".format(table)
-	cur.execute(q)
+    for paper, ref_count, my_paper in plist:
+        # Determine if the paper is a self-citation of the orig paper
+        skip = False
+        if not inc_self:
+            for key in my_type.keyn:
+                sc_query = 'SELECT {} FROM paper_info WHERE paper_id = ?'.format(key)
 
-with open(os.path.join(dir_out, 'authors_cited.txt'), 'w') as fh:
-	for key in citedDictionary.keys():
-		fh.write("{}\t{}\n".format(key, citedDictionary[key]))
+                # Find the entities (and cache to dictioanry)
+                try:
+                    my_e = sc_dict[key][my_paper]
+                except KeyError:
+                    cur.execute(sc_query, (my_paper, ))
+                    my_e = set(map(lambda r : r[0], cur.fetchall()))
+                    sc_dict[key][my_paper] = my_e
+                    
+                try:
+                    their_e = sc_dict[key][paper]
+                except KeyError:
+                    cur.execute(sc_query, (paper, ))
+                    their_e = set(map(lambda r : r[0], cur.fetchall()))
+                    sc_dict[key][paper] = their_e
 
-with open(os.path.join(dir_out, 'authors_citing.txt'), 'w') as fh:
-	for key in citingDictionary.keys():
-		fh.write("{}\t{}\n".format(key, citingDictionary[key]))
+                # Check if author overlap ie selfcite
+                if not my_e.isdisjoint(their_e):
+                    skip = True
+                    break
 
-# close database connection
-print("closing connection to database")
-cur.close()
-conn.close()
+        if skip:
+            continue
 
+        # query plan finding paper weights
+        output_scheme = ",".join(e_type.scheme)
+        query = 'SELECT {} FROM paper_info WHERE paper_id = ?'.format(output_scheme)
+
+        cur.execute(query, (paper, ))
+
+        # iterate through query results
+        for line in cur.fetchall():
+            # iterate over different table types
+            for wline in get_weight(e_type, line, ref_count):
+                e_id, weight, tkey = wline
+
+                # check ids_to_name dictionary
+                try:
+                    e_name = id_to_name[tkey][e_id]
+                except KeyError:
+                    id_query = 'SELECT * FROM {} WHERE {} = ? LIMIT 1'.format(e_type.edict[tkey], tkey)
+                    cur.execute(id_query, (e_id, ))
+                    name = cur.fetchone()[1]
+                    e_name = ' '.join(name.split())
+
+                    id_to_name[tkey][e_id] = e_name
+
+                # Add to score
+                try:
+                    res[e_name] += weight
+                except KeyError:
+                    res[e_name] = weight
+
+    cur.close()
+
+    # return dict results
+    return res, id_to_name, sc_dict
+
+# Generate the scores
+def generate_scores(conn, e_map, citing_p, cited_p, inc_self=False):
+    print('\n---\n{} start generating scores\n---'.format(datetime.now()))
+
+    my_type, e_type = e_map.get_map()
+
+    # initial id to name dictionaries 
+    id_to_name = dict([(tname, dict()) for tname in e_type.keyn])
+    sc_dict = dict([(tname, dict()) for tname in my_type.keyn])
+
+    # Generate scores
+    print('{} start generate cited scores'.format(datetime.now()))
+    citing_score, id_to_name, sc_dict = gen_score(conn, e_map, citing_p, id_to_name, sc_dict, inc_self=False)
+    print('{} finish generate cited scores'.format(datetime.now()))
+
+    print('{} start generate citing scores'.format(datetime.now()))
+    cited_score, _, _ = gen_score(conn, e_map, cited_p, id_to_name, sc_dict, inc_self=False)
+    print('{} finish generate citing scores'.format(datetime.now()))
+
+    print('---\n{} finish generating scores\n---\n'.format(datetime.now()))
+
+    return citing_score, cited_score
+
+if __name__ == "__main__":
+
+    # input
+    name = sys.argv[1]
+
+    # get paper ids associated with input name
+    print('{} start get associated papers to input name {}'.format(datetime.now(), name))
+    _, id_2_paper_id = getAuthor(name)
+    print('{} finish get associated papers to input name {}'.format(datetime.now(), name))
+
+    associated_papers = get_papers(id_2_paper_id)
+    my_ids = ids_dict(id_2_paper_id)
+
+    # sqlite connection
+    db_path = os.path.join(db_dir, 'paper_info.db')
+    conn = sqlite3.connect(db_path)
+
+    db_path2 = os.path.join(db_dir, 'paper_ref.db')
+    conn2 = sqlite3.connect(db_path2)
+
+    # filter ref papers
+    citing_papers, cited_papers = filter_references(conn2, associated_papers)
+
+    # Generate a self filter dictionary
+    filter_dict = self_dict(id_2_paper_id)
+
+    # Add coauthors to filter
+    # filter_dict = coauthors_dict(conn, id_2_paper_id, Entity.AUTH, filter_dict)
+
+    # Generate associated author scores for citing and cited
+    citing_records, cited_records = generate_scores(conn, Entity_map(Entity.AUTH, Entity.AUTH), citing_papers, cited_papers)
+
+    # Print to file (Do we really need this?
+    with open(os.path.join(dir_out, 'authors_citing.txt'), 'w') as fh:
+        for key in citing_records.keys():
+            fh.write("{}\t{}\n".format(key, citing_records[key]))
+
+    with open(os.path.join(dir_out, 'authors_cited.txt'), 'w') as fh:
+        for key in cited_records.keys():
+            fh.write("{}\t{}\n".format(key, cited_records[key]))
+
+    conn.close()
