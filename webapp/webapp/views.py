@@ -1,6 +1,6 @@
 import os, sys
 from django.shortcuts import render
-
+from datetime import datetime
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 PYTHON_DIR = os.path.join(os.path.dirname(BASE_DIR), 'python')
 sys.path.insert(0, PYTHON_DIR)
@@ -50,6 +50,7 @@ def loadInstitutionList():
         Institutionist = list(set(InstitutionList))
     return InstitutionList
 
+selfcite = False
 
 def main(request):
     optionlist = [  # option list
@@ -58,7 +59,7 @@ def main(request):
         {"id":"journal", "name":"Journal", "list": loadJournalList()},
         {"id":"inst", "name":"Institution", "list": loadInstitutionList()}
     ]
-    global keyword, option
+    global keyword, option, selfcite
     keyword = ""
     option = optionlist[0] # default selection
     inflflower = None
@@ -67,19 +68,23 @@ def main(request):
     # get user input from main.html page
     if request.method == "GET":
         print(request.GET)
+        if "self-cite" in request.GET:
+            selfcite = True
+            print("SELF_CITE")
         if "search" in request.GET:
             global id_pid_dict
             keyword = request.GET.get("keyword")
             option = [x for x in optionlist if x.get('id', '') == request.GET.get("option")][0]
             if keyword != "":
+                print("{}\t{}\t{}".format(datetime.now(), __file__ , entity_of_interest[option['id']].__name__))
                 entities, id_pid_dict =  entity_of_interest[option['id']](keyword) #(authors_testing, dict()) # getAuthor(keyword)
 
             # path to the influence flowers
             inflin = os.path.join(BASE_DIR, "output/flower1.png")
             inflby = os.path.join(BASE_DIR, "output/flower2.png")
             if option.get('id') == 'conf':
-                print("executed if statement" + " if option['id'] == 'conf':")
-                inflflower = getFlower(id_2_paper_id=id_pid_dict, name=keyword, ent_type='conf')
+                print("{}\t{}\t{}".format(datetime.now(), __file__ , getFlower.__name__))
+                inflflower = getFlower(id_2_paper_id=id_pid_dict, name=keyword, ent_type='conf', self_cite=selfcite)
             else:
                 inflflower = []#[inflin, inflby]
         if "submit" in request.GET:
@@ -87,7 +92,9 @@ def main(request):
             id_2_paper_id = dict()
             for aid in selected_ids:
                 id_2_paper_id[aid] = id_pid_dict[aid]
-            inflflower = getFlower(id_2_paper_id=id_2_paper_id, name=keyword, ent_type='author')
+            print("{}\t{}\t{}".format(datetime.now(), __file__ , getFlower.__name__))
+            print("selfcite :" + str(selfcite))
+            inflflower = getFlower(id_2_paper_id=id_2_paper_id, name=keyword, ent_type='author', self_cite=selfcite)
 
     # render page with data
     return render(request, "main.html", {
@@ -96,5 +103,5 @@ def main(request):
         "selectedOption": option,
         "inflflower": inflflower,
         "authors": entities,
-        "temp": loadAuthorList()
+        "selfcite": selfcite
     })

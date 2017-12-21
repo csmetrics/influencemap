@@ -36,11 +36,19 @@
                 {% for opt in optionlist %}
                 <div class="radio">
                   <label>
-                    <input onclick="test2(this)" class="entity-option" type="radio" name="option" id="{{opt.id}}" value="{{opt.id}}" {% if opt.id == selectedOption.id %} checked {% endif %}>
+                    <input onclick="loadAutoComplete(this)" class="entity-option" type="radio" name="option" id="{{opt.id}}" value="{{opt.id}}" {% if opt.id == selectedOption.id %} checked {% endif %}>
                     {{opt.name}}
                   </label>
                 </div>
                 {% endfor %}
+              </div>
+              <div class="form-group search-option">
+                <div class="checkbok"> 
+                  <label>
+                    <input class="self-cite" type="checkbox" name="self-cite" id="self-cite" {% if selfcite %} checked {% endif %}>
+                    include self citations
+                  </label>
+                </div>
               </div>
             </div>
           </form>
@@ -127,7 +135,7 @@ var lists = Object()
 {% endfor %}
 
 
-function test2(obj){
+function loadAutoComplete(obj){
 
 
 var lists = Object()
