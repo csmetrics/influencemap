@@ -162,11 +162,11 @@ def generate_scores(conn, e_map, citing_p, cited_p, inc_self=False):
 
     # Generate scores
     print('{} start generate cited scores'.format(datetime.now()))
-    citing_score, id_to_name, sc_dict = gen_score(conn, e_map, citing_p, id_to_name, sc_dict, inc_self=False)
+    citing_score, id_to_name, sc_dict = gen_score(conn, e_map, citing_p, id_to_name, sc_dict, inc_self=inc_self)
     print('{} finish generate cited scores'.format(datetime.now()))
 
     print('{} start generate citing scores'.format(datetime.now()))
-    cited_score, _, _ = gen_score(conn, e_map, cited_p, id_to_name, sc_dict, inc_self=False)
+    cited_score, _, _ = gen_score(conn, e_map, cited_p, id_to_name, sc_dict, inc_self=inc_self)
     print('{} finish generate citing scores'.format(datetime.now()))
 
     print('---\n{} finish generating scores\n---\n'.format(datetime.now()))
