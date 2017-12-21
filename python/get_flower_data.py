@@ -75,8 +75,21 @@ def get_weight(e_type, qline, ref_count):
             res.append((e_id, 1 / ref_count, key))
     return res
 
+def try_get(conn, key, qdict, query, qargs, func=lambda x: x):
+    try:
+        res = qdict[key]
+        return res
+    except KeyError:
+        cur = conn.cursor()
+        cur.execute(query, qargs)
+        res = func(cur.fetchall())
+        qdict[key] = res
+        return res
+        
 def gen_score(conn, e_map, plist, id_to_name, sc_dict, inc_self=False):
     my_type, e_type = e_map.get_map()
+    sc_map = lambda f : set(map(lambda r : r[0], f))
+    e_map = lambda f : ' '.join(f[0][1].split())
 
     res = dict()
 
@@ -93,20 +106,10 @@ def gen_score(conn, e_map, plist, id_to_name, sc_dict, inc_self=False):
             for key in my_type.keyn:
                 sc_query = 'SELECT {} FROM paper_info WHERE paper_id = ?'.format(key)
 
-                # Find the entities (and cache to dictioanry)
-                try:
-                    my_e = sc_dict[key][my_paper]
-                except KeyError:
-                    cur.execute(sc_query, (my_paper, ))
-                    my_e = set(map(lambda r : r[0], cur.fetchall()))
-                    sc_dict[key][my_paper] = my_e
+                # Find the entities (and cache to dictionary)
+                my_e = try_get(conn, my_paper, sc_dict[key], sc_query, (my_paper,), func=sc_map)
                     
-                try:
-                    their_e = sc_dict[key][paper]
-                except KeyError:
-                    cur.execute(sc_query, (paper, ))
-                    their_e = set(map(lambda r : r[0], cur.fetchall()))
-                    sc_dict[key][paper] = their_e
+                their_e = try_get(conn, paper, sc_dict[key], sc_query, (paper,), func=sc_map)
 
                 # Check if author overlap ie selfcite
                 if not my_e.isdisjoint(their_e):
@@ -127,17 +130,9 @@ def gen_score(conn, e_map, plist, id_to_name, sc_dict, inc_self=False):
             # iterate over different table types
             for wline in get_weight(e_type, line, ref_count):
                 e_id, weight, tkey = wline
+                id_query = 'SELECT * FROM {} WHERE {} = ? LIMIT 1'.format(e_type.edict[tkey], tkey)
 
-                # check ids_to_name dictionary
-                try:
-                    e_name = id_to_name[tkey][e_id]
-                except KeyError:
-                    id_query = 'SELECT * FROM {} WHERE {} = ? LIMIT 1'.format(e_type.edict[tkey], tkey)
-                    cur.execute(id_query, (e_id, ))
-                    name = cur.fetchone()[1]
-                    e_name = ' '.join(name.split())
-
-                    id_to_name[tkey][e_id] = e_name
+                e_name = try_get(conn, e_id, id_to_name[tkey], id_query, (e_id, ), func=e_map)
 
                 # Add to score
                 try:
