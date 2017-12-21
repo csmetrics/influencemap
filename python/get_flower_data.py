@@ -15,52 +15,11 @@ db_dir = "/localdata/u5642715/influenceMapOut"
 # output directory
 dir_out = "/localdata/u5642715/influenceMapOut/out"
 
-def ids_dict(pdict):
-    res = dict()
-    for key in pdict.keys():
-        res[key] = True
-    return res
-
 def get_papers(pdict):
     values = list()
     for key in pdict.keys():
         values += pdict[key]
     return values
-
-def self_dict(pdict):
-    res = dict()
-    for key in pdict.keys():
-        res[key] = True
-    return res
-
-'''
-def coauthors_dict(conn, pdict, my_e_type, fdict=dict()):
-    e_id = pdict.keys()
-    paper_ids = get_papers(pdict)
-    coauth_dict = fdict
-
-    cur = conn.cursor()
-
-    for paper in paper_ids:
-        query = 'SELECT {} FROM paper_info WHERE paper_id = ?'.format(my_e_type.get_keyn())
-        
-        cur.execute(query, (paper, ))
-
-        e_list = list()
-        filter_flag = False
-
-        for line in cur.fetchall():
-            key, = line
-            e_list.append(key)
-            if key in e_id:
-                filter_flag = True
-
-        for val in e_list:
-            coauth_dict[val] = True
-
-    cur.close()
-    return coauth_dict
-'''
 
 def get_weight(e_type, qline, ref_count):
     if e_type == Entity.AUTH:
@@ -75,13 +34,13 @@ def get_weight(e_type, qline, ref_count):
             res.append((e_id, 1 / ref_count, key))
     return res
 
-def try_get(conn, key, qdict, query, qargs, func=lambda x: x):
+def try_get(conn, key, qdict, query, func=lambda x: x):
     try:
         res = qdict[key]
         return res
     except KeyError:
         cur = conn.cursor()
-        cur.execute(query, qargs)
+        cur.execute(query, (key, ))
         res = func(cur.fetchall())
         qdict[key] = res
         return res
@@ -107,9 +66,9 @@ def gen_score(conn, e_map, plist, id_to_name, sc_dict, inc_self=False):
                 sc_query = 'SELECT {} FROM paper_info WHERE paper_id = ?'.format(key)
 
                 # Find the entities (and cache to dictionary)
-                my_e = try_get(conn, my_paper, sc_dict[key], sc_query, (my_paper,), func=sc_map)
+                my_e = try_get(conn, my_paper, sc_dict[key], sc_query, func=sc_map)
                     
-                their_e = try_get(conn, paper, sc_dict[key], sc_query, (paper,), func=sc_map)
+                their_e = try_get(conn, paper, sc_dict[key], sc_query, func=sc_map)
 
                 # Check if author overlap ie selfcite
                 if not my_e.isdisjoint(their_e):
@@ -132,7 +91,7 @@ def gen_score(conn, e_map, plist, id_to_name, sc_dict, inc_self=False):
                 e_id, weight, tkey = wline
                 id_query = 'SELECT * FROM {} WHERE {} = ? LIMIT 1'.format(e_type.edict[tkey], tkey)
 
-                e_name = try_get(conn, e_id, id_to_name[tkey], id_query, (e_id, ), func=e_map)
+                e_name = try_get(conn, e_id, id_to_name[tkey], id_query, func=e_map)
 
                 # Add to score
                 try:
@@ -180,26 +139,16 @@ if __name__ == "__main__":
     print('{} finish get associated papers to input name {}'.format(datetime.now(), name))
 
     associated_papers = get_papers(id_2_paper_id)
-    my_ids = ids_dict(id_2_paper_id)
 
     # sqlite connection
-    db_path = os.path.join(db_dir, 'paper_info.db')
+    db_path = os.path.join(db_dir, 'paper_info2.db')
     conn = sqlite3.connect(db_path)
 
-    db_path2 = os.path.join(db_dir, 'paper_ref.db')
-    conn2 = sqlite3.connect(db_path2)
-
     # filter ref papers
-    citing_papers, cited_papers = filter_references(conn2, associated_papers)
-
-    # Generate a self filter dictionary
-    filter_dict = self_dict(id_2_paper_id)
-
-    # Add coauthors to filter
-    # filter_dict = coauthors_dict(conn, id_2_paper_id, Entity.AUTH, filter_dict)
+    citing_papers, cited_papers = filter_references(conn, associated_papers)
 
     # Generate associated author scores for citing and cited
-    citing_records, cited_records = generate_scores(conn, Entity_map(Entity.AUTH, Entity.AUTH), citing_papers, cited_papers, inc_self=True)
+    citing_records, cited_records = generate_scores(conn, Entity_map(Entity.AUTH, Entity.AUTH), citing_papers, cited_papers)
 
     # sorter
     sort_by_value = lambda d : sorted(d.items(), key=lambda kv : (kv[1] ,kv[0]), reverse=True)

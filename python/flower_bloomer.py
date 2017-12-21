@@ -20,10 +20,9 @@ def getEntityMap(ego, outer):
     e = {'author': Entity.AUTH, 'conf': Entity.CONF, 'institution': Entity.AFFI}
     return Entity_map(e[ego], e[outer])
 
-def drawFlower(conn, ent_type, ent_type2, citing_papers, cited_papers, filter_dict, dir_out, name, self_cite):   
-    print("self cite: {}".format(self_cite))
+def drawFlower(conn, ent_type, ent_type2, citing_papers, cited_papers, filter_dict, dir_out, name):   
     # Generate associated author scores for citing and cited
-    citing_records, cited_records = generate_scores(conn, getEntityMap(ent_type, ent_type2), citing_papers, cited_papers, inc_self=self_cite)
+    citing_records, cited_records = generate_scores(conn, Entity_map(ent_type, ent_type2), citing_papers, cited_papers)
 
     #### START PRODUCING GRAPH
     plot_dir = os.path.join(dir_out, 'figures')
@@ -57,15 +56,11 @@ def drawFlower(conn, ent_type, ent_type2, citing_papers, cited_papers, filter_di
     return influencedby_filename, influencedto_filename
 
 
-def getFlower(id_2_paper_id, name, ent_type, self_cite):
-    print("self cite: {}".format(self_cite))
-    # db_dir = '/localdata/u5/influencemap'
-    db_dir = "/localdata/u5642715/influenceMapOut"
-    #db_name = 'paper.db'
-    #db_path = os.path.join(db_dir, db_name)
+def getFlower(id_2_paper_id, name, ent_type):
     dir_out = '/localdata/u5798145/influencemap/out'
 
-    db_path = os.path.join(db_dir, 'paper_ref.db')
+    db_dir = "/localdata/u5642715/influenceMapOut"
+    db_path = os.path.join(db_dir, 'paper_info2.db')
     conn = sqlite3.connect(db_path)
 
     # get paper ids associated with input name
@@ -80,14 +75,11 @@ def getFlower(id_2_paper_id, name, ent_type, self_cite):
     citing_papers, cited_papers = filter_references(conn, associated_papers)
 
     # Generate a self filter dictionary
-    filter_dict = self_dict(id_2_paper_id)
+    filter_dict = {}
 
-    db_path = os.path.join(db_dir, 'paper_info.db')
-    conn = sqlite3.connect(db_path)
-
-    entity_to_author = drawFlower(conn, ent_type,  "author" , citing_papers, cited_papers, filter_dict, dir_out, name, self_cite)
-    entity_to_conference = drawFlower(conn, ent_type, "conf", citing_papers, cited_papers, filter_dict, dir_out, name, self_cite)
-    entity_to_affiliation = drawFlower(conn, ent_type, "institution" , citing_papers, cited_papers, filter_dict, dir_out, name, self_cite)
+    entity_to_author = drawFlower(conn, ent_type,  "author" , citing_papers, cited_papers, filter_dict, dir_out, name)
+    entity_to_conference = drawFlower(conn, ent_type, "conf", citing_papers, cited_papers, filter_dict, dir_out, name)
+    entity_to_affiliation = drawFlower(conn, ent_type, "institution" , citing_papers, cited_papers, filter_dict, dir_out, name)
     conn.close()
     file_names = []
     for ls in [entity_to_author, entity_to_conference, entity_to_affiliation]:
