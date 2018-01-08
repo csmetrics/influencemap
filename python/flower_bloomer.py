@@ -12,6 +12,7 @@ plt.switch_backend('agg')
 
 # local module imports
 from get_flower_data import *
+from get_flower_df import gen_search_df
 from export_citations import filter_references
 from entity_type import Entity, Entity_map
 from draw_egonet import draw_halfcircle
@@ -20,9 +21,9 @@ def getEntityMap(ego, outer):
     e = {'author': Entity.AUTH, 'conf': Entity.CONF, 'institution': Entity.AFFI}
     return Entity_map(e[ego], e[outer])
 
-def drawFlower(conn, ent_type, ent_type2, citing_papers, cited_papers, filter_dict, dir_out, name):   
+def drawFlower(conn, ent_type, ent_type2, data_df, dir_out, name):   
     # Generate associated author scores for citing and cited
-    citing_records, cited_records = generate_scores(conn, Entity_map(ent_type, ent_type2), citing_papers, cited_papers)
+    citing_records, cited_records = generate_scores(conn, Entity_map(ent_type, ent_type2), data_df)
 
     #### START PRODUCING GRAPH
     plot_dir = os.path.join(dir_out, 'figures')
@@ -66,20 +67,13 @@ def getFlower(id_2_paper_id, name, ent_type):
     # get paper ids associated with input name
     print("\n\nid_to_paper_id\n\n\n\n\n\n{}".format(id_2_paper_id))
 
-    #if ent_type == "conf":
-    #    associated_papers = 
-    associated_papers = get_papers(id_2_paper_id)
-    print("\n\nassociated papers\n\n\n\n\n\n{}".format(associated_papers))
-
     # filter ref papers
-    citing_papers, cited_papers = filter_references(conn, associated_papers)
+    data_df = gen_search_df(conn, id_2_paper_id)
 
     # Generate a self filter dictionary
-    filter_dict = {}
-
-    entity_to_author = drawFlower(conn, ent_type,  "author" , citing_papers, cited_papers, filter_dict, dir_out, name)
-    entity_to_conference = drawFlower(conn, ent_type, "conf", citing_papers, cited_papers, filter_dict, dir_out, name)
-    entity_to_affiliation = drawFlower(conn, ent_type, "institution" , citing_papers, cited_papers, filter_dict, dir_out, name)
+    entity_to_author = drawFlower(conn, ent_type,  "author" , data_df, dir_out, name)
+    entity_to_conference = drawFlower(conn, ent_type, "conf", data_df, dir_out, name)
+    entity_to_affiliation = drawFlower(conn, ent_type, "institution" , data_df, dir_out, name)
     conn.close()
     file_names = []
     for ls in [entity_to_author, entity_to_conference, entity_to_affiliation]:

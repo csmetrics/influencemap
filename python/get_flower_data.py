@@ -1,13 +1,12 @@
 import sqlite3
 import os
 import sys
+import pandas as pd
 from datetime import datetime
 from mkAff import getAuthor
 from export_citations import filter_references
 from entity_type import *
-
-# Limit number of query
-BATCH_SIZE = 999 # MAX=999
+from flower_helpers import *
 
 # database location
 db_dir = "/localdata/u5642715/influenceMapOut"
@@ -15,140 +14,113 @@ db_dir = "/localdata/u5642715/influenceMapOut"
 # output directory
 dir_out = "/localdata/u5642715/influenceMapOut/out"
 
-def get_papers(pdict):
-    values = list()
-    for key in pdict.keys():
-        values += pdict[key]
-    return values
+info_cols = ['auth_id', 'num_auth', 'conf_id', 'journ_id', 'affi_id']
+mult_cols = [0]
 
-def get_weight(e_type, qline, ref_count):
-    if e_type == Entity.AUTH:
-        auth_id, auth_count = qline
-        if not auth_id == '':
-            return [(auth_id, (1 / auth_count) * (1 / ref_count), e_type.keyn[0])]
-
+def auth_weight(row):
     res = list()
-    for idx, key in enumerate(e_type.keyn):
-        e_id = qline[idx]
-        if not e_id == '':
-            res.append((e_id, 1 / ref_count, key))
+    if row['citing']:
+        val = (1 / row['citing_auth_count']) * (1 / row['citing_rc'])
+        for auth_id in row['citing_auth_id']:
+            if not auth_id == '':
+                res.append((auth_id, val))
+    else:
+        val = (1 / row['citing_auth_count']) * (1 / row['citing_rc'])
+        for i, auth_id in row['cited_auth_id'].iteritems():
+            if not auth_id == '':
+                res.append((auth_id, val))
     return res
 
-def try_get(conn, key, qdict, query, func=lambda x: x):
-    try:
-        res = qdict[key]
-        return res
-    except KeyError:
-        cur = conn.cursor()
-        cur.execute(query, (key, ))
-        res = func(cur.fetchall())
-        qdict[key] = res
-        return res
-        
-def gen_score(conn, e_map, plist, id_to_name, sc_dict, inc_self=False):
+def get_weight(e_map, row):
+    if row['citing']:
+        e_type = e_map.codomain
+        e_func = lambda s : 'citing_' + s
+    else:
+        e_type = e_map.domain
+        e_func = lambda s : 'cited_' + s
+
+    res = list()
+    if e_type == Entity.AUTH:
+        auth_res = auth_weight(row)
+        res += map(lambda r : r + (e_type.keyn[0], ), auth_res)
+    else:
+        for key in e_type.keyn:
+            e_id = row[e_func(key)]
+            if not e_id == '':
+                res.append((e_id, 1 / row['citing_rc'], key))
+    return res
+    
+
+def generate_scores(conn, e_map, data_df, inc_self=False):
+
+    print('{} start score generation\n---'.format(datetime.now()))
+    df = pd.concat(data_df.values())
+    if not inc_self:
+        df = df.loc[df['self_cite'] == 0]
+
     my_type, e_type = e_map.get_map()
-    sc_map = lambda f : set(map(lambda r : r[0], f))
-    e_map = lambda f : ' '.join(f[0][1].split())
+    id_query_map = lambda f : ' '.join(f[0][1].split())
+    id_to_name = dict([(tname, dict()) for tname in e_type.keyn])
 
-    res = dict()
+    # query plan finding paper weights
+    output_scheme = ",".join(e_type.scheme)
+    query = 'SELECT {} FROM paper_info WHERE paper_id = ?'.format(output_scheme)
 
-    # split papers into chunks
-    total_prog = 0
-    total = len(plist)
-
+    res = {'influencing' : dict(), 'influenced': dict()}
+    
     cur = conn.cursor()
 
-    for paper, ref_count, my_paper in plist:
-        # Determine if the paper is a self-citation of the orig paper
-        skip = False
-        if not inc_self:
-            for key in my_type.keyn:
-                sc_query = 'SELECT {} FROM paper_info WHERE paper_id = ?'.format(key)
-
-                # Find the entities (and cache to dictionary)
-                my_e = try_get(conn, my_paper, sc_dict[key], sc_query, func=sc_map)
-                    
-                their_e = try_get(conn, paper, sc_dict[key], sc_query, func=sc_map)
-
-                # Check if author overlap ie selfcite
-                if not my_e.isdisjoint(their_e):
-                    skip = True
-                    break
-
-        if skip:
-            continue
-
-        # query plan finding paper weights
-        output_scheme = ",".join(e_type.scheme)
-        query = 'SELECT {} FROM paper_info WHERE paper_id = ?'.format(output_scheme)
-
-        cur.execute(query, (paper, ))
-
-        # iterate through query results
-        for line in cur.fetchall():
+    for i, row in df.iterrows():
             # iterate over different table types
-            for wline in get_weight(e_type, line, ref_count):
+            for wline in get_weight(e_map, row):
                 e_id, weight, tkey = wline
                 id_query = 'SELECT * FROM {} WHERE {} = ? LIMIT 1'.format(e_type.edict[tkey], tkey)
 
-                e_name = try_get(conn, e_id, id_to_name[tkey], id_query, func=e_map)
+                e_name = try_get(conn, e_id, id_to_name[tkey], id_query, func=id_query_map)
 
                 # Add to score
-                try:
-                    res[e_name] += weight
-                except KeyError:
-                    res[e_name] = weight
+                if row['citing']:
+                    try:
+                        res['influenced'][e_name] += weight
+                    except KeyError:
+                        res['influenced'][e_name] = weight
+                else:
+                    try:
+                        res['influencing'][e_name] += weight
+                    except KeyError:
+                        res['influencing'][e_name] = weight
 
-    cur.close()
-
-    # return dict results
-    return res, id_to_name, sc_dict
-
-# Generate the scores
-def generate_scores(conn, e_map, citing_p, cited_p, inc_self=False):
-    print('\n---\n{} start generating scores\n---'.format(datetime.now()))
-
-    my_type, e_type = e_map.get_map()
-
-    # initial id to name dictionaries 
-    id_to_name = dict([(tname, dict()) for tname in e_type.keyn])
-    sc_dict = dict([(tname, dict()) for tname in my_type.keyn])
-
-    # Generate scores
-    print('{} start generate cited scores'.format(datetime.now()))
-    citing_score, id_to_name, sc_dict = gen_score(conn, e_map, citing_p, id_to_name, sc_dict, inc_self=inc_self)
-    print('{} finish generate cited scores'.format(datetime.now()))
-
-    print('{} start generate citing scores'.format(datetime.now()))
-    cited_score, _, _ = gen_score(conn, e_map, cited_p, id_to_name, sc_dict, inc_self=inc_self)
-    print('{} finish generate citing scores'.format(datetime.now()))
-
-    print('---\n{} finish generating scores\n---\n'.format(datetime.now()))
-
-    # return sorted dictionaries
-    return citing_score, cited_score
+    print('{} finish score generation\n---'.format(datetime.now()))
+    return res
 
 if __name__ == "__main__":
+    from mkAff import getAuthor
+    from get_flower_df import gen_search_df
+    import os, sys
 
     # input
-    name = sys.argv[1]
+    user_in = sys.argv[1]
+
+    # Input data directory
+    data_dir = '/mnt/data/MicrosoftAcademicGraph'
+
+    # Output data directory
+    out_dir = '/localdata/u5642715/influenceMapOut'
+
+    # database output directory
+    db_dir = '/localdata/u5642715/influenceMapOut'
 
     # get paper ids associated with input name
-    print('{} start get associated papers to input name {}'.format(datetime.now(), name))
-    _, id_2_paper_id = getAuthor(name)
-    print('{} finish get associated papers to input name {}'.format(datetime.now(), name))
+    _, id_2_paper_id = getAuthor(user_in)
 
-    associated_papers = get_papers(id_2_paper_id)
-
-    # sqlite connection
     db_path = os.path.join(db_dir, 'paper_info2.db')
     conn = sqlite3.connect(db_path)
 
-    # filter ref papers
-    citing_papers, cited_papers = filter_references(conn, associated_papers)
+    data_df = gen_search_df(conn, id_2_paper_id)
 
-    # Generate associated author scores for citing and cited
-    citing_records, cited_records = generate_scores(conn, Entity_map(Entity.AUTH, Entity.AUTH), citing_papers, cited_papers)
+    influence_dict = generate_scores(conn, Entity_map(Entity.AUTH, Entity.AUTH), data_df, inc_self=True)
+    citing_records = influence_dict['influenced']
+    cited_records = influence_dict['influencing']
 
     # sorter
     sort_by_value = lambda d : sorted(d.items(), key=lambda kv : (kv[1] ,kv[0]), reverse=True)
