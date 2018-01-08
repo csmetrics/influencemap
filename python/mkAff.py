@@ -31,32 +31,29 @@ def isSame(name1, name2):
          #return False 
     ls1 = name1.split(' ')
     ls2 = name2.split(' ')           
-    if ls2[-1] == ls1[-1]:
-         middle1 = ls1[1:-1]
-         middle2 = ls2[1:-1]
-         if len(ls2[0]) == 1 or len(ls1[0]) == 1:
-             if ls2[0][0] == ls1[0][0]:
-                  b = compareMiddle(middle1, middle2)
-                 # memory[name1] = b
-                  return b
-             else:
-                 #memory[name1] = False
-                 return False
+    if len(ls2[0]) == 1 or len(ls1[0]) == 1:
+         if ls2[0][0] == ls1[0][0]:
+              b = compareMiddle(name1, name2)
+              # memory[name1] = b
+              return b
          else:
-             if ls2[0] == ls1[0]:
-                 b =  compareMiddle(middle1, middle2)
-                 #memory[name1] = b
-                 return b
-             else: 
-                 #memory[name1] = False
-                 return False
-    else: 
-         #memory[name1] = False
-         return False
+              #memory[name1] = False
+              return False
+    else:
+        if ls2[0] == ls1[0]:
+              b =  compareMiddle(name1, name2)
+              #memory[name1] = b
+              return b
+        else: 
+              #memory[name1] = False
+              return False
+    
 
   
 
 def compareMiddle(m1,m2):
+   m1 = m1.split(' ')[1:-1]
+   m2 = m2.split(' ')[1:-1]
    ms1 = ''
    ms2 = ''
    for char in m1:
@@ -111,7 +108,7 @@ def getPaperName(pID):
     dbPAA = sqlite3.connect(db_PAA, check_same_thread = False)
     curP = dbPAA.cursor()
     if len(pID) == 1:
-        curP.execute("SELECT paperTitle, publishedDate FROM papers WHERE paperID == '" + pID[0][0] + "'")
+        curP.execute("SELECT paperTitle, publishedDate FROM papers WHERE paperID == '" + pID[0] + "'")
     else:
         curP.execute(removeCon("SELECT paperTitle, MAX(publishedDate) FROM papers WHERE paperID IN {}".format(tuple(pID))))
     title = curP.fetchall()
@@ -122,17 +119,19 @@ def getPaperName(pID):
     else: return ('','')
 
 
-def getAuthor(name):
-    saved = json.load(open('/localdata/u6363358/data/savedFile.json'))
-    if name in saved:
-        fs = saved[name][0]
-        for dic in fs:
-            print(dic)
-        return saved[name]
- 
+def getAuthor(name,use_cache=True):
+    if use_cache:   
+       with open(saved_dir,'r') as savedFile:
+           data_exist_author = json.load(savedFile)
+           for key in data_exist_author:
+                if isSame(key,name):
+                     for fs in data_exist_author[key][0]:
+                         print(fs)
+                     return data_exist_author[key]
+    
     dbPAA = sqlite3.connect(db_PAA, check_same_thread = False)
     dbA = sqlite3.connect(db_Authors, check_same_thread = False)
-    dbA.create_function("isSame",2,isSame)
+    dbA.create_function("compareMiddle",2,compareMiddle)
     curP = dbPAA.cursor()
     curA = dbA.cursor()
     name = name.lower()
@@ -141,8 +140,13 @@ def getAuthor(name):
 
     allAuthor = []
     lstN = name.split(' ')[-1]
+    fstN = name.split(' ')[0]
+    fstLetter = fstN[0]
+    #middle = name.split(' ')[1:-1]
     print("{} getting all the aID".format(datetime.now()))
-    curA.execute("SELECT * FROM authors WHERE authorName LIKE '%" + lstN + "' AND isSame(authorName,'" + name + "')")
+    #curA.execute("SELECT * FROM authors WHERE authorName LIKE '% " + lstN + "' AND isSame(authorName,'" + name + "')")
+    curA.execute("SELECT * FROM authors WHERE authorName LIKE '% " + lstN + "' AND (authorName LIKE '" + fstN + "%' OR substr(authorName,1,2) == '" + fstLetter + " ')" + "AND compareMiddle(authorName, '" + name + "')")
+    print("SELECT * FROM authors WHERE authorName LIKE '% " + lstN + "' AND (authorName LIKE '" + fstN + "%' OR substr(authorName,1,2) == '" + fstLetter + " ')" + "AND compareMiddle(authorName, '" + name + "')") 
    
     allAuthor = curA.fetchall()
     print("{} finished getting all the aID".format(datetime.now()))
@@ -336,4 +340,4 @@ def contains(name1, name2):
     return True
 
 if __name__ == '__main__':
-    trial = getAuthor('stephen m blackburn')
+    trial = getAuthor('a l hosking')
