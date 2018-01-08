@@ -1,21 +1,19 @@
+import json
 import sqlite3
 import os
 import sys
 import pandas as pd
 from datetime import datetime
 from mkAff import getAuthor
-from export_citations import filter_references
 from entity_type import *
 from flower_helpers import *
 
-# database location
-db_dir = "/localdata/u5642715/influenceMapOut"
-
-# output directory
-dir_out = "/localdata/u5642715/influenceMapOut/out"
-
-info_cols = ['auth_id', 'num_auth', 'conf_id', 'journ_id', 'affi_id']
-mult_cols = [0]
+# Config setup
+with open('config.json') as config_data:
+    config = json.load(config_data)
+    DB_DIR = config['sqlite3']['directory']
+    DB_PATH = os.path.join(DB_DIR, config['sqlite3']['name'])
+    OUT_DIR = config['data']['out']
 
 def auth_weight(row):
     res = list()
@@ -101,20 +99,10 @@ if __name__ == "__main__":
     # input
     user_in = sys.argv[1]
 
-    # Input data directory
-    data_dir = '/mnt/data/MicrosoftAcademicGraph'
-
-    # Output data directory
-    out_dir = '/localdata/u5642715/influenceMapOut'
-
-    # database output directory
-    db_dir = '/localdata/u5642715/influenceMapOut'
-
     # get paper ids associated with input name
     _, id_2_paper_id = getAuthor(user_in)
 
-    db_path = os.path.join(db_dir, 'paper_info2.db')
-    conn = sqlite3.connect(db_path)
+    conn = sqlite3.connect(DB_PATH)
 
     data_df = gen_search_df(conn, id_2_paper_id)
 
@@ -126,11 +114,11 @@ if __name__ == "__main__":
     sort_by_value = lambda d : sorted(d.items(), key=lambda kv : (kv[1] ,kv[0]), reverse=True)
 
     # Print to file (Do we really need this?)
-    with open(os.path.join(dir_out, 'authors_citing.txt'), 'w') as fh:
+    with open(os.path.join(OUT_DIR, 'authors_citing.txt'), 'w') as fh:
         for key, val in sort_by_value(citing_records):
             fh.write("{}\t{}\n".format(key, val))
 
-    with open(os.path.join(dir_out, 'authors_cited.txt'), 'w') as fh:
+    with open(os.path.join(OUT_DIR, 'authors_cited.txt'), 'w') as fh:
         for key, val in sort_by_value(cited_records):
             fh.write("{}\t{}\n".format(key, val))
 

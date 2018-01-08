@@ -1,6 +1,8 @@
 import sqlite3
 import pandas as pd
 import numpy as np
+import json
+import os
 from datetime import datetime
 from flower_helpers import is_selfcite
 
@@ -8,9 +10,15 @@ REF_LABELS = ['citing', 'citing_paper', 'citing_rc', 'cited_paper']
 INFO_COLS = ['auth_id', 'auth_count', 'conf_id', 'journ_id', 'affi_id']
 MULT_COLS = [0]
 
-# Limit number of query
-BATCH_SIZE = 999 # MAX=999
+# Config setup
+with open('config.json') as config_data:
+    config = json.load(config_data)
+    BATCH_SIZE = config['sqlite3']['batch size']
+    DB_DIR = config['sqlite3']['directory']
+    DB_PATH = os.path.join(DB_DIR, config['sqlite3']['name'])
+    CACHE_DIR = config['cache']['directory']
 
+# Filters the paper_ref database to relevent papers and uses pandas dataframes
 def gen_reference_df(conn, paper_ids):
     cur = conn.cursor()
 
@@ -44,6 +52,7 @@ def gen_reference_df(conn, paper_ids):
 
     return ref_df
 
+# Generates paper_info from database into pandas format
 def get_paper_info(conn, paper_id):
     info_query = 'SELECT {} FROM paper_info WHERE paper_id = ?'.format(','.join(INFO_COLS))
 
@@ -57,6 +66,7 @@ def get_paper_info(conn, paper_id):
     res_gen = (pd.Series(list(val)) if i in MULT_COLS else next(iter(val)) for i, val in enumerate(res))
     return tuple(res_gen)
 
+# Expands the ref dataframe to include more information on papers
 def gen_info_df(conn, ref_df):
     if not ref_df.empty:
         citing_cols = map(lambda s : 'citing_' + s, INFO_COLS)
@@ -73,6 +83,7 @@ def gen_info_df(conn, ref_df):
         print('EMPTY!')
     return ref_df
 
+# Wraps above functions to produce a dictionary of pandas dataframes for relevent information
 def gen_search_df(conn, paper_map):
     res_dict = dict()
 
@@ -100,24 +111,14 @@ if __name__ == "__main__":
     # input
     user_in = sys.argv[1]
 
-    # Input data directory
-    data_dir = '/mnt/data/MicrosoftAcademicGraph'
-
-    # Output data directory
-    out_dir = '/localdata/u5642715/influenceMapOut'
-
-    # database output directory
-    db_dir = '/localdata/u5642715/influenceMapOut'
-
     # get paper ids associated with input name
     _, id_2_paper_id = getAuthor(user_in)
 
-    db_path = os.path.join(db_dir, 'paper_info2.db')
-    conn = sqlite3.connect(db_path)
+    conn = sqlite3.connect(DB_PATH)
 
     # filter_references(conn, associated_papers)
     test = gen_search_df(conn, id_2_paper_id)
-    for k, v in test.items():
-        print(v.dtypes)
-#        print(k)
-#        print(v)
+#    for k, v in test.items():
+#        print(v.dtypes)
+        #print(k)
+        #print(v)
