@@ -5,19 +5,33 @@ Goal: Constructing maps of intellectual influence using academic data.
 Make it searchable and visualisable on the web.
 
 ## methodology
-The influence of a person, institution or conference (an entity) on and from other entities is measured using citations. The influence flowers show a normalised influence score meaning that flowers for two different entities cannot be directly compared. The underlying influence scores depend on the number of citations to and from an entity and the number of authors involved in the publications recieving the citations.
+The influence of a person, institution or conference (an entity) on and from
+other entities is measured using citations. The influence flowers show a
+normalised influence score meaning that flowers for two different entities
+cannot be directly compared. The underlying influence scores depend on the
+number of citations to and from an entity and the number of authors involved in
+the publications recieving the citations.
 
 ### calculating the influence one entity has on another entity
 
-#### shall we remove coauthors as nodes?
-
-NO, because ... 
-
 #### removing self citations
+
+We define a self citation between papers and a cited paper as a relation
+defined by the overlap in authorship. If the overlap is not empty, then the
+citation is defined to be a self citation.
+
+#### Why not remove all coauthor papers instead?
+ 
+When removing all coauthor papers (all scores from papers with a coauthor of
+the referencing paper authors) we found the 'cut down' to be too extreme. This
+would greatly effect the produced flower, leaving one with little to no
+information.
+
+#### weighting the citations -- coauthors
 
 [AS]
 
-#### weighting the citations -- coauthors
+#### Normalisation
 
 [AS]
 
