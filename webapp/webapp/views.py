@@ -58,37 +58,32 @@ optionlist = []
 @csrf_exempt
 def search(request):
     global keyword, optionlist, option, selfcite
+    global id_pid_dict
+
     print("search!!", request.GET)
     inflflower = None
     entities = []
 
-    if "selfcite" in request.GET:
-        selfcite = True
-        print("SELF_CITE")
-    if "search" in request.GET:
-        global id_pid_dict
-        keyword = request.GET.get("keyword")
-        option = [x for x in optionlist if x.get('id', '') == request.GET.get("option")][0]
-        if keyword != "":
-            print("{}\t{}\t{}".format(datetime.now(), __file__ , entity_of_interest[option['id']].__name__))
-            entities, id_pid_dict =  entity_of_interest[option['id']](keyword) #(authors_testing, dict()) # getAuthor(keyword)
+    selfcite = request.GET.get("selfcite")
+    keyword = request.GET.get("keyword")
+    option = [x for x in optionlist if x.get('id', '') == request.GET.get("option")][0]
+    print(keyword)
+    if keyword != "":
+        print("{}\t{}\t{}".format(datetime.now(), __file__ , entity_of_interest[option['id']].__name__))
+        entities, id_pid_dict =  entity_of_interest[option['id']](keyword) #(authors_testing, dict()) # getAuthor(keyword)
 
-        # path to the influence flowers
-        inflin = os.path.join(BASE_DIR, "output/flower1.png")
-        inflby = os.path.join(BASE_DIR, "output/flower2.png")
-        if False: #option.get('id') == 'conf':
-            print("{}\t{}\t{}".format(datetime.now(), __file__ , getFlower.__name__))
-            inflflower = getFlower(id_2_paper_id=id_pid_dict, name=keyword, ent_type='conference', self_cite=selfcite)
-        else:
-            inflflower = []#[inflin, inflby]
+    # path to the influence flowers
+    inflin = os.path.join(BASE_DIR, "output/flower1.png")
+    inflby = os.path.join(BASE_DIR, "output/flower2.png")
+    if False: #option.get('id') == 'conf':
+        print("{}\t{}\t{}".format(datetime.now(), __file__ , getFlower.__name__))
+        inflflower = getFlower(id_2_paper_id=id_pid_dict, name=keyword, ent_type='conference', self_cite=selfcite)
+    else:
+        inflflower = []#[inflin, inflby]
 
     data = {
-        "optionlist": optionlist,
-        "selectedKeyword": keyword,
-        "selectedOption": option,
         "inflflower": inflflower,
         "authors": entities,
-        "selfcite": selfcite
     }
     return JsonResponse(data, safe=False)
 
