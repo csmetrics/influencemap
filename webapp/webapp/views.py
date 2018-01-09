@@ -76,9 +76,33 @@ def search(request):
         else:
             inflflower = []#[inflin, inflby]
 
+    data = {
+        "optionlist": optionlist,
+        "selectedKeyword": keyword,
+        "selectedOption": option,
+        "inflflower": inflflower,
+        "authors": entities,
+        "selfcite": selfcite
+    }
     return JsonResponse(data, safe=False)
 
 def submit(request):
+    selected_ids = request.GET.getlist("authorlist")
+    id_2_paper_id = dict()
+    for aid in selected_ids:
+        id_2_paper_id[aid] = id_pid_dict[aid]
+    print("{}\t{}\t{}".format(datetime.now(), __file__ , getFlower.__name__))
+    print("selfcite :" + str(selfcite))
+    inflflower = getFlower(id_2_paper_id=id_2_paper_id, name=keyword, ent_type=option['id'], self_cite=selfcite)
+
+    data = {
+        "optionlist": optionlist,
+        "selectedKeyword": keyword,
+        "selectedOption": option,
+        "inflflower": inflflower,
+        "authors": entities,
+        "selfcite": selfcite
+    }
     return JsonResponse(data, safe=False)
 
 def main(request):
@@ -94,19 +118,6 @@ def main(request):
     option = optionlist[0] # default selection
     inflflower = None
     entities = []
-
-    # get user input from main.html page
-    if request.method == "GET":
-        print(request.GET)
-
-        if "submit" in request.GET:
-            selected_ids = request.GET.getlist("authorlist")
-            id_2_paper_id = dict()
-            for aid in selected_ids:
-                id_2_paper_id[aid] = id_pid_dict[aid]
-            print("{}\t{}\t{}".format(datetime.now(), __file__ , getFlower.__name__))
-            print("selfcite :" + str(selfcite))
-            inflflower = getFlower(id_2_paper_id=id_2_paper_id, name=keyword, ent_type=option['id'], self_cite=selfcite)
 
     # render page with data
     return render(request, "main.html", {
