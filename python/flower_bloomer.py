@@ -17,7 +17,7 @@ from entity_type import Entity, Entity_map
 from draw_egonet import draw_halfcircle
 
 def getEntityMap(ego, outer):
-    e = {'author': Entity.AUTH, 'conf': Entity.CONF, 'institution': Entity.AFFI}
+    e = {'author': Entity.AUTH, 'conference': Entity.CONF, 'institution': Entity.AFFI, 'journal': Entity.JOURN}
     return Entity_map(e[ego], e[outer])
 
 def drawFlower(conn, ent_type, ent_type2, citing_papers, cited_papers, filter_dict, dir_out, name, self_cite):   
@@ -86,7 +86,7 @@ def getFlower(id_2_paper_id, name, ent_type, self_cite):
     conn = sqlite3.connect(db_path)
 
     entity_to_author = drawFlower(conn, ent_type,  "author" , citing_papers, cited_papers, filter_dict, dir_out, name, self_cite)
-    entity_to_conference = drawFlower(conn, ent_type, "conf", citing_papers, cited_papers, filter_dict, dir_out, name, self_cite)
+    entity_to_conference = drawFlower(conn, ent_type, "conference", citing_papers, cited_papers, filter_dict, dir_out, name, self_cite)
     entity_to_affiliation = drawFlower(conn, ent_type, "institution" , citing_papers, cited_papers, filter_dict, dir_out, name, self_cite)
     conn.close()
     file_names = []
