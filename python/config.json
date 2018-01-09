@@ -9,6 +9,7 @@
     },
     "cache":{
         "directory":"/localdata/common/cache",
+        "paper threshold":20,
         "time-out":0
     },
     "flower":{
