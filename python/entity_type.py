@@ -7,7 +7,6 @@ class Entity(Enum):
     CONF = ({'conf_id': 'confname'}, ['conf_id'], [])
     JOURN = ({'journ_id': 'journname'}, ['journ_id'], [])
 
-
     def __init__(self, edict, key, add):
         self.edict = edict
         self.keyn = key

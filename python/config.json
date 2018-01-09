@@ -1,0 +1,16 @@
+{
+    "sqlite3":{
+        "directory":"/localdata/u5642715/influenceMapOut",
+        "name":"paper_info2.db",
+        "batch size": 999
+    }, 
+    "data":{
+        "out":"/localdata/u5642715/influenceMapOut/out"
+    },
+    "cache":{
+        "directory":""
+    },
+    "flower":{
+        "leaves":25
+    }
+}

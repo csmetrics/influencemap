@@ -114,7 +114,7 @@ def import_to_table(conn, name, f, colname, dataidx, delim='\t', fmap=None, tran
             row_count = 0
 
             for line in open(f, 'r'):
-                tokens = line.split('\t')
+                tokens = line.strip(' \n').split('\t')
                 row_count += 1
                 iline = map(lambda s : str(s), [tokens[i] for i in dataidx])
                 cur.execute('INSERT INTO {} ({}) VALUES {};'.format(name, ",".join(colname), ins_string), list(iline))
