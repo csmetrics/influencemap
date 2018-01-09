@@ -4,7 +4,6 @@ import sqlite3
 import os, sys
 from datetime import datetime
 import pandas as pd
-import numpy as np
 import networkx as nx
 import seaborn as sns
 import matplotlib.pyplot as plt
@@ -12,10 +11,15 @@ sns.set()
 plt.switch_backend('agg')
 
 # local module imports
-from get_flower_data import *
+from mkAff import getAuthor
+from get_flower_data import generate_scores
 from get_flower_df import gen_search_df
 from entity_type import Entity, Entity_map
 from draw_egonet import draw_halfcircle
+from influence_weight import get_weight
+
+weight_types = [ 'citing authors', 'cited authors', 'citing references']
+wfunc_test = lambda sdict : (lambda x, y : get_weight(x, y, tweight=sdict))
 
 # Config setup
 with open('config.json') as config_data:
@@ -25,20 +29,22 @@ with open('config.json') as config_data:
     OUT_DIR = config['data']['out']
     NUM_LEAVES = config['flower']['leaves']
 
-def getEntityMap(ego, outer):
-    e = {'author': Entity.AUTH, 'conference': Entity.CONF, 'institution': Entity.AFFI, 'journal': Entity.JOURN}
-    return Entity_map(e[ego], e[outer])
+def flower_wtest(conn, data_df, scheme, name, n):
+    sdict = dict()
+    for i, val in enumerate(scheme):
+        if val:
+            sdict[weight_types[i]] = True
+        else:
+            sdict[weight_types[i]] = False
 
-def drawFlower(conn, ent_type, ent_type2, data_df, dir_out, name):   
-    # Generate associated author scores for citing and cited
-    influence_dict = generate_scores(conn, Entity_map(ent_type, ent_type2), data_df)
+    influence_dict = generate_scores(conn, Entity_map(Entity.AUTH, Entity.AUTH), data_df, inc_self=True, calc_weight=wfunc_test(sdict))
     citing_records = influence_dict['influenced']
     cited_records = influence_dict['influencing']
-
+    
     #### START PRODUCING GRAPH
-    plot_dir = os.path.join(dir_out, 'figures')
+    plot_dir = os.path.join(OUT_DIR, 'figures')
 
-    for dir in [dir_out, plot_dir]:
+    for dir in [OUT_DIR, plot_dir]:
       if not os.path.exists(dir):
           os.makedirs(dir)
 
@@ -57,31 +63,35 @@ def drawFlower(conn, ent_type, ent_type2, data_df, dir_out, name):
     for entity in top_entities_influenced_by_poi:
       personG.add_edge(name, entity[0], weight=float(entity[1]))
 
-    influencedby_filename = os.path.join(plot_dir, 'influencedby_{}.png'.format(ent_type2))
-    influencedto_filename = os.path.join(plot_dir, 'influencedto_{}.png'.format(ent_type2))
+    influencedby_filename = os.path.join(plot_dir, 'influencedby_{}.png'.format(n))
+    influencedto_filename = os.path.join(plot_dir, 'influencedto_{}.png'.format(n))
     print("drawing graphs")
     draw_halfcircle(graph=personG, ego=name, renorm_weights='log', direction='in', filename = influencedby_filename)
     draw_halfcircle(graph=personG, ego=name, renorm_weights='log', direction='out', filename = influencedto_filename)
     print("finished graphs")
-    return influencedby_filename, influencedto_filename
+    
 
+if __name__ == '__main__':
+    import itertools
 
-def getFlower(id_2_paper_id, name, ent_type):
-    conn = sqlite3.connect(DB_PATH)
+    # input
+    user_in = sys.argv[1]
 
     # get paper ids associated with input name
-    print("\n\nid_to_paper_id\n\n\n\n\n\n{}".format(id_2_paper_id))
+    _, id_2_paper_id = getAuthor(user_in)
 
-    # filter ref papers
+    conn = sqlite3.connect(DB_PATH)
+
+    # Data dataframe
     data_df = gen_search_df(conn, id_2_paper_id)
 
-    # Generate a self filter dictionary
-    entity_to_author = drawFlower(conn, ent_type,  "author" , data_df, OUT_DIR, name)
-    entity_to_conference = drawFlower(conn, ent_type, "conf", data_df, OUT_DIR, name)
-    entity_to_affiliation = drawFlower(conn, ent_type, "institution" , data_df, OUT_DIR, name)
+    schemes = list()
+    for i, scheme in enumerate(itertools.product([True, False], repeat=3)):
+        print('{} start creating flower {} with scheme: [{}]'.format(datetime.now(), i, ', '.join(map(str, scheme))))
+        flower_wtest(conn, data_df, scheme, user_in, i)
+        print('{} finish creating flower {} with scheme: [{}]'.format(datetime.now(), i, ', '.join(map(str, scheme))))
+        schemes.append((i,scheme))
 
-    conn.close()
-    file_names = []
-    for ls in [entity_to_author, entity_to_conference, entity_to_affiliation]:
-        file_names.extend(ls)
-    return file_names
+    print('[{}]'.format(', '.join(map(str, weight_types))))
+    for i, scheme in schemes:
+        print('{}: [{}]'.format(i, ', '.join(map(str, scheme))))

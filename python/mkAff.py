@@ -67,7 +67,6 @@ def compareMiddle(m1,m2):
 def mostCommon(lst):
     return max(set(lst),key=lst.count)
 
-
 def getField(pID):
     dbK = sqlite3.connect(db_key, check_same_thread = False)
     dbN = sqlite3.connect(db_FName, check_same_thread = False)
@@ -126,9 +125,7 @@ def getPaperName(pID):
         return (title[0][0], title[0][1])
     else: return ('','')
 
-
-
-def getAuthor(name,expand=False,use_cache=True):
+def getAuthor(name,expand=False,use_cache=False):
     if use_cache:   
        with open(saved_dir,'r') as savedFile:
            data_exist_author = json.load(savedFile)

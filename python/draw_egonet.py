@@ -16,7 +16,8 @@ def draw_egocircle(graph=None, ego=None, ax=None, direction="out", renorm_weight
     sns.set_style("white")
     sns.despine()
         
-    xroot = 0.
+    xroot = 0. 
+
     yroot = 0.
     ax.plot(xroot, yroot, 'o', c=[.5, .5, .5], markersize=1.2*ps['max_marker'], fillstyle='full', mec='0.5')
     ax.text(xroot, yroot-5*ps['delta_text'], ego, horizontalalignment='center')
@@ -163,13 +164,27 @@ def draw_halfcircle(graph=None, ego=None, ax=None, direction="out", renorm_weigh
     #print(iangle)
     
     for i, jn in enumerate(isort):
+
+        side = 'c' if i == (nn//2) else ('l' if (i < nn//2) else 'r')
+#        x_shift_ls = [-0.2, 0.2]
+ #       x_shift = x_shift_ls[i // (len(isort) // 2)]
         n = node_list[jn]
         w = weight_norm[jn]
         # node position
+        alignment = 'center' if side == 'c' else ('right' if side == 'l' else 'left') # centre if middle position, otherwise align according to which side of centre
+
         xp = np.cos(anglelist[i]) 
         yp = np.sin(np.abs(anglelist[i])) 
-        #print((xp, yp))
+        hyp = 1.1 * np.sqrt(np.square(xp) + np.square(yp))
+        x = np.cos(anglelist[i]) * hyp
+        y = np.sin(anglelist[i]) * hyp * (1.1 if (i // (nn / 3) == 1) else 1)
+        # print((xp, yp))
         
+        neighbour = i - 1 if (side == 'l' or side == 'c') else i + 1
+        y_dist_from_neighbour = (abs(yp - np.sin(np.abs(anglelist[neighbour])))) if (neighbour >= 0 and neighbour <= nn-1) else (None)
+        min_y_dist_from_neighbour = 0.06 # 0.75 * ps['max_marker']
+        y_adjust = 0 if (y_dist_from_neighbour == None or min_y_dist_from_neighbour - y_dist_from_neighbour <=  0) else (min_y_dist_from_neighbour - y_dist_from_neighbour)   
+
         # calculate node color index based on its weight
         ci = int( w*(len(node_colors)-1e-3) )
         lw = ps['max_line'] * w + ps['min_line']
@@ -177,7 +192,7 @@ def draw_halfcircle(graph=None, ego=None, ax=None, direction="out", renorm_weigh
         ax.plot(xp, yp, 'o', c=node_colors[ci], markersize= ps['max_marker'], # markersize=int(sz), 
             alpha=.9, mec='0.5', mew=.5) 
         # add node text 
-        h = ax.text(xp, yp, n, horizontalalignment='left')
+        h = ax.text(xp+ (0 if side == 'c' else  (-.075 if side == 'l' else .075)), yp + y_adjust, n if True else "yp = {0:.2f}, xp = {1:.2f}, adj_y = {2:.2f}".format(yp,xp,y_adjust), horizontalalignment=alignment)
         # draw arc / arrow 
         ax.annotate("", xy=(xroot, yroot), xycoords='data',
             xytext=(xp, yp), textcoords='data',
@@ -186,8 +201,8 @@ def draw_halfcircle(graph=None, ego=None, ax=None, direction="out", renorm_weigh
                         connectionstyle="arc3,rad=0.12", ), )
         
     ### TODO: draw color bar
-    #cbar = plt.colorbar(cax = ax) #, ticks=[-1, 0, 1])
-    #cbar.ax.set_yticklabels(['< -1', '0', '> 1'])  # vertically oriented colorbar
+#    cbar = plt.colorbar(cax = ax) #, ticks=[-1, 0, 1])
+#    cbar.ax.set_yticklabels(['< -1', '0', '> 1'])  # vertically oriented colorbar
    
     ax.set_xlim((-1.2, 1.2))
     ax.set_ylim((-.1, 1.1))
