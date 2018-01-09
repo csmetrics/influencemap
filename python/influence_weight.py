@@ -23,11 +23,10 @@ def is_weighted(func_name, bval):
 
 def get_weight(e_map, row, tweight=default):
     if row['citing']:
-        e_type = e_map.codomain
         e_func = lambda s : 'citing_' + s
     else:
-        e_type = e_map.domain
         e_func = lambda s : 'cited_' + s
+    e_type = e_map.codomain
 
     res = list()
     if e_type == Entity.AUTH:
