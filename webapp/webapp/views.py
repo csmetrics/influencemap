@@ -77,7 +77,7 @@ def search(request):
     inflby = os.path.join(BASE_DIR, "output/flower2.png")
     if False: #option.get('id') == 'conf':
         print("{}\t{}\t{}".format(datetime.now(), __file__ , getFlower.__name__))
-        inflflower = getFlower(id_2_paper_id=id_pid_dict, name=keyword, ent_type='conference', self_cite=selfcite)
+        inflflower = getFlower(id_2_paper_id=id_pid_dict, name=keyword, ent_type='conference')
     else:
         inflflower = []#[inflin, inflby]
 
@@ -96,7 +96,7 @@ def submit(request):
         id_2_paper_id[aid] = id_pid_dict[aid]
     print("{}\t{}\t{}".format(datetime.now(), __file__ , getFlower.__name__))
     print("selfcite :" + str(selfcite))
-    inflflower = getFlower(id_2_paper_id=id_2_paper_id, name=keyword, ent_type=option['id'], self_cite=selfcite)
+    inflflower = getFlower(id_2_paper_id=id_2_paper_id, name=keyword, ent_type=option['id'])
 
     data = {
         "inflflower": inflflower,
