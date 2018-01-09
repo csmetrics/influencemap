@@ -72,12 +72,16 @@ def getField(pID):
     curK = dbK.cursor()
     curFN = dbN.cursor()
     if len(pID) == 1:
+         #print("{} Getting fieldID".format(datetime.now()))
          curK.execute("SELECT FieldID FROM paperKeywords WHERE PaperID = '" + pID[0] + "'") 
          #curK.execute(removeCon("SELECT FieldID FROM paperKeywords WHERE PaperID IN {}".format(tuple(pID))))
     else: 
+         #print("{} Getting fieldID".format(datetime.now()))
          curK.execute(removeCon("SELECT FieldID FROM paperKeywords WHERE PaperID IN {}".format(tuple(pID))))
          #curK.execute("SELECT FieldID FROM paperKeywords WHERE PaperID == '" + pID[0] + "'")
     res = list(map(lambda x: x[0],curK.fetchall()))
+    #print("{} finished getting fieldID".format(datetime.now()))
+    #print("{} getting fieldName".format(datetime.now()))
     if len(res) > 0:
          if len(set(res)) > 1:
             res = sorted(dict(Counter(res)).items(),key=operator.itemgetter(1),reverse=True) #produce a dict filedID: numOfOccur sorted in desending order
@@ -107,10 +111,12 @@ def getField(pID):
 def getPaperName(pID):
     dbPAA = sqlite3.connect(db_PAA, check_same_thread = False)
     curP = dbPAA.cursor()
+    #print("{} getting paperTitle and date".format(datetime.now()))
     if len(pID) == 1:
         curP.execute("SELECT paperTitle, publishedDate FROM papers WHERE paperID == '" + pID[0] + "'")
     else:
         curP.execute(removeCon("SELECT paperTitle, MAX(publishedDate) FROM papers WHERE paperID IN {}".format(tuple(pID))))
+    #print("{} finished getting paperTitle and date".format(datetime.now()))
     title = curP.fetchall()
     dbPAA.commit()
     dbPAA.close()
@@ -119,7 +125,7 @@ def getPaperName(pID):
     else: return ('','')
 
 
-def getAuthor(name,use_cache=True):
+def getAuthor(name,expand,use_cache=True):
     if use_cache:   
        with open(saved_dir,'r') as savedFile:
            data_exist_author = json.load(savedFile)
@@ -145,9 +151,12 @@ def getAuthor(name,use_cache=True):
     #middle = name.split(' ')[1:-1]
     print("{} getting all the aID".format(datetime.now()))
     #curA.execute("SELECT * FROM authors WHERE authorName LIKE '% " + lstN + "' AND isSame(authorName,'" + name + "')")
-    curA.execute("SELECT * FROM authors WHERE authorName LIKE '% " + lstN + "' AND (authorName LIKE '" + fstN + "%' OR substr(authorName,1,2) == '" + fstLetter + " ')" + "AND compareMiddle(authorName, '" + name + "')")
-    print("SELECT * FROM authors WHERE authorName LIKE '% " + lstN + "' AND (authorName LIKE '" + fstN + "%' OR substr(authorName,1,2) == '" + fstLetter + " ')" + "AND compareMiddle(authorName, '" + name + "')") 
-   
+    if expand:
+        curA.execute("SELECT * FROM authors WHERE authorName LIKE '% " + lstN + "' AND (authorName LIKE '" + fstN + "%' OR substr(authorName,1,2) == '" + fstLetter + " ')" + "AND compareMiddle(authorName, '" + name + "')")
+        #print("SELECT * FROM authors WHERE authorName LIKE '% " + lstN + "' AND (authorName LIKE '" + fstN + "%' OR substr(authorName,1,2) == '" + fstLetter + " ')" + "AND compareMiddle(authorName, '" + name + "')") 
+    else:
+        curA.execute("SELECT * FROM authors WHERE authorName == '" + name + "'")   
+    
     allAuthor = curA.fetchall()
     print("{} finished getting all the aID".format(datetime.now()))
    
@@ -219,6 +228,7 @@ def getAuthor(name,use_cache=True):
     #print(str(len(memory))) 
    
     return (finalresult,aIDpIDDict)  
+
 
 def getJournal(name):
     dbPAA = sqlite3.connect(db_PAA, check_same_thread = False)
@@ -340,4 +350,4 @@ def contains(name1, name2):
     return True
 
 if __name__ == '__main__':
-    trial = getAuthor('a l hosking')
+    trial = getAuthor('j eliot b moss',False,False)
