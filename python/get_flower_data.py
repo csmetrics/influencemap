@@ -7,6 +7,7 @@ from datetime import datetime
 from mkAff import getAuthor
 from entity_type import *
 from flower_helpers import *
+from influence_weight import get_weight
 
 # Config setup
 with open('config.json') as config_data:
@@ -15,42 +16,7 @@ with open('config.json') as config_data:
     DB_PATH = os.path.join(DB_DIR, config['sqlite3']['name'])
     OUT_DIR = config['data']['out']
 
-def auth_weight(row):
-    res = list()
-    if row['citing']:
-        val = (1 / row['citing_auth_count']) * (1 / row['citing_rc'])
-        for auth_id in row['citing_auth_id']:
-            if not auth_id == '':
-                res.append((auth_id, val))
-    else:
-        val = (1 / row['citing_auth_count']) * (1 / row['citing_rc'])
-        for i, auth_id in row['cited_auth_id'].iteritems():
-            if not auth_id == '':
-                res.append((auth_id, val))
-    return res
-
-def get_weight(e_map, row):
-    if row['citing']:
-        e_type = e_map.codomain
-        e_func = lambda s : 'citing_' + s
-    else:
-        e_type = e_map.domain
-        e_func = lambda s : 'cited_' + s
-
-    res = list()
-    if e_type == Entity.AUTH:
-        auth_res = auth_weight(row)
-        res += map(lambda r : r + (e_type.keyn[0], ), auth_res)
-    else:
-        for key in e_type.keyn:
-            e_id = row[e_func(key)]
-            if not e_id == '':
-                res.append((e_id, 1 / row['citing_rc'], key))
-    return res
-    
-
-def generate_scores(conn, e_map, data_df, inc_self=False):
-
+def generate_scores(conn, e_map, data_df, inc_self=False, calc_weight=get_weight):
     print('{} start score generation\n---'.format(datetime.now()))
     df = pd.concat(data_df.values())
     if not inc_self:
@@ -70,7 +36,7 @@ def generate_scores(conn, e_map, data_df, inc_self=False):
 
     for i, row in df.iterrows():
             # iterate over different table types
-            for wline in get_weight(e_map, row):
+            for wline in calc_weight(e_map, row):
                 e_id, weight, tkey = wline
                 id_query = 'SELECT * FROM {} WHERE {} = ? LIMIT 1'.format(e_type.edict[tkey], tkey)
 

@@ -125,7 +125,7 @@ def getPaperName(pID):
     else: return ('','')
 
 
-def getAuthor(name,expand=False,use_cache=True):
+def getAuthor(name,expand=False,use_cache=False):
     if use_cache:   
        with open(saved_dir,'r') as savedFile:
            data_exist_author = json.load(savedFile)

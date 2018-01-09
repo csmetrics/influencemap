@@ -5,10 +5,11 @@
         "batch size": 999
     }, 
     "data":{
-        "out":"/localdata/u5642715/influenceMapOut/out"
+        "out":"/home/u5642715/out"
     },
     "cache":{
-        "directory":""
+        "directory":"/localdata/common/cache",
+        "time-out":0
     },
     "flower":{
         "leaves":25
