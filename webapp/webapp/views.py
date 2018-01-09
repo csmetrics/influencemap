@@ -1,5 +1,7 @@
 import os, sys
 from django.shortcuts import render
+from django.http import JsonResponse
+from django.views.decorators.csrf import csrf_exempt
 from datetime import datetime
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 PYTHON_DIR = os.path.join(os.path.dirname(BASE_DIR), 'python')
@@ -53,36 +55,35 @@ def loadInstitutionList():
 selfcite = False
 optionlist = []
 
+@csrf_exempt
 def search(request):
     global keyword, optionlist, option, selfcite
-    print("search!!", request.GET)
-    if "self-cite" in request.GET:
-        selfcite = True
-        print("SELF_CITE")
-    if "search" in request.GET:
-        global id_pid_dict
-        keyword = request.GET.get("keyword")
-        option = [x for x in optionlist if x.get('id', '') == request.GET.get("option")][0]
-        if keyword != "":
-            print("{}\t{}\t{}".format(datetime.now(), __file__ , entity_of_interest[option['id']].__name__))
-            entities, id_pid_dict =  entity_of_interest[option['id']](keyword) #(authors_testing, dict()) # getAuthor(keyword)
+    global id_pid_dict
 
-        # path to the influence flowers
-        inflin = os.path.join(BASE_DIR, "output/flower1.png")
-        inflby = os.path.join(BASE_DIR, "output/flower2.png")
-        if False: #option.get('id') == 'conf':
-            print("{}\t{}\t{}".format(datetime.now(), __file__ , getFlower.__name__))
-            inflflower = getFlower(id_2_paper_id=id_pid_dict, name=keyword, ent_type='conference', self_cite=selfcite)
-        else:
-            inflflower = []#[inflin, inflby]
+    print("search!!", request.GET)
+    inflflower = None
+    entities = []
+
+    selfcite = request.GET.get("selfcite")
+    keyword = request.GET.get("keyword")
+    option = [x for x in optionlist if x.get('id', '') == request.GET.get("option")][0]
+    print(keyword)
+    if keyword != "":
+        print("{}\t{}\t{}".format(datetime.now(), __file__ , entity_of_interest[option['id']].__name__))
+        entities, id_pid_dict =  entity_of_interest[option['id']](keyword) #(authors_testing, dict()) # getAuthor(keyword)
+
+    # path to the influence flowers
+    inflin = os.path.join(BASE_DIR, "output/flower1.png")
+    inflby = os.path.join(BASE_DIR, "output/flower2.png")
+    if False: #option.get('id') == 'conf':
+        print("{}\t{}\t{}".format(datetime.now(), __file__ , getFlower.__name__))
+        inflflower = getFlower(id_2_paper_id=id_pid_dict, name=keyword, ent_type='conference', self_cite=selfcite)
+    else:
+        inflflower = []#[inflin, inflby]
 
     data = {
-        "optionlist": optionlist,
-        "selectedKeyword": keyword,
-        "selectedOption": option,
         "inflflower": inflflower,
         "authors": entities,
-        "selfcite": selfcite
     }
     return JsonResponse(data, safe=False)
 
@@ -116,15 +117,10 @@ def main(request):
 
     keyword = ""
     option = optionlist[0] # default selection
-    inflflower = None
-    entities = []
 
     # render page with data
     return render(request, "main.html", {
         "optionlist": optionlist,
         "selectedKeyword": keyword,
         "selectedOption": option,
-        "inflflower": inflflower,
-        "authors": entities,
-        "selfcite": selfcite
     })

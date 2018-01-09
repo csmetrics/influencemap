@@ -10,9 +10,15 @@
     <link rel="stylesheet" href="{% static 'css/auto-complete.css' %}" />
     <link rel="stylesheet" href="{% static 'css/webapp.css' %}" />
 
-    <script src="https://code.jquery.com/jquery-3.2.1.slim.min.js" integrity="sha384-KJ3o2DKtIkvYIK3UENzmM7KCkRr/rE9/Qpg6aAZGJwFDMVNA/GpGFF93hXpG5KkN" crossorigin="anonymous"></script>
+    <script src="https://code.jquery.com/jquery-3.2.1.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.12.3/umd/popper.min.js" integrity="sha384-vFJXuSJphROIrBnz7yo7oB41mKfc8JzQZiCq4NCceLEaO4IHwicKwpJf9c9IpFgh" crossorigin="anonymous"></script>
     <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0-beta.2/js/bootstrap.min.js" integrity="sha384-alpBpkh1PFOepccYVYDB4do5UnbKysX5WZXm3XxPqe5iKTfUKjNkCk9SaVuEZflJ" crossorigin="anonymous"></script>
+
+    <!-- datatable -->
+    <link rel="stylesheet" type="text/css" href="https://cdn.datatables.net/1.10.15/css/jquery.dataTables.min.css"/>
+    <script type="text/javascript" src="https://cdn.datatables.net/1.10.15/js/jquery.dataTables.min.js"></script>
+    <script type="text/javascript" src="https://cdn.datatables.net/select/1.2.4/js/dataTables.select.min.js"></script>
+
   </head>
   <body>
     <div class="wrapper" align="center">
@@ -24,34 +30,32 @@
       </div>
       <div class="row">
         <div class="col-md-12">
-          <form action="/search" method="get">
-            <div class="search-bar">
-              <div class="input-group input-group-sm" style="width: 300px">
-                <input id="name-search-bar" type="text" name="keyword" class="form-control" {% if selectedKeyword %} value="{{ selectedKeyword }}" {% endif %}>
-                <span class="input-group-btn">
-                  <button type="submit" name="search" value="search" class="btn btn-flat"><i class="fa fa-search"></i></button>
-                </span>
+          <div class="search-bar">
+            <div class="input-group input-group-sm" style="width: 300px">
+              <input id="name-search-bar" type="text" name="keyword" class="form-control" {% if selectedKeyword %} value="{{ selectedKeyword }}" {% endif %}>
+              <span class="input-group-btn">
+                <button id="search-btn" type="submit" name="search" value="search" class="btn btn-flat"><i class="fa fa-search"></i></button>
+              </span>
+            </div>
+            <div class="form-group search-option">
+              {% for opt in optionlist %}
+              <div class="radio">
+                <label>
+                  <input onclick="loadAutoComplete(this)" class="entity-option" type="radio" name="option" id="{{opt.id}}" value="{{opt.id}}" {% if opt.id == selectedOption.id %} checked {% endif %}>
+                  {{opt.name}}
+                </label>
               </div>
-              <div class="form-group search-option">
-                {% for opt in optionlist %}
-                <div class="radio">
-                  <label>
-                    <input onclick="loadAutoComplete(this)" class="entity-option" type="radio" name="option" id="{{opt.id}}" value="{{opt.id}}" {% if opt.id == selectedOption.id %} checked {% endif %}>
-                    {{opt.name}}
-                  </label>
-                </div>
-                {% endfor %}
-              </div>
-              <div class="form-group search-option">
-                <div class="checkbok">
-                  <label>
-                    <input class="self-cite" type="checkbox" name="self-cite" id="self-cite" {% if selfcite %} checked {% endif %}>
-                    include self citations
-                  </label>
-                </div>
+              {% endfor %}
+            </div>
+            <div class="form-group search-option">
+              <div class="checkbok">
+                <label>
+                  <input class="self-cite" type="checkbox" name="self-cite" id="self-cite" {% if selfcite %} checked {% endif %}>
+                  include self citations
+                </label>
               </div>
             </div>
-          </form>
+          </div>
         </div>
       </div>
       {% if inflflower %}
@@ -88,47 +92,87 @@
           <img class="fit-wrapper" src="{% static inflflower.5 %}"/>
         </div>
       </div>
-
       {% endif %}
-      {% if authors %}
-      <div class="container">
-        <form action="/submit" method="get">>
-          <table class="table table-condensed table-bordered table-hover" style="table-layout: fixed; width: 100%">
-           <thead>
-              <th>Name</th>
-              <th>Number of papers</th>
-              <th>Affiliations</th>
-              <th>Fields</th>
-              <th>Papers</th>
-              <th>Include</th>
-            </thead>
-          {% for auth in authors %}
-            <tr>
-              <td>{{auth.name}}</td>
-              <td>{{auth.numpaper}}</td>
-              <td style="word-wrap: break-word">{{auth.affiliation}}</td>
-              <td>
-                <ol style="margin:0">
-                {% for i in auth.field %}
-                  <li>{{i}}</li>
-                {% endfor %}
-                </ol>
-              </td>
-              <td style="word-wrap: break-word">
-                {{auth.recentPaper}}, {{auth.publishedDate}}
-              </td>
-              <td><input type="checkbox" name="authorlist" value={{auth.authorID}}></td>
-            </tr>
-          {% endfor %}
+      <div id="table-container" class="container invisible">
+        <table id="searchtable" class="row-border hover order-column" cellspacing="0" width="100%">
         </table>
         <input type="submit" name="submit">
-    </div></form>
-    {% endif %}
+      </div>
     </div>
   </body>
 </html>
 <script src="{% static 'js/auto-complete.min.js' %}"></script>
 <script>
+var tableContainer = document.getElementById("table-container");
+
+var inputBar = document.getElementById("name-search-bar");
+var selfCiteCheckbox = document.getElementById("self-cite");
+var searchButton = document.getElementById("search-btn");
+
+// Search Button event handler
+searchButton.addEventListener('click', function(){
+  $.ajax({
+    type: "GET",
+    url: "/search",
+    data: { // input to the views.py - search()
+      keyword: inputBar.value,
+      option: $(".entity-option:checked").val(),
+      selfcite: selfCiteCheckbox.checked
+    },
+    success: function (result) { // return data if success
+      console.log("searchButton success");
+      // console.log(result["authors"]);
+      updateTable(result["authors"]);
+      tableContainer.classList.remove("invisible");
+    },
+    error: function (result) {
+      console.log("searchButton error");
+    }
+  });
+});
+
+// Id selection table
+var searchTable = $('#searchtable').DataTable({
+  "pageLength": 10, // default page
+  "lengthMenu": [ 10, 20, 50, 100 ], // page options
+  "lengthChange": true,
+  "columns": [
+    { title: "Name", className: "index dt-body-center" },
+    { title: "Number of papers", className: "institution dt-body-right" },
+    { title: "Affiliations", className: "dt-body-center" },
+    { title: "Fields", className: "dt-body-left" },
+    { title: "Papers", className: "dt-body-left" },
+  ],
+  "select": {
+    "style": "multi"
+  },
+  "language": {
+    "emptyTable": "no search result"
+  },
+  "fixedColumns": true,
+  "paging": true,
+  "pagingType": "simple_numbers",
+  "ordering": true,
+  "order": [[ 1, "desc" ]],
+  "info": true,
+  "autoWidth": false,
+});
+
+// update searchTable
+function updateTable(data){
+  console.log("updateTable");
+  searchTable.clear();
+  for(var i in data) {
+    var newRow = {};
+    newRow[0] = data[i]["name"];
+    newRow[1] = data[i]["numpaper"];
+    newRow[2] = data[i]["affiliation"];
+    newRow[3] = data[i]["field"];
+    newRow[4] = data[i]["recentPaper"];
+    searchTable.row.add(newRow);
+  }
+  searchTable.draw();
+}
 
 var lists = Object()
   {% for opt in optionlist %}

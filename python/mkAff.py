@@ -15,7 +15,9 @@ db_Jour = '/localdata/u6363358/data/Journals.db'
 db_conf = '/localdata/u6363358/data/Conference.db'
 db_aff = '/localdata/u6363358/data/Affiliations.db'
 
-saved_dir = '/localdata/u6363358/data/savedFile.json'
+temp_saved_auInfo = '/localdata/common/temp_saved_auInfo.json'
+temp_saved_aIDpID = '/localdata/common/temp_saved_aIDpID.json'
+temp_saved_aID = '/localdata/common/temp_saved_aID.json'
 
 def removeCon(lst):
    if lst[-2] == ",":
@@ -64,7 +66,6 @@ def compareMiddle(m1,m2):
    
 def mostCommon(lst):
     return max(set(lst),key=lst.count)
-
 
 def getField(pID):
     dbK = sqlite3.connect(db_key, check_same_thread = False)
@@ -124,7 +125,6 @@ def getPaperName(pID):
         return (title[0][0], title[0][1])
     else: return ('','')
 
-
 def getAuthor(name,expand=False,use_cache=False):
     if use_cache:   
        with open(saved_dir,'r') as savedFile:
@@ -151,22 +151,28 @@ def getAuthor(name,expand=False,use_cache=False):
     #middle = name.split(' ')[1:-1]
     print("{} getting all the aID".format(datetime.now()))
     #curA.execute("SELECT * FROM authors WHERE authorName LIKE '% " + lstN + "' AND isSame(authorName,'" + name + "')")
-    if expand:
-        curA.execute("SELECT * FROM authors WHERE authorName LIKE '% " + lstN + "' AND (authorName LIKE '" + fstN + "%' OR substr(authorName,1,2) == '" + fstLetter + " ')" + "AND compareMiddle(authorName, '" + name + "')")
-        #print("SELECT * FROM authors WHERE authorName LIKE '% " + lstN + "' AND (authorName LIKE '" + fstN + "%' OR substr(authorName,1,2) == '" + fstLetter + " ')" + "AND compareMiddle(authorName, '" + name + "')") 
+
+    if not expand:
+        curA.execute("SELECT * FROM authors WHERE authorName LIKE '% " + lstN + "' AND (authorName LIKE '" + fstN + "%' OR substr(authorName, 1, 2) == '" + fstLetter + " ') AND compareMiddle(authorName, '" + name + "')")
+        allAuthor = curA.fetchall()
+        authorNotSameName = [x for x in allAuthor if x[1] != name]
+   
+        allAuthor = [x for x in allAuthor if x[1] == name]
+
+        with open(temp_saved_aID,'w') as saved_aID:
+             json.dump(authorNotSameName,saved_aID,indent = 2)
     else:
-        curA.execute("SELECT * FROM authors WHERE authorName == '" + name + "'")   
-    
-    allAuthor = curA.fetchall()
+        with open(temp_saved_aID) as saved_aID:
+             allAuthor = json.load(saved_aID)
     print("{} finished getting all the aID".format(datetime.now()))
    
     author = {} #authorID is the key and authorName is the value
-    #print("{} matching the right name".format(datetime.now()))
+    
     for a in allAuthor:
          author[a[0]] = a[1]
-    #print("{} finished matching".format(datetime.now()))
     
     aID = list(author.keys())
+   
     result = []
     print("{} getting all the (authorID, paperID, affiliationName)".format(datetime.now()))
     curP.execute(removeCon("SELECT authorID, paperID, affiliationNameOriginal FROM weightedPaperAuthorAffiliations WHERE authorID IN {}".format(tuple(aID))))
@@ -222,11 +228,29 @@ def getAuthor(name,expand=False,use_cache=False):
     dbA.commit()  
     dbPAA.close()
     dbA.close()
-   
-    for dic in finalresult:
-        print(dic)
-    #print(str(len(memory))) 
-   
+    
+    if not expand:
+         with open(temp_saved_auInfo, 'w' ) as saved_auInfo:
+              json.dump(finalresult, saved_auInfo, indent = 2)
+         with open(temp_saved_aIDpID, 'w') as saved_aIDpID:
+              json.dump(aIDpIDDict, saved_aIDpID, indent = 2)
+    else:
+         with open(temp_saved_auInfo) as saved_auInfo:
+              data_exist_auInfo = json.load(saved_auInfo)
+         for dic in finalresult:
+              data_exist_auInfo.append(dic)
+         with open(temp_saved_aIDpID) as saved_aIDpID:
+              data_exist_aIDpID = json.load(saved_aIDpID)
+         for key in aIDpIDDict:
+              data_exist_aIDpID[key] = aIDpIDDict[key]
+         finalresult = data_exist_auInfo
+         aIDpIDDict = data_exist_aIDpID
+    
+    for dic in finalresult: #finalresult is a list of dict
+         print(dic)
+    print(len(finalresult))
+    print(len(aIDpIDDict))  
+    
     return (finalresult,aIDpIDDict)  
 
 
@@ -350,4 +374,4 @@ def contains(name1, name2):
     return True
 
 if __name__ == '__main__':
-    trial = getAuthor('j eliot b moss',False,False)
+    trial = getAuthor('stephen m blackburn',True,False)
