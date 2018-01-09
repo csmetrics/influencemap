@@ -16,7 +16,8 @@ with open('config.json') as config_data:
 
     OUT_DIR = set_path(config['data']['out'])
 
-    CACHE_DIR = set_path(config['cache']['directory'])
+    CACHE_DIR = set_path(config['cache']['directory']['main'])
+    DATA_CACHE = set_path(os.path.join(CACHE_DIR, config['cache']['directory']['data']))
     PAPER_THRESHOLD = config['cache']['paper threshold']
 
     NUM_LEAVES = config['flower']['leaves']

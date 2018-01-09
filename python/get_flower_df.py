@@ -1,3 +1,4 @@
+import pickle
 import sqlite3
 import pandas as pd
 import numpy as np
@@ -88,17 +89,25 @@ def gen_search_df(conn, paper_map):
             threshold_papers += paper_ids
         else:
             # CHECK CACHE
+            cache_path = os.path.join(DATA_CACHE, entity_id)
+            try:
+                res_dict[entity_id] = pd.read_pickle(cache_path)
+                print('\n---\n{} found cache data for: {}\n---'.format(datetime.now(), entity_id))
+            except FileNotFoundError:
+                # IF MISS
+                print('\n---\n{} start finding paper references for: {}\n---'.format(datetime.now(), entity_id))
+                e_df = gen_reference_df(conn, paper_ids)
+                print('{} finish finding paper references for: {}\n---'.format(datetime.now(), entity_id))
 
-            # IF MISS
-            print('\n---\n{} start finding paper references for: {}\n---'.format(datetime.now(), entity_id))
-            e_df = gen_reference_df(conn, paper_ids)
-            print('{} finish finding paper references for: {}\n---'.format(datetime.now(), entity_id))
+                print('{} start finding paper info for: {}\n---'.format(datetime.now(), entity_id))
+                e_df = gen_info_df(conn, e_df)
+                print('{} finish finding paper info for: {}\n---'.format(datetime.now(), entity_id))
 
-            print('{} start finding paper info for: {}\n---'.format(datetime.now(), entity_id))
-            e_df = gen_info_df(conn, e_df)
-            print('{} finish finding paper info for: {}\n---'.format(datetime.now(), entity_id))
+                res_dict[entity_id] = e_df
 
-            res_dict[entity_id] = e_df
+                # Cache pickle file
+                e_df.to_pickle(cache_path)
+                os.chmod(cache_path, 0o777)
 
     # deal with threshold papers
     print('\n---\n{} start finding paper references for: threshold\n---'.format(datetime.now()))
