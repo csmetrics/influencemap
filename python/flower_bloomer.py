@@ -20,12 +20,12 @@ from draw_egonet import draw_halfcircle
 from config import *
 
 def getEntityMap(ego, outer):
-    e = {'author': Entity.AUTH, 'conference': Entity.CONF, 'institution': Entity.AFFI, 'journal': Entity.JOURN}
+    e = {'author': Entity.AUTH, 'conf': Entity.CONF, 'institution': Entity.AFFI, 'journal': Entity.JOURN}
     return Entity_map(e[ego], e[outer])
 
 def drawFlower(conn, ent_type, ent_type2, data_df, dir_out, name):   
     # Generate associated author scores for citing and cited
-    influence_dict = generate_scores(conn, Entity_map(ent_type, ent_type2), data_df)
+    influence_dict = generate_scores(conn, getEntityMap(ent_type, ent_type2), data_df)
     citing_records = influence_dict['influenced']
     cited_records = influence_dict['influencing']
 
