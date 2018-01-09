@@ -1,4 +1,3 @@
-import json
 import sqlite3
 import os
 import sys
@@ -10,11 +9,7 @@ from flower_helpers import *
 from influence_weight import get_weight
 
 # Config setup
-with open('config.json') as config_data:
-    config = json.load(config_data)
-    DB_DIR = config['sqlite3']['directory']
-    DB_PATH = os.path.join(DB_DIR, config['sqlite3']['name'])
-    OUT_DIR = config['data']['out']
+from config import *
 
 def generate_scores(conn, e_map, data_df, inc_self=False, calc_weight=get_weight):
     print('{} start score generation\n---'.format(datetime.now()))
@@ -38,6 +33,7 @@ def generate_scores(conn, e_map, data_df, inc_self=False, calc_weight=get_weight
             # iterate over different table types
             for wline in calc_weight(e_map, row):
                 e_id, weight, tkey = wline
+
                 id_query = 'SELECT * FROM {} WHERE {} = ? LIMIT 1'.format(e_type.edict[tkey], tkey)
 
                 e_name = try_get(conn, e_id, id_to_name[tkey], id_query, func=id_query_map)
@@ -72,7 +68,7 @@ if __name__ == "__main__":
 
     data_df = gen_search_df(conn, id_2_paper_id)
 
-    influence_dict = generate_scores(conn, Entity_map(Entity.AUTH, Entity.AUTH), data_df, inc_self=True)
+    influence_dict = generate_scores(conn, Entity_map(Entity.AUTH, Entity.CONF), data_df, inc_self=True)
     citing_records = influence_dict['influenced']
     cited_records = influence_dict['influencing']
 

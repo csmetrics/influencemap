@@ -8,7 +8,11 @@
         "out":"/home/u5642715/out"
     },
     "cache":{
-        "directory":"/localdata/common/cache",
+        "directory":{
+            "main":"/localdata/common/cache",
+            "data":"data"
+        },
+        "paper threshold":20,
         "time-out":0
     },
     "flower":{

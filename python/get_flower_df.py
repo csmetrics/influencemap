@@ -1,3 +1,4 @@
+import pickle
 import sqlite3
 import pandas as pd
 import numpy as np
@@ -6,17 +7,12 @@ import os
 from datetime import datetime
 from flower_helpers import is_selfcite
 
+# Config setup
+from config import *
+
 REF_LABELS = ['citing', 'citing_paper', 'citing_rc', 'cited_paper']
 INFO_COLS = ['auth_id', 'auth_count', 'conf_id', 'journ_id', 'affi_id']
 MULT_COLS = [0]
-
-# Config setup
-with open('config.json') as config_data:
-    config = json.load(config_data)
-    BATCH_SIZE = config['sqlite3']['batch size']
-    DB_DIR = config['sqlite3']['directory']
-    DB_PATH = os.path.join(DB_DIR, config['sqlite3']['name'])
-    CACHE_DIR = config['cache']['directory']
 
 # Filters the paper_ref database to relevent papers and uses pandas dataframes
 def gen_reference_df(conn, paper_ids):
@@ -86,21 +82,43 @@ def gen_info_df(conn, ref_df):
 # Wraps above functions to produce a dictionary of pandas dataframes for relevent information
 def gen_search_df(conn, paper_map):
     res_dict = dict()
+    threshold_papers = list()
 
     for entity_id, paper_ids in paper_map.items():
-        # CHECK CACHE
+        if len(paper_ids) < PAPER_THRESHOLD:
+            threshold_papers += paper_ids
+        else:
+            # CHECK CACHE
+            cache_path = os.path.join(DATA_CACHE, entity_id)
+            try:
+                res_dict[entity_id] = pd.read_pickle(cache_path)
+                print('\n---\n{} found cache data for: {}\n---'.format(datetime.now(), entity_id))
+            except FileNotFoundError:
+                # IF MISS
+                print('\n---\n{} start finding paper references for: {}\n---'.format(datetime.now(), entity_id))
+                e_df = gen_reference_df(conn, paper_ids)
+                print('{} finish finding paper references for: {}\n---'.format(datetime.now(), entity_id))
 
-        # IF MISS
-        print('\n---\n{} start finding paper references for: {}\n---'.format(datetime.now(), entity_id))
-        e_df = gen_reference_df(conn, paper_ids)
-        print('{} finish finding paper references for: {}\n---'.format(datetime.now(), entity_id))
+                print('{} start finding paper info for: {}\n---'.format(datetime.now(), entity_id))
+                e_df = gen_info_df(conn, e_df)
+                print('{} finish finding paper info for: {}\n---'.format(datetime.now(), entity_id))
 
-        print('{} start finding paper info for: {}\n---'.format(datetime.now(), entity_id))
-        e_df = gen_info_df(conn, e_df)
-        print('{} finish finding paper info for: {}\n---'.format(datetime.now(), entity_id))
+                res_dict[entity_id] = e_df
 
+                # Cache pickle file
+                e_df.to_pickle(cache_path)
+                os.chmod(cache_path, 0o777)
 
-        res_dict[entity_id] = e_df
+    # deal with threshold papers
+    print('\n---\n{} start finding paper references for: threshold\n---'.format(datetime.now()))
+    e_df = gen_reference_df(conn, threshold_papers)
+    print('{} finish finding paper references for: threshold\n---'.format(datetime.now()))
+
+    print('{} start finding paper info for: threshold\n---'.format(datetime.now()))
+    e_df = gen_info_df(conn, e_df)
+    print('{} finish finding paper info for: threshold\n---'.format(datetime.now(), entity_id))
+
+    res_dict[None] = e_df
 
     return res_dict
 

@@ -1,5 +1,4 @@
 # standard python imports
-import json
 import sqlite3
 import os, sys
 from datetime import datetime
@@ -18,20 +17,15 @@ from entity_type import Entity, Entity_map
 from draw_egonet import draw_halfcircle
 
 # Config setup
-with open('config.json') as config_data:
-    config = json.load(config_data)
-    DB_DIR = config['sqlite3']['directory']
-    DB_PATH = os.path.join(DB_DIR, config['sqlite3']['name'])
-    OUT_DIR = config['data']['out']
-    NUM_LEAVES = config['flower']['leaves']
+from config import *
 
 def getEntityMap(ego, outer):
-    e = {'author': Entity.AUTH, 'conference': Entity.CONF, 'institution': Entity.AFFI, 'journal': Entity.JOURN}
+    e = {'author': Entity.AUTH, 'conf': Entity.CONF, 'institution': Entity.AFFI, 'journal': Entity.JOURN}
     return Entity_map(e[ego], e[outer])
 
 def drawFlower(conn, ent_type, ent_type2, data_df, dir_out, name):   
     # Generate associated author scores for citing and cited
-    influence_dict = generate_scores(conn, Entity_map(ent_type, ent_type2), data_df)
+    influence_dict = generate_scores(conn, getEntityMap(ent_type, ent_type2), data_df)
     citing_records = influence_dict['influenced']
     cited_records = influence_dict['influencing']
 

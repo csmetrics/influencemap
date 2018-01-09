@@ -7,7 +7,7 @@ BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 PYTHON_DIR = os.path.join(os.path.dirname(BASE_DIR), 'python')
 sys.path.insert(0, PYTHON_DIR)
 
-#from flower_bloomer import getFlower
+from flower_bloomer import getFlower
 from mkAff import getAuthor, getJournal, getConf, getAff
 
 entity_of_interest = {'author': getAuthor, 'conference': getConf, 'institution': getAff, 'journal': getJournal}
@@ -58,56 +58,48 @@ optionlist = []
 @csrf_exempt
 def search(request):
     global keyword, optionlist, option, selfcite
+    global id_pid_dict
+
     print("search!!", request.GET)
     inflflower = None
     entities = []
 
-    if "selfcite" in request.GET:
-        selfcite = True
-        print("SELF_CITE")
-    if "search" in request.GET:
-        global id_pid_dict
-        keyword = request.GET.get("keyword")
-        option = [x for x in optionlist if x.get('id', '') == request.GET.get("option")][0]
-        if keyword != "":
-            print("{}\t{}\t{}".format(datetime.now(), __file__ , entity_of_interest[option['id']].__name__))
-            entities, id_pid_dict =  entity_of_interest[option['id']](keyword) #(authors_testing, dict()) # getAuthor(keyword)
+    selfcite = True if request.GET.get("selfcite") == "true" else False
+    keyword = request.GET.get("keyword")
+    option = [x for x in optionlist if x.get('id', '') == request.GET.get("option")][0]
+    print(keyword)
+    if keyword != "":
+        print("{}\t{}\t{}".format(datetime.now(), __file__ , entity_of_interest[option['id']].__name__))
+        entities, id_pid_dict =  entity_of_interest[option['id']](keyword) #(authors_testing, dict()) # getAuthor(keyword)
 
-        # path to the influence flowers
-        inflin = os.path.join(BASE_DIR, "output/flower1.png")
-        inflby = os.path.join(BASE_DIR, "output/flower2.png")
-        if False: #option.get('id') == 'conf':
-            print("{}\t{}\t{}".format(datetime.now(), __file__ , getFlower.__name__))
-            inflflower = getFlower(id_2_paper_id=id_pid_dict, name=keyword, ent_type='conference', self_cite=selfcite)
-        else:
-            inflflower = []#[inflin, inflby]
+    # path to the influence flowers
+    inflin = os.path.join(BASE_DIR, "output/flower1.png")
+    inflby = os.path.join(BASE_DIR, "output/flower2.png")
+    if False: #option.get('id') == 'conf':
+        print("{}\t{}\t{}".format(datetime.now(), __file__ , getFlower.__name__))
+        inflflower = getFlower(id_2_paper_id=id_pid_dict, name=keyword, ent_type='conference')
+    else:
+        inflflower = []#[inflin, inflby]
 
     data = {
-        "optionlist": optionlist,
-        "selectedKeyword": keyword,
-        "selectedOption": option,
         "inflflower": inflflower,
         "authors": entities,
-        "selfcite": selfcite
     }
     return JsonResponse(data, safe=False)
 
 def submit(request):
-    selected_ids = request.GET.getlist("authorlist")
+    global keyword, option, selfcite
+    selected_ids = request.GET.get("authorlist").split(",")
+    print("selected_ids", selected_ids)
     id_2_paper_id = dict()
     for aid in selected_ids:
         id_2_paper_id[aid] = id_pid_dict[aid]
     print("{}\t{}\t{}".format(datetime.now(), __file__ , getFlower.__name__))
     print("selfcite :" + str(selfcite))
-    inflflower = getFlower(id_2_paper_id=id_2_paper_id, name=keyword, ent_type=option['id'], self_cite=selfcite)
+    inflflower = getFlower(id_2_paper_id=id_2_paper_id, name=keyword, ent_type=option['id'])
 
     data = {
-        "optionlist": optionlist,
-        "selectedKeyword": keyword,
-        "selectedOption": option,
         "inflflower": inflflower,
-        "authors": entities,
-        "selfcite": selfcite
     }
     return JsonResponse(data, safe=False)
 
