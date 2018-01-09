@@ -1,13 +1,18 @@
 import json
 import os
 
+CONFIG_NAME = 'config.json'
+CONFIG_PATH = os.path.join(os.path.dirname(__file__), CONFIG_NAME)
+
 def set_path(path):
     if not os.path.exists(path):
           os.makedirs(path)
     return path
 
+
+
 # Config setup
-with open('config.json') as config_data:
+with open(CONFIG_PATH) as config_data:
     config = json.load(config_data)
 
     BATCH_SIZE = config['sqlite3']['batch size']
