@@ -1,4 +1,5 @@
 # standard python imports
+import json
 import sqlite3
 import os, sys
 from datetime import datetime
@@ -13,9 +14,16 @@ plt.switch_backend('agg')
 # local module imports
 from get_flower_data import *
 from get_flower_df import gen_search_df
-from export_citations import filter_references
 from entity_type import Entity, Entity_map
 from draw_egonet import draw_halfcircle
+
+# Config setup
+with open('config.json') as config_data:
+    config = json.load(config_data)
+    DB_DIR = config['sqlite3']['directory']
+    DB_PATH = os.path.join(DB_DIR, config['sqlite3']['name'])
+    OUT_DIR = config['data']['out']
+    NUM_LEAVES = config['flower']['leaves']
 
 def getEntityMap(ego, outer):
     e = {'author': Entity.AUTH, 'conf': Entity.CONF, 'institution': Entity.AFFI}
@@ -33,9 +41,8 @@ def drawFlower(conn, ent_type, ent_type2, data_df, dir_out, name):
           os.makedirs(dir)
 
     # get the top x influencersdrawFlower(conn, Entity.AUTH, citing_papers, cited_papers, my_ids, filter_dict, dir_out)
-    n = 25
-    top_entities_influenced_by_poi = [(k, citing_records[k]) for k in sorted(citing_records, key=citing_records.get, reverse = True)][:n]
-    top_entities_that_influenced_poi = [(k, cited_records[k]) for k in sorted(cited_records, key=cited_records.get, reverse = True)][:n]
+    top_entities_influenced_by_poi = [(k, citing_records[k]) for k in sorted(citing_records, key=citing_records.get, reverse = True)][:NUM_LEAVES]
+    top_entities_that_influenced_poi = [(k, cited_records[k]) for k in sorted(cited_records, key=cited_records.get, reverse = True)][:NUM_LEAVES]
     
 
     # build a graph structure for the top data
@@ -58,11 +65,7 @@ def drawFlower(conn, ent_type, ent_type2, data_df, dir_out, name):
 
 
 def getFlower(id_2_paper_id, name, ent_type):
-    dir_out = '/localdata/u5798145/influencemap/out'
-
-    db_dir = "/localdata/u5642715/influenceMapOut"
-    db_path = os.path.join(db_dir, 'paper_info2.db')
-    conn = sqlite3.connect(db_path)
+    conn = sqlite3.connect(DB_PATH)
 
     # get paper ids associated with input name
     print("\n\nid_to_paper_id\n\n\n\n\n\n{}".format(id_2_paper_id))
@@ -71,12 +74,11 @@ def getFlower(id_2_paper_id, name, ent_type):
     data_df = gen_search_df(conn, id_2_paper_id)
 
     # Generate a self filter dictionary
-    entity_to_author = drawFlower(conn, ent_type,  "author" , data_df, dir_out, name)
-    entity_to_conference = drawFlower(conn, ent_type, "conf", data_df, dir_out, name)
-    entity_to_affiliation = drawFlower(conn, ent_type, "institution" , data_df, dir_out, name)
+    entity_to_author = drawFlower(conn, ent_type,  "author" , data_df, OUT_DIR, name)
+    entity_to_conference = drawFlower(conn, ent_type, "conf", data_df, OUT_DIR, name)
+    entity_to_affiliation = drawFlower(conn, ent_type, "institution" , data_df, OUT_DIR, name)
     conn.close()
     file_names = []
     for ls in [entity_to_author, entity_to_conference, entity_to_affiliation]:
         file_names.extend(ls)
     return file_names
-
