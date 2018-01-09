@@ -19,5 +19,7 @@ from . import views
 
 urlpatterns = [
     url(r'^$', views.main),
+    url(r'^search', views.search),
+    url(r'^submit', views.submit),
     url(r'^admin/', admin.site.urls),
 ]

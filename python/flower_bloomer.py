@@ -26,7 +26,7 @@ with open('config.json') as config_data:
     NUM_LEAVES = config['flower']['leaves']
 
 def getEntityMap(ego, outer):
-    e = {'author': Entity.AUTH, 'conf': Entity.CONF, 'institution': Entity.AFFI}
+    e = {'author': Entity.AUTH, 'conference': Entity.CONF, 'institution': Entity.AFFI, 'journal': Entity.JOURN}
     return Entity_map(e[ego], e[outer])
 
 def drawFlower(conn, ent_type, ent_type2, data_df, dir_out, name):   
@@ -79,6 +79,7 @@ def getFlower(id_2_paper_id, name, ent_type):
     entity_to_author = drawFlower(conn, ent_type,  "author" , data_df, OUT_DIR, name)
     entity_to_conference = drawFlower(conn, ent_type, "conf", data_df, OUT_DIR, name)
     entity_to_affiliation = drawFlower(conn, ent_type, "institution" , data_df, OUT_DIR, name)
+
     conn.close()
     file_names = []
     for ls in [entity_to_author, entity_to_conference, entity_to_affiliation]:
