@@ -7,7 +7,7 @@ BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 PYTHON_DIR = os.path.join(os.path.dirname(BASE_DIR), 'python')
 sys.path.insert(0, PYTHON_DIR)
 
-#from flower_bloomer import getFlower
+from flower_bloomer import getFlower
 from mkAff import getAuthor, getJournal, getConf, getAff
 
 entity_of_interest = {'author': getAuthor, 'conference': getConf, 'institution': getAff, 'journal': getJournal}
@@ -64,7 +64,7 @@ def search(request):
     inflflower = None
     entities = []
 
-    selfcite = request.GET.get("selfcite")
+    selfcite = True if request.GET.get("selfcite") == "true" else False
     keyword = request.GET.get("keyword")
     option = [x for x in optionlist if x.get('id', '') == request.GET.get("option")][0]
     print(keyword)
@@ -88,7 +88,9 @@ def search(request):
     return JsonResponse(data, safe=False)
 
 def submit(request):
-    selected_ids = request.GET.getlist("authorlist")
+    global keyword, option, selfcite
+    selected_ids = request.GET.get("authorlist").split(",")
+    print("selected_ids", selected_ids)
     id_2_paper_id = dict()
     for aid in selected_ids:
         id_2_paper_id[aid] = id_pid_dict[aid]
@@ -97,12 +99,7 @@ def submit(request):
     inflflower = getFlower(id_2_paper_id=id_2_paper_id, name=keyword, ent_type=option['id'], self_cite=selfcite)
 
     data = {
-        "optionlist": optionlist,
-        "selectedKeyword": keyword,
-        "selectedOption": option,
         "inflflower": inflflower,
-        "authors": entities,
-        "selfcite": selfcite
     }
     return JsonResponse(data, safe=False)
 

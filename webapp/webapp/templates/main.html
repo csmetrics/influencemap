@@ -96,7 +96,7 @@
       <div id="table-container" class="container invisible">
         <table id="searchtable" class="row-border hover order-column" cellspacing="0" width="100%">
         </table>
-        <input type="submit" name="submit">
+        <input id="submit-btn" type="submit" name="submit">
       </div>
     </div>
   </body>
@@ -108,6 +108,7 @@ var tableContainer = document.getElementById("table-container");
 var inputBar = document.getElementById("name-search-bar");
 var selfCiteCheckbox = document.getElementById("self-cite");
 var searchButton = document.getElementById("search-btn");
+var submitButton = document.getElementById("submit-btn");
 
 // Search Button event handler
 searchButton.addEventListener('click', function(){
@@ -142,6 +143,13 @@ var searchTable = $('#searchtable').DataTable({
     { title: "Affiliations", className: "dt-body-center" },
     { title: "Fields", className: "dt-body-left" },
     { title: "Papers", className: "dt-body-left" },
+    { title: "ID"}
+  ],
+  "columnDefs": [
+    {
+      "targets": 5,
+      "visible": false
+    },
   ],
   "select": {
     "style": "multi"
@@ -169,10 +177,35 @@ function updateTable(data){
     newRow[2] = data[i]["affiliation"];
     newRow[3] = data[i]["field"];
     newRow[4] = data[i]["recentPaper"];
+    newRow[5] = data[i]["authorID"];
     searchTable.row.add(newRow);
   }
   searchTable.draw();
 }
+
+// Submit Button event handler
+submitButton.addEventListener('click', function(){
+  var selected_indexes = searchTable.rows({selected:true})[0];
+  var selected_rows = searchTable.rows( selected_indexes ).data().toArray();
+  var selected_ids = [];
+  for (var i in selected_rows) {
+    selected_ids.push(selected_rows[i][5]);
+  }
+  console.log(selected_ids);
+  $.ajax({
+    type: "GET",
+    url: "/submit",
+    data: { // input to the views.py - search()
+      authorlist: selected_ids.join(),
+    },
+    success: function (result) { // return data if success
+      console.log("submitButton success");
+    },
+    error: function (result) {
+      console.log("submitButton error");
+    }
+  });
+});
 
 var lists = Object()
   {% for opt in optionlist %}
