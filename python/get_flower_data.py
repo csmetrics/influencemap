@@ -1,4 +1,3 @@
-import json
 import sqlite3
 import os
 import sys
@@ -10,11 +9,7 @@ from flower_helpers import *
 from influence_weight import get_weight
 
 # Config setup
-with open('config.json') as config_data:
-    config = json.load(config_data)
-    DB_DIR = config['sqlite3']['directory']
-    DB_PATH = os.path.join(DB_DIR, config['sqlite3']['name'])
-    OUT_DIR = config['data']['out']
+from config import *
 
 def generate_scores(conn, e_map, data_df, inc_self=False, calc_weight=get_weight):
     print('{} start score generation\n---'.format(datetime.now()))

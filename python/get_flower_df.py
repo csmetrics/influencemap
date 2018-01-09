@@ -6,17 +6,12 @@ import os
 from datetime import datetime
 from flower_helpers import is_selfcite
 
+# Config setup
+from config import *
+
 REF_LABELS = ['citing', 'citing_paper', 'citing_rc', 'cited_paper']
 INFO_COLS = ['auth_id', 'auth_count', 'conf_id', 'journ_id', 'affi_id']
 MULT_COLS = [0]
-
-# Config setup
-with open('config.json') as config_data:
-    config = json.load(config_data)
-    BATCH_SIZE = config['sqlite3']['batch size']
-    DB_DIR = config['sqlite3']['directory']
-    DB_PATH = os.path.join(DB_DIR, config['sqlite3']['name'])
-    CACHE_DIR = config['cache']['directory']
 
 # Filters the paper_ref database to relevent papers and uses pandas dataframes
 def gen_reference_df(conn, paper_ids):
