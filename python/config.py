@@ -9,8 +9,6 @@ def set_path(path):
           os.makedirs(path)
     return path
 
-
-
 # Config setup
 with open(CONFIG_PATH) as config_data:
     config = json.load(config_data)

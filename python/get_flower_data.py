@@ -33,7 +33,11 @@ def generate_scores(conn, e_map, data_df, inc_self=False, calc_weight=get_weight
             # iterate over different table types
             for wline in calc_weight(e_map, row):
                 e_id, weight, tkey = wline
-                id_query = 'SELECT * FROM {} WHERE {} = ? LIMIT 1'.format(e_type.edict[tkey], tkey)
+
+                if row['citing']
+                    id_query = 'SELECT * FROM {} WHERE {} = ? LIMIT 1'.format(my_type.edict[tkey], tkey)
+                else:
+                    id_query = 'SELECT * FROM {} WHERE {} = ? LIMIT 1'.format(e_type.edict[tkey], tkey)
 
                 e_name = try_get(conn, e_id, id_to_name[tkey], id_query, func=id_query_map)
 
