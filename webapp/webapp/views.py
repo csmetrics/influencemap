@@ -1,5 +1,7 @@
 import os, sys
 from django.shortcuts import render
+from django.http import JsonResponse
+from django.views.decorators.csrf import csrf_exempt
 from datetime import datetime
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 PYTHON_DIR = os.path.join(os.path.dirname(BASE_DIR), 'python')
@@ -53,10 +55,14 @@ def loadInstitutionList():
 selfcite = False
 optionlist = []
 
+@csrf_exempt
 def search(request):
     global keyword, optionlist, option, selfcite
     print("search!!", request.GET)
-    if "self-cite" in request.GET:
+    inflflower = None
+    entities = []
+
+    if "selfcite" in request.GET:
         selfcite = True
         print("SELF_CITE")
     if "search" in request.GET:
@@ -116,15 +122,10 @@ def main(request):
 
     keyword = ""
     option = optionlist[0] # default selection
-    inflflower = None
-    entities = []
 
     # render page with data
     return render(request, "main.html", {
         "optionlist": optionlist,
         "selectedKeyword": keyword,
         "selectedOption": option,
-        "inflflower": inflflower,
-        "authors": entities,
-        "selfcite": selfcite
     })

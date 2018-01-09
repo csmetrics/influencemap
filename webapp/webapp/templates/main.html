@@ -10,7 +10,7 @@
     <link rel="stylesheet" href="{% static 'css/auto-complete.css' %}" />
     <link rel="stylesheet" href="{% static 'css/webapp.css' %}" />
 
-    <script src="https://code.jquery.com/jquery-3.2.1.slim.min.js" integrity="sha384-KJ3o2DKtIkvYIK3UENzmM7KCkRr/rE9/Qpg6aAZGJwFDMVNA/GpGFF93hXpG5KkN" crossorigin="anonymous"></script>
+    <script src="https://code.jquery.com/jquery-3.2.1.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.12.3/umd/popper.min.js" integrity="sha384-vFJXuSJphROIrBnz7yo7oB41mKfc8JzQZiCq4NCceLEaO4IHwicKwpJf9c9IpFgh" crossorigin="anonymous"></script>
     <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0-beta.2/js/bootstrap.min.js" integrity="sha384-alpBpkh1PFOepccYVYDB4do5UnbKysX5WZXm3XxPqe5iKTfUKjNkCk9SaVuEZflJ" crossorigin="anonymous"></script>
   </head>
@@ -24,34 +24,32 @@
       </div>
       <div class="row">
         <div class="col-md-12">
-          <form action="/search" method="get">
-            <div class="search-bar">
-              <div class="input-group input-group-sm" style="width: 300px">
-                <input id="name-search-bar" type="text" name="keyword" class="form-control" {% if selectedKeyword %} value="{{ selectedKeyword }}" {% endif %}>
-                <span class="input-group-btn">
-                  <button type="submit" name="search" value="search" class="btn btn-flat"><i class="fa fa-search"></i></button>
-                </span>
+          <div class="search-bar">
+            <div class="input-group input-group-sm" style="width: 300px">
+              <input id="name-search-bar" type="text" name="keyword" class="form-control" {% if selectedKeyword %} value="{{ selectedKeyword }}" {% endif %}>
+              <span class="input-group-btn">
+                <button id="search-btn" type="submit" name="search" value="search" class="btn btn-flat"><i class="fa fa-search"></i></button>
+              </span>
+            </div>
+            <div class="form-group search-option">
+              {% for opt in optionlist %}
+              <div class="radio">
+                <label>
+                  <input onclick="loadAutoComplete(this)" class="entity-option" type="radio" name="option" id="{{opt.id}}" value="{{opt.id}}" {% if opt.id == selectedOption.id %} checked {% endif %}>
+                  {{opt.name}}
+                </label>
               </div>
-              <div class="form-group search-option">
-                {% for opt in optionlist %}
-                <div class="radio">
-                  <label>
-                    <input onclick="loadAutoComplete(this)" class="entity-option" type="radio" name="option" id="{{opt.id}}" value="{{opt.id}}" {% if opt.id == selectedOption.id %} checked {% endif %}>
-                    {{opt.name}}
-                  </label>
-                </div>
-                {% endfor %}
-              </div>
-              <div class="form-group search-option">
-                <div class="checkbok">
-                  <label>
-                    <input class="self-cite" type="checkbox" name="self-cite" id="self-cite" {% if selfcite %} checked {% endif %}>
-                    include self citations
-                  </label>
-                </div>
+              {% endfor %}
+            </div>
+            <div class="form-group search-option">
+              <div class="checkbok">
+                <label>
+                  <input class="self-cite" type="checkbox" name="self-cite" id="self-cite" {% if selfcite %} checked {% endif %}>
+                  include self citations
+                </label>
               </div>
             </div>
-          </form>
+          </div>
         </div>
       </div>
       {% if inflflower %}
@@ -129,6 +127,28 @@
 </html>
 <script src="{% static 'js/auto-complete.min.js' %}"></script>
 <script>
+var inputBar = document.getElementById("name-search-bar");
+var selfCiteCheckbox = document.getElementById("self-cite");
+var searchButton = document.getElementById("search-btn");
+
+// Search Button event handler
+searchButton.addEventListener('click', function(){
+  $.ajax({
+    type: "GET",
+    url: "/search",
+    data: { // input to the views.py - search()
+      keyword: inputBar.value,
+      option: $(".entity-option:checked").val(),
+      selfcite: selfCiteCheckbox.value
+    },
+    success: function (result) { // return data if success
+      console.log("searchButton success");
+    },
+    error: function (result) {
+      console.log("searchButton error");
+    }
+  });
+});
 
 var lists = Object()
   {% for opt in optionlist %}
