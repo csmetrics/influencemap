@@ -5,7 +5,7 @@ import operator
 import sys
 import re
 import json
-
+from difflib import SequenceMatcher
 
 db_PAA = '/localdata/u5798145/influencemap/paper.db'
 db_Authors = '/localdata/common/authors_test.db'
@@ -57,12 +57,19 @@ def compareMiddle(m1,m2):
    m1 = m1.split(' ')[1:-1]
    m2 = m2.split(' ')[1:-1]
    ms1 = ''
-   ms2 = ''
    for char in m1:
-      ms1 = ms1 + char[0]
-   for char in m2:
-      ms2 = ms2 + char[0]
-   return (ms1 in ms2) or (ms2 in ms1) 
+       ms1 = ms1 + char[0]
+   for word in m2:
+       if len(word) == 1:
+           if word in ms1: return True
+       else:
+           for w in m1:
+               if len(w) == 1:
+                   if word[0] == w: return True
+               else:
+                   if word == w: return True
+   return False 
+                
    
 def mostCommon(lst):
     return max(set(lst),key=lst.count)
@@ -138,6 +145,7 @@ def getAuthor(name,expand=False,use_cache=False):
     dbPAA = sqlite3.connect(db_PAA, check_same_thread = False)
     dbA = sqlite3.connect(db_Authors, check_same_thread = False)
     dbA.create_function("compareMiddle",2,compareMiddle)
+    dbA.create_function("similar",2,similar)
     curP = dbPAA.cursor()
     curA = dbA.cursor()
     name = name.lower()
@@ -153,14 +161,16 @@ def getAuthor(name,expand=False,use_cache=False):
     #curA.execute("SELECT * FROM authors WHERE authorName LIKE '% " + lstN + "' AND isSame(authorName,'" + name + "')")
 
     if not expand:
-        curA.execute("SELECT * FROM authors WHERE authorName LIKE '% " + lstN + "' AND (authorName LIKE '" + fstN + "%' OR substr(authorName, 1, 2) == '" + fstLetter + " ') AND compareMiddle(authorName, '" + name + "')")
+        curA.execute("SELECT * FROM authors WHERE authorName LIKE '% " + lstN + "' AND (authorName LIKE '" + fstN + "%' OR substr(authorName, 1, 2) == '" + fstLetter + " ')")
         allAuthor = curA.fetchall()
         authorNotSameName = [x for x in allAuthor if x[1] != name]
    
         allAuthor = [x for x in allAuthor if x[1] == name]
 
         with open(temp_saved_aID,'w') as saved_aID:
-             json.dump(authorNotSameName,saved_aID,indent = 2)
+             if len(authorNotSameName) != 0:
+                 json.dump(authorNotSameName,saved_aID,indent = 2)
+             else: json.dump([],saved_aID,indent = 2)
     else:
         with open(temp_saved_aID) as saved_aID:
              allAuthor = json.load(saved_aID)
@@ -260,10 +270,12 @@ def getJournal(name):
     curP = dbPAA.cursor()
     curJ = dbJ.cursor()
     dbJ.create_function("match",2,match)
+    journals = []
     print("{} getting the journalIDs".format(datetime.now()))
     curJ.execute("SELECT * FROM Journals WHERE match(JournalName, '" + name + "')")
-    jID = list(map(lambda x: x[0],curJ.fetchall()))
+    #curJ.execute("SELECT * FROM Journals WHERE JournalName == '" + name + "'")
     journals = curJ.fetchall()
+    jID = list(map(lambda x: x[0],journals))
     print("{} finished getting jID".format(datetime.now()))
     print("{} getting the paper published".format(datetime.now()))
     curP.execute(removeCon("SELECT paperID, journalID FROM papers WHERE journalID IN {}".format(tuple(jID))))
@@ -277,9 +289,10 @@ def getJournal(name):
 
     curP.close()
     curJ.close()
-
+    
     for k in jID_papers:
-        print(jID_papers[k])
+        print(len(jID_papers[k]))
+    
     for tup in journals:
         print(tup)
     #jID_papers is a dict {jID, [(pID,pTitle,publishedDate)]}, journal is a list
@@ -287,27 +300,39 @@ def getJournal(name):
     return (journals, jID_papers)
  
 def getConf(name):
+    name = name.upper()
     dbConf = sqlite3.connect(db_conf, check_same_thread = False)
     dbP = sqlite3.connect(db_PAA, check_same_thread = False)
     curC = dbConf.cursor()
     curP = dbP.cursor()
+    dbConf.create_function("match",2,match)
     print("{} getting conferenceID".format(datetime.now()))
-    print("SELECT * FROM ConferenceSeries WHERE ShortName == '" + name + "' OR Fullname == '" + name + "'")
-    curC.execute("SELECT * FROM ConferenceSeries WHERE ShortName == '" + name + "' OR Fullname == '" + name + "'")
+    print("SELECT * FROM ConferenceSeries WHERE ShortName == '" + name + "' OR match('" + name + "', Fullname)")
+    curC.execute("SELECT * FROM ConferenceSeries WHERE ShortName == '" + name + "' OR match('" + name + "', Fullname)")
     conference = list(map(lambda x: (x[0],x[2]),curC.fetchall()))
     print("{} finished getting cID".format(datetime.now()))
-    cID = conference[0][0]
+
+    cID = list(map(lambda x: x[0], conference))    
+
+
     print("{} getting papers published".format(datetime.now()))
     
     #print(removeCon("SELECT paperID, paperTitle, publishedDate, conferenceID FROM papers WHERE conferenceID IN {}".format(tuple(cID))))
-    curP.execute("SELECT paperID, paperTitle, publishedDate, conferenceID FROM papers WHERE conferenceID == '" + cID + "'")
+    curP.execute(removeCon("SELECT paperID, paperTitle, publishedDate, conferenceID FROM papers WHERE conferenceID IN {}".format(tuple(cID))))
     papers = curP.fetchall()
     print("{} finished getting paper".format(datetime.now()))
     cID_papers = {}
-    cID_papers[cID] = papers
-            
+    temp = list(map(lambda x:(x[0],x[3]),papers)) #temp is a list of (pID,cID)
+    #papers contains tuples of (paperID, paperTitle, publishedDate, conferenceID)
+    for pID,cID in temp:
+        cID_papers.setdefault(cID,[]).append(pID) #cID_papers is a dict (cID,[pID])
+      
+ 
     for k in cID_papers:
-        print(cID_papers[k])
+        print(len(cID_papers[k]))
+    for t in conference:
+        print(t)
+    #conference is a list of (cID,conferenceFullname)
     return (conference, cID_papers)
 
     curP.close()
@@ -320,14 +345,15 @@ def getAff(aff):
     curA = dbA.cursor()
     aff = aff.lower()
     dbA.create_function("match",2,match)
+    dbP.create_function("contains",2,contains)
     #dbP.create_function("contains",2,contains)
     print("{} getting affiliationID".format(datetime.now())) #get affiliationID that match the given institution
-    print("SELECT AffiliationID, AffiliationName FROM Affiliations WHERE match(AffiliationName, '"+ aff + "')" )
+    print("SELECT AffiliationID, AffiliationName FROM Affiliations WHERE match(AffiliationName, '" + aff + "')" )
     curA.execute("SELECT AffiliationID, AffiliationName FROM Affiliations WHERE match(AffiliationName, '" + aff + "')")
     temp = curA.fetchall()
     affID = list(map(lambda x: x[0], temp))
-    affiliationName = temp[0][1] #get the normalized affiliationName
-    
+    if len(affID) != 0: affiliationName = temp[0][1] #get the normalized affiliationName
+    else: return {}
     print(affID)
   
     print("{} getting related papers".format(datetime.now())) #get papers related 
@@ -356,13 +382,28 @@ def getAff(aff):
     return(result) #A dict of aName, [pID]
 
 def match(name1, name2):
+    name1 = name1.lower()
+    name2 = name2.lower()
     ls1 = name1.split(' ')
     ls2 = name2.split(' ')
-    ls1 = [x for x in ls1 if x != 'the' and x != 'college' and x != 'department' and x != 'of' and x != 'and']
-    ls2 = [x for x in ls2 if x != 'the' and x != 'college' and x != 'department' and x != 'of' and x != 'and']
+    ls1 = [x for x in ls1 if x != 'the' and x != 'college' and x != 'department' and x != 'of' and x != 'and' and x != 'conference' and x != 'journal' and x != 'university']
+    ls2 = [x for x in ls2 if x != 'the' and x != 'college' and x != 'department' and x != 'of' and x != 'and' and x != 'conference' and x != 'journal' and x != 'university']
+        
     for word in ls1:
-        if word not in ls2: return False
+        exist = False
+        for w in ls2:
+            if similar(word,w): 
+                exist = True
+                break
+        if not exist: return False
+     
     return True
+    
+        
+
+def similar(name1, name2):
+    return SequenceMatcher(None,name1,name2).ratio() >= 0.9    
+
 
 def contains(name1, name2):
     name2 = name2.lower()
@@ -374,4 +415,4 @@ def contains(name1, name2):
     return True
 
 if __name__ == '__main__':
-    trial = getAuthor('stephen m blackburn',True,False)
+    trial = getConf('International conference on Information system')
