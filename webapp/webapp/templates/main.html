@@ -142,7 +142,6 @@ searchButton.addEventListener('click', function(){
       // console.log(result["authors"]);
       updateTable(result["authors"]);
       tableContainer.classList.remove("invisible");
-      hideProgressBar();
     },
     error: function (result) {
       console.log("searchButton error");

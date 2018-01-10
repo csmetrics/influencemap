@@ -4,16 +4,19 @@ var progressNumber = document.getElementById("progress-number");
 var progressBar = document.getElementById("progress-bar");
 var flag = false;
 var percent = 0;
+var message = "";
 
 function showProgressBar() {
   console.log("showProgressBar");
   flag = true;
   percent = 0;
+  message = "";
 }
 function hideProgressBar() {
   console.log("hideProgressBar");
   flag = false;
   percent = 0;
+  message = "";
 }
 
 function updateProgressBar(){
@@ -21,17 +24,21 @@ function updateProgressBar(){
     type: "GET",
     url: "/progress",
     data: {
-      progress: percent
+      progress: percent,
+      text: message
     },
     success: function (result) {
       console.log("updateProgressBar success");
       console.log(result["msg"], result["percent"]);
       percent = result["percent"];
-      progressText.innerText = result["msg"];
+      message = result["msg"];
+      progressText.innerText = message;
       progressNumber.innerText = percent+"%";
       progressBar.style.width = percent+"%";
-      if (percent < 100 && flag) {
-        window.setTimeout(updateProgressBar, 5000);
+      if (percent < 100) {
+        window.setTimeout(updateProgressBar, 2000);
+      } else {
+        hideProgressBar();
       }
       if (flag) {
         progressGroup.classList.remove("invisible");

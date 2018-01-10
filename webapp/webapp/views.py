@@ -73,7 +73,7 @@ def search(request):
     print(keyword)
     if keyword != "":
         print("{}\t{}\t{}".format(datetime.now(), __file__ , entity_of_interest[option['id']].__name__))
-        entities, id_pid_dict =  entity_of_interest[option['id']](keyword) #(authors_testing, dict()) # getAuthor(keyword)
+        entities, id_pid_dict =  entity_of_interest[option['id']](keyword, progressCallback) #(authors_testing, dict()) # getAuthor(keyword)
 
     # path to the influence flowers
     inflin = os.path.join(BASE_DIR, "output/flower1.png")
