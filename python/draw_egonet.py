@@ -236,7 +236,7 @@ def draw_twoway_halfcircle(graph=None, ego=None, ax=None, renorm_weights='lin',
     node_list = list(set([e[0] for e in graph.in_edges(ego)]) | set([e[1] for e in graph.out_edges(ego)]))
     if ego in node_list:
         node_list.remove(ego)
-    weight_dict_list = .list()
+    weight_dict_list = list()
     for node in node_list:
         node_dict = dict()
         node_dict['in'] = graph[node][ego] if node in graph.keys() and ego in graph[node].keys() else 0
