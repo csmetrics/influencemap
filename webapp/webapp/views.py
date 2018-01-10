@@ -1,8 +1,11 @@
 import os, sys
+import base64
 from django.shortcuts import render
 from django.http import JsonResponse
 from django.views.decorators.csrf import csrf_exempt
 from datetime import datetime
+from .utils import progressCallback
+
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 PYTHON_DIR = os.path.join(os.path.dirname(BASE_DIR), 'python')
 sys.path.insert(0, PYTHON_DIR)
@@ -70,7 +73,7 @@ def search(request):
     print(keyword)
     if keyword != "":
         print("{}\t{}\t{}".format(datetime.now(), __file__ , entity_of_interest[option['id']].__name__))
-        entities, id_pid_dict =  entity_of_interest[option['id']](keyword) #(authors_testing, dict()) # getAuthor(keyword)
+        entities, id_pid_dict =  entity_of_interest[option['id']](keyword, progressCallback) #(authors_testing, dict()) # getAuthor(keyword)
 
     # path to the influence flowers
     inflin = os.path.join(BASE_DIR, "output/flower1.png")
@@ -96,10 +99,10 @@ def submit(request):
         id_2_paper_id[aid] = id_pid_dict[aid]
     print("{}\t{}\t{}".format(datetime.now(), __file__ , getFlower.__name__))
     print("selfcite :" + str(selfcite))
-    inflflower = getFlower(id_2_paper_id=id_2_paper_id, name=keyword, ent_type=option['id'])
-
+    image_urls = getFlower(id_2_paper_id=id_2_paper_id, name=keyword, ent_type=option['id'])
+    print(image_urls)
     data = {
-        "inflflower": inflflower,
+        "images": image_urls,
     }
     return JsonResponse(data, safe=False)
 

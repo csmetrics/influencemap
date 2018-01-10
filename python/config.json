@@ -5,7 +5,7 @@
         "batch size": 999
     }, 
     "data":{
-        "out":"/home/u5642715/out"
+        "out":"/localdata/common"
     },
     "cache":{
         "directory":{

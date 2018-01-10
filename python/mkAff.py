@@ -22,7 +22,7 @@ temp_saved_aID = '/localdata/common/temp_saved_aID.json'
 def removeCon(lst):
    if lst[-2] == ",":
        return lst[:-2] + ")"
-   else: 
+   else:
        return lst
 
 
@@ -30,9 +30,9 @@ def isSame(name1, name2):
    # if name1 in memory: return memory[name1]
     #if not name1.endswith(name2.split(' ')[-1]):
         # memory[name1] = False
-         #return False 
+         #return False
     ls1 = name1.split(' ')
-    ls2 = name2.split(' ')           
+    ls2 = name2.split(' ')
     if len(ls2[0]) == 1 or len(ls1[0]) == 1:
          if ls2[0][0] == ls1[0][0]:
               b = compareMiddle(name1, name2)
@@ -46,12 +46,12 @@ def isSame(name1, name2):
               b =  compareMiddle(name1, name2)
               #memory[name1] = b
               return b
-        else: 
+        else:
               #memory[name1] = False
               return False
-    
 
-  
+
+
 
 def compareMiddle(m1,m2):
    m1 = m1.split(' ')[1:-1]
@@ -68,9 +68,9 @@ def compareMiddle(m1,m2):
                    if word[0] == w: return True
                else:
                    if word == w: return True
-   return False 
-                
-   
+   return False
+
+
 def mostCommon(lst):
     return max(set(lst),key=lst.count)
 
@@ -81,9 +81,9 @@ def getField(pID):
     curFN = dbN.cursor()
     if len(pID) == 1:
          #print("{} Getting fieldID".format(datetime.now()))
-         curK.execute("SELECT FieldID FROM paperKeywords WHERE PaperID = '" + pID[0] + "'") 
+         curK.execute("SELECT FieldID FROM paperKeywords WHERE PaperID = '" + pID[0] + "'")
          #curK.execute(removeCon("SELECT FieldID FROM paperKeywords WHERE PaperID IN {}".format(tuple(pID))))
-    else: 
+    else:
          #print("{} Getting fieldID".format(datetime.now()))
          curK.execute(removeCon("SELECT FieldID FROM paperKeywords WHERE PaperID IN {}".format(tuple(pID))))
          #curK.execute("SELECT FieldID FROM paperKeywords WHERE PaperID == '" + pID[0] + "'")
@@ -103,7 +103,7 @@ def getField(pID):
          else:
             singleFID = res[0][0]
             curFN.execute("SELECT FieldName, FieldID FROM FieldOfStudy WHERE FieldID == '" + singleFID + "'")
-            output = list(map(lambda x: (x[0],len(res)),curFN.fetchall())) 
+            output = list(map(lambda x: (x[0],len(res)),curFN.fetchall()))
          dbK.commit()
          dbN.commit()
          dbK.close()
@@ -132,8 +132,8 @@ def getPaperName(pID):
         return (title[0][0], title[0][1])
     else: return ('','')
 
-def getAuthor(name,expand=False,use_cache=False):
-    if use_cache:   
+def getAuthor(name,cbfunc,expand=False,use_cache=False):
+    if use_cache:
        with open(saved_dir,'r') as savedFile:
            data_exist_author = json.load(savedFile)
            for key in data_exist_author:
@@ -141,7 +141,7 @@ def getAuthor(name,expand=False,use_cache=False):
                      for fs in data_exist_author[key][0]:
                          print(fs)
                      return data_exist_author[key]
-    
+
     dbPAA = sqlite3.connect(db_PAA, check_same_thread = False)
     dbA = sqlite3.connect(db_Authors, check_same_thread = False)
     dbA.create_function("compareMiddle",2,compareMiddle)
@@ -158,13 +158,14 @@ def getAuthor(name,expand=False,use_cache=False):
     fstLetter = fstN[0]
     #middle = name.split(' ')[1:-1]
     print("{} getting all the aID".format(datetime.now()))
+    cbfunc("getting all the aID")
     #curA.execute("SELECT * FROM authors WHERE authorName LIKE '% " + lstN + "' AND isSame(authorName,'" + name + "')")
 
     if not expand:
         curA.execute("SELECT * FROM authors WHERE authorName LIKE '% " + lstN + "' AND (authorName LIKE '" + fstN + "%' OR substr(authorName, 1, 2) == '" + fstLetter + " ')")
         allAuthor = curA.fetchall()
         authorNotSameName = [x for x in allAuthor if x[1] != name]
-   
+
         allAuthor = [x for x in allAuthor if x[1] == name]
 
         with open(temp_saved_aID,'w') as saved_aID:
@@ -175,23 +176,24 @@ def getAuthor(name,expand=False,use_cache=False):
         with open(temp_saved_aID) as saved_aID:
              allAuthor = json.load(saved_aID)
     print("{} finished getting all the aID".format(datetime.now()))
-   
+    cbfunc("finished getting all the aID")
     author = {} #authorID is the key and authorName is the value
-    
+
     for a in allAuthor:
          author[a[0]] = a[1]
-    
+
     aID = list(author.keys())
-   
+
     result = []
     print("{} getting all the (authorID, paperID, affiliationName)".format(datetime.now()))
+    cbfunc("getting all the (authorID, paperID, affiliationName)")
     curP.execute(removeCon("SELECT authorID, paperID, affiliationNameOriginal FROM weightedPaperAuthorAffiliations WHERE authorID IN {}".format(tuple(aID))))
     result = curP.fetchall()
 
     aIDpIDDict = {}
-    
+
     finalres = []
-    
+
     #Putting the authorName into the tuples
     for tuples in result:
        finalres.append((author[tuples[0]],tuples[0],tuples[1],tuples[2]))
@@ -199,9 +201,9 @@ def getAuthor(name,expand=False,use_cache=False):
     #Getting the most frequently appeared affiliation
     tempres = []
     finalresult = []
-   
+
     print("{} counting the number of paper published by an author".format(datetime.now()))
-    
+    cbfunc("counting the number of paper published by an author")
     for tuples in finalres:
         currentID = tuples[1]
         if currentID not in list(map(lambda x:x[1], tempres)):
@@ -219,26 +221,26 @@ def getAuthor(name,expand=False,use_cache=False):
                 tempres.append((tuples[0],tuples[1],count,mostCommon(tep),pID))
             else:
                 tempres.append((tuples[0],tuples[1],count,'',pID))
-    
+
     tempres = sorted(tempres,key=lambda x: x[2],reverse=True)
-        
+
     same = []
     same[:] = [x for x in tempres if x[0] == name]
     tempres[:] = [x for x in tempres if x[0] != name]
     tempres = same + tempres
-    
+
     print("{} finish counting, getting the fieldName and recent paper".format(datetime.now()))
-   
+    cbfunc("finish counting, getting the fieldName and recent paper")
     for tuples in tempres:
         recent = getPaperName(tuples[-1]) #a tuple (paperName, date)
         finalresult.append({'name':tuples[0],'authorID':tuples[1],'numpaper':tuples[2],'affiliation':tuples[3],'field':getField(tuples[4]),'recentPaper':recent[0],'publishedDate':recent[1]})
     print("{} done".format(datetime.now()))
-    
+    cbfunc("done")
     dbPAA.commit()
-    dbA.commit()  
+    dbA.commit()
     dbPAA.close()
     dbA.close()
-    
+
     if not expand:
          with open(temp_saved_auInfo, 'w' ) as saved_auInfo:
               json.dump(finalresult, saved_auInfo, indent = 2)
@@ -255,13 +257,13 @@ def getAuthor(name,expand=False,use_cache=False):
               data_exist_aIDpID[key] = aIDpIDDict[key]
          finalresult = data_exist_auInfo
          aIDpIDDict = data_exist_aIDpID
-    
+
     for dic in finalresult: #finalresult is a list of dict
          print(dic)
     print(len(finalresult))
-    print(len(aIDpIDDict))  
-    
-    return (finalresult,aIDpIDDict)  
+    print(len(aIDpIDDict))
+
+    return (finalresult,aIDpIDDict)
 
 
 def getJournal(name):
@@ -281,7 +283,7 @@ def getJournal(name):
     curP.execute(removeCon("SELECT paperID, journalID FROM papers WHERE journalID IN {}".format(tuple(jID))))
     papers = curP.fetchall()
     print("{} finished getting paper".format(datetime.now()))
-    
+
     #grouping tuples by journalID
     jID_papers = {}
     for pID,jID in papers:
@@ -289,16 +291,16 @@ def getJournal(name):
 
     curP.close()
     curJ.close()
-    
+
     for k in jID_papers:
         print(len(jID_papers[k]))
-    
+
     for tup in journals:
         print(tup)
     #jID_papers is a dict {jID, [(pID,pTitle,publishedDate)]}, journal is a list
     #[journalID, journalName]
     return (journals, jID_papers)
- 
+
 def getConf(name):
     name = name.upper()
     dbConf = sqlite3.connect(db_conf, check_same_thread = False)
@@ -312,11 +314,11 @@ def getConf(name):
     conference = list(map(lambda x: (x[0],x[2]),curC.fetchall()))
     print("{} finished getting cID".format(datetime.now()))
 
-    cID = list(map(lambda x: x[0], conference))    
+    cID = list(map(lambda x: x[0], conference))
 
 
     print("{} getting papers published".format(datetime.now()))
-    
+
     #print(removeCon("SELECT paperID, paperTitle, publishedDate, conferenceID FROM papers WHERE conferenceID IN {}".format(tuple(cID))))
     curP.execute(removeCon("SELECT paperID, paperTitle, publishedDate, conferenceID FROM papers WHERE conferenceID IN {}".format(tuple(cID))))
     papers = curP.fetchall()
@@ -326,8 +328,8 @@ def getConf(name):
     #papers contains tuples of (paperID, paperTitle, publishedDate, conferenceID)
     for pID,cID in temp:
         cID_papers.setdefault(cID,[]).append(pID) #cID_papers is a dict (cID,[pID])
-      
- 
+
+
     for k in cID_papers:
         print(len(cID_papers[k]))
     for t in conference:
@@ -355,30 +357,30 @@ def getAff(aff):
     if len(affID) != 0: affiliationName = temp[0][1] #get the normalized affiliationName
     else: return {}
     print(affID)
-  
-    print("{} getting related papers".format(datetime.now())) #get papers related 
+
+    print("{} getting related papers".format(datetime.now())) #get papers related
     curP.execute(removeCon("SELECT paperID, affiliationNameOriginal FROM weightedPaperAuthorAffiliations WHERE affiliationID IN {}".format(tuple(affID))))
     #Form a dict of affiliationName, pID
     aName_pID = {}
     res = curP.fetchall()
     print("{} finished getting papers".format(datetime.now()))
-    
+
     for pID, aN in res:
         aName_pID.setdefault(aN,[]).append(pID)
-    
+
     #get papers related to the specified department
     aName_pID = {aN:pIDs for (aN,pIDs) in aName_pID.items() if contains(aff,aN)}
     result = {}
     ps = []
     for key in aName_pID:
         ps = ps + (aName_pID[key])
-    result[affiliationName] = ps 
+    result[affiliationName] = ps
     curA.close()
-    curP.close() 
+    curP.close()
 
     for key in result:
        print((key, result[key]))
-    
+
     return(result) #A dict of aName, [pID]
 
 def match(name1, name2):
@@ -388,21 +390,21 @@ def match(name1, name2):
     ls2 = name2.split(' ')
     ls1 = [x for x in ls1 if x != 'the' and x != 'college' and x != 'department' and x != 'of' and x != 'and' and x != 'conference' and x != 'journal' and x != 'university']
     ls2 = [x for x in ls2 if x != 'the' and x != 'college' and x != 'department' and x != 'of' and x != 'and' and x != 'conference' and x != 'journal' and x != 'university']
-        
+
     for word in ls1:
         exist = False
         for w in ls2:
-            if similar(word,w): 
+            if similar(word,w):
                 exist = True
                 break
         if not exist: return False
-     
+
     return True
-    
-        
+
+
 
 def similar(name1, name2):
-    return SequenceMatcher(None,name1,name2).ratio() >= 0.9    
+    return SequenceMatcher(None,name1,name2).ratio() >= 0.9
 
 
 def contains(name1, name2):
