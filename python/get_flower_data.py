@@ -56,7 +56,7 @@ def generate_scores(conn, e_map, data_df, inc_self=False, calc_weight=get_weight
     return res
 
 # Generates pandas dataframe for scores
-def generate_score_df(influence_dict):
+def generate_score_df(influence_dict, ratio_func=lambda x,y : x - y):
     df_dict = list()
 
     # Turn influence dictionaries into an outer merged table
@@ -72,7 +72,7 @@ def generate_score_df(influence_dict):
     score_df['influencing'].fillna(nan_influencing, inplace=True)
 
     # calculate influence ratios
-    score_df['ratio'] = score_df['influencing'] / score_df['influenced']
+    score_df['ratio'] =  ratio_func(score_df['influenced'], score_df['influencing'])
 
     # sort by union max score
     score_df.assign(tmp = np.maximum(score_df['influencing'], score_df['influenced'])).sort_values('tmp').drop('tmp', axis=1)
