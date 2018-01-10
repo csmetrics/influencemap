@@ -1,4 +1,5 @@
 import os, sys
+import base64
 from django.shortcuts import render
 from django.http import JsonResponse
 from django.views.decorators.csrf import csrf_exempt
@@ -96,10 +97,10 @@ def submit(request):
         id_2_paper_id[aid] = id_pid_dict[aid]
     print("{}\t{}\t{}".format(datetime.now(), __file__ , getFlower.__name__))
     print("selfcite :" + str(selfcite))
-    inflflower = getFlower(id_2_paper_id=id_2_paper_id, name=keyword, ent_type=option['id'])
-
+    image_urls = getFlower(id_2_paper_id=id_2_paper_id, name=keyword, ent_type=option['id'])
+    print(image_urls)
     data = {
-        "inflflower": inflflower,
+        "images": image_urls,
     }
     return JsonResponse(data, safe=False)
 
