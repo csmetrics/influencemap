@@ -5,9 +5,9 @@ CONFIG_NAME = 'config.json'
 CONFIG_PATH = os.path.join(os.path.dirname(__file__), CONFIG_NAME)
 
 def set_path(path):
-    if not os.path.exists(path):
-        os.makedirs(path)
-    os.chmod(path, 0o777)
+    #if not os.path.exists(path):
+    #    os.makedirs(path)
+    #os.chmod(path, 0o777)
     return path
 
 # Config setup

@@ -9,12 +9,12 @@ def progress(request):
     global progressmsg, percent
     percent = int(request.GET.get("progress"))
     print("get percent", percent)
-    if request.GET.get("text") == "done":
+    if progressmsg == "done":
         resetProgress()
         return JsonResponse({"msg": "done", "percent": 100})
     elif percent < 90:
         percent += 10
-        return JsonResponse({"msg": progressmsg, "percent": percent})
+    return JsonResponse({"msg": progressmsg, "percent": percent})
 
 def resetProgress():
     global progressmsg, percent

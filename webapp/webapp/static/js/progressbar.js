@@ -7,13 +7,13 @@ var percent = 0;
 var message = "";
 
 function showProgressBar() {
-  console.log("showProgressBar");
+  // console.log("showProgressBar");
   flag = true;
   percent = 0;
   message = "";
 }
 function hideProgressBar() {
-  console.log("hideProgressBar");
+  // console.log("hideProgressBar");
   flag = false;
   percent = 0;
   message = "";
@@ -28,8 +28,8 @@ function updateProgressBar(){
       text: message
     },
     success: function (result) {
-      console.log("updateProgressBar success");
-      console.log(result["msg"], result["percent"]);
+      // console.log("updateProgressBar success");
+      // console.log(result["msg"], result["percent"]);
       percent = result["percent"];
       message = result["msg"];
       progressText.innerText = message;
@@ -47,7 +47,7 @@ function updateProgressBar(){
       }
     },
     error: function (result) {
-      console.log("updateProgressBar error");
+      // console.log("updateProgressBar error");
     }
   });
 }

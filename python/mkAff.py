@@ -19,6 +19,8 @@ temp_saved_auInfo = '/localdata/common/temp_saved_auInfo.json'
 temp_saved_aIDpID = '/localdata/common/temp_saved_aIDpID.json'
 temp_saved_aID = '/localdata/common/temp_saved_aID.json'
 
+saved_dir = '/localdata/common/savedFileAuthor.json'
+
 def removeCon(lst):
    if lst[-2] == ",":
        return lst[:-2] + ")"
@@ -27,30 +29,17 @@ def removeCon(lst):
 
 
 def isSame(name1, name2):
-   # if name1 in memory: return memory[name1]
+    #if name1 in memory: return memory[name1]
     #if not name1.endswith(name2.split(' ')[-1]):
         # memory[name1] = False
          #return False
+    
     ls1 = name1.split(' ')
     ls2 = name2.split(' ')
     if len(ls2[0]) == 1 or len(ls1[0]) == 1:
-         if ls2[0][0] == ls1[0][0]:
-              b = compareMiddle(name1, name2)
-              # memory[name1] = b
-              return b
-         else:
-              #memory[name1] = False
-              return False
+        return ls2[0][0] == ls1[0][0] and ls2[-1] == ls1[-1]
     else:
-        if ls2[0] == ls1[0]:
-              b =  compareMiddle(name1, name2)
-              #memory[name1] = b
-              return b
-        else:
-              #memory[name1] = False
-              return False
-
-
+        return ls2[0] == ls1[0] and ls2[-1] == ls1[-1]
 
 
 def compareMiddle(m1,m2):
@@ -138,9 +127,18 @@ def getAuthor(name,cbfunc,expand=False,use_cache=False):
            data_exist_author = json.load(savedFile)
            for key in data_exist_author:
                 if isSame(key,name):
-                     for fs in data_exist_author[key][0]:
-                         print(fs)
-                     return data_exist_author[key]
+                     if expand:
+                         for dic in data_exist_author[key][0]: #data_exist_author is {name:({auInfo},{aID:[pID]})}
+                             print(dic) 
+                         return data_exist_author[key]
+                     else:
+                         auInfo = data_exist_author[key][0]
+                         auInfoSame = []
+                         for dic in auInfo:
+                             if dic['name'] == name: auInfoSame.append(dic)
+                         for dic in auInfoSame: print(dic)
+                         return (auInfoSame, data_exist_author[key][1])
+                    
 
     dbPAA = sqlite3.connect(db_PAA, check_same_thread = False)
     dbA = sqlite3.connect(db_Authors, check_same_thread = False)
@@ -274,7 +272,7 @@ def getJournal(name):
     dbJ.create_function("match",2,match)
     journals = []
     print("{} getting the journalIDs".format(datetime.now()))
-    curJ.execute("SELECT * FROM Journals WHERE match(JournalName, '" + name + "')")
+    curJ.execute("SELECT * FROM Journals WHERE match('" + name + "', JournalName)")
     #curJ.execute("SELECT * FROM Journals WHERE JournalName == '" + name + "'")
     journals = curJ.fetchall()
     jID = list(map(lambda x: x[0],journals))
@@ -312,24 +310,26 @@ def getConf(name):
     print("SELECT * FROM ConferenceSeries WHERE ShortName == '" + name + "' OR match('" + name + "', Fullname)")
     curC.execute("SELECT * FROM ConferenceSeries WHERE ShortName == '" + name + "' OR match('" + name + "', Fullname)")
     conference = list(map(lambda x: (x[0],x[2]),curC.fetchall()))
+     
+    temp = [x for x in conference if x[1] == name]
+    conference = [x for x in conference if x[1] != name]
+    conference = temp + conference
+    
     print("{} finished getting cID".format(datetime.now()))
 
     cID = list(map(lambda x: x[0], conference))
 
-
     print("{} getting papers published".format(datetime.now()))
 
     #print(removeCon("SELECT paperID, paperTitle, publishedDate, conferenceID FROM papers WHERE conferenceID IN {}".format(tuple(cID))))
-    curP.execute(removeCon("SELECT paperID, paperTitle, publishedDate, conferenceID FROM papers WHERE conferenceID IN {}".format(tuple(cID))))
-    papers = curP.fetchall()
-    print("{} finished getting paper".format(datetime.now()))
+    curP.execute(removeCon("SELECT paperID, conferenceID FROM papers WHERE conferenceID IN {}".format(tuple(cID))))
+    papers = curP.fetchall()  
+    print("{} finished getting paper".format(datetime.now()) + ' ' + str(len(papers)))
     cID_papers = {}
-    temp = list(map(lambda x:(x[0],x[3]),papers)) #temp is a list of (pID,cID)
+  
     #papers contains tuples of (paperID, paperTitle, publishedDate, conferenceID)
-    for pID,cID in temp:
+    for pID,cID in papers:
         cID_papers.setdefault(cID,[]).append(pID) #cID_papers is a dict (cID,[pID])
-
-
     for k in cID_papers:
         print(len(cID_papers[k]))
     for t in conference:
@@ -399,6 +399,7 @@ def match(name1, name2):
                 break
         if not exist: return False
 
+
     return True
 
 
@@ -417,4 +418,4 @@ def contains(name1, name2):
     return True
 
 if __name__ == '__main__':
-    trial = getConf('International conference on Information system')
+    trial = getAuthor('stephen m blackburn',False,True)
