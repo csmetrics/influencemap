@@ -51,11 +51,16 @@ def drawFlower(conn, ent_type, ent_type2, data_df, dir_out, name):
     for entity in top_entities_influenced_by_poi:
       personG.add_edge(name, entity[0], weight=float(entity[1]))
 
-    influencedby_filename = os.path.join(plot_dir, 'influencedby_{}.png'.format(ent_type2))
-    influencedto_filename = os.path.join(plot_dir, 'influencedto_{}.png'.format(ent_type2))
+ 
+    influencedby_filename = 'influencedby_{}.png'.format(ent_type2)
+    influencedto_filename = 'influencedto_{}.png'.format(ent_type2)
+
+    influencedby_path = os.path.join(plot_dir, influencedby_filename)
+    influencedto_path = os.path.join(plot_dir, influencedto_filename)
+
     print("drawing graphs")
-    draw_halfcircle(graph=personG, ego=name, renorm_weights='log', direction='in', filename = influencedby_filename)
-    draw_halfcircle(graph=personG, ego=name, renorm_weights='log', direction='out', filename = influencedto_filename)
+    draw_halfcircle(graph=personG, ego=name, renorm_weights='log', direction='in', filename = influencedby_path)
+    draw_halfcircle(graph=personG, ego=name, renorm_weights='log', direction='out', filename = influencedto_path)
     print("finished graphs")
     return influencedby_filename, influencedto_filename
 
