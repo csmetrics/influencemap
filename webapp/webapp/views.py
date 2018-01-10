@@ -131,7 +131,7 @@ def submit(request):
     print("{}\t{}\t{}".format(datetime.now(), __file__ , getFlower.__name__))
     print("selfcite :" + str(selfcite))
     image_urls = getFlower(id_2_paper_id=id_2_paper_id, name=keyword, ent_type=option['id'])
-    print(image_urls)
+    image_urls = ["static/" + url for url in image_urls]
     data = {
         "images": image_urls,
     }

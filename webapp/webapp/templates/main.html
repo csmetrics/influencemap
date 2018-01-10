@@ -253,12 +253,12 @@ submitButton.addEventListener('click', function(){
       searchTable.clear();
       tableContainer.style.display="none";
       imageContainer.classList.remove("invisible");
-      image1.src = 'static/influencedby_author.png';
-      image2.src = 'static/influencedto_author.png';
-      image3.src = 'static/influencedby_conf.png';
-      image4.src = 'static/influencedto_conf.png';
-      image5.src = 'static/influencedby_institution.png';
-      image6.src = 'static/influencedto_institution.png';
+      image1.src = result.images[0];
+      image2.src = result.images[1];
+      image3.src = result.images[2];
+      image4.src = result.images[3];
+      image5.src = result.images[4];
+      image6.src = result.images[5];
     },
     error: function (result) {
       console.log("submitButton error");
