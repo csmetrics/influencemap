@@ -90,6 +90,37 @@ def search(request):
     }
     return JsonResponse(data, safe=False)
 
+
+
+
+
+def loadall(request):
+    global keyword, optionlist, option, selfcite
+    global id_pid_dict
+
+    print("load all!!", request.GET)
+    inflflower = None
+    entities = []
+
+    selfcite = True if request.GET.get("selfcite") == "true" else False
+    keyword = request.GET.get("keyword")
+    option = [x for x in optionlist if x.get('id', '') == request.GET.get("option")][0]
+    print(keyword)
+    if keyword != "":
+        print("{}\t{}\t{}".format(datetime.now(), __file__ , entity_of_interest[option['id']].__name__))
+        entities, id_pid_dict =  entity_of_interest[option['id']](keyword, progressCallback, expand=True) #(authors_testing, dict()) # getAuthor(keyword)
+
+    data = {
+        "authors": entities,
+    }
+    return JsonResponse(data, safe=False)
+
+
+
+
+
+    
+
 def submit(request):
     global keyword, option, selfcite
     selected_ids = request.GET.get("authorlist").split(",")

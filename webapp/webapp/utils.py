@@ -12,7 +12,7 @@ def progress(request):
     if progressmsg == "done":
         resetProgress()
         return JsonResponse({"msg": "done", "percent": 100})
-    elif percent < 90:
+    elif percent <= 90:
         percent += 10
     return JsonResponse({"msg": progressmsg, "percent": percent})
 
