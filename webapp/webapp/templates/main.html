@@ -37,7 +37,7 @@
                 <button id="search-btn" type="submit" name="search" value="search" class="btn btn-flat"><i class="fa fa-search"></i></button>
               </span>
             </div>
-            <div class="form-group search-option">
+            <div class="search-option">
               {% for opt in optionlist %}
               <div class="radio">
                 <label>
@@ -47,7 +47,7 @@
               </div>
               {% endfor %}
             </div>
-            <div class="form-group search-option">
+            <div class="search-option">
               <div class="checkbok">
                 <label>
                   <input class="self-cite" type="checkbox" name="self-cite" id="self-cite" {% if selfcite %} checked {% endif %}>
@@ -58,7 +58,14 @@
           </div>
         </div>
       </div>
-      {% if inflflower %}
+      <div id="progress-group" class="progress-group invisible" style="width: 400px">
+        <span id="progress-text" class="progress-text"></span>
+        <span id="progress-number" class="progress-number"></span>
+        <div class="progress sm">
+          <div id="progress-bar" class="progress-bar progress-bar-aqua" style="width: 0%"></div>
+        </div>
+      </div>
+      <div id="image-container" class="container invisible">
       <div class="row">
         <div class="col-md-12">
           Keyword: <b>{{ selectedKeyword }}</b>
@@ -68,31 +75,31 @@
         <span>To Author</span>
       <div class="row">
         <div class="col-md-6">
-          <img class="fit-wrapper" src="{% static inflflower.0 %}"/>
+          <img id="image1" class="fit-wrapper" src=""/>
         </div>
         <div class="col-md-6">
-          <img class="fit-wrapper" src="{% static inflflower.1 %}"/>
+          <img id="image2" class="fit-wrapper" src=""/>
         </div>
       </div>
       <span>To conference</span>
       <div class="row">
         <div class="col-md-6">
-          <img class="fit-wrapper" src="{% static inflflower.2 %}"/>
+          <img id="image3" class="fit-wrapper" src=""/>
         </div>
         <div class="col-md-6">
-          <img class="fit-wrapper" src="{% static inflflower.3 %}"/>
+          <img id="image4" class="fit-wrapper" src=""/>
         </div>
       </div>
         <span>To institution</span>
       <div class="row">
         <div class="col-md-6">
-          <img class="fit-wrapper" src="{% static inflflower.4 %}"/>
+          <img id="image5" class="fit-wrapper" src=""/>
         </div>
         <div class="col-md-6">
-          <img class="fit-wrapper" src="{% static inflflower.5 %}"/>
+          <img id="image6" class="fit-wrapper" src=""/>
         </div>
       </div>
-      {% endif %}
+      </div>
       <div id="table-container" class="container invisible">
         <table id="searchtable" class="row-border hover order-column" cellspacing="0" width="100%">
         </table>
@@ -102,8 +109,16 @@
   </body>
 </html>
 <script src="{% static 'js/auto-complete.min.js' %}"></script>
+<script src="{% static 'js/progressbar.js' %}"></script>
 <script>
 var tableContainer = document.getElementById("table-container");
+var imageContainer = document.getElementById("image-container");
+var image1 = document.getElementById("image1");
+var image2 = document.getElementById("image2");
+var image3 = document.getElementById("image3");
+var image4 = document.getElementById("image4");
+var image5 = document.getElementById("image5");
+var image6 = document.getElementById("image6");
 
 var inputBar = document.getElementById("name-search-bar");
 var selfCiteCheckbox = document.getElementById("self-cite");
@@ -112,6 +127,8 @@ var submitButton = document.getElementById("submit-btn");
 
 // Search Button event handler
 searchButton.addEventListener('click', function(){
+  showProgressBar();
+  updateProgressBar();
   $.ajax({
     type: "GET",
     url: "/search",
@@ -201,8 +218,14 @@ submitButton.addEventListener('click', function(){
     success: function (result) { // return data if success
       console.log("submitButton success");
       searchTable.clear();
-      tableContainer.remove();
-      // TODO create and populate image container
+      tableContainer.style.display="none";
+      imageContainer.classList.remove("invisible");
+      image1.src = 'static/figures/influencedby_author.png';
+      image2.src = 'static/figures/influencedto_author.png';
+      image3.src = 'static/figures/influencedby_institution.png';
+      image4.src = 'static/figures/influencedto_institution.png';
+      image5.src = 'static/figures/influencedby_conf.png';
+      image6.src = 'static/figures/influencedto_conf.png';
     },
     error: function (result) {
       console.log("submitButton error");
