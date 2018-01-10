@@ -21,6 +21,7 @@
 
   </head>
   <body>
+<!-- Remove this line, used to test whether table cleared <input id="reveal-table" type="submit" value="reveal table"> -->
     <div class="wrapper" align="center">
       <div class="row">
         <div class="col-md-12">
@@ -208,14 +209,12 @@ loadMore.addEventListener('click', function(){
   var selected_ids = [];
   for (var i in selected_rows) {
     selected_ids.push(selected_rows[i][5]);
-  }
-  searchTable.clear()
-  tableContainer.classList.add("invisible")
-  showProgressBar();
-  updateProgressBar();
+  };
+  searchTable.clear();
+  tableContainer.classList.add("invisible");
   $.ajax({
     type: "GET",
-    url: "/search-all",
+    url: "/loadall",
     data: { // input to the views.py - search()
       keyword: inputBar.value,
       option: $(".entity-option:checked").val(),
@@ -228,7 +227,7 @@ loadMore.addEventListener('click', function(){
       tableContainer.classList.remove("invisible")
     },
     error: function (result) {
-      console.log("searchButton error");
+      console.log("load more button error");
     }
   });
 });
@@ -254,12 +253,12 @@ submitButton.addEventListener('click', function(){
       searchTable.clear();
       tableContainer.style.display="none";
       imageContainer.classList.remove("invisible");
-      image1.src = 'static/figures/influencedby_author.png';
-      image2.src = 'static/figures/influencedto_author.png';
-      image3.src = 'static/figures/influencedby_conf.png';
-      image4.src = 'static/figures/influencedto_conf.png';
-      image5.src = 'static/figures/influencedby_institution.png';
-      image6.src = 'static/figures/influencedto_institution.png';
+      image1.src = 'static/influencedby_author.png';
+      image2.src = 'static/influencedto_author.png';
+      image3.src = 'static/influencedby_conf.png';
+      image4.src = 'static/influencedto_conf.png';
+      image5.src = 'static/influencedby_institution.png';
+      image6.src = 'static/influencedto_institution.png';
     },
     error: function (result) {
       console.log("submitButton error");
@@ -301,5 +300,21 @@ a = new autoComplete({
 });
 }
 
+/*
+// remove this, only used to test whether data table is clearing
+var revealButton = document.getElementById("reveal-table")
+revealButton.addEventListener('click', function(){
+  if (revealButton.value === "reveal table"){
+    tableContainer.classList.remove('invisible');
+    revealButton.value = "hide table";
+    alert('revealed table');
+  }
+  else {
+    tableContainer.classList.add('invisible');
+    revealButton.value = "reveal table";
+    alert('concealed table');
+  }
+});
+*/
 
 </script>

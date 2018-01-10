@@ -20,7 +20,7 @@ from . import views, utils
 urlpatterns = [
     url(r'^$', views.main),
     url(r'^search', views.search),
-    url(r'^search-all', views.loadall),
+    url(r'^loadall', views.loadall),
     url(r'^submit', views.submit),
     url(r'^progress', utils.progress),
     url(r'^admin/', admin.site.urls),
