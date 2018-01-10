@@ -58,6 +58,13 @@
           </div>
         </div>
       </div>
+      <div id="progress-group" class="progress-group invisible" style="width: 400px">
+        <span id="progress-text" class="progress-text"></span>
+        <span id="progress-number" class="progress-number"></span>
+        <div class="progress sm">
+          <div id="progress-bar" class="progress-bar progress-bar-aqua" style="width: 0%"></div>
+        </div>
+      </div>
       {% if inflflower %}
       <div class="row">
         <div class="col-md-12">
@@ -102,6 +109,7 @@
   </body>
 </html>
 <script src="{% static 'js/auto-complete.min.js' %}"></script>
+<script src="{% static 'js/progressbar.js' %}"></script>
 <script>
 var tableContainer = document.getElementById("table-container");
 
@@ -112,6 +120,8 @@ var submitButton = document.getElementById("submit-btn");
 
 // Search Button event handler
 searchButton.addEventListener('click', function(){
+  showProgressBar();
+  updateProgressBar();
   $.ajax({
     type: "GET",
     url: "/search",
@@ -125,6 +135,7 @@ searchButton.addEventListener('click', function(){
       // console.log(result["authors"]);
       updateTable(result["authors"]);
       tableContainer.classList.remove("invisible");
+      hideProgressBar();
     },
     error: function (result) {
       console.log("searchButton error");
