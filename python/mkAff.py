@@ -42,24 +42,6 @@ def isSame(name1, name2):
         return ls2[0] == ls1[0] and ls2[-1] == ls1[-1]
 
 
-def compareMiddle(m1,m2):
-   m1 = m1.split(' ')[1:-1]
-   m2 = m2.split(' ')[1:-1]
-   ms1 = ''
-   for char in m1:
-       ms1 = ms1 + char[0]
-   for word in m2:
-       if len(word) == 1:
-           if word in ms1: return True
-       else:
-           for w in m1:
-               if len(w) == 1:
-                   if word[0] == w: return True
-               else:
-                   if word == w: return True
-   return False
-
-
 def mostCommon(lst):
     return max(set(lst),key=lst.count)
 
@@ -265,9 +247,7 @@ def getAuthor(name,cbfunc,expand=False,use_cache=False):
 
 
 def getJournal(name):
-    dbPAA = sqlite3.connect(db_PAA, check_same_thread = False)
     dbJ = sqlite3.connect(db_Jour, check_same_thread = False)
-    curP = dbPAA.cursor()
     curJ = dbJ.cursor()
     dbJ.create_function("match",2,match)
     journals = []
@@ -275,29 +255,32 @@ def getJournal(name):
     curJ.execute("SELECT * FROM Journals WHERE match('" + name + "', JournalName)")
     #curJ.execute("SELECT * FROM Journals WHERE JournalName == '" + name + "'")
     journals = curJ.fetchall()
-    jID = list(map(lambda x: x[0],journals))
+    
+    temp = [x for x in journals if x[1].lower() == name.lower()]
+    journals = [x for x in journals if x[1].lower() != name.lower()]
+    journals = temp + journals   
+
     print("{} finished getting jID".format(datetime.now()))
-    print("{} getting the paper published".format(datetime.now()))
-    curP.execute(removeCon("SELECT paperID, journalID FROM papers WHERE journalID IN {}".format(tuple(jID))))
-    papers = curP.fetchall()
-    print("{} finished getting paper".format(datetime.now()))
-
-    #grouping tuples by journalID
-    jID_papers = {}
-    for pID,jID in papers:
-        jID_papers.setdefault(jID,[]).append(pID)
-
-    curP.close()
     curJ.close()
-
-    for k in jID_papers:
-        print(len(jID_papers[k]))
 
     for tup in journals:
         print(tup)
-    #jID_papers is a dict {jID, [(pID,pTitle,publishedDate)]}, journal is a list
-    #[journalID, journalName]
-    return (journals, jID_papers)
+    return journals #journals is a list of (journalID, journalName)
+
+def getJourPID(jIDs): #thie function takes in a list of journalID, and produce a dict of jID:[pID]
+    dbPAA = sqlite3.connect(db_PAA, check_same_thread = False)
+    curP = dbPAA.cursor()
+    print("{} getting papers".format(datetime.now()))
+    curP.execute(removeCon("SELECT paperID, journalID FROM papers WHERE journalID IN {}".format(tuple(jIDs))))
+    papers = curP.fetchall()
+    print("{} finished getting paper".format(datetime.now()))
+    jID_papers = {}
+    for pID, jID in papers:
+        jID_papers.setdefault(jID,[]).append(pID)
+    curP.close()
+    return jID_papers #a dict of jID:[pID]
+
+
 
 def getConf(name):
     name = name.upper()
@@ -311,34 +294,31 @@ def getConf(name):
     curC.execute("SELECT * FROM ConferenceSeries WHERE ShortName == '" + name + "' OR match('" + name + "', Fullname)")
     conference = list(map(lambda x: (x[0],x[2]),curC.fetchall()))
      
-    temp = [x for x in conference if x[1] == name]
-    conference = [x for x in conference if x[1] != name]
+    temp = [x for x in conference if x[1].lower() == name.lower()]
+    conference = [x for x in conference if x[1].lower() != name.lower()]
     conference = temp + conference
+     
+    for tup in conference:
+        print(tup)
     
-    print("{} finished getting cID".format(datetime.now()))
-
-    cID = list(map(lambda x: x[0], conference))
-
-    print("{} getting papers published".format(datetime.now()))
-
-    #print(removeCon("SELECT paperID, paperTitle, publishedDate, conferenceID FROM papers WHERE conferenceID IN {}".format(tuple(cID))))
-    curP.execute(removeCon("SELECT paperID, conferenceID FROM papers WHERE conferenceID IN {}".format(tuple(cID))))
-    papers = curP.fetchall()  
-    print("{} finished getting paper".format(datetime.now()) + ' ' + str(len(papers)))
-    cID_papers = {}
-  
-    #papers contains tuples of (paperID, paperTitle, publishedDate, conferenceID)
-    for pID,cID in papers:
-        cID_papers.setdefault(cID,[]).append(pID) #cID_papers is a dict (cID,[pID])
-    for k in cID_papers:
-        print(len(cID_papers[k]))
-    for t in conference:
-        print(t)
-    #conference is a list of (cID,conferenceFullname)
-    return (conference, cID_papers)
-
-    curP.close()
     curC.close()
+    return conference #a list of (confID, confName)
+    
+
+def getConfPID(cIDs): #this function takes in a list of cID, and produce a dict of cID:[pID]
+    dbP = sqlite3.connect(db_PAA,check_same_thread = False)
+    curP = dbP.cursor()
+    print("{} start getting papers".format(datetime.now()))
+    curP.execute("SELECT paperId, conferenceID FROM papers WHERE conferenceID IN {}".format(tuple(cID)))
+    papers = curP.fetchall()
+    print("{} finished getting papers".format(datetime.now()))
+    cID_papers = {}
+    for pID, cID in papers:
+        cID_papers.setdefault(cID,[]).append(pID)
+    curP.close()
+    return cID_papers #cID_papers is a dict of cID:[pID]
+     
+
 
 def getAff(aff):
     dbP = sqlite3.connect(db_PAA, check_same_thread = False)
@@ -390,7 +370,6 @@ def match(name1, name2):
     ls2 = name2.split(' ')
     ls1 = [x for x in ls1 if x != 'the' and x != 'college' and x != 'department' and x != 'of' and x != 'and' and x != 'conference' and x != 'journal' and x != 'university']
     ls2 = [x for x in ls2 if x != 'the' and x != 'college' and x != 'department' and x != 'of' and x != 'and' and x != 'conference' and x != 'journal' and x != 'university']
-
     for word in ls1:
         exist = False
         for w in ls2:
@@ -398,8 +377,6 @@ def match(name1, name2):
                 exist = True
                 break
         if not exist: return False
-
-
     return True
 
 
@@ -418,4 +395,4 @@ def contains(name1, name2):
     return True
 
 if __name__ == '__main__':
-    trial = getAuthor('stephen m blackburn',False,True)
+    trial = getConf('programming implementation')
