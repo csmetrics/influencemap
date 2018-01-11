@@ -50,17 +50,19 @@ def getField(pID):
     dbN = sqlite3.connect(db_FName, check_same_thread = False)
     curK = dbK.cursor()
     curFN = dbN.cursor()
+    for p in pID:
+        print(p)
     if len(pID) == 1:
-         #print("{} Getting fieldID".format(datetime.now()))
+         print("{} Getting fieldID".format(datetime.now()))
          curK.execute("SELECT FieldID FROM paperKeywords WHERE PaperID = '" + pID[0] + "'")
          #curK.execute(removeCon("SELECT FieldID FROM paperKeywords WHERE PaperID IN {}".format(tuple(pID))))
     else:
-         #print("{} Getting fieldID".format(datetime.now()))
+         print("{} Getting fieldID".format(datetime.now()))
          curK.execute(removeCon("SELECT FieldID FROM paperKeywords WHERE PaperID IN {}".format(tuple(pID))))
          #curK.execute("SELECT FieldID FROM paperKeywords WHERE PaperID == '" + pID[0] + "'")
     res = list(map(lambda x: x[0],curK.fetchall()))
-    #print("{} finished getting fieldID".format(datetime.now()))
-    #print("{} getting fieldName".format(datetime.now()))
+    print("{} finished getting fieldID".format(datetime.now()))
+    print("{} getting fieldName".format(datetime.now()))
     if len(res) > 0:
          if len(set(res)) > 1:
             res = sorted(dict(Counter(res)).items(),key=operator.itemgetter(1),reverse=True) #produce a dict filedID: numOfOccur sorted in desending order
@@ -103,7 +105,7 @@ def getPaperName(pID):
         return (title[0][0], title[0][1])
     else: return ('','')
 
-def getAuthor(name,cbfunc=lambda _ : None,expand=False,use_cache=False):
+def getAuthor(name,nonExpandAID=[],cbfunc=lambda _ : None,expand=False,use_cache=False):
     if use_cache:
        with open(saved_dir,'r') as savedFile:
            data_exist_author = json.load(savedFile)
@@ -133,6 +135,7 @@ def getAuthor(name,cbfunc=lambda _ : None,expand=False,use_cache=False):
     #Extracting al the authorID whose name matches
 
     allAuthor = []
+    authorNotSameName = []
     lstN = name.split(' ')[-1]
     fstN = name.split(' ')[0]
     fstLetter = fstN[0]
@@ -144,17 +147,15 @@ def getAuthor(name,cbfunc=lambda _ : None,expand=False,use_cache=False):
     if not expand:
         curA.execute("SELECT * FROM authors WHERE authorName LIKE '% " + lstN + "' AND (authorName LIKE '" + fstN + "%' OR substr(authorName, 1, 2) == '" + fstLetter + " ')")
         allAuthor = curA.fetchall()
+        for a in allAuthor:
+            print(a)
         authorNotSameName = [x for x in allAuthor if x[1] != name]
 
         allAuthor = [x for x in allAuthor if x[1] == name]
-
-        with open(temp_saved_aID,'w') as saved_aID:
-             if len(authorNotSameName) != 0:
-                 json.dump(authorNotSameName,saved_aID,indent = 2)
-             else: json.dump([],saved_aID,indent = 2)
+        
     else:
-        with open(temp_saved_aID) as saved_aID:
-             allAuthor = json.load(saved_aID)
+        allAuthor = nonExpandAID
+
     print("{} finished getting all the aID".format(datetime.now()))
     cbfunc("finished getting all the aID")
     author = {} #authorID is the key and authorName is the value
@@ -212,7 +213,9 @@ def getAuthor(name,cbfunc=lambda _ : None,expand=False,use_cache=False):
     print("{} finish counting, getting the fieldName and recent paper".format(datetime.now()))
     cbfunc("finish counting, getting the fieldName and recent paper")
     for tuples in tempres:
+        print(tuples[0])
         recent = getPaperName(tuples[-1]) #a tuple (paperName, date)
+        print("{} finished getting recentPaper".format(datetime.now()))
         finalresult.append({'name':tuples[0],'authorID':tuples[1],'numpaper':tuples[2],'affiliation':tuples[3],'field':getField(tuples[4]),'recentPaper':recent[0],'publishedDate':recent[1]})
     print("{} done".format(datetime.now()))
     cbfunc("done")
@@ -220,30 +223,14 @@ def getAuthor(name,cbfunc=lambda _ : None,expand=False,use_cache=False):
     dbA.commit()
     dbPAA.close()
     dbA.close()
-    '''
-    if not expand:
-         with open(temp_saved_auInfo, 'w' ) as saved_auInfo:
-              json.dump(finalresult, saved_auInfo, indent = 2)
-         with open(temp_saved_aIDpID, 'w') as saved_aIDpID:
-              json.dump(aIDpIDDict, saved_aIDpID, indent = 2)
-    else:
-         with open(temp_saved_auInfo) as saved_auInfo:
-              data_exist_auInfo = json.load(saved_auInfo)
-         for dic in finalresult:
-              data_exist_auInfo.append(dic)
-         with open(temp_saved_aIDpID) as saved_aIDpID:
-              data_exist_aIDpID = json.load(saved_aIDpID)
-         for key in aIDpIDDict:
-              data_exist_aIDpID[key] = aIDpIDDict[key]
-         finalresult = data_exist_auInfo
-         aIDpIDDict = data_exist_aIDpID
-    '''
+   
     for dic in finalresult: #finalresult is a list of dict
          print(dic)
     print(len(finalresult))
     print(len(aIDpIDDict))
 
-    return (finalresult,aIDpIDDict)
+    if not expand: return (finalresult, aIDpIDDict, authorNotSameName) #if not expand, will also return a list of authorID whose name are not exactly the same
+    else: return (finalresult,aIDpIDDict) 
 
 
 def getJournal(name):
@@ -265,7 +252,14 @@ def getJournal(name):
 
     for tup in journals:
         print(tup)
-    return journals #journals is a list of (journalID, journalName)
+    
+    output = []
+   
+    for tup in journals:
+        temp = {'id':tup[0],'name':tup[1]}
+        output.append(temp)
+
+    return output #output is a list of {'id':journalID, 'name':journalName}
 
 def getJourPID(jIDs): #thie function takes in a list of journalID, and produce a dict of jID:[pID]
     dbPAA = sqlite3.connect(db_PAA, check_same_thread = False)
@@ -300,9 +294,14 @@ def getConf(name):
      
     for tup in conference:
         print(tup)
+
+    output = []
+    
+    for tup in conference:
+        output.append({'id':tup[0],'name':tup[1]})        
     
     curC.close()
-    return conference #a list of (confID, confName)
+    return output #a list of {'id':confID, 'name':confName}
     
 
 def getConfPID(cIDs): #this function takes in a list of cID, and produce a dict of cID:[pID]
@@ -395,4 +394,7 @@ def contains(name1, name2):
     return True
 
 if __name__ == '__main__':
-    trial = getAuthor('stephen m blackburn',lambda x:x, True, False)
+    trial = getAuthor('stephen m blackburn')
+    nonExpandID = trial[-1]
+    xx = getAuthor('stephen m blackburn',nonExpandAID = nonExpandID,expand=True)
+    
