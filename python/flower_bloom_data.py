@@ -23,7 +23,7 @@ def flower_df_to_graph(score_df, ego):
     normed_sum = min_max_scaler.fit_transform(np.log(score_df['sum']).values.reshape(-1, 1)).reshape(NUM_LEAVES)
 
     # Ego Graph
-    egoG = nx.DiGraph(ego=ego)
+    egoG = nx.DiGraph(ego=ego, max_influenced=score_df['influenced'].max(), max_influencing=score_df['influencing'].max())
 
     # Add ego
     egoG.add_node(ego, weight=None)
@@ -34,8 +34,8 @@ def flower_df_to_graph(score_df, ego):
         egoG.add_node(row['entity_id'], nratiow=normed_ratio[i], ratiow=row['ratio'], sumw=normed_sum[i])
 
         # Add influence weights
-        egoG.add_edge(ego, row['entity_id'], weight=normed_influencing[i], direction='out')
-        egoG.add_edge(row['entity_id'], ego, weight=normed_influenced[i], direction='in')
+        egoG.add_edge(ego, row['entity_id'], weight=row['influencing'], nweight=normed_influencing[i], direction='out')
+        egoG.add_edge(row['entity_id'], ego, weight=row['influenced'], nweight=normed_influenced[i], direction='in')
 
     return egoG
 
@@ -44,7 +44,7 @@ if __name__ == "__main__":
     from get_flower_df import gen_search_df
     from get_flower_data import generate_scores, generate_score_df
     from entity_type import *
-    from draw_flower import draw_flower
+    from draw_flower import draw_flower, draw_cite_volume
     import os, sys
     import sqlite3
 
@@ -52,7 +52,7 @@ if __name__ == "__main__":
     user_in = sys.argv[1]
 
     # get paper ids associated with input name
-    _, id_2_paper_id = getAuthor(user_in, lambda _ : None)
+    _, id_2_paper_id = getAuthor(user_in)
 
     conn = sqlite3.connect(DB_PATH)
 
@@ -65,10 +65,10 @@ if __name__ == "__main__":
 
     flower_graph = flower_df_to_graph(flower_df, user_in)
 
-
     plot_dir = os.path.join(OUT_DIR, 'figures')
 
     if not os.path.exists(plot_dir):
         os.makedirs(plot_dir)
 
-    draw_flower(egoG=flower_graph, filename=os.path.join(plot_dir, 'test.png'))
+    draw_flower(egoG=flower_graph, filename=os.path.join(plot_dir, 'test_flower.png'))
+    draw_cite_volume(egoG=flower_graph, filename=os.path.join(plot_dir, 'test_bar.png'))
