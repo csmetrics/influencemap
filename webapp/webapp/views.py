@@ -69,29 +69,18 @@ def search(request):
 
     selfcite = True if request.GET.get("selfcite") == "true" else False
     keyword = request.GET.get("keyword")
-    option = [x for x in optionlist if x.get('id', '') == request.GET.get("option")][0]
+    option = request.GET.get("option")
     print(keyword)
     if keyword != "":
-        print("{}\t{}\t{}".format(datetime.now(), __file__ , entity_of_interest[option['id']].__name__))
-        entities, id_pid_dict =  entity_of_interest[option['id']](keyword, progressCallback) #(authors_testing, dict()) # getAuthor(keyword)
-
-    # path to the influence flowers
-    inflin = os.path.join(BASE_DIR, "output/flower1.png")
-    inflby = os.path.join(BASE_DIR, "output/flower2.png")
-    if False: #option.get('id') == 'conf':
-        print("{}\t{}\t{}".format(datetime.now(), __file__ , getFlower.__name__))
-        inflflower = getFlower(id_2_paper_id=id_pid_dict, name=keyword, ent_type='conference')
-    else:
-        inflflower = []#[inflin, inflby]
-
+        print("{}\t{}\t{}".format(datetime.now(), __file__ , entity_of_interest[option].__name__))
+        if option == 'author':
+            entities, id_pid_dict =  entity_of_interest[option](keyword, progressCallback) #(authors_testing, dict()) # getAuthor(keyword)
+        else:
+            entities = entity_of_interest[option](keyword, progressCallback)
     data = {
-        "inflflower": inflflower,
-        "authors": entities,
+        "entities": entities,
     }
     return JsonResponse(data, safe=False)
-
-
-
 
 
 def loadall(request):
@@ -113,24 +102,24 @@ def loadall(request):
     data = {
         "authors": entities,
     }
+
     return JsonResponse(data, safe=False)
-
-
-
-
-
     
 
 def submit(request):
-    global keyword, option, selfcite
+    global keyword, option, selfcite, id_pid_dict
     selected_ids = request.GET.get("authorlist").split(",")
+    option = request.GET.get("option")
+    print(option)
+    if option == 'conference':
+        id_pid_dict = getConfPID(selected_ids)
     print("selected_ids", selected_ids)
     id_2_paper_id = dict()
     for aid in selected_ids:
         id_2_paper_id[aid] = id_pid_dict[aid]
     print("{}\t{}\t{}".format(datetime.now(), __file__ , getFlower.__name__))
     print("selfcite :" + str(selfcite))
-    image_urls = getFlower(id_2_paper_id=id_2_paper_id, name=keyword, ent_type=option['id'])
+    image_urls = getFlower(id_2_paper_id=id_2_paper_id, name=keyword, ent_type=option)
     image_urls = ["static/" + url for url in image_urls]
     data = {
         "images": image_urls,
