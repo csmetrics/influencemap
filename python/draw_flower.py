@@ -4,6 +4,7 @@ import matplotlib.pyplot as plt
 import seaborn as sns
 import numpy as np
 import networkx as nx
+import math
 
 # Config setup
 from config import *
@@ -15,7 +16,7 @@ def draw_flower(egoG=None, ax=None,
 
     ps = plot_setting
     if not ax:
-        fig = plt.figure(figsize=(12, 8))
+        fig = plt.figure(figsize=(16, 8))
         ax = fig.add_subplot(111)
 
     sns.set_context("talk", font_scale=1.)
@@ -75,18 +76,36 @@ def draw_flower(egoG=None, ax=None,
         else:
             text_angle = anglelist[i]
 
-        xt = xp * (1.06 + 0.0145 * (len(node) - 1))
-        yt = yp * (1.06 + 0.0145 * (len(node) - 1))
+        # name split in words
+        words = node.split()
+
+        # Position of text
+        xt = xp * (1.1 + 0.01 * (max(map(len, words)) - 1))
+        yt = yp * (1.1 + 0.01 * (max(map(len, words)) - 1))
+
+        # values to determin how to space word/name
+        if len(words) > 1:
+            word_split = len(words) / 2
+            floor_len = max(sum(map(len, words[:math.floor(word_split)])), sum(map(len, words[math.floor(word_split):])))
+            ceil_len = max(sum(map(len, words[:math.ceil(word_split)])), sum(map(len, words[math.ceil(word_split):])))
+
+            if floor_len < ceil_len:
+                text = ' '.join(words[:math.floor(word_split)]) + '\n' + ' '.join(words[math.floor(word_split):])
+
+            else:
+                text = ' '.join(words[:math.ceil(word_split)]) + '\n' + ' '.join(words[math.ceil(word_split):])
+        else:
+            text = words[0]
 
         # Draw text
-        ax.text(xt, yt, node, size=12,
+        ax.text(xt, yt, text, size=15,
             horizontalalignment='center',
             verticalalignment='center',
             rotation_mode='anchor',
             rotation=text_angle * 180.0 / np.pi)
 
-    ax.set_xlim((-1.4, 1.4))
-    ax.set_ylim((-.1, 1.3))
+    ax.set_xlim((-1.2, 1.2))
+    ax.set_ylim((-.1, 1.1))
     ax.axis('off')
 
     if filename != None:

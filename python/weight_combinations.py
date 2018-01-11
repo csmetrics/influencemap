@@ -17,7 +17,7 @@ from entity_type import Entity, Entity_map
 from draw_egonet import draw_halfcircle, draw_twoway_halfcircle
 from influence_weight import get_weight
 from flower_bloom_data import get_flower_df, flower_df_to_graph
-from draw_flower import draw_flower
+from draw_flower import draw_flower, draw_cite_volume
 
 # Config setup
 from config import *
@@ -33,7 +33,7 @@ def flower_wtest(conn, data_df, scheme, name, n):
         else:
             sdict[weight_types[i]] = False
 
-    influence_dict = generate_scores(conn, Entity_map(Entity.AUTH, Entity.AUTH), data_df, inc_self=True, calc_weight=wfunc_test(sdict))
+    influence_dict = generate_scores(conn, Entity_map(Entity.AUTH, Entity.AUTH), data_df, inc_self=False, calc_weight=wfunc_test(sdict))
 
     score_df = generate_score_df(influence_dict)
     
@@ -46,7 +46,8 @@ def flower_wtest(conn, data_df, scheme, name, n):
     if not os.path.exists(plot_dir):
         os.makedirs(plot_dir)
 
-    draw_flower(egoG=flower_graph, filename=os.path.join(plot_dir, 'weight_combination{}.png'.format(n)))
+    draw_flower(egoG=flower_graph, filename=os.path.join(plot_dir, 'weight_combination_flower{}.png'.format(n)))
+    draw_cite_volume(egoG=flower_graph, filename=os.path.join(plot_dir, 'weight_combination_bar{}.png'.format(n)))
 
 if __name__ == '__main__':
     import itertools
