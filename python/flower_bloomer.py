@@ -11,10 +11,11 @@ sns.set()
 plt.switch_backend('agg')
 
 # local module imports
-from get_flower_data import *
+from get_flower_data import generate_scores, generate_score_df
 from get_flower_df import gen_search_df
 from entity_type import Entity, Entity_map
-from draw_egonet import draw_halfcircle
+from draw_flower import draw_flower
+from flower_bloom_data import get_flower_df, flower_df_to_graph
 
 # Config setup
 from config import *
@@ -26,9 +27,10 @@ def getEntityMap(ego, outer):
 def drawFlower(conn, ent_type, ent_type2, data_df, dir_out, name):   
     # Generate associated author scores for citing and cited
     influence_dict = generate_scores(conn, getEntityMap(ent_type, ent_type2), data_df)
-    citing_records = influence_dict['influenced']
-    cited_records = influence_dict['influencing']
-
+    score_df = generate_score_df(influence_dict)
+    flower_df = get_flower_df(score_df)
+    flower_graph = flower_df_to_graph(flower_df, name)
+    
     #### START PRODUCING GRAPH
     plot_dir = os.path.join(dir_out, 'figures')
 
@@ -36,33 +38,17 @@ def drawFlower(conn, ent_type, ent_type2, data_df, dir_out, name):
       if not os.path.exists(dir):
           os.makedirs(dir)
 
-    # get the top x influencersdrawFlower(conn, Entity.AUTH, citing_papers, cited_papers, my_ids, filter_dict, dir_out)
-    top_entities_influenced_by_poi = [(k, citing_records[k]) for k in sorted(citing_records, key=citing_records.get, reverse = True)][:NUM_LEAVES]
-    top_entities_that_influenced_poi = [(k, cited_records[k]) for k in sorted(cited_records, key=cited_records.get, reverse = True)][:NUM_LEAVES]
+    name_for_filename = "_".join(name.split())
     
+    image_filename = '{}_flower_{}.png'.format(name_for_filename, ent_type2)
 
-    # build a graph structure for the top data
-    personG = nx.DiGraph()
+    image_path = os.path.join(plot_dir, image_filename)
 
-    for entity in top_entities_that_influenced_poi:
-      # note that edge direction is with respect to influence, not citation i.e. for add_edge(a,b,c) it means a influenced b with a weight of c 
-      personG.add_edge(entity[0], name, weight=float(entity[1]))
-
-    for entity in top_entities_influenced_by_poi:
-      personG.add_edge(name, entity[0], weight=float(entity[1]))
-
- 
-    influencedby_filename = 'influencedby_{}.png'.format(ent_type2)
-    influencedto_filename = 'influencedto_{}.png'.format(ent_type2)
-
-    influencedby_path = os.path.join(plot_dir, influencedby_filename)
-    influencedto_path = os.path.join(plot_dir, influencedto_filename)
-
-    print("drawing graphs")
-    draw_halfcircle(graph=personG, ego=name, renorm_weights='log', direction='in', filename = influencedby_path)
-    draw_halfcircle(graph=personG, ego=name, renorm_weights='log', direction='out', filename = influencedto_path)
-    print("finished graphs")
-    return influencedby_filename, influencedto_filename
+    print("drawing graph")
+    draw_flower(egoG=flower_graph, filename = image_path)
+    print("finished graph")
+    print(image_filename)
+    return image_filename
 
 
 def getFlower(id_2_paper_id, name, ent_type):
@@ -80,7 +66,5 @@ def getFlower(id_2_paper_id, name, ent_type):
     entity_to_affiliation = drawFlower(conn, ent_type, "institution" , data_df, OUT_DIR, name)
 
     conn.close()
-    file_names = []
-    for ls in [entity_to_author, entity_to_conference, entity_to_affiliation]:
-        file_names.extend(ls)
+    file_names = [entity_to_author, entity_to_conference, entity_to_affiliation]
     return file_names

@@ -67,39 +67,24 @@
         </div>
       </div>
       <div id="image-container" class="container invisible">
-      <div class="row">
-        <div class="col-md-12">
-          Keyword: <b>{{ selectedKeyword }}</b>
-          Type: <b>{{ selectedOption.name }}</b>
+        <div class="row">
+          <div class="col-md-12">
+            Keyword: <b>{{ selectedKeyword }}</b>
+            Type: <b>{{ selectedOption.name }}</b>
+          </div>
         </div>
-      </div>
         <span>To Author</span>
-      <div class="row">
-        <div class="col-md-6">
+        <div class="row">
           <img id="image1" class="fit-wrapper" src=""/>
         </div>
-        <div class="col-md-6">
+        <span>To conference</span>
+        <div class="row">
           <img id="image2" class="fit-wrapper" src=""/>
         </div>
-      </div>
-      <span>To conference</span>
-      <div class="row">
-        <div class="col-md-6">
+          <span>To institution</span>
+        <div class="row">
           <img id="image3" class="fit-wrapper" src=""/>
         </div>
-        <div class="col-md-6">
-          <img id="image4" class="fit-wrapper" src=""/>
-        </div>
-      </div>
-        <span>To institution</span>
-      <div class="row">
-        <div class="col-md-6">
-          <img id="image5" class="fit-wrapper" src=""/>
-        </div>
-        <div class="col-md-6">
-          <img id="image6" class="fit-wrapper" src=""/>
-        </div>
-      </div>
       </div>
       <div id="table-container" class="container invisible">
         <table id="searchtable" class="row-border hover order-column" cellspacing="0" width="100%">
@@ -118,9 +103,6 @@ var imageContainer = document.getElementById("image-container");
 var image1 = document.getElementById("image1");
 var image2 = document.getElementById("image2");
 var image3 = document.getElementById("image3");
-var image4 = document.getElementById("image4");
-var image5 = document.getElementById("image5");
-var image6 = document.getElementById("image6");
 var loadMore = document.getElementById("load-more-btn");
 var inputBar = document.getElementById("name-search-bar");
 var selfCiteCheckbox = document.getElementById("self-cite");
@@ -256,9 +238,6 @@ submitButton.addEventListener('click', function(){
       image1.src = result.images[0];
       image2.src = result.images[1];
       image3.src = result.images[2];
-      image4.src = result.images[3];
-      image5.src = result.images[4];
-      image6.src = result.images[5];
     },
     error: function (result) {
       console.log("submitButton error");
