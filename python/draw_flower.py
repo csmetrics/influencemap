@@ -40,10 +40,11 @@ def draw_flower(egoG=None, ax=None,
     in_edge_color = dot_colors[round(1*num_clrs/4)] #{'r':192, 'g':32, 'b':32}
 
     anglelist = np.linspace(np.pi, 0., num=NUM_LEAVES)
+    n_outer_nodes = len(outer_nodes)
 
     for i, node in enumerate(outer_nodes):
-        xp = np.cos(anglelist[i]) #np.log10(venue_metric[vn])/metric_max
-        yp = np.sin(np.abs(anglelist[i])) # np.random.random() 
+        xp = np.cos(anglelist[i])
+        yp = np.sin(np.abs(anglelist[i]))
 
         out_lw = ps['max_line'] * egoG[center_node][node]['weight'] + ps['min_line']
         in_lw = ps['max_line'] * egoG[node][center_node]['weight'] + ps['min_line']
@@ -65,10 +66,26 @@ def draw_flower(egoG=None, ax=None,
         ax.plot(xp, yp, 'o', #c=dot_colors[int(ci)], markersize=int(sz), 
                 alpha=.9, mec='0.5', mew=.5) 
 
+        # Angle of text dependent on side of flower
+        if i < n_outer_nodes / 2:
+            text_angle = anglelist[i] - np.pi
+        else:
+            text_angle = anglelist[i]
+
+        xt = xp * (1.06 + 0.0145 * (len(node) - 1))
+        yt = yp * (1.06 + 0.0145 * (len(node) - 1))
+
+        # Draw text
+        ax.text(xt, yt, node, size=12,
+            horizontalalignment='center',
+            verticalalignment='center',
+            rotation_mode='anchor',
+            rotation=text_angle * 180.0 / np.pi)
 
 
-    ax.set_xlim((-1.2, 1.2))
-    ax.set_ylim((-.1, 1.1))
+
+    ax.set_xlim((-1.4, 1.4))
+    ax.set_ylim((-.1, 1.3))
     ax.axis('off')
     if filename != None:
         plt.savefig(filename)

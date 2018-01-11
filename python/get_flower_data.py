@@ -61,8 +61,8 @@ def generate_score_df(influence_dict, ratio_func=np.vectorize(lambda x,y : x - y
 
     # Turn influence dictionaries into an outer merged table
     for tkey, data_dict in influence_dict.items():
-        df_dict.append(pd.DataFrame.from_records(list(data_dict.items()), columns=['entity id', tkey]))
-    score_df = pd.merge(*df_dict, how='outer', on='entity id', sort=False)
+        df_dict.append(pd.DataFrame.from_records(list(data_dict.items()), columns=['entity_id', tkey]))
+    score_df = pd.merge(*df_dict, how='outer', on='entity_id', sort=False)
 
     # calculate minimum scores to fill nan values (for ratio)
     nan_influenced = score_df['influenced'].min() / 2

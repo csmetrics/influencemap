@@ -28,7 +28,7 @@ def drawFlower(conn, ent_type, ent_type2, data_df, dir_out, name):
     # Generate associated author scores for citing and cited
     influence_dict = generate_scores(conn, getEntityMap(ent_type, ent_type2), data_df)
     score_df = generate_score_df(influence_dict)
-    flower_df = get_flower_df(score_df)
+    flower_df = get_flower_df(score_df, name)
     flower_graph = flower_df_to_graph(flower_df, name)
     
     #### START PRODUCING GRAPH
