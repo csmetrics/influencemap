@@ -32,12 +32,11 @@ def draw_flower(egoG=None, ax=None,
     # Get basic node information from ego graph
     outer_nodes = list(egoG)
     outer_nodes.remove(center_node)
-    outer_nodes.sort(key=lambda n : egoG.nodes[n]['weight'])
+    outer_nodes.sort(key=lambda n : egoG.nodes[n]['ratiow'])
 
-    num_clrs = 100
-    dot_colors = sns.color_palette("RdBu", num_clrs)
-    out_edge_color = dot_colors[round(3*num_clrs/4)] #{'r':32, 'g':32, 'b':192}
-    in_edge_color = dot_colors[round(1*num_clrs/4)] #{'r':192, 'g':32, 'b':32}
+    dot_colors = sns.color_palette("RdBu", ps['num_colors'])
+    out_edge_color = dot_colors[round(3*ps['num_colors']/4)] #{'r':32, 'g':32, 'b':192}
+    in_edge_color = dot_colors[round(1*ps['num_colors']/4)] #{'r':192, 'g':32, 'b':32}
 
     anglelist = np.linspace(np.pi, 0., num=NUM_LEAVES)
     n_outer_nodes = len(outer_nodes)
@@ -48,6 +47,9 @@ def draw_flower(egoG=None, ax=None,
 
         out_lw = ps['max_line'] * egoG[center_node][node]['weight'] + ps['min_line']
         in_lw = ps['max_line'] * egoG[node][center_node]['weight'] + ps['min_line']
+
+        size = egoG.nodes[node]['sumw'] * ps['max_marker'] / 2 + ps['max_marker'] / 2
+        colour = egoG.nodes[node]['nratiow'] * (ps['num_colors'] - 1)
 
         # draw connectors/arcs
         ax.annotate("", xy=(xroot, yroot), xycoords='data',
@@ -63,7 +65,7 @@ def draw_flower(egoG=None, ax=None,
                                 connectionstyle="arc3,rad=0.12",),)
 
         # draw the node
-        ax.plot(xp, yp, 'o', #c=dot_colors[int(ci)], markersize=int(sz), 
+        ax.plot(xp, yp, 'o', markersize=int(size), c=dot_colors[int(colour)],
                 alpha=.9, mec='0.5', mew=.5) 
 
         # Angle of text dependent on side of flower

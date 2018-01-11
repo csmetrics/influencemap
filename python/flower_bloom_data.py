@@ -1,6 +1,7 @@
 import pandas as pd
 import networkx as nx
 import numpy as np
+from sklearn import preprocessing
 
 # Config setup
 from config import *
@@ -13,13 +14,13 @@ def get_flower_df(score_df, ego):
 # Turns the dataframe for flower into networkx graph
 # Additionally normalises influence values
 def flower_df_to_graph(score_df, ego):
+    # Create a minimum and maximum processor object
+    min_max_scaler = preprocessing.MinMaxScaler()
 
-    # Normalise dataframe values 
-    influenced_max = score_df['influenced'].max()
-    influencing_max = score_df['influencing'].max()
-
-    score_df['normed influenced'] = np.vectorize(lambda x : x / influenced_max)(score_df['influenced'])
-    score_df['normed influencing'] = np.vectorize(lambda x : x / influencing_max)(score_df['influencing'])
+    normed_influenced = min_max_scaler.fit_transform(score_df['influenced'].values.reshape(-1, 1)).reshape(NUM_LEAVES)
+    normed_influencing = min_max_scaler.fit_transform(score_df['influencing'].values.reshape(-1, 1)).reshape(NUM_LEAVES)
+    normed_ratio = min_max_scaler.fit_transform(np.log(score_df['ratio']).values.reshape(-1, 1)).reshape(NUM_LEAVES)
+    normed_sum = min_max_scaler.fit_transform(np.log(score_df['sum']).values.reshape(-1, 1)).reshape(NUM_LEAVES)
 
     # Ego Graph
     egoG = nx.DiGraph(ego=ego)
@@ -28,13 +29,13 @@ def flower_df_to_graph(score_df, ego):
     egoG.add_node(ego, weight=None)
 
     # Iterate over dataframe
-    for i, row in score_df.iterrows():
+    for i, (_, row) in enumerate(score_df.iterrows()):
         # Add ratio weight
-        egoG.add_node(row['entity_id'], weight=row['ratio'])
+        egoG.add_node(row['entity_id'], nratiow=normed_ratio[i], ratiow=row['ratio'], sumw=normed_sum[i])
 
         # Add influence weights
-        egoG.add_edge(ego, row['entity_id'], weight=row['normed influencing'], direction='out')
-        egoG.add_edge(row['entity_id'], ego, weight=row['normed influenced'], direction='in')
+        egoG.add_edge(ego, row['entity_id'], weight=normed_influencing[i], direction='out')
+        egoG.add_edge(row['entity_id'], ego, weight=normed_influenced[i], direction='in')
 
     return egoG
 
