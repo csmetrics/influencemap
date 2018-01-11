@@ -4,6 +4,7 @@ import matplotlib.pyplot as plt
 import seaborn as sns
 import numpy as np
 import networkx as nx
+import math
 
 # Config setup
 from config import *
@@ -15,7 +16,7 @@ def draw_flower(egoG=None, ax=None,
 
     ps = plot_setting
     if not ax:
-        fig = plt.figure(figsize=(12, 8))
+        fig = plt.figure(figsize=(16, 8))
         ax = fig.add_subplot(111)
 
     sns.set_context("talk", font_scale=1.)
@@ -34,6 +35,7 @@ def draw_flower(egoG=None, ax=None,
     outer_nodes.remove(center_node)
     outer_nodes.sort(key=lambda n : egoG.nodes[n]['ratiow'])
 
+    # Colours
     dot_colors = sns.color_palette("RdBu", ps['num_colors'])
     out_edge_color = dot_colors[round(3*ps['num_colors']/4)] #{'r':32, 'g':32, 'b':192}
     in_edge_color = dot_colors[round(1*ps['num_colors']/4)] #{'r':192, 'g':32, 'b':32}
@@ -45,8 +47,8 @@ def draw_flower(egoG=None, ax=None,
         xp = np.cos(anglelist[i])
         yp = np.sin(np.abs(anglelist[i]))
 
-        out_lw = ps['max_line'] * egoG[center_node][node]['weight'] + ps['min_line']
-        in_lw = ps['max_line'] * egoG[node][center_node]['weight'] + ps['min_line']
+        out_lw = ps['max_line'] * egoG[center_node][node]['nweight'] + ps['min_line']
+        in_lw = ps['max_line'] * egoG[node][center_node]['nweight'] + ps['min_line']
 
         size = egoG.nodes[node]['sumw'] * ps['max_marker'] / 2 + ps['max_marker'] / 2
         colour = egoG.nodes[node]['nratiow'] * (ps['num_colors'] - 1)
@@ -74,20 +76,75 @@ def draw_flower(egoG=None, ax=None,
         else:
             text_angle = anglelist[i]
 
-        xt = xp * (1.06 + 0.0145 * (len(node) - 1))
-        yt = yp * (1.06 + 0.0145 * (len(node) - 1))
+        # name split in words
+        words = node.split()
+
+        # Position of text
+        xt = xp * (1.1 + 0.01 * (max(map(len, words)) - 1))
+        yt = yp * (1.1 + 0.01 * (max(map(len, words)) - 1))
+
+        # values to determin how to space word/name
+        if len(words) > 1:
+            word_split = len(words) / 2
+            floor_len = max(sum(map(len, words[:math.floor(word_split)])), sum(map(len, words[math.floor(word_split):])))
+            ceil_len = max(sum(map(len, words[:math.ceil(word_split)])), sum(map(len, words[math.ceil(word_split):])))
+
+            if floor_len < ceil_len:
+                text = ' '.join(words[:math.floor(word_split)]) + '\n' + ' '.join(words[math.floor(word_split):])
+
+            else:
+                text = ' '.join(words[:math.ceil(word_split)]) + '\n' + ' '.join(words[math.ceil(word_split):])
+        else:
+            text = words[0]
 
         # Draw text
-        ax.text(xt, yt, node, size=12,
+        ax.text(xt, yt, text, size=15,
             horizontalalignment='center',
             verticalalignment='center',
             rotation_mode='anchor',
             rotation=text_angle * 180.0 / np.pi)
 
-
-
-    ax.set_xlim((-1.4, 1.4))
-    ax.set_ylim((-.1, 1.3))
+    ax.set_xlim((-1.2, 1.2))
+    ax.set_ylim((-.1, 1.1))
     ax.axis('off')
+
+    if filename != None:
+        plt.savefig(filename)
+
+def draw_cite_volume(egoG=None, ax=None, filename=None):
+    if not ax:
+        fig = plt.figure(figsize=(15, 4))
+        ax = fig.add_subplot(111)
+
+    center_node = egoG.graph['ego']
+
+    # Get basic node information from ego graph
+    outer_nodes = list(egoG)
+    outer_nodes.remove(center_node)
+    outer_nodes.sort(key=lambda n : egoG.nodes[n]['ratiow'])
+
+    # x position
+    x_pos = [x + 1 for x in range(NUM_LEAVES)]
+
+    v_bar_influencing = ax.bar([x - 0.2 for x in x_pos], [egoG[center_node][node]['weight'] for node in outer_nodes], width=.4) #, color=bar_colrs3[mdx])
+    ax.set_ylim([0, max(egoG.graph['max_influencing'], egoG.graph['max_influenced'])])
+
+    ax2 = ax.twinx()
+    v_bar_influencing = ax.bar([x + 0.2 for x in x_pos], [egoG[node][center_node]['weight'] for node in outer_nodes], width=.4) #, color=bar_colrs3[mdx])
+    ax2.set_ylim([0, max(egoG.graph['max_influencing'], egoG.graph['max_influenced'])])
+
+    tk2 = plt.xticks([],[])
+    ax.set_xticks(x_pos)
+    ax.set_xticklabels(outer_nodes, rotation=90)
+
+    ax.set_ylabel('# references')#, color=bar_colrs3[mdx])
+    ax2.set_ylabel('# citations')#, color=bar_colrs2[mdx])
+
+    #for tl in ax.get_yticklabels():
+    #    tl.set_color(bar_colrs3[mdx])
+    #for tl in ax2.get_yticklabels():
+    #    tl.set_color(bar_colrs2[mdx]) 
+    plt.tight_layout()
+
     if filename != None:
         plt.savefig(filename)
