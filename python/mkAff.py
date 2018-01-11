@@ -124,7 +124,7 @@ def getAuthor(name,cbfunc,expand=False,use_cache=False):
 
     dbPAA = sqlite3.connect(db_PAA, check_same_thread = False)
     dbA = sqlite3.connect(db_Authors, check_same_thread = False)
-    dbA.create_function("compareMiddle",2,compareMiddle)
+    #dbA.create_function("compareMiddle",2,compareMiddle)
     dbA.create_function("similar",2,similar)
     curP = dbPAA.cursor()
     curA = dbA.cursor()
@@ -220,7 +220,7 @@ def getAuthor(name,cbfunc,expand=False,use_cache=False):
     dbA.commit()
     dbPAA.close()
     dbA.close()
-
+    '''
     if not expand:
          with open(temp_saved_auInfo, 'w' ) as saved_auInfo:
               json.dump(finalresult, saved_auInfo, indent = 2)
@@ -237,7 +237,7 @@ def getAuthor(name,cbfunc,expand=False,use_cache=False):
               data_exist_aIDpID[key] = aIDpIDDict[key]
          finalresult = data_exist_auInfo
          aIDpIDDict = data_exist_aIDpID
-
+    '''
     for dic in finalresult: #finalresult is a list of dict
          print(dic)
     print(len(finalresult))
@@ -395,4 +395,4 @@ def contains(name1, name2):
     return True
 
 if __name__ == '__main__':
-    trial = getConf('programming implementation')
+    trial = getAuthor('stephen m blackburn',lambda x:x, True, False)
