@@ -233,7 +233,7 @@ def getAuthor(name,nonExpandAID=[],cbfunc=lambda _ : None,expand=False,use_cache
     else: return (finalresult,aIDpIDDict) 
 
 
-def getJournal(name):
+def getJournal(name, a=None):
     dbJ = sqlite3.connect(db_Jour, check_same_thread = False)
     curJ = dbJ.cursor()
     dbJ.create_function("match",2,match)
@@ -276,7 +276,7 @@ def getJourPID(jIDs): #thie function takes in a list of journalID, and produce a
 
 
 
-def getConf(name):
+def getConf(name, a=None):
     name = name.upper()
     dbConf = sqlite3.connect(db_conf, check_same_thread = False)
     dbP = sqlite3.connect(db_PAA, check_same_thread = False)
@@ -307,8 +307,9 @@ def getConf(name):
 def getConfPID(cIDs): #this function takes in a list of cID, and produce a dict of cID:[pID]
     dbP = sqlite3.connect(db_PAA,check_same_thread = False)
     curP = dbP.cursor()
+    cIDs = ["'"+cID+"'" for cID in cIDs]
     print("{} start getting papers".format(datetime.now()))
-    curP.execute("SELECT paperId, conferenceID FROM papers WHERE conferenceID IN {}".format(tuple(cID)))
+    curP.execute("SELECT paperId, conferenceID FROM papers WHERE conferenceID IN ({})".format(', '.join(cIDs)))
     papers = curP.fetchall()
     print("{} finished getting papers".format(datetime.now()))
     cID_papers = {}
@@ -319,7 +320,7 @@ def getConfPID(cIDs): #this function takes in a list of cID, and produce a dict 
      
 
 
-def getAff(aff):
+def getAff(aff, a=None):
     dbP = sqlite3.connect(db_PAA, check_same_thread = False)
     dbA = sqlite3.connect(db_aff, check_same_thread = False)
     curP = dbP.cursor()
