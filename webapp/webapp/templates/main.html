@@ -96,11 +96,13 @@
 </html>
 <script src="{% static 'js/auto-complete.min.js' %}"></script>
 <script src="{% static 'js/progressbar.js' %}"></script>
+<script src="{% static 'js/searchTableConfig.js' %}"></script>
 <script>
 
 // ----  data table  ----
 
 var tableContainer = document.getElementById("table-container");
+
 
 // table settings depending on entity type
 var searchTableConfig = {
@@ -155,49 +157,23 @@ var searchTableConfig = {
 };
 
 
-
 // function to create searchTable
 function makeSearchTable(entityType){
-  var stconfig = searchTableConfig[entityType];
-  return $('#searchtable').DataTable({
-    "pageLength": 10, // default page
-    "lengthMenu": [ 10, 20, 50, 100 ], // page options
-    "lengthChange": true,
-    "columns": stconfig['columns'],
-    "columnDefs": [
-      {
-        "targets": stconfig['idColumnNumber'],
-        "visible": false
-      },
-    ],
-    "select": {
-      "style": "multi"
-    },
-    "language": {
-      "emptyTable": "no search result"
-    },
-    "fixedColumns": true,
-    "paging": true,
-    "pagingType": "simple_numbers",
-    "ordering": true,
-    "order": [[ stconfig['orderOn'], "desc" ]],
-    "info": true,
-    "autoWidth": false,
-  });
+  var tableSettings = searchTableConfig1[entityType]['tableSettings'];
+  return $('#searchtable').DataTable(tableSettings);
 }
-
 
 // create search table
 //var searchTable = makeSearchTable('conference');
  
 // update searchTable
-function updateTable(data, table, configDict){
+function updateTable(data, table, resKeys){
   console.log("updateTable");
   table.clear();
   for(var i in data) {
     var newRow = {};
-    for(var j in configDict['responseKeys']) {
-       key = configDict['responseKeys'][j];
+    for(var j in resKeys) {
+       key = resKeys[j];
        newRow[j] = data[i][key];
     };
     table.row.add(newRow);
@@ -225,7 +201,7 @@ var submitButton = document.getElementById("submit-btn");
 // Search Button event handler
 searchButton.addEventListener('click', function(){
   var entityType = $(".entity-option:checked").val();
-  var entityTableConfig = searchTableConfig[entityType];
+  var responseKeys = searchTableConfig1[entityType]['responseKeys'];
   searchTable = makeSearchTable(entityType);
   showProgressBar();
   updateProgressBar();
@@ -240,7 +216,7 @@ searchButton.addEventListener('click', function(){
     success: function (result) { // return data if success
       console.log("searchButton success");
       // console.log(result["authors"]);
-      updateTable(result["entities"], searchTable, entityTableConfig);
+      updateTable(result["entities"], searchTable, responseKeys);
       tableContainer.classList.remove("invisible");
     },
     error: function (result) {
@@ -281,12 +257,19 @@ loadMore.addEventListener('click', function(){
 
 // Submit Button event handler
 submitButton.addEventListener('click', function(){
+  var entityType = $(".entity-option:checked").val();
+  var idColumnNumber = searchTableConfig1[entityType].idCol;
+  //alert(config['idColumnNumber']);
   var selected_indexes = searchTable.rows({selected:true})[0];
   var selected_rows = searchTable.rows( selected_indexes ).data().toArray();
   var selected_ids = [];
   for (var i in selected_rows) {
-    selected_ids.push(selected_rows[i][5]);
+    selected_ids.push(selected_rows[i][idColumnNumber]);
   }
+  console.log(entityType);
+  console.log(idColumnNumber);
+  console.log(searchTableConfig1);
+  console.log(searchTableConfig1[entityType]);
   console.log(selected_ids);
   $.ajax({
     type: "GET",
@@ -327,9 +310,6 @@ var lists = Object()
     lists["{{opt.id}}"]= {{opt.list | safe}}
   {% endfor %}
 
-  alert(obj.id)
-
-  console.log(lists[obj.id])
 
   a = new autoComplete({
     selector: '#name-search-bar',
