@@ -34,8 +34,8 @@ def flower_df_to_graph(score_df, ego):
         egoG.add_node(row['entity_id'], nratiow=normed_ratio[i], ratiow=row['ratio'], sumw=normed_sum[i])
 
         # Add influence weights
-        egoG.add_edge(ego, row['entity_id'], weight=row['influencing'], nweight=normed_influencing[i], direction='out')
-        egoG.add_edge(row['entity_id'], ego, weight=row['influenced'], nweight=normed_influenced[i], direction='in')
+        egoG.add_edge(row['entity_id'], ego, weight=row['influencing'], nweight=normed_influencing[i], direction='out')
+        egoG.add_edge(ego, row['entity_id'], weight=row['influenced'], nweight=normed_influenced[i], direction='in')
 
     return egoG
 
