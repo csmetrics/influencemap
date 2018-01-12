@@ -56,7 +56,7 @@ if __name__ == '__main__':
     user_in = sys.argv[1]
 
     # get paper ids associated with input name
-    _, id_2_paper_id = getAuthor(user_in)
+    _, id_2_paper_id, _ = getAuthor(user_in)
 
     conn = sqlite3.connect(DB_PATH)
 
