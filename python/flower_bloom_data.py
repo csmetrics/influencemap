@@ -50,15 +50,16 @@ if __name__ == "__main__":
 
     # input
     user_in = sys.argv[1]
+    id_2_paper_id = {'7FF2AF05' : [1] * PAPER_THRESHOLD}
 
     # get paper ids associated with input name
-    _, id_2_paper_id = getAuthor(user_in)
+    #_, id_2_paper_id, _ = getAuthor(user_in)
 
     conn = sqlite3.connect(DB_PATH)
 
-    data_df = gen_search_df(conn, id_2_paper_id)
+    data_df = gen_search_df(conn, id_2_paper_id, Entity.AUTH)
 
-    influence_dict = generate_scores(conn, Entity_map(Entity.AUTH, Entity.AUTH), data_df, inc_self=True)
+    influence_dict = generate_scores(conn, Entity_map(Entity.AUTH, Entity.AUTH), data_df, inc_self=False)
     score_df = generate_score_df(influence_dict)
     
     flower_df = get_flower_df(score_df, user_in)

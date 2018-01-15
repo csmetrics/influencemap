@@ -5,14 +5,15 @@ import numpy as np
 import json
 import os
 from datetime import datetime
-from flower_helpers import is_selfcite
+from flower_helpers import is_self_cite
+from entity_type import *
 
 # Config setup
 from config import *
 
 REF_LABELS = ['citing', 'citing_paper', 'citing_rc', 'cited_paper']
 INFO_COLS = ['auth_id', 'auth_count', 'conf_id', 'journ_id', 'affi_id']
-MULT_COLS = [0]
+MULT_COLS = [0, 4]
 
 # Filters the paper_ref database to relevent papers and uses pandas dataframes
 def gen_reference_df(conn, paper_ids):
@@ -20,7 +21,7 @@ def gen_reference_df(conn, paper_ids):
 
     # NEED TO CACHE THIS
     auth_cache_dict = dict()
-    is_sc_vec = np.vectorize(lambda x, y: is_selfcite(conn, x, y, auth_cache_dict), otypes=[bool])
+    is_sc_vec = np.vectorize(lambda x, y: is_collab_self_cite(conn, x, y, auth_cache_dict), otypes=[bool])
 
     total_papers = len(paper_ids)
     total_prog = 0
@@ -44,7 +45,7 @@ def gen_reference_df(conn, paper_ids):
     ref_df = pd.DataFrame.from_records(rows, columns=REF_LABELS)
 
     # calculate self citation row
-    ref_df['self_cite'] = is_sc_vec(ref_df['citing_paper'], ref_df['cited_paper'])
+    # ref_df['collab_self_cite'] = is_sc_vec(ref_df['citing_paper'], ref_df['cited_paper'])
 
     return ref_df
 
@@ -80,9 +81,10 @@ def gen_info_df(conn, ref_df):
     return ref_df
 
 # Wraps above functions to produce a dictionary of pandas dataframes for relevent information
-def gen_search_df(conn, paper_map):
+def gen_search_df(conn, paper_map, etype):
     res_dict = dict()
     threshold_papers = list()
+    entity_ids = paper_map.keys()
 
     for entity_id, paper_ids in paper_map.items():
         if len(paper_ids) < PAPER_THRESHOLD:
@@ -118,7 +120,27 @@ def gen_search_df(conn, paper_map):
     e_df = gen_info_df(conn, e_df)
     print('{} finish finding paper info for: threshold\n---'.format(datetime.now(), entity_id))
 
+    # Other entities
     res_dict[None] = e_df
+
+    # Calculate self-citations
+    is_sc_vec = np.vectorize(lambda x, y, z : is_self_cite(x, y, z, entity_ids))
+
+    # Calculate auth self-citations if auth
+    if etype == Entity.AUTH:
+        for df in res_dict.values():
+            if not df.empty:
+                df['self_cite'] = is_sc_vec(df['citing'], df['citing_auth_id'], df['cited_auth_id'])
+
+    # Calculate inst self-citations if inst
+    elif etype == Entity.AUTH:
+        for df in res_dict.values():
+            if not df.empty:
+                df['self_cite'] = is_sc_vec(df['citing'], df['citing_affi_id'], df['cited_affi_id'])
+
+    else:
+        if not df.empty:
+            df['self_cite'] = False
 
     return res_dict
 
@@ -130,7 +152,7 @@ if __name__ == "__main__":
     user_in = sys.argv[1]
 
     # get paper ids associated with input name
-    _, id_2_paper_id = getAuthor(user_in)
+    _, id_2_paper_id, _ = getAuthor(user_in)
 
     conn = sqlite3.connect(DB_PATH)
 
