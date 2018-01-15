@@ -13,18 +13,9 @@ sys.path.insert(0, PYTHON_DIR)
 from flower_bloomer import getFlower
 from mkAff import getAuthor, getJournal, getConf, getAff, getConfPID, getJourPID, getConfPID
 
-dataFunctionDict = {
-    'get_ids':{
-        'author': getAuthor, 
-        'conference': getConf, 
-        'institution': getAff, 
-        'journal': getJournal
-    },
-    'get_pids':{
-        'conference': getConfPID,
-        'jounral': getJourPID
-    }
-}
+
+
+
 AuthorList = []
 ConferenceList = []
 JournalList = []
@@ -64,6 +55,36 @@ def loadInstitutionList():
             InstitutionList = [journ.strip() for journ in f]
         Institutionist = list(set(InstitutionList))
     return InstitutionList
+
+
+dataFunctionDict = {
+    'get_ids':{
+        'author': getAuthor,
+        'conference': getConf,
+        'institution': getAff,
+        'journal': getJournal
+    },
+    'get_pids':{
+        'conference': getConfPID,
+        'jounral': getJourPID
+    },
+    'autocomplete':{
+        'author': loadAuthorList(),
+        'conference': loadConferenceList(),
+        'institution': loadJournalList(),
+        'journal': loadInstitutionList()
+    }
+}
+
+
+def autocomplete(request):
+    entity_type = request.GET.get('option')
+    print("autocomplete called")
+    print(request)
+    print(request.GET.get('option'))
+    data = dataFunctionDict['autocomplete'][entity_type]
+    return JsonResponse(data,safe=False)
+
 
 selfcite = False
 optionlist = []
@@ -120,8 +141,7 @@ def submit(request):
     image_urls = ["static/" + url for url in image_names]
 
     data = {"images": image_urls,}
-
-    return JsonResponse(data, safe=False)
+    return JsonResponse(test, safe=False)
 
 
 def main(request):
@@ -142,13 +162,6 @@ def main(request):
         "selectedKeyword": keyword,
         "selectedOption": option,
     })
-
-
-
-
-
-
-
 
 
 def loadall(request):
