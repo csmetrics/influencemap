@@ -13,18 +13,9 @@ sys.path.insert(0, PYTHON_DIR)
 from flower_bloomer import getFlower
 from mkAff import getAuthor, getJournal, getConf, getAff, getConfPID, getJourPID, getConfPID
 
-dataFunctionDict = {
-    'get_ids':{
-        'author': getAuthor, 
-        'conference': getConf, 
-        'institution': getAff, 
-        'journal': getJournal
-    },
-    'get_pids':{
-        'conference': getConfPID,
-        'jounral': getJourPID
-    }
-}
+
+
+
 AuthorList = []
 ConferenceList = []
 JournalList = []
@@ -65,13 +56,43 @@ def loadInstitutionList():
         Institutionist = list(set(InstitutionList))
     return InstitutionList
 
+
+dataFunctionDict = {
+    'get_ids':{
+        'author': getAuthor,
+        'conference': getConf,
+        'institution': getAff,
+        'journal': getJournal
+    },
+    'get_pids':{
+        'conference': getConfPID,
+        'jounral': getJourPID
+    },
+    'autocomplete':{
+        'author': loadAuthorList(),
+        'conference': loadConferenceList(),
+        'institution': loadJournalList(),
+        'journal': loadInstitutionList()
+    }
+}
+
+
+def autocomplete(request):
+    entity_type = request.GET.get('option')
+    print("autocomplete called")
+    print(request)
+    print(request.GET.get('option'))
+    data = dataFunctionDict['autocomplete'][entity_type]
+    return JsonResponse(data,safe=False)
+
+
 selfcite = False
 optionlist = []
+expanded_ids = []
 
 @csrf_exempt
 def search(request):
     global keyword, optionlist, option, selfcite, author_id_pid_dict, expanded_ids
-
     print("search!!", request.GET)
     inflflower = None
     entities = []
@@ -79,11 +100,18 @@ def search(request):
     selfcite = True if request.GET.get("selfcite") == "true" else False
     keyword = request.GET.get("keyword")
     option = request.GET.get("option")
+    expand = True if request.GET.get("expand") == 'true' else False
+    if not expanded_ids:
+        expanded_ids = []
+
     print(keyword)
 
     if keyword:
         if option == 'author':
-            entities, author_id_pid_dict, expanded_ids = dataFunctionDict['get_ids'][option](keyword, progressCallback)
+            try:
+                entities, author_id_pid_dict, expanded_ids = getAuthor(keyword, progressCallback, nonExpandAID=expanded_ids, expand=expand)
+            except:
+                entities, author_id_pid_dict = getAuthor(keyword, progressCallback, nonExpandAID=expanded_ids, expand=expand)
         else:
             entities = dataFunctionDict['get_ids'][option](keyword, progressCallback)
 
@@ -98,7 +126,6 @@ def submit(request):
 
     selected_ids = request.GET.get("authorlist").split(",")
     option = request.GET.get("option")
-
 
     if option in ['conference', 'journal']:
         id_pid_dict = dataFunctionDict['get_pids'][option](selected_ids)
@@ -120,8 +147,7 @@ def submit(request):
     image_urls = ["static/" + url for url in image_names]
 
     data = {"images": image_urls,}
-
-    return JsonResponse(data, safe=False)
+    return JsonResponse(test, safe=False)
 
 
 def main(request):
@@ -142,13 +168,6 @@ def main(request):
         "selectedKeyword": keyword,
         "selectedOption": option,
     })
-
-
-
-
-
-
-
 
 
 def loadall(request):
