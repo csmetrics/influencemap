@@ -30,8 +30,8 @@ def gen_reference_df(conn, paper_ids):
     rows = list()
 
     for chunk in paper_chunks:
-        papers_citing_me_q = 'SELECT 1, paper_id, paper_rc, paper_ref_id FROM paper_ref_count WHERE paper_ref_id IN ({})'.format(','.join(['?'] * len(chunk)))
-        papers_cited_by_me_q = 'SELECT 0, paper_id, paper_rc, paper_ref_id FROM paper_ref_count WHERE paper_id IN ({})'.format(','.join(['?'] * len(chunk)))
+        papers_citing_me_q = 'SELECT 1, paper_id, ref_count, paper_ref_id FROM paper_ref_count WHERE paper_ref_id IN ({})'.format(','.join(['?'] * len(chunk)))
+        papers_cited_by_me_q = 'SELECT 0, paper_id, ref_count, paper_ref_id FROM paper_ref_count WHERE paper_id IN ({})'.format(','.join(['?'] * len(chunk)))
 
         cur.execute(papers_citing_me_q, chunk)
         rows += cur.fetchall()
@@ -60,7 +60,7 @@ def get_paper_info(conn, paper_id):
         for i, val in enumerate(line):
             res[i].add(val)
     cur.close()
-    res_gen = (pd.Series(list(val)) if i in MULT_COLS else next(iter(val)) for i, val in enumerate(res))
+    res_gen = (','.join(sorted(list(val))) if i in MULT_COLS else next(iter(val)) for i, val in enumerate(res))
     return tuple(res_gen)
 
 # Expands the ref dataframe to include more information on papers
@@ -106,6 +106,7 @@ def gen_search_df(conn, paper_map, etype):
                 print('{} finish finding paper info for: {}\n---'.format(datetime.now(), entity_id))
 
                 res_dict[entity_id] = e_df
+                print(e_df)
 
                 # Cache pickle file
                 e_df.to_pickle(cache_path)
@@ -139,7 +140,7 @@ def gen_search_df(conn, paper_map, etype):
                 df['self_cite'] = is_sc_vec(df['citing'], df['citing_affi_id'], df['cited_affi_id'])
 
     else:
-        if not df.empty:
+        if df.empty:
             df['self_cite'] = False
 
     return res_dict

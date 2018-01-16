@@ -32,7 +32,7 @@ def get_weight(e_map, row, tweight=default):
     if e_type == Entity.AUTH:
         val = reduce(operator.mul, map(lambda v : is_weighted(*v)(row), tweight.items()))
         key = e_type.keyn[0]
-        for i, auth_id in row[e_func(key)].iteritems():
+        for auth_id in row[e_func(key)].split(','):
             if not auth_id == '':
                 res.append((auth_id, val, key))
     else:
