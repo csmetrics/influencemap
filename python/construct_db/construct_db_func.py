@@ -39,6 +39,7 @@ def construct_table(conn, name, scheme, override=False, primary=[]):
         cur.execute('CREATE TABLE IF NOT EXISTS {} ({});'.format(name, ",".join(scheme)))
         print('{} created table {}'.format(datetime.now(), name))
 
+        conn.commit()
         cur.close()
     except Error as e:
         print(e)
@@ -118,10 +119,13 @@ def import_to_table(conn, name, f, colname, dataidx, delim='\t', fmap=None, tran
                 row_count += 1
                 iline = map(lambda s : str(s), [tokens[i] for i in dataidx])
                 cur.execute('INSERT INTO {} ({}) VALUES {};'.format(name, ",".join(colname), ins_string), list(iline))
+
                 if row_count % 1e6 == 0:
+                    conn.commit()
                     print("{} finished inserting {} rows".format(datetime.now(), row_count))
             print("{} finished inserting {} rows".format(datetime.now(), row_count))
 
+        conn.commit()
         cur.close()
 
     except Error as e:
@@ -133,6 +137,7 @@ def create_index(conn, table, col):
     idx_name = 'indx_{}_{}'.format(table, col)
     print('{} indexing {} in {}'.format(datetime.now(), col, table))
     cur.execute('CREATE INDEX {} ON {} ({});'.format(idx_name, table, col))
+    conn.commit()
     print('{} indexed {} in {}'.format(datetime.now(), col, table))
 
     cur.close()

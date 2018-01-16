@@ -6,6 +6,8 @@ from construct_db_authname import construct_authname
 from construct_db_confname import construct_confname
 from construct_db_affiname import construct_affiname
 from construct_db_journname import construct_journname
+from construct_db_papers import construct_papers
+from construct_db_paa import construct_paa
 from construct_db_ref import construct_ref
 from construct_db_info import construct_paper_info
 import construct_db_config as cfg
@@ -31,8 +33,11 @@ construct_affiname()
 construct_authname()
 construct_journname()
 
-construct_paper_info()
 construct_ref()
+#construct_paa()
+#construct_papers()
+#construct_paper_info()
+
 
 # Save
 conn.commit()

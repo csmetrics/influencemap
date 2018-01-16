@@ -12,7 +12,7 @@ from config import *
 def draw_flower(egoG=None, ax=None, 
                    plot_setting={'max_marker':30, 'max_line': 4., 'min_line': .5, 
                                  "sns_palette": "RdBu", "out_palette": "Reds", "in_palette": "Blues", 
-                                 "num_colors": 100, "delta_text":0.02}, filename=None):
+                                 "num_colors": 200, "delta_text":0.02}, filename=None):
 
     ps = plot_setting
     if not ax:
@@ -58,13 +58,13 @@ def draw_flower(egoG=None, ax=None,
                 xytext=(xp, yp), textcoords='data',
                 arrowprops=dict(arrowstyle="-", #linestyle="dashed",
                                 color=out_edge_color, linewidth=in_lw,
-                                connectionstyle="arc3,rad=0.12", ), )
+                                connectionstyle="arc3,rad=0.22", ), )
 
         ax.annotate("", xy=(xp, yp), xycoords='data',
                 xytext=(xroot, yroot), textcoords='data',
                 arrowprops=dict(arrowstyle="->", #linestyle="dashed",
                                 color=in_edge_color, linewidth=out_lw,
-                                connectionstyle="arc3,rad=0.12",),)
+                                connectionstyle="arc3,rad=0.22",),)
 
         # draw the node
         ax.plot(xp, yp, 'o', markersize=int(size), c=dot_colors[int(colour)],

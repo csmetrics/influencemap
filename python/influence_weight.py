@@ -11,7 +11,7 @@ weights = {
 
 default = {
     'citing authors' : False,
-    'cited authors' : False,
+    'cited authors' : True,
     'citing references' : False
     }
 

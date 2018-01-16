@@ -17,7 +17,7 @@ def generate_scores(conn, e_map, data_df, inc_self=False, calc_weight=get_weight
     print('{} start score generation\n---'.format(datetime.now()))
     df = pd.concat(data_df.values())
     if not inc_self:
-        df = df.loc[df['self_cite'] == 0]
+        df = df.loc[df['self_cite']]
 
     my_type, e_type = e_map.get_map()
     id_query_map = lambda f : ' '.join(f[0][1].split())
@@ -56,7 +56,7 @@ def generate_scores(conn, e_map, data_df, inc_self=False, calc_weight=get_weight
     return res
 
 # Generates pandas dataframe for scores
-def generate_score_df(influence_dict, ratio_func=np.vectorize(lambda x,y : x / y), sort_func=np.maximum):
+def generate_score_df(influence_dict, ratio_func=np.vectorize(lambda x, y : x / y), sort_func=np.maximum):
     df_dict = list()
 
     # Turn influence dictionaries into an outer merged table
@@ -89,10 +89,12 @@ if __name__ == "__main__":
     import os, sys
 
     # input
-    user_in = sys.argv[1]
+    #user_in = sys.argv[1]
 
     # get paper ids associated with input name
-    _, id_2_paper_id = getAuthor(user_in)
+    #_, id_2_paper_id = getAuthor(user_in)
+
+    id_2_paper_id = {}
 
     conn = sqlite3.connect(DB_PATH)
 

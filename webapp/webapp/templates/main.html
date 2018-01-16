@@ -18,10 +18,8 @@
     <link rel="stylesheet" type="text/css" href="https://cdn.datatables.net/1.10.15/css/jquery.dataTables.min.css"/>
     <script type="text/javascript" src="https://cdn.datatables.net/1.10.15/js/jquery.dataTables.min.js"></script>
     <script type="text/javascript" src="https://cdn.datatables.net/select/1.2.4/js/dataTables.select.min.js"></script>
-
   </head>
   <body>
-<!-- Remove this line, used to test whether table cleared <input id="reveal-table" type="submit" value="reveal table"> -->
     <div class="wrapper" align="center">
       <div class="row">
         <div class="col-md-12">
@@ -42,7 +40,7 @@
               {% for opt in optionlist %}
               <div class="radio">
                 <label>
-                  <input onclick="loadAutoComplete(this)" class="entity-option" type="radio" name="option" id="{{opt.id}}" value="{{opt.id}}" {% if opt.id == selectedOption.id %} checked {% endif %}>
+                  <input class="entity-option" type="radio" name="option" id="{{opt.id}}" value="{{opt.id}}" {% if opt.id == selectedOption.id %} checked {% endif %}>
                   {{opt.name}}
                 </label>
               </div>
@@ -81,15 +79,15 @@
         <div class="row">
           <img id="image2" class="fit-wrapper" src=""/>
         </div>
-          <span>To institution</span>
-        <div class="row">
+        <span>To institution</span>
+        <div class= "row">
           <img id="image3" class="fit-wrapper" src=""/>
         </div>
       </div>
       <div id="table-container" class="container invisible">
         <table id="searchtable" class="row-border hover order-column" cellspacing="0" width="100%">
         </table>
-        <input id="load-more-btn" type="submit" value="advanced search" name="load-more">
+        <input id="load-more-btn" type="submit" value="Expand search" name="load-more">
         <input id="submit-btn" type="submit" name="submit">
       </div>
     </div>
@@ -97,20 +95,59 @@
 </html>
 <script src="{% static 'js/auto-complete.min.js' %}"></script>
 <script src="{% static 'js/progressbar.js' %}"></script>
+<script src="{% static 'js/searchTableConfig.js' %}"></script>
 <script>
+
+// ----  data table  ----
+
 var tableContainer = document.getElementById("table-container");
+
+// function to create searchTable
+function makeSearchTable(entityType){
+  var tableSettings = searchTableConfig1[entityType]['tableSettings'];
+  return $('#searchtable').DataTable(tableSettings);
+}
+
+// create search table
+//var searchTable = makeSearchTable('conference');
+ 
+// update searchTable
+function updateTable(data, table, resKeys, clear){
+  console.log("updateTable");
+  if (clear) {table.clear();}
+  for(var i in data) {
+    var newRow = {};
+    for(var j in resKeys) {
+       key = resKeys[j];
+       newRow[j] = data[i][key];
+    };
+    table.row.add(newRow);
+  };
+  table.draw();
+}
+
+
+// ----  images  ----
 var imageContainer = document.getElementById("image-container");
 var image1 = document.getElementById("image1");
 var image2 = document.getElementById("image2");
 var image3 = document.getElementById("image3");
+
+
 var loadMore = document.getElementById("load-more-btn");
 var inputBar = document.getElementById("name-search-bar");
 var selfCiteCheckbox = document.getElementById("self-cite");
 var searchButton = document.getElementById("search-btn");
 var submitButton = document.getElementById("submit-btn");
 
-// Search Button event handler
-searchButton.addEventListener('click', function(){
+
+
+// ----  listeners  ----
+
+function search(exp, clear){
+  var entityType = $(".entity-option:checked").val();
+  var responseKeys = searchTableConfig1[entityType]['responseKeys'];
+  searchTable = makeSearchTable(entityType);
   showProgressBar();
   updateProgressBar();
   $.ajax({
@@ -119,116 +156,54 @@ searchButton.addEventListener('click', function(){
     data: { // input to the views.py - search()
       keyword: inputBar.value,
       option: $(".entity-option:checked").val(),
-      selfcite: selfCiteCheckbox.checked
+      selfcite: selfCiteCheckbox.checked,
+      expand: exp
     },
     success: function (result) { // return data if success
       console.log("searchButton success");
       // console.log(result["authors"]);
-      updateTable(result["authors"]);
+      updateTable(result["entities"], searchTable, responseKeys, clear);
       tableContainer.classList.remove("invisible");
     },
     error: function (result) {
       console.log("searchButton error");
     }
   });
-});
-
-// Id selection table
-var searchTable = $('#searchtable').DataTable({
-  "pageLength": 10, // default page
-  "lengthMenu": [ 10, 20, 50, 100 ], // page options
-  "lengthChange": true,
-  "columns": [
-    { title: "Name", className: "index dt-body-center" },
-    { title: "Number of papers", className: "institution dt-body-right" },
-    { title: "Affiliations", className: "dt-body-center" },
-    { title: "Fields", className: "dt-body-left" },
-    { title: "Papers", className: "dt-body-left" },
-    { title: "ID"}
-  ],
-  "columnDefs": [
-    {
-      "targets": 5,
-      "visible": false
-    },
-  ],
-  "select": {
-    "style": "multi"
-  },
-  "language": {
-    "emptyTable": "no search result"
-  },
-  "fixedColumns": true,
-  "paging": true,
-  "pagingType": "simple_numbers",
-  "ordering": true,
-  "order": [[ 1, "desc" ]],
-  "info": true,
-  "autoWidth": false,
-});
-
-// update searchTable
-function updateTable(data){
-  console.log("updateTable");
-  searchTable.clear();
-  for(var i in data) {
-    var newRow = {};
-    newRow[0] = data[i]["name"];
-    newRow[1] = data[i]["numpaper"];
-    newRow[2] = data[i]["affiliation"];
-    newRow[3] = data[i]["field"];
-    newRow[4] = data[i]["recentPaper"];
-    newRow[5] = data[i]["authorID"];
-    searchTable.row.add(newRow);
-  }
-  searchTable.draw();
 }
 
-// load more authors to select from
-loadMore.addEventListener('click', function(){
-  var selected_indexes = searchTable.rows({selected:true})[0];
-  var selected_rows = searchTable.rows( selected_indexes ).data().toArray();
-  var selected_ids = [];
-  for (var i in selected_rows) {
-    selected_ids.push(selected_rows[i][5]);
-  };
-  searchTable.clear();
-  tableContainer.classList.add("invisible");
-  $.ajax({
-    type: "GET",
-    url: "/loadall",
-    data: { // input to the views.py - search()
-      keyword: inputBar.value,
-      option: $(".entity-option:checked").val(),
-      selfcite: selfCiteCheckbox.checked
-    },
-    success: function (result) { // return data if success
-      console.log("loadMore button success");
-      // console.log(result["authors"]);
-      updateTable(result["authors"]);
-      tableContainer.classList.remove("invisible")
-    },
-    error: function (result) {
-      console.log("load more button error");
-    }
-  });
+
+// Search Button event handler
+searchButton.addEventListener('click', function(){
+  search(false, true); // expand: false, clear: true
 });
 
+
+// Search all event handler
+loadMore.addEventListener('click', function(){
+  search(true, false); // expand: true, clear: false
+});
 
 // Submit Button event handler
 submitButton.addEventListener('click', function(){
+  var entityType = $(".entity-option:checked").val();
+  var idColumnNumber = searchTableConfig1[entityType].idCol;
   var selected_indexes = searchTable.rows({selected:true})[0];
   var selected_rows = searchTable.rows( selected_indexes ).data().toArray();
   var selected_ids = [];
   for (var i in selected_rows) {
-    selected_ids.push(selected_rows[i][5]);
+    selected_ids.push(selected_rows[i][idColumnNumber]);
   }
+  console.log(entityType);
+  console.log(idColumnNumber);
+  console.log(searchTableConfig1);
+  console.log(searchTableConfig1[entityType]);
   console.log(selected_ids);
   $.ajax({
     type: "GET",
     url: "/submit",
     data: { // input to the views.py - search()
       authorlist: selected_ids.join(),
+      option: $(".entity-option:checked").val(),
     },
     success: function (result) { // return data if success
       console.log("submitButton success");
@@ -245,55 +220,25 @@ submitButton.addEventListener('click', function(){
   });
 });
 
-var lists = Object()
-  {% for opt in optionlist %}
-  lists["{{opt.id}}"]= {{opt.list | safe}}
-{% endfor %}
-
-
-function loadAutoComplete(obj){
-
-
-var lists = Object()
-  {% for opt in optionlist %}
-  lists["{{opt.id}}"]= {{opt.list | safe}}
-{% endfor %}
-
-
-alert(obj.id)
-console.log(lists[obj.id])
-a = new autoComplete({
-    selector: '#name-search-bar',
-    minChars: 2,
-    source: function(term, suggest){
+// ----   auto complete   ----
+var ac = new autoComplete({
+  selector: '#name-search-bar', 
+  source: function(term, response){
+    $.getJSON(
+      '/autocomplete?option='+$(".entity-option:checked").val(), 
+      { q: term },
+      function(data){ 
         term = term.toLowerCase();
-        var choices = lists[obj.id];
+        var choices = data;
         var suggestions = [];
         var maxSuggest = 10;
         for (i = 0; i < choices.length && suggestions.length < maxSuggest; i++) {
-            if (~choices[i].toLowerCase().indexOf(term))
+          if (~choices[i].toLowerCase().indexOf(term))
               suggestions.push(choices[i]);
         }
-        suggest(suggestions);
-    }
-});
-}
-
-/*
-// remove this, only used to test whether data table is clearing
-var revealButton = document.getElementById("reveal-table")
-revealButton.addEventListener('click', function(){
-  if (revealButton.value === "reveal table"){
-    tableContainer.classList.remove('invisible');
-    revealButton.value = "hide table";
-    alert('revealed table');
+        response(suggestions); 
+      }); 
   }
-  else {
-    tableContainer.classList.add('invisible');
-    revealButton.value = "reveal table";
-    alert('concealed table');
-  }
-});
-*/
+}); 
 
 </script>

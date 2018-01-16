@@ -104,7 +104,7 @@ def getPaperName(pID):
         return (title[0][0], title[0][1])
     else: return ('','')
 
-def getAuthor(name,nonExpandAID=[],cbfunc=lambda _ : None,expand=False,use_cache=False):
+def getAuthor(name,cbfunc=lambda _ : None, nonExpandAID=[], expand=False,use_cache=False):
     if use_cache:
        with open(saved_dir,'r') as savedFile:
            data_exist_author = json.load(savedFile)
@@ -234,7 +234,7 @@ def getAuthor(name,nonExpandAID=[],cbfunc=lambda _ : None,expand=False,use_cache
     else: return (finalresult,aIDpIDDict) 
 
 
-def getJournal(name):
+def getJournal(name, a=None):
     dbJ = sqlite3.connect(db_Jour, check_same_thread = False)
     curJ = dbJ.cursor()
     dbJ.create_function("match",2,match)
@@ -279,7 +279,7 @@ def getJourPID(jIDs): #thie function takes in a list of journalID, and produce a
 
 
 
-def getConf(name):
+def getConf(name, a=None):
     name = name.upper()
     dbConf = sqlite3.connect(db_conf, check_same_thread = False)
     curC = dbConf.cursor()
@@ -309,8 +309,9 @@ def getConf(name):
 def getConfPID(cIDs): #this function takes in a list of cID, and produce a dict of cID:[pID]
     dbP = sqlite3.connect(db_PAA,check_same_thread = False)
     curP = dbP.cursor()
+    cIDs = ["'"+cID+"'" for cID in cIDs]
     print("{} start getting papers".format(datetime.now()))
-    curP.execute("SELECT paperId, conferenceID FROM papers WHERE conferenceID IN {}".format(tuple(cID)))
+    curP.execute("SELECT paperId, conferenceID FROM papers WHERE conferenceID IN ({})".format(', '.join(cIDs)))
     papers = curP.fetchall()
     print("{} finished getting papers".format(datetime.now()))
     cID_papers = {}
@@ -321,7 +322,7 @@ def getConfPID(cIDs): #this function takes in a list of cID, and produce a dict 
     return cID_papers #cID_papers is a dict of cID:[pID]
      
 
-def getAff(name):
+def getAff(aff, a=None):
     dbA = sqlite3.connect(db_aff, check_same_thread = False)
     dbA.create_function("match",2,match)
     curA = dbA.cursor()

@@ -16,7 +16,7 @@ def try_get(conn, key, qdict, query, func=lambda x: x):
         qdict[key] = res
         return res
 
-def is_selfcite(conn, paper_id, paper_ref_id, auth_dict):
+def is_collab_self_cite(conn, paper_id, paper_ref_id, auth_dict):
     sc_query = 'SELECT auth_id FROM paper_info WHERE paper_id = ?'
     func = lambda f : set(map(lambda r : r[0], f))
 
@@ -25,3 +25,9 @@ def is_selfcite(conn, paper_id, paper_ref_id, auth_dict):
     their_auth = try_get(conn, paper_ref_id, auth_dict, sc_query, func=func)
 
     return int(not my_auth.isdisjoint(their_auth))
+
+def is_self_cite(citing, citing_id, cited_id, entity_ids):
+    if citing:
+        return not set(entity_ids).isdisjoint(set(citing_id.tolist()))
+    else:
+        return not set(entity_ids).isdisjoint(set(cited_id.tolist()))
