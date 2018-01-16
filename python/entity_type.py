@@ -1,11 +1,11 @@
 from enum import Enum
 
 class Entity(Enum):
-    AUTH = ('AUTH', {'auth_id': 'authname'}, ['auth_id'], ['auth_count'])
-    CFJN = ('CFJN', {'conf_id': 'confname', 'journ_id': 'journname'}, ['conf_id', 'journ_id'], [])
-    AFFI = ('AFFI', {'affi_id': 'affiname'}, ['affi_id'], [])
-    CONF = ('CONF', {'conf_id': 'confname'}, ['conf_id'], [])
-    JOURN = ('JOUR', {'journ_id': 'journname'}, ['journ_id'], [])
+    AUTH = ('AUTH', {'auth_id': 'authname'}, ['auth_name'], ['auth_count'])
+    CFJN = ('CFJN', {'conf_id': 'confname', 'journ_id': 'journname'}, ['conf_name', 'journ_name'], [])
+    AFFI = ('AFFI', {'affi_id': 'affiname'}, ['affi_name'], [])
+    CONF = ('CONF', {'conf_id': 'confname'}, ['conf_name'], [])
+    JOURN = ('JOUR', {'journ_id': 'journname'}, ['journ_name'], [])
 
     def __init__(self, prefix, edict, key, add):
         self.prefix = prefix

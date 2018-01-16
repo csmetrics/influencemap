@@ -21,12 +21,7 @@ def generate_scores(conn, e_map, data_df, inc_self=False, calc_weight=get_weight
 
     # Check self citations
     if not inc_self:
-        df = df.loc[df['self_cite']]
-
-    # Check if unique option
-    if unique:
-        print("FILTERING DUPS")
-        df = df.drop_duplicates()
+        df = df.loc[df['self_cite'].fillna(False)]
 
     my_type, e_type = e_map.get_map()
     id_query_map = lambda f : ' '.join(f[0][1].split())
@@ -43,11 +38,7 @@ def generate_scores(conn, e_map, data_df, inc_self=False, calc_weight=get_weight
     for i, row in df.iterrows():
             # iterate over different table types
             for wline in calc_weight(e_map, row):
-                e_id, weight, tkey = wline
-
-                id_query = 'SELECT * FROM {} WHERE {} = ? LIMIT 1'.format(e_type.edict[tkey], tkey)
-
-                e_name = try_get(conn, e_id, id_to_name[tkey], id_query, func=id_query_map)
+                e_name, weight, tkey = wline
 
                 # Add to score
                 if row['citing']:
