@@ -28,6 +28,6 @@ def is_collab_self_cite(conn, paper_id, paper_ref_id, auth_dict):
 
 def is_self_cite(citing, citing_id, cited_id, entity_ids):
     if citing:
-        return not set(entity_ids).isdisjoint(set(citing_id.tolist()))
+        return not set(entity_ids).isdisjoint(set(citing_id.split(',')))
     else:
-        return not set(entity_ids).isdisjoint(set(cited_id.tolist()))
+        return not set(entity_ids).isdisjoint(set(cited_id.split(',')))

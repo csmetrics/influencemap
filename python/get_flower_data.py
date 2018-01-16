@@ -15,9 +15,18 @@ from config import *
 # Creates dictionaries for the weight scores
 def generate_scores(conn, e_map, data_df, inc_self=False, calc_weight=get_weight):
     print('{} start score generation\n---'.format(datetime.now()))
+
+    # Concat the tables together
     df = pd.concat(data_df.values())
+
+    # Check self citations
     if not inc_self:
         df = df.loc[df['self_cite']]
+
+    # Check if unique option
+    if unique:
+        print("FILTERING DUPS")
+        df = df.drop_duplicates()
 
     my_type, e_type = e_map.get_map()
     id_query_map = lambda f : ' '.join(f[0][1].split())
