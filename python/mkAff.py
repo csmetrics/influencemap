@@ -14,10 +14,7 @@ db_FName = '/localdata/u6363358/data/FieldOfStudy.db'
 db_Jour = '/localdata/u6363358/data/Journals.db'
 db_conf = '/localdata/u6363358/data/Conference.db'
 db_aff = '/localdata/u6363358/data/Affiliations.db'
-
-temp_saved_auInfo = '/localdata/common/temp_saved_auInfo.json'
-temp_saved_aIDpID = '/localdata/common/temp_saved_aIDpID.json'
-temp_saved_aID = '/localdata/common/temp_saved_aID.json'
+db_myPAA = '/localdata/u6363358/data/paperAuthorAffiliations.db'
 
 saved_dir = '/localdata/common/savedFileAuthor.json'
 
@@ -50,8 +47,6 @@ def getField(pID):
     dbN = sqlite3.connect(db_FName, check_same_thread = False)
     curK = dbK.cursor()
     curFN = dbN.cursor()
-    for p in pID:
-        print(p)
     if len(pID) == 1:
          print("{} Getting fieldID".format(datetime.now()))
          curK.execute("SELECT FieldID FROM paperKeywords WHERE PaperID = '" + pID[0] + "'")
@@ -60,8 +55,10 @@ def getField(pID):
          print("{} Getting fieldID".format(datetime.now()))
          curK.execute(removeCon("SELECT FieldID FROM paperKeywords WHERE PaperID IN {}".format(tuple(pID))))
          #curK.execute("SELECT FieldID FROM paperKeywords WHERE PaperID == '" + pID[0] + "'")
-    res = list(map(lambda x: x[0],curK.fetchall()))
+    #res = list(map(lambda x: x[0],curK.fetchall()))
+    res = curK.fetchall()
     print("{} finished getting fieldID".format(datetime.now()))
+    res = list(map(lambda x:x[0],res))
     print("{} getting fieldName".format(datetime.now()))
     if len(res) > 0:
          if len(set(res)) > 1:
@@ -94,8 +91,10 @@ def getPaperName(pID):
     curP = dbPAA.cursor()
     #print("{} getting paperTitle and date".format(datetime.now()))
     if len(pID) == 1:
+        print("SELECT paperTitle, publishedDate FROM papers WHERE paperID == '" + pID[0] + "'")
         curP.execute("SELECT paperTitle, publishedDate FROM papers WHERE paperID == '" + pID[0] + "'")
     else:
+        print(removeCon("SELECT paperTitle, MAX(publishedDate) FROM papers WHERE paperID IN {}".format(tuple(pID))))
         curP.execute(removeCon("SELECT paperTitle, MAX(publishedDate) FROM papers WHERE paperID IN {}".format(tuple(pID))))
     #print("{} finished getting paperTitle and date".format(datetime.now()))
     title = curP.fetchall()
@@ -124,10 +123,9 @@ def getAuthor(name,nonExpandAID=[],cbfunc=lambda _ : None,expand=False,use_cache
                          return (auInfoSame, data_exist_author[key][1])
                     
 
-    dbPAA = sqlite3.connect(db_PAA, check_same_thread = False)
+    dbPAA = sqlite3.connect(db_myPAA, check_same_thread = False)
     dbA = sqlite3.connect(db_Authors, check_same_thread = False)
     #dbA.create_function("compareMiddle",2,compareMiddle)
-    dbA.create_function("similar",2,similar)
     curP = dbPAA.cursor()
     curA = dbA.cursor()
     name = name.lower()
@@ -155,7 +153,8 @@ def getAuthor(name,nonExpandAID=[],cbfunc=lambda _ : None,expand=False,use_cache
         
     else:
         allAuthor = nonExpandAID
-
+  
+    
     print("{} finished getting all the aID".format(datetime.now()))
     cbfunc("finished getting all the aID")
     author = {} #authorID is the key and authorName is the value
@@ -168,7 +167,7 @@ def getAuthor(name,nonExpandAID=[],cbfunc=lambda _ : None,expand=False,use_cache
     result = []
     print("{} getting all the (authorID, paperID, affiliationName)".format(datetime.now()))
     cbfunc("getting all the (authorID, paperID, affiliationName)")
-    curP.execute(removeCon("SELECT authorID, paperID, affiliationNameOriginal FROM weightedPaperAuthorAffiliations WHERE authorID IN {}".format(tuple(aID))))
+    curP.execute(removeCon("SELECT auth_id, paper_id, affNameOri FROM paa WHERE auth_id IN {}".format(tuple(aID))))
     result = curP.fetchall()
 
     aIDpIDDict = {}
@@ -219,9 +218,11 @@ def getAuthor(name,nonExpandAID=[],cbfunc=lambda _ : None,expand=False,use_cache
         finalresult.append({'name':tuples[0],'authorID':tuples[1],'numpaper':tuples[2],'affiliation':tuples[3],'field':getField(tuples[4]),'recentPaper':recent[0],'publishedDate':recent[1]})
     print("{} done".format(datetime.now()))
     cbfunc("done")
+    curP.close()    
     dbPAA.commit()
-    dbA.commit()
     dbPAA.close()
+    curA.close()
+    dbA.commit()
     dbA.close()
    
     for dic in finalresult: #finalresult is a list of dict
@@ -249,6 +250,7 @@ def getJournal(name):
 
     print("{} finished getting jID".format(datetime.now()))
     curJ.close()
+    dbJ.close()
 
     for tup in journals:
         print(tup)
@@ -272,6 +274,7 @@ def getJourPID(jIDs): #thie function takes in a list of journalID, and produce a
     for pID, jID in papers:
         jID_papers.setdefault(jID,[]).append(pID)
     curP.close()
+    dbPAA.close()
     return jID_papers #a dict of jID:[pID]
 
 
@@ -279,9 +282,7 @@ def getJourPID(jIDs): #thie function takes in a list of journalID, and produce a
 def getConf(name):
     name = name.upper()
     dbConf = sqlite3.connect(db_conf, check_same_thread = False)
-    dbP = sqlite3.connect(db_PAA, check_same_thread = False)
     curC = dbConf.cursor()
-    curP = dbP.cursor()
     dbConf.create_function("match",2,match)
     print("{} getting conferenceID".format(datetime.now()))
     print("SELECT * FROM ConferenceSeries WHERE ShortName == '" + name + "' OR match('" + name + "', Fullname)")
@@ -301,6 +302,7 @@ def getConf(name):
         output.append({'id':tup[0],'name':tup[1]})        
     
     curC.close()
+    dbConf.close()
     return output #a list of {'id':confID, 'name':confName}
     
 
@@ -315,52 +317,43 @@ def getConfPID(cIDs): #this function takes in a list of cID, and produce a dict 
     for pID, cID in papers:
         cID_papers.setdefault(cID,[]).append(pID)
     curP.close()
+    dbP.close()
     return cID_papers #cID_papers is a dict of cID:[pID]
      
 
-
-def getAff(aff):
-    dbP = sqlite3.connect(db_PAA, check_same_thread = False)
+def getAff(name):
     dbA = sqlite3.connect(db_aff, check_same_thread = False)
-    curP = dbP.cursor()
-    curA = dbA.cursor()
-    aff = aff.lower()
     dbA.create_function("match",2,match)
-    dbP.create_function("contains",2,contains)
-    #dbP.create_function("contains",2,contains)
-    print("{} getting affiliationID".format(datetime.now())) #get affiliationID that match the given institution
-    print("SELECT AffiliationID, AffiliationName FROM Affiliations WHERE match(AffiliationName, '" + aff + "')" )
-    curA.execute("SELECT AffiliationID, AffiliationName FROM Affiliations WHERE match(AffiliationName, '" + aff + "')")
-    temp = curA.fetchall()
-    affID = list(map(lambda x: x[0], temp))
-    if len(affID) != 0: affiliationName = temp[0][1] #get the normalized affiliationName
-    else: return {}
-    print(affID)
-
-    print("{} getting related papers".format(datetime.now())) #get papers related
-    curP.execute(removeCon("SELECT paperID, affiliationNameOriginal FROM weightedPaperAuthorAffiliations WHERE affiliationID IN {}".format(tuple(affID))))
-    #Form a dict of affiliationName, pID
-    aName_pID = {}
-    res = curP.fetchall()
-    print("{} finished getting papers".format(datetime.now()))
-
-    for pID, aN in res:
-        aName_pID.setdefault(aN,[]).append(pID)
-
-    #get papers related to the specified department
-    aName_pID = {aN:pIDs for (aN,pIDs) in aName_pID.items() if contains(aff,aN)}
-    result = {}
-    ps = []
-    for key in aName_pID:
-        ps = ps + (aName_pID[key])
-    result[affiliationName] = ps
+    curA = dbA.cursor()
+    curA.execute("SELECT AffiliationID, AffiliationName FROM Affiliations WHERE match(AffiliationName, '" + name + "')")    
+    affiliations = curA.fetchall()
     curA.close()
+    dbA.close()
+    temp = [x for x in affiliations if x[1] == name] 
+    affiliations = [x for x in affiliations if x[1] != name]
+    affiliations = temp + affiliations
+    for tup in affiliations:
+        print(tup)
+    return affiliations #affiliations is a list of (affID, affName)
+
+def getAffPID(affID,name):
+    dbPAA = sqlite3.connect(db_myPAA, check_same_thread = False)
+    dbPAA.create_function("match",2,match)
+    curP = dbPAA.cursor()
+    curP.execute(removeCon("SELECT paper_id, affi_id, affNameOri FROM paa WHERE affi_id IN {}".format(tuple(affID))) + " AND match('" + name + "', affNameOri)")     
+    papers = curP.fetchall()
     curP.close()
-
-    for key in result:
-       print((key, result[key]))
-
-    return(result) #A dict of aName, [pID]
+    dbPAA.close()
+    affID_pID = {}
+    
+    affIDpIDList = list(map(lambda x: (x[0],x[1]), papers))
+    for paper, aff in affIDpIDList:
+        affID_pID.setdefault(aff,[]).append(paper)
+    affNameSet = set(map(lambda x:x[2], papers))
+    for n in affNameSet:
+        print(n)    
+                
+    return affID_pID #affID_pID is a dict of affID:[pID]
 
 def match(name1, name2):
     name1 = name1.lower()
@@ -394,7 +387,8 @@ def contains(name1, name2):
     return True
 
 if __name__ == '__main__':
-    trial = getAuthor('stephen m blackburn')
-    nonExpandID = trial[-1]
-    xx = getAuthor('stephen m blackburn',nonExpandAID = nonExpandID,expand=True)
+    trial = getAff('computer science australian national university')
+    aID = list(map(lambda x:x[0],trial))
+    t = getAffPID(aID, 'computer science australian national university')
+    
     
