@@ -23,11 +23,6 @@ def generate_scores(conn, e_map, data_df, inc_self=False, calc_weight=get_weight
     if not inc_self:
         df = df.loc[df['self_cite']]
 
-    # Check if unique option
-    if unique:
-        print("FILTERING DUPS")
-        df = df.drop_duplicates()
-
     my_type, e_type = e_map.get_map()
     id_query_map = lambda f : ' '.join(f[0][1].split())
     id_to_name = dict([(tname, dict()) for tname in e_type.keyn])

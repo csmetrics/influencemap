@@ -134,14 +134,16 @@ def gen_search_df(conn, paper_map, etype):
                 df['self_cite'] = is_sc_vec(df['citing'], df['citing_auth_id'], df['cited_auth_id'])
 
     # Calculate inst self-citations if inst
-    elif etype == Entity.AUTH:
+    elif etype == Entity.AFFI:
         for df in res_dict.values():
             if not df.empty:
                 df['self_cite'] = is_sc_vec(df['citing'], df['citing_affi_id'], df['cited_affi_id'])
 
     else:
-        if df.empty:
-            df['self_cite'] = False
+        for df in res_dict.values():
+            if df.empty:
+                df['self_cite'] = False
+    
 
     return res_dict
 
