@@ -104,7 +104,7 @@ var tableContainer = document.getElementById("table-container");
 
 // function to create searchTable
 function makeSearchTable(entityType){
-  var tableSettings = searchTableConfig1[entityType]['tableSettings'];
+  var tableSettings = searchTableConfig[entityType]['tableSettings'];
   return $('#searchtable').DataTable(tableSettings);
 }
 
@@ -146,7 +146,7 @@ var submitButton = document.getElementById("submit-btn");
 
 function search(exp, clear){
   var entityType = $(".entity-option:checked").val();
-  var responseKeys = searchTableConfig1[entityType]['responseKeys'];
+  var responseKeys = searchTableConfig[entityType]['responseKeys'];
   searchTable = makeSearchTable(entityType);
   showProgressBar();
   updateProgressBar();
@@ -186,7 +186,7 @@ loadMore.addEventListener('click', function(){
 // Submit Button event handler
 submitButton.addEventListener('click', function(){
   var entityType = $(".entity-option:checked").val();
-  var idColumnNumber = searchTableConfig1[entityType].idCol;
+  var idColumnNumber = searchTableConfig[entityType].idCol;
   var selected_indexes = searchTable.rows({selected:true})[0];
   var selected_rows = searchTable.rows( selected_indexes ).data().toArray();
   var selected_ids = [];
@@ -195,8 +195,8 @@ submitButton.addEventListener('click', function(){
   }
   console.log(entityType);
   console.log(idColumnNumber);
-  console.log(searchTableConfig1);
-  console.log(searchTableConfig1[entityType]);
+  console.log(searchTableConfig);
+  console.log(searchTableConfig[entityType]);
   console.log(selected_ids);
   $.ajax({
     type: "GET",
