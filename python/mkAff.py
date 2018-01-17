@@ -338,9 +338,22 @@ def getAff(aff, a=None):
         print(tup)
     return affiliations #affiliations is a list of (affID, affName)
 
-def nameHandler(aff, name): #this function takes in the name of the affiliation the user selected, and output a name which includes all the key word the user input
+def nameHandler(aff, name):
+    #this function takes in the name of the affiliation the user selected, and output a name which includes all the key word the user input
     aff = aff.lower().split(' ')
     name = name.lower().split(' ')
+    exist = False
+    for word in name:
+        for w in aff:
+            if similar(word,w):
+                exist = True
+                break
+        if not exist:
+            break
+    if exist: 
+        print(' '.join(aff))
+        return ' '.join(aff)
+    
     short = ''.join([x[0] for x in name if x != 'the' and x != 'of' and x != 'for'])
     keyword = ' '.join([x for x in aff if x != short])
     print(keyword + ' ' + ' '.join(name))
@@ -408,7 +421,7 @@ def matchForShort(name1, name2):
 
 
 if __name__ == '__main__':
-    trial = getAff('computer science australian national university')
-    ri = [x for x in trial if x[1] == 'australian national university']
-    name = nameHandler('computer science anu',ri[0][1])
+    trial = getAff('computer science mit')
+    ri = [x for x in trial if x[1] == 'massachusetts institute of technology']
+    name = nameHandler('computer science mit',ri[0][1])
     d = getAffPID([ri[0][0]], name)
