@@ -15,46 +15,15 @@ from mkAff import getAuthor, getJournal, getConf, getAff, getConfPID, getJourPID
 
 
 
+autoCompleteLists = {}
 
-AuthorList = []
-ConferenceList = []
-JournalList = []
-InstitutionList = []
-def loadAuthorList():
-    global AuthorList
-    path = os.path.join(BASE_DIR, "webapp/cache/AuthorList.txt")
-    if len(AuthorList) == 0:
+def loadList(entity):
+    path = os.path.join(BASE_DIR, "webapp/cache/"+entity+"List.txt")
+    if entity not in autoCompleteLists.keys():
         with open(path, "r") as f:
-            AuthorList = [name.strip() for name in f]
-    AuthorList = list(set(AuthorList))
-    return AuthorList
-
-def loadConferenceList():
-    global ConferenceList
-    path = os.path.join(BASE_DIR, "webapp/cache/ConferenceList.txt")
-    if len(ConferenceList) == 0:
-        with open(path, "r") as f:
-            ConferenceList = [conf.strip() for conf in f]
-        ConferenceList = list(set(ConferenceList))
-    return ConferenceList
-
-def loadJournalList():
-    global JournalList
-    path = os.path.join(BASE_DIR, "webapp/cache/JournalList.txt")
-    if len(JournalList) == 0:
-        with open(path, "r") as f:
-            JournalList = [journ.strip() for journ in f]
-        JournaList = list(set(JournalList))
-    return JournalList
-
-def loadInstitutionList():
-    global InstitutionList
-    path = os.path.join(BASE_DIR, "webapp/cache/InstitutionList.txt")
-    if len(InstitutionList) == 0:
-        with open(path, "r") as f:
-            InstitutionList = [journ.strip() for journ in f]
-        Institutionist = list(set(InstitutionList))
-    return InstitutionList
+            autoCompleteLists[entity] = [name.strip() for name in f]
+        autoCompleteLists[entity] = list(set(autoCompleteLists[entity]))
+    return autoCompleteLists[entity]
 
 
 dataFunctionDict = {
@@ -67,22 +36,15 @@ dataFunctionDict = {
     'get_pids':{
         'conference': getConfPID,
         'jounral': getJourPID
-    },
-    'autocomplete':{
-        'author': loadAuthorList(),
-        'conference': loadConferenceList(),
-        'journal': loadJournalList(),
-        'institution': loadInstitutionList()
     }
 }
 
 
 def autocomplete(request):
     entity_type = request.GET.get('option')
-    print("autocomplete called")
     print(request)
     print(request.GET.get('option'))
-    data = dataFunctionDict['autocomplete'][entity_type]
+    data = loadList(entity_type)
     return JsonResponse(data,safe=False)
 
 
@@ -153,10 +115,10 @@ def submit(request):
 def main(request):
     global keyword, optionlist, option, selfcite
     optionlist = [  # option list
-        {"id":"author", "name":"Author", "list": loadAuthorList()},
-        {"id":"conference", "name":"Conference", "list": loadConferenceList()},
-        {"id":"journal", "name":"Journal", "list": loadJournalList()},
-        {"id":"institution", "name":"Institution", "list": loadInstitutionList()}
+        {"id":"author", "name":"Author"},
+        {"id":"conference", "name":"Conference"},
+        {"id":"journal", "name":"Journal"},
+        {"id":"institution", "name":"Institution"}
     ]
 
     keyword = ""
@@ -168,28 +130,4 @@ def main(request):
         "selectedKeyword": keyword,
         "selectedOption": option,
     })
-
-
-def loadall(request):
-    global keyword, optionlist, option, selfcite
-    global id_pid_dict
-
-    print("load all!!", request.GET)
-    inflflower = None
-    entities = []
-
-    selfcite = True if request.GET.get("selfcite") == "true" else False
-    keyword = request.GET.get("keyword")
-    option = [x for x in optionlist if x.get('id', '') == request.GET.get("option")][0]
-    print(keyword)
-    if keyword != "":
-        print("{}\t{}\t{}".format(datetime.now(), __file__ , entity_of_interest[option['id']].__name__))
-        entities, id_pid_dict =  entity_of_interest[option['id']](keyword, progressCallback, expand=True) #(authors_testing, dict()) # getAuthor(keyword)
-
-    data = {
-        "authors": entities,
-    }
-
-    return JsonResponse(data, safe=False)
-
 
