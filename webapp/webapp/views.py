@@ -11,7 +11,7 @@ PYTHON_DIR = os.path.join(os.path.dirname(BASE_DIR), 'python')
 sys.path.insert(0, PYTHON_DIR)
 
 from flower_bloomer import getFlower
-from mkAff import getAuthor, getJournal, getConf, getAff, getConfPID, getJourPID, getConfPID
+from mkAff import getAuthor, getJournal, getConf, getAff, getConfPID, getJourPID, getConfPID, getAffPID
 
 
 
@@ -35,7 +35,8 @@ dataFunctionDict = {
     },
     'get_pids':{
         'conference': getConfPID,
-        'jounral': getJourPID
+        'jounral': getJourPID,
+        'institution': getAffPID
     }
 }
 
@@ -92,7 +93,8 @@ def submit(request):
     if option in ['conference', 'journal']:
         id_pid_dict = dataFunctionDict['get_pids'][option](selected_ids)
     elif option in ['institution']:
-        print("\n\n\nnot yet set up for institutions\n\n\n")
+        selected_names = request.GET.get("nameslist").split(",")
+        id_pid_dict = dataFunctionDict['get_pids'][option](selected_ids, selected_names)
     elif option in ['author']:
         id_pid_dict = author_id_pid_dict
     else:
