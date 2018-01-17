@@ -44,7 +44,6 @@ def gen_reference_df(conn, paper_ids):
 
     return ref_df
 
-
 def gen_info_df(conn, paper_ids):
     cur = conn.cursor()
 
@@ -109,6 +108,48 @@ def combine_df(ref_df, info_df):
     
     return res
 
+def gen_combined_df(conn, entity_id, paper_ids):
+    # If entity_id is None (theshold papers) with no caching
+    if not entity_id:
+        print('\n---\n{} start finding paper references for: threshold\n---'.format(datetime.now()))
+        ref_df = gen_reference_df(conn, paper_ids)
+        print('{} finish finding paper references for: threshold\n---'.format(datetime.now()))
+
+        print('{} start finding paper info for: threshold\n---'.format(datetime.now()))
+        info_df = gen_info_df(conn, paper_ids)
+        print('{} finish finding paper info for: threshold\n---'.format(datetime.now(), entity_id))
+
+        # Combine and deal with possible unique
+        print('{} start joining dataframes\n---'.format(datetime.now()))
+        res_df = combine_df(ref_df, info_df)
+        print('{} finish joining dataframes\n---'.format(datetime.now(), entity_id))
+    else:
+        # Check cache for entity
+        cache_path = os.path.join(DATA_CACHE, entity_id)
+        try:
+            res_df = pd.read_pickle(cache_path)
+            print('\n---\n{} found ref cache for: {}\n---'.format(datetime.now(), entity_id))
+        # If miss
+        except FileNotFoundError:
+            print('\n---\n{} start finding paper references for: {}\n---'.format(datetime.now(), entity_id))
+            ref_df = gen_reference_df(conn, paper_ids)
+            print('{} finish finding paper references for: {}\n---'.format(datetime.now(), entity_id))
+
+            print('{} start finding paper info for: {}\n---'.format(datetime.now(), entity_id))
+            info_df = gen_info_df(conn, paper_ids)
+            print('{} finish finding paper info for: {}\n---'.format(datetime.now(), entity_id))
+
+            # Combine and deal with possible unique
+            print('{} start joining dataframes\n---'.format(datetime.now()))
+            res_df = combine_df(ref_df, info_df)
+            print('{} finish joining dataframes\n---'.format(datetime.now(), entity_id))
+
+            # Cache info pickle file
+            res_df.to_pickle(cache_path)
+            os.chmod(cache_path, 0o777)
+
+    return res_df
+
 # Wraps above functions to produce a dictionary of pandas dataframes for relevent information
 def gen_search_df(conn, paper_map, etype):
     res_dict = dict()
@@ -119,44 +160,10 @@ def gen_search_df(conn, paper_map, etype):
         if len(paper_ids) < PAPER_THRESHOLD:
             threshold_papers += paper_ids
         else:
-            # CHECK CACHE
-            cache_path = os.path.join(DATA_CACHE, entity_id)
-            try:
-                res_dict[entity_id] = pd.read_pickle(cache_path)
-                print(res_dict[entity_id])
-                print('\n---\n{} found cache data for: {}\n---'.format(datetime.now(), entity_id))
-            except FileNotFoundError:
-                # IF MISS
-                print('\n---\n{} start finding paper references for: {}\n---'.format(datetime.now(), entity_id))
-                ref_df = gen_reference_df(conn, paper_ids)
-                print('{} finish finding paper references for: {}\n---'.format(datetime.now(), entity_id))
+            res_dict[entity_id] = gen_combined_df(conn, entity_id, paper_ids)
 
-                print('{} start finding paper info for: {}\n---'.format(datetime.now(), entity_id))
-                info_df = gen_info_df(conn, paper_ids)
-                print('{} finish finding paper info for: {}\n---'.format(datetime.now(), entity_id))
-
-                print('{} start joining dataframes for: {}\n---'.format(datetime.now(), entity_id))
-                e_df = combine_df(ref_df, info_df)
-                res_dict[entity_id] = e_df
-                print('{} finish joining dataframes for: {}\n---'.format(datetime.now(), entity_id))
-
-                # Cache pickle file
-                e_df.to_pickle(cache_path)
-                os.chmod(cache_path, 0o777)
-
-    # deal with threshold papers
-    print('\n---\n{} start finding paper references for: threshold\n---'.format(datetime.now()))
-    e_df = gen_reference_df(conn, threshold_papers)
-    print('{} finish finding paper references for: threshold\n---'.format(datetime.now()))
-
-    print('{} start finding paper info for: threshold\n---'.format(datetime.now()))
-    info_df = gen_info_df(conn, threshold_papers)
-    print('{} finish finding paper info for: threshold\n---'.format(datetime.now(), entity_id))
-
-    # Other entities
-    print('{} start joining dataframes for: threshold\n---'.format(datetime.now()))
-    res_dict[None] = combine_df(ref_df, info_df)
-    print('{} finish joining dataframes for: threshold\n---'.format(datetime.now(), entity_id))
+    # Calculate threshold values
+    res_dict[None] = gen_combined_df(conn, None, threshold_papers)
 
     # Calculate self-citations
     is_sc_vec = np.vectorize(lambda x, y, z : is_self_cite(x, y, z, entity_ids))
