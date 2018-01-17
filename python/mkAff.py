@@ -325,23 +325,35 @@ def getConfPID(cIDs): #this function takes in a list of cID, and produce a dict 
 def getAff(aff, a=None):
     dbA = sqlite3.connect(db_aff, check_same_thread = False)
     dbA.create_function("match",2,match)
+    dbA.create_function("matchForShort", 2, matchForShort)
     curA = dbA.cursor()
-    curA.execute("SELECT AffiliationID, AffiliationName FROM Affiliations WHERE match(AffiliationName, '" + name + "')")    
+    curA.execute("SELECT AffiliationID, AffiliationName FROM Affiliations WHERE match(AffiliationName, '" + aff + "') OR matchForShort('" + aff + "', AffiliationName)" )    
     affiliations = curA.fetchall()
     curA.close()
     dbA.close()
-    temp = [x for x in affiliations if x[1] == name] 
-    affiliations = [x for x in affiliations if x[1] != name]
+    temp = [x for x in affiliations if x[1] == aff] 
+    affiliations = [x for x in affiliations if x[1] != aff]
     affiliations = temp + affiliations
     for tup in affiliations:
         print(tup)
     return affiliations #affiliations is a list of (affID, affName)
 
-def getAffPID(affID,name):
+def nameHandler(aff, name): #this function takes in the name of the affiliation the user selected, and output a name which includes all the key word the user input
+    aff = aff.lower().split(' ')
+    name = name.lower().split(' ')
+    short = ''.join([x[0] for x in name if x != 'the' and x != 'of' and x != 'for'])
+    keyword = ' '.join([x for x in aff if x != short])
+    print(keyword + ' ' + ' '.join(name))
+    return (keyword + ' ' + ' '.join(name))
+
+
+def getAffPID(affID,name): # affID is a list of affiliationID obtained by using getAff, name is the name output by nameHandler, which takes in aff: the user input, and name: the affiliationName the user chosed
     dbPAA = sqlite3.connect(db_myPAA, check_same_thread = False)
     dbPAA.create_function("match",2,match)
     curP = dbPAA.cursor()
-    curP.execute(removeCon("SELECT paper_id, affi_id, affNameOri FROM paa WHERE affi_id IN {}".format(tuple(affID))) + " AND match('" + name + "', affNameOri)")     
+    #print(removeCon("SELECT paper_id, affi_id, affNameOri FROM paa WHERE affi_id IN {}".format(tuple(affID))))
+    curP.execute(removeCon("SELECT paper_id, affi_id, affNameOri FROM paa WHERE affi_id IN {}".format(tuple(affID))) + " AND match('" + name + "', affNameOri)")
+    #curP.execute(removeCon("SELECT paper_id, affi_id, affNameOri FROM paa WHERE affi_id IN {}".format(tuple(affID))))     
     papers = curP.fetchall()
     curP.close()
     dbPAA.close()
@@ -373,7 +385,6 @@ def match(name1, name2):
     return True
 
 
-
 def similar(name1, name2):
     return SequenceMatcher(None,name1,name2).ratio() >= 0.9
 
@@ -387,9 +398,17 @@ def contains(name1, name2):
              return False
     return True
 
+def matchForShort(name1, name2):
+    name1 = name1.lower().split(' ')
+    name2 = name2.lower().split(' ')
+    ls2 = [x[0] for x in name2 if x != 'the' and x != 'of' and x != 'for']
+    ls2 = ''.join(ls2)
+    return ls2 in name1
+    
+
+
 if __name__ == '__main__':
     trial = getAff('computer science australian national university')
-    aID = list(map(lambda x:x[0],trial))
-    t = getAffPID(aID, 'computer science australian national university')
-    
-    
+    ri = [x for x in trial if x[1] == 'australian national university']
+    name = nameHandler('computer science anu',ri[0][1])
+    d = getAffPID([ri[0][0]], name)
