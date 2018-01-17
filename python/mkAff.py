@@ -326,16 +326,17 @@ def getAff(aff, a=None):
     dbA = sqlite3.connect(db_aff, check_same_thread = False)
     dbA.create_function("match",2,match)
     curA = dbA.cursor()
-    curA.execute("SELECT AffiliationID, AffiliationName FROM Affiliations WHERE match(AffiliationName, '" + name + "')")    
+    curA.execute("SELECT AffiliationID, AffiliationName FROM Affiliations WHERE match(AffiliationName, '" + aff + "')")    
     affiliations = curA.fetchall()
     curA.close()
     dbA.close()
-    temp = [x for x in affiliations if x[1] == name] 
-    affiliations = [x for x in affiliations if x[1] != name]
+    temp = [x for x in affiliations if x[1] == aff] 
+    affiliations = [x for x in affiliations if x[1] != aff]
     affiliations = temp + affiliations
+    affiliations = [{'id': x[0], 'name': x[1]} for x in affiliations]
     for tup in affiliations:
         print(tup)
-    return affiliations #affiliations is a list of (affID, affName)
+    return affiliations #affiliations is a list of {'id': affID, 'name': affName)
 
 def getAffPID(affID,name):
     dbPAA = sqlite3.connect(db_myPAA, check_same_thread = False)
