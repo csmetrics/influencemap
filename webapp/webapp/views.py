@@ -71,8 +71,8 @@ dataFunctionDict = {
     'autocomplete':{
         'author': loadAuthorList(),
         'conference': loadConferenceList(),
-        'institution': loadJournalList(),
-        'journal': loadInstitutionList()
+        'journal': loadJournalList(),
+        'institution': loadInstitutionList()
     }
 }
 
