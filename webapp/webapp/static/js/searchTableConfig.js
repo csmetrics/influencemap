@@ -1,4 +1,4 @@
-var searchTableConfig1 = {
+var searchTableConfig = {
   author: {
     tableSettings: {
       "pageLength": 10, // default page
