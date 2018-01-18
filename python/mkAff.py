@@ -18,6 +18,8 @@ db_myPAA = '/localdata/u6363358/data/paperAuthorAffiliations.db'
 
 saved_dir = '/localdata/common/savedFileAuthor.json'
 
+temp_nameList = {}
+
 def removeCon(lst):
    if lst[-2] == ",":
        return lst[:-2] + ")"
@@ -74,12 +76,16 @@ def getField(pID):
             singleFID = res[0][0]
             curFN.execute("SELECT FieldName, FieldID FROM FieldOfStudy WHERE FieldID == '" + singleFID + "'")
             output = list(map(lambda x: (x[0],len(res)),curFN.fetchall()))
+         curK.close()
+         curFN.close()
          dbK.commit()
          dbN.commit()
          dbK.close()
          dbN.close()
          return output
     else:
+         curK.close()
+         curFN.close()
          dbK.commit()
          dbN.commit()
          dbK.close()
@@ -98,6 +104,7 @@ def getPaperName(pID):
         curP.execute(removeCon("SELECT paperTitle, MAX(publishedDate) FROM papers WHERE paperID IN {}".format(tuple(pID))))
     #print("{} finished getting paperTitle and date".format(datetime.now()))
     title = curP.fetchall()
+    curP.close()
     dbPAA.commit()
     dbPAA.close()
     if len(title) > 0:
@@ -327,7 +334,7 @@ def getAff(aff, a=None):
     dbA.create_function("match",2,match)
     dbA.create_function("matchForShort", 2, matchForShort)
     curA = dbA.cursor()
-    curA.execute("SELECT AffiliationID, AffiliationName FROM Affiliations WHERE match(AffiliationName, '" + aff + "') OR matchForShort('" + aff + "', AffiliationName)" )    
+    curA.execute("SELECT AffiliationID, AffiliationName FROM Affiliations WHERE match(AffiliationName, '" + aff + "') OR matchForShort('" + aff + "', AffiliationName) OR match('" + aff + "', AffiliationName)" )    
     affiliations = curA.fetchall()
     curA.close()
     dbA.close()
@@ -352,21 +359,26 @@ def nameHandler(aff, name):
         if not exist:
             break
     if exist: 
-        print(' '.join(aff))
+       # print(' '.join(aff))
         return ' '.join(aff)
     
     short = ''.join([x[0] for x in name if x != 'the' and x != 'of' and x != 'for'])
     keyword = ' '.join([x for x in aff if x != short])
-    print(keyword + ' ' + ' '.join(name))
+    #print(keyword + ' ' + ' '.join(name))
     return (keyword + ' ' + ' '.join(name))
 
 
-def getAffPID(affID,name): # affID is a list of affiliationID obtained by using getAff, name is the name output by nameHandler, which takes in aff: the user input, and name: the affiliationName the user chosed
+def getAffPID(chosen,name): # affID is a list of affiliationID obtained by using getAff, name is the name output by nameHandler, which takes in aff: the user input, and name: the affiliationName the user chosed
     dbPAA = sqlite3.connect(db_myPAA, check_same_thread = False)
-    dbPAA.create_function("match",2,match)
+    dbPAA.create_function("matchList",1,matchList)
     curP = dbPAA.cursor()
+    affID = list(map(lambda x:x['id'], chosen))
+    affName = list(map(lambda x:x['name'], chosen))
+    global temp_nameList
+    temp_nameList = set(map(lambda x:nameHandler(name, x),affName))    
     #print(removeCon("SELECT paper_id, affi_id, affNameOri FROM paa WHERE affi_id IN {}".format(tuple(affID))))
-    curP.execute(removeCon("SELECT paper_id, affi_id, affNameOri FROM paa WHERE affi_id IN {}".format(tuple(affID))) + " AND match('" + name + "', affNameOri)")
+    #print(removeCon("SELECT paper_id, affi_id, affNameOri FROM paa WHERE affi_id IN {}".format(tuple(affID))) +  " AND" + removeCon(" matchList(affNameOri, {})".format(tuple(affName))))
+    curP.execute(removeCon("SELECT paper_id, affi_id, affNameOri FROM paa WHERE affi_id IN {}".format(tuple(affID))) + " AND matchList(affNameOri)")
     #curP.execute(removeCon("SELECT paper_id, affi_id, affNameOri FROM paa WHERE affi_id IN {}".format(tuple(affID))))     
     papers = curP.fetchall()
     curP.close()
@@ -382,11 +394,12 @@ def getAffPID(affID,name): # affID is a list of affiliationID obtained by using 
                 
     return affID_pID #affID_pID is a dict of affID:[pID]
 
-def match(name1, name2):
-    name1 = name1.lower()
-    name2 = name2.lower()
-    ls1 = name1.split(' ')
-    ls2 = name2.split(' ')
+
+def match(name1, name2): # name1 must be in name2
+    name1tem = name1.lower()
+    name2tem = name2.lower()
+    ls1 = name1tem.split(' ')
+    ls2 = name2tem.split(' ')
     ls1 = [x for x in ls1 if x != 'the' and x != 'college' and x != 'department' and x != 'of' and x != 'and' and x != 'conference' and x != 'journal' and x != 'university']
     ls2 = [x for x in ls2 if x != 'the' and x != 'college' and x != 'department' and x != 'of' and x != 'and' and x != 'conference' and x != 'journal' and x != 'university']
     for word in ls1:
@@ -398,6 +411,11 @@ def match(name1, name2):
         if not exist: return False
     return True
 
+def matchList(name2):
+    instanceList = temp_nameList
+    for n in instanceList:
+        if match(n,name2): return True
+    return False
 
 def similar(name1, name2):
     return SequenceMatcher(None,name1,name2).ratio() >= 0.9
@@ -419,10 +437,8 @@ def matchForShort(name1, name2):
     ls2 = ''.join(ls2)
     return ls2 in name1
     
-
-
 if __name__ == '__main__':
-    trial = getAff('computer science mit')
-    ri = [x for x in trial if x[1] == 'massachusetts institute of technology']
-    name = nameHandler('computer science mit',ri[0][1])
-    d = getAffPID([ri[0][0]], name)
+    trial = getAff('anu computer science')
+    ri = [x for x in trial if x['name'] == 'australian national university']
+    t = getAffPID(ri, 'anu computer science')    
+    #t = getAuthor('B Schmidt')
