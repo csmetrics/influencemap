@@ -190,8 +190,10 @@ submitButton.addEventListener('click', function(){
   var selected_indexes = searchTable.rows({selected:true})[0];
   var selected_rows = searchTable.rows( selected_indexes ).data().toArray();
   var selected_ids = [];
+  var selected_names = [];
   for (var i in selected_rows) {
     selected_ids.push(selected_rows[i][idColumnNumber]);
+    selected_names.push(selected_rows[i][0]);
   }
   console.log(entityType);
   console.log(idColumnNumber);
@@ -203,7 +205,9 @@ submitButton.addEventListener('click', function(){
     url: "/submit",
     data: { // input to the views.py - search()
       authorlist: selected_ids.join(),
+      nameslist: selected_names.join(),
       option: $(".entity-option:checked").val(),
+      keyword: inputBar.value,
     },
     success: function (result) { // return data if success
       console.log("submitButton success");
