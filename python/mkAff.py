@@ -316,17 +316,33 @@ def getConf(name, a=None):
 def getConfPID(cIDs): #this function takes in a list of cID, and produce a dict of cID:[pID]
     dbP = sqlite3.connect(db_PAA,check_same_thread = False)
     curP = dbP.cursor()
-    cIDs = ["'"+cID+"'" for cID in cIDs]
+    #cIDs = ["'"+cID+"'" for cID in cIDs]
     print("{} start getting papers".format(datetime.now()))
-    curP.execute("SELECT paperId, conferenceID FROM papers WHERE conferenceID IN ({})".format(', '.join(cIDs)))
-    papers = curP.fetchall()
+    currentDate = 2017
+    #print("SELECT paperID, paperTitle, publishedYear, conferenceID FROM papers WHERE conferenceID IN ({})".format(', '.join(cIDs)))
+    #curP.execute("SELECT paperId, paperTitle, publishedYear,conferenceID FROM papers WHERE conferenceID IN ({})".format(', '.join(cIDs)))
+    print(removeCon("SELECT paperID, paperTitle, publishedYear, conferenceID FROM papers WHERE conferenceID IN {}".format(tuple(cIDs))))
+    curP.execute(removeCon("SELECT paperID, paperTitle, publishedYear, conferenceID FROM papers WHERE conferenceID IN {}".format(tuple(cIDs))))
+    papersConfID = curP.fetchall()
+    papers = list(map(lambda x:((x[0],x[1],x[2]),x[3]),papersConfID))
     print("{} finished getting papers".format(datetime.now()))
     cID_papers = {}
     for pID, cID in papers:
-        cID_papers.setdefault(cID,[]).append(pID)
+        cID_papers.setdefault(cID,[]).append(pID[0])
+    print("{} getting recent paper".format(datetime.now()))
+    recentPaperTitle = {}
+    for paper, cID in papers:
+        if paper[-1] != '':
+            if int(paper[-1]) >= 2014:
+                recentPaperTitle.setdefault(cID,[]).append((paper[1],paper[-1]))
+    print("{} finished getting recent paper".format(datetime.now()))
+
+    for key in recentPaperTitle:
+        for p in recentPaperTitle[key]: print(p)
+
     curP.close()
     dbP.close()
-    return cID_papers #cID_papers is a dict of cID:[pID]
+    return (cID_papers, recentPaperTitle) #cID_papers is a dict of cID:[pID], recentPaperTitle is a dict of cID:[(paperTitle, publishedYear)]
      
 
 def getAff(aff, a=None):
@@ -438,7 +454,9 @@ def matchForShort(name1, name2):
     return ls2 in name1
     
 if __name__ == '__main__':
-    trial = getAff('anu computer science')
-    ri = [x for x in trial if x['name'] == 'australian national university']
-    t = getAffPID(ri, 'anu computer science')    
+    trial = getConf('pldi')
+    confID = [trial[0]['id']]
+    x = getConfPID(confID)
+    #ri = [x for x in trial if x['name'] == 'australian national university']
+    #t = getAffPID(ri, 'anu research school of computer science and engineering')    
     #t = getAuthor('B Schmidt')
