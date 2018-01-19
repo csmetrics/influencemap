@@ -191,6 +191,7 @@ submitButton.addEventListener('click', function(){
       nameslist: selected_names.join(),
       option: $(".entity-option:checked").val(),
       keyword: inputBar.value,
+      selfcite: selfCiteCheckbox.checked
     },
     success: function (result) { // return data if success
       console.log("submitButton success");
