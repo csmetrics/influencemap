@@ -50,7 +50,6 @@ def loadList(entity):
         autoCompleteLists[entity] = list(set(autoCompleteLists[entity]))
     return autoCompleteLists[entity]
 
-
 def autocomplete(request):
     entity_type = request.GET.get('option')
     data = loadList(entity_type)
@@ -86,7 +85,7 @@ def search(request):
 
     return JsonResponse(data, safe=False)
 
-    
+
 
 def submit(request):
     global option, saved_pids
@@ -128,8 +127,9 @@ def main(request):
 
     # render page with data
     return render(request, "main.html", {
-        "optionlist": optionlist,
-        "selectedKeyword": keyword,
-        "selectedOption": option,
+        "navbarOption": {
+            "optionlist": optionlist,
+            "selectedKeyword": keyword,
+            "selectedOption": option,
+        }
     })
-
