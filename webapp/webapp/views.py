@@ -16,6 +16,12 @@ from mkAff import getAuthor, getJournal, getConf, getAff, getConfPID, getJourPID
 
 
 autoCompleteLists = {}
+optionlist = [  # option list
+    {"id":"author", "name":"Author"},
+    {"id":"conference", "name":"Conference"},
+    {"id":"journal", "name":"Journal"},
+    {"id":"institution", "name":"Institution"}
+]
 
 def loadList(entity):
     path = os.path.join(BASE_DIR, "webapp/cache/"+entity+"List.txt")
@@ -49,7 +55,6 @@ def autocomplete(request):
 
 
 selfcite = False
-optionlist = []
 expanded_ids = []
 
 @csrf_exempt
@@ -106,22 +111,21 @@ def submit(request):
         id_2_paper_id[aid] = id_pid_dict[aid]
 
     image_names = getFlower(id_2_paper_id=id_2_paper_id, name=keyword, ent_type=option)
-
     image_urls = ["static/" + url for url in image_names]
 
-    data = {"images": image_urls,}
-    return JsonResponse(test, safe=False)
+    data = {
+        "images": image_urls,
+        "navbarOption": {
+            "optionlist": optionlist,
+            "selectedKeyword": keyword,
+            "selectedOption": [o for o in optionlist if o["id"] == option][0],
+        }
+    }
+    return render(request, "flower.html", data)
 
 
 def main(request):
     global keyword, optionlist, option, selfcite
-    optionlist = [  # option list
-        {"id":"author", "name":"Author"},
-        {"id":"conference", "name":"Conference"},
-        {"id":"journal", "name":"Journal"},
-        {"id":"institution", "name":"Institution"}
-    ]
-
     keyword = ""
     option = optionlist[0] # default selection
 
