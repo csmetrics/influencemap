@@ -274,16 +274,29 @@ def getJourPID(jIDs): #thie function takes in a list of journalID, and produce a
     dbPAA = sqlite3.connect(db_PAA, check_same_thread = False)
     curP = dbPAA.cursor()
     print("{} getting papers".format(datetime.now()))
-    curP.execute(removeCon("SELECT paperID, journalID FROM papers WHERE journalID IN {}".format(tuple(jIDs))))
-    papers = curP.fetchall()
+    curP.execute(removeCon("SELECT paperID, paperTitle, publishedYear, journalID FROM papers WHERE journalID IN {}".format(tuple(jIDs))))
+    paperJourID = curP.fetchall()
     print("{} finished getting paper".format(datetime.now()))
+    papers = list(map(lambda x:((x[0],x[1],x[2]),x[3]), paperJourID))
+
     jID_papers = {}
-    for pID, jID in papers:
-        jID_papers.setdefault(jID,[]).append(pID)
+    for paper, jID in papers:
+        jID_papers.setdefault(jID,[]).append(paper[0])
+
+    print("{} getting recent paper".format(datetime.now()))
+    recentPaperTitle = {}
+    for paper, jID in papers:
+        if paper[-1] != '':
+            if int(paper[-1]) >= 2014:
+                recentPaperTitle.setdefault(jID,[]).append((paper[1],paper[2]))
+    print("{} finished getting recent paper".format(datetime.now()))
+
+    for key in recentPaperTitle:
+        for p in recentPaperTitle[key]: print(p)
+
     curP.close()
     dbPAA.close()
-    return jID_papers #a dict of jID:[pID]
-
+    return (jID_papers, recentPaperTitle) #jID_papers is a dict of jID:[pID], recentPaperTitle is a dict of jID:[(paperTitle, publishedYear)]
 
 
 def getConf(name, a=None):
@@ -454,9 +467,9 @@ def matchForShort(name1, name2):
     return ls2 in name1
     
 if __name__ == '__main__':
-    trial = getConf('pldi')
-    confID = [trial[0]['id']]
-    x = getConfPID(confID)
+    trial = getJournal('bioinformatics')
+    jourID = [trial[0]['id']]
+    x = getJourPID(jourID)
     #ri = [x for x in trial if x['name'] == 'australian national university']
     #t = getAffPID(ri, 'anu research school of computer science and engineering')    
     #t = getAuthor('B Schmidt')
