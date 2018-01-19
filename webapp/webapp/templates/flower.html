@@ -3,6 +3,28 @@
 <html>
   {% include 'header.html' %}
   <body>
-    test
+    <div class="wrapper" align="center">
+      {% include 'navbar.html' with navbar=navbarOption %}
+      <div id="image-container" class="container invisible">
+        <div class="row">
+          <div class="col-md-12">
+            Keyword: <b>{{ navbarOption.selectedKeyword }}</b>
+            Type: <b>{{ navbarOption.selectedOption.name }}</b>
+          </div>
+        </div>
+        <span>To Author</span>
+        <div class="row">
+          <img id="image1" class="fit-wrapper" src=""/>
+        </div>
+        <span>To conference</span>
+        <div class="row">
+          <img id="image2" class="fit-wrapper" src=""/>
+        </div>
+        <span>To institution</span>
+        <div class= "row">
+          <img id="image3" class="fit-wrapper" src=""/>
+        </div>
+      </div>
+    </div>
   </body>
 </html>

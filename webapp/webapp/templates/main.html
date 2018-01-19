@@ -4,69 +4,7 @@
   {% include 'header.html' %}
   <body>
     <div class="wrapper" align="center">
-      <div class="row">
-        <div class="col-md-12">
-          <a href="/"><div class="page-title"><b>Project influencemap</b></div></a>
-          <span class="text-muted">Constructing maps of intellectual influence using academic data</span>
-        </div>
-      </div>
-      <div class="row">
-        <div class="col-md-12">
-          <div class="search-bar">
-            <div class="input-group input-group-sm" style="width: 300px">
-              <input id="name-search-bar" type="text" name="keyword" class="form-control" {% if selectedKeyword %} value="{{ selectedKeyword }}" {% endif %}>
-              <span class="input-group-btn">
-                <button id="search-btn" type="submit" name="search" value="search" class="btn btn-flat"><i class="fa fa-search"></i></button>
-              </span>
-            </div>
-            <div class="search-option">
-              {% for opt in optionlist %}
-              <div class="radio">
-                <label>
-                  <input class="entity-option" type="radio" name="option" id="{{opt.id}}" value="{{opt.id}}" {% if opt.id == selectedOption.id %} checked {% endif %}>
-                  {{opt.name}}
-                </label>
-              </div>
-              {% endfor %}
-            </div>
-            <div class="search-option">
-              <div class="checkbok">
-                <label>
-                  <input class="self-cite" type="checkbox" name="self-cite" id="self-cite" {% if selfcite %} checked {% endif %}>
-                  include self citations
-                </label>
-              </div>
-            </div>
-          </div>
-        </div>
-      </div>
-      <div id="progress-group" class="progress-group invisible" style="width: 400px">
-        <span id="progress-text" class="progress-text"></span>
-        <span id="progress-number" class="progress-number"></span>
-        <div class="progress sm">
-          <div id="progress-bar" class="progress-bar progress-bar-aqua" style="width: 0%"></div>
-        </div>
-      </div>
-      <div id="image-container" class="container invisible">
-        <div class="row">
-          <div class="col-md-12">
-            Keyword: <b>{{ selectedKeyword }}</b>
-            Type: <b>{{ selectedOption.name }}</b>
-          </div>
-        </div>
-        <span>To Author</span>
-        <div class="row">
-          <img id="image1" class="fit-wrapper" src=""/>
-        </div>
-        <span>To conference</span>
-        <div class="row">
-          <img id="image2" class="fit-wrapper" src=""/>
-        </div>
-        <span>To institution</span>
-        <div class= "row">
-          <img id="image3" class="fit-wrapper" src=""/>
-        </div>
-      </div>
+      {% include 'navbar.html' with navbar=navbarOption %}
       <div id="table-container" class="container invisible">
         <table id="searchtable" class="row-border hover order-column" cellspacing="0" width="100%">
         </table>
@@ -194,9 +132,9 @@ submitButton.addEventListener('click', function(){
     },
     success: function (result) { // return data if success
       console.log("submitButton success");
-      searchTable.clear();
-      tableContainer.style.display="none";
-      imageContainer.classList.remove("invisible");
+      // searchTable.clear();
+      // tableContainer.style.display="none";
+      // imageContainer.classList.remove("invisible");
       image1.src = result.images[0];
       image2.src = result.images[1];
       image3.src = result.images[2];
