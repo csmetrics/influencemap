@@ -1,89 +1,10 @@
 {% load staticfiles %}
 
 <html>
-  <head>
-    <title>InfluenceMap</title>
-
-    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0-beta.2/css/bootstrap.min.css" integrity="sha384-PsH8R72JQ3SOdhVi3uxftmaW6Vc51MKb0q5P2rRUpPvrszuE4W1povHYgTpBfshb" crossorigin="anonymous">
-    <link href="https://maxcdn.bootstrapcdn.com/font-awesome/4.7.0/css/font-awesome.min.css" rel="stylesheet" integrity="sha384-wvfXpqpZZVQGK6TAh5PVlGOfQNHSoD2xbE+QkPxCAFlNEevoEH3Sl0sibVcOQVnN" crossorigin="anonymous">
-<link rel="stylesheet" href="{% static 'css/AdminLTE.css' %}" />
-    <link rel="stylesheet" href="{% static 'css/auto-complete.css' %}" />
-    <link rel="stylesheet" href="{% static 'css/webapp.css' %}" />
-
-    <script src="https://code.jquery.com/jquery-3.2.1.min.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.12.3/umd/popper.min.js" integrity="sha384-vFJXuSJphROIrBnz7yo7oB41mKfc8JzQZiCq4NCceLEaO4IHwicKwpJf9c9IpFgh" crossorigin="anonymous"></script>
-    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0-beta.2/js/bootstrap.min.js" integrity="sha384-alpBpkh1PFOepccYVYDB4do5UnbKysX5WZXm3XxPqe5iKTfUKjNkCk9SaVuEZflJ" crossorigin="anonymous"></script>
-
-    <!-- datatable -->
-    <link rel="stylesheet" type="text/css" href="https://cdn.datatables.net/1.10.15/css/jquery.dataTables.min.css"/>
-    <script type="text/javascript" src="https://cdn.datatables.net/1.10.15/js/jquery.dataTables.min.js"></script>
-    <script type="text/javascript" src="https://cdn.datatables.net/select/1.2.4/js/dataTables.select.min.js"></script>
-  </head>
+  {% include 'header.html' %}
   <body>
     <div class="wrapper" align="center">
-      <div class="row">
-        <div class="col-md-12">
-          <a href="/"><div class="page-title"><b>Project influencemap</b></div></a>
-          <span class="text-muted">Constructing maps of intellectual influence using academic data</span>
-        </div>
-      </div>
-      <div class="row">
-        <div class="col-md-12">
-          <div class="search-bar">
-            <div class="input-group input-group-sm" style="width: 300px">
-              <input id="name-search-bar" type="text" name="keyword" class="form-control" {% if selectedKeyword %} value="{{ selectedKeyword }}" {% endif %}>
-              <span class="input-group-btn">
-                <button id="search-btn" type="submit" name="search" value="search" class="btn btn-flat"><i class="fa fa-search"></i></button>
-              </span>
-            </div>
-            <div class="search-option">
-              {% for opt in optionlist %}
-              <div class="radio">
-                <label>
-                  <input class="entity-option" type="radio" name="option" id="{{opt.id}}" value="{{opt.id}}" {% if opt.id == selectedOption.id %} checked {% endif %}>
-                  {{opt.name}}
-                </label>
-              </div>
-              {% endfor %}
-            </div>
-            <div class="search-option">
-              <div class="checkbok">
-                <label>
-                  <input class="self-cite" type="checkbox" name="self-cite" id="self-cite" {% if selfcite %} checked {% endif %}>
-                  include self citations
-                </label>
-              </div>
-            </div>
-          </div>
-        </div>
-      </div>
-      <div id="progress-group" class="progress-group invisible" style="width: 400px">
-        <span id="progress-text" class="progress-text"></span>
-        <span id="progress-number" class="progress-number"></span>
-        <div class="progress sm">
-          <div id="progress-bar" class="progress-bar progress-bar-aqua" style="width: 0%"></div>
-        </div>
-      </div>
-      <div id="image-container" class="container invisible">
-        <div class="row">
-          <div class="col-md-12">
-            Keyword: <b>{{ selectedKeyword }}</b>
-            Type: <b>{{ selectedOption.name }}</b>
-          </div>
-        </div>
-        <span>To Author</span>
-        <div class="row">
-          <img id="image1" class="fit-wrapper" src=""/>
-        </div>
-        <span>To conference</span>
-        <div class="row">
-          <img id="image2" class="fit-wrapper" src=""/>
-        </div>
-        <span>To institution</span>
-        <div class= "row">
-          <img id="image3" class="fit-wrapper" src=""/>
-        </div>
-      </div>
+      {% include 'navbar.html' with navbar=navbarOption %}
       <div id="table-container" class="container invisible">
         <table id="searchtable" class="row-border hover order-column" cellspacing="0" width="100%">
         </table>
@@ -110,7 +31,7 @@ function makeSearchTable(entityType){
 
 // create search table
 //var searchTable = makeSearchTable('conference');
- 
+
 // update searchTable
 function updateTable(data, table, resKeys, clear){
   console.log("updateTable");
@@ -211,9 +132,9 @@ submitButton.addEventListener('click', function(){
     },
     success: function (result) { // return data if success
       console.log("submitButton success");
-      searchTable.clear();
-      tableContainer.style.display="none";
-      imageContainer.classList.remove("invisible");
+      // searchTable.clear();
+      // tableContainer.style.display="none";
+      // imageContainer.classList.remove("invisible");
       image1.src = result.images[0];
       image2.src = result.images[1];
       image3.src = result.images[2];
@@ -226,12 +147,12 @@ submitButton.addEventListener('click', function(){
 
 // ----   auto complete   ----
 var ac = new autoComplete({
-  selector: '#name-search-bar', 
+  selector: '#name-search-bar',
   source: function(term, response){
     $.getJSON(
-      '/autocomplete?option='+$(".entity-option:checked").val(), 
+      '/autocomplete?option='+$(".entity-option:checked").val(),
       { q: term },
-      function(data){ 
+      function(data){
         term = term.toLowerCase();
         var choices = data;
         var suggestions = [];
@@ -240,9 +161,9 @@ var ac = new autoComplete({
           if (~choices[i].toLowerCase().indexOf(term))
               suggestions.push(choices[i]);
         }
-        response(suggestions); 
-      }); 
+        response(suggestions);
+      });
   }
-}); 
+});
 
 </script>

@@ -40,7 +40,6 @@ dataFunctionDict = {
     }
 }
 
-
 def autocomplete(request):
     entity_type = request.GET.get('option')
     print(request)
@@ -82,7 +81,7 @@ def search(request):
 
     return JsonResponse(data, safe=False)
 
-    
+
 
 def submit(request):
     global keyword, option, selfcite, author_id_pid_dict
@@ -128,8 +127,9 @@ def main(request):
 
     # render page with data
     return render(request, "main.html", {
-        "optionlist": optionlist,
-        "selectedKeyword": keyword,
-        "selectedOption": option,
+        "navbarOption": {
+            "optionlist": optionlist,
+            "selectedKeyword": keyword,
+            "selectedOption": option,
+        }
     })
-
