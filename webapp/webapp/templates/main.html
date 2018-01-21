@@ -86,6 +86,7 @@ var submitButton = document.getElementById("submit-btn");
 // ----  listeners  ----
 
 function search(exp, clear){
+  tableContainer.classList.add("invisible");
   var entityType = $(".entity-option:checked").val();
   var responseKeys = searchTableConfig[entityType]['responseKeys'];
   if (!exp){searchTable = makeSearchTable(entityType)}
