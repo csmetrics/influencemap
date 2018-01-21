@@ -143,29 +143,13 @@ submitButton.addEventListener('click', function(){
   console.log(searchTableConfig);
   console.log(searchTableConfig[entityType]);
   console.log(selected_ids);
-  $.ajax({
-    type: "GET",
-    url: "/submit",
-    data: { // input to the views.py - search()
+  data = {
       authorlist: selected_ids.join(),
       nameslist: selected_names.join(),
       option: $(".entity-option:checked").val(),
       keyword: inputBar.value,
-      selfcite: selfCiteCheckbox.checked
-    },
-    success: function (result) { // return data if success
-      console.log("submitButton success");
-      searchTable.clear();
-      tableContainer.style.display="none";
-      imageContainer.classList.remove("invisible");
-      image1.src = result.images[0];
-      image2.src = result.images[1];
-      image3.src = result.images[2];
-    },
-    error: function (result) {
-      console.log("submitButton error");
-    }
-  });
+  }
+  window.location.href = "/submit/?" + $.param(data);
 });
 
 // ----   auto complete   ----

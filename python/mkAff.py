@@ -270,7 +270,7 @@ def getJournal(name, a=None):
 
     return output #output is a list of {'id':journalID, 'name':journalName}
 
-def getJourPID(jIDs): #thie function takes in a list of journalID, and produce a dict of jID:[pID]
+def getJourPID(jIDs, yearStart=0, yearEnd=2016): #thie function takes in a list of journalID, and produce a dict of jID:[pID]
     dbPAA = sqlite3.connect(db_PAA, check_same_thread = False)
     curP = dbPAA.cursor()
     print("{} getting papers".format(datetime.now()))
@@ -281,7 +281,8 @@ def getJourPID(jIDs): #thie function takes in a list of journalID, and produce a
 
     jID_papers = {}
     for paper, jID in papers:
-        jID_papers.setdefault(jID,[]).append(paper[0])
+        if int(paper[-1]) >= yearStart and int(paper[-1]) <= yearEnd: 
+            jID_papers.setdefault(jID,[]).append(paper[0])
 
     print("{} getting recent paper".format(datetime.now()))
     recentPaperTitle = {}
@@ -293,6 +294,9 @@ def getJourPID(jIDs): #thie function takes in a list of journalID, and produce a
 
     for key in recentPaperTitle:
         for p in recentPaperTitle[key]: print(p)
+        print(len(recentPaperTitle[key]))
+    for key in jID_papers:
+        print(len(jID_papers[key]))
 
     curP.close()
     dbPAA.close()
@@ -326,12 +330,11 @@ def getConf(name, a=None):
     return output #a list of {'id':confID, 'name':confName}
     
 
-def getConfPID(cIDs): #this function takes in a list of cID, and produce a dict of cID:[pID]
+def getConfPID(cIDs, yearStart=0, yearEnd=2016): #this function takes in a list of cID, and produce a dict of cID:[pID]
     dbP = sqlite3.connect(db_PAA,check_same_thread = False)
     curP = dbP.cursor()
     #cIDs = ["'"+cID+"'" for cID in cIDs]
     print("{} start getting papers".format(datetime.now()))
-    currentDate = 2017
     #print("SELECT paperID, paperTitle, publishedYear, conferenceID FROM papers WHERE conferenceID IN ({})".format(', '.join(cIDs)))
     #curP.execute("SELECT paperId, paperTitle, publishedYear,conferenceID FROM papers WHERE conferenceID IN ({})".format(', '.join(cIDs)))
     print(removeCon("SELECT paperID, paperTitle, publishedYear, conferenceID FROM papers WHERE conferenceID IN {}".format(tuple(cIDs))))
@@ -340,8 +343,10 @@ def getConfPID(cIDs): #this function takes in a list of cID, and produce a dict 
     papers = list(map(lambda x:((x[0],x[1],x[2]),x[3]),papersConfID))
     print("{} finished getting papers".format(datetime.now()))
     cID_papers = {}
+    
     for pID, cID in papers:
-        cID_papers.setdefault(cID,[]).append(pID[0])
+        if int(pID[-1]) >= yearStart and int(pID[-1]) <= yearEnd: 
+            cID_papers.setdefault(cID,[]).append(pID[0])
     print("{} getting recent paper".format(datetime.now()))
     recentPaperTitle = {}
     for paper, cID in papers:
@@ -352,6 +357,10 @@ def getConfPID(cIDs): #this function takes in a list of cID, and produce a dict 
 
     for key in recentPaperTitle:
         for p in recentPaperTitle[key]: print(p)
+        print(len(recentPaperTitle[key]))
+
+    for key in cID_papers:
+        print(len(cID_papers[key]))
 
     curP.close()
     dbP.close()
@@ -467,9 +476,11 @@ def matchForShort(name1, name2):
     return ls2 in name1
     
 if __name__ == '__main__':
-    trial = getJournal('bioinformatics')
-    jourID = [trial[0]['id']]
-    x = getJourPID(jourID)
+    trial = getConf('pldi')
+    confID = [trial[0]['id']]
+    x = getConfPID(confID, 1980, 2014)
+    #jourID = [x['id'] for x in trial if x['name'] == 'Cell']
+    #x = getJourPID(jourID)
     #ri = [x for x in trial if x['name'] == 'australian national university']
     #t = getAffPID(ri, 'anu research school of computer science and engineering')    
     #t = getAuthor('B Schmidt')
