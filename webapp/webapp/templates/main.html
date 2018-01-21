@@ -28,7 +28,7 @@
       <div id="table-container" class="container invisible">
         <table id="searchtable" class="row-border hover order-column" cellspacing="0" width="100%">
         </table>
-        <input id="load-more-btn" type="submit" value="Expand search" name="load-more">
+        <input id="expand-btn" type="submit" value="Expand search" name="expand search">
         <input id="submit-btn" type="submit" name="submit">
       </div>
     </div>
@@ -40,17 +40,17 @@
 <script>
 
 // ----  data table  ----
-
 var tableContainer = document.getElementById("table-container");
 
 // function to create searchTable
 function makeSearchTable(entityType){
+  if ($.fn.DataTable.isDataTable("#searchtable")) {
+    $('#searchtable').DataTable().clear().destroy();
+    $('#searchtable').empty();
+  }
   var tableSettings = searchTableConfig[entityType]['tableSettings'];
   return $('#searchtable').DataTable(tableSettings);
 }
-
-// create search table
-//var searchTable = makeSearchTable('conference');
 
 // update searchTable
 function updateTable(data, table, resKeys, clear){
@@ -75,7 +75,7 @@ var image2 = document.getElementById("image2");
 var image3 = document.getElementById("image3");
 
 
-var loadMore = document.getElementById("load-more-btn");
+var expandButton = document.getElementById("expand-btn");
 var inputBar = document.getElementById("name-search-bar");
 var selfCiteCheckbox = document.getElementById("self-cite");
 var searchButton = document.getElementById("search-btn");
@@ -88,7 +88,7 @@ var submitButton = document.getElementById("submit-btn");
 function search(exp, clear){
   var entityType = $(".entity-option:checked").val();
   var responseKeys = searchTableConfig[entityType]['responseKeys'];
-  searchTable = makeSearchTable(entityType);
+  if (!exp){searchTable = makeSearchTable(entityType)}
   showProgressBar();
   updateProgressBar();
   $.ajax({
@@ -104,6 +104,7 @@ function search(exp, clear){
       console.log("searchButton success");
       // console.log(result["authors"]);
       updateTable(result["entities"], searchTable, responseKeys, clear);
+      if ($(".entity-option:checked").val() !== 'author'){expandButton.style.display='none'} else {expandButton.style.display='inline'}
       tableContainer.classList.remove("invisible");
     },
     error: function (result) {
@@ -120,7 +121,7 @@ searchButton.addEventListener('click', function(){
 
 
 // Search all event handler
-loadMore.addEventListener('click', function(){
+expandButton.addEventListener('click', function(){
   search(true, false); // expand: true, clear: false
 });
 
@@ -186,5 +187,4 @@ var ac = new autoComplete({
       });
   }
 });
-
 </script>

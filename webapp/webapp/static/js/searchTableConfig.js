@@ -31,6 +31,7 @@ var searchTableConfig = {
       "order": [[1, "desc" ]],
       "info": true,
       "autoWidth": false,
+      "destroy": true,
     },
     responseKeys: [
     'name', 'numpaper', 'affiliation','field','recentPaper','authorID'
@@ -65,6 +66,7 @@ var searchTableConfig = {
       "order": [[0, "asc" ]],
       "info": true,
       "autoWidth": false,
+      "destroy": true,
     },
     responseKeys: [
     'name', 'id'
@@ -99,6 +101,7 @@ var searchTableConfig = {
       "order": [[0, "asc" ]],
       "info": true,
       "autoWidth": false,
+      "destroy": true,
     },
     responseKeys: [
     'name', 'id'
@@ -133,6 +136,7 @@ var searchTableConfig = {
       "order": [[0, "asc" ]],
       "info": true,
       "autoWidth": false,
+      "destroy": true,
     },
     responseKeys: [
     'name', 'id'
