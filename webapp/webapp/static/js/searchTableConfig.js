@@ -8,7 +8,7 @@ var searchTableConfig = {
       { title: "Name", className: "index dt-body-center" },
       { title: "Number of papers", className: "institution dt-body-right" },
       { title: "Affiliations", className: "dt-body-center" },
-      { title: "Field (number of papers)", className: "dt-body-left" },
+      { title: "Field (number of papers)", className: "field dt-body-left" },
       { title: "Most recent paper", className: "dt-body-left" },
       { title: "ID"}
       ],
