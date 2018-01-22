@@ -138,6 +138,7 @@ submitButton.addEventListener('click', function(){
       nameslist: selected_names.join(),
       option: $(".entity-option:checked").val(),
       keyword: inputBar.value,
+      selfcite: selfCiteCheckbox.checked,
   }
   window.location.href = "/submit/?" + $.param(data);
 });

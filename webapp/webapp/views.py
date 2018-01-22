@@ -103,6 +103,10 @@ def submit(request):
     option = request.GET.get("option")
     keyword = request.GET.get('keyword')
     selfcite = True if request.GET.get("selfcite") == "true" else False
+    print('\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n')
+    print(request.GET.get('selfcite'))
+    print('\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n')
+
 
     if option in ['conference', 'journal']:
         id_pid_dict = dataFunctionDict['get_pids'][option](selected_ids)
@@ -120,7 +124,7 @@ def submit(request):
     for aid in selected_ids:
         id_2_paper_id[aid] = id_pid_dict[aid]
 
-    image_names = getFlower(id_2_paper_id=id_2_paper_id, name=keyword, ent_type=option)
+    image_names = getFlower(id_2_paper_id=id_2_paper_id, name=keyword, ent_type=option, selfcite=selfcite)
     image_urls = ["static/" + url for url in image_names]
 
     data = {
