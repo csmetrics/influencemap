@@ -111,7 +111,7 @@ def getPaperName(pID):
         return (title[0][0], title[0][1])
     else: return ('','')
 
-def getAuthor(name,cbfunc=lambda _ : None, nonExpandAID=[], expand=False,use_cache=False):
+def getAuthor(name,cbfunc=lambda _ : None, nonExpandAID=[], expand=False,use_cache=False, yearStart=0, yearEnd=2016):
     if use_cache:
        with open(saved_dir,'r') as savedFile:
            data_exist_author = json.load(savedFile)
@@ -284,23 +284,29 @@ def getJourPID(jIDs, yearStart=0, yearEnd=2016): #thie function takes in a list 
         if int(paper[-1]) >= yearStart and int(paper[-1]) <= yearEnd: 
             jID_papers.setdefault(jID,[]).append(paper[0])
 
-    print("{} getting recent paper".format(datetime.now()))
-    recentPaperTitle = {}
-    for paper, jID in papers:
-        if paper[-1] != '':
-            if int(paper[-1]) >= 2014:
-                recentPaperTitle.setdefault(jID,[]).append((paper[1],paper[2]))
-    print("{} finished getting recent paper".format(datetime.now()))
+    periodPaperTitle = {}
 
-    for key in recentPaperTitle:
-        for p in recentPaperTitle[key]: print(p)
-        print(len(recentPaperTitle[key]))
-    for key in jID_papers:
-        print(len(jID_papers[key]))
+    if yearEnd - yearStart == 2016:
+        print("{} getting recent paper".format(datetime.now()))
+        for paper, jID in papers:
+            if paper[-1] != '':
+                if int(paper[-1]) >= 2014:
+                    periodPaperTitle.setdefault(jID,[]).append((paper[1],paper[2]))
+        print("{} finished getting recent paper".format(datetime.now()))
+    else:
+       print("{} getting the paper in that period".format(datetime.now()))
+       for paper, jID in papers:
+           if paper[-1] != '':
+               if int(paper[-1]) >= yearStart and int(paper[-1]) <= yearEnd:
+                   periodPaperTitle.setdefault(jID,[]).append((paper[1],paper[2]))
+       print("{} finished getting paper in that period".format(datetime.now()))
+
+    for key in periodPaperTitle:
+        for p in periodPaperTitle[key]: print(p)
 
     curP.close()
     dbPAA.close()
-    return (jID_papers, recentPaperTitle) #jID_papers is a dict of jID:[pID], recentPaperTitle is a dict of jID:[(paperTitle, publishedYear)]
+    return (jID_papers, periodPaperTitle) #jID_papers is a dict of jID:[pID], periodPaperTitle is a dict of jID:[(paperTitle, publishedYear)]
 
 
 def getConf(name, a=None):
@@ -347,24 +353,29 @@ def getConfPID(cIDs, yearStart=0, yearEnd=2016): #this function takes in a list 
     for pID, cID in papers:
         if int(pID[-1]) >= yearStart and int(pID[-1]) <= yearEnd: 
             cID_papers.setdefault(cID,[]).append(pID[0])
-    print("{} getting recent paper".format(datetime.now()))
-    recentPaperTitle = {}
-    for paper, cID in papers:
-        if paper[-1] != '':
-            if int(paper[-1]) >= 2014:
-                recentPaperTitle.setdefault(cID,[]).append((paper[1],paper[-1]))
-    print("{} finished getting recent paper".format(datetime.now()))
+   
+    periodPaperTitle = {}
+    if yearEnd - yearStart == 2016:
+        print("{} getting recent paper".format(datetime.now()))
+        for paper, cID in papers:
+            if paper[-1] != '':
+                if int(paper[-1]) >= 2014:
+                    periodPaperTitle.setdefault(cID,[]).append((paper[1],paper[-1]))
+        print("{} finished getting recent paper".format(datetime.now()))
+    else:
+        print("{} getting paper in that period".format(datetime.now()))
+        for paper, cID in papers:
+            if paper[-1] != '':
+                if int(paper[-1]) >= yearStart and int(paper[-1]) <= yearEnd:
+                    periodPaperTitle.setdefault(cID,[]).append((paper[1],paper[-1]))
+        print("{} finshed getting paper in that period".format(datetime.now()))
 
-    for key in recentPaperTitle:
-        for p in recentPaperTitle[key]: print(p)
-        print(len(recentPaperTitle[key]))
-
-    for key in cID_papers:
-        print(len(cID_papers[key]))
+    for key in periodPaperTitle:
+        for p in periodPaperTitle[key]: print(p)
 
     curP.close()
     dbP.close()
-    return (cID_papers, recentPaperTitle) #cID_papers is a dict of cID:[pID], recentPaperTitle is a dict of cID:[(paperTitle, publishedYear)]
+    return (cID_papers, periodPaperTitle) #cID_papers is a dict of cID:[pID], recentPaperTitle is a dict of cID:[(paperTitle, publishedYear)]
      
 
 def getAff(aff, a=None):
@@ -478,7 +489,7 @@ def matchForShort(name1, name2):
 if __name__ == '__main__':
     trial = getConf('pldi')
     confID = [trial[0]['id']]
-    x = getConfPID(confID, 1980, 2014)
+    x = getConfPID(confID, 2011, 2013)
     #jourID = [x['id'] for x in trial if x['name'] == 'Cell']
     #x = getJourPID(jourID)
     #ri = [x for x in trial if x['name'] == 'australian national university']
