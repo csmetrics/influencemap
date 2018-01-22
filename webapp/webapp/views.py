@@ -124,7 +124,9 @@ def submit(request):
     for aid in selected_ids:
         id_2_paper_id[aid] = id_pid_dict[aid]
 
-    image_names = getFlower(id_2_paper_id=id_2_paper_id, name=keyword, ent_type=option, selfcite=selfcite)
+    #image_names = getFlower(id_2_paper_id=id_2_paper_id, name=keyword, ent_type=option, selfcite=selfcite)
+    image_names = ['lexing_xie_flower_author.png', 'lexing_xie_flower_conf.png', 'lexing_xie_flower_author.png']
+
     image_urls = ["static/" + url for url in image_names]
 
     data = {
