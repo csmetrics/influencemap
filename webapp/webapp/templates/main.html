@@ -5,30 +5,10 @@
   <body>
     <div class="wrapper" align="center">
       {% include 'navbar.html' with navbar=navbarOption %}
-      <div id="image-container" class="container invisible">
-        <div class="row">
-          <div class="col-md-12">
-            Keyword: <b>{{ navbarOption.selectedKeyword }}</b>
-            Type: <b>{{ navbarOption.selectedOption.name }}</b>
-          </div>
-        </div>
-        <span>To Author</span>
-        <div class="row">
-          <img id="image1" class="fit-wrapper" src=""/>
-        </div>
-        <span>To conference</span>
-        <div class="row">
-          <img id="image2" class="fit-wrapper" src=""/>
-        </div>
-        <span>To institution</span>
-        <div class= "row">
-          <img id="image3" class="fit-wrapper" src=""/>
-        </div>
-      </div>
       <div id="table-container" class="container invisible">
         <table id="searchtable" class="row-border hover order-column" cellspacing="0" width="100%">
         </table>
-        <input id="load-more-btn" type="submit" value="Expand search" name="load-more">
+        <input id="expand-btn" type="submit" value="Expand search" name="expand search">
         <input id="submit-btn" type="submit" name="submit">
       </div>
     </div>
@@ -40,17 +20,17 @@
 <script>
 
 // ----  data table  ----
-
 var tableContainer = document.getElementById("table-container");
 
 // function to create searchTable
 function makeSearchTable(entityType){
+  if ($.fn.DataTable.isDataTable("#searchtable")) {
+    $('#searchtable').DataTable().clear().destroy();
+    $('#searchtable').empty();
+  }
   var tableSettings = searchTableConfig[entityType]['tableSettings'];
   return $('#searchtable').DataTable(tableSettings);
 }
-
-// create search table
-//var searchTable = makeSearchTable('conference');
 
 // update searchTable
 function updateTable(data, table, resKeys, clear){
@@ -62,6 +42,16 @@ function updateTable(data, table, resKeys, clear){
        key = resKeys[j];
        newRow[j] = data[i][key];
     };
+
+    // fields
+    fields = "";
+    for (var f in newRow[3]) {
+      fields += "<li>" + newRow[3][f][0] + " (" + newRow[3][f][1] + ")</li>";
+    }
+    newRow[3] = "<ul>" + fields + "</ul>";
+    // Uppercase first letter
+    newRow[4] = newRow[4].charAt(0).toUpperCase() + newRow[4].slice(1);
+
     table.row.add(newRow);
   };
   table.draw();
@@ -75,7 +65,7 @@ var image2 = document.getElementById("image2");
 var image3 = document.getElementById("image3");
 
 
-var loadMore = document.getElementById("load-more-btn");
+var expandButton = document.getElementById("expand-btn");
 var inputBar = document.getElementById("name-search-bar");
 var selfCiteCheckbox = document.getElementById("self-cite");
 var searchButton = document.getElementById("search-btn");
@@ -86,9 +76,10 @@ var submitButton = document.getElementById("submit-btn");
 // ----  listeners  ----
 
 function search(exp, clear){
+  tableContainer.classList.add("invisible");
   var entityType = $(".entity-option:checked").val();
   var responseKeys = searchTableConfig[entityType]['responseKeys'];
-  searchTable = makeSearchTable(entityType);
+  if (!exp){searchTable = makeSearchTable(entityType)}
   showProgressBar();
   updateProgressBar();
   $.ajax({
@@ -104,6 +95,7 @@ function search(exp, clear){
       console.log("searchButton success");
       // console.log(result["authors"]);
       updateTable(result["entities"], searchTable, responseKeys, clear);
+      if ($(".entity-option:checked").val() !== 'author'){expandButton.style.display='none'} else {expandButton.style.display='inline'}
       tableContainer.classList.remove("invisible");
     },
     error: function (result) {
@@ -120,7 +112,7 @@ searchButton.addEventListener('click', function(){
 
 
 // Search all event handler
-loadMore.addEventListener('click', function(){
+expandButton.addEventListener('click', function(){
   search(true, false); // expand: true, clear: false
 });
 
@@ -141,28 +133,13 @@ submitButton.addEventListener('click', function(){
   console.log(searchTableConfig);
   console.log(searchTableConfig[entityType]);
   console.log(selected_ids);
-  $.ajax({
-    type: "GET",
-    url: "/submit",
-    data: { // input to the views.py - search()
+  data = {
       authorlist: selected_ids.join(),
       nameslist: selected_names.join(),
       option: $(".entity-option:checked").val(),
       keyword: inputBar.value,
-    },
-    success: function (result) { // return data if success
-      console.log("submitButton success");
-      searchTable.clear();
-      tableContainer.style.display="none";
-      imageContainer.classList.remove("invisible");
-      image1.src = result.images[0];
-      image2.src = result.images[1];
-      image3.src = result.images[2];
-    },
-    error: function (result) {
-      console.log("submitButton error");
-    }
-  });
+  }
+  window.location.href = "/submit/?" + $.param(data);
 });
 
 // ----   auto complete   ----
@@ -185,5 +162,4 @@ var ac = new autoComplete({
       });
   }
 });
-
 </script>

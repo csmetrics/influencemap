@@ -5,7 +5,7 @@
   <body>
     <div class="wrapper" align="center">
       {% include 'navbar.html' with navbar=navbarOption %}
-      <div id="image-container" class="container invisible">
+      <div id="image-container" class="container">
         <div class="row">
           <div class="col-md-12">
             Keyword: <b>{{ navbarOption.selectedKeyword }}</b>
@@ -14,15 +14,15 @@
         </div>
         <span>To Author</span>
         <div class="row">
-          <img id="image1" class="fit-wrapper" src=""/>
+          <img id="image1" class="fit-wrapper" src="{% static images.0 %}"/>
         </div>
         <span>To conference</span>
         <div class="row">
-          <img id="image2" class="fit-wrapper" src=""/>
+          <img id="image2" class="fit-wrapper" src="{% static images.1 %}"/>
         </div>
         <span>To institution</span>
         <div class= "row">
-          <img id="image3" class="fit-wrapper" src=""/>
+          <img id="image3" class="fit-wrapper" src="{% static images.2 %}"/>
         </div>
       </div>
     </div>
