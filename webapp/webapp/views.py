@@ -120,8 +120,7 @@ def submit(request):
     for aid in selected_ids:
         id_2_paper_id[aid] = id_pid_dict[aid]
 
-    image_names = getFlower(id_2_paper_id=id_2_paper_id, name=keyword, ent_type=option)
-    image_urls = ["static/" + url for url in image_names]
+    image_urls = getFlower(id_2_paper_id=id_2_paper_id, name=keyword, ent_type=option)
 
     data = {
         "images": image_urls,
