@@ -146,7 +146,7 @@ def gen_search_df(conn, paper_map, etype):
 
     # deal with threshold papers
     print('\n---\n{} start finding paper references for: threshold\n---'.format(datetime.now()))
-    e_df = gen_reference_df(conn, threshold_papers)
+    ref_df = gen_reference_df(conn, threshold_papers)
     print('{} finish finding paper references for: threshold\n---'.format(datetime.now()))
 
     print('{} start finding paper info for: threshold\n---'.format(datetime.now()))
@@ -155,7 +155,7 @@ def gen_search_df(conn, paper_map, etype):
 
     # Other entities
     print('{} start joining dataframes for: threshold\n---'.format(datetime.now()))
-    #res_dict[None] = combine_df(ref_df, info_df)
+    res_dict[None] = combine_df(ref_df, info_df)
     print('{} finish joining dataframes for: threshold\n---'.format(datetime.now(), entity_id))
 
     # Calculate self-citations
