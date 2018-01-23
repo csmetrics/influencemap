@@ -97,19 +97,16 @@ def getPaperName(pID):
     curP = dbPAA.cursor()
     #print("{} getting paperTitle and date".format(datetime.now()))
     if len(pID) == 1:
-        print("SELECT paperTitle, publishedDate FROM papers WHERE paperID == '" + pID[0] + "'")
-        curP.execute("SELECT paperTitle, publishedDate FROM papers WHERE paperID == '" + pID[0] + "'")
+        #print("SELECT paperTitle, publishedDate FROM papers WHERE paperID == '" + pID[0] + "'")
+        curP.execute("SELECT paperID, paperTitle, publishedYear, publishedDate FROM papers WHERE paperID == '" + pID[0] + "'")
     else:
-        print(removeCon("SELECT paperTitle, MAX(publishedDate) FROM papers WHERE paperID IN {}".format(tuple(pID))))
-        curP.execute(removeCon("SELECT paperTitle, MAX(publishedDate) FROM papers WHERE paperID IN {}".format(tuple(pID))))
-    #print("{} finished getting paperTitle and date".format(datetime.now()))
-    title = curP.fetchall()
+        #print(removeCon("SELECT paperTitle, MAX(publishedDate) FROM papers WHERE paperID IN {}".format(tuple(pID))))
+        curP.execute(removeCon("SELECT paperID, paperTitle, publishedYear, publishedDate FROM papers WHERE paperID IN {}".format(tuple(pID))))
+    res = curP.fetchall()
     curP.close()
-    dbPAA.commit()
     dbPAA.close()
-    if len(title) > 0:
-        return (title[0][0], title[0][1])
-    else: return ('','')
+    recent = max(res, key=lambda x: x[-1])
+    return (res,recent)
 
 def getAuthor(name,cbfunc=lambda _ : None, nonExpandAID=[], expand=False,use_cache=False, yearStart=0, yearEnd=2016):
     if use_cache:
@@ -177,8 +174,6 @@ def getAuthor(name,cbfunc=lambda _ : None, nonExpandAID=[], expand=False,use_cac
     curP.execute(removeCon("SELECT auth_id, paper_id, affNameOri FROM paa WHERE auth_id IN {}".format(tuple(aID))))
     result = curP.fetchall()
 
-    aIDpIDDict = {}
-
     finalres = []
 
     #Putting the authorName into the tuples
@@ -203,7 +198,6 @@ def getAuthor(name,cbfunc=lambda _ : None, nonExpandAID=[], expand=False,use_cac
                     pID.append(tup[-2]) #pID contains paperID
                     tep.append(tup[-1]) #tep contatins affiliationNameOriginal
             tep[:] = [x for x in tep if x != '']
-            aIDpIDDict[currentID] = pID
             if len(tep) > 0:
                 tempres.append((tuples[0],tuples[1],count,mostCommon(tep),pID))
             else:
@@ -216,13 +210,23 @@ def getAuthor(name,cbfunc=lambda _ : None, nonExpandAID=[], expand=False,use_cac
     tempres[:] = [x for x in tempres if x[0] != name]
     tempres = same + tempres
 
+    aIDpaper = {}  
+
     print("{} finish counting, getting the fieldName and recent paper".format(datetime.now()))
     cbfunc("finish counting, getting the fieldName and recent paper")
     for tuples in tempres:
         print(tuples[0])
-        recent = getPaperName(tuples[-1]) #a tuple (paperName, date)
+        paperInfo = getPaperName(tuples[-1]) #paperInfo is a tuple of ([(paperID, paperTitle, publishedYear, publishedDate)], recentPaperInfo)
+        ps = paperInfo[0]
+        tem = []
+        for p in ps:
+            if p[-2] != '':
+                if int(p[-2]) >= yearStart and int(p[-2]) <= yearEnd:
+                    tem.append((p[0], p[1])) #tem is a list of (paperID, paperTitle)          
+        recent = paperInfo[1]
+        aIDpaper[tuples[1]] = tem #aIDpaper is a dict of aID:[(paperID, paperTitle)]
         print("{} finished getting recentPaper".format(datetime.now()))
-        finalresult.append({'name':tuples[0],'authorID':tuples[1],'numpaper':tuples[2],'affiliation':tuples[3],'field':getField(tuples[4]),'recentPaper':recent[0],'publishedDate':recent[1]})
+        finalresult.append({'name':tuples[0],'authorID':tuples[1],'numpaper':tuples[2],'affiliation':tuples[3],'field':getField(tuples[4]),'recentPaper':recent[1],'publishedDate':recent[-1]})
     print("{} done".format(datetime.now()))
     cbfunc("done")
     curP.close()    
@@ -232,13 +236,16 @@ def getAuthor(name,cbfunc=lambda _ : None, nonExpandAID=[], expand=False,use_cac
     dbA.commit()
     dbA.close()
    
+    '''
     for dic in finalresult: #finalresult is a list of dict
          print(dic)
-    print(len(finalresult))
-    print(len(aIDpIDDict))
+    '''
+    for key in aIDpaper:
+        print(aIDpaper[key])
 
-    if not expand: return (finalresult, aIDpIDDict, authorNotSameName) #if not expand, will also return a list of authorID whose name are not exactly the same
-    else: return (finalresult,aIDpIDDict) 
+
+    if not expand: return (finalresult, aIDpaper, authorNotSameName) #if not expand, will also return a list of authorID whose name are not exactly the same
+    else: return (finalresult,aIDpaper) 
 
 
 def getJournal(name, a=None):
@@ -417,7 +424,7 @@ def nameHandler(aff, name):
     return (keyword + ' ' + ' '.join(name))
 
 
-def getAffPID(chosen,name): # affID is a list of affiliationID obtained by using getAff, name is the name output by nameHandler, which takes in aff: the user input, and name: the affiliationName the user chosed
+def getAffPID(chosen,name): # chosen is the list of dict chosen by the user, name is the user input
     dbPAA = sqlite3.connect(db_myPAA, check_same_thread = False)
     dbPAA.create_function("matchList",1,matchList)
     curP = dbPAA.cursor()
@@ -437,10 +444,14 @@ def getAffPID(chosen,name): # affID is a list of affiliationID obtained by using
     affIDpIDList = list(map(lambda x: (x[0],x[1]), papers))
     for paper, aff in affIDpIDList:
         affID_pID.setdefault(aff,[]).append(paper)
+    
+    for key in affID_pID: print(len(affID_pID[key]))
+   
+    '''
     affNameSet = set(map(lambda x:x[2], papers))
     for n in affNameSet:
         print(n)    
-                
+    '''            
     return affID_pID #affID_pID is a dict of affID:[pID]
 
 
@@ -487,9 +498,11 @@ def matchForShort(name1, name2):
     return ls2 in name1
     
 if __name__ == '__main__':
-    trial = getConf('pldi')
-    confID = [trial[0]['id']]
-    x = getConfPID(confID, 2011, 2013)
+    trial = getAuthor('stephen m blackburn')
+    #affID = []
+    #x = getAffPID(affID,'university of cambridge')
+    #confID = [trial[0]['id']]
+    #x = getConfPID(confID, 2011, 2013)
     #jourID = [x['id'] for x in trial if x['name'] == 'Cell']
     #x = getJourPID(jourID)
     #ri = [x for x in trial if x['name'] == 'australian national university']
