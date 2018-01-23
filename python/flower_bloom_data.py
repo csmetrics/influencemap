@@ -17,10 +17,11 @@ def flower_df_to_graph(score_df, ego):
     # Create a minimum and maximum processor object
     min_max_scaler = preprocessing.MinMaxScaler()
 
-    normed_influenced = min_max_scaler.fit_transform(score_df['influenced'].values.reshape(-1, 1)).reshape(NUM_LEAVES)
-    normed_influencing = min_max_scaler.fit_transform(score_df['influencing'].values.reshape(-1, 1)).reshape(NUM_LEAVES)
-    normed_ratio = min_max_scaler.fit_transform(np.log(score_df['ratio']).values.reshape(-1, 1)).reshape(NUM_LEAVES)
-    normed_sum = min_max_scaler.fit_transform(np.log(score_df['sum']).values.reshape(-1, 1)).reshape(NUM_LEAVES)
+    num_leaves = min(NUM_LEAVES, len(min_max_scaler.fit_transform(score_df['influenced'].values.reshape(-1, 1))))
+    normed_influenced = min_max_scaler.fit_transform(score_df['influenced'].values.reshape(-1, 1)).reshape(num_leaves)
+    normed_influencing = min_max_scaler.fit_transform(score_df['influencing'].values.reshape(-1, 1)).reshape(num_leaves)
+    normed_ratio = min_max_scaler.fit_transform(np.log(score_df['ratio']).values.reshape(-1, 1)).reshape(num_leaves)
+    normed_sum = min_max_scaler.fit_transform(np.log(score_df['sum']).values.reshape(-1, 1)).reshape(num_leaves)
 
     # Ego Graph
     egoG = nx.DiGraph(ego=ego, max_influenced=score_df['influenced'].max(), max_influencing=score_df['influencing'].max())

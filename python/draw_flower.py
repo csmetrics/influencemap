@@ -77,7 +77,7 @@ def draw_flower(egoG=None, ax=None,
             text_angle = anglelist[i]
 
         # name split in words
-        words = node.split()
+        words = node.split() if node != None else ["None"]
 
         # Position of text
         xt = xp * (1.1 + 0.01 * (max(map(len, words)) - 1))

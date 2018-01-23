@@ -113,7 +113,7 @@ def gen_combined_df(conn, e_map, entity_id, entity_ids, paper_ids):
         print('{} finish finding paper references for: threshold\n---'.format(datetime.now()))
 
         # Get the papers to find info for
-        info_papers = list(set(ref_df['paper_citing'].tolist() + ref_df['paper_cited'].tolist()))
+        info_papers = list(set(ref_df['paper_citing'].tolist()).union(set(ref_df['paper_cited'].tolist())))
 
         print('{} start finding paper info for: threshold\n---'.format(datetime.now()))
         info_df = gen_info_df(conn, info_papers)
@@ -121,7 +121,7 @@ def gen_combined_df(conn, e_map, entity_id, entity_ids, paper_ids):
 
         # Combine and deal with possible unique
         print('{} start joining dataframes\n---'.format(datetime.now()))
-        res_df = combine_df(ref_df, info_df)
+        res_df = combine_df(e_map, ref_df, info_df)
         print('{} finish joining dataframes\n---'.format(datetime.now(), entity_id))
     else:
         # Check cache for entity
@@ -136,7 +136,7 @@ def gen_combined_df(conn, e_map, entity_id, entity_ids, paper_ids):
             print('{} finish finding paper references for: {}\n---'.format(datetime.now(), entity_id))
 
             # Get the papers to find info for
-            info_papers = list(set(ref_df['paper_citing'].tolist() + ref_df['paper_cited'].tolist()))
+            info_papers = list(set(ref_df['paper_citing'].tolist()).union(set(ref_df['paper_cited'].tolist())))
 
             print('{} start finding paper info for: {}\n---'.format(datetime.now(), entity_id))
             info_df = gen_info_df(conn, info_papers)
@@ -161,14 +161,16 @@ def gen_search_df(conn, e_map, paper_map):
     res_dict = dict()
     threshold_papers = list()
 
-    for entity_id, paper_ids in paper_map.items():
+    # Go through each of the entity types the user selects
+    for entity_id, paper_tuple in paper_map.items():
+        paper_ids = list(map(lambda x : x[0], paper_tuple))
         if len(paper_ids) < PAPER_THRESHOLD:
             threshold_papers += paper_ids
         else:
             res_dict[entity_id] = gen_combined_df(conn, e_map, entity_id, entity_ids, paper_ids)
 
     # Calculate threshold values
-    #res_dict[None] = gen_combined_df(conn, None, threshold_papers)
+    res_dict[None] = gen_combined_df(conn, e_map, None, entity_ids, threshold_papers)
 
     return res_dict
 

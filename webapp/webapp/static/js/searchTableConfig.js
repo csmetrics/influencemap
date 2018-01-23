@@ -8,8 +8,8 @@ var searchTableConfig = {
       { title: "Name", className: "index dt-body-center" },
       { title: "Number of papers", className: "institution dt-body-right" },
       { title: "Affiliations", className: "dt-body-center" },
-      { title: "Fields", className: "dt-body-left" },
-      { title: "Papers", className: "dt-body-left" },
+      { title: "Field (number of papers)", className: "field dt-body-left" },
+      { title: "Most recent paper", className: "dt-body-left" },
       { title: "ID"}
       ],
       "columnDefs": [
@@ -31,6 +31,7 @@ var searchTableConfig = {
       "order": [[1, "desc" ]],
       "info": true,
       "autoWidth": false,
+      "destroy": true,
     },
     responseKeys: [
     'name', 'numpaper', 'affiliation','field','recentPaper','authorID'
@@ -65,6 +66,7 @@ var searchTableConfig = {
       "order": [[0, "asc" ]],
       "info": true,
       "autoWidth": false,
+      "destroy": true,
     },
     responseKeys: [
     'name', 'id'
@@ -99,6 +101,7 @@ var searchTableConfig = {
       "order": [[0, "asc" ]],
       "info": true,
       "autoWidth": false,
+      "destroy": true,
     },
     responseKeys: [
     'name', 'id'
@@ -133,6 +136,7 @@ var searchTableConfig = {
       "order": [[0, "asc" ]],
       "info": true,
       "autoWidth": false,
+      "destroy": true,
     },
     responseKeys: [
     'name', 'id'

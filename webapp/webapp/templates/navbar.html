@@ -1,0 +1,45 @@
+{% load staticfiles %}
+
+<div class="row">
+  <div class="col-md-12">
+    <a href="/"><div class="page-title"><b>Project influencemap</b></div></a>
+    <span class="text-muted">Constructing maps of intellectual influence using academic data</span>
+  </div>
+</div>
+<div class="row">
+  <div class="col-md-12">
+    <div class="search-bar">
+      <div class="input-group input-group-sm" style="width: 300px">
+        <input id="name-search-bar" type="text" name="keyword" class="form-control" {% if navbar.selectedKeyword %} value="{{ navbar.selectedKeyword }}" {% endif %}>
+        <span class="input-group-btn">
+          <button id="search-btn" type="submit" name="search" value="search" class="btn btn-primary btn-flat"><i class="fa fa-search"></i></button>
+        </span>
+      </div>
+      <div class="search-option">
+        {% for opt in navbar.optionlist %}
+        <div class="radio">
+          <label>
+            <input class="entity-option" type="radio" name="option" id="{{opt.id}}" value="{{opt.id}}" {% if opt.id == navbar.selectedOption.id %} checked {% endif %}>
+            {{opt.name}}
+          </label>
+        </div>
+        {% endfor %}
+      </div>
+      <div class="search-option">
+        <div class="checkbok">
+          <label>
+            <input class="self-cite" type="checkbox" name="self-cite" id="self-cite" {% if navbar.selfcite %} checked {% endif %}>
+            include self citations
+          </label>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+<div id="progress-group" class="progress-group invisible" style="width: 400px">
+  <span id="progress-text" class="progress-text"></span>
+  <span id="progress-number" class="progress-number"></span>
+  <div class="progress sm">
+    <div id="progress-bar" class="progress-bar progress-bar-aqua" style="width: 0%"></div>
+  </div>
+</div>
