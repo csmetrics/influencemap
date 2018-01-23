@@ -1,15 +1,15 @@
 from enum import Enum
 
 class Entity(Enum):
-    AUTH = ('AUTH', {'auth_id': 'authname'}, ['auth_name'], ['auth_count'])
-    CFJN = ('CFJN', {'conf_id': 'confname', 'journ_id': 'journname'}, ['conf_name', 'journ_name'], [])
-    AFFI = ('AFFI', {'affi_id': 'affiname'}, ['affi_name'], [])
-    CONF = ('CONF', {'conf_id': 'confname'}, ['conf_name'], [])
-    JOURN = ('JOUR', {'journ_id': 'journname'}, ['journ_name'], [])
+    AUTH = ('AUTH', ['auth_id'], ['auth_name'], ['auth_count'])
+    CFJN = ('CFJN', ['conf_id', 'journ_id'], ['conf_abv', 'journ_name'], [])
+    AFFI = ('AFFI', ['affi_id'], ['affi_name'], [])
+    CONF = ('CONF', ['conf_id'], ['conf_abv'], [])
+    JOURN = ('JOUR', ['journ_id'], ['journ_name'], [])
 
-    def __init__(self, prefix, edict, key, add):
+    def __init__(self, prefix, ids, key, add):
         self.prefix = prefix
-        self.edict = edict
+        self.ids = ids
         self.keyn = key
         self.scheme = key + add
 

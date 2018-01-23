@@ -10,6 +10,8 @@
     "cache":{
         "directory":{
             "main":"/localdata/common/cache",
+            "ref":"ref",
+            "info":"info",
             "data":"data"
         },
         "paper threshold":20,

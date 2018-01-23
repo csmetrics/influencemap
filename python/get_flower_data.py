@@ -12,45 +12,67 @@ from influence_weight import get_weight
 # Config setup
 from config import *
 
+def gen_pred_score_df(data_df, e_map):
+    res = list()
+    # split data info citing and cited
+    for citing, info_df in data_df.groupby('citing'):
+        if citing:
+            s = '_citing'
+        else:
+            s = '_cited'
+
+        # Group by scoring paper
+        df = info_df.groupby('paper' + s).agg(lambda x : x.tolist()).reset_index()
+        df['citing'] = bool(citing)
+        df['self_cite'] = df['self_cite'].apply(lambda x : x[0])
+
+        res.append(df)
+
+    return pd.concat(res)
+
 # Creates dictionaries for the weight scores
 def generate_scores(conn, e_map, data_df, inc_self=False, calc_weight=get_weight):
     print('{} start score generation\n---'.format(datetime.now()))
 
     # Concat the tables together
-    df = pd.concat(data_df.values())
+    df = gen_pred_score_df(pd.concat(data_df.values()), e_map)
 
     # Check self citations
     if not inc_self:
-        df = df.loc[df['self_cite'].fillna(False)]
+        df = df.loc[-df['self_cite'].fillna(False)]
 
     my_type, e_type = e_map.get_map()
     id_query_map = lambda f : ' '.join(f[0][1].split())
     id_to_name = dict([(tname, dict()) for tname in e_type.keyn])
-
-    # query plan finding paper weights
-    output_scheme = ",".join(e_type.scheme)
-    query = 'SELECT {} FROM paper_info WHERE paper_id = ?'.format(output_scheme)
 
     res = {'influencing' : dict(), 'influenced': dict()}
     
     cur = conn.cursor()
 
     for i, row in df.iterrows():
-            # iterate over different table types
-            for wline in calc_weight(e_map, row):
-                e_name, weight, tkey = wline
-
-                # Add to score
-                if row['citing']:
+        # Add to score
+        if row['citing']:
+            func = lambda x : x + '_citing'
+            # Check each type
+            for id_names in e_type.keyn:
+                for i, name in enumerate(row[func(id_names)]):
+                    if name == None:
+                        continue
                     try:
-                        res['influenced'][e_name] += weight
+                        res['influenced'][name] += row['influence'][i]
                     except KeyError:
-                        res['influenced'][e_name] = weight
-                else:
+                        res['influenced'][name] = row['influence'][i]
+        else:
+            func = lambda x : x + '_cited'
+            # Check each type
+            for id_names in e_type.keyn:
+                for i, name in enumerate(row[func(id_names)]):
+                    if name == None:
+                        continue
                     try:
-                        res['influencing'][e_name] += weight
+                        res['influencing'][name] += row['influence'][i]
                     except KeyError:
-                        res['influencing'][e_name] = weight
+                        res['influencing'][name] = row['influence'][i]
 
     print('{} finish score generation\n---'.format(datetime.now()))
     return res
@@ -89,19 +111,16 @@ if __name__ == "__main__":
     import os, sys
 
     # input
-    #user_in = sys.argv[1]
+    user_in = sys.argv[1]
 
     # get paper ids associated with input name
-    #_, id_2_paper_id = getAuthor(user_in)
-
-    id_2_paper_id = {}
+    _, id_2_paper_id, _ = getAuthor(user_in)
 
     conn = sqlite3.connect(DB_PATH)
 
-    data_df = gen_search_df(conn, id_2_paper_id)
+    data_df = gen_search_df(conn, Entity_map(Entity.AUTH, Entity.CFJN), id_2_paper_id)
 
-    influence_dict = generate_scores(conn, Entity_map(Entity.AUTH, Entity.CONF), data_df, inc_self=True)
-    print(generate_score_df(influence_dict))
+    influence_dict = generate_scores(conn, Entity_map(Entity.AUTH, Entity.CFJN), data_df, inc_self=True)
     #citing_records = influence_dict['influenced']
     #cited_records = influence_dict['influencing']
 
