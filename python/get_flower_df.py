@@ -14,6 +14,7 @@ from config import *
 
 REF_LABELS = ['citing', 'paper_citing', 'rc_citing', 'paper_cited']
 INFO_COLS = ['auth_id', 'auth_name', 'auth_count', 'conf_id', 'conf_abv', 'conf_name', 'journ_id', 'journ_name', 'affi_id', 'affi_name']
+SC_COLS = [e.eid + '_citing' for e in Entity_type] + [e.eid + '_cited' for e in Entity_type]
 
 # Filters the paper_ref database to relevent papers and uses pandas dataframes
 def gen_reference_df(conn, paper_ids):
@@ -75,7 +76,7 @@ def test_sc(row):
     return val
 
 # joining operator to rename and combine dataframes
-def combine_df(ref_df, info_df):
+def combine_df(ref_df, info_df, entity_id):
     # Column names for citing and cited reference information
     citing_cols = dict([(x, x + '_citing') for x in ['paper'] + INFO_COLS])
     cited_cols = dict([(x, x + '_cited') for x in ['paper'] + INFO_COLS])
@@ -92,12 +93,14 @@ def combine_df(ref_df, info_df):
     res['influence'] = res.apply(lambda x : get_weight(x), axis=1)
 
     # Calculate self-citations
-    sc_df = res[['citing', 'paper_map']]
+    sc_df = res[['citing', 'paper_map'] + SC_COLS]
     sc_df = sc_df.groupby('paper_map').agg(lambda x : x.tolist()).reset_index()
 
     # self-cite
-    sc_df['self_cite'] = sc_df.apply(test_sc, axis=1)
-    sc_df = sc_df.drop(columns=['citing'])
+    sc_namer = lambda s : s + '_self_cite'
+    for entity_type in Entity_type:
+        sc_df[sc_namer(entity_type.prefix)] = sc_df.apply(lambda x : is_self_cite(x, entity_type.eid, entity_id), axis=1)
+    sc_df = sc_df.drop(columns=['citing'] + SC_COLS)
 
     # Join selfcite
     res = pd.merge(res, sc_df, on='paper_map', sort=False)
@@ -120,7 +123,7 @@ def gen_combined_df(conn, my_type, entity_id, entity_ids, paper_ids):
 
         # Combine and deal with possible unique
         print('{} start joining dataframes\n---'.format(datetime.now()))
-        res_df = combine_df(ref_df, info_df)
+        res_df = combine_df(ref_df, info_df, entity_ids)
         print('{} finish joining dataframes\n---'.format(datetime.now(), entity_id))
     else:
         # Check cache for entity
@@ -143,7 +146,7 @@ def gen_combined_df(conn, my_type, entity_id, entity_ids, paper_ids):
 
             # Combine and deal with possible unique
             print('{} start joining dataframes\n---'.format(datetime.now()))
-            res_df = combine_df(ref_df, info_df)
+            res_df = combine_df(ref_df, info_df, [entity_id])
             print('{} finish joining dataframes\n---'.format(datetime.now(), entity_id))
 
             # Cache info pickle file

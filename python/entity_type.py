@@ -24,6 +24,9 @@ class Entity_map:
     def get_map(self):
         return self.domain, self.codomain
 
+    def get_center_prefix(self):
+        return self.domain.prefix
+
 # Class to wrap type and id together
 class Entity:
     def __init__(self, entity_id, entity_type):
