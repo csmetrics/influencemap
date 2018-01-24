@@ -1,8 +1,10 @@
 import json
 import mkAff
 from datetime import datetime
+import os
+aName = ["Tim Berners-Lee", "Martin E Hellman", "Whitfield Diffie","Michael Stonebraker","Leslie Lamport","Silvio Micali","Shafi Goldwasser","Judea Pearl","Leslie G Valiant","Charles P Thacker","Barbara Liskov","Edmund M Clarke","E Allen Emerson","Joseph Sifakis","Frances E Allen","Peter Naur","Vinton G Cerf","Robert E Kahn","Alan Kay","Ronald L Rivest","Afi Shamir","Lenoard M Adleman","Ole Johan Dahl","Kristen Nygaard","Andrew Chi Chih Yao","Frederick P Brooks Jr","Jim Gray","Douglas Engelbart","Amir Pnueli","Manuel Blum","Edward Feigenbaum","Raj Reddy","Juris Hartmanis","Richard E Stearns","Butler W Lampson","Robin Milner","Fernando J Corbato","William Kahan","Ivan Sutherland","John Cocke","John Hopcroft","Robert Tarjan","Richard M Karp","Niklaus Wirth","Ken Thompson","Denis M Ritchie","Stephen A Cook","Edgar F Codd","Tony Hoare","Kenneth E Iverson","Robert W Floyd","John Backus","Micheal O Rabin","Dana S Scott","Allen Newell","Herbert A Simon","Donald E Knuth","Charles W Bachman","Edsger W Dijkstra","John McCarthy","James H Wilkinson","Marvin Minsky","Richard Hamming","Maurice Wilkes","Alan J Perlis"]
 
-aName = ["j eliot b moss"]
+test = ["Tim Berners Lee"]
 
 confName = []
 
@@ -10,45 +12,64 @@ jourName = []
 
 affName = []
 
-out_autDir = '/localdata/common/savedFileAuthor.json'
-
-out_confDir = '/localdata/common/savedFileConf.json'
-
-out_jourDir = '/localdata/common/savedFileJour.json'
-
-out_affDir = '/localdata/common/savedFileAff.json'
-
-def save(typ,initial):
+def save(typ):
+    '''
     lst = []
     out_dir = ''
     getter_func = lambda x:x
     data_exist = {}
+    
     if typ == 'Author':
         out_dir = out_autDir
-        lst = aName
-        getter_func = lambda name:getAuthor(name,False)
+        lst = test
+        getter_func = lambda name:mkAff.getAuthor(name)
+    
     if typ == 'Conference':
         out_dir = out_confDir
         lst = confName
-        getter_func = lambda name:getConf(name,False)
+        getter_func = lambda name:mkAff.getConf(name)
     if typ == 'Journal':
         out_dir = out_jourDir
         lst = jourName
-        getter_func = lambda name:getJour(name,False)
+        getter_func = lambda name:mkAff.getJoural(name)
     if typ == 'Affiliation':
         out_dir = out_affDir
         lst = affName
-        getter_func = lambda name:getAff(name,False)    
-    if not initial:
-        with open(out_dir) as output:
-            data_exist = json.load(output)
+        getter_func = lambda name:mkAff.getAff(name)    
+    '''
+    for name in test:
+        nonExpandRes = mkAff.getAuthor(name) #([{name, aID, numpaper, affiliation, field, recentPaper, publishedDate}], {aID:[(paperID, title, year)]}, [aID])
+        aIDNotSameName = nonExpandRes[-1]
+        resNonExpand = (nonExpandRes[0],nonExpandRes[1])
+        expandRes = mkAff.getAuthor(name, nonExpandAID=aIDNotSameName, expand=True)
+       
+        wholeRes = {}
+        for dic in resNonExpand[0]:
+            for key in resNonExpand[1]:
+                if dic['authorID'] == key.entity_id:
+                    wholeRes[dic['name']] = (dic, {key.entity_id:resNonExpand[1][key]})
+                    break
+        
+        for dic in expandRes[0]:
+            for key in expandRes[1]:
+                if dic['authorID'] == key.entity_id:
+                    wholeRes[dic['name']] = (dic, {key.entity_id:expandRes[1][key]})
+                    break
+            
+        lsName = name.split(' ')
+        cacheName = '_'.join(lsName)
 
-    for name in lst:
-        res = getter_func name
-        data_exist[name] = res
-    
-    with open(out_dir,'w') as output:
-        json.dump(data_exist,output,indent = 2)
+        with open("/localdata/common/" + cacheName  + ".json", "w+") as out:
+            out.write('')
+
+        os.chmod("/localdata/common/" + cacheName + ".json", 0o777)     
+        
+        with open("/localdata/common/" + cacheName + ".json", 'w') as output:
+            json.dump(wholeRes,output,indent = 2)              
+        #dump a dict of aID:({name, aID, numpaper, affiliation, field, recent, date}, {aID:[(paperID, title, year)]})
+        with open("/localdata/common/authorNameCache.txt","w") as nameList:
+            nameList.write(name)
+
 
 if __name__ == '__main__':
-    trial = save("Author",False)
+    trial = save("Author")
