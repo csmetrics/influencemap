@@ -1,6 +1,6 @@
 from enum import Enum
 
-class Entity(Enum):
+class Entity_type(Enum):
     AUTH = ('AUTH', 'auth', 'auth_id', 'auth_name')
     AFFI = ('AFFI', 'affi', 'affi_id', 'affi_name')
     CONF = ('CONF', 'conf', 'conf_id', 'conf_abv')

@@ -21,7 +21,7 @@ from flower_bloom_data import get_flower_df, flower_df_to_graph
 from config import *
 
 def getEntityMap(ego, outer):
-    e = {'author': Entity.AUTH, 'conf': Entity.CONF, 'institution': Entity.AFFI, 'journal': Entity.JOURN}
+    e = {'author': Entity_type.AUTH, 'conference': Entity_type.CONF, 'institution': Entity_type.AFFI, 'journal': Entity_type.JOURN}
     return Entity_map(e[ego], [e[outer]])
 
 def drawFlower(conn, ent_type, ent_type2, data_df, dir_out, name):   
@@ -62,7 +62,7 @@ def getFlower(id_2_paper_id, name, ent_type):
 
     # Generate a self filter dictionary
     entity_to_author = drawFlower(conn, ent_type,  "author" , data_df, OUT_DIR, name)
-    entity_to_conference = drawFlower(conn, ent_type, "conf", data_df, OUT_DIR, name)
+    entity_to_conference = drawFlower(conn, ent_type, "conference", data_df, OUT_DIR, name)
     entity_to_affiliation = drawFlower(conn, ent_type, "institution" , data_df, OUT_DIR, name)
 
     conn.close()

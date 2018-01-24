@@ -113,36 +113,3 @@ def generate_score_df(influence_dict, ratio_func=np.vectorize(lambda x, y : x / 
     score_df = score_df.sort_values('tmp', ascending=False).drop('tmp', axis=1)
 
     return score_df
-
-if __name__ == "__main__":
-    from mkAff import getAuthor
-    from get_flower_df import gen_search_df
-    import os, sys
-
-    # input
-    user_in = sys.argv[1]
-
-    # get paper ids associated with input name
-    _, id_2_paper_id, _ = getAuthor(user_in)
-
-    conn = sqlite3.connect(DB_PATH)
-
-    data_df = gen_search_df(conn, Entity_map(Entity.AUTH, Entity.CFJN), id_2_paper_id)
-
-    influence_dict = generate_scores(conn, Entity_map(Entity.AUTH, Entity.CFJN), data_df, inc_self=True, unique=True)
-    #citing_records = influence_dict['influenced']
-    #cited_records = influence_dict['influencing']
-
-    ## sorter
-    #sort_by_value = lambda d : sorted(d.items(), key=lambda kv : (kv[1] ,kv[0]), reverse=True)
-
-    ## Print to file (Do we really need this?)
-    #with open(os.path.join(OUT_DIR, 'authors_citing.txt'), 'w') as fh:
-    #    for key, val in sort_by_value(citing_records):
-    #        fh.write("{}\t{}\n".format(key, val))
-
-    #with open(os.path.join(OUT_DIR, 'authors_cited.txt'), 'w') as fh:
-    #    for key, val in sort_by_value(cited_records):
-    #        fh.write("{}\t{}\n".format(key, val))
-
-    conn.close()
