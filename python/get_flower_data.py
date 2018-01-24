@@ -31,7 +31,7 @@ def gen_pred_score_df(data_df, e_map):
     return pd.concat(res)
 
 # Creates dictionaries for the weight scores
-def generate_scores(conn, e_map, data_df, inc_self=False, calc_weight=get_weight):
+def generate_scores(conn, e_map, data_df, inc_self=False, unique=False):
     print('{} start score generation\n---'.format(datetime.now()))
 
     # Concat the tables together
@@ -50,29 +50,39 @@ def generate_scores(conn, e_map, data_df, inc_self=False, calc_weight=get_weight
     cur = conn.cursor()
 
     for i, row in df.iterrows():
-        # Add to score
+        # Determine if influencing or influenced score
         if row['citing']:
+            dict_type = 'influenced'
             func = lambda x : x + '_citing'
-            # Check each type
-            for id_names in e_type.keyn:
-                for i, name in enumerate(row[func(id_names)]):
-                    if name == None:
-                        continue
-                    try:
-                        res['influenced'][name] += row['influence'][i]
-                    except KeyError:
-                        res['influenced'][name] = row['influence'][i]
         else:
+            dict_type = 'influencing'
             func = lambda x : x + '_cited'
+
+        # Scoring depending if an entity can only score once per paper (take max)
+        if unique:
             # Check each type
-            for id_names in e_type.keyn:
-                for i, name in enumerate(row[func(id_names)]):
-                    if name == None:
+            for id__type, name_type in zip(e_type.ids, e_type.keyn):
+                name_col = func(name_type)
+                # Make a small dataframe with influence and name to do a group by name
+                row_df = pd.concat([pd.Series(row['influence'], name='influence'), pd.Series(row[name_col], name=name_col)], axis=1)
+                for entity_name, score_df in row_df.groupby(name_col):
+                    if entity_name == None:
                         continue
                     try:
-                        res['influencing'][name] += row['influence'][i]
+                        res[dict_type][entity_name] += score_df['influence'].max()
                     except KeyError:
-                        res['influencing'][name] = row['influence'][i]
+                        res[dict_type][entity_name] = score_df['influence'].max()
+        else:
+            # Check each type
+            for id_names in e_type.keyn:
+                # Add score for each series of type
+                for influence, entity_name in zip(row['influence'], row[func(id_names)]):
+                    if entity_name == None:
+                        continue
+                    try:
+                        res[dict_type][entity_name] += influence
+                    except KeyError:
+                        res[dict_type][entity_name] = influence
 
     print('{} finish score generation\n---'.format(datetime.now()))
     return res
@@ -120,7 +130,7 @@ if __name__ == "__main__":
 
     data_df = gen_search_df(conn, Entity_map(Entity.AUTH, Entity.CFJN), id_2_paper_id)
 
-    influence_dict = generate_scores(conn, Entity_map(Entity.AUTH, Entity.CFJN), data_df, inc_self=True)
+    influence_dict = generate_scores(conn, Entity_map(Entity.AUTH, Entity.CFJN), data_df, inc_self=True, unique=True)
     #citing_records = influence_dict['influenced']
     #cited_records = influence_dict['influencing']
 

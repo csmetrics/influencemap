@@ -14,7 +14,6 @@ from config import *
 
 REF_LABELS = ['citing', 'paper_citing', 'rc_citing', 'paper_cited']
 INFO_COLS = ['auth_id', 'auth_name', 'auth_count', 'conf_id', 'conf_abv', 'conf_name', 'journ_id', 'journ_name', 'affi_id', 'affi_name']
-MULT_COLS = [0, 8]
 
 # Filters the paper_ref database to relevent papers and uses pandas dataframes
 def gen_reference_df(conn, paper_ids):
