@@ -1,5 +1,6 @@
 from enum import Enum
 
+# Type of entities for the flower
 class Entity_type(Enum):
     AUTH = ('AUTH', 'auth', 'auth_id', 'auth_name')
     AFFI = ('AFFI', 'affi', 'affi_id', 'affi_name')
@@ -22,3 +23,9 @@ class Entity_map:
 
     def get_map(self):
         return self.domain, self.codomain
+
+# Class to wrap type and id together
+class Entity:
+    def __init__(self, entity_id, entity_type):
+        self.entity_id = entity_id
+        self.entity_type = entity_type
