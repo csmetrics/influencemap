@@ -12,7 +12,7 @@ from influence_weight import get_weight
 # Config setup
 from config import *
 
-def gen_pred_score_df(data_df, e_map):
+def gen_pred_score_df(data_df):
     res = list()
     # split data info citing and cited
     for citing, info_df in data_df.groupby('citing'):
@@ -24,7 +24,8 @@ def gen_pred_score_df(data_df, e_map):
         # Group by scoring paper
         df = info_df.groupby('paper' + s).agg(lambda x : x.tolist()).reset_index()
         df['citing'] = bool(citing)
-        df['self_cite'] = df['self_cite'].apply(lambda x : x[0])
+        for entity in Entity_type:
+            df[entity.prefix + '_self_cite'] = df[entity.prefix + '_self_cite'].apply(lambda x : x[0])
 
         res.append(df)
 
@@ -35,11 +36,11 @@ def generate_scores(conn, e_map, data_df, inc_self=False, unique=False):
     print('{} start score generation\n---'.format(datetime.now()))
 
     # Concat the tables together
-    df = gen_pred_score_df(pd.concat(data_df.values()), e_map)
+    df = gen_pred_score_df(pd.concat(data_df.values()))
 
     # Check self citations
     if not inc_self:
-        df = df.loc[-df['self_cite'].fillna(False)]
+        df = df.loc[-df[e_map.get_center_prefix() + '_self_cite'].fillna(False)]
 
     id_query_map = lambda f : ' '.join(f[0][1].split())
     id_to_name = dict([(tname, dict()) for tname in e_map.keyn])
