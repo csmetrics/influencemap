@@ -32,7 +32,7 @@ def flower_df_to_graph(score_df, ego):
     # Iterate over dataframe
     for i, (_, row) in enumerate(score_df.iterrows()):
         # Add ratio weight
-        egoG.add_node(row['entity_id'], nratiow=normed_ratio[i], ratiow=row['ratio'], sumw=normed_sum[i])
+        egoG.add_node(row['entity_id'], nratiow=normed_ratio[i], ratiow=row['ratio'], sumw=normed_sum[i], coauthor=row['coauthor'])
 
         # Add influence weights
         egoG.add_edge(row['entity_id'], ego, weight=row['influencing'], nweight=normed_influencing[i], direction='out')
@@ -43,7 +43,7 @@ def flower_df_to_graph(score_df, ego):
 if __name__ == "__main__":
     from mkAff import getAuthor
     from get_flower_df import gen_search_df
-    from get_flower_data import generate_scores, generate_score_df
+    from get_flower_data import generate_scores, generate_score_df, generate_coauthors
     from entity_type import *
     from draw_flower import draw_flower, draw_cite_volume
     import os, sys
@@ -59,8 +59,11 @@ if __name__ == "__main__":
 
     data_df = gen_search_df(conn, id_2_paper_id)
 
-    influence_dict = generate_scores(conn, Entity_map(Entity_type.AUTH, [Entity_type.CONF, Entity_type.JOUR]), data_df, inc_self=True, unique=True)
-    score_df = generate_score_df(influence_dict)
+    influence_dict = generate_scores(conn, Entity_map(Entity_type.AUTH, [Entity_type.AUTH]), data_df, inc_self=True, unique=True)
+
+    coauthors = generate_coauthors(Entity_map(Entity_type.AUTH, [Entity_type.AUTH]), data_df)
+
+    score_df = generate_score_df(influence_dict, coauthors=coauthors)
     
     flower_df = get_flower_df(score_df, user_in)
 

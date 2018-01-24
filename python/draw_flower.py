@@ -97,8 +97,16 @@ def draw_flower(egoG=None, ax=None,
         else:
             text = words[0]
 
+        if egoG.nodes[node]['coauthor']:
+            style = 'italic'
+            weight='bold'
+        else:
+            style = 'normal'
+            weight = 'normal'
+
         # Draw text
         ax.text(xt, yt, text, size=15,
+            style=style,
             horizontalalignment='center',
             verticalalignment='center',
             rotation_mode='anchor',
