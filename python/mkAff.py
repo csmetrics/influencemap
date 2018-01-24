@@ -5,6 +5,7 @@ import operator
 import sys
 import re
 import json
+import entity_type as et 
 from difflib import SequenceMatcher
 
 db_PAA = '/localdata/u5798145/influencemap/paper.db'
@@ -147,7 +148,7 @@ def getAuthor(name,cbfunc=lambda _ : None, nonExpandAID=[], expand=False,use_cac
     #curA.execute("SELECT * FROM authors WHERE authorName LIKE '% " + lstN + "' AND isSame(authorName,'" + name + "')")
 
     if not expand:
-        curA.execute("SELECT * FROM authors WHERE authorName LIKE '% " + lstN + "' AND (authorName LIKE '" + fstN + "%' OR substr(authorName, 1, 2) == '" + fstLetter + " ')")
+        curA.execute("SELECT * FROM authors WHERE authorName LIKE '% " + lstN + "' AND (authorName LIKE '" + fstN + "%' OR authorName LIKE '" + fstLetter + " %')")
         allAuthor = curA.fetchall()
         for a in allAuthor:
             print(a)
@@ -222,9 +223,9 @@ def getAuthor(name,cbfunc=lambda _ : None, nonExpandAID=[], expand=False,use_cac
         for p in ps:
             if p[-2] != '':
                 if int(p[-2]) >= yearStart and int(p[-2]) <= yearEnd:
-                    tem.append((p[0], p[1])) #tem is a list of (paperID, paperTitle)          
+                    tem.append((p[0], p[1], p[2])) #tem is a list of (paperID, paperTitle, publishedYear)          
         recent = paperInfo[1]
-        aIDpaper[tuples[1]] = tem #aIDpaper is a dict of aID:[(paperID, paperTitle)]
+        aIDpaper[et.Entity(tuples[1], et.Entity_type.AUTH)] = tem #aIDpaper is a dict of entity(aID, entity_type('auth_id')):[(paperID, paperTitle)]
         print("{} finished getting recentPaper".format(datetime.now()))
         finalresult.append({'name':tuples[0],'authorID':tuples[1],'numpaper':tuples[2],'affiliation':tuples[3],'field':getField(tuples[4]),'recentPaper':recent[1],'publishedDate':recent[-1]})
     print("{} done".format(datetime.now()))
@@ -236,13 +237,13 @@ def getAuthor(name,cbfunc=lambda _ : None, nonExpandAID=[], expand=False,use_cac
     dbA.commit()
     dbA.close()
    
-    '''
+    
     for dic in finalresult: #finalresult is a list of dict
          print(dic)
-    '''
+     
     for key in aIDpaper:
         print(aIDpaper[key])
-
+      
 
     if not expand: return (finalresult, aIDpaper, authorNotSameName) #if not expand, will also return a list of authorID whose name are not exactly the same
     else: return (finalresult,aIDpaper) 
@@ -289,7 +290,7 @@ def getJourPID(jIDs, yearStart=0, yearEnd=2016): #thie function takes in a list 
     jID_papers = {}
     for paper, jID in papers:
         if int(paper[-1]) >= yearStart and int(paper[-1]) <= yearEnd: 
-            jID_papers.setdefault(jID,[]).append(paper[0])
+            jID_papers.setdefault(et.Entity(jID,et.Entity_type.JOUR),[]).append(paper[0])
 
     periodPaperTitle = {}
 
@@ -358,8 +359,10 @@ def getConfPID(cIDs, yearStart=0, yearEnd=2016): #this function takes in a list 
     cID_papers = {}
     
     for pID, cID in papers:
-        if int(pID[-1]) >= yearStart and int(pID[-1]) <= yearEnd: 
-            cID_papers.setdefault(cID,[]).append(pID[0])
+        if pID[-1] != '':
+            if int(pID[-1]) >= yearStart and int(pID[-1]) <= yearEnd: 
+                cID_papers.setdefault(et.Entity(cID,et.Entity_type.CONF),[]).append(pID[0])
+        
    
     periodPaperTitle = {}
     if yearEnd - yearStart == 2016:
@@ -443,15 +446,15 @@ def getAffPID(chosen,name): # chosen is the list of dict chosen by the user, nam
     
     affIDpIDList = list(map(lambda x: (x[0],x[1]), papers))
     for paper, aff in affIDpIDList:
-        affID_pID.setdefault(aff,[]).append(paper)
-    
+        affID_pID.setdefault(et.Entity(aff, et.Entity.type.AFFI),[]).append(paper)
+     
     for key in affID_pID: print(len(affID_pID[key]))
    
     '''
     affNameSet = set(map(lambda x:x[2], papers))
     for n in affNameSet:
         print(n)    
-    '''            
+    '''           
     return affID_pID #affID_pID is a dict of affID:[pID]
 
 
@@ -498,7 +501,7 @@ def matchForShort(name1, name2):
     return ls2 in name1
     
 if __name__ == '__main__':
-    trial = getAuthor('stephen m blackburn')
+    trial = getAuthor('john slaney', yearStart=2013, yearEnd=2016)
     #affID = []
     #x = getAffPID(affID,'university of cambridge')
     #confID = [trial[0]['id']]
