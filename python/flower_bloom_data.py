@@ -57,9 +57,9 @@ if __name__ == "__main__":
 
     conn = sqlite3.connect(DB_PATH)
 
-    data_df = gen_search_df(conn, Entity_map(Entity.AUTH, Entity.CONF), id_2_paper_id)
+    data_df = gen_search_df(conn, Entity.AUTH, id_2_paper_id)
 
-    influence_dict = generate_scores(conn, Entity_map(Entity.AUTH, Entity.CONF), data_df, inc_self=True, unique=True)
+    influence_dict = generate_scores(conn, Entity_map(Entity.AUTH, [Entity.CONF, Entity.JOUR]), data_df, inc_self=True, unique=True)
     score_df = generate_score_df(influence_dict)
     
     flower_df = get_flower_df(score_df, user_in)

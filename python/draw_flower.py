@@ -135,10 +135,10 @@ def draw_cite_volume(egoG=None, ax=None, filename=None):
 
     tk2 = plt.xticks([],[])
     ax.set_xticks(x_pos)
-    ax.set_xticklabels(outer_nodes, rotation=90)
+    ax.set_xticklabels(list(map(lambda x : x[:10], outer_nodes)), rotation=90)
 
-    ax.set_ylabel('# references')#, color=bar_colrs3[mdx])
-    ax2.set_ylabel('# citations')#, color=bar_colrs2[mdx])
+    ax.set_ylabel('reference score')#, color=bar_colrs3[mdx])
+    ax2.set_ylabel('citation score')#, color=bar_colrs2[mdx])
 
     #for tl in ax.get_yticklabels():
     #    tl.set_color(bar_colrs3[mdx])

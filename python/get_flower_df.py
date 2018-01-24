@@ -75,7 +75,7 @@ def test_sc(row):
     return val
 
 # joining operator to rename and combine dataframes
-def combine_df(e_map, ref_df, info_df):
+def combine_df(ref_df, info_df):
     # Column names for citing and cited reference information
     citing_cols = dict([(x, x + '_citing') for x in ['paper'] + INFO_COLS])
     cited_cols = dict([(x, x + '_cited') for x in ['paper'] + INFO_COLS])
@@ -89,7 +89,7 @@ def combine_df(e_map, ref_df, info_df):
     res = pd.merge(res, info_df.rename(index=str, columns=cited_cols), on='paper_cited', sort=True)
 
     # Calculate scores
-    res['influence'] = res.apply(lambda x : get_weight(e_map, x), axis=1)
+    res['influence'] = res.apply(lambda x : get_weight(x), axis=1)
 
     # Calculate self-citations
     sc_df = res[['citing', 'paper_map']]
@@ -104,7 +104,7 @@ def combine_df(e_map, ref_df, info_df):
     
     return res.drop(columns=['paper_map'])
 
-def gen_combined_df(conn, e_map, entity_id, entity_ids, paper_ids):
+def gen_combined_df(conn, my_type, entity_id, entity_ids, paper_ids):
     # If entity_id is None (theshold papers) with no caching
     if not entity_id:
         print('\n---\n{} start finding paper references for: threshold\n---'.format(datetime.now()))
@@ -120,7 +120,7 @@ def gen_combined_df(conn, e_map, entity_id, entity_ids, paper_ids):
 
         # Combine and deal with possible unique
         print('{} start joining dataframes\n---'.format(datetime.now()))
-        res_df = combine_df(e_map, ref_df, info_df)
+        res_df = combine_df(ref_df, info_df)
         print('{} finish joining dataframes\n---'.format(datetime.now(), entity_id))
     else:
         # Check cache for entity
@@ -143,7 +143,7 @@ def gen_combined_df(conn, e_map, entity_id, entity_ids, paper_ids):
 
             # Combine and deal with possible unique
             print('{} start joining dataframes\n---'.format(datetime.now()))
-            res_df = combine_df(e_map, ref_df, info_df)
+            res_df = combine_df(ref_df, info_df)
             print('{} finish joining dataframes\n---'.format(datetime.now(), entity_id))
 
             # Cache info pickle file
@@ -153,8 +153,7 @@ def gen_combined_df(conn, e_map, entity_id, entity_ids, paper_ids):
     return res_df
 
 # Wraps above functions to produce a dictionary of pandas dataframes for relevent information
-def gen_search_df(conn, e_map, paper_map):
-    my_type, e_type = e_map.get_map()
+def gen_search_df(conn, my_type, paper_map):
     entity_ids = paper_map.keys()
 
     res_dict = dict()
@@ -166,10 +165,10 @@ def gen_search_df(conn, e_map, paper_map):
         if len(paper_ids) < PAPER_THRESHOLD:
             threshold_papers += paper_ids
         else:
-            res_dict[entity_id] = gen_combined_df(conn, e_map, entity_id, entity_ids, paper_ids)
+            res_dict[entity_id] = gen_combined_df(conn, my_type, entity_id, entity_ids, paper_ids)
 
     # Calculate threshold values
-    res_dict[None] = gen_combined_df(conn, e_map, None, entity_ids, threshold_papers)
+    res_dict[None] = gen_combined_df(conn, my_type, None, entity_ids, threshold_papers)
 
     return res_dict
 

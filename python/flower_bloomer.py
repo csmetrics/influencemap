@@ -22,7 +22,7 @@ from config import *
 
 def getEntityMap(ego, outer):
     e = {'author': Entity.AUTH, 'conf': Entity.CONF, 'institution': Entity.AFFI, 'journal': Entity.JOURN}
-    return Entity_map(e[ego], e[outer])
+    return Entity_map(e[ego], [e[outer]])
 
 def drawFlower(conn, ent_type, ent_type2, data_df, dir_out, name):   
     # Generate associated author scores for citing and cited
@@ -58,7 +58,7 @@ def getFlower(id_2_paper_id, name, ent_type):
     print("\n\nid_to_paper_id\n\n\n\n\n\n{}".format(id_2_paper_id))
 
     # filter ref papers (NEED TO FIX)
-    data_df = gen_search_df(conn, Entity_map(ent_type, ent_type), id_2_paper_id)
+    data_df = gen_search_df(conn, ent_type, id_2_paper_id)
 
     # Generate a self filter dictionary
     entity_to_author = drawFlower(conn, ent_type,  "author" , data_df, OUT_DIR, name)

@@ -21,7 +21,7 @@ def is_weighted(func_name, bval):
     else:
         return lambda r : 1
 
-def get_weight(e_map, row, tweight=default):
+def get_weight(row, tweight=default):
 #    e_type = e_map.codomain
 
 #    if e_type == Entity.AUTH:

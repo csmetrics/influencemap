@@ -41,9 +41,8 @@ def generate_scores(conn, e_map, data_df, inc_self=False, unique=False):
     if not inc_self:
         df = df.loc[-df['self_cite'].fillna(False)]
 
-    my_type, e_type = e_map.get_map()
     id_query_map = lambda f : ' '.join(f[0][1].split())
-    id_to_name = dict([(tname, dict()) for tname in e_type.keyn])
+    id_to_name = dict([(tname, dict()) for tname in e_map.keyn])
 
     res = {'influencing' : dict(), 'influenced': dict()}
     
@@ -61,7 +60,7 @@ def generate_scores(conn, e_map, data_df, inc_self=False, unique=False):
         # Scoring depending if an entity can only score once per paper (take max)
         if unique:
             # Check each type
-            for id__type, name_type in zip(e_type.ids, e_type.keyn):
+            for id__type, name_type in zip(e_map.ids, e_map.keyn):
                 name_col = func(name_type)
                 # Make a small dataframe with influence and name to do a group by name
                 row_df = pd.concat([pd.Series(row['influence'], name='influence'), pd.Series(row[name_col], name=name_col)], axis=1)
@@ -74,7 +73,7 @@ def generate_scores(conn, e_map, data_df, inc_self=False, unique=False):
                         res[dict_type][entity_name] = score_df['influence'].max()
         else:
             # Check each type
-            for id_names in e_type.keyn:
+            for id_names in map_type.keyn:
                 # Add score for each series of type
                 for influence, entity_name in zip(row['influence'], row[func(id_names)]):
                     if entity_name == None:
