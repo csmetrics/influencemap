@@ -9,7 +9,7 @@
         <table id="searchtable" class="row-border hover order-column" cellspacing="0" width="100%">
         </table>
         <input id="expand-btn" type="submit" value="Expand search" name="expand search">
-        <input id="submit-btn" type="submit" name="submit">
+        <input id="continue-btn" type="submit" value="Continue">
       </div>
     </div>
   </body>
@@ -69,11 +69,34 @@ var expandButton = document.getElementById("expand-btn");
 var inputBar = document.getElementById("name-search-bar");
 var selfCiteCheckbox = document.getElementById("self-cite");
 var searchButton = document.getElementById("search-btn");
-var submitButton = document.getElementById("submit-btn");
+var continueButton = document.getElementById("continue-btn");
 
 
 
 // ----  listeners  ----
+
+continueButton.addEventListener('click', function(){
+  var entityType = $(".entity-option:checked").val();
+  var idColumnNumber = searchTableConfig[entityType].idCol;
+  var selected_indexes = searchTable.rows({selected:true})[0];
+  var selected_rows = searchTable.rows( selected_indexes ).data().toArray();
+  var selected_ids = [];
+  for (var i in selected_rows) {
+    selected_ids.push(selected_rows[i][idColumnNumber]);
+  };
+
+  data = {
+    selectedIds: selected_ids.join(),
+    entityType: entityType,
+    load_json: false,
+  };
+
+  console.log(data); 
+  window.location.href="/view_papers/?" + $.param(data);
+});
+
+
+
 
 function search(exp, clear){
   tableContainer.classList.add("invisible");
@@ -116,32 +139,11 @@ expandButton.addEventListener('click', function(){
   search(true, false); // expand: true, clear: false
 });
 
-// Submit Button event handler
-submitButton.addEventListener('click', function(){
-  var entityType = $(".entity-option:checked").val();
-  var idColumnNumber = searchTableConfig[entityType].idCol;
-  var selected_indexes = searchTable.rows({selected:true})[0];
-  var selected_rows = searchTable.rows( selected_indexes ).data().toArray();
-  var selected_ids = [];
-  var selected_names = [];
-  for (var i in selected_rows) {
-    selected_ids.push(selected_rows[i][idColumnNumber]);
-    selected_names.push(selected_rows[i][0]);
-  }
-  console.log(entityType);
-  console.log(idColumnNumber);
-  console.log(searchTableConfig);
-  console.log(searchTableConfig[entityType]);
-  console.log(selected_ids);
-  data = {
-      authorlist: selected_ids.join(),
-      nameslist: selected_names.join(),
-      option: $(".entity-option:checked").val(),
-      keyword: inputBar.value,
-      selfcite: selfCiteCheckbox.checked,
-  }
-  window.location.href = "/submit/?" + $.param(data);
-});
+
+
+
+
+
 
 // ----   auto complete   ----
 var ac = new autoComplete({

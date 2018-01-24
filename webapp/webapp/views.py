@@ -1,10 +1,11 @@
-import os, sys
+import os, sys, json
 import base64
 from django.shortcuts import render
 from django.http import JsonResponse
 from django.views.decorators.csrf import csrf_exempt
 from datetime import datetime
 from .utils import progressCallback
+from urllib import parse
 
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 PYTHON_DIR = os.path.join(os.path.dirname(BASE_DIR), 'python')
@@ -150,3 +151,19 @@ def main(request):
             "selectedOption": option,
         }
     })
+
+def view_papers(request):
+    print("\n\nrequest: {}\n\n".format(request))
+
+    selectedIds = request.GET.get('selectedIds')
+
+    print("\n\nselectedIds: {}\n\n".format(selectedIds))
+
+    entityType = request.GET.get('entityType')
+
+    data = {
+        'entityType': entityType, 
+        'selectedInfo': selectedIds
+    }
+
+    return render(request, 'view_papers.html', data)
