@@ -57,7 +57,7 @@ if __name__ == "__main__":
 
     conn = sqlite3.connect(DB_PATH)
 
-    data_df = gen_search_df(conn, Entity_type.AUTH, id_2_paper_id)
+    data_df = gen_search_df(conn, id_2_paper_id)
 
     influence_dict = generate_scores(conn, Entity_map(Entity_type.AUTH, [Entity_type.CONF, Entity_type.JOUR]), data_df, inc_self=True, unique=True)
     score_df = generate_score_df(influence_dict)

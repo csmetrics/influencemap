@@ -1,4 +1,5 @@
 from enum import Enum
+import os
 
 # Type of entities for the flower
 class Entity_type(Enum):
@@ -32,3 +33,9 @@ class Entity:
     def __init__(self, entity_id, entity_type):
         self.entity_id = entity_id
         self.entity_type = entity_type
+
+    def cache_str(self):
+        return os.path.join(self.entity_type.ident, self.entity_id)
+
+    def name_str(self):
+        return self.entity_type.ident + '-' + self.entity_id
