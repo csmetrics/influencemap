@@ -57,8 +57,8 @@ def getFlower(id_2_paper_id, name, ent_type):
     # get paper ids associated with input name
     print("\n\nid_to_paper_id\n\n\n\n\n\n{}".format(id_2_paper_id))
 
-    # filter ref papers (NEED TO FIX)
-    data_df = gen_search_df(conn, ent_type, id_2_paper_id)
+    # filter ref papers
+    data_df = gen_search_df(conn, id_2_paper_id)
 
     # Generate a self filter dictionary
     entity_to_author = drawFlower(conn, ent_type,  "author" , data_df, OUT_DIR, name)
