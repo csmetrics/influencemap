@@ -92,7 +92,9 @@ def search(request):
             entities = dataFunctionDict['get_ids'][option](keyword, progressCallback)
 
     data = {"entities": entities,}
-
+    print('\n\n\n\n\nentities:')
+    for e in entities:
+        print(e)
     return JsonResponse(data, safe=False)
 
 
@@ -104,10 +106,6 @@ def submit(request):
     option = request.GET.get("option")
     keyword = request.GET.get('keyword')
     selfcite = True if request.GET.get("selfcite") == "true" else False
-    print('\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n')
-    print(request.GET.get('selfcite'))
-    print('\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n')
-
 
     if option in ['conference', 'journal']:
         id_pid_dict = dataFunctionDict['get_pids'][option](selected_ids)
@@ -155,15 +153,32 @@ def main(request):
 def view_papers(request):
     print("\n\nrequest: {}\n\n".format(request))
 
-    selectedIds = request.GET.get('selectedIds')
-
-    print("\n\nselectedIds: {}\n\n".format(selectedIds))
-
+    selectedIds = request.GET.get('selectedIds').split(',')
+    selectedNames = request.GET.get('selectedNames').split(',')
     entityType = request.GET.get('entityType')
+    expanded = request.GET.get('expanded') == 'true'
+    name = request.GET.get('name')
+
+    if entityType == 'author':
+        if expanded:
+            entity_tuples, paper_dicts = getAuthor(name=name, expand=True)
+        else:
+            entity_tuples, paper_dicts, _ = getAuthor(name=name, expand=False)
+    else:
+        entities = dataFunctionDict['get_ids'][entityType](name=name)
+        paper_dicts = dataFunctionDict['get_pids'][entityType](selectedIds, selectedNames)
+
+    entity_tuples = [x for x in entity_tuples if x['authorID'] in selectedIds]   
+
+    for entity in entity_tuples:
+        entity['field'] = ['_'.join([str(y) for y in x]) for x in entity['field']]
 
     data = {
+        'entityTuples': entity_tuples,
         'entityType': entityType, 
         'selectedInfo': selectedIds
     }
-
+    print('\n\nprinting entities')
+    for entity in entity_tuples:
+        print(entity)
     return render(request, 'view_papers.html', data)

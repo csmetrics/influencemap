@@ -40,21 +40,29 @@ function updateTable(data, table, resKeys, clear){
     // fields
     fields = "";
     for (var f in newRow[3]) {
-      fields += "<li>" + newRow[3][f][0] + " (" + newRow[3][f][1] + ")</li>";
+      field = newRow[3][f].split('_');
+      fields += "<li>" + field[0] + " (" + field[1] + ")</li>";
     }
     newRow[3] = "<ul>" + fields + "</ul>";
     // Uppercase first letter
-    newRow[4] = newRow[4].charAt(0).toUpperCase() + newRow[4].slice(1);
+
+    try {
+      newRow[4] = newRow[4].charAt(0).toUpperCase() + newRow[4].slice(1);
+    } catch(e){};
 
     table.row.add(newRow);
   };
   table.draw();
 };
 
-var selectedInfo = '{{ selectedInfo | safe }}';
+var selectedInfo = {{ entityTuples | safe}};
 var entityType = '{{ entityType }}';
+var responseKeys = papersTableConfig[entityType]['responseKeys'];
 
 console.log(selectedInfo);
+
+updateTable(selectedInfo, papersTable, responseKeys, true); 
+
 
 // Submit Button event handler
 submitButton.addEventListener('click', function(){

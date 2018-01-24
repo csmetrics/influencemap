@@ -18,7 +18,9 @@
 <script src="{% static 'js/progressbar.js' %}"></script>
 <script src="{% static 'js/searchTableConfig.js' %}"></script>
 <script>
-
+// keep track of whether search was expanded
+var expanded = false;
+var latestSearch = "";
 // ----  data table  ----
 var tableContainer = document.getElementById("table-container");
 
@@ -42,7 +44,6 @@ function updateTable(data, table, resKeys, clear){
        key = resKeys[j];
        newRow[j] = data[i][key];
     };
-
     // fields
     fields = "";
     for (var f in newRow[3]) {
@@ -81,14 +82,19 @@ continueButton.addEventListener('click', function(){
   var selected_indexes = searchTable.rows({selected:true})[0];
   var selected_rows = searchTable.rows( selected_indexes ).data().toArray();
   var selected_ids = [];
+  var selected_names = [];
   for (var i in selected_rows) {
     selected_ids.push(selected_rows[i][idColumnNumber]);
+    selected_names.push(selected_rows[i][0]);
   };
 
   data = {
     selectedIds: selected_ids.join(),
+    selectedNames: selected_names.join(),
     entityType: entityType,
     load_json: false,
+    expanded: expanded,
+    name: latestSearch
   };
 
   console.log(data); 
@@ -102,21 +108,28 @@ function search(exp, clear){
   tableContainer.classList.add("invisible");
   var entityType = $(".entity-option:checked").val();
   var responseKeys = searchTableConfig[entityType]['responseKeys'];
-  if (!exp){searchTable = makeSearchTable(entityType)}
+  if (!exp){
+    searchTable = makeSearchTable(entityType);
+    expanded = false;
+    latestSearch = inputBar.value;
+  } else {
+    expanded = true;
+  }
+
   showProgressBar();
   updateProgressBar();
   $.ajax({
     type: "GET",
     url: "/search",
     data: { // input to the views.py - search()
-      keyword: inputBar.value,
+      keyword: latestSearch,
       option: $(".entity-option:checked").val(),
       selfcite: selfCiteCheckbox.checked,
       expand: exp
     },
     success: function (result) { // return data if success
       console.log("searchButton success");
-      // console.log(result["authors"]);
+      console.log(result['entities']);
       updateTable(result["entities"], searchTable, responseKeys, clear);
       if ($(".entity-option:checked").val() !== 'author'){expandButton.style.display='none'} else {expandButton.style.display='inline'}
       tableContainer.classList.remove("invisible");
