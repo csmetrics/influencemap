@@ -7,13 +7,13 @@ import os
 from datetime import datetime
 from flower_helpers import is_self_cite
 from entity_type import *
+from influence_weight import get_weight
 
 # Config setup
 from config import *
 
 REF_LABELS = ['citing', 'paper_citing', 'rc_citing', 'paper_cited']
-INFO_COLS = ['auth_id', 'auth_name', 'auth_count', 'conf_id', 'conf_name', 'journ_id', 'journ_name', 'affi_id', 'affi_name']
-MULT_COLS = [0, 7]
+INFO_COLS = ['auth_id', 'auth_name', 'auth_count', 'conf_id', 'conf_abv', 'conf_name', 'journ_id', 'journ_name', 'affi_id', 'affi_name']
 
 # Filters the paper_ref database to relevent papers and uses pandas dataframes
 def gen_reference_df(conn, paper_ids):
@@ -44,7 +44,7 @@ def gen_reference_df(conn, paper_ids):
 
     return ref_df
 
-
+# Filter info table for papers in paper_ids
 def gen_info_df(conn, paper_ids):
     cur = conn.cursor()
 
@@ -55,41 +55,12 @@ def gen_info_df(conn, paper_ids):
     pdict = dict()
     rows = list()
 
+    # Find information in chunks
     for chunk in paper_chunks:
         info_query = 'SELECT paper_id, {} FROM paper_info WHERE paper_id IN ({})'.format(','.join(INFO_COLS), ','.join(['?'] * len(chunk)))
 
         cur.execute(info_query, chunk)
-        for row in cur.fetchall():
-            paper_id, info = row[0], row[1:]
-            try:
-                pdict[paper_id].append(info) 
-            except KeyError:
-                pdict[paper_id] = [info]
-
-    for paper_id, info_tuples in pdict.items():
-        row = (paper_id, )
-        # Combine information of same paper
-        list_info = list(map(list, zip(*info_tuples)))
-
-        # Change type of lists to strings for hashing
-        for i in range(len(INFO_COLS)):
-            if i-1 in MULT_COLS:
-                continue
-            elif i in MULT_COLS:
-                ids = list(map(str, list_info[i]))
-                names = list(map(str, list_info[i+1]))
-
-                idx = np.argsort(ids)
-
-                sorted_ids = np.array(ids)[idx]
-                sorted_names = np.array(names)[idx]
-
-                # Change input into a string for hashing
-                row += (','.join(sorted_ids), ','.join(sorted_names))
-            else:
-                row += (list_info[i][0], )
-
-        rows.append(row)
+        rows += cur.fetchall()
 
     # Turn list of tuples into dataframe
     info_df = pd.DataFrame.from_records(rows, columns=['paper'] + INFO_COLS)
@@ -98,80 +69,106 @@ def gen_info_df(conn, paper_ids):
 
     return info_df
 
+def test_sc(row):
+    citing = set(row['citing'])
+    val = len(set(citing)) == 1
+    return val
+
 # joining operator to rename and combine dataframes
 def combine_df(ref_df, info_df):
     # Column names for citing and cited reference information
     citing_cols = dict([(x, x + '_citing') for x in ['paper'] + INFO_COLS])
     cited_cols = dict([(x, x + '_cited') for x in ['paper'] + INFO_COLS])
+
+    # Calculate sc join index
+    ref_df['paper_map'] = ref_df['paper_citing'] + '-' + ref_df['paper_cited']
+
+    # Join citing information
+    res = pd.merge(ref_df, info_df.rename(index=str, columns=citing_cols), on='paper_citing', sort=True)
+    # Join cited information
+    res = pd.merge(res, info_df.rename(index=str, columns=cited_cols), on='paper_cited', sort=True)
+
+    # Calculate scores
+    res['influence'] = res.apply(lambda x : get_weight(x), axis=1)
+
+    # Calculate self-citations
+    sc_df = res[['citing', 'paper_map']]
+    sc_df = sc_df.groupby('paper_map').agg(lambda x : x.tolist()).reset_index()
+
+    # self-cite
+    sc_df['self_cite'] = sc_df.apply(test_sc, axis=1)
+    sc_df = sc_df.drop(columns=['citing'])
+
+    # Join selfcite
+    res = pd.merge(res, sc_df, on='paper_map', sort=False)
     
-    res = pd.merge(ref_df, info_df.rename(index=str, columns=citing_cols), on='paper_citing', sort=False)
-    res = pd.merge(res, info_df.rename(index=str, columns=cited_cols), on='paper_cited', sort=False)
-    
-    return res
+    return res.drop(columns=['paper_map'])
+
+def gen_combined_df(conn, my_type, entity_id, entity_ids, paper_ids):
+    # If entity_id is None (theshold papers) with no caching
+    if not entity_id:
+        print('\n---\n{} start finding paper references for: threshold\n---'.format(datetime.now()))
+        ref_df = gen_reference_df(conn, paper_ids)
+        print('{} finish finding paper references for: threshold\n---'.format(datetime.now()))
+
+        # Get the papers to find info for
+        info_papers = list(set(ref_df['paper_citing'].tolist()).union(set(ref_df['paper_cited'].tolist())))
+
+        print('{} start finding paper info for: threshold\n---'.format(datetime.now()))
+        info_df = gen_info_df(conn, info_papers)
+        print('{} finish finding paper info for: threshold\n---'.format(datetime.now(), entity_id))
+
+        # Combine and deal with possible unique
+        print('{} start joining dataframes\n---'.format(datetime.now()))
+        res_df = combine_df(ref_df, info_df)
+        print('{} finish joining dataframes\n---'.format(datetime.now(), entity_id))
+    else:
+        # Check cache for entity
+        cache_path = os.path.join(DATA_CACHE, entity_id)
+        try:
+            res_df = pd.read_pickle(cache_path)
+            print('\n---\n{} found ref cache for: {}\n---'.format(datetime.now(), entity_id))
+        # If miss
+        except FileNotFoundError:
+            print('\n---\n{} start finding paper references for: {}\n---'.format(datetime.now(), entity_id))
+            ref_df = gen_reference_df(conn, paper_ids)
+            print('{} finish finding paper references for: {}\n---'.format(datetime.now(), entity_id))
+
+            # Get the papers to find info for
+            info_papers = list(set(ref_df['paper_citing'].tolist()).union(set(ref_df['paper_cited'].tolist())))
+
+            print('{} start finding paper info for: {}\n---'.format(datetime.now(), entity_id))
+            info_df = gen_info_df(conn, info_papers)
+            print('{} finish finding paper info for: {}\n---'.format(datetime.now(), entity_id))
+
+            # Combine and deal with possible unique
+            print('{} start joining dataframes\n---'.format(datetime.now()))
+            res_df = combine_df(ref_df, info_df)
+            print('{} finish joining dataframes\n---'.format(datetime.now(), entity_id))
+
+            # Cache info pickle file
+            res_df.to_pickle(cache_path)
+            os.chmod(cache_path, 0o777)
+
+    return res_df
 
 # Wraps above functions to produce a dictionary of pandas dataframes for relevent information
-def gen_search_df(conn, paper_map, etype):
-    res_dict = dict()
-    threshold_papers = list()
+def gen_search_df(conn, my_type, paper_map):
     entity_ids = paper_map.keys()
 
-    for entity_id, paper_ids in paper_map.items():
+    res_dict = dict()
+    threshold_papers = list()
+
+    # Go through each of the entity types the user selects
+    for entity_id, paper_tuple in paper_map.items():
+        paper_ids = list(map(lambda x : x[0], paper_tuple))
         if len(paper_ids) < PAPER_THRESHOLD:
             threshold_papers += paper_ids
         else:
-            # CHECK CACHE
-            cache_path = os.path.join(DATA_CACHE, entity_id)
-            try:
-                res_dict[entity_id] = pd.read_pickle(cache_path)
-                print(res_dict[entity_id])
-                print('\n---\n{} found cache data for: {}\n---'.format(datetime.now(), entity_id))
-            except FileNotFoundError:
-                # IF MISS
-                print('\n---\n{} start finding paper references for: {}\n---'.format(datetime.now(), entity_id))
-                ref_df = gen_reference_df(conn, paper_ids)
-                print('{} finish finding paper references for: {}\n---'.format(datetime.now(), entity_id))
+            res_dict[entity_id] = gen_combined_df(conn, my_type, entity_id, entity_ids, paper_ids)
 
-                print('{} start finding paper info for: {}\n---'.format(datetime.now(), entity_id))
-                info_df = gen_info_df(conn, paper_ids)
-                print('{} finish finding paper info for: {}\n---'.format(datetime.now(), entity_id))
-
-                print('{} start joining dataframes for: {}\n---'.format(datetime.now(), entity_id))
-                e_df = combine_df(ref_df, info_df)
-                res_dict[entity_id] = e_df
-                print('{} finish joining dataframes for: {}\n---'.format(datetime.now(), entity_id))
-
-                # Cache pickle file
-                e_df.to_pickle(cache_path)
-                os.chmod(cache_path, 0o777)
-
-    # deal with threshold papers
-    print('\n---\n{} start finding paper references for: threshold\n---'.format(datetime.now()))
-    ref_df = gen_reference_df(conn, threshold_papers)
-    print('{} finish finding paper references for: threshold\n---'.format(datetime.now()))
-
-    print('{} start finding paper info for: threshold\n---'.format(datetime.now()))
-    info_df = gen_info_df(conn, threshold_papers)
-    print('{} finish finding paper info for: threshold\n---'.format(datetime.now(), entity_id))
-
-    # Other entities
-    print('{} start joining dataframes for: threshold\n---'.format(datetime.now()))
-    res_dict[None] = combine_df(ref_df, info_df)
-    print('{} finish joining dataframes for: threshold\n---'.format(datetime.now(), entity_id))
-
-    # Calculate self-citations
-    is_sc_vec = np.vectorize(lambda x, y, z : is_self_cite(x, y, z, entity_ids))
-
-    # Calculate auth self-citations if auth
-    if etype == Entity.AUTH:
-        for df in res_dict.values():
-            if not df.empty:
-                df['self_cite'] = is_sc_vec(df['citing'], df['auth_id_citing'], df['auth_id_cited'])
-
-    # Calculate inst self-citations if inst
-    elif etype == Entity.AFFI:
-        for df in res_dict.values():
-            if not df.empty:
-                df['self_cite'] = is_sc_vec(df['citing'], df['affi_id_citing'], df['affi_id_cited'])
+    # Calculate threshold values
+    res_dict[None] = gen_combined_df(conn, my_type, None, entity_ids, threshold_papers)
 
     return res_dict
 

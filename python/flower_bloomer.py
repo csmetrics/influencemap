@@ -21,8 +21,8 @@ from flower_bloom_data import get_flower_df, flower_df_to_graph
 from config import *
 
 def getEntityMap(ego, outer):
-    e = {'author': Entity.AUTH, 'conf': Entity.CONF, 'institution': Entity.AFFI, 'journal': Entity.JOURN}
-    return Entity_map(e[ego], e[outer])
+    e = {'author': Entity_type.AUTH, 'conference': Entity_type.CONF, 'institution': Entity_type.AFFI, 'journal': Entity_type.JOURN}
+    return Entity_map(e[ego], [e[outer]])
 
 def drawFlower(conn, ent_type, ent_type2, data_df, dir_out, name):   
     # Generate associated author scores for citing and cited
@@ -57,12 +57,12 @@ def getFlower(id_2_paper_id, name, ent_type):
     # get paper ids associated with input name
     print("\n\nid_to_paper_id\n\n\n\n\n\n{}".format(id_2_paper_id))
 
-    # filter ref papers
-    data_df = gen_search_df(conn, id_2_paper_id, ent_type)
+    # filter ref papers (NEED TO FIX)
+    data_df = gen_search_df(conn, ent_type, id_2_paper_id)
 
     # Generate a self filter dictionary
     entity_to_author = drawFlower(conn, ent_type,  "author" , data_df, OUT_DIR, name)
-    entity_to_conference = drawFlower(conn, ent_type, "conf", data_df, OUT_DIR, name)
+    entity_to_conference = drawFlower(conn, ent_type, "conference", data_df, OUT_DIR, name)
     entity_to_affiliation = drawFlower(conn, ent_type, "institution" , data_df, OUT_DIR, name)
 
     conn.close()

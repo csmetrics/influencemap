@@ -6,28 +6,8 @@ def get_papers(pdict):
         values += pdict[key]
     return values
 
-def try_get(conn, key, qdict, query, func=lambda x: x):
-    try:
-        return qdict[key]
-    except KeyError:
-        cur = conn.cursor()
-        cur.execute(query, (key, ))
-        res = func(cur.fetchall())
-        qdict[key] = res
-        return res
-
-def is_collab_self_cite(conn, paper_id, paper_ref_id, auth_dict):
-    sc_query = 'SELECT auth_id FROM paper_info WHERE paper_id = ?'
-    func = lambda f : set(map(lambda r : r[0], f))
-
-    my_auth = try_get(conn, paper_id, auth_dict, sc_query, func=func)
-                    
-    their_auth = try_get(conn, paper_ref_id, auth_dict, sc_query, func=func)
-
-    return int(not my_auth.isdisjoint(their_auth))
-
-def is_self_cite(citing, citing_id, cited_id, entity_ids):
-    if citing:
-        return not set(entity_ids).isdisjoint(set(citing_id.split(',')))
+def is_self_cite(row, e_id, entity_id):
+    if row['citing']:
+        return not set([entity_id]).isdisjoint(set(row[e_id + '_citing']))
     else:
-        return not set(entity_ids).isdisjoint(set(cited_id.split(',')))
+        return not set([entity_id]).isdisjoint(set(row[e_id + '_cited']))
