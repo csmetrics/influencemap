@@ -135,15 +135,16 @@ def getAuthor(name,cbfunc=lambda _ : None, nonExpandAID=[], expand=False,use_cac
                         if tsName == name:
                             finalresult.append(cacheData[key][1])
                             aIDpaper[et.Entity(key, et.Entity_type.AUTH)] = cacheData[key][2]
-                        
-                        for dic in finalresult: print(dic) 
+                      
 
                     else:
                         tsName = cacheData[key][0]
                         if isSame(tsName, name) and tsName != name:
                             finalresult.append(cacheData[key][1])
                             aIDpaper[et.Entity(key, et.Entity_type.AUTH)] = cacheData[key][2]
-                        for dic in finalresult: print(dic)
+                
+
+                for dic in finalresult: print(dic)
                 if not expand: return (finalresult, aIDpaper, [])
                 else: return (finalresult, aIDpaper)                       
                                                 
@@ -518,7 +519,7 @@ def matchForShort(name1, name2):
     return ls2 in name1
     
 if __name__ == '__main__':
-    trial = getAuthor('thomas lee', use_cache=True)
+    trial = getAuthor('shafi goldwasser', use_cache=True)
     #affID = []
     #x = getAffPID(affID,'university of cambridge')
     #confID = [trial[0]['id']]
