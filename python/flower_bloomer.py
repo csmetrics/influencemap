@@ -26,10 +26,15 @@ def getEntityMap(ego, outer):
 
 def drawFlower(conn, ent_type, ent_type2, data_df, dir_out, name):   
     # Generate associated author scores for citing and cited
-    influence_dict = generate_scores(conn, getEntityMap(ent_type, ent_type2), data_df)
-    score_df = generate_score_df(influence_dict)
-    flower_df = get_flower_df(score_df, name)
-    flower_graph = flower_df_to_graph(flower_df, name)
+    e_map = getEntityMap(ent_type, ent_type2)
+
+    influence_dict = generate_scores(conn, e_map, data_df)
+
+    coauthors = generate_coauthors(e_map, data_df)
+
+    score_df = generate_score_df(influence_dict, e_map, name)
+
+    flower_graph = score_df_to_graph(score_df)
     
     #### START PRODUCING GRAPH
     plot_dir = os.path.join(dir_out, 'figures')

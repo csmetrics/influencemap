@@ -3,16 +3,17 @@ import os
 
 # Type of entities for the flower
 class Entity_type(Enum):
-    AUTH = ('AUTH', 'auth', 'auth_id', 'auth_name')
-    AFFI = ('AFFI', 'affi', 'affi_id', 'affi_name')
-    CONF = ('CONF', 'conf', 'conf_id', 'conf_abv')
-    JOUR = ('JOUR', 'journ', 'journ_id', 'journ_name')
+    AUTH = ('AUTH', 'auth', 'auth_id', 'auth_name', 'Author')
+    AFFI = ('AFFI', 'affi', 'affi_id', 'affi_name', 'Affiliation')
+    CONF = ('CONF', 'conf', 'conf_id', 'conf_abv', 'Conference')
+    JOUR = ('JOUR', 'journ', 'journ_id', 'journ_name', 'Journal')
 
-    def __init__(self, indent, prefix, eid, ename):
+    def __init__(self, indent, prefix, eid, ename, text):
         self.ident = indent
         self.prefix = prefix
         self.eid = eid
         self.ename = ename
+        self.text = text
 
 # Defines the type of the flower. (Center, Leaves)
 class Entity_map:
@@ -27,6 +28,19 @@ class Entity_map:
 
     def get_center_prefix(self):
         return self.domain.prefix
+
+    def get_center_text(self):
+        return self.domain.text
+
+    def get_leave_text(self):
+        texts = [e.text for e in self.codomain]
+
+        if len(texts) > 1:
+            text1, textr = texts[0], texts[1:]
+
+            return ' and '.join([', '.join(textr), text1])
+        else:
+            return texts[0]
 
 # Class to wrap type and id together
 class Entity:

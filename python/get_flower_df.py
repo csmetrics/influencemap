@@ -13,7 +13,7 @@ from influence_weight import get_weight
 from config import *
 
 REF_LABELS = ['citing', 'paper_citing', 'rc_citing', 'paper_cited']
-INFO_COLS = ['auth_id', 'auth_name', 'auth_count', 'conf_id', 'conf_abv', 'conf_name', 'journ_id', 'journ_name', 'affi_id', 'affi_name']
+INFO_COLS = ['auth_id', 'auth_name', 'auth_count', 'conf_id', 'conf_abv', 'conf_name', 'journ_id', 'journ_name', 'affi_id', 'affi_name', 'pub_year']
 SC_COLS = [e.eid + '_citing' for e in Entity_type] + [e.eid + '_cited' for e in Entity_type]
 
 # Filters the paper_ref database to relevent papers and uses pandas dataframes
@@ -171,7 +171,7 @@ def gen_search_df(conn, paper_map):
             res_dict[entity.name_str()] = gen_combined_df(conn, entity, entity_ids, paper_ids)
 
     # Calculate threshold values
-    res_dict[None] = gen_combined_df(conn, None, entity_ids, threshold_papers)
+#    res_dict[None] = gen_combined_df(conn, None, entity_ids, threshold_papers)
 
     return res_dict
 

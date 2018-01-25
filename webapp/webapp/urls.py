@@ -23,5 +23,6 @@ urlpatterns = [
     url(r'^submit/', views.submit),
     url(r'^progress', utils.progress),
     url(r'^admin/', admin.site.urls),
-    url(r'^autocomplete', views.autocomplete)
+    url(r'^autocomplete', views.autocomplete),
+    url(r'^view_papers/', views.view_papers)
 ]

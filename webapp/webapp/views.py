@@ -1,10 +1,11 @@
-import os, sys
+import os, sys, json
 import base64
 from django.shortcuts import render
 from django.http import JsonResponse
 from django.views.decorators.csrf import csrf_exempt
 from datetime import datetime
 from .utils import progressCallback
+from urllib import parse
 
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 PYTHON_DIR = os.path.join(os.path.dirname(BASE_DIR), 'python')
@@ -12,7 +13,6 @@ sys.path.insert(0, PYTHON_DIR)
 
 from flower_bloomer import getFlower
 from mkAff import getAuthor, getJournal, getConf, getAff, getConfPID, getJourPID, getConfPID, getAffPID
-
 # initialise as no saved pids
 saved_pids = dict() 
 
@@ -91,7 +91,9 @@ def search(request):
             entities = dataFunctionDict['get_ids'][option](keyword, progressCallback)
 
     data = {"entities": entities,}
-
+    print('\n\n\n\n\nentities:')
+    for e in entities:
+        print(e)
     return JsonResponse(data, safe=False)
 
 
@@ -146,3 +148,40 @@ def main(request):
             "selectedOption": option,
         }
     })
+
+def view_papers(request):
+    print("\n\nrequest: {}\n\n".format(request))
+
+    selectedIds = request.GET.get('selectedIds').split(',')
+    selectedNames = request.GET.get('selectedNames').split(',')
+    entityType = request.GET.get('entityType')
+    expanded = request.GET.get('expanded') == 'true'
+    name = request.GET.get('name')
+
+    if entityType == 'author':
+        if expanded:
+            entity_tuples, paper_dict = getAuthor(name=name, expand=True)
+        else:
+            entity_tuples, paper_dict, _ = getAuthor(name=name, expand=False)
+    else:
+        entities = dataFunctionDict['get_ids'][entityType](name=name)
+        paper_dict = dataFunctionDict['get_pids'][entityType](selectedIds, selectedNames)
+
+    entity_tuples = [x for x in entity_tuples if x['authorID'] in selectedIds]   
+
+    for entity in entity_tuples:
+        entity['field'] = ['_'.join([str(y) for y in x]) for x in entity['field']]
+
+    simplified_paper_dict = dict()
+    for k, v in paper_dict.items(): # a dict of type entity(aID, entity_type('auth_id')):[(paperID, paperTitle)] according to mkAff.py
+        eid = k.entity_id
+        simplified_paper_dict[eid] = ['_'.join(x) for x in v]
+
+    data = {
+        'entityTuples': entity_tuples,
+        'papersDict': simplified_paper_dict,
+        'entityType': entityType, 
+        'selectedInfo': selectedIds
+    }
+
+    return render(request, 'view_papers.html', data)
