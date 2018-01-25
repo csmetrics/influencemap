@@ -5,6 +5,8 @@ import seaborn as sns
 import numpy as np
 import networkx as nx
 import math
+from datetime import datetime
+from matplotlib import rc
 
 # Config setup
 from config import *
@@ -13,6 +15,8 @@ def draw_flower(egoG=None, ax=None,
                    plot_setting={'max_marker':30, 'max_line': 4., 'min_line': .5, 
                                  "sns_palette": "RdBu", "out_palette": "Reds", "in_palette": "Blues", 
                                  "num_colors": 200, "delta_text":0.02}, filename=None):
+
+    print('{} start drawing flower\n---'.format(datetime.now()))
 
     ps = plot_setting
     if not ax:
@@ -23,12 +27,12 @@ def draw_flower(egoG=None, ax=None,
     sns.set_style("white")
     sns.despine()
 
+    # Get center node string
     center_node = egoG.graph['ego']
         
     xroot = 0.
     yroot = 0.
     ax.plot(xroot, yroot, 'o', c=[.5, .5, .5], markersize=1.2*ps['max_marker'], fillstyle='full', mec='0.5')
-    ax.text(xroot, yroot-5*ps['delta_text'], center_node, horizontalalignment='center')
 
     # Get basic node information from ego graph
     outer_nodes = list(egoG)
@@ -115,12 +119,21 @@ def draw_flower(egoG=None, ax=None,
             rotation_mode='anchor',
             rotation=text_angle * 180.0 / np.pi)
 
+    # Label flower center
+    ax.text(xroot, yroot-0.08, center_node, horizontalalignment='center', verticalalignment='center', size=20)
+    ax.text(xroot, yroot-0.13, 'Flower Type: ' + egoG.graph['mapping'], horizontalalignment='center', verticalalignment='center', size=10)
+    ax.text(xroot, yroot-0.17, 'Publication Dates: ' + egoG.graph['date_range'], horizontalalignment='center', verticalalignment='center', size=10)
+
     ax.set_xlim((-1.2, 1.2))
-    ax.set_ylim((-.1, 1.1))
+    ax.set_ylim((-.05, 1.15))
     ax.axis('off')
 
     if filename != None:
         plt.savefig(filename)
+
+    plt.close()
+
+    print('{} finish drawing flower\n---'.format(datetime.now()))
 
 def draw_cite_volume(egoG=None, ax=None, filename=None):
     if not ax:
@@ -135,7 +148,7 @@ def draw_cite_volume(egoG=None, ax=None, filename=None):
     outer_nodes.sort(key=lambda n : egoG.nodes[n]['ratiow'])
 
     # x position
-    x_pos = [x + 1 for x in range(NUM_LEAVES)]
+    x_pos = [x + 1 for x in range(len(outer_nodes))]
 
     v_bar_influencing = ax.bar([x - 0.2 for x in x_pos], [egoG[center_node][node]['weight'] for node in outer_nodes], width=.4) #, color=bar_colrs3[mdx])
     ax.set_ylim([0, max(egoG.graph['max_influencing'], egoG.graph['max_influenced'])])
@@ -151,6 +164,11 @@ def draw_cite_volume(egoG=None, ax=None, filename=None):
     ax.set_ylabel('reference score')#, color=bar_colrs3[mdx])
     ax2.set_ylabel('citation score')#, color=bar_colrs2[mdx])
 
+    # plot info on left bot
+    fig.text(0, 0, 'Pub Dates: ' + egoG.graph['date_range'], horizontalalignment='left', verticalalignment='bottom', size=10)
+    fig.text(0, 0 + 0.035, 'Flower Type: ' + egoG.graph['mapping'], horizontalalignment='left', verticalalignment='bottom', size=10)
+    fig.text(0, 0 + 0.07, 'Ego: ' + center_node, horizontalalignment='left', verticalalignment='bottom', size=10)
+    
     #for tl in ax.get_yticklabels():
     #    tl.set_color(bar_colrs3[mdx])
     #for tl in ax2.get_yticklabels():
@@ -159,3 +177,5 @@ def draw_cite_volume(egoG=None, ax=None, filename=None):
 
     if filename != None:
         plt.savefig(filename)
+
+    plt.close()
