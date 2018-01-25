@@ -110,23 +110,43 @@ def getPaperName(pID):
     return (res,recent)
 
 def getAuthor(name,cbfunc=lambda _ : None, nonExpandAID=[], expand=False,use_cache=False, yearStart=0, yearEnd=2016):
+    
+    finalresult = [] #finalresult is a list of dict
+    aIDpaper = {} #aIDpaper is a dict of entity:[(pID, title, year)]
+    
     if use_cache:
-       with open(saved_dir,'r') as savedFile:
-           data_exist_author = json.load(savedFile)
-           for key in data_exist_author:
-                if isSame(key,name):
-                     if expand:
-                         for dic in data_exist_author[key][0]: #data_exist_author is {name:({auInfo},{aID:[pID]})}
-                             print(dic) 
-                         return data_exist_author[key]
-                     else:
-                         auInfo = data_exist_author[key][0]
-                         auInfoSame = []
-                         for dic in auInfo:
-                             if dic['name'] == name: auInfoSame.append(dic)
-                         for dic in auInfoSame: print(dic)
-                         return (auInfoSame, data_exist_author[key][1])
-                    
+        inside = False
+        theName = ''
+        with open("/localdata/common/authInfoCache/authNameList.txt") as nameList:
+            for line in nameList:
+                if isSame(line.strip().lower(), name.lower()):
+                    inside = True
+                    theName = line
+                    break
+        if inside: 
+            name = name.lower()    
+            cacheName = '_'.join(theName.split(' '))[0:-1]
+            print(cacheName)
+            with open("/localdata/common/authInfoCache/" + cacheName + ".json", 'r') as cache:
+                cacheData = json.load(cache) #cacheData = aID:(name, {name, aID, numpaper, aff, field, recentPaper, date}, [(paperID, title, year)]
+                for key in cacheData:
+                    if not expand:
+                        tsName = cacheData[key][0]
+                        if tsName == name:
+                            finalresult.append(cacheData[key][1])
+                            aIDpaper[et.Entity(key, et.Entity_type.AUTH)] = cacheData[key][2]
+                        
+                        for dic in finalresult: print(dic) 
+
+                    else:
+                        tsName = cacheData[key][0]
+                        if isSame(tsName, name) and tsName != name:
+                            finalresult.append(cacheData[key][1])
+                            aIDpaper[et.Entity(key, et.Entity_type.AUTH)] = cacheData[key][2]
+                        for dic in finalresult: print(dic)
+                if not expand: return (finalresult, aIDpaper, [])
+                else: return (finalresult, aIDpaper)                       
+                                                
 
     dbPAA = sqlite3.connect(db_myPAA, check_same_thread = False)
     dbA = sqlite3.connect(db_Authors, check_same_thread = False)
@@ -150,8 +170,8 @@ def getAuthor(name,cbfunc=lambda _ : None, nonExpandAID=[], expand=False,use_cac
     if not expand:
         curA.execute("SELECT * FROM authors WHERE authorName LIKE '% " + lstN + "' AND (authorName LIKE '" + fstN + "%' OR authorName LIKE '" + fstLetter + " %')")
         allAuthor = curA.fetchall()
-        for a in allAuthor:
-            print(a)
+        for a in allAuthor: print(a)
+        print("number of author is " + str(len(allAuthor))) 
         authorNotSameName = [x for x in allAuthor if x[1] != name]
 
         allAuthor = [x for x in allAuthor if x[1] == name]
@@ -183,7 +203,6 @@ def getAuthor(name,cbfunc=lambda _ : None, nonExpandAID=[], expand=False,use_cac
 
     #Getting the most frequently appeared affiliation
     tempres = []
-    finalresult = []
 
     print("{} counting the number of paper published by an author".format(datetime.now()))
     cbfunc("counting the number of paper published by an author")
@@ -209,9 +228,7 @@ def getAuthor(name,cbfunc=lambda _ : None, nonExpandAID=[], expand=False,use_cac
     same = []
     same[:] = [x for x in tempres if x[0] == name]
     tempres[:] = [x for x in tempres if x[0] != name]
-    tempres = same + tempres
-
-    aIDpaper = {}  
+    tempres = same + tempres  
 
     print("{} finish counting, getting the fieldName and recent paper".format(datetime.now()))
     cbfunc("finish counting, getting the fieldName and recent paper")
@@ -236,14 +253,14 @@ def getAuthor(name,cbfunc=lambda _ : None, nonExpandAID=[], expand=False,use_cac
     curA.close()
     dbA.commit()
     dbA.close()
-   
     
+    '''   
     for dic in finalresult: #finalresult is a list of dict
          print(dic)
      
     for key in aIDpaper:
         print(aIDpaper[key])
-      
+    '''  
 
     if not expand: return (finalresult, aIDpaper, authorNotSameName) #if not expand, will also return a list of authorID whose name are not exactly the same
     else: return (finalresult,aIDpaper) 
@@ -501,7 +518,7 @@ def matchForShort(name1, name2):
     return ls2 in name1
     
 if __name__ == '__main__':
-    trial = getAuthor('john slaney', yearStart=2013, yearEnd=2016)
+    trial = getAuthor('thomas lee', use_cache=True)
     #affID = []
     #x = getAffPID(affID,'university of cambridge')
     #confID = [trial[0]['id']]
