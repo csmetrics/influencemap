@@ -16,6 +16,8 @@
       </div>
     </div>
 
+<script src="https://code.jquery.com/jquery-1.12.4.js"></script>
+<script src="https://cdn.datatables.net/1.10.16/js/jquery.dataTables.min.js"></script>
 <script src="{% static 'js/papersTableConfig.js' %}"></script>
 <script>
 
@@ -56,12 +58,18 @@ function updateTable(data, table, resKeys, clear){
 };
 
 var selectedInfo = {{ entityTuples | safe}};
+var papersDict = {{ papersDict | safe }};
 var entityType = '{{ entityType }}';
 var responseKeys = papersTableConfig[entityType]['responseKeys'];
 
-console.log(selectedInfo);
 
+console.log(selectedInfo);
+console.log(papersDict);
 updateTable(selectedInfo, papersTable, responseKeys, true); 
+
+
+for (var i in papersDict)
+
 
 
 // Submit Button event handler
@@ -87,6 +95,51 @@ submitButton.addEventListener('click', function(){
   }
   window.location.href = "/submit/?" + $.param(data);
 });
+
+
+
+
+
+function format (d) {
+    // `d` is the original data object for the row
+
+    var eid = d[5];
+    var papers = papersDict[eid];
+    console.log(papers)
+    var out = '<table cellpadding="5" cellspacing="0" border="0" style="padding-left:50px;">';
+
+    for (var i  in papers) {
+        var paper = papers[i].split('_');
+        var pid = paper[0];
+        var title = paper[1];
+        var yr = paper[2];
+        out += '<tr>'+ '<td>' + title + '</td><td>'+ yr +'</td></tr>';
+    } 
+
+    out += '</table>';
+
+    return out;    
+}
+
+
+// Add event listener for opening and closing details
+$('#papers-table tbody').on('click', 'td.details-control', function () {
+    var tr = $(this).closest('tr');
+    var row = papersTable.row( tr );
+    console.log(row.data());
+    if ( row.child.isShown() ) {
+        // This row is already open - close it
+        row.child.hide();
+        tr.removeClass('shown');
+    }
+    else {
+        // Open this row
+        row.child( format(row.data()) ).show();
+        tr.addClass('shown');
+    }
+} );
+
+
 
 
 </script>

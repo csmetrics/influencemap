@@ -13,7 +13,6 @@ sys.path.insert(0, PYTHON_DIR)
 
 from flower_bloomer import getFlower
 from mkAff import getAuthor, getJournal, getConf, getAff, getConfPID, getJourPID, getConfPID, getAffPID
-
 # initialise as no saved pids
 saved_pids = dict() 
 
@@ -161,24 +160,28 @@ def view_papers(request):
 
     if entityType == 'author':
         if expanded:
-            entity_tuples, paper_dicts = getAuthor(name=name, expand=True)
+            entity_tuples, paper_dict = getAuthor(name=name, expand=True)
         else:
-            entity_tuples, paper_dicts, _ = getAuthor(name=name, expand=False)
+            entity_tuples, paper_dict, _ = getAuthor(name=name, expand=False)
     else:
         entities = dataFunctionDict['get_ids'][entityType](name=name)
-        paper_dicts = dataFunctionDict['get_pids'][entityType](selectedIds, selectedNames)
+        paper_dict = dataFunctionDict['get_pids'][entityType](selectedIds, selectedNames)
 
     entity_tuples = [x for x in entity_tuples if x['authorID'] in selectedIds]   
 
     for entity in entity_tuples:
         entity['field'] = ['_'.join([str(y) for y in x]) for x in entity['field']]
 
+    simplified_paper_dict = dict()
+    for k, v in paper_dict.items(): # a dict of type entity(aID, entity_type('auth_id')):[(paperID, paperTitle)] according to mkAff.py
+        eid = k.entity_id
+        simplified_paper_dict[eid] = ['_'.join(x) for x in v]
+
     data = {
         'entityTuples': entity_tuples,
+        'papersDict': simplified_paper_dict,
         'entityType': entityType, 
         'selectedInfo': selectedIds
     }
-    print('\n\nprinting entities')
-    for entity in entity_tuples:
-        print(entity)
+
     return render(request, 'view_papers.html', data)
