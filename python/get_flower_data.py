@@ -88,7 +88,7 @@ def generate_scores(conn, e_map, data_df, inc_self=False, unique=False):
     return res
 
 # Generates pandas dataframe for scores
-def generate_score_df(influence_dict, ratio_func=np.vectorize(lambda x, y : x / y), sort_func=np.maximum):
+def generate_score_df(influence_dict, coauthors=set([]), ratio_func=np.vectorize(lambda x, y : x / y), sort_func=np.maximum):
     df_dict = list()
 
     # Turn influence dictionaries into an outer merged table
@@ -113,4 +113,23 @@ def generate_score_df(influence_dict, ratio_func=np.vectorize(lambda x, y : x / 
     score_df = score_df.assign(tmp = sort_func(score_df['influencing'], score_df['influenced']))
     score_df = score_df.sort_values('tmp', ascending=False).drop('tmp', axis=1)
 
+    # Flag coauthors
+    score_df['coauthor'] = score_df.apply(lambda row : row['entity_id'] in coauthors, axis=1)
+
     return score_df
+
+def generate_coauthors(e_map, data_df):
+    coauthors = list()
+
+    # Split into cases of citing and cited
+    for citing, info_df in pd.concat(data_df.values()).groupby('citing'):
+        if citing:
+            s = '_cited'
+        else:
+            s = '_citing'
+
+        # Find coauthoring for each type of leaf
+        for key in e_map.keyn:
+            coauthors += info_df[key + s].tolist()
+
+    return set(coauthors)

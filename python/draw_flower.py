@@ -66,9 +66,19 @@ def draw_flower(egoG=None, ax=None,
                                 color=in_edge_color, linewidth=out_lw,
                                 connectionstyle="arc3,rad=0.22",),)
 
+        # Plot style for coauthors
+        if egoG.nodes[node]['coauthor']:
+            weight='medium'
+            node_mec = 'g'
+            node_mew = 2.0
+        else:
+            weight = 'normal'
+            node_mec = '0.5'
+            node_mew = 1
+
         # draw the node
         ax.plot(xp, yp, 'o', markersize=int(size), c=dot_colors[int(colour)],
-                alpha=.9, mec='0.5', mew=.5) 
+                alpha=.9, mec=node_mec, mew=node_mew) 
 
         # Angle of text dependent on side of flower
         if i < n_outer_nodes / 2:
@@ -99,6 +109,7 @@ def draw_flower(egoG=None, ax=None,
 
         # Draw text
         ax.text(xt, yt, text, size=15,
+            weight=weight,
             horizontalalignment='center',
             verticalalignment='center',
             rotation_mode='anchor',
