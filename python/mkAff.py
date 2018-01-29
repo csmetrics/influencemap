@@ -9,7 +9,8 @@ import entity_type as et
 from difflib import SequenceMatcher
 
 db_PAA = '/localdata/u5798145/influencemap/paper.db'
-db_Authors = '/localdata/common/authors_test.db'
+#db_Authors = '/localdata/common/authors_test.db'
+db_Authors = '/localdata/u6363358/data/authors.db'
 db_key = '/localdata/u6363358/data/paperKeywords.db'
 db_FName = '/localdata/u6363358/data/FieldOfStudy.db'
 db_Jour = '/localdata/u6363358/data/Journals.db'
@@ -20,6 +21,8 @@ db_myPAA = '/localdata/u6363358/data/paperAuthorAffiliations.db'
 saved_dir = '/localdata/common/savedFileAuthor.json'
 
 temp_nameList = {}
+
+checked_name = {}
 
 def removeCon(lst):
    if lst[-2] == ",":
@@ -40,10 +43,27 @@ def isSame(name1, name2):
         return ls2[0][0] == ls1[0][0] and ls2[-1] == ls1[-1]
     else:
         return ls2[0] == ls1[0] and ls2[-1] == ls1[-1]
-
+    '''
+    #global checked_name
+    #if name1 in checked_name:
+    #    return checked_name[name1]
+    #else:
+        ls1 = name1.split(' ')
+        ls2 = name2.split(' ')
+        if ls1[-1] == ls2[-1]:
+            if len(ls2[0]) == 1 or len(ls1[0]) == 1: 
+                exist = ls2[0][0] == ls1[0][0]
+                checked_name[name1] = exist
+                return exist
+        else:
+           exist = ls2[0] == ls1[0]
+           checked_name[name1] = exist
+           return exist
+    '''
 
 def mostCommon(lst):
     return max(set(lst),key=lst.count)
+
 
 def getField(pID):
     dbK = sqlite3.connect(db_key, check_same_thread = False)
@@ -151,6 +171,7 @@ def getAuthor(name,cbfunc=lambda _ : None, nonExpandAID=[], expand=False,use_cac
 
     dbPAA = sqlite3.connect(db_myPAA, check_same_thread = False)
     dbA = sqlite3.connect(db_Authors, check_same_thread = False)
+    #dbA.create_function("isSame",2,isSame)
     #dbA.create_function("compareMiddle",2,compareMiddle)
     curP = dbPAA.cursor()
     curA = dbA.cursor()
@@ -167,9 +188,13 @@ def getAuthor(name,cbfunc=lambda _ : None, nonExpandAID=[], expand=False,use_cac
     print("{} getting all the aID".format(datetime.now()))
     cbfunc("getting all the aID")
     #curA.execute("SELECT * FROM authors WHERE authorName LIKE '% " + lstN + "' AND isSame(authorName,'" + name + "')")
-
+ 
+ 
     if not expand:
-        curA.execute("SELECT * FROM authors WHERE authorName LIKE '% " + lstN + "' AND (authorName LIKE '" + fstN + "%' OR authorName LIKE '" + fstLetter + " %')")
+        #curA.execute("SELECT * FROM authors WHERE authorName LIKE '% " + lstN + "' AND (authorName LIKE '" + fstN + "%' OR authorName LIKE '" + fstLetter + " %')")
+        #curA.execute("SELECT * FROM authors WHERE isSame(authorName, '" + name + "')")
+        #curA.execute("SELECT authorID, authorName FROM authors WHERE substr(authorName, " + str(-lstNameLen) + ") > '" + tem_name + lst + "' AND substr(authorName, " + str(-lstNameLen) + ") < '" + tem_name + nxt + "' AND (authorName LIKE '" + fstN + "%' OR authorName LIKE '" + fstLetter + " %')")
+        curA.execute("SELECT authorID, authorName FROM authors WHERE lastName == '" + lstN + "' AND (authorName LIKE '" + fstN + "%' OR authorName LIKE '" + fstLetter + " %')")
         allAuthor = curA.fetchall()
         for a in allAuthor: print(a)
         print("number of author is " + str(len(allAuthor))) 
@@ -255,10 +280,10 @@ def getAuthor(name,cbfunc=lambda _ : None, nonExpandAID=[], expand=False,use_cac
     dbA.commit()
     dbA.close()
     
-    '''   
+       
     for dic in finalresult: #finalresult is a list of dict
          print(dic)
-     
+    ''' 
     for key in aIDpaper:
         print(aIDpaper[key])
     '''  
@@ -519,7 +544,7 @@ def matchForShort(name1, name2):
     return ls2 in name1
     
 if __name__ == '__main__':
-    trial = getAuthor('shafi goldwasser', use_cache=True)
+    trial = getAuthor('b schmidt')
     #affID = []
     #x = getAffPID(affID,'university of cambridge')
     #confID = [trial[0]['id']]
