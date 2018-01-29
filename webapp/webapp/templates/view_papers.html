@@ -65,35 +65,43 @@ var responseKeys = papersTableConfig[entityType]['responseKeys'];
 
 console.log(selectedInfo);
 console.log(papersDict);
-updateTable(selectedInfo, papersTable, responseKeys, true); 
+updateTable(selectedInfo, papersTable, responseKeys, true);
 
 
-for (var i in papersDict)
+// for (var i in papersDict)
 
 
 
 // Submit Button event handler
 submitButton.addEventListener('click', function(){
-  var entityType = $(".entity-option:checked").val();
-  var idColumnNumber = searchTableConfig[entityType].idCol;
-  var selected_indexes = searchTable.rows({selected:true})[0];
-  var selected_rows = searchTable.rows( selected_indexes ).data().toArray();
-  var selected_ids = [];
-
-  var selected_names = [];
-
-  for (var i in selected_rows) {
-    selected_ids.push(selected_rows[i][idColumnNumber]);
-    selected_names.push(selected_rows[i][0]);
-  }
-  data = {
-      authorlist: selected_ids.join(),
-      nameslist: selected_names.join(),
-      option: $(".entity-option:checked").val(),
-      keyword: inputBar.value,
-      selfcite: selfCiteCheckbox.checked,
-  }
-  window.location.href = "/submit/?" + $.param(data);
+  var selected_papers = [];
+  $("table.author_papers tr").each(function () {
+    console.log($(this).find("td input").prop('checked'));
+    if ($(this).find("td input").prop('checked')) {
+      selected_papers.push($(this).find("td:eq(2)").text());
+    }
+  });
+  console.log(selected_papers);
+  // var entityType = $(".entity-option:checked").val();
+  // var idColumnNumber = searchTableConfig[entityType].idCol;
+  // var selected_indexes = searchTable.rows({selected:true})[0];
+  // var selected_rows = searchTable.rows( selected_indexes ).data().toArray();
+  // var selected_ids = [];
+  //
+  // var selected_names = [];
+  //
+  // for (var i in selected_rows) {
+  //   selected_ids.push(selected_rows[i][idColumnNumber]);
+  //   selected_names.push(selected_rows[i][0]);
+  // }
+  // data = {
+  //     authorlist: selected_ids.join(),
+  //     nameslist: selected_names.join(),
+  //     option: $(".entity-option:checked").val(),
+  //     keyword: inputBar.value,
+  //     selfcite: selfCiteCheckbox.checked,
+  // }
+  // window.location.href = "/submit/?" + $.param(data);
 });
 
 
@@ -106,20 +114,23 @@ function format (d) {
     var eid = d[5];
     var papers = papersDict[eid];
     console.log(papers)
-    var out = '<table cellpadding="5" cellspacing="0" border="0" style="padding-left:50px;">';
+    var out = '<table class="author_papers" cellpadding="5" cellspacing="0" border="0" style="padding-left:50px;">';
 
     for (var i  in papers) {
         var paper = papers[i].split('_');
         var pid = paper[0];
         var title = paper[1];
         var yr = paper[2];
-        out += '<tr>'+ '<td>' + title + '</td><td>'+ yr +'</td></tr>';
-    } 
+        out += '<tr>'
+            + '<td><input type="checkbox" checked></input></td>'
+            + '<td>' + title + '</td><td>'+ pid +'</td><td>'+ yr +'</td></tr>';
+    }
 
     out += '</table>';
 
-    return out;    
+    return out;
 }
+
 
 
 // Add event listener for opening and closing details
@@ -147,4 +158,4 @@ $('#papers-table tbody').on('click', 'td.details-control', function () {
 
   </body>
 </html>
-~          
+~
