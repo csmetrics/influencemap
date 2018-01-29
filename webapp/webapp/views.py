@@ -101,26 +101,18 @@ def search(request):
 def submit(request):
     global option, saved_pids
 
-    selected_ids = request.GET.get("authorlist").split(",")
-    option = request.GET.get("option")
-    keyword = request.GET.get('keyword')
-    selfcite = True if request.GET.get("selfcite") == "true" else False
-
-    if option in ['conference', 'journal']:
-        id_pid_dict = dataFunctionDict['get_pids'][option](selected_ids)
-    elif option in ['institution']:
-        selected_names = request.GET.get("nameslist").split(",")
-        id_pid_dict = dataFunctionDict['get_pids'][option](selected_ids, selected_names)
-    elif option in ['author']:
-        id_pid_dict = saved_pids[keyword]
-    else:
-        print("option: {}. This is not a valid selection".format(option))
-        id_pid_dict = None
+    papers_string = request.GET.get('papers')   # 'eid1:pid,pid,...,pid_entity_eid2:pid,...'
+    id_papers_strings = papers_string.split('_entity_')
 
     id_2_paper_id = dict()
 
-    for aid in selected_ids:
-        id_2_paper_id[aid] = id_pid_dict[aid]
+    for id_papers_string in id_papers_strings:
+        eid, pids = id_papers_string.split(':')
+        id_2_paper_id[eid] = pids.split(',')
+
+    option = request.GET.get("option")
+    keyword = request.GET.get('keyword')
+    selfcite = True if request.GET.get("selfcite") == "true" else False
 
     image_urls = getFlower(id_2_paper_id=id_2_paper_id, name=keyword, ent_type=option)
 
@@ -181,7 +173,8 @@ def view_papers(request):
         'entityTuples': entity_tuples,
         'papersDict': simplified_paper_dict,
         'entityType': entityType, 
-        'selectedInfo': selectedIds
+        'selectedInfo': selectedIds,
+        'keyword': name
     }
 
     return render(request, 'view_papers.html', data)

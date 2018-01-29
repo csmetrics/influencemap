@@ -13,7 +13,15 @@
         </table>
         <input id="return-btn" type="submit" value="Return to search">
         <input id="submit-btn" type="submit" name="submit">
+      <div class="search-option">
+        <div class="checkbox">
+          <label>
+            <input class="self-cite" type="checkbox" name="self-cite" id="self-cite">
+            include self citations
+          </label>
+        </div>
       </div>
+     </div>
     </div>
 
 <script src="https://code.jquery.com/jquery-1.12.4.js"></script>
@@ -24,7 +32,7 @@
 var papersTableElement = document.getElementById('papers-table');
 var submitButton = document.getElementById('submit-btn');
 var returnButton = document.getElementById('return-btn');
-
+var selfCiteCheckbox = document.getElementById('self-cite');
 var papersTable = $('#papers-table').DataTable(papersTableConfig['author']['tableSettings']);
 
 
@@ -61,7 +69,7 @@ var selectedInfo = {{ entityTuples | safe}};
 var papersDict = {{ papersDict | safe }};
 var entityType = '{{ entityType }}';
 var responseKeys = papersTableConfig[entityType]['responseKeys'];
-
+var keyword = '{{ keyword }}';
 
 console.log(selectedInfo);
 console.log(papersDict);
@@ -74,34 +82,32 @@ updateTable(selectedInfo, papersTable, responseKeys, true);
 
 // Submit Button event handler
 submitButton.addEventListener('click', function(){
-  var selected_papers = [];
+  console.log('submit button clicked');
+  var selected_papers = {};
   $("table.author_papers tr").each(function () {
-    console.log($(this).find("td input").prop('checked'));
     if ($(this).find("td input").prop('checked')) {
-      selected_papers.push($(this).find("td:eq(2)").text());
+      if($(this).find("td:eq(4)").text() in selected_papers){
+        selected_papers[$(this).find("td:eq(4)").text()].push($(this).find("td:eq(2)").text());
+      } else {
+        selected_papers[$(this).find("td:eq(4)").text()] = [($(this).find("td:eq(2)").text())];
+      }
     }
   });
-  console.log(selected_papers);
-  // var entityType = $(".entity-option:checked").val();
-  // var idColumnNumber = searchTableConfig[entityType].idCol;
-  // var selected_indexes = searchTable.rows({selected:true})[0];
-  // var selected_rows = searchTable.rows( selected_indexes ).data().toArray();
-  // var selected_ids = [];
-  //
-  // var selected_names = [];
-  //
-  // for (var i in selected_rows) {
-  //   selected_ids.push(selected_rows[i][idColumnNumber]);
-  //   selected_names.push(selected_rows[i][0]);
-  // }
-  // data = {
-  //     authorlist: selected_ids.join(),
-  //     nameslist: selected_names.join(),
-  //     option: $(".entity-option:checked").val(),
-  //     keyword: inputBar.value,
-  //     selfcite: selfCiteCheckbox.checked,
-  // }
-  // window.location.href = "/submit/?" + $.param(data);
+  
+  for (var key in selected_papers) {
+    selected_papers[key] = key + ":" + selected_papers[key].join()
+  };
+
+  var selected_papers_str = Object.values(selected_papers).join('_entity_');
+  console.log(selected_papers_str);
+  alert('');
+   data = {
+       papers: selected_papers_str,
+       option: entityType,
+       keyword: keyword,
+       selfcite: selfCiteCheckbox.checked,
+   }
+   window.location.href = "/submit/?" + $.param(data);
 });
 
 
@@ -123,14 +129,17 @@ function format (d) {
         var yr = paper[2];
         out += '<tr>'
             + '<td><input type="checkbox" checked></input></td>'
-            + '<td>' + title + '</td><td>'+ pid +'</td><td>'+ yr +'</td></tr>';
+            + '<td>' + title + '</td>' 
+            + '<td style="display: none">'+ pid +'</td>'
+            + '<td>'+ yr +'</td>'
+            + '<td style="display: none">'+ eid +'</td>'
+             + '</tr>';
     }
 
     out += '</table>';
 
     return out;
 }
-
 
 
 // Add event listener for opening and closing details

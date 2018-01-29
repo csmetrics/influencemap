@@ -11,17 +11,18 @@ sns.set()
 plt.switch_backend('agg')
 
 # local module imports
-from get_flower_data import generate_scores, generate_score_df
+from get_flower_data import generate_scores, generate_score_df, generate_coauthors
 from get_flower_df import gen_search_df
-from entity_type import Entity, Entity_map
+from entity_type import * #Entity, Entity_map, Entity_type
 from draw_flower import draw_flower
-#from flower_bloom_data import get_flower_df, flower_df_to_graph
+from flower_bloom_data import score_df_to_graph
 
 # Config setup
 from config import *
 
+e = {'author': Entity_type.AUTH, 'conference': Entity_type.CONF, 'institution': Entity_type.AFFI, 'journal': Entity_type.JOUR}
+
 def getEntityMap(ego, outer):
-    e = {'author': Entity_type.AUTH, 'conference': Entity_type.CONF, 'institution': Entity_type.AFFI, 'journal': Entity_type.JOURN}
     return Entity_map(e[ego], [e[outer]])
 
 def drawFlower(conn, ent_type, ent_type2, data_df, dir_out, name):   
@@ -62,8 +63,12 @@ def getFlower(id_2_paper_id, name, ent_type):
     # get paper ids associated with input name
     print("\n\nid_to_paper_id\n\n\n\n\n\n{}".format(id_2_paper_id))
 
+    entity_id_2_paper_id = dict()
+    for eid, papers in id_2_paper_id.items():
+        entity_id_2_paper_id[Entity(eid, e[ent_type])] = papers
+
     # filter ref papers
-    data_df = gen_search_df(conn, id_2_paper_id)
+    data_df = gen_search_df(conn, entity_id_2_paper_id)
 
     # Generate a self filter dictionary
     entity_to_author = drawFlower(conn, ent_type,  "author" , data_df, OUT_DIR, name)

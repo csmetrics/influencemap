@@ -68,7 +68,6 @@ var image3 = document.getElementById("image3");
 
 var expandButton = document.getElementById("expand-btn");
 var inputBar = document.getElementById("name-search-bar");
-var selfCiteCheckbox = document.getElementById("self-cite");
 var searchButton = document.getElementById("search-btn");
 var continueButton = document.getElementById("continue-btn");
 
@@ -124,7 +123,6 @@ function search(exp, clear){
     data: { // input to the views.py - search()
       keyword: latestSearch,
       option: $(".entity-option:checked").val(),
-      selfcite: selfCiteCheckbox.checked,
       expand: exp
     },
     success: function (result) { // return data if success
