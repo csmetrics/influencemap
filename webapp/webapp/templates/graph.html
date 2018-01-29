@@ -1,0 +1,56 @@
+{% load staticfiles %}
+<style>
+
+.link {
+  fill: none;
+  stroke: #666;
+  stroke-width: 1.5px;
+}
+
+circle {
+  stroke: #666;
+}
+
+text {
+  font: 15px sans-serif;
+  pointer-events: none;
+  text-shadow: 0 1px 0 #fff, 1px 0 0 #fff, 0 -1px 0 #fff, -1px 0 0 #fff;
+}
+
+</style>{% load staticfiles %}
+
+<html>
+  {% include 'header.html' %}
+  <body>
+    <div class="wrapper" align="center">
+      {% include 'navbar.html' with navbar=navbarOption %}
+      <div>
+        <span>To Author</span>
+        <div align="center">
+          <svg id="graph1" width=900 height=650></svg>
+        </div>
+        <span>To conference</span>
+        <div align="center">
+          <svg id="graph2" width=900 height=650></svg>
+        </div>
+        <span>To institution</span>
+        <div align="center">
+          <svg id="graph3" width=900 height=650></svg>
+        </div>
+      </div>
+    </div>
+  </bod>
+</html>
+<script src="https://d3js.org/d3.v4.min.js"></script>
+<script src="https://d3js.org/d3-selection-multi.v1.js"></script>
+<script src="https://d3js.org/d3-scale-chromatic.v1.min.js"></script>
+<script src="{% static 'js/flowerGraph.js' %}"></script>
+<script>
+
+author_data = {{ author|safe }}
+conf_data = {{ conf|safe }}
+inst_data = {{ inst|safe }}
+drawFlower("#graph1", author_data, 0);
+drawFlower("#graph2", conf_data, 1);
+drawFlower("#graph3", inst_data, 2);
+</script>
