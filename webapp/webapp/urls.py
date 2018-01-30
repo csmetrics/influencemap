@@ -20,8 +20,8 @@ from . import views, graph, utils
 urlpatterns = [
     url(r'^$', views.main),
     url(r'^search', views.search),
-    url(r'^submit/', views.submit),
-    url(r'^test/', graph.test),
+    #url(r'^submit/', views.submit),
+    url(r'^submit/', graph.submit),
     url(r'^progress', utils.progress),
     url(r'^admin/', admin.site.urls),
     url(r'^autocomplete', views.autocomplete),

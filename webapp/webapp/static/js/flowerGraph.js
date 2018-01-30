@@ -178,6 +178,7 @@ function ticked(idx) {
   link[idx].attr("d", linkArc);
   node[idx].attr("transform", transform);
   text[idx].attr("transform", transform_text);
+  text[idx].attr("text-anchor", locate_text);
 }
 
 function linkArc(d) {
@@ -199,13 +200,14 @@ function transform_text(d) {
   d.fx = center[0]+magf*d.xpos;
   d.fy = center[1]-magf*d.ypos;
 
-  if (d.xpos < -.2) d.x -= 8+8*d.name.length;
-  else if (d.xpos < .05) d.x -= 5+5*d.name.length;
-  else if (d.xpos < .2) d.x -= 2*d.name.length;
-  else d.x += d.name.length;
-
   if (d.id > 0 && -.3 < d.xpos && d.xpos < .3) d.y -= 10;
   if (d.id > 0 && -.2 < d.xpos && d.xpos < .2) d.y -= 10;
   if (d.id > 0 && -.1 < d.xpos && d.xpos < .1) d.y -= 10;
   return "translate(" + d.x + "," + d.y + ")";
+}
+
+function locate_text(d) {
+  if (d.xpos < -0.1) return "end";
+  else if (d.xpos > 0.1) return "start";
+  else return "middle";
 }

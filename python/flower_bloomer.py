@@ -51,10 +51,11 @@ def drawFlower(conn, ent_type, ent_type2, data_df, dir_out, name):
     image_path = os.path.join(plot_dir, image_filename)
 
     print("drawing graph")
-    draw_flower(egoG=flower_graph, filename = image_path)
+    ##draw_flower(egoG=flower_graph, filename = image_path)
     print("finished graph")
     print(image_filename)
-    return image_filename
+    #return image_filename
+    return flower_graph
 
 
 def getFlower(id_2_paper_id, name, ent_type):
