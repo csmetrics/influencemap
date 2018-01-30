@@ -152,7 +152,20 @@ expandButton.addEventListener('click', function(){
 
 
 
-
+function toAcronym(name){
+var words_to_rm = ['of', 'the', 'and']
+var w = name.split(' ');
+var primary_words = [];
+st = '';
+for (var j in w){if (!(w[j] in words_to_rm)){primary_words.push(w[j])}};
+  var st = "";
+  if (primary_words.length >= 3){
+    for (var word in primary_words){
+       st += primary_words[word].charAt(0).toUpperCase()
+    };
+  }
+return st;
+}
 
 
 
@@ -169,8 +182,20 @@ var ac = new autoComplete({
         var suggestions = [];
         var maxSuggest = 10;
         for (i = 0; i < choices.length && suggestions.length < maxSuggest; i++) {
-          if (~choices[i].toLowerCase().indexOf(term))
-              suggestions.push(choices[i]);
+          if (~choices[i].toLowerCase().indexOf(term) | ~toAcronym(choices[i]).toLowerCase().indexOf(term.toLowerCase()){
+              var w = choices[i].split(' ');
+
+              var primary_words = [];
+              for (var j in w){if (!(w[j] in words_to_rm)){primary_words.push(w[j])}};
+
+              var st = "";
+              if (primary_words.length >= 3 & $(".entity-option:checked").val() !== 'author'){
+                st += toAcronym(choices[i]);
+              st += ' - ';
+              };
+              st += w.join(' ');
+              suggestions.push(st);
+          }
         }
         response(suggestions);
       });
