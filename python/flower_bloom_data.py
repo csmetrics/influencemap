@@ -1,11 +1,48 @@
 import pandas as pd
 import networkx as nx
 import numpy as np
-from sklearn import preprocessing
 from datetime import datetime
 
 # Config setup
 from config import *
+
+# Function to log normalise data for a singular series
+def normalise_singular(series):
+    max_val = series.max()
+    min_val = series.min()
+
+    max_min_dif = max_val - min_val
+
+    # Cases if max equal to min
+    if max_min_dif == 0 and max_val == 0:
+        return series
+    elif max_min_dif == 0:
+        return pd.Series([1] * series.size)
+
+    # Scale from 1 to 1024
+    scaled = series.apply(lambda x : 1 + (x - min_val) / max_min_dif)
+
+    # Log down to 0 to 1
+    return scaled.apply(np.log2)
+
+def normalise_double(series1, series2):
+    max_val = max(series1.max(), series2.max())
+    min_val = min(series1.min(), series2.min())
+
+    max_min_dif = max_val - min_val
+
+    # Cases if max equal to min
+    if max_min_dif == 0 and max_val == 0:
+        return series1, series2
+    elif max_min_dif == 0:
+        return pd.Series([1] * series.size), pd.Series([1] * series.size)
+
+    # Scale from 1 to 1024
+    scaled1 = series1.apply(lambda x : 1 + (x - min_val) / max_min_dif)
+    scaled2 = series2.apply(lambda x : 1 + (x - min_val) / max_min_dif)
+
+    # Log down to 0 to 1
+    return scaled1.apply(np.log2), scaled2.apply(np.log2)
 
 # Turns the dataframe for flower into networkx graph
 # Additionally normalises influence values
@@ -20,26 +57,28 @@ def score_df_to_graph(score_df):
     # Get top data for graph
     score_df = score_df[score_df.entity_id != ego].head(n=NUM_LEAVES)
 
-    # Create a minimum and maximum processor object
-    min_max_scaler = preprocessing.MinMaxScaler()
-
-    num_leaves = min(NUM_LEAVES, len(min_max_scaler.fit_transform(score_df['influenced'].values.reshape(-1, 1))))
-    normed_influenced = min_max_scaler.fit_transform(score_df['influenced'].values.reshape(-1, 1)).reshape(num_leaves)
-    normed_influencing = min_max_scaler.fit_transform(score_df['influencing'].values.reshape(-1, 1)).reshape(num_leaves)
-    normed_ratio = min_max_scaler.fit_transform(np.log(score_df['ratio']).values.reshape(-1, 1)).reshape(num_leaves)
-    normed_sum = min_max_scaler.fit_transform(np.log(score_df['sum']).values.reshape(-1, 1)).reshape(num_leaves)
+    # Normalise values
+    score_df['normed_sum'] = normalise_singular(score_df['sum'])
+    score_df['normed_ratio'] = normalise_singular(score_df['ratio'])
+    norm_influenced, norm_influencing = normalise_double(score_df['influenced'], score_df['influencing'])
+    score_df['normed_influenced'] = norm_influenced
+    score_df['normed_influencing'] = norm_influencing
 
     # Add ego
     egoG.add_node(ego, weight=None)
 
     # Iterate over dataframe
-    for i, (_, row) in enumerate(score_df.iterrows()):
+    #for i, (_, row) in enumerate(score_df.iterrows()):
+    for _, row in score_df.iterrows():
         # Add ratio weight
-        egoG.add_node(row['entity_id'], nratiow=normed_ratio[i], ratiow=row['ratio'], sumw=normed_sum[i], coauthor=row['coauthor'])
+        #egoG.add_node(row['entity_id'], nratiow=normed_ratio[i], ratiow=row['ratio'], sumw=normed_sum[i], coauthor=row['coauthor'])
+        egoG.add_node(row['entity_id'], nratiow=row['normed_ratio'], ratiow=row['ratio'], sumw=row['normed_sum'], coauthor=row['coauthor'])
 
         # Add influence weights
-        egoG.add_edge(row['entity_id'], ego, weight=row['influencing'], nweight=normed_influencing[i], direction='out')
-        egoG.add_edge(ego, row['entity_id'], weight=row['influenced'], nweight=normed_influenced[i], direction='in')
+        #egoG.add_edge(row['entity_id'], ego, weight=row['influencing'], nweight=normed_influencing[i], direction='out')
+        egoG.add_edge(row['entity_id'], ego, weight=row['influencing'], nweight=row['normed_influencing'], direction='out')
+        #egoG.add_edge(ego, row['entity_id'], weight=row['influenced'], nweight=normed_influenced[i], direction='in')
+        egoG.add_edge(ego, row['entity_id'], weight=row['influenced'], nweight=row['normed_influenced'], direction='in')
 
     print('{} finish graph generation\n---'.format(datetime.now()))
 
@@ -53,6 +92,7 @@ if __name__ == "__main__":
     from draw_flower import draw_flower, draw_cite_volume
     import os, sys
     import sqlite3
+    import imageio
 
     # out
     plot_dir = os.path.join(OUT_DIR, 'figures')
@@ -70,14 +110,30 @@ if __name__ == "__main__":
 
     data_df = gen_search_df(conn, id_2_paper_id)
 
-    influence_dict = generate_scores(conn, e_map, data_df, inc_self=False, unique=True)
+    influence_dict = generate_scores(conn, e_map, data_df, inc_self=False, unique=False)
 
     coauthors = generate_coauthors(e_map, data_df)
 
-    for year in range(2000, 2018):
-        score_df = generate_score_df(influence_dict, e_map, user_in, coauthors=coauthors, score_year_max=year)
-        
-        flower_graph = score_df_to_graph(score_df)
+    score_df = generate_score_df(influence_dict, e_map, user_in, coauthors=coauthors)
 
-        draw_flower(egoG=flower_graph, filename=os.path.join(plot_dir, 'test_flower_{}.png'.format(year)))
-        draw_cite_volume(egoG=flower_graph, filename=os.path.join(plot_dir, 'test_bar_{}.png'.format(year)))
+    flower_graph = score_df_to_graph(score_df)
+
+    draw_flower(egoG=flower_graph, filename=os.path.join(plot_dir, 'test_flower.png'))
+    draw_cite_volume(egoG=flower_graph, filename=os.path.join(plot_dir, 'test_bar.png'))
+
+    #images = list()
+
+    #for year in range(2010, 2018):
+    #    score_df = generate_score_df(influence_dict, e_map, user_in, coauthors=coauthors, score_year_max=year)
+    #    
+    #    flower_graph = score_df_to_graph(score_df)
+
+    #    path_name = os.path.join(plot_dir, 'lexing_flower_{}.png'.format(year))
+    #    draw_flower(egoG=flower_graph, filename=path_name)
+
+    #    for x in range(20):
+    #        images.append(imageio.imread(path_name))
+
+    #    draw_cite_volume(egoG=flower_graph, filename=os.path.join(plot_dir, 'lexing_bar_{}.png'.format(year)))
+
+    #imageio.mimsave(os.path.join(plot_dir, 'lexing_flower.gif'), images)
