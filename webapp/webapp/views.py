@@ -1,5 +1,4 @@
 import os, sys, json
-import base64
 from django.shortcuts import render
 from django.http import JsonResponse
 from django.views.decorators.csrf import csrf_exempt
@@ -174,7 +173,8 @@ def view_papers(request):
     simplified_paper_dict = dict()
     for k, v in paper_dict.items(): # a dict of type entity(aID, entity_type('auth_id')):[(paperID, paperTitle)] according to mkAff.py
         eid = k.entity_id
-        simplified_paper_dict[eid] = ['_'.join(x) for x in v]
+        sorted_papers = sorted(v, key= lambda x: x[2], reverse = True)
+        simplified_paper_dict[eid] = ['_'.join(x) for x in sorted_papers]
 
     data = {
         'entityTuples': entity_tuples,
