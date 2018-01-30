@@ -1,10 +1,10 @@
 import os, sys, json
-import base64
 from django.shortcuts import render
 from django.http import JsonResponse
 from django.views.decorators.csrf import csrf_exempt
 from datetime import datetime
 from .utils import progressCallback
+from .graph import processdata
 from urllib import parse
 
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
@@ -114,10 +114,16 @@ def submit(request):
     keyword = request.GET.get('keyword')
     selfcite = True if request.GET.get("selfcite") == "true" else False
 
-    image_urls = getFlower(id_2_paper_id=id_2_paper_id, name=keyword, ent_type=option)
+    flower_data = getFlower(id_2_paper_id=id_2_paper_id, name=keyword, ent_type=option)
+
+    data1 = processdata("author", flower_data[0])
+    data2 = processdata("conf", flower_data[1])
+    data3 = processdata("inst", flower_data[2])
 
     data = {
-        "images": image_urls,
+        "author": data1,
+        "conf": data2,
+        "inst": data3,
         "navbarOption": {
             "optionlist": optionlist,
             "selectedKeyword": keyword,
@@ -167,7 +173,8 @@ def view_papers(request):
     simplified_paper_dict = dict()
     for k, v in paper_dict.items(): # a dict of type entity(aID, entity_type('auth_id')):[(paperID, paperTitle)] according to mkAff.py
         eid = k.entity_id
-        simplified_paper_dict[eid] = ['_'.join(x) for x in v]
+        sorted_papers = sorted(v, key= lambda x: x[2], reverse = True)
+        simplified_paper_dict[eid] = ['_'.join(x) for x in sorted_papers]
 
     data = {
         'entityTuples': entity_tuples,

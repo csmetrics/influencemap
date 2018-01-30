@@ -110,8 +110,24 @@ submitButton.addEventListener('click', function(){
    window.location.href = "/submit/?" + $.param(data);
 });
 
+function capitalise_first_letter(word){
+  return word.charAt(0).toUpperCase() + word.slice(1);
+}
 
-
+function title_case(sentence){
+  var exceptions = ['a', 'an', 'the', 'and', 'but', 'or', 'for', 'nor','on','at','to','from','by'];
+    word_list = sentence.split(' ');
+    out = [capitalise_first_letter(word_list[0])];
+    for (var i = 1; i < word_list.length; i++){
+        var word = word_list[i];
+        if (exceptions.indexOf(word) < 0){ 
+          out.push(capitalise_first_letter(word))
+        } else {
+          out.push(word)
+        }
+    }
+    return out.join(" ");
+}
 
 
 function format (d) {
@@ -125,7 +141,7 @@ function format (d) {
     for (var i  in papers) {
         var paper = papers[i].split('_');
         var pid = paper[0];
-        var title = paper[1];
+        var title = title_case(paper[1]);
         var yr = paper[2];
         out += '<tr>'
             + '<td><input type="checkbox" checked></input></td>'
