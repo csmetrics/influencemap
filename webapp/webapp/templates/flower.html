@@ -13,18 +13,31 @@
           </div>
         </div>
         <span>To Author</span>
-        <div class="row">
-          <img id="image1" class="fit-wrapper" src="{% static images.0 %}"/>
+        <div align="center">
+          <svg id="graph1" width=900 height=650></svg>
         </div>
         <span>To conference</span>
-        <div class="row">
-          <img id="image2" class="fit-wrapper" src="{% static images.1 %}"/>
+        <div align="center">
+          <svg id="graph2" width=900 height=650></svg>
         </div>
         <span>To institution</span>
-        <div class= "row">
-          <img id="image3" class="fit-wrapper" src="{% static images.2 %}"/>
+        <div align="center">
+          <svg id="graph3" width=900 height=650></svg>
         </div>
       </div>
     </div>
   </body>
 </html>
+<script src="https://d3js.org/d3.v4.min.js"></script>
+<script src="https://d3js.org/d3-selection-multi.v1.js"></script>
+<script src="https://d3js.org/d3-scale-chromatic.v1.min.js"></script>
+<script src="{% static 'js/flowerGraph.js' %}"></script>
+<script>
+
+author_data = {{ author|safe }}
+conf_data = {{ conf|safe }}
+inst_data = {{ inst|safe }}
+drawFlower("#graph1", author_data, 0);
+drawFlower("#graph2", conf_data, 1);
+drawFlower("#graph3", inst_data, 2);
+</script>

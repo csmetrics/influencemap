@@ -1,9 +1,6 @@
 import os, sys, json
-from django.shortcuts import render
-from operator import itemgetter
-from random import random
 import numpy as np
-from flower_bloomer import getFlower
+from operator import itemgetter
 
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 PYTHON_DIR = os.path.join(os.path.dirname(BASE_DIR), 'python')
@@ -56,38 +53,3 @@ def processdata(gtype, egoG):
     chartdata = sorted(chartdata, key=itemgetter("sum"))
     return { "nodes": list(nodedata.values()), "links": linkdata, "bars": chartdata }
 
-
-def submit(request):
-    global option, saved_pids
-
-    papers_string = request.GET.get('papers')   # 'eid1:pid,pid,...,pid_entity_eid2:pid,...'
-    id_papers_strings = papers_string.split('_entity_')
-
-    id_2_paper_id = dict()
-
-    for id_papers_string in id_papers_strings:
-        eid, pids = id_papers_string.split(':')
-        id_2_paper_id[eid] = pids.split(',')
-
-    option = request.GET.get("option")
-    keyword = request.GET.get('keyword')
-    selfcite = True if request.GET.get("selfcite") == "true" else False
-
-    flower_data = getFlower(id_2_paper_id=id_2_paper_id, name=keyword, ent_type=option)
-
-    data1 = processdata("author", flower_data[0])
-    data2 = processdata("conf", flower_data[1])
-    data3 = processdata("inst", flower_data[2])
-
-    data = {
-        "author": data1,
-        "conf": data2,
-        "inst": data3,
-        # "navbarOption": {
-        #    "optionlist": optionlist,
-        #    "selectedKeyword": keyword,
-        #    "selectedOption": [o for o in optionlist if o["id"] == option][0],
-        # }
-    }
-
-    return render(request, "graph.html", data)
