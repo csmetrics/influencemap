@@ -74,7 +74,7 @@ def draw_flower(egoG=None, ax=None,
         if egoG.nodes[node]['coauthor']:
             weight='medium'
             node_mec = 'g'
-            node_mew = 5.0
+            node_mew = 3.0
         else:
             weight = 'normal'
             node_mec = '0.5'
