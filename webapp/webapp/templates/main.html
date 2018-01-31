@@ -201,9 +201,17 @@ var ac = new autoComplete({
         var choices = data;
         var suggestions = [];
         var maxSuggest = 10;
+        var termTokens = term.split(" ");
+
 
         for (i = 0; i < choices.length && suggestions.length < maxSuggest; i++) {
-          if (~choices[i].toLowerCase().indexOf(term) | ~toAcronym(choices[i]).toLowerCase().indexOf(term.toLowerCase())){
+          var termInName = true;  // ~choices[i].toLowerCase().indexOf(term)
+          for (var termIndex in termTokens){
+             if (!(~choices[i].toLowerCase().indexOf(termTokens[termIndex]))){termInName = false}
+          }
+          var acronymInNameAcroynm = ~toAcronym(choices[i]).toLowerCase().indexOf(term.toLowerCase());
+
+          if (termInName | acronymInNameAcroynm){
               var w = choices[i].split(' ');
 
               var acronym = toAcronym(choices[i]);
