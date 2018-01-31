@@ -43,23 +43,7 @@ def isSame(name1, name2):
         return ls2[0][0] == ls1[0][0] and ls2[-1] == ls1[-1]
     else:
         return ls2[0] == ls1[0] and ls2[-1] == ls1[-1]
-    '''
-    #global checked_name
-    #if name1 in checked_name:
-    #    return checked_name[name1]
-    #else:
-        ls1 = name1.split(' ')
-        ls2 = name2.split(' ')
-        if ls1[-1] == ls2[-1]:
-            if len(ls2[0]) == 1 or len(ls1[0]) == 1: 
-                exist = ls2[0][0] == ls1[0][0]
-                checked_name[name1] = exist
-                return exist
-        else:
-           exist = ls2[0] == ls1[0]
-           checked_name[name1] = exist
-           return exist
-    '''
+    
 
 def mostCommon(lst):
     return max(set(lst),key=lst.count)
@@ -129,7 +113,7 @@ def getPaperName(pID):
     recent = max(res, key=lambda x: x[-1])
     return (res,recent)
 
-def getAuthor(name,cbfunc=lambda _ : None, nonExpandAID=[], expand=False,use_cache=False, yearStart=0, yearEnd=2016):
+def getAuthor(name,cbfunc=lambda _ : None, nonExpandAID=[], expand=False,use_cache=True, yearStart=0, yearEnd=2016):
     
     finalresult = [] #finalresult is a list of dict
     aIDpaper = {} #aIDpaper is a dict of entity:[(pID, title, year)]
@@ -270,7 +254,7 @@ def getAuthor(name,cbfunc=lambda _ : None, nonExpandAID=[], expand=False,use_cac
         recent = paperInfo[1]
         aIDpaper[et.Entity(tuples[1], et.Entity_type.AUTH)] = tem #aIDpaper is a dict of entity(aID, entity_type('auth_id')):[(paperID, paperTitle)]
         print("{} finished getting recentPaper".format(datetime.now()))
-        finalresult.append({'name':tuples[0],'authorID':tuples[1],'numpaper':tuples[2],'affiliation':tuples[3],'field':getField(tuples[4]),'recentPaper':recent[1],'publishedDate':recent[-1]})
+        finalresult.append({'name':tuples[0],'id':tuples[1],'numpaper':tuples[2],'affiliation':tuples[3],'field':getField(tuples[4]),'recentPaper':recent[1],'publishedDate':recent[-1]})
     print("{} done".format(datetime.now()))
     cbfunc("done")
     curP.close()    
@@ -283,10 +267,7 @@ def getAuthor(name,cbfunc=lambda _ : None, nonExpandAID=[], expand=False,use_cac
        
     for dic in finalresult: #finalresult is a list of dict
          print(dic)
-    ''' 
-    for key in aIDpaper:
-        print(aIDpaper[key])
-    '''  
+      
 
     if not expand: return (finalresult, aIDpaper, authorNotSameName) #if not expand, will also return a list of authorID whose name are not exactly the same
     else: return (finalresult,aIDpaper) 
@@ -335,30 +316,9 @@ def getJourPID(jIDs, yearStart=0, yearEnd=2016): #thie function takes in a list 
         if int(paper[-1]) >= yearStart and int(paper[-1]) <= yearEnd: 
             jID_papers.setdefault(et.Entity(jID,et.Entity_type.JOUR),[]).append(paper[0])
 
-    periodPaperTitle = {}
-
-    if yearEnd - yearStart == 2016:
-        print("{} getting recent paper".format(datetime.now()))
-        for paper, jID in papers:
-            if paper[-1] != '':
-                if int(paper[-1]) >= 2014:
-                    periodPaperTitle.setdefault(jID,[]).append((paper[1],paper[2]))
-        print("{} finished getting recent paper".format(datetime.now()))
-    else:
-       print("{} getting the paper in that period".format(datetime.now()))
-       for paper, jID in papers:
-           if paper[-1] != '':
-               if int(paper[-1]) >= yearStart and int(paper[-1]) <= yearEnd:
-                   periodPaperTitle.setdefault(jID,[]).append((paper[1],paper[2]))
-       print("{} finished getting paper in that period".format(datetime.now()))
-
-    for key in periodPaperTitle:
-        for p in periodPaperTitle[key]: print(p)
-
     curP.close()
     dbPAA.close()
-    return (jID_papers, periodPaperTitle) #jID_papers is a dict of jID:[pID], periodPaperTitle is a dict of jID:[(paperTitle, publishedYear)]
-
+    return jID_papers #jID_papers is a dict of jID:[(pID, paperTitle, year)]
 
 def getConf(name, a=None):
     name = name.upper()
@@ -406,29 +366,10 @@ def getConfPID(cIDs, yearStart=0, yearEnd=2016): #this function takes in a list 
             if int(pID[-1]) >= yearStart and int(pID[-1]) <= yearEnd: 
                 cID_papers.setdefault(et.Entity(cID,et.Entity_type.CONF),[]).append(pID[0])
         
-   
-    periodPaperTitle = {}
-    if yearEnd - yearStart == 2016:
-        print("{} getting recent paper".format(datetime.now()))
-        for paper, cID in papers:
-            if paper[-1] != '':
-                if int(paper[-1]) >= 2014:
-                    periodPaperTitle.setdefault(cID,[]).append((paper[1],paper[-1]))
-        print("{} finished getting recent paper".format(datetime.now()))
-    else:
-        print("{} getting paper in that period".format(datetime.now()))
-        for paper, cID in papers:
-            if paper[-1] != '':
-                if int(paper[-1]) >= yearStart and int(paper[-1]) <= yearEnd:
-                    periodPaperTitle.setdefault(cID,[]).append((paper[1],paper[-1]))
-        print("{} finshed getting paper in that period".format(datetime.now()))
-
-    for key in periodPaperTitle:
-        for p in periodPaperTitle[key]: print(p)
 
     curP.close()
     dbP.close()
-    return (cID_papers, periodPaperTitle) #cID_papers is a dict of cID:[pID], recentPaperTitle is a dict of cID:[(paperTitle, publishedYear)]
+    return cID_papers #cID_papers is a dict of cID:[(pID, paperTitle, year)]
      
 
 def getAff(aff, a=None):
@@ -493,11 +434,7 @@ def getAffPID(chosen,name): # chosen is the list of dict chosen by the user, nam
      
     for key in affID_pID: print(len(affID_pID[key]))
    
-    '''
-    affNameSet = set(map(lambda x:x[2], papers))
-    for n in affNameSet:
-        print(n)    
-    '''           
+               
     return affID_pID #affID_pID is a dict of affID:[pID]
 
 
@@ -544,11 +481,11 @@ def matchForShort(name1, name2):
     return ls2 in name1
     
 if __name__ == '__main__':
-    trial = getAuthor('b schmidt')
+    trial = getAuthor('rainer weiss', use_cache=False,expand=False)
     #affID = []
     #x = getAffPID(affID,'university of cambridge')
     #confID = [trial[0]['id']]
-    #x = getConfPID(confID, 2011, 2013)
+    #x = getConfPID(confID)
     #jourID = [x['id'] for x in trial if x['name'] == 'Cell']
     #x = getJourPID(jourID)
     #ri = [x for x in trial if x['name'] == 'australian national university']

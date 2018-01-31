@@ -68,8 +68,6 @@ def score_df_to_graph(score_df):
     score_df['normed_influenced'] = norm_influenced
     score_df['normed_influencing'] = norm_influencing
 
-    print(score_df)
-
     # Add ego
     egoG.add_node(ego, weight=None)
 
@@ -96,6 +94,7 @@ if __name__ == "__main__":
     from get_flower_data import generate_scores, generate_score_df, generate_coauthors
     from entity_type import *
     from draw_flower import draw_flower, draw_cite_volume
+    from flower_helpers import *
     import os, sys
     import sqlite3
     import imageio
@@ -122,24 +121,24 @@ if __name__ == "__main__":
 
     score_df = generate_score_df(influence_dict, e_map, user_in, coauthors=coauthors)
 
-    flower_graph = score_df_to_graph(score_df)
+    #flower_graph = score_df_to_graph(score_df)
 
-    draw_flower(egoG=flower_graph, filename=os.path.join(plot_dir, 'test_flower.png'))
-    draw_cite_volume(egoG=flower_graph, filename=os.path.join(plot_dir, 'test_bar.png'))
+    #draw_flower(egoG=flower_graph, filename=os.path.join(plot_dir, 'test_flower.png'))
+    #draw_cite_volume(egoG=flower_graph, filename=os.path.join(plot_dir, 'test_bar.png'))
 
-    #images = list()
+    images = list()
 
-    #for year in range(2010, 2018):
-    #    score_df = generate_score_df(influence_dict, e_map, user_in, coauthors=coauthors, score_year_max=year)
-    #    
-    #    flower_graph = score_df_to_graph(score_df)
+    for year in range(influence_df_min_year(influence_dict), 2018):
+        score_df = generate_score_df(influence_dict, e_map, user_in, coauthors=coauthors, score_year_max=year)
+        
+        flower_graph = score_df_to_graph(score_df)
 
-    #    path_name = os.path.join(plot_dir, 'lexing_flower_{}.png'.format(year))
-    #    draw_flower(egoG=flower_graph, filename=path_name)
+        path_name = os.path.join(plot_dir, '{}_flower_{}.png'.format(user_in, year))
+        draw_flower(egoG=flower_graph, filename=path_name)
 
-    #    for x in range(20):
-    #        images.append(imageio.imread(path_name))
+        for x in range(15):
+            images.append(imageio.imread(path_name))
 
-    #    draw_cite_volume(egoG=flower_graph, filename=os.path.join(plot_dir, 'lexing_bar_{}.png'.format(year)))
+        draw_cite_volume(egoG=flower_graph, filename=os.path.join(plot_dir, '{}_bar_{}.png'.format(user_in, year)))
 
-    #imageio.mimsave(os.path.join(plot_dir, 'lexing_flower.gif'), images)
+    imageio.mimsave(os.path.join(plot_dir, 'lexing_flower.gif'), images)
