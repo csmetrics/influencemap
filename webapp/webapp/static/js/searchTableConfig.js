@@ -34,7 +34,7 @@ var searchTableConfig = {
       "destroy": true,
     },
     responseKeys: [
-    'name', 'numpaper', 'affiliation','field','recentPaper','authorID'
+    'name', 'numpaper', 'affiliation','field','recentPaper','id'
     ], 
     idCol: 5
   },

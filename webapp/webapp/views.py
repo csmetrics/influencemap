@@ -37,7 +37,7 @@ dataFunctionDict = {
         'journal': getJournal},
     'get_pids':{
         'conference': getConfPID,
-        'jounral': getJourPID,
+        'journal': getJourPID,
         'institution': getAffPID}}
 
 # option list for radios
@@ -158,17 +158,18 @@ def view_papers(request):
 
     if entityType == 'author':
         if expanded:
-            entity_tuples, paper_dict = getAuthor(name=name, expand=True)
+            entities, paper_dict = getAuthor(name=name, expand=True)
         else:
-            entity_tuples, paper_dict, _ = getAuthor(name=name, expand=False)
+            entities, paper_dict, _ = getAuthor(name=name, expand=False)
+        entities = [x for x in entities if x['id'] in selectedIds]   
+        for entity in entities:
+            entity['field'] = ['_'.join([str(y) for y in x]) for x in entity['field']]
     else:
         entities = dataFunctionDict['get_ids'][entityType](name=name)
-        paper_dict = dataFunctionDict['get_pids'][entityType](selectedIds, selectedNames)
+        paper_dict = dataFunctionDict['get_pids'][entityType](selectedIds)
+        entities = [x for x in entities if x['id'] in selectedIds]   
 
-    entity_tuples = [x for x in entity_tuples if x['authorID'] in selectedIds]   
 
-    for entity in entity_tuples:
-        entity['field'] = ['_'.join([str(y) for y in x]) for x in entity['field']]
 
     simplified_paper_dict = dict()
     for k, v in paper_dict.items(): # a dict of type entity(aID, entity_type('auth_id')):[(paperID, paperTitle)] according to mkAff.py
@@ -177,7 +178,7 @@ def view_papers(request):
         simplified_paper_dict[eid] = ['_'.join(x) for x in sorted_papers]
 
     data = {
-        'entityTuples': entity_tuples,
+        'entityTuples': entities,
         'papersDict': simplified_paper_dict,
         'entityType': entityType, 
         'selectedInfo': selectedIds,
