@@ -150,19 +150,19 @@ def draw_cite_volume(egoG=None, ax=None, filename=None):
     # x position
     x_pos = [x + 1 for x in range(len(outer_nodes))]
 
-    v_bar_influencing = ax.bar([x - 0.2 for x in x_pos], [egoG[center_node][node]['weight'] for node in outer_nodes], width=.4) #, color=bar_colrs3[mdx])
+    v_bar_influencing = ax.bar([x + 0.2 for x in x_pos], [egoG[node][center_node]['weight'] for node in outer_nodes], width=.4) #, color=bar_colrs3[mdx])
     ax.set_ylim([0, max(egoG.graph['max_influencing'], egoG.graph['max_influenced'])])
 
     ax2 = ax.twinx()
-    v_bar_influencing = ax.bar([x + 0.2 for x in x_pos], [egoG[node][center_node]['weight'] for node in outer_nodes], width=.4) #, color=bar_colrs3[mdx])
+    v_bar_influencing = ax.bar([x - 0.2 for x in x_pos], [egoG[center_node][node]['weight'] for node in outer_nodes], width=.4) #, color=bar_colrs3[mdx])
     ax2.set_ylim([0, max(egoG.graph['max_influencing'], egoG.graph['max_influenced'])])
 
     tk2 = plt.xticks([],[])
     ax.set_xticks(x_pos)
     ax.set_xticklabels(list(map(lambda x : x[:10], outer_nodes)), rotation=90)
 
-    ax.set_ylabel('reference score')#, color=bar_colrs3[mdx])
-    ax2.set_ylabel('citation score')#, color=bar_colrs2[mdx])
+    ax.set_ylabel('influenced by {}'.format(center_node))#, color=bar_colrs3[mdx])
+    ax2.set_ylabel('influencing {}'.format(center_node))#, color=bar_colrs2[mdx])
 
     # plot info on left bot
     fig.text(0, 0, 'Pub Dates: ' + egoG.graph['date_range'], horizontalalignment='left', verticalalignment='bottom', size=10)
