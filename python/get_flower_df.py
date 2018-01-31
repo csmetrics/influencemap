@@ -89,6 +89,10 @@ def combine_df(ref_df, info_df, entity_ids):
     # Join cited information
     res = pd.merge(res, info_df.rename(index=str, columns=cited_cols), on='paper_cited', sort=True)
 
+    # If empty return empty
+    if res.empty:
+        return res
+
     # Calculate scores
     res['influence'] = res.apply(lambda x : get_weight(x), axis=1)
 
@@ -171,7 +175,7 @@ def gen_search_df(conn, paper_map):
             res_dict[entity.name_str()] = gen_combined_df(conn, entity, entity_ids, paper_ids)
 
     # Calculate threshold values
-#    res_dict[None] = gen_combined_df(conn, None, entity_ids, threshold_papers)
+    res_dict[None] = gen_combined_df(conn, None, entity_ids, threshold_papers)
 
     return res_dict
 

@@ -12,7 +12,7 @@ from matplotlib import rc
 from config import *
 
 def draw_flower(egoG=None, ax=None, 
-                   plot_setting={'max_marker':30, 'max_line': 4., 'min_line': .5, 
+                   plot_setting={'max_marker':30, 'max_line': 6., 'min_line': 2, 
                                  "sns_palette": "RdBu", "out_palette": "Reds", "in_palette": "Blues", 
                                  "num_colors": 200, "delta_text":0.02}, filename=None):
 
@@ -74,11 +74,11 @@ def draw_flower(egoG=None, ax=None,
         if egoG.nodes[node]['coauthor']:
             weight='medium'
             node_mec = 'g'
-            node_mew = 2.0
+            node_mew = 5.0
         else:
             weight = 'normal'
             node_mec = '0.5'
-            node_mew = 1
+            node_mew = 2
 
         # draw the node
         ax.plot(xp, yp, 'o', markersize=int(size), c=dot_colors[int(colour)],
