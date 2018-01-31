@@ -17,7 +17,8 @@ def normalise_singular_linear(series):
     if max_min_dif == 0 and max_val == 0:
         return series
     elif max_min_dif == 0:
-        return pd.Series([1] * series.size)
+        series = 1
+        return series
 
     # Normalise
     return series.apply(lambda x : (x - min_val) / max_min_dif)
@@ -72,16 +73,12 @@ def score_df_to_graph(score_df):
     egoG.add_node(ego, weight=None)
 
     # Iterate over dataframe
-    #for i, (_, row) in enumerate(score_df.iterrows()):
     for _, row in score_df.iterrows():
         # Add ratio weight
-        #egoG.add_node(row['entity_id'], nratiow=normed_ratio[i], ratiow=row['ratio'], sumw=normed_sum[i], coauthor=row['coauthor'])
         egoG.add_node(row['entity_id'], nratiow=row['normed_ratio'], ratiow=row['ratio'], sumw=row['normed_sum'], coauthor=row['coauthor'])
 
         # Add influence weights
-        #egoG.add_edge(row['entity_id'], ego, weight=row['influencing'], nweight=normed_influencing[i], direction='out')
         egoG.add_edge(row['entity_id'], ego, weight=row['influencing'], nweight=row['normed_influencing'], direction='out')
-        #egoG.add_edge(ego, row['entity_id'], weight=row['influenced'], nweight=normed_influenced[i], direction='in')
         egoG.add_edge(ego, row['entity_id'], weight=row['influenced'], nweight=row['normed_influenced'], direction='in')
 
     print('{} finish graph generation\n---'.format(datetime.now()))
@@ -141,4 +138,4 @@ if __name__ == "__main__":
 
         draw_cite_volume(egoG=flower_graph, filename=os.path.join(plot_dir, '{}_bar_{}.png'.format(user_in, year)))
 
-    imageio.mimsave(os.path.join(plot_dir, 'lexing_flower.gif'), images)
+    imageio.mimsave(os.path.join(plot_dir, '{}_flower.gif'.format(user_in)), images)

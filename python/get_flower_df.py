@@ -169,6 +169,8 @@ def gen_search_df(conn, paper_map):
     # Go through each of the entity types the user selects
     for entity, paper_tuple in paper_map.items():
         paper_ids = list(map(lambda x : x[0], paper_tuple))
+
+        # Bin entity papers with papers less than threshold number
         if len(paper_ids) < PAPER_THRESHOLD:
             threshold_papers += paper_ids
         else:
