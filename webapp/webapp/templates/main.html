@@ -20,7 +20,11 @@
 <script>
 // keep track of whether search was expanded
 var expanded = false;
-var latestSearch = "";
+var latestSearchTerm = "";
+var latestSearchOption = $(".entity-option:checked").val();
+
+
+
 // ----  data table  ----
 var tableContainer = document.getElementById("table-container");
 
@@ -44,6 +48,7 @@ function updateTable(data, table, resKeys, clear){
        key = resKeys[j];
        newRow[j] = data[i][key];
     };
+    if (latestSearchOption == 'author'){
     // fields
     fields = "";
     for (var f in newRow[3]) {
@@ -52,7 +57,7 @@ function updateTable(data, table, resKeys, clear){
     newRow[3] = "<ul>" + fields + "</ul>";
     // Uppercase first letter
     newRow[4] = newRow[4].charAt(0).toUpperCase() + newRow[4].slice(1);
-
+    }
     table.row.add(newRow);
   };
   table.draw();
@@ -76,8 +81,8 @@ var continueButton = document.getElementById("continue-btn");
 // ----  listeners  ----
 
 continueButton.addEventListener('click', function(){
-  var entityType = $(".entity-option:checked").val();
-  var idColumnNumber = searchTableConfig[entityType].idCol;
+  latestSearchOption = $(".entity-option:checked").val();
+  var idColumnNumber = searchTableConfig[latestSearchOption].idCol;
   var selected_indexes = searchTable.rows({selected:true})[0];
   var selected_rows = searchTable.rows( selected_indexes ).data().toArray();
   var selected_ids = [];
@@ -90,10 +95,10 @@ continueButton.addEventListener('click', function(){
   data = {
     selectedIds: selected_ids.join(),
     selectedNames: selected_names.join(),
-    entityType: entityType,
+    entityType: latestSearchOption,
     load_json: false,
     expanded: expanded,
-    name: latestSearch
+    name: latestSearchTerm
   };
 
   console.log(data); 
@@ -102,15 +107,14 @@ continueButton.addEventListener('click', function(){
 
 
 
-
 function search(exp, clear){
   tableContainer.classList.add("invisible");
-  var entityType = $(".entity-option:checked").val();
-  var responseKeys = searchTableConfig[entityType]['responseKeys'];
+  latestSearchOption = $(".entity-option:checked").val();
+  var responseKeys = searchTableConfig[latestSearchOption]['responseKeys'];
   if (!exp){
-    searchTable = makeSearchTable(entityType);
+    searchTable = makeSearchTable(latestSearchOption);
     expanded = false;
-    latestSearch = inputBar.value;
+    latestSearchTerm = inputBar.value;
   } else {
     expanded = true;
   }
@@ -121,15 +125,15 @@ function search(exp, clear){
     type: "GET",
     url: "/search",
     data: { // input to the views.py - search()
-      keyword: latestSearch,
-      option: $(".entity-option:checked").val(),
+      keyword: latestSearchTerm,
+      option: latestSearchOption,
       expand: exp
     },
     success: function (result) { // return data if success
       console.log("searchButton success");
       console.log(result['entities']);
       updateTable(result["entities"], searchTable, responseKeys, clear);
-      if ($(".entity-option:checked").val() !== 'author'){expandButton.style.display='none'} else {expandButton.style.display='inline'}
+      if (latestSearchOption !== 'author'){expandButton.style.display='none'} else {expandButton.style.display='inline'}
       tableContainer.classList.remove("invisible");
     },
     error: function (result) {
@@ -150,14 +154,30 @@ expandButton.addEventListener('click', function(){
   search(true, false); // expand: true, clear: false
 });
 
+// Search when enter pressed in input bar
+inputBar.addEventListener('keypress', function (e) {
+    var key = e.which || e.keyCode;
+    if (key === 13) { // 13 is enter
+      search(false, true);
+    }
+});
+
+
+
+
+// Just a useful function to check whether one object contains another (for use on lists and strings)
+function isInArray(word, list) {
+    return list.indexOf(word.toLowerCase()) > -1;
+}
+
 
 
 function toAcronym(name){
-var words_to_rm = ['of', 'the', 'and']
+words_to_rm = ['of', 'the', 'and', 'on', 'for']
 var w = name.split(' ');
 var primary_words = [];
 st = '';
-for (var j in w){if (!(w[j] in words_to_rm)){primary_words.push(w[j])}};
+for (var j in w){if (!(isInArray(w[j], words_to_rm))){primary_words.push(w[j])}};
   var st = "";
   if (primary_words.length >= 3){
     for (var word in primary_words){
@@ -181,16 +201,16 @@ var ac = new autoComplete({
         var choices = data;
         var suggestions = [];
         var maxSuggest = 10;
+
         for (i = 0; i < choices.length && suggestions.length < maxSuggest; i++) {
-          if (~choices[i].toLowerCase().indexOf(term) | ~toAcronym(choices[i]).toLowerCase().indexOf(term.toLowerCase()){
+          if (~choices[i].toLowerCase().indexOf(term) | ~toAcronym(choices[i]).toLowerCase().indexOf(term.toLowerCase())){
               var w = choices[i].split(' ');
 
-              var primary_words = [];
-              for (var j in w){if (!(w[j] in words_to_rm)){primary_words.push(w[j])}};
+              var acronym = toAcronym(choices[i]);
 
               var st = "";
-              if (primary_words.length >= 3 & $(".entity-option:checked").val() !== 'author'){
-                st += toAcronym(choices[i]);
+              if (acronym.length >= 3 & $(".entity-option:checked").val() !== 'author'){
+                st += acronym;
               st += ' - ';
               };
               st += w.join(' ');
@@ -199,6 +219,14 @@ var ac = new autoComplete({
         }
         response(suggestions);
       });
+  },
+  onSelect: function(e, term, item){
+    if (term.indexOf(" - ") < 0) {
+      inputBar.value = term; 
+    } else {
+      inputBar.value = term.split(" - ")[1]
+    };
+    search(false,  true);
   }
 });
 </script>

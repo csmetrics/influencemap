@@ -39,16 +39,13 @@ def generate_scores(conn, e_map, data_df, inc_self=False, unique=False):
     # Concat the tables together
     df = gen_pred_score_df(pd.concat(data_df.values()))
 
-    # Check self citations
-    if not inc_self:
-        df = df.loc[-df[e_map.get_center_prefix() + '_self_cite'].fillna(False)]
-
-    id_query_map = lambda f : ' '.join(f[0][1].split())
-    id_to_name = dict([(tname, dict()) for tname in e_map.keyn])
-
     influence_list = list()
     
     for i, row in df.iterrows():
+        # Filter self-citations
+        if not inc_self and row[e_map.get_center_prefix() + '_self_cite']:
+            continue
+
         # Determine if influencing or influenced score
         if row['citing']:
             func = lambda x : x + '_citing'
@@ -91,7 +88,7 @@ def generate_scores(conn, e_map, data_df, inc_self=False, unique=False):
     return res
 
 # Generates pandas dataframe for scores
-def generate_score_df(influence_df, e_map, ego, coauthors=set([]), score_year_min=None, score_year_max=None, ratio_func=np.vectorize(lambda x, y : x / y), sort_func=np.maximum):
+def generate_score_df(influence_df, e_map, ego, coauthors=set([]), score_year_min=None, score_year_max=None, ratio_func=np.vectorize(lambda x, y : y / x), sort_func=np.maximum):
 
     print('{} start score generation\n---'.format(datetime.now()))
 
@@ -139,6 +136,9 @@ def generate_score_df(influence_df, e_map, ego, coauthors=set([]), score_year_mi
 
     # Flag coauthors
     score_df['coauthor'] = score_df.apply(lambda row : row['entity_id'] in coauthors, axis=1)
+
+    # Filter coauthors
+    #score_df = score_df.loc[~score_df['entity_id'].isin(coauthors)]
 
     # Add meta data
     score_df.mapping = ' to '.join([e_map.get_center_text(), e_map.get_leave_text()])

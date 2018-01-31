@@ -12,7 +12,7 @@ from matplotlib import rc
 from config import *
 
 def draw_flower(egoG=None, ax=None, 
-                   plot_setting={'max_marker':30, 'max_line': 4., 'min_line': .5, 
+                   plot_setting={'max_marker':30, 'max_line': 6., 'min_line': 2, 
                                  "sns_palette": "RdBu", "out_palette": "Reds", "in_palette": "Blues", 
                                  "num_colors": 200, "delta_text":0.02}, filename=None):
 
@@ -74,11 +74,11 @@ def draw_flower(egoG=None, ax=None,
         if egoG.nodes[node]['coauthor']:
             weight='medium'
             node_mec = 'g'
-            node_mew = 2.0
+            node_mew = 5.0
         else:
             weight = 'normal'
             node_mec = '0.5'
-            node_mew = 1
+            node_mew = 2
 
         # draw the node
         ax.plot(xp, yp, 'o', markersize=int(size), c=dot_colors[int(colour)],
@@ -150,19 +150,19 @@ def draw_cite_volume(egoG=None, ax=None, filename=None):
     # x position
     x_pos = [x + 1 for x in range(len(outer_nodes))]
 
-    v_bar_influencing = ax.bar([x - 0.2 for x in x_pos], [egoG[center_node][node]['weight'] for node in outer_nodes], width=.4) #, color=bar_colrs3[mdx])
+    v_bar_influencing = ax.bar([x + 0.2 for x in x_pos], [egoG[node][center_node]['weight'] for node in outer_nodes], width=.4) #, color=bar_colrs3[mdx])
     ax.set_ylim([0, max(egoG.graph['max_influencing'], egoG.graph['max_influenced'])])
 
     ax2 = ax.twinx()
-    v_bar_influencing = ax.bar([x + 0.2 for x in x_pos], [egoG[node][center_node]['weight'] for node in outer_nodes], width=.4) #, color=bar_colrs3[mdx])
+    v_bar_influencing = ax.bar([x - 0.2 for x in x_pos], [egoG[center_node][node]['weight'] for node in outer_nodes], width=.4) #, color=bar_colrs3[mdx])
     ax2.set_ylim([0, max(egoG.graph['max_influencing'], egoG.graph['max_influenced'])])
 
     tk2 = plt.xticks([],[])
     ax.set_xticks(x_pos)
     ax.set_xticklabels(list(map(lambda x : x[:10], outer_nodes)), rotation=90)
 
-    ax.set_ylabel('reference score')#, color=bar_colrs3[mdx])
-    ax2.set_ylabel('citation score')#, color=bar_colrs2[mdx])
+    ax.set_ylabel('influenced by {}'.format(center_node))#, color=bar_colrs3[mdx])
+    ax2.set_ylabel('influencing {}'.format(center_node))#, color=bar_colrs2[mdx])
 
     # plot info on left bot
     fig.text(0, 0, 'Pub Dates: ' + egoG.graph['date_range'], horizontalalignment='left', verticalalignment='bottom', size=10)
