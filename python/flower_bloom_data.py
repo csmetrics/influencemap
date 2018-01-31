@@ -6,8 +6,8 @@ from datetime import datetime
 # Config setup
 from config import *
 
-# Function to log normalise data for a singular series
-def normalise_singular(series):
+# Function to normalise data for a singular series
+def normalise_singular_linear(series):
     max_val = series.max()
     min_val = series.min()
 
@@ -19,13 +19,17 @@ def normalise_singular(series):
     elif max_min_dif == 0:
         return pd.Series([1] * series.size)
 
+    # Normalise
+    return series.apply(lambda x : (x - min_val) / max_min_dif)
+
     # Scale from 1 to 1024
     scaled = series.apply(lambda x : 1 + (x - min_val) / max_min_dif)
 
     # Log down to 0 to 1
     return scaled.apply(np.log2)
 
-def normalise_double(series1, series2):
+# Normalise two series logwise
+def normalise_double_log(series1, series2):
     max_val = max(series1.max(), series2.max())
     min_val = min(series1.min(), series2.min())
 
@@ -58,11 +62,13 @@ def score_df_to_graph(score_df):
     score_df = score_df[score_df.entity_id != ego].head(n=NUM_LEAVES)
 
     # Normalise values
-    score_df['normed_sum'] = normalise_singular(score_df['sum'])
-    score_df['normed_ratio'] = normalise_singular(score_df['ratio'])
-    norm_influenced, norm_influencing = normalise_double(score_df['influenced'], score_df['influencing'])
+    score_df['normed_sum'] = normalise_singular_linear(score_df['sum'])
+    score_df['normed_ratio'] = normalise_singular_linear(score_df['ratio'])
+    norm_influenced, norm_influencing = normalise_double_log(score_df['influenced'], score_df['influencing'])
     score_df['normed_influenced'] = norm_influenced
     score_df['normed_influencing'] = norm_influencing
+
+    print(score_df)
 
     # Add ego
     egoG.add_node(ego, weight=None)

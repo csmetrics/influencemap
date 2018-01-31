@@ -44,7 +44,6 @@ def generate_scores(conn, e_map, data_df, inc_self=False, unique=False):
     for i, row in df.iterrows():
         # Filter self-citations
         if not inc_self and row[e_map.get_center_prefix() + '_self_cite']:
-            print(1)
             continue
 
         # Determine if influencing or influenced score
@@ -89,7 +88,7 @@ def generate_scores(conn, e_map, data_df, inc_self=False, unique=False):
     return res
 
 # Generates pandas dataframe for scores
-def generate_score_df(influence_df, e_map, ego, coauthors=set([]), score_year_min=None, score_year_max=None, ratio_func=np.vectorize(lambda x, y : x / y), sort_func=np.maximum):
+def generate_score_df(influence_df, e_map, ego, coauthors=set([]), score_year_min=None, score_year_max=None, ratio_func=np.vectorize(lambda x, y : y / x), sort_func=np.maximum):
 
     print('{} start score generation\n---'.format(datetime.now()))
 
@@ -114,13 +113,9 @@ def generate_score_df(influence_df, e_map, ego, coauthors=set([]), score_year_mi
     # Aggrigatge scores up
     score_df = score_df.groupby('entity_id').agg(np.sum).reset_index()
 
-    print(score_df)
-
     # calculate minimum scores to fill nan values (for ratio)
     nan_influenced = score_df['influenced'].iloc[score_df['influenced'].nonzero()[0]].min() / 4
     nan_influencing = score_df['influencing'].iloc[score_df['influencing'].nonzero()[0]].min() / 4
-
-    print(score_df['influencing'].max())
 
     # Incase all zeroes
     nan_val = min(nan_influenced, nan_influencing, 1)
