@@ -99,10 +99,15 @@ def generate_score_df(influence_df, e_map, ego, coauthors=set([]), score_year_mi
         # Set minimum year if none set
         if score_year_min == None:
             score_year_min = influence_df['influence_year'].min()
+        else:
+            score_year_min = min(influence_df['influence_year'].max(), score_year_min)
+            
 
         # Set maximum year if none set
         if score_year_max == None:
-            score_year_max = max(influence_df['influence_year'].max(), score_year_min)
+            score_year_max = influence_df['influence_year'].max()
+        else:
+            score_year_max = max(influence_df['influence_year'].min(), score_year_max)
 
         # Filter based on year
         score_df = influence_df[(score_year_min <= influence_df['influence_year']) & (influence_df['influence_year'] <= score_year_max)]
@@ -118,7 +123,11 @@ def generate_score_df(influence_df, e_map, ego, coauthors=set([]), score_year_mi
     nan_influencing = score_df['influencing'].iloc[score_df['influencing'].nonzero()[0]].min() / 4
 
     # Incase all zeroes
-    nan_val = min(nan_influenced, nan_influencing, 1)
+    pos_vals = [x for x in [nan_influenced, nan_influencing] if str(x) != 'nan']
+    if pos_vals:
+        nan_val = min(pos_vals)
+    else:
+        nan_val = 0.001
 
     # Remove zero values to remove divide by zero case
     score_df.loc[score_df['influenced'] < nan_val, 'influenced'] = nan_val
