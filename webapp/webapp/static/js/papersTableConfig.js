@@ -11,20 +11,21 @@ var  papersTableConfig= {
       { title: "Field (number of papers)", className: "field dt-body-left" },
       { title: "Most recent paper", className: "dt-body-left" },
       { title: "ID"},
-      { // expand button
+/*      { // expand button
        title: "",
         className: 'details-control',
         orderable: false,
         data: null,
         defaultContent: ''
       }
-      ],
+*/      ],
       "columnDefs": [
       {
         "targets": 5,
         "visible": false
       },
       ],
+      "createdRow": function(row, data, index) { $(row).addClass("outer-table-row") },
       "select": {
         "style": "multi"
       },
@@ -167,7 +168,7 @@ var  papersTableConfig= {
       "searching": false
     },
     responseKeys: [
-    1,2,0
+    0,1,2
     ],
     idCol: 2
   },
