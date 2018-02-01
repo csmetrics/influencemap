@@ -36,7 +36,7 @@ def isSame(name1, name2):
     #if not name1.endswith(name2.split(' ')[-1]):
         # memory[name1] = False
          #return False
-    
+   
     ls1 = name1.split(' ')
     ls2 = name2.split(' ')
     if len(ls2[0]) == 1 or len(ls1[0]) == 1:
@@ -55,18 +55,18 @@ def getField(pID):
     curK = dbK.cursor()
     curFN = dbN.cursor()
     if len(pID) == 1:
-         print("{} Getting fieldID".format(datetime.now()))
+         #print("{} Getting fieldID".format(datetime.now()))
          curK.execute("SELECT FieldID FROM paperKeywords WHERE PaperID = '" + pID[0] + "'")
          #curK.execute(removeCon("SELECT FieldID FROM paperKeywords WHERE PaperID IN {}".format(tuple(pID))))
     else:
-         print("{} Getting fieldID".format(datetime.now()))
+         #print("{} Getting fieldID".format(datetime.now()))
          curK.execute(removeCon("SELECT FieldID FROM paperKeywords WHERE PaperID IN {}".format(tuple(pID))))
          #curK.execute("SELECT FieldID FROM paperKeywords WHERE PaperID == '" + pID[0] + "'")
     #res = list(map(lambda x: x[0],curK.fetchall()))
     res = curK.fetchall()
-    print("{} finished getting fieldID".format(datetime.now()))
+    #print("{} finished getting fieldID".format(datetime.now()))
     res = list(map(lambda x:x[0],res))
-    print("{} getting fieldName".format(datetime.now()))
+    #print("{} getting fieldName".format(datetime.now()))
     if len(res) > 0:
          if len(set(res)) > 1:
             res = sorted(dict(Counter(res)).items(),key=operator.itemgetter(1),reverse=True) #produce a dict filedID: numOfOccur sorted in desending order
@@ -110,8 +110,8 @@ def getPaperName(pID):
     res = curP.fetchall()
     curP.close()
     dbPAA.close()
-    recent = max(res, key=lambda x: x[-1])
-    return (res,recent)
+    #recent = max(res, key=lambda x: x[-1])
+    return res
 
 def getAuthor(name,cbfunc=lambda _ : None, nonExpandAID=[], expand=False,use_cache=True, yearStart=0, yearEnd=2016):
     
@@ -155,8 +155,6 @@ def getAuthor(name,cbfunc=lambda _ : None, nonExpandAID=[], expand=False,use_cac
 
     dbPAA = sqlite3.connect(db_myPAA, check_same_thread = False)
     dbA = sqlite3.connect(db_Authors, check_same_thread = False)
-    #dbA.create_function("isSame",2,isSame)
-    #dbA.create_function("compareMiddle",2,compareMiddle)
     curP = dbPAA.cursor()
     curA = dbA.cursor()
     name = name.lower()
@@ -195,11 +193,10 @@ def getAuthor(name,cbfunc=lambda _ : None, nonExpandAID=[], expand=False,use_cac
     author = {} #authorID is the key and authorName is the value
 
     for a in allAuthor:
-         author[a[0]] = a[1]
+        author[a[0]] = a[1]
 
     aID = list(author.keys())
 
-    result = []
     print("{} getting all the (authorID, paperID, affiliationName)".format(datetime.now()))
     cbfunc("getting all the (authorID, paperID, affiliationName)")
     curP.execute(removeCon("SELECT auth_id, paper_id, affNameOri FROM paa WHERE auth_id IN {}".format(tuple(aID))))
@@ -209,52 +206,56 @@ def getAuthor(name,cbfunc=lambda _ : None, nonExpandAID=[], expand=False,use_cac
 
     #Putting the authorName into the tuples
     for tuples in result:
-       finalres.append((author[tuples[0]],tuples[0],tuples[1],tuples[2]))
+        finalres.append((author[tuples[0]],tuples[0],tuples[1],tuples[2]))
 
-    #Getting the most frequently appeared affiliation
-    tempres = []
+    #Getting the most frequently appeared affiliation and paperInfo
+    
+    paperIDs = list(map(lambda x:x[2], finalres))
+    print("{} getting all the paperInfo".format(datetime.now()))
+    paperNames = getPaperName(paperIDs) #paperNames is a [(paperID,title, year, date)]  
 
-    print("{} counting the number of paper published by an author".format(datetime.now()))
-    cbfunc("counting the number of paper published by an author")
-    for tuples in finalres:
-        currentID = tuples[1]
-        if currentID not in list(map(lambda x:x[1], tempres)):
-            count = 0
-            tep = []
-            pID = []
-            for tup in finalres:
-                if tup[1] == currentID:
-                    count += 1
-                    pID.append(tup[-2]) #pID contains paperID
-                    tep.append(tup[-1]) #tep contatins affiliationNameOriginal
-            tep[:] = [x for x in tep if x != '']
-            if len(tep) > 0:
-                tempres.append((tuples[0],tuples[1],count,mostCommon(tep),pID))
-            else:
-                tempres.append((tuples[0],tuples[1],count,'',pID))
+   
+    tempres = [] #tempres is a list of (authName, authID, paperID, affName, title, year, date) 
+    for tup in finalres:
+        for t in paperNames:
+            if tup[2] == t[0]:
+                tempres.append((tup[0],tup[1],tup[2],tup[3],t[1],t[2],t[3]))
+    
+    # to modify aIDpaper
+    temp_aIDpaper = {}
+    for tup in tempres:
+        tsID = tup[1]
+        tsPID = []
+        for t in tempres:
+            if t[1] == tsID:
+                 tsPID.append(t[2])
+        temp_aIDpaper[tsID] = tsPID
 
-    tempres = sorted(tempres,key=lambda x: x[2],reverse=True)
+    #to modify finalresult
+    print("{} getting related fields".format(datetime.now()))
+    used_ids = []
+    for tup in tempres:
+        ids = tup[1]
+        if ids in used_ids:
+            continue
+        numpaper = len(temp_aIDpaper[ids])
+        field = getField(temp_aIDpaper[ids])
+        aff = []
+        paperInfo = []
+        for t in tempres:
+            if t[1] == ids:
+                 aff.append(t[3])
+                 paperInfo.append((t[2],t[3],t[4],t[5],t[6])) #paperInfo is a list of (paperID, affname, title, year, date)
+        affiliation = mostCommon(aff)
+        recent = max(paperInfo, key=lambda x:x[-1])
+        aIDpaper[et.Entity(ids, et.Entity_type.AUTH)] = paperInfo
+        finalresult.append({'name':name,'id':ids,'numpaper':numpaper,'affiliation':affiliation,'recentPaper':recent[2],'publishedDate':recent[-1]})    
+        used_ids.append(ids)        
 
-    same = []
-    same[:] = [x for x in tempres if x[0] == name]
-    tempres[:] = [x for x in tempres if x[0] != name]
-    tempres = same + tempres  
+    for dic in finalresult: print(dic)
+    #for key in aIDpaper: print(aIDpaper[key])
 
-    print("{} finish counting, getting the fieldName and recent paper".format(datetime.now()))
-    cbfunc("finish counting, getting the fieldName and recent paper")
-    for tuples in tempres:
-        print(tuples[0])
-        paperInfo = getPaperName(tuples[-1]) #paperInfo is a tuple of ([(paperID, paperTitle, publishedYear, publishedDate)], recentPaperInfo)
-        ps = paperInfo[0]
-        tem = []
-        for p in ps:
-            if p[-2] != '':
-                if int(p[-2]) >= yearStart and int(p[-2]) <= yearEnd:
-                    tem.append((p[0], p[1], p[2])) #tem is a list of (paperID, paperTitle, publishedYear)          
-        recent = paperInfo[1]
-        aIDpaper[et.Entity(tuples[1], et.Entity_type.AUTH)] = tem #aIDpaper is a dict of entity(aID, entity_type('auth_id')):[(paperID, paperTitle)]
-        print("{} finished getting recentPaper".format(datetime.now()))
-        finalresult.append({'name':tuples[0],'id':tuples[1],'numpaper':tuples[2],'affiliation':tuples[3],'field':getField(tuples[4]),'recentPaper':recent[1],'publishedDate':recent[-1]})
+ 
     print("{} done".format(datetime.now()))
     cbfunc("done")
     curP.close()    
@@ -264,11 +265,6 @@ def getAuthor(name,cbfunc=lambda _ : None, nonExpandAID=[], expand=False,use_cac
     dbA.commit()
     dbA.close()
     
-       
-    for dic in finalresult: #finalresult is a list of dict
-         print(dic)
-      
-
     if not expand: return (finalresult, aIDpaper, authorNotSameName) #if not expand, will also return a list of authorID whose name are not exactly the same
     else: return (finalresult,aIDpaper) 
 
@@ -455,8 +451,8 @@ def match(name1, name2): # name1 must be in name2
     return True
 
 def matchList(name2):
-    instanceList = temp_nameList
-    for n in instanceList:
+    #instanceList = temp_nameList
+    for n in temp_nameList:
         if match(n,name2): return True
     return False
 
@@ -481,7 +477,7 @@ def matchForShort(name1, name2):
     return ls2 in name1
     
 if __name__ == '__main__':
-    trial = getAuthor('rainer weiss', use_cache=False,expand=False)
+    trial = getAuthor('Peter Higgs', use_cache=False,expand=False)
     #affID = []
     #x = getAffPID(affID,'university of cambridge')
     #confID = [trial[0]['id']]
@@ -491,3 +487,4 @@ if __name__ == '__main__':
     #ri = [x for x in trial if x['name'] == 'australian national university']
     #t = getAffPID(ri, 'anu research school of computer science and engineering')    
     #t = getAuthor('B Schmidt')
+    #x = getAff('standford')
