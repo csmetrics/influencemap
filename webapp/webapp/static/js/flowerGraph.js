@@ -42,6 +42,7 @@ function drawFlower(svg_id, data, idx) {
     x.domain(bars.map(function(d) { return d.name; }));
     y.domain([0, d3.max(bars, function(d) { return d.weight; })]);
 
+    // bar chart
     bar[idx] = svg[idx].append("g").selectAll("rect")
         .data(bars)
       .enter().append("rect")
@@ -54,6 +55,7 @@ function drawFlower(svg_id, data, idx) {
         .attr("transform", "translate(0," + height + ")")
         .style("fill", function(d) { if (d.type == "in") return norcolor[0]; else return norcolor[1]; });
 
+    // bar chart x axis
     svg[idx].append("g")
         .attr("transform", "translate(0," + (height+yheight-v_margin) + ")")
         .call(d3.axisBottom(x))
@@ -62,10 +64,12 @@ function drawFlower(svg_id, data, idx) {
           .attr("dx", "-.8em")
           .attr("dy", "-.5em")
           .attr("transform", "rotate(-90)");;
+    // bar chart y axis
     svg[idx].append("g")
         .attr("transform", "translate(" + h_margin + "," + (height-v_margin) + ")")
         .call(d3.axisLeft(y).ticks(5));
 
+    // flower graph edge arrow
     svg[idx].append("defs").selectAll("marker")
         .data(links)
       .enter().append("marker")
@@ -80,7 +84,7 @@ function drawFlower(svg_id, data, idx) {
       .append("path")
         .attr("d", "M0,-5L10,0L0,5")
         .style("fill", function (d) { if (d.type == "in") return norcolor[0]; else return norcolor[1]; });
-
+    // flower graph edge arrow _selected
     svg[idx].append("defs").selectAll("marker")
         .data(links)
       .enter().append("marker")
@@ -96,6 +100,7 @@ function drawFlower(svg_id, data, idx) {
         .attr("d", "M0,-5L10,0L0,5")
         .style("fill", function (d) { if (d.type == "in") return selcolor[0]; else return selcolor[1]; });
 
+    // flower graph edges
     link[idx] = svg[idx].append("g").selectAll("path")
         .data(links)
       .enter().append("path")
@@ -108,6 +113,7 @@ function drawFlower(svg_id, data, idx) {
         .on("mouseover", function() { highlight_on(idx, this); })
         .on("mouseout", function() { highlight_off(idx); });
 
+    // flower graph nodes
     node[idx] = svg[idx].append("g").selectAll("circle")
         .data(nodes)
       .enter().append("circle")
@@ -118,6 +124,7 @@ function drawFlower(svg_id, data, idx) {
         .on("mouseover", function() { highlight_on(idx, this); })
         .on("mouseout", function() { highlight_off(idx); });
 
+    // flower graph node text
     text[idx] = svg[idx].append("g").selectAll("text")
         .data(nodes)
       .enter().append("text")
@@ -127,6 +134,7 @@ function drawFlower(svg_id, data, idx) {
         .attr("y", ".31em")
         .text(function(d) { return d.name; });
 
+    // flower graph chart layout
     simulation[idx] = d3.forceSimulation(nodes)
         .force("charge", d3.forceManyBody().strength(-80))
         .force("link", d3.forceLink(links).id(function (d) {return d.id;}).distance(300).strength(1).iterations(0))
