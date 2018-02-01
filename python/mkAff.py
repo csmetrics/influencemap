@@ -155,8 +155,13 @@ def getAuthor(name,cbfunc=lambda _ : None, nonExpandAID=[], expand=False,use_cac
 
     dbPAA = sqlite3.connect(db_myPAA, check_same_thread = False)
     dbA = sqlite3.connect(db_Authors, check_same_thread = False)
+    dbK = sqlite3.connect(db_key, check_same_thread = False)
+    dbFN = sqlite3.connect(db_FName, check_same_thread = False)
     curP = dbPAA.cursor()
     curA = dbA.cursor()
+    curK = dbK.cursor()
+    curFN = dbFN.cursor()
+
     name = name.lower()
 
     #Extracting al the authorID whose name matches
@@ -208,12 +213,24 @@ def getAuthor(name,cbfunc=lambda _ : None, nonExpandAID=[], expand=False,use_cac
     for tuples in result:
         finalres.append((author[tuples[0]],tuples[0],tuples[1],tuples[2]))
 
-    #Getting the most frequently appeared affiliation and paperInfo
-    
+    #Getting paperInfo and most related fields    
     paperIDs = list(map(lambda x:x[2], finalres))
     print("{} getting all the paperInfo".format(datetime.now()))
-    paperNames = getPaperName(paperIDs) #paperNames is a [(paperID,title, year, date)]  
-
+    paperNames = getPaperName(paperIDs) #paperNames is a [(paperID,title, year, date)]
+    print("{} getting related fieldIDs".format(datetime.now()))  
+    curK.execute(removeCon("SELECT PaperID, FieldID FROM paperKeywords WHERE PaperID IN {}".format(tuple(paperIDs))))
+    pIDfID = curK.fetchall() #is a [(pID, ieldID)]
+    fIDs = list(map(lambda x:x[1], pIDfID))
+    pIDfN = [] #a list of (pID, fName)
+    if len(fIDs) > 0:
+        curFN.execute(removeCon("SELECT FieldName, FieldID FROM FieldOfStudy WHERE FieldID IN {}".format(tuple(fIDs))))
+        fNfID = curFN.fetchall()
+        for pf in pIDfID:
+            for nid in fNfID:
+                if pf[1] == nid[1]:
+                    pIDfN.append((pf[0],nid[0]))
+                    break
+    
    
     tempres = [] #tempres is a list of (authName, authID, paperID, affName, title, year, date) 
     for tup in finalres:
@@ -239,7 +256,30 @@ def getAuthor(name,cbfunc=lambda _ : None, nonExpandAID=[], expand=False,use_cac
         if ids in used_ids:
             continue
         numpaper = len(temp_aIDpaper[ids])
-        field = getField(temp_aIDpaper[ids])
+        paperIDs = temp_aIDpaper[ids]
+        fields = []
+        for p in paperIDs:
+            for ps in pIDfN:
+                if p == ps[0]:
+                    fields.append(ps[1])
+        tem_field = []
+        used_fname = []
+        for fname in fields:
+            if fname in used_fname:
+                continue
+            tsName = fname
+            num = 0
+            for f in fields:
+                if f == tsName: 
+                   num = num + 1
+            tem_field.append((tsName, num))
+            used_fname.append(fname)
+        tem_field = sorted(tem_field, key=lambda x:x[1], reverse=True)
+        field = []
+        if len(tem_field) >= 3:
+            field = tem_field[0:3]            
+        else:
+            field = tem_field
         aff = []
         paperInfo = []
         for t in tempres:
@@ -249,7 +289,7 @@ def getAuthor(name,cbfunc=lambda _ : None, nonExpandAID=[], expand=False,use_cac
         affiliation = mostCommon(aff)
         recent = max(paperInfo, key=lambda x:x[-1])
         aIDpaper[et.Entity(ids, et.Entity_type.AUTH)] = paperInfo
-        finalresult.append({'name':name,'id':ids,'numpaper':numpaper,'affiliation':affiliation,'recentPaper':recent[2],'publishedDate':recent[-1]})    
+        finalresult.append({'name':name,'id':ids,'numpaper':numpaper,'affiliation':affiliation,'field':field,'recentPaper':recent[2],'publishedDate':recent[-1]})    
         used_ids.append(ids)        
 
     for dic in finalresult: print(dic)
@@ -477,7 +517,7 @@ def matchForShort(name1, name2):
     return ls2 in name1
     
 if __name__ == '__main__':
-    trial = getAuthor('Peter Higgs', use_cache=False,expand=False)
+    trial = getAuthor('randy schekman', use_cache=False,expand=False)
     #affID = []
     #x = getAffPID(affID,'university of cambridge')
     #confID = [trial[0]['id']]
