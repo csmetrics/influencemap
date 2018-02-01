@@ -39,9 +39,6 @@ var papersTable = $('#papers-table').DataTable(papersTableConfig['author']['tabl
 // update searchTable
 function updateTable(data, table, resKeys, clear){
   console.log("updateTable");
-  console.log(data);
-  console.log(table);
-  console.log(resKeys);
   if (clear) {table.clear();}
   for(var i in data) {
     var newRow = {};
@@ -87,30 +84,39 @@ function title_case(sentence){
     return out.join(" ");
 }
 
-
-
 var selectedInfo = {{ entityTuples | safe}};
 var papersDict = {{ papersDict | safe }};
 var entityType = '{{ entityType }}';
-console.log(entityType);
-console.log(papersTableConfig);
-console.log(papersTableConfig[entityType]);
-console.log(papersTableConfig['institution']);
+
 var responseKeys = papersTableConfig[entityType]['responseKeys'];
 
 var keyword = '{{ keyword }}';
 
-console.log(selectedInfo);
-console.log(papersDict);
 updateTable(selectedInfo, papersTable, responseKeys, true);
 
+// split and capitalise paper lists
 for (var key in papersDict){
   papersDict[key] = papersDict[key].map(function(x){
     var temp_split = x.split("_"); 
     return [temp_split[0], title_case(temp_split[1]), temp_split[2]]
   });
 }
-// for (var i in papersDict)
+
+var nested_tables = {};
+
+// add all nested data tables
+console.log("-----");
+papersTable.rows().every(function(rowIdx, tableLoop, rowLoop){
+  var eid = this.data()[5];
+  var tableId = eid;
+  var child_text = "<table id='"+tableId+"' class='author_papers'></table>";
+  this.child(child_text).show();
+  var tableSelector = "#" + tableId;
+  nested_tables[eid] = $(tableSelector).DataTable(papersTableConfig['all']['tableSettings']);
+  var childResponseKeys = papersTableConfig['all']['responseKeys'];
+  updateTable(papersDict[eid], nested_tables[eid], childResponseKeys, true);
+  this.child.hide();
+});
 
 
 
@@ -118,61 +124,38 @@ for (var key in papersDict){
 submitButton.addEventListener('click', function(){
   console.log('submit button clicked');
   var selected_papers = {};
-  $("table.author_papers tr").each(function () {
-    console.log(this);     }); // delete these brackets
-/*    if ($(this).find("td input").prop('checked')) {
-      if($(this).find("td:eq(4)").text() in selected_papers){
-        selected_papers[$(this).find("td:eq(4)").text()].push($(this).find("td:eq(2)").text());
-      } else {
-        selected_papers[$(this).find("td:eq(4)").text()] = [($(this).find("td:eq(2)").text())];
-      }
-    }
+  papersTable.rows().every(function(rowIdx, tableLoop, rowLoop){
+    var table_dom = this.child().find('table')[0]     
+    var table_id = table_dom.id;
+    selected_papers[table_id] = [];
+    var data_table = nested_tables[table_id];
+    data_table.rows().every(function (ri, tl, rl){
+      var node = this.node();
+      var row_checked = ($(node).find('input').prop('checked'));
+      if (row_checked) { selected_papers[table_id].push(this.data()[2]) }
+    });
   });
+
+  console.log(selected_papers);
   
   for (var key in selected_papers) {
-    selected_papers[key] = key + ":" + selected_papers[key].join()
+    if (selected_papers[key].length > 0) {
+      selected_papers[key] = key + ":" + selected_papers[key].join() 
+    } else {
+      delete selected_papers[key];
+    }
   };
-
+  console.log(selected_papers);
   var selected_papers_str = Object.values(selected_papers).join('_entity_');
   console.log(selected_papers_str);
-  alert('');
    data = {
        papers: selected_papers_str,
        option: entityType,
        keyword: keyword,
        selfcite: selfCiteCheckbox.checked,
    }
-   window.location.href = "/submit/?" + $.param(data);
-*/
+  // window.location.href = "/submit/?" + $.param(data);
 });
-
-
-
-function format (tableId){  //(d) {
-    // `d` is the original data object for the row
-//    var eid = d[5];
-//    var tableId = "papers_table_"+eid;
-//    var papers = papersDict[eid];
-//    console.log(papers)
-    var out = '<table id="'+tableId+'" class="author_papers" cellpadding="5" cellspacing="0" border="0" style="padding-left:0px;">';
-/*
-    for (var i  in papers) {
-        var paper = papers[i].split('_');
-        var pid = paper[0];
-        var title = title_case(paper[1]);
-        var yr = paper[2];
-        out += '<tr>'
-            + '<td><input type="checkbox" checked></input></td>'
-            + '<td>' + title + '</td>' 
-            + '<td style="display: none">'+ pid +'</td>'
-            + '<td>'+ yr +'</td>'
-            + '<td style="display: none">'+ eid +'</td>'
-             + '</tr>';
-    }
-*/
-    out += '</table>';
-    return out;
-}
 
 
 function childrowDataTable(data) {
@@ -181,12 +164,10 @@ function childrowDataTable(data) {
   var dt = DataTable
 }
 
-
 // Add event listener for opening and closing details
 $('#papers-table tbody').on('click', 'td.details-control', function () {
     var tr = $(this).closest('tr');
     var row = papersTable.row( tr );
-    console.log(row.data());
     if ( row.child.isShown() ) {
         // This row is already open - close it
         row.child.hide();
@@ -194,17 +175,10 @@ $('#papers-table tbody').on('click', 'td.details-control', function () {
     }
     else {
         // Open this row
-        var eid = row.data()[5];
-        var tableId = "papers_table_"+eid;
-        row.child( format(tableId)).show();   //row.data()) ).show();
-        var tableSelector = "#" + tableId;
-        tab = $(tableSelector).DataTable(papersTableConfig['all']['tableSettings']);
-        var childResponseKeys = papersTableConfig['all']['responseKeys'];
-        updateTable(papersDict[eid], tab, childResponseKeys, true);
+        row.child.show();
         tr.addClass('shown');
     }
-} );
-
+})
 
 
 
