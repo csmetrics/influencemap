@@ -128,6 +128,10 @@ def submit(request):
             "optionlist": optionlist,
             "selectedKeyword": keyword,
             "selectedOption": [o for o in optionlist if o["id"] == option][0],
+        },
+        "yearSlider": {
+            "title": "Publications range",
+            "range": [2000,2014] # placeholder value, just for testing
         }
     }
     return render(request, "flower.html", data)
@@ -165,8 +169,10 @@ def view_papers(request):
         for entity in entities:
             entity['field'] = ['_'.join([str(y) for y in x]) for x in entity['field']]
     else:
-        entities = dataFunctionDict['get_ids'][entityType](name=name)
-        paper_dict = dataFunctionDict['get_pids'][entityType](selectedIds)
+        entities = dataFunctionDict['get_ids'][entityType](name)
+        print("ids: {}\tnames: {}".format(len(selectedIds), len(selectedNames)))
+        get_pid_params = (selectedIds) if entityType != 'institution' else ([{'id':selectedIds[i],'name':selectedNames[i]} for i in range(len(selectedIds))], name)
+        paper_dict = dataFunctionDict['get_pids'][entityType](*get_pid_params)
         entities = [x for x in entities if x['id'] in selectedIds]   
 
 
