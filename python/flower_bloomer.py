@@ -25,7 +25,7 @@ e = {'author': Entity_type.AUTH, 'conference': Entity_type.CONF, 'institution': 
 def getEntityMap(ego, outer):
     return Entity_map(e[ego], [e[outer]])
 
-def drawFlower(conn, ent_type, ent_type2, data_df, dir_out, name):   
+def drawFlower(conn, ent_type, ent_type2, data_df, dir_out, name, bot_year=bot_year, top_year=top_year):
     # Generate associated author scores for citing and cited
     e_map = getEntityMap(ent_type, ent_type2)
 
@@ -33,7 +33,7 @@ def drawFlower(conn, ent_type, ent_type2, data_df, dir_out, name):
 
     coauthors = generate_coauthors(e_map, data_df)
 
-    score_df = generate_score_df(influence_dict, e_map, name)
+    score_df = generate_score_df(influence_dict, e_map, name, coauthors=coauthors, score_year_min=bot_year, score_year_max=top_year)
 
     flower_graph = score_df_to_graph(score_df)
     
@@ -58,7 +58,7 @@ def drawFlower(conn, ent_type, ent_type2, data_df, dir_out, name):
     return flower_graph
 
 
-def getFlower(id_2_paper_id, name, ent_type):
+def getFlower(id_2_paper_id, name, ent_type, bot_year=None, top_year=None):
     conn = sqlite3.connect(DB_PATH)
 
     # get paper ids associated with input name
@@ -72,10 +72,10 @@ def getFlower(id_2_paper_id, name, ent_type):
     data_df = gen_search_df(conn, entity_id_2_paper_id)
 
     # Generate a self filter dictionary
-    entity_to_author = drawFlower(conn, ent_type,  "author" , data_df, OUT_DIR, name)
-    entity_to_conference = drawFlower(conn, ent_type, "conference", data_df, OUT_DIR, name)
-    entity_to_affiliation = drawFlower(conn, ent_type, "institution" , data_df, OUT_DIR, name)
-
+    entity_to_author = drawFlower(conn, ent_type, "author", data_df, OUT_DIR, name, bot_year=bot_year, top_year=top_year)
+    entity_to_conference = drawFlower(conn, ent_type, "conference", data_df, OUT_DIR, name, bot_year=bot_year, top_year=top_year)
+    entity_to_affiliation = drawFlower(conn, ent_type, "institution", data_df, OUT_DIR, name, bot_year=bot_year, top_year=top_year)
+ 
     conn.close()
     file_names = [entity_to_author, entity_to_conference, entity_to_affiliation]
     return file_names
