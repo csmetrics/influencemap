@@ -24,6 +24,7 @@ def gen_reference_df(conn, paper_ids):
     total_prog = 0
 
     paper_chunks = [paper_ids[x:x+BATCH_SIZE] for x in range(0, total_papers, BATCH_SIZE)]
+    print(paper_chunks)
     rows = list()
 
     for chunk in paper_chunks:
@@ -76,7 +77,7 @@ def test_sc(row):
     return val
 
 # joining operator to rename and combine dataframes
-def combine_df(ref_df, info_df, entity_ids):
+def combine_df(ref_df, info_df):
     # Column names for citing and cited reference information
     citing_cols = dict([(x, x + '_citing') for x in ['paper'] + INFO_COLS])
     cited_cols = dict([(x, x + '_cited') for x in ['paper'] + INFO_COLS])
@@ -89,15 +90,19 @@ def combine_df(ref_df, info_df, entity_ids):
     # Join cited information
     res = pd.merge(res, info_df.rename(index=str, columns=cited_cols), on='paper_cited', sort=True)
 
+    return res
+
+# generate score info from combined dataframe
+def score_information(df, entity_ids):
     # If empty return empty
-    if res.empty:
-        return res
+    if df.empty:
+        return df
 
     # Calculate scores
-    res['influence'] = res.apply(lambda x : get_weight(x), axis=1)
+    df['influence'] = df.apply(lambda x : get_weight(x), axis=1)
 
     # Calculate self-citations
-    sc_df = res[['citing', 'paper_map'] + SC_COLS]
+    sc_df = df[['citing', 'paper_map'] + SC_COLS]
     sc_df = sc_df.groupby('paper_map').agg(lambda x : x.tolist()).reset_index()
 
     # self-cite
@@ -107,9 +112,9 @@ def combine_df(ref_df, info_df, entity_ids):
     sc_df = sc_df.drop(columns=['citing'] + SC_COLS)
 
     # Join selfcite
-    res = pd.merge(res, sc_df, on='paper_map', sort=False)
+    df = pd.merge(df, sc_df, on='paper_map', sort=False)
     
-    return res.drop(columns=['paper_map'])
+    return df.drop(columns=['paper_map'])
 
 def gen_combined_df(conn, entity, entity_ids, paper_ids):
     # If entity_id is None (theshold papers) with no caching
@@ -127,7 +132,7 @@ def gen_combined_df(conn, entity, entity_ids, paper_ids):
 
         # Combine and deal with possible unique
         print('{} start joining dataframes\n---'.format(datetime.now()))
-        res_df = combine_df(ref_df, info_df, entity_ids)
+        res_df = combine_df(ref_df, info_df)
         print('{} finish joining dataframes\n---'.format(datetime.now()))
     else:
         # Check cache for entity
@@ -150,17 +155,18 @@ def gen_combined_df(conn, entity, entity_ids, paper_ids):
 
             # Combine and deal with possible unique
             print('{} start joining dataframes\n---'.format(datetime.now()))
-            res_df = combine_df(ref_df, info_df, [entity.entity_id])
+            res_df = combine_df(ref_df, info_df)
             print('{} finish joining dataframes\n---'.format(datetime.now()))
 
             # Cache info pickle file
             res_df.to_pickle(cache_path)
             os.chmod(cache_path, 0o777)
 
-    return res_df
+    return score_information(res_df, entity_ids)
 
 # Wraps above functions to produce a dictionary of pandas dataframes for relevent information
 def gen_search_df(conn, paper_map):
+    print(paper_map)
     entity_ids = list(map(lambda x : x.entity_id, paper_map.keys()))
 
     res_dict = dict()
@@ -177,7 +183,7 @@ def gen_search_df(conn, paper_map):
             res_dict[entity.name_str()] = gen_combined_df(conn, entity, entity_ids, paper_ids)
 
     # Calculate threshold values
-    res_dict[None] = gen_combined_df(conn, None, entity_ids, threshold_papers)
+    #res_dict[None] = gen_combined_df(conn, None, entity_ids, threshold_papers)
 
     return res_dict
 

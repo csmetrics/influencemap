@@ -98,7 +98,7 @@ updateTable(selectedInfo, papersTable, responseKeys, true);
 for (var key in papersDict){
   papersDict[key] = papersDict[key].map(function(x){
     var temp_split = x.split("_"); 
-    return [title_case(temp_split[0]), temp_split[1], temp_split[2]]
+    return [title_case(temp_split[0]), temp_split[1], temp_split[2], temp_split[3]]
   });
 }
 
@@ -166,6 +166,11 @@ function childrowDataTable(data) {
 
 // Add event listener for opening and closing details
 $('#papers-table tbody').on('click', '.outer-table-row', function () {
+//    $('.shown').each( function (i, elem) {
+//      elem.classList.removeClass('shown');
+//      var tblRow = papersTable.row( elem );
+//      tblRow.child.hide();
+//    });
     var tr = $(this).closest('tr');
     var row = papersTable.row( tr );
     if ( row.child.isShown() ) {

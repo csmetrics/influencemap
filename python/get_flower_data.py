@@ -152,10 +152,8 @@ def generate_score_df(influence_df, e_map, ego, coauthors=set([]), score_year_mi
     # Add meta data
     score_df.mapping = ' to '.join([e_map.get_center_text(), e_map.get_leave_text()])
     
-    if score_year_min == None and score_year_max == None:
-        score_df.date_range = 'All'
-    else:
-        score_df.date_range = '{} to {}'.format(score_year_min, score_year_max)
+    # Set publication year
+    score_df.date_range = '{} to {}'.format(score_year_min, score_year_max)
 
     score_df.ego = ego
 

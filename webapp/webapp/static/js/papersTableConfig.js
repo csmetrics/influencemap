@@ -140,13 +140,14 @@ var  papersTableConfig= {
       "lengthChange": false,
       "columns": [
       { title: "Papers", className: "index dt-body-left" },
+      { title: "Conference", className: "dt-body-left"},
       { title: "Publication year", className: "institution dt-body-right" },
       { title: "ID"},
       { title: "", orderable: false, className: 'paper-checkbox', 'render': function (data, type, full, meta){return '<input type="checkbox" checked>'}}
       ],
       "columnDefs": [
       {
-        "targets": [2],
+        "targets": [3],
         "visible": false
       },
       ],
@@ -168,7 +169,7 @@ var  papersTableConfig= {
       "searching": false
     },
     responseKeys: [
-    0,1,2
+    0,3,1,2
     ],
     idCol: 2
   },
