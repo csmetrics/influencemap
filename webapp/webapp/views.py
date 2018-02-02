@@ -11,7 +11,7 @@ BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 PYTHON_DIR = os.path.join(os.path.dirname(BASE_DIR), 'python')
 sys.path.insert(0, PYTHON_DIR)
 
-from flower_bloomer import getFlower
+from flower_bloomer import getFlower, getPreFlowerData
 from mkAff import getAuthor, getJournal, getConf, getAff, getConfPID, getJourPID, getConfPID, getAffPID
 # initialise as no saved pids
 saved_pids = dict() 
@@ -67,6 +67,9 @@ expanded_ids = dict()
 
 @csrf_exempt
 def search(request):
+
+    request.session['id'] = 'id_' + str(datetime.now())
+
     global saved_pids, expanded_ids
     print("search!!", request.GET)
 
@@ -91,14 +94,14 @@ def search(request):
             entities = dataFunctionDict['get_ids'][option](keyword, progressCallback)
 
     data = {"entities": entities,}
-    print('\n\n\n\n\nentities:')
-    for e in entities:
-        print(e)
+    print('\n\n\n\n\n{}\n\n\n\n\n\n'.format(request.session['id']))
     return JsonResponse(data, safe=False)
 
 
 
 def submit(request):
+    request.session['id'] = 'id_' + str(datetime.now())
+    print('\n\n\n\n\n{}\n\n\n\n\n\n'.format(request.session['id']))
     global option, saved_pids
 
     papers_string = request.GET.get('papers')   # 'eid1:pid,pid,...,pid_entity_eid2:pid,...'
@@ -113,8 +116,11 @@ def submit(request):
     option = request.GET.get("option")
     keyword = request.GET.get('keyword')
     selfcite = True if request.GET.get("selfcite") == "true" else False
+#    print('\n\n\n\n\n\n\n\n{}\n\n\n\n\n\n\n'.format(tid_2_paper_id))
 
-    flower_data = getFlower(id_2_paper_id=id_2_paper_id, name=keyword, ent_type=option)
+    request.session['pre_flower_data'] = getPreFlowerData(id_2_paper_id)
+
+    flower_data = getFlower(data_df=request.session['pre_flower_data'], name=keyword, ent_type=option)
 
     data1 = processdata("author", flower_data[0])
     data2 = processdata("conf", flower_data[1])
@@ -136,12 +142,44 @@ def submit(request):
     }
     return render(request, "flower.html", data)
 
+def resubmit(request):
+    from_year = request.GET.get('from_year')
+    to_year = request.GET.get('to_year')
+    option = request.GET.get('option')
+    name = request.GET.get('keyword')
+    pre_flower_data = []
+    flower_data = getFlower(data_df=request.session['pre_flower_data'], name=keyword, ent_type=option)
+
+    data1 = processdata("author", flower_data[0])
+    data2 = processdata("conf", flower_data[1])
+    data3 = processdata("inst", flower_data[2])
+
+    data = {
+        "author": data1,
+        "conf": data2,
+        "inst": data3,
+        "navbarOption": {
+            "optionlist": optionlist,
+            "selectedKeyword": keyword,
+            "selectedOption": [o for o in optionlist if o["id"] == option][0],
+        },
+        "yearSlider": {
+            "title": "Publications range",
+            "range": [2000,2014] # placeholder value, just for testing
+        }
+    }
+    return JsonResponse(data, safe=False)
+
+
+def printDict(d):
+    for k,v in d.items():
+        print('k: {}\tv: {}'.format(k,v))
+
 
 def main(request):
     global keyword, optionlist, option, selfcite
     keyword = ""
     option = optionlist[0] # default selection
-
     # render page with data
     return render(request, "main.html", {
         "navbarOption": {
@@ -170,7 +208,6 @@ def view_papers(request):
             entity['field'] = ['_'.join([str(y) for y in x]) for x in entity['field']]
     else:
         entities = dataFunctionDict['get_ids'][entityType](name)
-        print("ids: {}\tnames: {}".format(len(selectedIds), len(selectedNames)))
         get_pid_params = (selectedIds) if entityType != 'institution' else ([{'id':selectedIds[i],'name':selectedNames[i]} for i in range(len(selectedIds))], name)
         paper_dict = dataFunctionDict['get_pids'][entityType](*get_pid_params)
         entities = [x for x in entities if x['id'] in selectedIds]   
@@ -178,10 +215,14 @@ def view_papers(request):
 
 
     simplified_paper_dict = dict()
-    for k, v in paper_dict.items(): # a dict of type entity(aID, entity_type('auth_id')):[(paperID, paperTitle)] according to mkAff.py
+    for k, v in paper_dict.items(): # based on a dict of type entity(aID, entity_type('auth_id')):[(paperID, affiliationName, paperTitle, year, date, confName)] according to mkAff.py
         eid = k.entity_id
         sorted_papers = sorted(v, key= lambda x: x[2], reverse = True)
-        simplified_paper_dict[eid] = ['_'.join(x) for x in sorted_papers]
+        if eid in selectedIds:
+            simplified_paper_dict[eid] = ['_'.join([x[2],x[3],x[0],x[5]]) for x in sorted_papers] # to create a string of title_year_id
+
+    print("simplified_paper_dict: {}".format(simplified_paper_dict))
+    print("paper_dict: {}".format(paper_dict))
 
     data = {
         'entityTuples': entities,
@@ -191,4 +232,5 @@ def view_papers(request):
         'keyword': name
     }
 
+    print('\n\n\n\n\n{}\n\n\n\n\n\n'.format(request.session['id']))
     return render(request, 'view_papers.html', data)
