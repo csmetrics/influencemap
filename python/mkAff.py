@@ -133,7 +133,7 @@ def getAuthor(name,cbfunc=lambda _ : None, nonExpandAID=[], expand=False,use_cac
  
     if not expand:
         curA.execute("SELECT authorID, authorName FROM authors WHERE lastName == '" + lstN + "' AND (authorName LIKE '" + fstN + "%' OR authorName LIKE '" + fstLetter + " %')")
-        allAuthor = curA.fetchall()
+        allAuthor = curA.fetchall() #allAuthor is a list of (authorID, authName)
         for a in allAuthor: print(a)
         print("number of author is " + str(len(allAuthor))) 
         authorNotSameName = [x for x in allAuthor if x[1] != name]
@@ -158,7 +158,7 @@ def getAuthor(name,cbfunc=lambda _ : None, nonExpandAID=[], expand=False,use_cac
     curP.execute(removeCon("SELECT auth_id, paper_id, affNameOri FROM paa WHERE auth_id IN {}".format(tuple(aID))))
     result = curP.fetchall()
 
-    finalres = []
+    finalres = [] #finalres is a list of (authorName, authorID, pID, affName)
 
     #Putting the authorName into the tuples
     for tuples in result:
@@ -167,7 +167,7 @@ def getAuthor(name,cbfunc=lambda _ : None, nonExpandAID=[], expand=False,use_cac
     #Getting paperInfo and most related fields    
     paperIDs = list(map(lambda x:x[2], finalres))
     print("{} getting all the paperInfo".format(datetime.now()))
-    tem_paperNames = getPaperName(paperIDs) #tem_paperNames is a [(paperID,title, year, date, conferenceID)]
+    tem_paperNames = getPaperName(paperIDs) #tem_paperNames is a [(paperID, title, year, date, conferenceID)]
     print("{} getting all conference related".format(datetime.now()))
     confIDs = list(map(lambda x:x[-1], tem_paperNames))
     curC.execute(removeCon("SELECT ConfID, FullName FROM ConferenceSeries WHERE ConfID IN {}".format(tuple(confIDs))))
@@ -175,10 +175,15 @@ def getAuthor(name,cbfunc=lambda _ : None, nonExpandAID=[], expand=False,use_cac
     paperNames = [] #paperNames is a list of (paperID, title, year, date, conferenceName)
 
     for tup in tem_paperNames:
-        ids = tup[-1]
+        cid = tup[-1]
+        hascID = False
         for t in cIDN:
-            if t[0] == ids:
-                paperNames.append((tup[0],tup[1],tup[2],tup[3],t[1]))    
+            if t[0] == cid:
+                 paperNames.append((tup[0],tup[1],tup[2],tup[3],t[1]))
+                 hascID = True
+                 break
+        if not hascID:
+            paperNames.append((tup[0],tup[1],tup[2],tup[3],''))    
 
     print("{} getting related fieldIDs".format(datetime.now()))  
     curK.execute(removeCon("SELECT PaperID, FieldID FROM paperKeywords WHERE PaperID IN {}".format(tuple(paperIDs))))
@@ -253,12 +258,12 @@ def getAuthor(name,cbfunc=lambda _ : None, nonExpandAID=[], expand=False,use_cac
             affiliation = mostCommon(aff)
         else:
             affiliation = ''
-        recent = max(paperInfo, key=lambda x:x[-1])
+        recent = max(paperInfo, key=lambda x:x[-2])
         aIDpaper[et.Entity(ids, et.Entity_type.AUTH)] = paperInfo
         finalresult.append({'name':name,'id':ids,'numpaper':numpaper,'affiliation':affiliation,'field':field,'recentPaper':recent[2],'publishedDate':recent[-1]})    
         used_ids.append(ids)        
 
-    #for dic in finalresult: print(dic)
+    for dic in finalresult: print(dic)
     for key in aIDpaper:
         infos = aIDpaper[key]
         for entity in infos: print(entity)
