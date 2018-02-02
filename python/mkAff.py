@@ -260,14 +260,15 @@ def getAuthor(name,cbfunc=lambda _ : None, nonExpandAID=[], expand=False,use_cac
             affiliation = ''
         recent = max(paperInfo, key=lambda x:x[-2])
         aIDpaper[et.Entity(ids, et.Entity_type.AUTH)] = paperInfo
-        finalresult.append({'name':name,'id':ids,'numpaper':numpaper,'affiliation':affiliation,'field':field,'recentPaper':recent[2],'publishedDate':recent[-1]})    
+        finalresult.append({'name':name,'id':ids,'numpaper':numpaper,'affiliation':affiliation,'field':field,'recentPaper':recent[2],'publishedDate':recent[4]})    
         used_ids.append(ids)        
 
     for dic in finalresult: print(dic)
+    '''
     for key in aIDpaper:
         infos = aIDpaper[key]
         for entity in infos: print(entity)
-
+    ''' 
 
     print("{} done".format(datetime.now()))
     cbfunc("done")
@@ -496,7 +497,7 @@ def matchForShort(name1, name2):
     return ls2 in name1
     
 if __name__ == '__main__':
-    trial = getAuthor('stephen m blackburn', use_cache=False,expand=False)
+    trial = getAuthor('j eliot b moss', use_cache=False,expand=False)
     #affID = []
     #x = getAffPID(affID,'university of cambridge')
     #confID = [trial[0]['id']]
