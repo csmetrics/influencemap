@@ -25,7 +25,7 @@ e = {'author': Entity_type.AUTH, 'conference': Entity_type.CONF, 'institution': 
 def getEntityMap(ego, outer):
     return Entity_map(e[ego], [e[outer]])
 
-def drawFlower(conn, ent_type, ent_type2, data_df, dir_out, name, bot_year=bot_year, top_year=top_year):
+def drawFlower(conn, ent_type, ent_type2, data_df, dir_out, name, bot_year=None, top_year=None):
     # Generate associated author scores for citing and cited
     e_map = getEntityMap(ent_type, ent_type2)
 
