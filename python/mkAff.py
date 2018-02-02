@@ -231,7 +231,7 @@ def getAuthor(name,cbfunc=lambda _ : None, nonExpandAID=[], expand=False,use_cac
                     pIDfN.append((pf[0],nid[0]))
                     break
     
-   
+    
     tempres = [] #tempres is a list of (authName, authID, paperID, affName, title, year, date) 
     for tup in finalres:
         for t in paperNames:
@@ -284,20 +284,26 @@ def getAuthor(name,cbfunc=lambda _ : None, nonExpandAID=[], expand=False,use_cac
         paperInfo = []
         for t in tempres:
             if t[1] == ids:
-                 aff.append(t[3])
+                 if t[3] != '': aff.append(t[3])
                  paperInfo.append((t[2],t[3],t[4],t[5],t[6])) #paperInfo is a list of (paperID, affname, title, year, date)
-        affiliation = mostCommon(aff)
+        if len(aff) > 0:
+            affiliation = mostCommon(aff)
+        else:
+            affiliation = ''
         recent = max(paperInfo, key=lambda x:x[-1])
         aIDpaper[et.Entity(ids, et.Entity_type.AUTH)] = paperInfo
         finalresult.append({'name':name,'id':ids,'numpaper':numpaper,'affiliation':affiliation,'field':field,'recentPaper':recent[2],'publishedDate':recent[-1]})    
         used_ids.append(ids)        
 
     for dic in finalresult: print(dic)
-    #for key in aIDpaper: print(aIDpaper[key])
 
- 
+
     print("{} done".format(datetime.now()))
     cbfunc("done")
+    curK.close()
+    dbK.close()
+    curFN.close()
+    dbFN.close()
     curP.close()    
     dbPAA.commit()
     dbPAA.close()
@@ -517,7 +523,7 @@ def matchForShort(name1, name2):
     return ls2 in name1
     
 if __name__ == '__main__':
-    trial = getAuthor('randy schekman', use_cache=False,expand=False)
+    trial = getAuthor('', use_cache=False,expand=False)
     #affID = []
     #x = getAffPID(affID,'university of cambridge')
     #confID = [trial[0]['id']]
