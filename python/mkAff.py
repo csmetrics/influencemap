@@ -58,7 +58,7 @@ def getPaperName(pID):
         curP.execute("SELECT paperID, paperTitle, publishedYear, publishedDate, conferenceID FROM papers WHERE paperID == '" + pID[0] + "'")
     else:
         #print(removeCon("SELECT paperTitle, MAX(publishedDate) FROM papers WHERE paperID IN {}".format(tuple(pID))))
-        curP.execute("SELECT paperID, paperTitle, publishedYear, publishedDate, conferenceID FROM papers WHERE paperID IN " + removeCon("(" + "?," * len(pID) + ")"), pID)
+        curP.execute(removeCon("SELECT paperID, paperTitle, publishedYear, publishedDate, conferenceID FROM papers WHERE paperID IN {}".format(tuple(pID))))
     res = curP.fetchall()
     curP.close()
     dbPAA.close()
@@ -133,7 +133,7 @@ def getAuthor(name,cbfunc=lambda _ : None, nonExpandAID=[], expand=False,use_cac
  
     if not expand:
         inputValues = (lstN, fstN + "%", fstLetter + " %")
-        #curA.execute("SELECT authorID, authorName FROM authors WHERE lastName == '" + lstN + "' AND (authorName LIKE '" + fstN + "%' OR authorName LIKE '" + fstLetter + " %')")
+        #THE Only query that process user input
         curA.execute("""SELECT authorID, authorName FROM authors WHERE lastName == ? AND (authorName LIKE ? OR authorName LIKE ? )""",inputValues)
         allAuthor = curA.fetchall() #allAuthor is a list of (authorID, authName)
         for a in allAuthor: print(a)
@@ -154,11 +154,10 @@ def getAuthor(name,cbfunc=lambda _ : None, nonExpandAID=[], expand=False,use_cac
         author[a[0]] = a[1]
 
     aID = list(author.keys())
-    parameterIn = "(" + "?," * len(aID) + ")"
  
     print("{} getting all the (authorID, paperID, affiliationName)".format(datetime.now()))
     cbfunc("getting all the (authorID, paperID, affiliationName)")
-    curP.execute("SELECT auth_id, paper_id, affNameOri FROM paa WHERE auth_id IN " + removeCon(parameterIn), aID)
+    curP.execute(removeCon("SELECT auth_id, paper_id, affNameOri FROM paa WHERE auth_id IN {}".format(tuple(aID))))
     result = curP.fetchall()
 
     finalres = [] #finalres is a list of (authorName, authorID, pID, affName)
@@ -173,7 +172,7 @@ def getAuthor(name,cbfunc=lambda _ : None, nonExpandAID=[], expand=False,use_cac
     tem_paperNames = getPaperName(paperIDs) #tem_paperNames is a [(paperID, title, year, date, conferenceID)]
     print("{} getting all conference related".format(datetime.now()))
     confIDs = list(set(map(lambda x:x[-1], tem_paperNames)))
-    curC.execute("SELECT ConfID, FullName FROM ConferenceSeries WHERE ConfID IN " + removeCon("(" + "?," * len(confIDs) + ")"), confIDs)
+    curC.execute(removeCon("SELECT ConfID, FullName FROM ConferenceSeries WHERE ConfID IN {}".format(tuple(confIDs))))
     cIDN = curC.fetchall() #cIDN is a list of (ConfID, confName)
     paperNames = [] #paperNames is a list of (paperID, title, year, date, conferenceName)
 
@@ -189,12 +188,12 @@ def getAuthor(name,cbfunc=lambda _ : None, nonExpandAID=[], expand=False,use_cac
             paperNames.append((tup[0],tup[1],tup[2],tup[3],''))    
 
     print("{} getting related fieldIDs".format(datetime.now()))  
-    curK.execute("SELECT PaperID, FieldID FROM paperKeywords WHERE PaperID IN " + removeCon("(" + "?," * len(paperIDs) + ")"), paperIDs)
+    curK.execute(removeCon("SELECT PaperID, FieldID FROM paperKeywords WHERE PaperID IN {}".format(tuple(paperIDs))))
     pIDfID = curK.fetchall() #is a [(pID, fieldID)]
     fIDs = list(set(map(lambda x:x[1], pIDfID)))
     pIDfN = [] #a list of (pID, fName)
     if len(fIDs) > 0:
-        curFN.execute("SELECT FieldName, FieldID FROM FieldOfStudy WHERE FieldID IN " + removeCon("(" + "?," * len(fIDs) + ")"), fIDs)
+        curFN.execute(removeCon("SELECT FieldName, FieldID FROM FieldOfStudy WHERE FieldID IN {}".format(tuple(fIDs))))
         fNfID = curFN.fetchall()
         for pf in pIDfID:
             for nid in fNfID:
@@ -256,14 +255,14 @@ def getAuthor(name,cbfunc=lambda _ : None, nonExpandAID=[], expand=False,use_cac
         for t in tempres:
             if t[1] == ids:
                  if t[3] != '': aff.append(t[3])
-                 paperInfo.append((t[2],t[3],t[4],t[5],t[6],t[7])) #paperInfo is a list of (paperID, affname, title, year, date, confName)
+                 paperInfo.append({'paperID':t[2],'affiliatoins':t[3],'title':t[4],'year':t[5],'date':t[6],'confName':t[7]}) #paperInfo is a list of (paperID, affname, title, year, date, confName)
         if len(aff) > 0:
             affiliation = mostCommon(aff)
         else:
             affiliation = ''
-        recent = max(paperInfo, key=lambda x:x[-2])
+        recent = max(paperInfo, key=lambda x:x['date'])
         aIDpaper[et.Entity(ids, et.Entity_type.AUTH)] = paperInfo
-        finalresult.append({'name':name,'id':ids,'numpaper':numpaper,'affiliation':affiliation,'field':field,'recentPaper':recent[2],'publishedDate':recent[4]})    
+        finalresult.append({'name':name,'id':ids,'numpaper':numpaper,'affiliation':affiliation,'field':field,'recentPaper':recent['title'],'publishedDate':recent['date']})    
         used_ids.append(ids)        
 
     for dic in finalresult: print(dic)
@@ -500,7 +499,7 @@ def matchForShort(name1, name2):
     return ls2 in name1
     
 if __name__ == '__main__':
-    trial = getAuthor('antony l hosking', use_cache=False,expand=False)
+    trial = getAuthor('stephen m blackburn', use_cache=False,expand=False)
     #affID = []
     #x = getAffPID(affID,'university of cambridge')
     #confID = [trial[0]['id']]
