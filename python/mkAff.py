@@ -49,64 +49,16 @@ def mostCommon(lst):
     return max(set(lst),key=lst.count)
 
 
-def getField(pID):
-    dbK = sqlite3.connect(db_key, check_same_thread = False)
-    dbN = sqlite3.connect(db_FName, check_same_thread = False)
-    curK = dbK.cursor()
-    curFN = dbN.cursor()
-    if len(pID) == 1:
-         #print("{} Getting fieldID".format(datetime.now()))
-         curK.execute("SELECT FieldID FROM paperKeywords WHERE PaperID = '" + pID[0] + "'")
-         #curK.execute(removeCon("SELECT FieldID FROM paperKeywords WHERE PaperID IN {}".format(tuple(pID))))
-    else:
-         #print("{} Getting fieldID".format(datetime.now()))
-         curK.execute(removeCon("SELECT FieldID FROM paperKeywords WHERE PaperID IN {}".format(tuple(pID))))
-         #curK.execute("SELECT FieldID FROM paperKeywords WHERE PaperID == '" + pID[0] + "'")
-    #res = list(map(lambda x: x[0],curK.fetchall()))
-    res = curK.fetchall()
-    #print("{} finished getting fieldID".format(datetime.now()))
-    res = list(map(lambda x:x[0],res))
-    #print("{} getting fieldName".format(datetime.now()))
-    if len(res) > 0:
-         if len(set(res)) > 1:
-            res = sorted(dict(Counter(res)).items(),key=operator.itemgetter(1),reverse=True) #produce a dict filedID: numOfOccur sorted in desending order
-            topThree = {}
-            for i in res:
-                if len(topThree) < 3:
-                     topThree[i[0]] = i[1] #topthree contains {fieldID, numPaper}
-                else: break
-            curFN.execute(removeCon("SELECT FieldName, FieldID FROM FieldOfStudy WHERE FieldID IN {}".format(tuple(map(lambda x: x,topThree)))))
-            output = list(map(lambda x: (x[0],topThree[x[1]]),curFN.fetchall()))
-         else:
-            singleFID = res[0][0]
-            curFN.execute("SELECT FieldName, FieldID FROM FieldOfStudy WHERE FieldID == '" + singleFID + "'")
-            output = list(map(lambda x: (x[0],len(res)),curFN.fetchall()))
-         curK.close()
-         curFN.close()
-         dbK.commit()
-         dbN.commit()
-         dbK.close()
-         dbN.close()
-         return output
-    else:
-         curK.close()
-         curFN.close()
-         dbK.commit()
-         dbN.commit()
-         dbK.close()
-         dbN.close()
-         return []
-
 def getPaperName(pID):
     dbPAA = sqlite3.connect(db_PAA, check_same_thread = False)
     curP = dbPAA.cursor()
     #print("{} getting paperTitle and date".format(datetime.now()))
     if len(pID) == 1:
         #print("SELECT paperTitle, publishedDate FROM papers WHERE paperID == '" + pID[0] + "'")
-        curP.execute("SELECT paperID, paperTitle, publishedYear, publishedDate FROM papers WHERE paperID == '" + pID[0] + "'")
+        curP.execute("SELECT paperID, paperTitle, publishedYear, publishedDate, conferenceID FROM papers WHERE paperID == '" + pID[0] + "'")
     else:
         #print(removeCon("SELECT paperTitle, MAX(publishedDate) FROM papers WHERE paperID IN {}".format(tuple(pID))))
-        curP.execute(removeCon("SELECT paperID, paperTitle, publishedYear, publishedDate FROM papers WHERE paperID IN {}".format(tuple(pID))))
+        curP.execute(removeCon("SELECT paperID, paperTitle, publishedYear, publishedDate, conferenceID FROM papers WHERE paperID IN {}".format(tuple(pID))))
     res = curP.fetchall()
     curP.close()
     dbPAA.close()
@@ -157,10 +109,12 @@ def getAuthor(name,cbfunc=lambda _ : None, nonExpandAID=[], expand=False,use_cac
     dbA = sqlite3.connect(db_Authors, check_same_thread = False)
     dbK = sqlite3.connect(db_key, check_same_thread = False)
     dbFN = sqlite3.connect(db_FName, check_same_thread = False)
+    dbConf = sqlite3.connect(db_conf, check_same_thread = False)
     curP = dbPAA.cursor()
     curA = dbA.cursor()
     curK = dbK.cursor()
     curFN = dbFN.cursor()
+    curC = dbConf.cursor()
 
     name = name.lower()
 
@@ -178,9 +132,6 @@ def getAuthor(name,cbfunc=lambda _ : None, nonExpandAID=[], expand=False,use_cac
  
  
     if not expand:
-        #curA.execute("SELECT * FROM authors WHERE authorName LIKE '% " + lstN + "' AND (authorName LIKE '" + fstN + "%' OR authorName LIKE '" + fstLetter + " %')")
-        #curA.execute("SELECT * FROM authors WHERE isSame(authorName, '" + name + "')")
-        #curA.execute("SELECT authorID, authorName FROM authors WHERE substr(authorName, " + str(-lstNameLen) + ") > '" + tem_name + lst + "' AND substr(authorName, " + str(-lstNameLen) + ") < '" + tem_name + nxt + "' AND (authorName LIKE '" + fstN + "%' OR authorName LIKE '" + fstLetter + " %')")
         curA.execute("SELECT authorID, authorName FROM authors WHERE lastName == '" + lstN + "' AND (authorName LIKE '" + fstN + "%' OR authorName LIKE '" + fstLetter + " %')")
         allAuthor = curA.fetchall()
         for a in allAuthor: print(a)
@@ -216,7 +167,19 @@ def getAuthor(name,cbfunc=lambda _ : None, nonExpandAID=[], expand=False,use_cac
     #Getting paperInfo and most related fields    
     paperIDs = list(map(lambda x:x[2], finalres))
     print("{} getting all the paperInfo".format(datetime.now()))
-    paperNames = getPaperName(paperIDs) #paperNames is a [(paperID,title, year, date)]
+    tem_paperNames = getPaperName(paperIDs) #tem_paperNames is a [(paperID,title, year, date, conferenceID)]
+    print("{} getting all conference related".format(datetime.now()))
+    confIDs = list(map(lambda x:x[-1], tem_paperNames))
+    curC.execute(removeCon("SELECT ConfID, FullName FROM ConferenceSeries WHERE ConfID IN {}".format(tuple(confIDs))))
+    cIDN = curC.fetchall() #cIDN is a list of (ConfID, confName)
+    paperNames = [] #paperNames is a list of (paperID, title, year, date, conferenceName)
+
+    for tup in tem_paperNames:
+        ids = tup[-1]
+        for t in cIDN:
+            if t[0] == ids:
+                paperNames.append((tup[0],tup[1],tup[2],tup[3],t[1]))    
+
     print("{} getting related fieldIDs".format(datetime.now()))  
     curK.execute(removeCon("SELECT PaperID, FieldID FROM paperKeywords WHERE PaperID IN {}".format(tuple(paperIDs))))
     pIDfID = curK.fetchall() #is a [(pID, ieldID)]
@@ -231,12 +194,12 @@ def getAuthor(name,cbfunc=lambda _ : None, nonExpandAID=[], expand=False,use_cac
                     pIDfN.append((pf[0],nid[0]))
                     break
     
-   
-    tempres = [] #tempres is a list of (authName, authID, paperID, affName, title, year, date) 
+    
+    tempres = [] #tempres is a list of (authName, authID, paperID, affName, title, year, date, confName) 
     for tup in finalres:
         for t in paperNames:
             if tup[2] == t[0]:
-                tempres.append((tup[0],tup[1],tup[2],tup[3],t[1],t[2],t[3]))
+                tempres.append((tup[0],tup[1],tup[2],tup[3],t[1],t[2],t[3],t[4]))
     
     # to modify aIDpaper
     temp_aIDpaper = {}
@@ -284,20 +247,31 @@ def getAuthor(name,cbfunc=lambda _ : None, nonExpandAID=[], expand=False,use_cac
         paperInfo = []
         for t in tempres:
             if t[1] == ids:
-                 aff.append(t[3])
-                 paperInfo.append((t[2],t[3],t[4],t[5],t[6])) #paperInfo is a list of (paperID, affname, title, year, date)
-        affiliation = mostCommon(aff)
+                 if t[3] != '': aff.append(t[3])
+                 paperInfo.append((t[2],t[3],t[4],t[5],t[6],t[7])) #paperInfo is a list of (paperID, affname, title, year, date, confName)
+        if len(aff) > 0:
+            affiliation = mostCommon(aff)
+        else:
+            affiliation = ''
         recent = max(paperInfo, key=lambda x:x[-1])
         aIDpaper[et.Entity(ids, et.Entity_type.AUTH)] = paperInfo
         finalresult.append({'name':name,'id':ids,'numpaper':numpaper,'affiliation':affiliation,'field':field,'recentPaper':recent[2],'publishedDate':recent[-1]})    
         used_ids.append(ids)        
 
-    for dic in finalresult: print(dic)
-    #for key in aIDpaper: print(aIDpaper[key])
+    #for dic in finalresult: print(dic)
+    for key in aIDpaper:
+        infos = aIDpaper[key]
+        for entity in infos: print(entity)
 
- 
+
     print("{} done".format(datetime.now()))
     cbfunc("done")
+    curC.close()
+    dbConf.close()
+    curK.close()
+    dbK.close()
+    curFN.close()
+    dbFN.close()
     curP.close()    
     dbPAA.commit()
     dbPAA.close()
@@ -517,7 +491,7 @@ def matchForShort(name1, name2):
     return ls2 in name1
     
 if __name__ == '__main__':
-    trial = getAuthor('randy schekman', use_cache=False,expand=False)
+    trial = getAuthor('stephen m blackburn', use_cache=False,expand=False)
     #affID = []
     #x = getAffPID(affID,'university of cambridge')
     #confID = [trial[0]['id']]
