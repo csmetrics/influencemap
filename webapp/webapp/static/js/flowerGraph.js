@@ -121,6 +121,8 @@ function drawFlower(svg_id, data, idx) {
         .attr("gtype", function(d) { return d.gtype; })
         .attr("r", function(d) { return 5+10*d.size; })
         .style("fill", function (d, i) {if (d.id == 0) return "#ccc"; else return colors(d.weight);})
+        .style("stroke-width", function(d) { if (d.coauthor == 'False') return 3; else return 2; })
+        .style("stroke", function(d) { if (d.coauthor == 'False') return "grey"; else return "green"; })
         .on("mouseover", function() { highlight_on(idx, this); })
         .on("mouseout", function() { highlight_off(idx); });
 
