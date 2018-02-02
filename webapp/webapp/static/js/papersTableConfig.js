@@ -169,7 +169,7 @@ var  papersTableConfig= {
       "searching": false
     },
     responseKeys: [
-    0,3,1,2
+    'title', 'confName', 'year', 'paperID'
     ],
     idCol: 2
   },

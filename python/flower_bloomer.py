@@ -29,6 +29,8 @@ def drawFlower(conn, ent_type, ent_type2, data_df, dir_out, name, bot_year=None,
     # Generate associated author scores for citing and cited
     e_map = getEntityMap(ent_type, ent_type2)
 
+
+
     influence_dict = generate_scores(conn, e_map, data_df)
 
     coauthors = generate_coauthors(e_map, data_df)
@@ -58,11 +60,10 @@ def drawFlower(conn, ent_type, ent_type2, data_df, dir_out, name, bot_year=None,
     return flower_graph
 
 
-def getFlower(id_2_paper_id, name, ent_type, bot_year=None, top_year=None):
+def getPreFlowerData(id_2_paper_id, ent_type): # id_2_paper_id should be a dict eid: [pid] including all papers regardless if they were deselected
     conn = sqlite3.connect(DB_PATH)
 
     # get paper ids associated with input name
-    print("\n\nid_to_paper_id\n\n\n\n\n\n{}".format(id_2_paper_id))
 
     entity_id_2_paper_id = dict()
     for eid, papers in id_2_paper_id.items():
@@ -70,6 +71,15 @@ def getFlower(id_2_paper_id, name, ent_type, bot_year=None, top_year=None):
 
     # filter ref papers
     data_df = gen_search_df(conn, entity_id_2_paper_id)
+
+    conn.close()
+
+    return data_df
+
+
+
+def getFlower(data_df, name, ent_type, bot_year=None, top_year=None):
+    conn = sqlite3.connect(DB_PATH)
 
     # Generate a self filter dictionary
     entity_to_author = drawFlower(conn, ent_type, "author", data_df, OUT_DIR, name, bot_year=bot_year, top_year=top_year)

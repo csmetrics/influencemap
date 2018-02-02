@@ -94,7 +94,6 @@ def search(request):
             entities = dataFunctionDict['get_ids'][option](keyword, progressCallback)
 
     data = {"entities": entities,}
-    print('\n\n\n\n\n{}\n\n\n\n\n\n'.format(request.session['id']))
     return JsonResponse(data, safe=False)
 
 
@@ -116,11 +115,10 @@ def submit(request):
     option = request.GET.get("option")
     keyword = request.GET.get('keyword')
     selfcite = True if request.GET.get("selfcite") == "true" else False
-#    print('\n\n\n\n\n\n\n\n{}\n\n\n\n\n\n\n'.format(tid_2_paper_id))
 
-    request.session['pre_flower_data'] = getPreFlowerData(id_2_paper_id)
-
-    flower_data = getFlower(data_df=request.session['pre_flower_data'], name=keyword, ent_type=option)
+#    request.session['pre_flower_data'] = getPreFlowerData(id_2_paper_id, ent_type = option)
+    d = getPreFlowerData(id_2_paper_id, ent_type = option)
+    flower_data = getFlower(data_df=d, name=keyword, ent_type=option)
 
     data1 = processdata("author", flower_data[0])
     data2 = processdata("conf", flower_data[1])
@@ -215,14 +213,14 @@ def view_papers(request):
 
 
     simplified_paper_dict = dict()
+
     for k, v in paper_dict.items(): # based on a dict of type entity(aID, entity_type('auth_id')):[(paperID, affiliationName, paperTitle, year, date, confName)] according to mkAff.py
         eid = k.entity_id
-        sorted_papers = sorted(v, key= lambda x: x[2], reverse = True)
         if eid in selectedIds:
-            simplified_paper_dict[eid] = ['_'.join([x[2],x[3],x[0],x[5]]) for x in sorted_papers] # to create a string of title_year_id
+            sorted_papers = sorted(v, key= lambda x: x['year'], reverse = True)
+            simplified_paper_dict[eid] = sorted_papers
 
-    print("simplified_paper_dict: {}".format(simplified_paper_dict))
-    print("paper_dict: {}".format(paper_dict))
+
 
     data = {
         'entityTuples': entities,
