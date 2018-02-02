@@ -18,6 +18,8 @@ def processdata(gtype, egoG):
     anglelist = np.linspace(np.pi, 0., num=len(outer_nodes))
     x_pos = [0]; x_pos.extend(list(np.cos(anglelist)))
     y_pos = [0]; y_pos.extend(list(np.sin(anglelist)))
+
+    # Outer nodes data
     nodedata = { key:{
             "name": key,
             "weight": egoG.nodes[key]["nratiow"],
@@ -25,14 +27,24 @@ def processdata(gtype, egoG):
             "gtype": gtype,
             "size": egoG.nodes[key]["sumw"],
             "xpos": x_pos[i],
-            "ypos": y_pos[i]
+            "ypos": y_pos[i],
+            "coauthor": str(egoG.nodes[key]['coauthor'])
         } for i, key in zip(range(1, len(outer_nodes)+1), outer_nodes)}
+
+    # Center node data
     nodedata[center_node] = {
-        "name": center_node, "weight": 1,
-        "id": 0, "gtype": gtype, "size": 1,
-        "xpos": x_pos[0], "ypos": y_pos[0]
+        "name": center_node,
+        "weight": 1,
+        "id": 0,
+        "gtype": gtype,
+        "size": 1,
+        "xpos": x_pos[0],
+        "ypos": y_pos[0],
+        "coauthor": str(False)
     }
+
     nodekeys = [v["name"] for v in sorted(nodedata.values(), key=itemgetter("id"))]
+
     linkdata = [{
             "source": nodekeys.index(s),
             "target": nodekeys.index(t),
