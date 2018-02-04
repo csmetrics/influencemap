@@ -285,7 +285,7 @@ function split_flower(idx, shift) {
     .each(function() {
         d3.select(this).transition()
             .duration(2000)
-            .attr("transform", "translate(" + shift + ", 0)");
+            .attr("transform", "translate(" + eval(-shift) + ", 0)");
     });
 
   // Move text wrt shift
@@ -293,7 +293,7 @@ function split_flower(idx, shift) {
     .each(function() {
         d3.select(this).transition()
             .duration(2000)
-            .attr("transform", "translate(" + eval(-shift) + ", 0)");
+            .attr("transform", "translate(" + shift + ", 0)");
     });
 
   // Move nodes wrt shift
@@ -301,7 +301,7 @@ function split_flower(idx, shift) {
     .each(function() {
         d3.select(this).transition()
             .duration(2000)
-            .attr("transform", "translate(" + shift + ", 0)");
+            .attr("transform", "translate(" + eval(-shift) + ", 0)");
     });
 
   // Move nodes wrt shift
@@ -309,16 +309,16 @@ function split_flower(idx, shift) {
     .each(function() {
         d3.select(this).transition()
             .duration(2000)
-            .attr("transform", "translate(" + eval(-shift) + ", 0)");
+            .attr("transform", "translate(" + shift + ", 0)");
     });
 
   link[idx].transition()
     .each(function() {
         console.log()
         if (d3.select(this).attr("class") == "link in")
-            { var move = shift }
-        else
             { var move = -shift }
+        else
+            { var move = shift }
         d3.select(this).transition()
             .duration(2000)
             .attr("transform", "translate(" + move + ", 0)");
