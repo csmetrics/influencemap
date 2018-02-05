@@ -112,6 +112,20 @@ def submit(request):
         eid, pids = id_papers_string.split(':')
         id_2_paper_id[eid] = pids.split(',')
 
+    unselected_papers_string = request.GET.get('unselected_papers')   # 'eid1:pid,pid,...,pid_entity_eid2:pid,...'
+    unselected_id_papers_strings = unselected_papers_string.split('_entity_')
+
+    unselected_id_2_paper_id = dict()
+
+    for us_id_papers_string in unselected_id_papers_strings:
+        us_eid, us_pids = us_id_papers_string.split(':')
+        unselected_id_2_paper_id[us_eid] = us_pids.split(',')
+
+  
+    print('\n\n\n\n\n\n'*5)
+    print('{}\n\n{}'.format(id_2_paper_id, unselected_id_2_paper_id))
+    print('\n\n\n\n\n\n'*5)
+
     option = request.GET.get("option")
     keyword = request.GET.get('keyword')
     selfcite = True if request.GET.get("selfcite") == "true" else False
@@ -138,6 +152,8 @@ def submit(request):
             "range": [2000,2014] # placeholder value, just for testing
         }
     }
+
+
     return render(request, "flower.html", data)
 
 def resubmit(request):
