@@ -19,12 +19,12 @@ var  papersTableConfig= {
         defaultContent: ''
       }
 */      ],
-      "columnDefs": [
-      {
-        "targets": 5,
-        "visible": false
-      },
-      ],
+//      "columnDefs": [
+//      {
+//        "targets": 5,
+//        "visible": false
+//      },
+//      ],
       "createdRow": function(row, data, index) { $(row).addClass("outer-table-row") },
       "select": {
         "style": "multi"
@@ -145,12 +145,12 @@ var  papersTableConfig= {
       { title: "ID"},
       { title: "", orderable: false, className: 'paper-checkbox', 'render': function (data, type, full, meta){return '<input type="checkbox" checked>'}}
       ],
-      "columnDefs": [
-      {
-        "targets": [3],
-        "visible": false
-      },
-      ],
+//      "columnDefs": [
+//      {
+//        "targets": [3],
+//        "visible": false
+//      },
+//      ],
       "select": {
         "style": "os", 
         "selector": 'td:last-child'
