@@ -230,7 +230,7 @@ def view_papers(request):
     for k, v in paper_dict.items(): # based on a dict of type entity(aID, entity_type('auth_id')):[(paperID, affiliationName, paperTitle, year, date, confName)] according to mkAff.py
         eid = k.entity_id
         if eid in selectedIds:
-            sorted_papers = sorted(v, key= lambda x: x['year'], reverse = True)
+            sorted_papers = sorted(v, key= lambda x: x['year'] if entityType != 'institution' else x['paperID'], reverse = True)
             simplified_paper_dict[eid] = sorted_papers
 
 
@@ -243,5 +243,6 @@ def view_papers(request):
         'keyword': name
     }
 
+    print('\n\n\n\n\n{}\n\n\n\n\n\n'.format(paper_dict))
     print('\n\n\n\n\n{}\n\n\n\n\n\n'.format(request.session['id']))
     return render(request, 'view_papers.html', data)

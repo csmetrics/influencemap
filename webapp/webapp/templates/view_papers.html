@@ -26,11 +26,27 @@
 <script src="{% static 'js/papersTableConfig.js' %}"></script>
 <script>
 
+var entityType = '{{ entityType }}';
+
 var papersTableElement = document.getElementById('papers-table');
 var submitButton = document.getElementById('submit-btn');
 var returnButton = document.getElementById('return-btn');
 var selfCiteCheckbox = document.getElementById('self-cite');
-var papersTable = $('#papers-table').DataTable(papersTableConfig['author']['tableSettings']);
+var papersTable = $('#papers-table').DataTable(papersTableConfig[entityType]['outerTable']['tableSettings']);
+
+
+/*
+// function to create searchTable
+function makeSearchTable(entityType){
+  if ($.fn.DataTable.isDataTable("#papers-table")) {
+    $('#papers-table').DataTable().clear().destroy();
+    $('#papers-table').empty();
+  }
+  var tableSettings = papersTableConfig[entityType]['outerTable']['tableSettings'];
+  return $('#papers-table').DataTable(tableSettings);
+}
+*/
+
 
 // update searchTable
 function updateTable(data, table, resKeys, clear){
@@ -78,8 +94,6 @@ function title_case(sentence){
 
 var selectedInfo = {{ entityTuples | safe}};
 var papersDict = {{ papersDict | safe }};
-var entityType = '{{ entityType }}';
-
 var responseKeys = papersTableConfig[entityType]['outerTable']['responseKeys'];
 
 var keyword = '{{ keyword }}';
@@ -89,7 +103,9 @@ updateTable(selectedInfo, papersTable, responseKeys, true);
 // split and capitalise paper lists
 for (var key in papersDict){
   for (var i in papersDict[key]){
-    papersDict[key][i]['title'] = title_case(papersDict[key][i]['title'])
+    if (Object.keys(papersDict[key][i]).indexOf('title') >= 0) {
+       papersDict[key][i]['title'] = title_case(papersDict[key][i]['title'])
+    }
   }
 }
 
@@ -97,7 +113,7 @@ var nested_tables = {};
 
 // add all nested data tables
 papersTable.rows().every(function(rowIdx, tableLoop, rowLoop){
-  var eid = this.data()[5];
+  var eid = this.data()[papersTableConfig[entityType]['outerTable']['idCol']];
   var tableId = eid;
   var child_text = "<table id='"+tableId+"' class='author_papers compact'></table>";
   this.child(child_text).show();
@@ -106,6 +122,10 @@ papersTable.rows().every(function(rowIdx, tableLoop, rowLoop){
   nested_tables[eid] = $(tableSelector).DataTable(papersTableConfig[entityType]['innerTable']['tableSettings']);
   var childResponseKeys = papersTableConfig[entityType]['innerTable']['responseKeys'];
   updateTable(papersDict[eid], nested_tables[eid], childResponseKeys, true);
+  console.log(papersDict[eid]);
+  console.log(childResponseKeys);
+
+
   this.child.hide();
 });
 
@@ -175,6 +195,7 @@ function childrowDataTable(data) {
 
 // Add event listener for opening and closing details
 $('#papers-table tbody').on('click', '.outer-table-row', function () {
+    console.log('row clicked');
     var tr = $(this).closest('tr');
     var row = papersTable.row( tr );
     var show = !(row.child.isShown());
