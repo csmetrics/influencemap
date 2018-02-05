@@ -99,9 +99,10 @@ var nested_tables = {};
 papersTable.rows().every(function(rowIdx, tableLoop, rowLoop){
   var eid = this.data()[5];
   var tableId = eid;
-  var child_text = "<table id='"+tableId+"' class='author_papers'></table>";
+  var child_text = "<table id='"+tableId+"' class='author_papers compact'></table>";
   this.child(child_text).show();
   var tableSelector = "#" + tableId;
+  $(tableSelector).closest("td").addClass("innertable");
   nested_tables[eid] = $(tableSelector).DataTable(papersTableConfig[entityType]['innerTable']['tableSettings']);
   var childResponseKeys = papersTableConfig[entityType]['innerTable']['responseKeys'];
   updateTable(papersDict[eid], nested_tables[eid], childResponseKeys, true);

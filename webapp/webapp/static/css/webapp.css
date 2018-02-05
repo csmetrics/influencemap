@@ -25,6 +25,25 @@ img.fit-wrapper {
   white-space: nowrap;
 }
 
+.innertable {
+  box-shadow: inset 0px 2px 1px 0px #bbb;
+}
+.innertable div {
+  padding: 8 50 3 50;
+}
+
+.innertable,
+.innertable div,
+.innertable table.dataTable thead th,
+.innertable table.dataTable thead tr,
+.innertable table.dataTable tbody tr {
+  background-color: #edf5f9;
+}
+.innertable table.dataTable thead th {
+  white-space: nowrap;
+}
+
+
 .link {
   fill: none;
   stroke: #666;
