@@ -40,8 +40,11 @@ function drawFlower(svg_id, data, idx) {
 
     // bar location
     bar_width_ratio = 0.9,
+    bar_right_margin = 0,
     bar_left = h_margin+width*(1-bar_width_ratio),
-    bar_right = width*bar_width_ratio-h_margin;
+    bar_right = width*bar_width_ratio-h_margin - bar_right_margin;
+
+    console.log(bar_right)
 
     var x = d3.scaleBand()
               .range([bar_left, bar_right])
@@ -135,7 +138,7 @@ function drawFlower(svg_id, data, idx) {
         .style("fill", function (d, i) {if (d.id == 0) return "#ccc"; else return colors(d.weight);})
         .style("stroke-width", function(d) { if (d.coauthor == 'False') return 3; else return 2; })
         .style("stroke", function(d) { if (d.coauthor == 'False') return "grey"; else return "green"; })
-        .on("click", function() { toggle_flower(idx, this); })
+        .on("click", function(d) { click_node(idx, this, d); })
         .on("mouseover", function() { highlight_on(idx, this); })
         .on("mouseout", function() { highlight_off(idx); });
 
@@ -149,7 +152,7 @@ function drawFlower(svg_id, data, idx) {
         .style("fill", function (d, i) {if (d.id == 0) return "#ccc"; else return colors(d.weight);})
         .style("stroke-width", function(d) { if (d.coauthor == 'False') return 3; else return 2; })
         .style("stroke", function(d) { if (d.coauthor == 'False') return "grey"; else return "green"; })
-        .on("click", function() { toggle_flower(idx, this); })
+        .on("click", function(d) { click_node(idx, this, d); })
         .on("mouseover", function() { highlight_on(idx, this); })
         .on("mouseout", function() { highlight_off(idx); });
 
@@ -263,13 +266,14 @@ function transform_text_x(d) {
 
 function transform_text_y(d) {
   magf = 250;
+  var shift = 0;
   d.fx = center[0]+magf*d.xpos;
   d.fy = center[1]-magf*d.ypos;
 
-  if (d.id > 0 && -.3 < d.xpos && d.xpos < .3) d.y -= 10;
-  if (d.id > 0 && -.2 < d.xpos && d.xpos < .2) d.y -= 10;
-  if (d.id > 0 && -.1 < d.xpos && d.xpos < .1) d.y -= 10;
-  return d.y
+  if (d.id > 0 && -.3 < d.xpos && d.xpos < .3) shift -= 10;
+  if (d.id > 0 && -.2 < d.xpos && d.xpos < .2) shift -= 10;
+  if (d.id > 0 && -.1 < d.xpos && d.xpos < .1) shift -= 10;
+  return d.y + shift
 }
 
 function locate_text(d) {
@@ -325,21 +329,19 @@ function split_flower(idx, shift) {
     });
 }
 
-function toggle_flower(idx, selected) {
+function click_node(idx, selected, d) {
     var split_distance = 450
     id = d3.select(selected).attr("id");
 
-    console.log(id)
-    console.log(flower_state[idx])
-
-    if (id != 0) return;
-
-    if (flower_state[idx]) {
-        split_flower(idx, 0);
-        flower_state[idx] = false;
-    }
-    else {
-        split_flower(idx, split_distance); 
-        flower_state[idx] = true;
+    // If click the ego, then split flower
+    if (id == 0) {
+        if (flower_state[idx]) {
+            split_flower(idx, 0);
+            flower_state[idx] = false;
+        }
+        else {
+            split_flower(idx, split_distance); 
+            flower_state[idx] = true;
+        }
     }
 }

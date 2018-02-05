@@ -5,9 +5,6 @@
   <body>
     <div class="wrapper" align="center">
       {% include 'navbar.html' with navbar=navbarOption %}
-      <div id="search-details" class="container">
-        <span>Search name:</span><span>Insert search name here</span>
-      </div>
       <div id="table-container" class="container">
         <table id="papers-table" class="row-border hover order-column" cellspacing="0" width="100%">
         </table>
@@ -34,7 +31,6 @@ var submitButton = document.getElementById('submit-btn');
 var returnButton = document.getElementById('return-btn');
 var selfCiteCheckbox = document.getElementById('self-cite');
 var papersTable = $('#papers-table').DataTable(papersTableConfig['author']['tableSettings']);
-
 
 // update searchTable
 function updateTable(data, table, resKeys, clear){
@@ -117,6 +113,8 @@ papersTable.rows().every(function(rowIdx, tableLoop, rowLoop){
 // Submit Button event handler
 submitButton.addEventListener('click', function(){
   console.log('submit button clicked');
+  showProgressBar();
+
   var selected_papers = {};
   var unselected_papers = {};
   papersTable.rows().every(function(rowIdx, tableLoop, rowLoop){
@@ -195,6 +193,9 @@ $('#papers-table tbody').on('click', '.outer-table-row', function () {
 })
 
 
+$(document).ready(function() {
+  hideProgressBar();
+});
 
 </script>
 

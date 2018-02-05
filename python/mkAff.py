@@ -65,7 +65,7 @@ def getPaperName(pID):
     #recent = max(res, key=lambda x: x[-1])
     return res
 
-def getAuthor(name,cbfunc=lambda _ : None, nonExpandAID=[], expand=False,use_cache=True, yearStart=0, yearEnd=2016):
+def getAuthor(name, cbfunc=None, nonExpandAID=[], expand=False,use_cache=True, yearStart=0, yearEnd=2016):
     
     if len(name) == 0:
         if expand: return ([],[],[])
@@ -134,7 +134,7 @@ def getAuthor(name,cbfunc=lambda _ : None, nonExpandAID=[], expand=False,use_cac
     fstLetter = fstN[0]
     #middle = name.split(' ')[1:-1]
     print("{} getting all the aID".format(datetime.now()))
-    cbfunc("getting all the aID")
+    cbfunc(10, "getting all the aID")
     #curA.execute("SELECT * FROM authors WHERE authorName LIKE '% " + lstN + "' AND isSame(authorName,'" + name + "')")
  
  
@@ -154,7 +154,7 @@ def getAuthor(name,cbfunc=lambda _ : None, nonExpandAID=[], expand=False,use_cac
   
     
     print("{} finished getting all the aID".format(datetime.now()))
-    cbfunc("finished getting all the aID")
+    cbfunc(30, "finished getting all the aID")
     author = {} #authorID is the key and authorName is the value
 
     for a in allAuthor:
@@ -163,7 +163,7 @@ def getAuthor(name,cbfunc=lambda _ : None, nonExpandAID=[], expand=False,use_cac
     aID = list(author.keys())
  
     print("{} getting all the (authorID, paperID, affiliationName)".format(datetime.now()))
-    cbfunc("getting all the (authorID, paperID, affiliationName)")
+    cbfunc(40, "getting all the (authorID, paperID, affiliationName)")
     curP.execute(removeCon("SELECT auth_id, paper_id, affNameOri FROM paa WHERE auth_id IN {}".format(tuple(aID))))
     result = curP.fetchall()
 
@@ -176,8 +176,10 @@ def getAuthor(name,cbfunc=lambda _ : None, nonExpandAID=[], expand=False,use_cac
     #Getting paperInfo and most related fields    
     paperIDs = list(set(map(lambda x:x[2], finalres)))
     print("{} getting all the paperInfo".format(datetime.now()))
+    cbfunc(50, "getting all the paperInfo")
     tem_paperNames = getPaperName(paperIDs) #tem_paperNames is a [(paperID, title, year, date, conferenceID)]
     print("{} getting all conference related".format(datetime.now()))
+    cbfunc(60, "getting all conference related")
     confIDs = list(set(map(lambda x:x[-1], tem_paperNames)))
     curC.execute(removeCon("SELECT ConfID, FullName FROM ConferenceSeries WHERE ConfID IN {}".format(tuple(confIDs))))
     cIDN = curC.fetchall() #cIDN is a list of (ConfID, confName)
@@ -195,6 +197,7 @@ def getAuthor(name,cbfunc=lambda _ : None, nonExpandAID=[], expand=False,use_cac
             paperNames.append((tup[0],tup[1],tup[2],tup[3],''))    
 
     print("{} getting related fieldIDs".format(datetime.now()))  
+    cbfunc(70, "getting related fieldIDs")
     curK.execute(removeCon("SELECT PaperID, FieldID FROM paperKeywords WHERE PaperID IN {}".format(tuple(paperIDs))))
     pIDfID = curK.fetchall() #is a [(pID, fieldID)]
     fIDs = list(set(map(lambda x:x[1], pIDfID)))
@@ -227,6 +230,7 @@ def getAuthor(name,cbfunc=lambda _ : None, nonExpandAID=[], expand=False,use_cac
 
     #to modify finalresult
     print("{} getting related fields".format(datetime.now()))
+    cbfunc(90, "getting related fields")
     used_ids = []
     for tup in tempres:
         ids = tup[1]
@@ -280,7 +284,7 @@ def getAuthor(name,cbfunc=lambda _ : None, nonExpandAID=[], expand=False,use_cac
      
 
     print("{} done".format(datetime.now()))
-    cbfunc("done")
+    cbfunc(100, "done")
     curC.close()
     dbConf.close()
     curK.close()
