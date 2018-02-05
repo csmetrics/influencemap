@@ -16,35 +16,36 @@ var selcolor = [colors(0.2), colors(0.8)],
     hidcolor = [colors(0.4), colors(0.6)];
 
 var center;
-var link = [], flower_state = [], bar = [],
+var link = [], flower_split = [], bar = [],
     numnodes = [], svg = [], simulation = [],
+    bar_axis_x = [], bar_axis_y = [],
     node_in = [], node_out = [],
-    text_in = [], text_out = [];
+    text_in = [], text_out = [],
+    split_button = [], delete_button = [],
+    info_table = [];
 
 function drawFlower(svg_id, data, idx) {
     var nodes = data["nodes"];
     var links = data["links"];
     var bars = data["bars"];
 
-    h_margin = 100;
+    h_margin = 25;
     v_margin = 200;
     yheight = 100;
     flower_margin = 50;
 
     svg[idx] = d3.select(svg_id),
     width = svg[idx].attr("width"),
-    height = 600,
+    height = 650,
     numnodes[idx] = nodes.length,
     center = [width/2, height/2 + flower_margin];
-    flower_state[idx] = false;
+    flower_split[idx] = false;
 
     // bar location
     bar_width_ratio = 0.9,
-    bar_right_margin = 0,
-    bar_left = h_margin+width*(1-bar_width_ratio),
+    bar_right_margin = 325,
+    bar_left = h_margin + width*(1-bar_width_ratio),
     bar_right = width*bar_width_ratio-h_margin - bar_right_margin;
-
-    console.log(bar_right)
 
     var x = d3.scaleBand()
               .range([bar_left, bar_right])
@@ -68,7 +69,7 @@ function drawFlower(svg_id, data, idx) {
         .style("fill", function(d) { if (d.type == "in") return norcolor[0]; else return norcolor[1]; });
 
     // bar chart x axis
-    svg[idx].append("g")
+    bar_axis_x[idx] = svg[idx].append("g")
         .attr("transform", "translate(0," + (height+yheight-v_margin) + ")")
         .call(d3.axisBottom(x))
         .selectAll("text")
@@ -78,7 +79,7 @@ function drawFlower(svg_id, data, idx) {
           .attr("transform", "rotate(-90)");;
 
     // bar chart y axis
-    svg[idx].append("g")
+    bar_axis_y[idx] = svg[idx].append("g")
         .attr("transform", "translate(" + bar_left + "," + (height-v_margin) + ")")
         .call(d3.axisLeft(y).ticks(5));
 
@@ -138,7 +139,6 @@ function drawFlower(svg_id, data, idx) {
         .style("fill", function (d, i) {if (d.id == 0) return "#ccc"; else return colors(d.weight);})
         .style("stroke-width", function(d) { if (d.coauthor == 'False') return 3; else return 2; })
         .style("stroke", function(d) { if (d.coauthor == 'False') return "grey"; else return "green"; })
-        .on("click", function(d) { click_node(idx, this, d); })
         .on("mouseover", function() { highlight_on(idx, this); })
         .on("mouseout", function() { highlight_off(idx); });
 
@@ -152,7 +152,6 @@ function drawFlower(svg_id, data, idx) {
         .style("fill", function (d, i) {if (d.id == 0) return "#ccc"; else return colors(d.weight);})
         .style("stroke-width", function(d) { if (d.coauthor == 'False') return 3; else return 2; })
         .style("stroke", function(d) { if (d.coauthor == 'False') return "grey"; else return "green"; })
-        .on("click", function(d) { click_node(idx, this, d); })
         .on("mouseover", function() { highlight_on(idx, this); })
         .on("mouseout", function() { highlight_off(idx); });
 
@@ -176,6 +175,87 @@ function drawFlower(svg_id, data, idx) {
         .attr("y", ".31em")
         .text(function(d) { return d.name; });
 
+    // button variables
+    var button_padding_x = 30,
+        button_padding_y = 20,
+        button_width = 140,
+        button_height = 50,
+        text_padding = 5,
+        button_x = bar_right + button_padding_x + button_width / 2,
+        button_y = height - button_padding_y + button_height / 2,
+
+        button_delete_x = bar_right + 2 * button_padding_x + button_width + button_width / 2,
+        button_delete_y = height - button_padding_y + button_height / 2;
+
+    // button for splitting
+    split_button[idx] = svg[idx].append("g");
+
+    split_button[idx]
+        .append("rect")
+        .attr("x" ,button_x - button_width / 2)
+        .attr("y", button_y - button_height / 2)
+        .attr("width", button_width)
+        .attr("height", button_height)
+        .attr("fill", norcolor[1])
+        .on("click", function() { toggle_split(idx); });
+
+    split_button[idx]
+        .append("rect")
+        .attr("x" ,button_x - button_width / 2 - 0.2 * button_height / 2)
+        .attr("y", button_y - 0.8 * button_height / 2)
+        .attr("width", button_width + 0.2 * button_height)
+        .attr("height", 0.8 * button_height)
+        .attr("fill", "grey")
+        .attr("opacity", 0.6)
+        .on("click", function() { toggle_split(idx); });
+
+    split_button[idx]
+        .append("text")
+        .attr("x", button_x)
+        .attr("y", button_y + text_padding)
+        .attr("text-anchor", "middle")
+        .text("Split Flower")
+        .on("click", function() { toggle_split(idx); });
+
+    // button for deletion
+    delete_button[idx] = svg[idx].append("g");
+
+    delete_button[idx]
+        .append("rect")
+        .attr("x" , button_delete_x - button_width / 2)
+        .attr("y", button_delete_y - button_height / 2)
+        .attr("width", button_width)
+        .attr("height", button_height)
+        .attr("fill", norcolor[0]);
+
+    delete_button[idx]
+        .append("rect")
+        .attr("x" ,button_delete_x - button_width / 2 - 0.2 * button_height / 2)
+        .attr("y", button_delete_y - 0.8 * button_height / 2)
+        .attr("width", button_width + 0.2 * button_height)
+        .attr("height", 0.8 * button_height)
+        .attr("fill", "grey")
+        .attr("opacity", 0.6);
+
+    delete_button[idx]
+        .append("text")
+        .attr("x", button_delete_x)
+        .attr("y", button_delete_y + text_padding)
+        .attr("text-anchor", "middle")
+        .text("Delete Node");
+
+    // information table (height-v_margin)
+    info_table[idx] = svg[idx].append("g");
+
+    info_table[idx]
+        .append("rect")
+        .attr("x" , button_x - button_width / 2)
+        .attr("y", height-v_margin)
+        .attr("width", button_delete_x - button_x + button_width)
+        .attr("height", button_y - button_height / 2 - (height - v_margin) - button_padding_y)
+        .attr("fill", "grey")
+        .attr("opacity", 0.6);
+
     // flower graph chart layout
     simulation[idx] = d3.forceSimulation(nodes)
         .force("charge", d3.forceManyBody().strength(-80))
@@ -190,12 +270,25 @@ function highlight_on(idx, selected) {
   group = d3.select(selected).attr("gtype");
   console.log("selected", id, group);
   if (id == 0) return;
-  svg[idx].selectAll("rect")
+
+  // highlight rectangles
+  bar[idx].selectAll("rect")
     .style("opacity", function (d) { if(id != d.id && d.id != 0 && group == d.gtype) return 0.4; else return 1; });
-  svg[idx].selectAll("text")
+
+  // highlight text
+  text_in[idx].selectAll("text")
     .style("opacity", function (d) { if(id != d.id && d.id != 0 && group == d.gtype) return 0.4; else return 1; });
-  svg[idx].selectAll("circle")
+  text_out[idx].selectAll("text")
     .style("opacity", function (d) { if(id != d.id && d.id != 0 && group == d.gtype) return 0.4; else return 1; });
+  bar_axis_x[idx].selectAll("text")
+    .style("opacity", function (d) { if(id != d.id && d.id != 0 && group == d.gtype) return 0.4; else return 1; });
+
+  // highlight circles
+  node_in[idx].selectAll("circle")
+    .style("opacity", function (d) { if(id != d.id && d.id != 0 && group == d.gtype) return 0.4; else return 1; });
+  node_out[idx].selectAll("circle")
+    .style("opacity", function (d) { if(id != d.id && d.id != 0 && group == d.gtype) return 0.4; else return 1; });
+
   svg[idx].selectAll("path")
     .attr('marker-end', function(d) {
       if (d)
@@ -219,9 +312,18 @@ function highlight_off(idx) {
     .attr('marker-end', function(d) { if (d) return "url(#" + d.gtype+"_"+d.type+"_"+d.id + ")"; })
     .style("stroke", function (d) { if (d) if (d.type == "in") return norcolor[0]; else return norcolor[1]; })
     .style("opacity", function (d) { if (d) return 1; } );
-  svg[idx].selectAll("circle").style("opacity", function (d) { return 1; });
-  svg[idx].selectAll("text").style("opacity", function (d) { return 1; });
-  svg[idx].selectAll("rect").style("opacity", function (d) { return 1; });
+
+  // un-highlight rectangles
+  bar[idx].selectAll("rect").style("opacity", function (d) { return 1; });
+
+  // un-highlight text
+  text_in[idx].selectAll("text").style("opacity", function (d) { return 1; });
+  text_out[idx].selectAll("text").style("opacity", function (d) { return 1; });
+  bar_axis_x[idx].selectAll("text").style("opacity", function (d) { return 1; });
+
+  // un-highlight circles
+  node_in[idx].selectAll("circle").style("opacity", function (d) { return 1; });
+  node_out[idx].selectAll("circle").style("opacity", function (d) { return 1; });
 }
 
 function ticked(idx) {
@@ -329,19 +431,20 @@ function split_flower(idx, shift) {
     });
 }
 
-function click_node(idx, selected, d) {
+function toggle_split(idx) {
     var split_distance = 450
-    id = d3.select(selected).attr("id");
 
     // If click the ego, then split flower
-    if (id == 0) {
-        if (flower_state[idx]) {
-            split_flower(idx, 0);
-            flower_state[idx] = false;
-        }
-        else {
-            split_flower(idx, split_distance); 
-            flower_state[idx] = true;
-        }
+    if (flower_split[idx]) {
+        split_flower(idx, 0);
+        flower_split[idx] = false;
+        split_button[idx].select("text")
+            .text("Split Flower")
+    }
+    else {
+        split_flower(idx, split_distance); 
+        flower_split[idx] = true;
+        split_button[idx].select("text")
+            .text("Combine Flower")
     }
 }
