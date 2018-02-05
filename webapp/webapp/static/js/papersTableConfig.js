@@ -19,12 +19,12 @@ var  papersTableConfig= {
         defaultContent: ''
       }
 */      ],
-      "columnDefs": [
-      {
-        "targets": 5,
-        "visible": false
-      },
-      ],
+//      "columnDefs": [
+//      {
+//        "targets": 5,
+//        "visible": false
+//      },
+//      ],
       "createdRow": function(row, data, index) { $(row).addClass("outer-table-row") },
       "select": {
         "style": "multi"
@@ -140,16 +140,17 @@ var  papersTableConfig= {
       "lengthChange": false,
       "columns": [
       { title: "Papers", className: "index dt-body-left" },
+      { title: "Conference", className: "dt-body-left"},
       { title: "Publication year", className: "institution dt-body-right" },
       { title: "ID"},
       { title: "", orderable: false, className: 'paper-checkbox', 'render': function (data, type, full, meta){return '<input type="checkbox" checked>'}}
       ],
-      "columnDefs": [
-      {
-        "targets": [2],
-        "visible": false
-      },
-      ],
+//      "columnDefs": [
+//      {
+//        "targets": [3],
+//        "visible": false
+//      },
+//      ],
       "select": {
         "style": "os", 
         "selector": 'td:last-child'
@@ -168,7 +169,7 @@ var  papersTableConfig= {
       "searching": false
     },
     responseKeys: [
-    0,1,2
+    'title', 'confName', 'year', 'paperID'
     ],
     idCol: 2
   },

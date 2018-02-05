@@ -132,7 +132,9 @@ def getAuthor(name,cbfunc=lambda _ : None, nonExpandAID=[], expand=False,use_cac
  
  
     if not expand:
-        curA.execute("SELECT authorID, authorName FROM authors WHERE lastName == '" + lstN + "' AND (authorName LIKE '" + fstN + "%' OR authorName LIKE '" + fstLetter + " %')")
+        inputValues = (lstN, fstN + "%", fstLetter + " %")
+        #NOTE THE Only query that process user input
+        curA.execute("""SELECT authorID, authorName FROM authors WHERE lastName == ? AND (authorName LIKE ? OR authorName LIKE ? )""",inputValues)
         allAuthor = curA.fetchall() #allAuthor is a list of (authorID, authName)
         for a in allAuthor: print(a)
         print("number of author is " + str(len(allAuthor))) 
@@ -152,7 +154,7 @@ def getAuthor(name,cbfunc=lambda _ : None, nonExpandAID=[], expand=False,use_cac
         author[a[0]] = a[1]
 
     aID = list(author.keys())
-
+ 
     print("{} getting all the (authorID, paperID, affiliationName)".format(datetime.now()))
     cbfunc("getting all the (authorID, paperID, affiliationName)")
     curP.execute(removeCon("SELECT auth_id, paper_id, affNameOri FROM paa WHERE auth_id IN {}".format(tuple(aID))))
@@ -165,11 +167,11 @@ def getAuthor(name,cbfunc=lambda _ : None, nonExpandAID=[], expand=False,use_cac
         finalres.append((author[tuples[0]],tuples[0],tuples[1],tuples[2]))
 
     #Getting paperInfo and most related fields    
-    paperIDs = list(map(lambda x:x[2], finalres))
+    paperIDs = list(set(map(lambda x:x[2], finalres)))
     print("{} getting all the paperInfo".format(datetime.now()))
     tem_paperNames = getPaperName(paperIDs) #tem_paperNames is a [(paperID, title, year, date, conferenceID)]
     print("{} getting all conference related".format(datetime.now()))
-    confIDs = list(map(lambda x:x[-1], tem_paperNames))
+    confIDs = list(set(map(lambda x:x[-1], tem_paperNames)))
     curC.execute(removeCon("SELECT ConfID, FullName FROM ConferenceSeries WHERE ConfID IN {}".format(tuple(confIDs))))
     cIDN = curC.fetchall() #cIDN is a list of (ConfID, confName)
     paperNames = [] #paperNames is a list of (paperID, title, year, date, conferenceName)
@@ -187,8 +189,8 @@ def getAuthor(name,cbfunc=lambda _ : None, nonExpandAID=[], expand=False,use_cac
 
     print("{} getting related fieldIDs".format(datetime.now()))  
     curK.execute(removeCon("SELECT PaperID, FieldID FROM paperKeywords WHERE PaperID IN {}".format(tuple(paperIDs))))
-    pIDfID = curK.fetchall() #is a [(pID, ieldID)]
-    fIDs = list(map(lambda x:x[1], pIDfID))
+    pIDfID = curK.fetchall() #is a [(pID, fieldID)]
+    fIDs = list(set(map(lambda x:x[1], pIDfID)))
     pIDfN = [] #a list of (pID, fName)
     if len(fIDs) > 0:
         curFN.execute(removeCon("SELECT FieldName, FieldID FROM FieldOfStudy WHERE FieldID IN {}".format(tuple(fIDs))))
@@ -253,22 +255,22 @@ def getAuthor(name,cbfunc=lambda _ : None, nonExpandAID=[], expand=False,use_cac
         for t in tempres:
             if t[1] == ids:
                  if t[3] != '': aff.append(t[3])
-                 paperInfo.append((t[2],t[3],t[4],t[5],t[6],t[7])) #paperInfo is a list of (paperID, affname, title, year, date, confName)
+                 paperInfo.append({'paperID':t[2],'affiliatoins':t[3],'title':t[4],'year':t[5],'date':t[6],'confName':t[7]}) #paperInfo is a list of (paperID, affname, title, year, date, confName)
         if len(aff) > 0:
             affiliation = mostCommon(aff)
         else:
             affiliation = ''
-        recent = max(paperInfo, key=lambda x:x[-2])
+        recent = max(paperInfo, key=lambda x:x['date'])
         aIDpaper[et.Entity(ids, et.Entity_type.AUTH)] = paperInfo
-        finalresult.append({'name':name,'id':ids,'numpaper':numpaper,'affiliation':affiliation,'field':field,'recentPaper':recent[2],'publishedDate':recent[4]})    
+        finalresult.append({'name':name,'id':ids,'numpaper':numpaper,'affiliation':affiliation,'field':field,'recentPaper':recent['title'],'publishedDate':recent['date']})    
         used_ids.append(ids)        
 
     for dic in finalresult: print(dic)
-    '''
+    
     for key in aIDpaper:
         infos = aIDpaper[key]
         for entity in infos: print(entity)
-    ''' 
+     
 
     print("{} done".format(datetime.now()))
     cbfunc("done")
@@ -295,7 +297,8 @@ def getJournal(name, a=None):
     dbJ.create_function("match",2,match)
     journals = []
     print("{} getting the journalIDs".format(datetime.now()))
-    curJ.execute("SELECT * FROM Journals WHERE match('" + name + "', JournalName)")
+    #NOTE query that process user input
+    curJ.execute("""SELECT * FROM Journals WHERE match(?, JournalName)""", [name])
     #curJ.execute("SELECT * FROM Journals WHERE JournalName == '" + name + "'")
     journals = curJ.fetchall()
     
@@ -342,8 +345,8 @@ def getConf(name, a=None):
     curC = dbConf.cursor()
     dbConf.create_function("match",2,match)
     print("{} getting conferenceID".format(datetime.now()))
-    print("SELECT * FROM ConferenceSeries WHERE ShortName == '" + name + "' OR match('" + name + "', Fullname)")
-    curC.execute("SELECT * FROM ConferenceSeries WHERE ShortName == '" + name + "' OR match('" + name + "', Fullname)")
+    #NOTE query that process user input
+    curC.execute("""SELECT * FROM ConferenceSeries WHERE ShortName == ? OR match(?, Fullname)""", (name,name))
     conference = list(map(lambda x: (x[0],x[2]),curC.fetchall()))
      
     temp = [x for x in conference if x[1].lower() == name.lower()]
@@ -393,7 +396,8 @@ def getAff(aff, a=None):
     dbA.create_function("match",2,match)
     dbA.create_function("matchForShort", 2, matchForShort)
     curA = dbA.cursor()
-    curA.execute("SELECT AffiliationID, AffiliationName FROM Affiliations WHERE match(AffiliationName, '" + aff + "') OR matchForShort('" + aff + "', AffiliationName) OR match('" + aff + "', AffiliationName)" )    
+    #NOTE query that process user input
+    curA.execute("""SELECT AffiliationID, AffiliationName FROM Affiliations WHERE match(AffiliationName, ?) OR matchForShort(?, AffiliationName) OR match(?, AffiliationName)""" , (aff,aff,aff))    
     affiliations = curA.fetchall()
     curA.close()
     dbA.close()
@@ -497,14 +501,5 @@ def matchForShort(name1, name2):
     return ls2 in name1
     
 if __name__ == '__main__':
-    trial = getAuthor('j eliot b moss', use_cache=False,expand=False)
-    #affID = []
-    #x = getAffPID(affID,'university of cambridge')
-    #confID = [trial[0]['id']]
-    #x = getConfPID(confID)
-    #jourID = [x['id'] for x in trial if x['name'] == 'Cell']
-    #x = getJourPID(jourID)
-    #ri = [x for x in trial if x['name'] == 'australian national university']
-    #t = getAffPID(ri, 'anu research school of computer science and engineering')    
-    #t = getAuthor('B Schmidt')
-    #x = getAff('standford')
+    trial = getAff('ANU')
+    

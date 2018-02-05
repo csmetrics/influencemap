@@ -46,19 +46,15 @@ function updateTable(data, table, resKeys, clear){
        key = resKeys[j];
        newRow[j] = data[i][key];
     };
-
-    // fields
-    fields = "";
-    for (var f in newRow[3]) {
-      field = newRow[3][f].split('_');
-      fields += "<li>" + field[0] + " (" + field[1] + ")</li>";
+    if (resKeys.indexOf('field') >= 0){
+      // fields
+      fields = "";
+      for (var f in newRow[3]) {
+        field = newRow[3][f].split('_');
+        fields += "<li>" + field[0] + " (" + field[1] + ")</li>";
+      }
+      newRow[3] = "<ul>" + fields + "</ul>";
     }
-    newRow[3] = "<ul>" + fields + "</ul>";
-    // Uppercase first letter
-
-    try {
-      newRow[4] = newRow[4].charAt(0).toUpperCase() + newRow[4].slice(1);
-    } catch(e){};
 
     table.row.add(newRow);
   };
@@ -96,16 +92,14 @@ updateTable(selectedInfo, papersTable, responseKeys, true);
 
 // split and capitalise paper lists
 for (var key in papersDict){
-  papersDict[key] = papersDict[key].map(function(x){
-    var temp_split = x.split("_"); 
-    return [title_case(temp_split[0]), temp_split[1], temp_split[2]]
-  });
+  for (var i in papersDict[key]){
+    papersDict[key][i]['title'] = title_case(papersDict[key][i]['title'])
+  }
 }
 
 var nested_tables = {};
 
 // add all nested data tables
-console.log("-----");
 papersTable.rows().every(function(rowIdx, tableLoop, rowLoop){
   var eid = this.data()[5];
   var tableId = eid;
@@ -132,11 +126,10 @@ submitButton.addEventListener('click', function(){
     data_table.rows().every(function (ri, tl, rl){
       var node = this.node();
       var row_checked = ($(node).find('input').prop('checked'));
-      if (row_checked) { selected_papers[table_id].push(this.data()[2]) }
+      if (row_checked) { selected_papers[table_id].push(this.data()[3]) }
     });
   });
 
-  console.log(selected_papers);
   
   for (var key in selected_papers) {
     if (selected_papers[key].length > 0) {
@@ -145,9 +138,7 @@ submitButton.addEventListener('click', function(){
       delete selected_papers[key];
     }
   };
-  console.log(selected_papers);
   var selected_papers_str = Object.values(selected_papers).join('_entity_');
-  console.log(selected_papers_str);
    data = {
        papers: selected_papers_str,
        option: entityType,
@@ -168,12 +159,16 @@ function childrowDataTable(data) {
 $('#papers-table tbody').on('click', '.outer-table-row', function () {
     var tr = $(this).closest('tr');
     var row = papersTable.row( tr );
-    if ( row.child.isShown() ) {
-        // This row is already open - close it
-        row.child.hide();
-        tr.removeClass('shown');
-    }
-    else {
+    var show = !(row.child.isShown());
+ 
+   // Close all open rows
+    $('.shown').each( function (i, elem) {
+      var tblRow = papersTable.row( elem );
+      elem.classList.remove('shown');
+      tblRow.child.hide();
+    });
+
+    if ( show ) {
         // Open this row
         row.child.show();
         tr.addClass('shown');
