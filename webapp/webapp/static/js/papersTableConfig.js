@@ -162,8 +162,8 @@ var  papersTableConfig= {
       "paging": true,
       "pagingType": "simple_numbers",
       "ordering": true,
-      "order": [[1, "desc" ]],
-//      "info": true,
+      "order": [[2, "desc" ]],
+      "info": true,
       "autoWidth": false,
       "destroy": true,
       "searching": false
