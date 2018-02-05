@@ -9,6 +9,9 @@ sys.path.insert(0, PYTHON_DIR)
 def processdata(gtype, egoG):
     center_node = egoG.graph['ego']
 
+    # Radius of circle
+    radius = 1.2
+
     # Get basic node information from ego graph
     outer_nodes = list(egoG)
     outer_nodes.remove(center_node)
@@ -16,8 +19,8 @@ def processdata(gtype, egoG):
 
     links = egoG.edges(data=True)
     anglelist = np.linspace(np.pi, 0., num=len(outer_nodes))
-    x_pos = [0]; x_pos.extend(list(np.cos(anglelist)))
-    y_pos = [0]; y_pos.extend(list(np.sin(anglelist)))
+    x_pos = [0]; x_pos.extend(list(radius * np.cos(anglelist)))
+    y_pos = [0]; y_pos.extend(list(radius * np.sin(anglelist)))
 
     # Outer nodes data
     nodedata = { key:{
@@ -54,6 +57,7 @@ def processdata(gtype, egoG):
             "type": v["direction"],
             "weight": v["nweight"]
         } for s, t, v in links]
+
     chartdata = [{
             "id": nodedata[t]["id"] if v["direction"] == "in" else nodedata[s]["id"],
             "name": t if v["direction"] == "in" else s,
