@@ -84,7 +84,7 @@ var selectedInfo = {{ entityTuples | safe}};
 var papersDict = {{ papersDict | safe }};
 var entityType = '{{ entityType }}';
 
-var responseKeys = papersTableConfig[entityType]['responseKeys'];
+var responseKeys = papersTableConfig[entityType]['outerTable']['responseKeys'];
 
 var keyword = '{{ keyword }}';
 
@@ -106,8 +106,8 @@ papersTable.rows().every(function(rowIdx, tableLoop, rowLoop){
   var child_text = "<table id='"+tableId+"' class='author_papers'></table>";
   this.child(child_text).show();
   var tableSelector = "#" + tableId;
-  nested_tables[eid] = $(tableSelector).DataTable(papersTableConfig['all']['tableSettings']);
-  var childResponseKeys = papersTableConfig['all']['responseKeys'];
+  nested_tables[eid] = $(tableSelector).DataTable(papersTableConfig[entityType]['innerTable']['tableSettings']);
+  var childResponseKeys = papersTableConfig[entityType]['innerTable']['responseKeys'];
   updateTable(papersDict[eid], nested_tables[eid], childResponseKeys, true);
   this.child.hide();
 });
