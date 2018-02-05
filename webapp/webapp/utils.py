@@ -11,7 +11,6 @@ def progress(request):
 
 def resetProgress():
     global progressmsg, percent
-    print("@@@@@@@@@@@@@@@ reset Progress")
     percent = 0
     progressmsg = "start searching"
 
