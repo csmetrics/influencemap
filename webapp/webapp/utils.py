@@ -7,13 +7,6 @@ percent = 0
 @csrf_exempt
 def progress(request):
     global progressmsg, percent
-    percent = int(request.GET.get("progress"))
-    print("get percent", percent)
-    if progressmsg == "done":
-        resetProgress()
-        return JsonResponse({"msg": "done", "percent": 100})
-    elif percent <= 90:
-        percent += 10
     return JsonResponse({"msg": progressmsg, "percent": percent})
 
 def resetProgress():
@@ -22,7 +15,8 @@ def resetProgress():
     progressmsg = "start searching"
 
 # call back function for progress bar
-def progressCallback(msg):
-    global progressmsg
+def progressCallback(progress, msg):
+    global progressmsg, percent
+    percent = progress
     progressmsg = msg
-    print("progressCallback", progressmsg)
+    print("progressCallback", percent, progressmsg)
