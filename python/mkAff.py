@@ -342,7 +342,13 @@ def getJourPID(jIDs, yearStart=0, yearEnd=2016): #thie function takes in a list 
     jID_papers = {}
     for paper, jID in papers:
         if int(paper[-1]) >= yearStart and int(paper[-1]) <= yearEnd: 
-            jID_papers.setdefault(et.Entity(jID,et.Entity_type.JOUR),[]).append(paper[0])
+            jID_papers.setdefault(jID,[]).append({'title':paper[1], 'paperID':paper[0],'year':paper[2]})
+
+    output = {}
+    for key in jID_papers:
+        output[et.Entity(key, et.Entity_type.JOUR)] = jID_papers[key]
+
+    for key in output: print(output[key])
 
     curP.close()
     dbPAA.close()
@@ -363,15 +369,15 @@ def getConf(name, a=None):
     temp = [x for x in conference if x[1].lower() == name.lower()]
     conference = [x for x in conference if x[1].lower() != name.lower()]
     conference = temp + conference
-     
-    for tup in conference:
-        print(tup)
 
     output = []
     
     for tup in conference:
         output.append({'id':tup[0],'name':tup[1]})        
     
+    for dic in output: print(dic)
+
+
     curC.close()
     dbConf.close()
     return output #a list of {'id':confID, 'name':confName}
@@ -394,8 +400,13 @@ def getConfPID(cIDs, yearStart=0, yearEnd=2016): #this function takes in a list 
     for pID, cID in papers:
         if pID[-1] != '':
             if int(pID[-1]) >= yearStart and int(pID[-1]) <= yearEnd: 
-                cID_papers.setdefault(et.Entity(cID,et.Entity_type.CONF),[]).append(pID[0])
+                cID_papers.setdefault(cID,[]).append({'title':pID[1],'paperID':pID[0],'year':pID[2]})
         
+    output = {}
+    for key in cID_papers:
+        output[et.Entity(key, et.Entity_type.CONF)] = cID_papers[key]
+
+    for key in output: print(output[key])
 
     curP.close()
     dbP.close()
@@ -452,10 +463,7 @@ def getAffPID(chosen,name): # chosen is the list of dict chosen by the user, nam
     affName = list(map(lambda x:x['name'], chosen))
     global temp_nameList
     temp_nameList = set(map(lambda x:nameHandler(name, x),affName))    
-    #print(removeCon("SELECT paper_id, affi_id, affNameOri FROM paa WHERE affi_id IN {}".format(tuple(affID))))
-    #print(removeCon("SELECT paper_id, affi_id, affNameOri FROM paa WHERE affi_id IN {}".format(tuple(affID))) +  " AND" + removeCon(" matchList(affNameOri, {})".format(tuple(affName))))
-    curP.execute(removeCon("SELECT paper_id, affi_id, affNameOri FROM paa WHERE affi_id IN {}".format(tuple(affID))) + " AND matchList(affNameOri)")
-    #curP.execute(removeCon("SELECT paper_id, affi_id, affNameOri FROM paa WHERE affi_id IN {}".format(tuple(affID))))     
+    curP.execute(removeCon("SELECT paper_id, affi_id, affNameOri FROM paa WHERE affi_id IN {}".format(tuple(affID))) + " AND matchList(affNameOri)")     
     papers = curP.fetchall()
     curP.close()
     dbPAA.close()
@@ -463,9 +471,13 @@ def getAffPID(chosen,name): # chosen is the list of dict chosen by the user, nam
     
     affIDpIDList = list(map(lambda x: (x[0],x[1]), papers))
     for paper, aff in affIDpIDList:
-        affID_pID.setdefault(et.Entity(aff, et.Entity.type.AFFI),[]).append(paper)
+        affID_pID.setdefault(aff,[]).append({'id':paper})
      
-    for key in affID_pID: print(len(affID_pID[key]))
+    output = {}
+    for key in affID_pID:
+        output[et.Entity(key, et.Entity_type.AFFI)] = affID_pID[key]
+
+    for key in output: print(output[key])
    
                
     return affID_pID #affID_pID is a dict of affID:[pID]
@@ -514,4 +526,6 @@ def matchForShort(name1, name2):
     return ls2 in name1
     
 if __name__ == '__main__':
-    trial = getAff(' ') 
+    trial = getAff('anu')
+    cID = [x for x in trial if x['name'] == 'australian national university']
+    x = getAffPID(cID,'anu') 
