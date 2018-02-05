@@ -13,26 +13,23 @@ function showProgressBar() {
   progressText.innerText = message;
   progressNumber.innerText = percent+"%";
   progressBar.style.width = percent+"%";
-  console.log("showProgressBar", percent, flag);
+  // console.log("showProgressBar", percent, flag);
   progressGroup.classList.remove("invisible");
   window.setTimeout(updateProgressBar, 1000);
 }
 function hideProgressBar() {
   flag = false;
-  console.log("hideProgressBar", percent, flag);
+  // console.log("hideProgressBar", percent, flag);
   progressGroup.classList.add("invisible");
 }
 
-function updateProgressBar(ptype){
+function updateProgressBar(){
   $.ajax({
     type: "POST",
     url: "/progress",
-    data: {
-        type: ptype
-    },
     success: function (result) {
-      console.log("updateProgressBar success");
-      console.log(result["msg"], result["percent"]);
+      // console.log("updateProgressBar success");
+      // console.log(result["msg"], result["percent"]);
       percent = result["percent"];
       message = result["msg"];
       progressText.innerText = message;
