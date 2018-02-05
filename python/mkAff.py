@@ -414,7 +414,7 @@ def getConfPID(cIDs, yearStart=0, yearEnd=2016): #this function takes in a list 
 
     curP.close()
     dbP.close()
-    return cID_papers #cID_papers is a dict of cID:[(pID, paperTitle, year)]
+    return output # WAS: cID_papers #cID_papers is a dict of cID:[(pID, paperTitle, year)]
      
 
 def getAff(aff, a=None):
@@ -475,7 +475,7 @@ def getAffPID(chosen,name): # chosen is the list of dict chosen by the user, nam
     
     affIDpIDList = list(map(lambda x: (x[0],x[1]), papers))
     for paper, aff in affIDpIDList:
-        affID_pID.setdefault(aff,[]).append({'id':paper})
+        affID_pID.setdefault(aff,[]).append({'paperID':paper})
      
     output = {}
     for key in affID_pID:
@@ -484,7 +484,7 @@ def getAffPID(chosen,name): # chosen is the list of dict chosen by the user, nam
     for key in output: print(output[key])
    
                
-    return affID_pID #affID_pID is a dict of affID:[pID]
+    return output # WAS: affID_pID #affID_pID is a dict of affID:[pID]
 
 
 def match(name1, name2): # name1 must be in name2
