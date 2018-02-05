@@ -5,7 +5,7 @@
   <body>
     <div class="wrapper" align="center">
       {% include 'navbar.html' with navbar=navbarOption %}
-      <div id="image-container" class="container">
+      <div id="image-container" width=1800>
         <div class="row">
           <div class="col-md-12">
             Keyword: <b>{{ navbarOption.selectedKeyword }}</b>
@@ -14,15 +14,15 @@
         </div>
         <span>To Author</span>
         <div align="center">
-          <svg id="graph1" width=900 height=650></svg>
+          <svg id="graph1" width=1800 height=650></svg>
         </div>
         <span>To conference</span>
         <div align="center">
-          <svg id="graph2" width=900 height=650></svg>
+          <svg id="graph2" width=1800 height=650></svg>
         </div>
         <span>To institution</span>
         <div align="center">
-          <svg id="graph3" width=900 height=650></svg>
+          <svg id="graph3" width=1800 height=650></svg>
         </div>
       </div>
     </div>
