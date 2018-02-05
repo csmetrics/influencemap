@@ -157,19 +157,18 @@ function childrowDataTable(data) {
 
 // Add event listener for opening and closing details
 $('#papers-table tbody').on('click', '.outer-table-row', function () {
-//    $('.shown').each( function (i, elem) {
-//      elem.classList.removeClass('shown');
-//      var tblRow = papersTable.row( elem );
-//      tblRow.child.hide();
-//    });
     var tr = $(this).closest('tr');
     var row = papersTable.row( tr );
-    if ( row.child.isShown() ) {
-        // This row is already open - close it
-        row.child.hide();
-        tr.removeClass('shown');
-    }
-    else {
+    var show = !(row.child.isShown());
+ 
+   // Close all open rows
+    $('.shown').each( function (i, elem) {
+      var tblRow = papersTable.row( elem );
+      elem.classList.remove('shown');
+      tblRow.child.hide();
+    });
+
+    if ( show ) {
         // Open this row
         row.child.show();
         tr.addClass('shown');
