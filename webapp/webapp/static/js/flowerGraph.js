@@ -15,13 +15,13 @@ var selcolor = [colors(0.2), colors(0.8)],
     norcolor = [colors(0.25), colors(0.75)],
     hidcolor = [colors(0.4), colors(0.6)];
 
-var center;
+var width, height, center, magf;
 var link = [], flower_state = [], bar = [],
     numnodes = [], svg = [], simulation = [],
     node_in = [], node_out = [],
     text_in = [], text_out = [];
 
-function drawFlower(svg_id, data, idx) {
+function drawFlower(svg_id, data, idx, w) {
     var nodes = data["nodes"];
     var links = data["links"];
     var bars = data["bars"];
@@ -32,7 +32,7 @@ function drawFlower(svg_id, data, idx) {
     flower_margin = 50;
 
     svg[idx] = d3.select(svg_id),
-    width = svg[idx].attr("width"),
+    width = w, magf = Math.min(250, width/7),
     height = 600,
     numnodes[idx] = nodes.length,
     center = [width/2, height/2 + flower_margin];
@@ -165,7 +165,8 @@ function drawFlower(svg_id, data, idx) {
         .attr("gtype", function(d) { return d.gtype; })
         .attr("x", 8)
         .attr("y", ".31em")
-        .text(function(d) { return d.name; });
+        .text(function(d) { return d.name; })
+        .style("font-style", function(d) { if (d.coauthor == 'False') return "normal"; else return "italic"; });
 
     // flower graph node text
     text_out[idx] = svg[idx].append("g").selectAll("text")
@@ -175,7 +176,8 @@ function drawFlower(svg_id, data, idx) {
         .attr("gtype", function(d) { return d.gtype; })
         .attr("x", 8)
         .attr("y", ".31em")
-        .text(function(d) { return d.name; });
+        .text(function(d) { return d.name; })
+        .style("font-style", function(d) { if (d.coauthor == 'False') return "normal"; else return "italic"; });
 
     // flower graph chart layout
     simulation[idx] = d3.forceSimulation(nodes)
@@ -247,19 +249,16 @@ function linkArc(d) {
 }
 
 function transform_x(d) {
-  magf = 250;
   d.fx = center[0]+magf*d.xpos;
   return d.x
 }
 
 function transform_y(d) {
-  magf = 250;
   d.fy = center[0]+magf*d.ypos;
   return d.y
 }
 
 function transform_text_x(d) {
-  magf = 250;
   shift = 0;
   d.fx = center[0]+magf*d.xpos;
 
@@ -269,8 +268,7 @@ function transform_text_x(d) {
 }
 
 function transform_text_y(d) {
-  magf = 250;
-  var shift = 0;
+  shift = 0;
   d.fx = center[0]+magf*d.xpos;
   d.fy = center[1]-magf*d.ypos;
 
@@ -334,7 +332,8 @@ function split_flower(idx, shift) {
 }
 
 function click_node(idx, selected, d) {
-    var split_distance = 450
+    //var split_distance = 450
+    var split_distance = width/4;
     id = d3.select(selected).attr("id");
 
     // If click the ego, then split flower
