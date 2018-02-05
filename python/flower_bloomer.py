@@ -60,32 +60,42 @@ def drawFlower(conn, ent_type, ent_type2, data_df, dir_out, name, bot_year=None,
     return flower_graph
 
 
-def getPreFlowerData(id_2_paper_id, ent_type): # id_2_paper_id should be a dict eid: [pid] including all papers regardless if they were deselected
+def getPreFlowerData(id_2_paper_id, ent_type, cbfunc=None): # id_2_paper_id should be a dict eid: [pid] including all papers regardless if they were deselected
     conn = sqlite3.connect(DB_PATH)
 
     # get paper ids associated with input name
+    cbfunc(10, "get paper ids associated with input name")
 
     entity_id_2_paper_id = dict()
     for eid, papers in id_2_paper_id.items():
         entity_id_2_paper_id[Entity(eid, e[ent_type])] = papers
 
     # filter ref papers
+    cbfunc(20, "filter reference papers")
     data_df = gen_search_df(conn, entity_id_2_paper_id)
 
     conn.close()
 
+    cbfunc(30, "generating flower data")
     return data_df
 
 
 
-def getFlower(data_df, name, ent_type, bot_year=None, top_year=None):
+def getFlower(data_df, name, ent_type, cbfunc=None, bot_year=None, top_year=None):
     conn = sqlite3.connect(DB_PATH)
 
     # Generate a self filter dictionary
+    cbfunc(40, "draw entity_to_author flower")
     entity_to_author = drawFlower(conn, ent_type, "author", data_df, OUT_DIR, name, bot_year=bot_year, top_year=top_year)
+
+    cbfunc(60, "draw entity_to_conference flower")
     entity_to_conference = drawFlower(conn, ent_type, "conference", data_df, OUT_DIR, name, bot_year=bot_year, top_year=top_year)
+
+    cbfunc(80, "draw entity_to_affiliation flower")
     entity_to_affiliation = drawFlower(conn, ent_type, "institution", data_df, OUT_DIR, name, bot_year=bot_year, top_year=top_year)
  
     conn.close()
+
+    cbfunc(100, "done")
     file_names = [entity_to_author, entity_to_conference, entity_to_affiliation]
     return file_names
