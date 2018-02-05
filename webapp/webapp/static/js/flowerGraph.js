@@ -72,6 +72,7 @@ function drawFlower(svg_id, data, idx) {
         .attr("transform", "translate(0," + (height+yheight-v_margin) + ")")
         .call(d3.axisBottom(x))
         .selectAll("text")
+          .text(function(d) { if (d.length > 20) return d.slice(0, 20)+"..."; else return d.slice(0, 20); })
           .style("text-anchor", "end")
           .attr("dx", "-.8em")
           .attr("dy", "-.5em")
@@ -259,9 +260,12 @@ function transform_y(d) {
 
 function transform_text_x(d) {
   magf = 250;
+  shift = 0;
   d.fx = center[0]+magf*d.xpos;
 
-  return d.x
+  if (d.xpos < -.3) shift -= 10;
+  if (d.xpos > .3) shift += 10;
+  return d.x + shift
 }
 
 function transform_text_y(d) {
