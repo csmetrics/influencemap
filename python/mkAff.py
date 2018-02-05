@@ -67,6 +67,13 @@ def getPaperName(pID):
 
 def getAuthor(name,cbfunc=lambda _ : None, nonExpandAID=[], expand=False,use_cache=True, yearStart=0, yearEnd=2016):
     
+    if len(name) == 0:
+        if expand: return ([],[],[])
+        else: return ([],[])
+
+    name = ' '.join([x for x in name.split(' ') if x != ''])
+
+
     finalresult = [] #finalresult is a list of dict
     aIDpaper = {} #aIDpaper is a dict of entity:[(pID, title, year)]
     
@@ -292,6 +299,8 @@ def getAuthor(name,cbfunc=lambda _ : None, nonExpandAID=[], expand=False,use_cac
 
 
 def getJournal(name, a=None):
+    if len(name) == 0: return []
+    name = ' '.join([x for x in name.split(' ') if x != ''])
     dbJ = sqlite3.connect(db_Jour, check_same_thread = False)
     curJ = dbJ.cursor()
     dbJ.create_function("match",2,match)
@@ -340,6 +349,8 @@ def getJourPID(jIDs, yearStart=0, yearEnd=2016): #thie function takes in a list 
     return jID_papers #jID_papers is a dict of jID:[(pID, paperTitle, year)]
 
 def getConf(name, a=None):
+    if len(name) == 0: return []
+    name = ' '.join([x for x in name.split(' ') if x != ''])
     name = name.upper()
     dbConf = sqlite3.connect(db_conf, check_same_thread = False)
     curC = dbConf.cursor()
@@ -392,6 +403,8 @@ def getConfPID(cIDs, yearStart=0, yearEnd=2016): #this function takes in a list 
      
 
 def getAff(aff, a=None):
+    if len(aff) == 0: return []
+    aff = ' '.join([x for x in aff.split(' ') if x != ''])
     dbA = sqlite3.connect(db_aff, check_same_thread = False)
     dbA.create_function("match",2,match)
     dbA.create_function("matchForShort", 2, matchForShort)
@@ -501,5 +514,4 @@ def matchForShort(name1, name2):
     return ls2 in name1
     
 if __name__ == '__main__':
-    trial = getAff('ANU')
-    
+    trial = getAff(' ') 
