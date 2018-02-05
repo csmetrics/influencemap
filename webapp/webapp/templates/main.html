@@ -15,7 +15,6 @@
   </body>
 </html>
 <script src="{% static 'js/auto-complete.min.js' %}"></script>
-<script src="{% static 'js/progressbar.js' %}"></script>
 <script src="{% static 'js/searchTableConfig.js' %}"></script>
 <script>
 // keep track of whether search was expanded
@@ -120,7 +119,6 @@ function search(exp, clear){
   }
 
   showProgressBar();
-  updateProgressBar();
   $.ajax({
     type: "GET",
     url: "/search",

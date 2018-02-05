@@ -3,7 +3,7 @@ from django.shortcuts import render
 from django.http import JsonResponse
 from django.views.decorators.csrf import csrf_exempt
 from datetime import datetime
-from .utils import progressCallback
+from .utils import progressCallback, resetProgress
 from .graph import processdata
 from urllib import parse
 
@@ -99,6 +99,7 @@ def search(request):
 
 
 def submit(request):
+    resetProgress()
     request.session['id'] = 'id_' + str(datetime.now())
     print('\n\n\n\n\n{}\n\n\n\n\n\n'.format(request.session['id']))
     global option, saved_pids
@@ -112,13 +113,27 @@ def submit(request):
         eid, pids = id_papers_string.split(':')
         id_2_paper_id[eid] = pids.split(',')
 
+    unselected_papers_string = request.GET.get('unselected_papers')   # 'eid1:pid,pid,...,pid_entity_eid2:pid,...'
+    unselected_id_papers_strings = unselected_papers_string.split('_entity_')
+
+    unselected_id_2_paper_id = dict()
+
+    for us_id_papers_string in unselected_id_papers_strings:
+        us_eid, us_pids = us_id_papers_string.split(':')
+        unselected_id_2_paper_id[us_eid] = us_pids.split(',')
+
+  
+    print('\n\n\n\n\n\n'*5)
+    print('{}\n\n{}'.format(id_2_paper_id, unselected_id_2_paper_id))
+    print('\n\n\n\n\n\n'*5)
+
     option = request.GET.get("option")
     keyword = request.GET.get('keyword')
     selfcite = True if request.GET.get("selfcite") == "true" else False
 
 #    request.session['pre_flower_data'] = getPreFlowerData(id_2_paper_id, ent_type = option)
-    d = getPreFlowerData(id_2_paper_id, ent_type = option)
-    flower_data = getFlower(data_df=d, name=keyword, ent_type=option)
+    d = getPreFlowerData(id_2_paper_id, ent_type = option, cbfunc=progressCallback)
+    flower_data = getFlower(data_df=d, name=keyword, ent_type=option, cbfunc=progressCallback)
 
     data1 = processdata("author", flower_data[0])
     data2 = processdata("conf", flower_data[1])
@@ -138,6 +153,8 @@ def submit(request):
             "range": [2000,2014] # placeholder value, just for testing
         }
     }
+
+
     return render(request, "flower.html", data)
 
 def resubmit(request):
@@ -189,6 +206,7 @@ def main(request):
 
 def view_papers(request):
     print("\n\nrequest: {}\n\n".format(request))
+    resetProgress()
 
     selectedIds = request.GET.get('selectedIds').split(',')
     selectedNames = request.GET.get('selectedNames').split(',')
@@ -198,9 +216,9 @@ def view_papers(request):
 
     if entityType == 'author':
         if expanded:
-            entities, paper_dict = getAuthor(name=name, expand=True)
+            entities, paper_dict = getAuthor(name=name, expand=True, cbfunc=progressCallback)
         else:
-            entities, paper_dict, _ = getAuthor(name=name, expand=False)
+            entities, paper_dict, _ = getAuthor(name=name, expand=False, cbfunc=progressCallback)
         entities = [x for x in entities if x['id'] in selectedIds]   
         for entity in entities:
             entity['field'] = ['_'.join([str(y) for y in x]) for x in entity['field']]

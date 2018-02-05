@@ -7,26 +7,26 @@ var percent = 0;
 var message = "";
 
 function showProgressBar() {
-  // console.log("showProgressBar");
-  flag = true;
   percent = 0;
-  message = "";
+  message = "start searching"
+  flag = true;
+  progressText.innerText = message;
+  progressNumber.innerText = percent+"%";
+  progressBar.style.width = percent+"%";
+  // console.log("showProgressBar", percent, flag);
+  progressGroup.classList.remove("invisible");
+  window.setTimeout(updateProgressBar, 1000);
 }
 function hideProgressBar() {
-  // console.log("hideProgressBar");
   flag = false;
-  percent = 0;
-  message = "";
+  // console.log("hideProgressBar", percent, flag);
+  progressGroup.classList.add("invisible");
 }
 
 function updateProgressBar(){
   $.ajax({
-    type: "GET",
+    type: "POST",
     url: "/progress",
-    data: {
-      progress: percent,
-      text: message
-    },
     success: function (result) {
       // console.log("updateProgressBar success");
       // console.log(result["msg"], result["percent"]);
@@ -35,19 +35,17 @@ function updateProgressBar(){
       progressText.innerText = message;
       progressNumber.innerText = percent+"%";
       progressBar.style.width = percent+"%";
-      if (percent < 100) {
-        window.setTimeout(updateProgressBar, 2000);
+      if (percent < 100){
+        window.setTimeout(updateProgressBar, 1000);
       } else {
-        hideProgressBar();
+        flag = false;
       }
-      if (flag) {
-        progressGroup.classList.remove("invisible");
-      } else {
-        progressGroup.classList.add("invisible");
+      if (!flag) {
+        hideProgressBar();
       }
     },
     error: function (result) {
-      // console.log("updateProgressBar error");
+      flag = false;
     }
   });
 }

@@ -65,8 +65,15 @@ def getPaperName(pID):
     #recent = max(res, key=lambda x: x[-1])
     return res
 
-def getAuthor(name,cbfunc=lambda _ : None, nonExpandAID=[], expand=False,use_cache=True, yearStart=0, yearEnd=2016):
+def getAuthor(name, cbfunc=None, nonExpandAID=[], expand=False,use_cache=True, yearStart=0, yearEnd=2016):
     
+    if len(name) == 0:
+        if expand: return ([],[],[])
+        else: return ([],[])
+
+    name = ' '.join([x for x in name.split(' ') if x != ''])
+
+
     finalresult = [] #finalresult is a list of dict
     aIDpaper = {} #aIDpaper is a dict of entity:[(pID, title, year)]
     
@@ -127,7 +134,7 @@ def getAuthor(name,cbfunc=lambda _ : None, nonExpandAID=[], expand=False,use_cac
     fstLetter = fstN[0]
     #middle = name.split(' ')[1:-1]
     print("{} getting all the aID".format(datetime.now()))
-    cbfunc("getting all the aID")
+    cbfunc(10, "getting all the aID")
     #curA.execute("SELECT * FROM authors WHERE authorName LIKE '% " + lstN + "' AND isSame(authorName,'" + name + "')")
  
  
@@ -147,7 +154,7 @@ def getAuthor(name,cbfunc=lambda _ : None, nonExpandAID=[], expand=False,use_cac
   
     
     print("{} finished getting all the aID".format(datetime.now()))
-    cbfunc("finished getting all the aID")
+    cbfunc(30, "finished getting all the aID")
     author = {} #authorID is the key and authorName is the value
 
     for a in allAuthor:
@@ -156,7 +163,7 @@ def getAuthor(name,cbfunc=lambda _ : None, nonExpandAID=[], expand=False,use_cac
     aID = list(author.keys())
  
     print("{} getting all the (authorID, paperID, affiliationName)".format(datetime.now()))
-    cbfunc("getting all the (authorID, paperID, affiliationName)")
+    cbfunc(40, "getting all the (authorID, paperID, affiliationName)")
     curP.execute(removeCon("SELECT auth_id, paper_id, affNameOri FROM paa WHERE auth_id IN {}".format(tuple(aID))))
     result = curP.fetchall()
 
@@ -169,8 +176,10 @@ def getAuthor(name,cbfunc=lambda _ : None, nonExpandAID=[], expand=False,use_cac
     #Getting paperInfo and most related fields    
     paperIDs = list(set(map(lambda x:x[2], finalres)))
     print("{} getting all the paperInfo".format(datetime.now()))
+    cbfunc(50, "getting all the paperInfo")
     tem_paperNames = getPaperName(paperIDs) #tem_paperNames is a [(paperID, title, year, date, conferenceID)]
     print("{} getting all conference related".format(datetime.now()))
+    cbfunc(60, "getting all conference related")
     confIDs = list(set(map(lambda x:x[-1], tem_paperNames)))
     curC.execute(removeCon("SELECT ConfID, FullName FROM ConferenceSeries WHERE ConfID IN {}".format(tuple(confIDs))))
     cIDN = curC.fetchall() #cIDN is a list of (ConfID, confName)
@@ -188,6 +197,7 @@ def getAuthor(name,cbfunc=lambda _ : None, nonExpandAID=[], expand=False,use_cac
             paperNames.append((tup[0],tup[1],tup[2],tup[3],''))    
 
     print("{} getting related fieldIDs".format(datetime.now()))  
+    cbfunc(70, "getting related fieldIDs")
     curK.execute(removeCon("SELECT PaperID, FieldID FROM paperKeywords WHERE PaperID IN {}".format(tuple(paperIDs))))
     pIDfID = curK.fetchall() #is a [(pID, fieldID)]
     fIDs = list(set(map(lambda x:x[1], pIDfID)))
@@ -220,6 +230,7 @@ def getAuthor(name,cbfunc=lambda _ : None, nonExpandAID=[], expand=False,use_cac
 
     #to modify finalresult
     print("{} getting related fields".format(datetime.now()))
+    cbfunc(90, "getting related fields")
     used_ids = []
     for tup in tempres:
         ids = tup[1]
@@ -273,7 +284,7 @@ def getAuthor(name,cbfunc=lambda _ : None, nonExpandAID=[], expand=False,use_cac
      
 
     print("{} done".format(datetime.now()))
-    cbfunc("done")
+    cbfunc(100, "done")
     curC.close()
     dbConf.close()
     curK.close()
@@ -292,6 +303,8 @@ def getAuthor(name,cbfunc=lambda _ : None, nonExpandAID=[], expand=False,use_cac
 
 
 def getJournal(name, a=None):
+    if len(name) == 0: return []
+    name = ' '.join([x for x in name.split(' ') if x != ''])
     dbJ = sqlite3.connect(db_Jour, check_same_thread = False)
     curJ = dbJ.cursor()
     dbJ.create_function("match",2,match)
@@ -340,6 +353,8 @@ def getJourPID(jIDs, yearStart=0, yearEnd=2016): #thie function takes in a list 
     return jID_papers #jID_papers is a dict of jID:[(pID, paperTitle, year)]
 
 def getConf(name, a=None):
+    if len(name) == 0: return []
+    name = ' '.join([x for x in name.split(' ') if x != ''])
     name = name.upper()
     dbConf = sqlite3.connect(db_conf, check_same_thread = False)
     curC = dbConf.cursor()
@@ -392,6 +407,8 @@ def getConfPID(cIDs, yearStart=0, yearEnd=2016): #this function takes in a list 
      
 
 def getAff(aff, a=None):
+    if len(aff) == 0: return []
+    aff = ' '.join([x for x in aff.split(' ') if x != ''])
     dbA = sqlite3.connect(db_aff, check_same_thread = False)
     dbA.create_function("match",2,match)
     dbA.create_function("matchForShort", 2, matchForShort)
@@ -501,5 +518,4 @@ def matchForShort(name1, name2):
     return ls2 in name1
     
 if __name__ == '__main__':
-    trial = getAff('ANU')
-    
+    trial = getAff(' ') 

@@ -5,9 +5,6 @@
   <body>
     <div class="wrapper" align="center">
       {% include 'navbar.html' with navbar=navbarOption %}
-      <div id="search-details" class="container">
-        <span>Search name:</span><span>Insert search name here</span>
-      </div>
       <div id="table-container" class="container">
         <table id="papers-table" class="row-border hover order-column" cellspacing="0" width="100%">
         </table>
@@ -34,7 +31,6 @@ var submitButton = document.getElementById('submit-btn');
 var returnButton = document.getElementById('return-btn');
 var selfCiteCheckbox = document.getElementById('self-cite');
 var papersTable = $('#papers-table').DataTable(papersTableConfig['author']['tableSettings']);
-
 
 // update searchTable
 function updateTable(data, table, resKeys, clear){
@@ -117,16 +113,24 @@ papersTable.rows().every(function(rowIdx, tableLoop, rowLoop){
 // Submit Button event handler
 submitButton.addEventListener('click', function(){
   console.log('submit button clicked');
+  showProgressBar();
+
   var selected_papers = {};
+  var unselected_papers = {};
   papersTable.rows().every(function(rowIdx, tableLoop, rowLoop){
     var table_dom = this.child().find('table')[0]     
     var table_id = table_dom.id;
     selected_papers[table_id] = [];
+    unselected_papers[table_id] = [];
     var data_table = nested_tables[table_id];
     data_table.rows().every(function (ri, tl, rl){
       var node = this.node();
       var row_checked = ($(node).find('input').prop('checked'));
-      if (row_checked) { selected_papers[table_id].push(this.data()[3]) }
+      if (row_checked) { 
+        selected_papers[table_id].push(this.data()[3]) 
+      } else {
+        unselected_papers[table_id].push(this.data()[3])
+      }
     });
   });
 
@@ -139,8 +143,21 @@ submitButton.addEventListener('click', function(){
     }
   };
   var selected_papers_str = Object.values(selected_papers).join('_entity_');
+  
+  for (var key in unselected_papers) {
+    if (unselected_papers[key].length > 0) {
+      unselected_papers[key] = key + ":" + unselected_papers[key].join() 
+    } else {
+      delete unselected_papers[key];
+    }
+  };
+  var unselected_papers_str = Object.values(unselected_papers).join('_entity_');
+
+
+
    data = {
        papers: selected_papers_str,
+       unselected_papers: unselected_papers_str,
        option: entityType,
        keyword: keyword,
        selfcite: selfCiteCheckbox.checked,
@@ -176,6 +193,9 @@ $('#papers-table tbody').on('click', '.outer-table-row', function () {
 })
 
 
+$(document).ready(function() {
+  hideProgressBar();
+});
 
 </script>
 

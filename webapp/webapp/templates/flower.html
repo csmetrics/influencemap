@@ -33,11 +33,11 @@
 <script src="{% static 'js/d3-scale-chromatic.v1.min.js' %}"></script>
 <script src="{% static 'js/flowerGraph.js' %}"></script>
 <script>
-
 author_data = {{ author|safe }}
 conf_data = {{ conf|safe }}
 inst_data = {{ inst|safe }}
 drawFlower("#graph1", author_data, 0);
 drawFlower("#graph2", conf_data, 1);
 drawFlower("#graph3", inst_data, 2);
+
 </script>
