@@ -12,12 +12,12 @@ var searchTableConfig = {
       { title: "Most recent paper", className: "dt-body-left" },
       { title: "ID"}
       ],
-      "columnDefs": [
-      {
-        "targets": 5,
-        "visible": false
-      },
-      ],
+//      "columnDefs": [
+//      {
+//        "targets": 5,
+//        "visible": false
+//      },
+//      ],
       "select": {
         "style": "multi"
       },
@@ -47,12 +47,12 @@ var searchTableConfig = {
       { title: "Name", className: "index dt-body-center" },
       { title: "ID"}
       ],
-      "columnDefs": [
-      {
-        "targets": 1,
-        "visible": false
-      },
-      ],
+//      "columnDefs": [
+//      {
+//        "targets": 1,
+//        "visible": false
+//      },
+//      ],
       "select": {
         "style": "multi"
       },
@@ -82,12 +82,12 @@ var searchTableConfig = {
       { title: "Name", className: "index dt-body-center" },
       { title: "ID"}
       ],
-      "columnDefs": [
-      {
-        "targets": 1,
-        "visible": false
-      },
-      ],
+//      "columnDefs": [
+//      {
+//        "targets": 1,
+//        "visible": false
+//      },
+//      ],
       "select": {
         "style": "multi"
       },
@@ -117,12 +117,12 @@ var searchTableConfig = {
       { title: "Name", className: "index dt-body-center" },
       { title: "ID"}
       ],
-      "columnDefs": [
-      {
-        "targets": 1,
-        "visible": false
-      },
-      ],
+//      "columnDefs": [
+//      {
+//        "targets": 1,
+//        "visible": false
+//      },
+//      ],
       "select": {
         "style": "multi"
       },
