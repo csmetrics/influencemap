@@ -233,6 +233,7 @@ def getAuthor(name, cbfunc=None, nonExpandAID=[], expand=False,use_cache=True, y
     cbfunc(90, "getting related fields")
     used_ids = []
     for tup in tempres:
+        tupname = tup[0]
         ids = tup[1]
         if ids in used_ids:
             continue
@@ -273,7 +274,7 @@ def getAuthor(name, cbfunc=None, nonExpandAID=[], expand=False,use_cache=True, y
             affiliation = ''
         recent = max(paperInfo, key=lambda x:x['date'])
         aIDpaper[et.Entity(ids, et.Entity_type.AUTH)] = paperInfo
-        finalresult.append({'name':name,'id':ids,'numpaper':numpaper,'affiliation':affiliation,'field':field,'recentPaper':recent['title'],'publishedDate':recent['date']})    
+        finalresult.append({'name':tupname,'id':ids,'numpaper':numpaper,'affiliation':affiliation,'field':field,'recentPaper':recent['title'],'publishedDate':recent['date']})    
         used_ids.append(ids)        
 
     for dic in finalresult: print(dic)
