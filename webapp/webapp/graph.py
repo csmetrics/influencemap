@@ -26,6 +26,7 @@ def processdata(gtype, egoG):
     nodedata = { key:{
             "name": key,
             "weight": egoG.nodes[key]["nratiow"],
+            "color": egoG.nodes[key]["ratiow"],
             "id": i,
             "gtype": gtype,
             "size": egoG.nodes[key]["sumw"],

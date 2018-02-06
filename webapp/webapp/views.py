@@ -117,15 +117,10 @@ def submit(request):
     unselected_id_papers_strings = unselected_papers_string.split('_entity_')
 
     unselected_id_2_paper_id = dict()
-
-    for us_id_papers_string in unselected_id_papers_strings:
-        us_eid, us_pids = us_id_papers_string.split(':')
-        unselected_id_2_paper_id[us_eid] = us_pids.split(',')
-
-  
-    print('\n\n\n\n\n\n'*5)
-    print('{}\n\n{}'.format(id_2_paper_id, unselected_id_2_paper_id))
-    print('\n\n\n\n\n\n'*5)
+    if unselected_papers_string != "":
+        for us_id_papers_string in unselected_id_papers_strings:
+            us_eid, us_pids = us_id_papers_string.split(':')
+            unselected_id_2_paper_id[us_eid] = us_pids.split(',')
 
     option = request.GET.get("option")
     keyword = request.GET.get('keyword')
@@ -224,7 +219,7 @@ def view_papers(request):
             entity['field'] = ['_'.join([str(y) for y in x]) for x in entity['field']]
     else:
         entities = dataFunctionDict['get_ids'][entityType](name)
-        get_pid_params = (selectedIds) if entityType != 'institution' else ([{'id':selectedIds[i],'name':selectedNames[i]} for i in range(len(selectedIds))], name)
+        get_pid_params = [selectedIds] if entityType != 'institution' else ([{'id':selectedIds[i],'name':selectedNames[i]} for i in range(len(selectedIds))], name)
         paper_dict = dataFunctionDict['get_pids'][entityType](*get_pid_params)
         entities = [x for x in entities if x['id'] in selectedIds]   
 
@@ -235,7 +230,7 @@ def view_papers(request):
     for k, v in paper_dict.items(): # based on a dict of type entity(aID, entity_type('auth_id')):[(paperID, affiliationName, paperTitle, year, date, confName)] according to mkAff.py
         eid = k.entity_id
         if eid in selectedIds:
-            sorted_papers = sorted(v, key= lambda x: x['year'], reverse = True)
+            sorted_papers = sorted(v, key= lambda x: x['year'] if entityType != 'institution' else x['paperID'], reverse = True)
             simplified_paper_dict[eid] = sorted_papers
 
 
@@ -248,5 +243,6 @@ def view_papers(request):
         'keyword': name
     }
 
+    print('\n\n\n\n\n{}\n\n\n\n\n\n'.format(paper_dict))
     print('\n\n\n\n\n{}\n\n\n\n\n\n'.format(request.session['id']))
     return render(request, 'view_papers.html', data)

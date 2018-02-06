@@ -5,7 +5,7 @@
   <body>
     <div class="wrapper" align="center">
       {% include 'navbar.html' with navbar=navbarOption %}
-      <div id="image-container" width=1800>
+      <div id="image-container" width=100%>
         <div class="row">
           <div class="col-md-12">
             Keyword: <b>{{ navbarOption.selectedKeyword }}</b>
@@ -36,8 +36,10 @@
 author_data = {{ author|safe }}
 conf_data = {{ conf|safe }}
 inst_data = {{ inst|safe }}
-drawFlower("#graph1", author_data, 0);
-drawFlower("#graph2", conf_data, 1);
-drawFlower("#graph3", inst_data, 2);
+
+var width = document.getElementById('image-container').offsetWidth;
+drawFlower("#graph1", author_data, 0, width);
+drawFlower("#graph2", conf_data, 1, width);
+drawFlower("#graph3", inst_data, 2, width);
 
 </script>

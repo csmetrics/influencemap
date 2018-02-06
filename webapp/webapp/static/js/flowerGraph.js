@@ -15,7 +15,7 @@ var selcolor = [colors(0.2), colors(0.8)],
     norcolor = [colors(0.25), colors(0.75)],
     hidcolor = [colors(0.4), colors(0.6)];
 
-var center;
+var width, height, center, magf;
 var link = [], flower_split = [], bar = [],
     numnodes = [], svg = [], simulation = [],
     bar_axis_x = [], bar_axis_y = [],
@@ -24,7 +24,7 @@ var link = [], flower_split = [], bar = [],
     split_button = [], delete_button = [],
     info_table = [];
 
-function drawFlower(svg_id, data, idx) {
+function drawFlower(svg_id, data, idx, w) {
     var nodes = data["nodes"];
     var links = data["links"];
     var bars = data["bars"];
@@ -35,7 +35,7 @@ function drawFlower(svg_id, data, idx) {
     flower_margin = 50;
 
     svg[idx] = d3.select(svg_id),
-    width = svg[idx].attr("width"),
+    width = w, magf = Math.min(250, width/7),
     height = 650,
     numnodes[idx] = nodes.length,
     center = [width/2, height/2 + flower_margin];
@@ -62,17 +62,20 @@ function drawFlower(svg_id, data, idx) {
         .attr("class", "bar")
         .attr("id", function(d) { return d.id; })
         .attr("x", function(d) { if (d.type == "in") return x(d.name)+x.bandwidth()/2; else return x(d.name); })
-        .attr("width", x.bandwidth()/2)
         .attr("y", function(d) { return y(d.weight)-v_margin; })
+        .attr("width", x.bandwidth()/2)
         .attr("height", function(d) { return yheight - y(d.weight); })
         .attr("transform", "translate(0," + height + ")")
+        .style("opacity", 1)
         .style("fill", function(d) { if (d.type == "in") return norcolor[0]; else return norcolor[1]; });
 
     // bar chart x axis
     bar_axis_x[idx] = svg[idx].append("g")
         .attr("transform", "translate(0," + (height+yheight-v_margin) + ")")
+        .attr("class", "hl-text")
         .call(d3.axisBottom(x))
         .selectAll("text")
+          .text(function(d) { if (d.length > 20) return d.slice(0, 20)+"..."; else return d.slice(0, 20); })
           .style("text-anchor", "end")
           .attr("dx", "-.8em")
           .attr("dy", "-.5em")
@@ -134,9 +137,10 @@ function drawFlower(svg_id, data, idx) {
         .data(nodes)
       .enter().append("circle")
         .attr("id", function(d) { return d.id; })
+        .attr("class", "hl-circle")
         .attr("gtype", function(d) { return d.gtype; })
         .attr("r", function(d) { return 5+10*d.size; })
-        .style("fill", function (d, i) {if (d.id == 0) return "#ccc"; else return colors(d.weight);})
+        .style("fill", function (d, i) {if (d.id == 0) return "#ccc"; else return colors(d.color);})
         .style("stroke-width", function(d) { if (d.coauthor == 'False') return 3; else return 2; })
         .style("stroke", function(d) { if (d.coauthor == 'False') return "grey"; else return "green"; })
         .on("mouseover", function() { highlight_on(idx, this); })
@@ -147,9 +151,10 @@ function drawFlower(svg_id, data, idx) {
         .data(nodes)
       .enter().append("circle")
         .attr("id", function(d) { return d.id; })
+        .attr("class", "hl-circle")
         .attr("gtype", function(d) { return d.gtype; })
         .attr("r", function(d) { return 5+10*d.size; })
-        .style("fill", function (d, i) {if (d.id == 0) return "#ccc"; else return colors(d.weight);})
+        .style("fill", function (d, i) {if (d.id == 0) return "#ccc"; else return colors(d.color);})
         .style("stroke-width", function(d) { if (d.coauthor == 'False') return 3; else return 2; })
         .style("stroke", function(d) { if (d.coauthor == 'False') return "grey"; else return "green"; })
         .on("mouseover", function() { highlight_on(idx, this); })
@@ -160,20 +165,24 @@ function drawFlower(svg_id, data, idx) {
         .data(nodes)
       .enter().append("text")
         .attr("id", function(d) { return d.id; })
+        .attr("class", "hl-text")
         .attr("gtype", function(d) { return d.gtype; })
         .attr("x", 8)
         .attr("y", ".31em")
-        .text(function(d) { return d.name; });
+        .text(function(d) { return d.name; })
+        .style("font-style", function(d) { if (d.coauthor == 'False') return "normal"; else return "italic"; });
 
     // flower graph node text
     text_out[idx] = svg[idx].append("g").selectAll("text")
         .data(nodes)
       .enter().append("text")
         .attr("id", function(d) { return d.id; })
+        .attr("class", "hl-text")
         .attr("gtype", function(d) { return d.gtype; })
         .attr("x", 8)
         .attr("y", ".31em")
-        .text(function(d) { return d.name; });
+        .text(function(d) { return d.name; })
+        .style("font-style", function(d) { if (d.coauthor == 'False') return "normal"; else return "italic"; });
 
     // button variables
     var button_padding_x = 30,
@@ -272,22 +281,25 @@ function highlight_on(idx, selected) {
   if (id == 0) return;
 
   // highlight rectangles
-  bar[idx].selectAll("rect")
-    .style("opacity", function (d) { if(id != d.id && d.id != 0 && group == d.gtype) return 0.4; else return 1; });
+  svg[idx].selectAll("rect").each(function() {
+    if (d3.select(this).attr("class") == "bar") {
+        d3.select(this).style("opacity", function (d) { if(id != d.id && d.id != 0 && group == d.gtype) return 0.4; else return 1; });
+    }
+  });
 
   // highlight text
-  text_in[idx].selectAll("text")
-    .style("opacity", function (d) { if(id != d.id && d.id != 0 && group == d.gtype) return 0.4; else return 1; });
-  text_out[idx].selectAll("text")
-    .style("opacity", function (d) { if(id != d.id && d.id != 0 && group == d.gtype) return 0.4; else return 1; });
-  bar_axis_x[idx].selectAll("text")
-    .style("opacity", function (d) { if(id != d.id && d.id != 0 && group == d.gtype) return 0.4; else return 1; });
+  svg[idx].selectAll("text").each(function() {
+    if (d3.select(this).attr("class") == "hl-text") {
+        d3.select(this).style("opacity", function (d) { if(id != d.id && d.id != 0 && group == d.gtype) return 0.4; else return 1; });
+    }
+  });
 
   // highlight circles
-  node_in[idx].selectAll("circle")
-    .style("opacity", function (d) { if(id != d.id && d.id != 0 && group == d.gtype) return 0.4; else return 1; });
-  node_out[idx].selectAll("circle")
-    .style("opacity", function (d) { if(id != d.id && d.id != 0 && group == d.gtype) return 0.4; else return 1; });
+  svg[idx].selectAll("circle").each(function() {
+    if (d3.select(this).attr("class") == "hl-circle") {
+        d3.select(this).style("opacity", function (d) { if(id != d.id && d.id != 0 && group == d.gtype) return 0.4; else return 1; });
+    }
+  });
 
   svg[idx].selectAll("path")
     .attr('marker-end', function(d) {
@@ -314,16 +326,25 @@ function highlight_off(idx) {
     .style("opacity", function (d) { if (d) return 1; } );
 
   // un-highlight rectangles
-  bar[idx].selectAll("rect").style("opacity", function (d) { return 1; });
+  svg[idx].selectAll("rect").each(function() {
+    if (d3.select(this).attr("class") == "bar") {
+        d3.select(this).style("opacity", 1);
+    }
+  });
 
   // un-highlight text
-  text_in[idx].selectAll("text").style("opacity", function (d) { return 1; });
-  text_out[idx].selectAll("text").style("opacity", function (d) { return 1; });
-  bar_axis_x[idx].selectAll("text").style("opacity", function (d) { return 1; });
+  svg[idx].selectAll("text").each(function() {
+    if (d3.select(this).attr("class") == "hl-text") {
+        d3.select(this).style("opacity", 1);
+    }
+  });
 
   // un-highlight circles
-  node_in[idx].selectAll("circle").style("opacity", function (d) { return 1; });
-  node_out[idx].selectAll("circle").style("opacity", function (d) { return 1; });
+  svg[idx].selectAll("circle").each(function() {
+    if (d3.select(this).attr("class") == "hl-circle") {
+        d3.select(this).style("opacity", 1);
+    }
+  });
 }
 
 function ticked(idx) {
@@ -348,27 +369,26 @@ function linkArc(d) {
 }
 
 function transform_x(d) {
-  magf = 250;
   d.fx = center[0]+magf*d.xpos;
   return d.x
 }
 
 function transform_y(d) {
-  magf = 250;
   d.fy = center[0]+magf*d.ypos;
   return d.y
 }
 
 function transform_text_x(d) {
-  magf = 250;
+  shift = 0;
   d.fx = center[0]+magf*d.xpos;
 
-  return d.x
+  if (d.xpos < -.3) shift -= 10;
+  if (d.xpos > .3) shift += 10;
+  return d.x + shift
 }
 
 function transform_text_y(d) {
-  magf = 250;
-  var shift = 0;
+  shift = 0;
   d.fx = center[0]+magf*d.xpos;
   d.fy = center[1]-magf*d.ypos;
 
@@ -432,7 +452,7 @@ function split_flower(idx, shift) {
 }
 
 function toggle_split(idx) {
-    var split_distance = 450
+    var split_distance = width/4;
 
     // If click the ego, then split flower
     if (flower_split[idx]) {
