@@ -5,7 +5,7 @@ from django.views.decorators.csrf import csrf_exempt
 from datetime import datetime
 from .utils import progressCallback, resetProgress
 from .graph import processdata
-from urllib import parse
+
 
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 PYTHON_DIR = os.path.join(os.path.dirname(BASE_DIR), 'python')
@@ -14,10 +14,13 @@ sys.path.insert(0, PYTHON_DIR)
 from flower_bloomer import getFlower, getPreFlowerData
 from mkAff import getAuthor, getJournal, getConf, getAff, getConfPID, getJourPID, getConfPID, getAffPID
 # initialise as no saved pids
-saved_pids = dict() 
+saved_pids = dict()
 
 # initialise as no expanded ids
 expanded_ids = dict()
+
+# initialise no stored flower data frames
+pre_flower_data_dict = dict()
 
 # initialise as no autocomplete lists yet (wait until needed)
 autoCompleteLists = {}
@@ -31,21 +34,26 @@ optionlist = [  # option list
 # dictionary to store option specific functions
 dataFunctionDict = {
     'get_ids':{
-        'author': getAuthor,
-        'conference': getConf,
-        'institution': getAff,
-        'journal': getJournal},
+	'author': getAuthor,
+	'conference': getConf,
+	'institution': getAff,
+	'journal': getJournal},
     'get_pids':{
-        'conference': getConfPID,
-        'journal': getJourPID,
-        'institution': getAffPID}}
+	'conference': getConfPID,
+	'journal': getJourPID,
+	'institution': getAffPID}}
 
 # option list for radios
 optionlist = [  # option list
-        {"id":"author", "name":"Author"},
-        {"id":"conference", "name":"Conference"},
-        {"id":"journal", "name":"Journal"},
-        {"id":"institution", "name":"Institution"}]
+	{"id":"author", "name":"Author"},
+	{"id":"conference", "name":"Conference"},
+	{"id":"journal", "name":"Journal"},
+	{"id":"institution", "name":"Institution"}]
+
+
+def printDict(d):
+    for k,v in d.items():
+        print('k: {}\tv: {}'.format(k,v))
 
 
 def loadList(entity):
@@ -61,26 +69,37 @@ def autocomplete(request):
     data = loadList(entity_type)
     return JsonResponse(data,safe=False)
 
-
 selfcite = False
-expanded_ids = dict() 
+expanded_ids = dict()
+
+
+def main(request):
+    global keyword, optionlist, option, selfcite
+    keyword = ""
+    option = optionlist[0] # default selection
+    # render page with data
+    return render(request, "main.html", {
+	"navbarOption": {
+	    "optionlist": optionlist,
+	    "selectedKeyword": keyword,
+	    "selectedOption": option,
+	}
+    })
+
 
 @csrf_exempt
 def search(request):
-
     request.session['id'] = 'id_' + str(datetime.now())
-
+    print('\n\n\n\n\nstart of search: {}\n\n\n\n\n\n'.format(request.session['id']))
     global saved_pids, expanded_ids
     print("search!!", request.GET)
-
     entities = []
 
     keyword = request.GET.get("keyword")
     option = request.GET.get("option")
     expand = True if request.GET.get("expand") == 'true' else False
-
     if keyword not in expanded_ids.keys():
-        expanded_ids[keyword] = list()
+         expanded_ids[keyword] = list()
 
     if keyword:
         if option == 'author':
@@ -92,21 +111,61 @@ def search(request):
                 saved_pids[keyword] = {**entities_and_saved_pids[1], **saved_pids[keyword]}
         else:
             entities = dataFunctionDict['get_ids'][option](keyword, progressCallback)
-
     data = {"entities": entities,}
+    print('\n\n\n\n\nend of search: {}\n\n\n\n\n\n'.format(request.session['id']))
     return JsonResponse(data, safe=False)
+
+
+def view_papers(request):
+    print("\n\nrequest: {}\n\n".format(request))
+    resetProgress()
+    print('\n\n\n\n\nstart of view papers: {}\n\n\n\n\n\n'.format(request.session['id']))
+    selectedIds = request.GET.get('selectedIds').split(',')
+    selectedNames = request.GET.get('selectedNames').split(',')
+    entityType = request.GET.get('entityType')
+    expanded = request.GET.get('expanded') == 'true'
+    name = request.GET.get('name')
+    if entityType == 'author':
+        if expanded:
+            entities, paper_dict = getAuthor(name=name, expand=True, cbfunc=progressCallback)
+        else:
+            entities, paper_dict, _ = getAuthor(name=name, expand=False, cbfunc=progressCallback)
+        entities = [x for x in entities if x['id'] in selectedIds]
+        for entity in entities:
+            entity['field'] = ['_'.join([str(y) for y in x]) for x in entity['field']]
+    else:
+        entities = dataFunctionDict['get_ids'][entityType](name)
+        get_pid_params = [selectedIds] if entityType != 'institution' else ([{'id':selectedIds[i],'name':selectedNames[i]} for i in range(len(selectedIds))], name)
+        paper_dict = dataFunctionDict['get_pids'][entityType](*get_pid_params)
+        entities = [x for x in entities if x['id'] in selectedIds]
+
+    simplified_paper_dict = dict()
+
+    for k, v in paper_dict.items(): # based on a dict of type entity(aID, entity_type('auth_id')):[(paperID, affiliationName, paperTitle, year, date, confName)] according to mkAff.py
+        eid = k.entity_id
+        if eid in selectedIds:
+            sorted_papers = sorted(v, key= lambda x: x['year'] if entityType != 'institution' else x['paperID'], reverse = True)
+            simplified_paper_dict[eid] = sorted_papers
+    data = {
+        'entityTuples': entities,
+        'papersDict': simplified_paper_dict,
+        'entityType': entityType,
+        'selectedInfo': selectedIds,
+        'keyword': name
+    }
+
+    print('\n\n\n\n\nend of view papers: {}\n\n\n\n\n\n'.format(request.session['id']))
+    return render(request, 'view_papers.html', data)
 
 
 
 def submit(request):
     resetProgress()
-    request.session['id'] = 'id_' + str(datetime.now())
-    print('\n\n\n\n\n{}\n\n\n\n\n\n'.format(request.session['id']))
+    print('\n\n\n\n\nstart of submit: {}\n\n\n\n\n\n'.format(request.session['id']))
     global option, saved_pids
 
     papers_string = request.GET.get('papers')   # 'eid1:pid,pid,...,pid_entity_eid2:pid,...'
     id_papers_strings = papers_string.split('_entity_')
-
     id_2_paper_id = dict()
 
     for id_papers_string in id_papers_strings:
@@ -125,40 +184,13 @@ def submit(request):
     option = request.GET.get("option")
     keyword = request.GET.get('keyword')
     selfcite = True if request.GET.get("selfcite") == "true" else False
-
-#    request.session['pre_flower_data'] = getPreFlowerData(id_2_paper_id, ent_type = option)
-    d = getPreFlowerData(id_2_paper_id, ent_type = option, cbfunc=progressCallback)
-    flower_data = getFlower(data_df=d, name=keyword, ent_type=option, cbfunc=progressCallback)
-
-    data1 = processdata("author", flower_data[0])
-    data2 = processdata("conf", flower_data[1])
-    data3 = processdata("inst", flower_data[2])
-
-    data = {
-        "author": data1,
-        "conf": data2,
-        "inst": data3,
-        "navbarOption": {
-            "optionlist": optionlist,
-            "selectedKeyword": keyword,
-            "selectedOption": [o for o in optionlist if o["id"] == option][0],
-        },
-        "yearSlider": {
-            "title": "Publications range",
-            "range": [2000,2014] # placeholder value, just for testing
-        }
-    }
+    bot_year_min = int(request.GET.get("bot_year_min"))
+    top_year_max = int(request.GET.get("top_year_max"))
 
 
-    return render(request, "flower.html", data)
-
-def resubmit(request):
-    from_year = request.GET.get('from_year')
-    to_year = request.GET.get('to_year')
-    option = request.GET.get('option')
-    name = request.GET.get('keyword')
-    pre_flower_data = []
-    flower_data = getFlower(data_df=request.session['pre_flower_data'], name=keyword, ent_type=option)
+    pre_flower_data_dict[request.session['id']] = getPreFlowerData(id_2_paper_id, ent_type = option, cbfunc=progressCallback)
+    print( pre_flower_data_dict[request.session['id']])    
+    flower_data = getFlower(data_df=pre_flower_data_dict[request.session['id']], name=keyword, ent_type=option, cbfunc=progressCallback)
 
     data1 = processdata("author", flower_data[0])
     data2 = processdata("conf", flower_data[1])
@@ -168,81 +200,45 @@ def resubmit(request):
         "author": data1,
         "conf": data2,
         "inst": data3,
-        "navbarOption": {
-            "optionlist": optionlist,
-            "selectedKeyword": keyword,
-            "selectedOption": [o for o in optionlist if o["id"] == option][0],
-        },
-        "yearSlider": {
-            "title": "Publications range",
-            "range": [2000,2014] # placeholder value, just for testing
-        }
-    }
-    return JsonResponse(data, safe=False)
-
-
-def printDict(d):
-    for k,v in d.items():
-        print('k: {}\tv: {}'.format(k,v))
-
-
-def main(request):
-    global keyword, optionlist, option, selfcite
-    keyword = ""
-    option = optionlist[0] # default selection
-    # render page with data
-    return render(request, "main.html", {
         "navbarOption": {
             "optionlist": optionlist,
             "selectedKeyword": keyword,
             "selectedOption": option,
+        },
+        "yearSlider": {
+            "title": "Publications range",
+            "range": [bot_year_min, top_year_max] # placeholder value, just for testing
         }
-    })
-
-def view_papers(request):
-    print("\n\nrequest: {}\n\n".format(request))
-    resetProgress()
-
-    selectedIds = request.GET.get('selectedIds').split(',')
-    selectedNames = request.GET.get('selectedNames').split(',')
-    entityType = request.GET.get('entityType')
-    expanded = request.GET.get('expanded') == 'true'
-    name = request.GET.get('name')
-
-    if entityType == 'author':
-        if expanded:
-            entities, paper_dict = getAuthor(name=name, expand=True, cbfunc=progressCallback)
-        else:
-            entities, paper_dict, _ = getAuthor(name=name, expand=False, cbfunc=progressCallback)
-        entities = [x for x in entities if x['id'] in selectedIds]   
-        for entity in entities:
-            entity['field'] = ['_'.join([str(y) for y in x]) for x in entity['field']]
-    else:
-        entities = dataFunctionDict['get_ids'][entityType](name)
-        get_pid_params = [selectedIds] if entityType != 'institution' else ([{'id':selectedIds[i],'name':selectedNames[i]} for i in range(len(selectedIds))], name)
-        paper_dict = dataFunctionDict['get_pids'][entityType](*get_pid_params)
-        entities = [x for x in entities if x['id'] in selectedIds]   
-
-
-
-    simplified_paper_dict = dict()
-
-    for k, v in paper_dict.items(): # based on a dict of type entity(aID, entity_type('auth_id')):[(paperID, affiliationName, paperTitle, year, date, confName)] according to mkAff.py
-        eid = k.entity_id
-        if eid in selectedIds:
-            sorted_papers = sorted(v, key= lambda x: x['year'] if entityType != 'institution' else x['paperID'], reverse = True)
-            simplified_paper_dict[eid] = sorted_papers
-
-
-
-    data = {
-        'entityTuples': entities,
-        'papersDict': simplified_paper_dict,
-        'entityType': entityType, 
-        'selectedInfo': selectedIds,
-        'keyword': name
     }
 
-    print('\n\n\n\n\n{}\n\n\n\n\n\n'.format(paper_dict))
-    print('\n\n\n\n\n{}\n\n\n\n\n\n'.format(request.session['id']))
-    return render(request, 'view_papers.html', data)
+    print('\n\n\n\n\nend of submit: {}\n\n\n\n\n\n'.format(request.session['id']))
+    return render(request, "flower.html", data)
+
+
+def resubmit(request):
+    from_year = int(request.GET.get('from_year'))
+    to_year = int(request.GET.get('to_year'))
+    option = request.GET.get('option')
+    keyword = request.GET.get('keyword')
+    pre_flower_data = []
+
+
+    print( pre_flower_data_dict[request.session['id']])    
+    flower_data = getFlower(data_df=pre_flower_data_dict[request.session['id']], name=keyword, ent_type=option, bot_year=from_year, top_year=to_year)
+
+    data1 = processdata("author", flower_data[0])
+    data2 = processdata("conf", flower_data[1])
+    data3 = processdata("inst", flower_data[2])
+
+    data = {
+        "author": data1,
+        "conf": data2,
+        "inst": data3,
+        "navbarOption": {
+            "optionlist": optionlist,
+            "selectedKeyword": keyword,
+            "selectedOption": [o for o in optionlist if o["id"] == option][0],
+        },
+    }
+    return JsonResponse(data, safe=False)
+

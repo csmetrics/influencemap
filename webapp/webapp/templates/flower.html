@@ -12,6 +12,7 @@
             Type: <b>{{ navbarOption.selectedOption.name }}</b>
           </div>
         </div>
+{% include 'year_slider.html' %}
         <span>To Author</span>
         <div align="center">
           <svg id="graph1" width=1800 height=700></svg>
@@ -33,13 +34,52 @@
 <script src="{% static 'js/d3-scale-chromatic.v1.min.js' %}"></script>
 <script src="{% static 'js/flowerGraph.js' %}"></script>
 <script>
+option = '{{ navbarOption.selectedOption }}';
+keyword = '{{ navbarOption.selectedKeyword }}';
 author_data = {{ author|safe }}
 conf_data = {{ conf|safe }}
 inst_data = {{ inst|safe }}
+
+console.log(author_data);
 
 var width = document.getElementById('image-container').offsetWidth;
 drawFlower("#graph1", author_data, 0, width);
 drawFlower("#graph2", conf_data, 1, width);
 drawFlower("#graph3", inst_data, 2, width);
+
+
+resubmitButton.addEventListener('click', function(){
+console.log(nodes);
+  $.ajax({
+    type: "GET",
+    url: "/resubmit",
+    data: {
+      from_year: nodes[0].textContent,
+      to_year: nodes[1].textContent,
+      option: option,
+      keyword: keyword
+    },
+    success: function(result){
+      $("#graph1").empty();
+      $("#graph2").empty();
+      $("#graph3").empty();
+
+
+
+      author_data = result.author;
+      conf_data = result.conf;
+      inst_data = result.inst;
+
+console.log(author_data);
+
+      drawFlower("#graph1", author_data, 0, width);
+      drawFlower("#graph2", conf_data, 1, width);
+      drawFlower("#graph3", inst_data, 2, width);
+
+      
+    }
+  });
+});
+
 
 </script>

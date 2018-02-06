@@ -1,0 +1,55 @@
+{% load staticfiles%}
+    <table>
+      <tr>
+        <td colspan="5" class="text-center">
+          <span class="text-muted"><small>{{ yearSlider.title }}</small></span>
+        </td>
+      </tr>
+        <td style="padding: 8px 30px">
+          <div class="text-right">
+            <span class="label-as-badge"><span id="pub-lower-value"></span></span>
+          </div>
+        </td>
+        <td style="padding: 8px 0">
+          <div id="publication-range" style="width: 200px" class="yearslider"></div>
+        </td>
+        <td style="padding: 8px 30px">
+          <div class="text-left">
+            <span class="label-as-badge"><span id="pub-upper-value"></span></span>
+          </div>
+        </td>
+        <td><button class="btn btn-success" style="width:100%; height:60px" id="resubmitButton">Go</button></td>
+      </tr>
+    </table>
+<script>
+// script for year slider
+
+var yearrange = {{ yearSlider.range | safe }};
+var pubSlider = document.getElementById('publication-range');
+
+noUiSlider.create(pubSlider, {
+  connect: true,
+  behaviour: 'tap',
+  start: [ yearrange[0], yearrange[1] ],
+  step: 1,
+  animate: false,
+  range: {
+    'min': [ yearrange[0] ],
+    'max': [ yearrange[1] ]
+  }
+});
+
+var pubLowerHandle = pubSlider.getElementsByClassName('noUi-handle-lower')[0];
+var pubUpperHandle = pubSlider.getElementsByClassName('noUi-handle-upper')[0];
+
+var nodes = [
+  document.getElementById('pub-lower-value'),
+  document.getElementById('pub-upper-value'),
+];
+
+
+pubSlider.noUiSlider.on('update', function ( values, handle, unencoded, isTap, positions ) {
+  nodes[handle].innerText = parseInt(values[handle]);
+});
+
+</script>

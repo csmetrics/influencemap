@@ -59,3 +59,10 @@ text {
   pointer-events: none;
   text-shadow: 0 1px 0 #fff, 1px 0 0 #fff, 0 -1px 0 #fff, -1px 0 0 #fff;
 }
+
+.label-as-badge {
+    border-radius: 4px;
+    padding: 4px;
+    background-color: rgb(245, 245, 245);
+    border: 1px solid #e5e5e5;
+}

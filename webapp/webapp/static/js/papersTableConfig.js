@@ -77,7 +77,8 @@ var  papersTableConfig = {
       responseKeys: [
       'title', 'confName', 'year', 'paperID'
       ],
-      idCol: 3
+      idCol: 3,
+      yearCol: 2
     }
   },
   conference: {
@@ -153,7 +154,8 @@ var  papersTableConfig = {
       responseKeys: [
         'title', 'year', 'paperID'
       ],
-      idCol: 2
+      idCol: 2,
+      yearCol: 1
     }
   },
   institution: {
@@ -227,7 +229,8 @@ var  papersTableConfig = {
       responseKeys: [
         'paperID'
       ],
-      idCol: 0
+      idCol: 0,
+      yearCol: null
     }
   }
 }

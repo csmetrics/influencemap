@@ -27,12 +27,15 @@
 <script>
 
 var entityType = '{{ entityType }}';
+var config = papersTableConfig[entityType];
+var innerConfig = config['innerTable'];
+var outerConfig = config['outerTable'];
 
 var papersTableElement = document.getElementById('papers-table');
 var submitButton = document.getElementById('submit-btn');
 var returnButton = document.getElementById('return-btn');
 var selfCiteCheckbox = document.getElementById('self-cite');
-var papersTable = $('#papers-table').DataTable(papersTableConfig[entityType]['outerTable']['tableSettings']);
+var papersTable = $('#papers-table').DataTable(outerConfig['tableSettings']);
 
 
 /*
@@ -94,7 +97,7 @@ function title_case(sentence){
 
 var selectedInfo = {{ entityTuples | safe}};
 var papersDict = {{ papersDict | safe }};
-var responseKeys = papersTableConfig[entityType]['outerTable']['responseKeys'];
+var responseKeys = outerConfig['responseKeys'];
 
 var keyword = '{{ keyword }}';
 
@@ -113,14 +116,15 @@ var nested_tables = {};
 
 // add all nested data tables
 papersTable.rows().every(function(rowIdx, tableLoop, rowLoop){
-  var eid = this.data()[papersTableConfig[entityType]['outerTable']['idCol']];
+  var outerTableIdCol = outerConfig['idCol'];
+  var eid = this.data()[outerTableIdCol];
   var tableId = eid;
   var child_text = "<table id='"+tableId+"' class='author_papers compact'></table>";
   this.child(child_text).show();
   var tableSelector = "#" + tableId;
   $(tableSelector).closest("td").addClass("innertable");
-  nested_tables[eid] = $(tableSelector).DataTable(papersTableConfig[entityType]['innerTable']['tableSettings']);
-  var childResponseKeys = papersTableConfig[entityType]['innerTable']['responseKeys'];
+  nested_tables[eid] = $(tableSelector).DataTable(innerConfig['tableSettings']);
+  var childResponseKeys = innerConfig['responseKeys'];
   updateTable(papersDict[eid], nested_tables[eid], childResponseKeys, true);
   console.log(papersDict[eid]);
   console.log(childResponseKeys);
@@ -135,7 +139,15 @@ papersTable.rows().every(function(rowIdx, tableLoop, rowLoop){
 submitButton.addEventListener('click', function(){
   console.log('submit button clicked');
   showProgressBar();
-
+  var innerTableIdCol = innerConfig['idCol'];
+  var innerTableYearCol = innerConfig['yearCol'];
+  if (innerTableYearCol === null) {
+    var bot_year_min = 1900;
+    var top_year_max = 2020;
+  } else {
+    var bot_year_min = 100000;
+    var top_year_max = 0;
+  }
   var selected_papers = {};
   var unselected_papers = {};
   papersTable.rows().every(function(rowIdx, tableLoop, rowLoop){
@@ -148,9 +160,13 @@ submitButton.addEventListener('click', function(){
       var node = this.node();
       var row_checked = ($(node).find('input').prop('checked'));
       if (row_checked) { 
-        selected_papers[table_id].push(this.data()[3]) 
+        selected_papers[table_id].push(this.data()[innerTableIdCol]);
+        if (innerTableYearCol !== null) {
+          if (this.data()[innerTableYearCol] < bot_year_min){bot_year_min = this.data()[innerTableYearCol]}; 
+          if (this.data()[innerTableYearCol] > top_year_max){top_year_max = this.data()[innerTableYearCol]}; 
+        }
       } else {
-        unselected_papers[table_id].push(this.data()[3])
+        unselected_papers[table_id].push(this.data()[innerTableIdCol])
       }
     });
   });
@@ -182,6 +198,8 @@ submitButton.addEventListener('click', function(){
        option: entityType,
        keyword: keyword,
        selfcite: selfCiteCheckbox.checked,
+       bot_year_min: bot_year_min,
+       top_year_max: top_year_max
    }
    window.location.href = "/submit/?" + $.param(data);
 });
