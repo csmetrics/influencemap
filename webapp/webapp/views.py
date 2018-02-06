@@ -16,6 +16,9 @@ from mkAff import getAuthor, getJournal, getConf, getAff, getConfPID, getJourPID
 # initialise as no saved pids
 saved_pids = dict()
 
+# initialise as no saved entities
+saved_entities = dict()
+
 # initialise as no expanded ids
 expanded_ids = dict()
 
@@ -105,12 +108,15 @@ def search(request):
         if option == 'author':
             try:
                 entities, saved_pids[keyword], expanded_ids[keyword] = getAuthor(keyword, progressCallback, nonExpandAID=expanded_ids[keyword], expand=expand)
+                saved_entities[keyword] = entities
             except:
                 entities_and_saved_pids = getAuthor(keyword, progressCallback, nonExpandAID=expanded_ids[keyword], expand=expand)
                 entities = entities_and_saved_pids[0]
+                saved_entities[keyword] += entities
                 saved_pids[keyword] = {**entities_and_saved_pids[1], **saved_pids[keyword]}
         else:
             entities = dataFunctionDict['get_ids'][option](keyword, progressCallback)
+            saved_entities[keyword] = entities
     data = {"entities": entities,}
     print('\n\n\n\n\nend of search: {}\n\n\n\n\n\n'.format(request.session['id']))
     return JsonResponse(data, safe=False)
@@ -126,15 +132,18 @@ def view_papers(request):
     expanded = request.GET.get('expanded') == 'true'
     name = request.GET.get('name')
     if entityType == 'author':
-        if expanded:
-            entities, paper_dict = getAuthor(name=name, expand=True, cbfunc=progressCallback)
-        else:
-            entities, paper_dict, _ = getAuthor(name=name, expand=False, cbfunc=progressCallback)
+#        if expanded:
+#            entities, paper_dict = getAuthor(name=name, expand=True, cbfunc=progressCallback, nonExpandAID=expanded_ids[name])
+#        else:
+#            entities, paper_dict, _ = getAuthor(name=name, expand=False, cbfunc=progressCallback)
+        entities = saved_entities[name]
+        paper_dict = saved_pids[name]
         entities = [x for x in entities if x['id'] in selectedIds]
         for entity in entities:
             entity['field'] = ['_'.join([str(y) for y in x]) for x in entity['field']]
     else:
-        entities = dataFunctionDict['get_ids'][entityType](name)
+#        entities = dataFunctionDict['get_ids'][entityType](name)
+        entities = saved_entities[name]
         get_pid_params = [selectedIds] if entityType != 'institution' else ([{'id':selectedIds[i],'name':selectedNames[i]} for i in range(len(selectedIds))], name)
         paper_dict = dataFunctionDict['get_pids'][entityType](*get_pid_params)
         entities = [x for x in entities if x['id'] in selectedIds]
@@ -155,6 +164,7 @@ def view_papers(request):
     }
 
     print('\n\n\n\n\nend of view papers: {}\n\n\n\n\n\n'.format(request.session['id']))
+    print('expand {}'.format(expanded))
     return render(request, 'view_papers.html', data)
 
 
