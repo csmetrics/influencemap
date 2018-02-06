@@ -60,7 +60,7 @@ def drawFlower(conn, ent_type, ent_type2, data_df, dir_out, name, bot_year=None,
     return flower_graph
 
 
-def getPreFlowerData(id_2_paper_id, ent_type, cbfunc=None): # id_2_paper_id should be a dict eid: [pid] including all papers regardless if they were deselected
+def getPreFlowerData(id_2_paper_id, ent_type, cbfunc=lambda x, y: print("{}\t{}".format(x,y))): # id_2_paper_id should be a dict eid: [pid] including all papers regardless if they were deselected
     conn = sqlite3.connect(DB_PATH)
 
     # get paper ids associated with input name
@@ -81,7 +81,7 @@ def getPreFlowerData(id_2_paper_id, ent_type, cbfunc=None): # id_2_paper_id shou
 
 
 
-def getFlower(data_df, name, ent_type, cbfunc=None, bot_year=None, top_year=None):
+def getFlower(data_df, name, ent_type, cbfunc=lambda x, y: print("{}\t{}".format(x,y)), bot_year=None, top_year=None):
     conn = sqlite3.connect(DB_PATH)
 
     # Generate a self filter dictionary
