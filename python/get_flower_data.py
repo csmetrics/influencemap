@@ -88,7 +88,7 @@ def generate_scores(conn, e_map, data_df, inc_self=False, unique=False):
     return res
 
 # Generates pandas dataframe for scores
-def generate_score_df(influence_df, e_map, ego, coauthors=set([]), score_year_min=None, score_year_max=None, ratio_func=np.vectorize(lambda x, y : y / x), sort_func=np.maximum):
+def generate_score_df(influence_df, e_map, ego, coauthors=set([]), score_year_min=None, score_year_max=None, ratio_func=np.vectorize(lambda x, y : y - x), sort_func=np.maximum):
 
     print('{} start score generation\n---'.format(datetime.now()))
 

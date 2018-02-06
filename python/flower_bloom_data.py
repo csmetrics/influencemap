@@ -14,20 +14,27 @@ def normalise_singular_linear(series):
     max_min_dif = max_val - min_val
 
     # Cases if max equal to min
-    if max_min_dif == 0 and max_val == 0:
-        return series
-    elif max_min_dif == 0:
-        series = 1
+    if max_min_dif == 0:
+        series = 0.5
         return series
 
     # Normalise
     return series.apply(lambda x : (x - min_val) / max_min_dif)
 
-    # Scale from 1 to 1024
-    scaled = series.apply(lambda x : 1 + (x - min_val) / max_min_dif)
+# Function to normalise color
+def normalise_colour_dif(series):
+    max_val = series.max()
+    min_val = series.min()
+    
+    normalisation = max(abs(max_val), abs(min_val))
 
-    # Log down to 0 to 1
-    return scaled.apply(np.log2)
+    # Cases if max equal to min
+    if normalisation == 0:
+        series = 0.5
+        return series
+
+    # Normalise
+    return series.apply(lambda x : (x + normalisation) / (2 * normalisation))
 
 # Normalise two series logwise
 def normalise_double_log(series1, series2):
@@ -64,7 +71,7 @@ def score_df_to_graph(score_df):
 
     # Normalise values
     score_df['normed_sum'] = normalise_singular_linear(score_df['sum'])
-    score_df['normed_ratio'] = normalise_singular_linear(score_df['ratio'])
+    score_df['normed_ratio'] = normalise_colour_dif(score_df['ratio'])
     norm_influenced, norm_influencing = normalise_double_log(score_df['influenced'], score_df['influencing'])
     score_df['normed_influenced'] = norm_influenced
     score_df['normed_influencing'] = norm_influencing
@@ -133,9 +140,8 @@ if __name__ == "__main__":
         path_name = os.path.join(plot_dir, '{}_flower_{}.png'.format(user_in, year))
         draw_flower(egoG=flower_graph, filename=path_name)
 
-        for x in range(15):
-            images.append(imageio.imread(path_name))
+        images.append(imageio.imread(path_name))
 
         draw_cite_volume(egoG=flower_graph, filename=os.path.join(plot_dir, '{}_bar_{}.png'.format(user_in, year)))
 
-    imageio.mimsave(os.path.join(plot_dir, '{}_flower.gif'.format(user_in)), images)
+    imageio.mimsave(os.path.join(plot_dir, '{}_flower.gif'.format(user_in)), images, duration=5)
