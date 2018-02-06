@@ -61,7 +61,7 @@ function drawFlower(svg_id, data, idx, w) {
       .enter().append("rect")
         .attr("class", "bar")
         .attr("id", function(d) { return d.id; })
-        .attr("x", function(d) { if (d.type == "in") return x(d.name)+x.bandwidth()/2; else return x(d.name); })
+        .attr("x", function(d) { if (d.type == "out") return x(d.name)+x.bandwidth()/2; else return x(d.name); })
         .attr("y", function(d) { return y(d.weight)-v_margin; })
         .attr("width", x.bandwidth()/2)
         .attr("height", function(d) { return yheight - y(d.weight); })
