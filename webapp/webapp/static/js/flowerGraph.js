@@ -20,16 +20,14 @@ var link = [], flower_split = [], bar = [],
     numnodes = [], svg = [], simulation = [],
     bar_axis_x = [], bar_axis_y = [],
     node_in = [], node_out = [],
-    text_in = [], text_out = [],
-    split_button = [], delete_button = [],
-    info_table = [];
+    text_in = [], text_out = [];
 
 function drawFlower(svg_id, data, idx, w) {
     var nodes = data["nodes"];
     var links = data["links"];
     var bars = data["bars"];
 
-    h_margin = 25;
+    h_margin = 225;
     v_margin = 200;
     yheight = 100;
     flower_margin = 50;
@@ -42,10 +40,10 @@ function drawFlower(svg_id, data, idx, w) {
     flower_split[idx] = false;
 
     // bar location
-    bar_width_ratio = 0.9,
-    bar_right_margin = 325,
-    bar_left = h_margin + width*(1-bar_width_ratio),
-    bar_right = width*bar_width_ratio-h_margin - bar_right_margin;
+    bar_width_ratio = 0.6,
+    bar_right_margin = 0,
+    bar_left = center[0] - width * bar_width_ratio /2
+    bar_right = center[0] + width * bar_width_ratio /2
 
     var x = d3.scaleBand()
               .range([bar_left, bar_right])
@@ -142,7 +140,8 @@ function drawFlower(svg_id, data, idx, w) {
         .attr("r", function(d) { return 5+10*d.size; })
         .style("fill", function (d, i) {if (d.id == 0) return "#ccc"; else return colors(d.weight);})
         .on("mouseover", function() { highlight_on(idx, this); })
-        .on("mouseout", function() { highlight_off(idx); });
+        .on("mouseout", function() { highlight_off(idx); })
+        .on("click", function(d) { toggle_split(idx, this); });
 
     // flower graph nodes
     node_out[idx] = svg[idx].append("g").selectAll("circle")
@@ -154,7 +153,8 @@ function drawFlower(svg_id, data, idx, w) {
         .attr("r", function(d) { return 5+10*d.size; })
         .style("fill", function (d, i) {if (d.id == 0) return "#ccc"; else return colors(d.weight);})
         .on("mouseover", function() { highlight_on(idx, this); })
-        .on("mouseout", function() { highlight_off(idx); });
+        .on("mouseout", function() { highlight_off(idx); })
+        .on("click", function(d) { toggle_split(idx, this); });
 
     // flower graph node text
     text_in[idx] = svg[idx].append("g").selectAll("text")
@@ -179,87 +179,6 @@ function drawFlower(svg_id, data, idx, w) {
         .attr("y", ".31em")
         .text(function(d) { return d.name; })
         .style("font-style", function(d) { if (d.coauthor == 'False') return "normal"; else return "italic"; });
-
-    // button variables
-    var button_padding_x = 30,
-        button_padding_y = 20,
-        button_width = 140,
-        button_height = 50,
-        text_padding = 5,
-        button_x = bar_right + button_padding_x + button_width / 2,
-        button_y = height - button_padding_y + button_height / 2,
-
-        button_delete_x = bar_right + 2 * button_padding_x + button_width + button_width / 2,
-        button_delete_y = height - button_padding_y + button_height / 2;
-
-    // button for splitting
-    split_button[idx] = svg[idx].append("g");
-
-    split_button[idx]
-        .append("rect")
-        .attr("x" ,button_x - button_width / 2)
-        .attr("y", button_y - button_height / 2)
-        .attr("width", button_width)
-        .attr("height", button_height)
-        .attr("fill", norcolor[1])
-        .on("click", function() { toggle_split(idx); });
-
-    split_button[idx]
-        .append("rect")
-        .attr("x" ,button_x - button_width / 2 - 0.2 * button_height / 2)
-        .attr("y", button_y - 0.8 * button_height / 2)
-        .attr("width", button_width + 0.2 * button_height)
-        .attr("height", 0.8 * button_height)
-        .attr("fill", "grey")
-        .attr("opacity", 0.6)
-        .on("click", function() { toggle_split(idx); });
-
-    split_button[idx]
-        .append("text")
-        .attr("x", button_x)
-        .attr("y", button_y + text_padding)
-        .attr("text-anchor", "middle")
-        .text("Split Flower")
-        .on("click", function() { toggle_split(idx); });
-
-    // button for deletion
-    delete_button[idx] = svg[idx].append("g");
-
-    delete_button[idx]
-        .append("rect")
-        .attr("x" , button_delete_x - button_width / 2)
-        .attr("y", button_delete_y - button_height / 2)
-        .attr("width", button_width)
-        .attr("height", button_height)
-        .attr("fill", norcolor[0]);
-
-    delete_button[idx]
-        .append("rect")
-        .attr("x" ,button_delete_x - button_width / 2 - 0.2 * button_height / 2)
-        .attr("y", button_delete_y - 0.8 * button_height / 2)
-        .attr("width", button_width + 0.2 * button_height)
-        .attr("height", 0.8 * button_height)
-        .attr("fill", "grey")
-        .attr("opacity", 0.6);
-
-    delete_button[idx]
-        .append("text")
-        .attr("x", button_delete_x)
-        .attr("y", button_delete_y + text_padding)
-        .attr("text-anchor", "middle")
-        .text("Delete Node");
-
-    // information table (height-v_margin)
-    info_table[idx] = svg[idx].append("g");
-
-    info_table[idx]
-        .append("rect")
-        .attr("x" , button_x - button_width / 2)
-        .attr("y", height-v_margin)
-        .attr("width", button_delete_x - button_x + button_width)
-        .attr("height", button_y - button_height / 2 - (height - v_margin) - button_padding_y)
-        .attr("fill", "grey")
-        .attr("opacity", 0.6);
 
     // flower graph chart layout
     simulation[idx] = d3.forceSimulation(nodes)
@@ -447,8 +366,11 @@ function split_flower(idx, shift) {
     });
 }
 
-function toggle_split(idx) {
-    var split_distance = width/4;
+function toggle_split(idx, selected) {
+    var split_distance = width/4,
+        id = d3.select(selected).attr("id");
+
+    if (id != 0) { return; }
 
     // If click the ego, then split flower
     if (flower_split[idx]) {
