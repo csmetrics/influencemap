@@ -40,7 +40,6 @@ var papersTable = $('#papers-table').DataTable(outerConfig['tableSettings']);
 
 // update searchTable
 function updateTable(data, table, resKeys, clear){
-  console.log("updateTable");
   if (clear) {table.clear();}
   for(var i in data) {
     var newRow = {};
@@ -113,8 +112,6 @@ papersTable.rows().every(function(rowIdx, tableLoop, rowLoop){
   nested_tables[eid] = $(tableSelector).DataTable(innerConfig['tableSettings']);
   var childResponseKeys = innerConfig['responseKeys'];
   updateTable(papersDict[eid], nested_tables[eid], childResponseKeys, true);
-  console.log(papersDict[eid]);
-  console.log(childResponseKeys);
 
 
   this.child.hide();
@@ -124,7 +121,6 @@ papersTable.rows().every(function(rowIdx, tableLoop, rowLoop){
 
 // Submit Button event handler
 submitButton.addEventListener('click', function(){
-  console.log('submit button clicked');
   showProgressBar();
   var innerTableIdCol = innerConfig['idCol'];
   var innerTableYearCol = innerConfig['yearCol'];
@@ -200,7 +196,6 @@ function childrowDataTable(data) {
 
 // Add event listener for opening and closing details
 $('#papers-table tbody').on('click', '.outer-table-row', function () {
-    console.log('row clicked');
     var tr = $(this).closest('tr');
     var row = papersTable.row( tr );
     var show = !(row.child.isShown());

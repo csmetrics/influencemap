@@ -77,6 +77,7 @@ expanded_ids = dict()
 
 
 def main(request):
+    print(request)
     global keyword, optionlist, option, selfcite
     keyword = ""
     option = optionlist[0] # default selection
@@ -92,9 +93,9 @@ def main(request):
 
 @csrf_exempt
 def search(request):
+    print(request)
     request.session['id'] = 'id_' + str(datetime.now())
     global saved_pids, expanded_ids
-    print("search!!", request.POST)
     entities = []
 
     keyword = request.POST.get("keyword")
@@ -117,12 +118,11 @@ def search(request):
             entities = dataFunctionDict['get_ids'][option](keyword, progressCallback)
             saved_entities[keyword] = entities
     data = {"entities": entities,}
-    print('\n\n\n\n\nend of search: {}\n\n\n\n\n\n'.format(request.session['id']))
     return JsonResponse(data, safe=False)
 
 
 def view_papers(request):
-    print("\n\nrequest: {}\n\n".format(request))
+    print(request)
     resetProgress()
     data = json.loads(request.POST.get('data'))
     selectedIds = data.get('selectedIds').split(',')
@@ -131,17 +131,12 @@ def view_papers(request):
     expanded = data.get('expanded') == 'true'
     name = data.get('name')
     if entityType == 'author':
-#        if expanded:
-#            entities, paper_dict = getAuthor(name=name, expand=True, cbfunc=progressCallback, nonExpandAID=expanded_ids[name])
-#        else:
-#            entities, paper_dict, _ = getAuthor(name=name, expand=False, cbfunc=progressCallback)
         entities = saved_entities[name]
         paper_dict = saved_pids[name]
         entities = [x for x in entities if x['id'] in selectedIds]
         for entity in entities:
             entity['field'] = ['_'.join([str(y) for y in x]) for x in entity['field']]
     else:
-#        entities = dataFunctionDict['get_ids'][entityType](name)
         entities = saved_entities[name]
         get_pid_params = [selectedIds] if entityType != 'institution' else ([{'id':selectedIds[i],'name':selectedNames[i]} for i in range(len(selectedIds))], name)
         paper_dict = dataFunctionDict['get_pids'][entityType](*get_pid_params)
@@ -221,6 +216,7 @@ def submit(request):
 
 
 def resubmit(request):
+    print(request)
     data = json.loads(request.POST.get('data'))
     from_year = int(data.get('from_year'))
     to_year = int(data.get('to_year'))
