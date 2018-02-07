@@ -20,9 +20,9 @@ db_myPAA = '/localdata/u6363358/data/paperAuthorAffiliations.db'
 
 saved_dir = '/localdata/common/savedFileAuthor.json'
 
-temp_nameList = {}
+#temp_nameList = {}
 
-checked_name = {}
+#checked_name = {}
 
 def removeCon(lst):
    if lst[-2] == ",":
@@ -461,27 +461,29 @@ def nameHandler(aff, name):
 
 def getAffPID(chosen,name): # chosen is the list of dict chosen by the user, name is the user input
     dbPAA = sqlite3.connect(db_myPAA, check_same_thread = False)
-    dbPAA.create_function("matchList",1,matchList)
+    #dbPAA.create_function("matchList",1,matchList)
     curP = dbPAA.cursor()
     affID = list(map(lambda x:x['id'], chosen))
     affName = list(map(lambda x:x['name'], chosen))
-    global temp_nameList
-    temp_nameList = set(map(lambda x:nameHandler(name, x),affName))    
+    temp_nameList = set(map(lambda x:nameHandler(name, x),affName))
+    temp_matchList = lambda x:matchList(temp_nameList, x)
+    dbPAA.create_function("matchList",1,temp_matchList)    
     curP.execute(removeCon("SELECT paper_id, affi_id, affNameOri FROM paa WHERE affi_id IN {}".format(tuple(affID))) + " AND matchList(affNameOri)")     
     papers = curP.fetchall()
     curP.close()
     dbPAA.close()
     affID_pID = {}
     
-    affIDpIDList = list(map(lambda x: (x[0],x[1]), papers))
+    affIDpIDList = list(map(lambda x: ((x[0],x[2]),x[1]), papers)) #a list of (affid, (paperID, affName))
     for paper, aff in affIDpIDList:
-        affID_pID.setdefault(aff,[]).append({'id':paper})
+        affID_pID.setdefault(aff,[]).append({'id':paper[0], 'affName':paper[1]}) #affID_pID is a dict of affid: {'id', 'affName'}
      
     output = {}
     for key in affID_pID:
         output[et.Entity(key, et.Entity_type.AFFI)] = affID_pID[key]
 
-    for key in output: print(output[key])
+    for key in output:
+        for thing in output[key]: print(thing)
    
                
     return affID_pID #affID_pID is a dict of affID:[pID]
@@ -503,9 +505,9 @@ def match(name1, name2): # name1 must be in name2
         if not exist: return False
     return True
 
-def matchList(name2):
+def matchList(nameList, name2):
     #instanceList = temp_nameList
-    for n in temp_nameList:
+    for n in nameList:
         if match(n,name2): return True
     return False
 
@@ -530,6 +532,6 @@ def matchForShort(name1, name2):
     return ls2 in name1
     
 if __name__ == '__main__':
-    trial = getAff('anu')
-    cID = [x for x in trial if x['name'] == 'australian national university']
-    x = getAffPID(cID,'anu') 
+    trial = getAff('anu computer science')
+    x = [s for s in trial if s['name'] == 'australian national university']
+    z = getAffPID(x,'anu computer science')
