@@ -276,13 +276,13 @@ def getAuthor(name, cbfunc=None, nonExpandAID=[], expand=False,use_cache=True, y
         aIDpaper[et.Entity(ids, et.Entity_type.AUTH)] = paperInfo
         finalresult.append({'name':tupname,'id':ids,'numpaper':numpaper,'affiliation':affiliation,'field':field,'recentPaper':recent['title'],'publishedDate':recent['date']})    
         used_ids.append(ids)        
-
+    '''
     for dic in finalresult: print(dic)
     
     for key in aIDpaper:
         infos = aIDpaper[key]
         for entity in infos: print(entity)
-     
+    '''  
 
     print("{} done".format(datetime.now()))
     cbfunc(100, "done")
@@ -323,10 +323,10 @@ def getJournal(name, a=None):
     print("{} finished getting jID".format(datetime.now()))
     curJ.close()
     dbJ.close()
-
+    '''
     for tup in journals:
         print(tup)
-    
+    '''
     output = []
    
     for tup in journals:
@@ -353,7 +353,7 @@ def getJourPID(jIDs, yearStart=0, yearEnd=2016): #thie function takes in a list 
     for key in jID_papers:
         output[et.Entity(key, et.Entity_type.JOUR)] = jID_papers[key]
 
-    for key in output: print(output[key])
+    #for key in output: print(output[key])
 
     curP.close()
     dbPAA.close()
@@ -380,7 +380,7 @@ def getConf(name, a=None):
     for tup in conference:
         output.append({'id':tup[0],'name':tup[1]})        
     
-    for dic in output: print(dic)
+    #for dic in output: print(dic)
 
 
     curC.close()
@@ -411,7 +411,7 @@ def getConfPID(cIDs, yearStart=0, yearEnd=2016): #this function takes in a list 
     for key in cID_papers:
         output[et.Entity(key, et.Entity_type.CONF)] = cID_papers[key]
 
-    for key in output: print(output[key])
+    #for key in output: print(output[key])
 
     curP.close()
     dbP.close()
@@ -434,8 +434,8 @@ def getAff(aff, a=None):
     affiliations = [x for x in affiliations if x[1] != aff]
     affiliations = temp + affiliations
     affiliations = [{'id': x[0], 'name': x[1]} for x in affiliations]
-    for tup in affiliations:
-        print(tup)
+    #for tup in affiliations:
+    #    print(tup)
     return affiliations #affiliations is a list of {'id': affID, 'name': affName)
 
 def nameHandler(aff, name):
@@ -483,8 +483,8 @@ def getAffPID(chosen,name): # chosen is the list of dict chosen by the user, nam
     for key in affID_pID:
         output[et.Entity(key, et.Entity_type.AFFI)] = affID_pID[key]
 
-    for key in output:
-        for thing in output[key]: print(thing)
+    #for key in output:
+    #    for thing in output[key]: print(thing)
    
                
     return output # WAS: affID_pID #affID_pID is a dict of affID:[pID]
@@ -533,6 +533,7 @@ def matchForShort(name1, name2):
     return ls2 in name1
     
 if __name__ == '__main__':
-    trial = getAff('anu computer science')
-    x = [s for s in trial if s['name'] == 'australian national university']
-    z = getAffPID(x,'anu computer science')
+    trial = getAff('harvard')
+    #x = [s for s in trial if s['name'] == 'harvard business school']
+    x = trial
+    z = getAffPID(x,'harvard')
