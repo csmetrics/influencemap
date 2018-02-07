@@ -34,7 +34,7 @@ def gen_pred_score_df(data_df):
 # Creates dictionaries for the weight scores
 def generate_scores(conn, e_map, data_df, inc_self=False, unique=False):
 
-    print('{} start filtering influence\n---'.format(datetime.now()))
+    print('\n---\n{} start filtering influence'.format(datetime.now()))
 
     # Concat the tables together
     df = gen_pred_score_df(pd.concat(data_df.values()))
@@ -90,7 +90,7 @@ def generate_scores(conn, e_map, data_df, inc_self=False, unique=False):
 # Generates pandas dataframe for scores
 def generate_score_df(influence_df, e_map, ego, coauthors=set([]), score_year_min=None, score_year_max=None, ratio_func=np.vectorize(lambda x, y : y - x), sort_func=np.maximum):
 
-    print('{} start score generation\n---'.format(datetime.now()))
+    print('\n---\n{} start score generation'.format(datetime.now()))
 
     # Check if any range set
     if score_year_min == None and score_year_max == None:
