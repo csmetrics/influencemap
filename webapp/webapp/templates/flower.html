@@ -40,7 +40,6 @@ author_data = {{ author|safe }}
 conf_data = {{ conf|safe }}
 inst_data = {{ inst|safe }}
 
-console.log(author_data);
 
 var width = document.getElementById('image-container').offsetWidth;
 drawFlower("#graph1", author_data, 0, width);
@@ -49,9 +48,8 @@ drawFlower("#graph3", inst_data, 2, width);
 
 
 resubmitButton.addEventListener('click', function(){
-console.log(nodes);
   $.ajax({
-    type: "GET",
+    type: "POST",
     url: "/resubmit",
     data: {
       from_year: nodes[0].textContent,
@@ -70,7 +68,6 @@ console.log(nodes);
       conf_data = result.conf;
       inst_data = result.inst;
 
-console.log(author_data);
 
       drawFlower("#graph1", author_data, 0, width);
       drawFlower("#graph2", conf_data, 1, width);

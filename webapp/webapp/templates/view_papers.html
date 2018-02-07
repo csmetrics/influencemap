@@ -38,22 +38,8 @@ var selfCiteCheckbox = document.getElementById('self-cite');
 var papersTable = $('#papers-table').DataTable(outerConfig['tableSettings']);
 
 
-function sendPost(data) {
-  
-  var url = '/submit/';
-  data = JSON.stringify(data);
-  var form = $('<form action="' + url + '" method="post">' +
-    "<input type='text' name='data' value='" + data + "' />" +
-    '</form>');
-  $('body').append(form);
-  form.submit();
-
-}
-
-
 // update searchTable
 function updateTable(data, table, resKeys, clear){
-  console.log("updateTable");
   if (clear) {table.clear();}
   for(var i in data) {
     var newRow = {};
@@ -126,8 +112,6 @@ papersTable.rows().every(function(rowIdx, tableLoop, rowLoop){
   nested_tables[eid] = $(tableSelector).DataTable(innerConfig['tableSettings']);
   var childResponseKeys = innerConfig['responseKeys'];
   updateTable(papersDict[eid], nested_tables[eid], childResponseKeys, true);
-  console.log(papersDict[eid]);
-  console.log(childResponseKeys);
 
 
   this.child.hide();
@@ -137,7 +121,6 @@ papersTable.rows().every(function(rowIdx, tableLoop, rowLoop){
 
 // Submit Button event handler
 submitButton.addEventListener('click', function(){
-  console.log('submit button clicked');
   showProgressBar();
   var innerTableIdCol = innerConfig['idCol'];
   var innerTableYearCol = innerConfig['yearCol'];
@@ -201,8 +184,7 @@ submitButton.addEventListener('click', function(){
        bot_year_min: bot_year_min,
        top_year_max: top_year_max
    }
-   sendPost(data)
-//   window.location.href = "/submit/?" + $.param(data);
+   postData('/submit/', data, "{% csrf_token %}")
 });
 
 
@@ -214,7 +196,6 @@ function childrowDataTable(data) {
 
 // Add event listener for opening and closing details
 $('#papers-table tbody').on('click', '.outer-table-row', function () {
-    console.log('row clicked');
     var tr = $(this).closest('tr');
     var row = papersTable.row( tr );
     var show = !(row.child.isShown());

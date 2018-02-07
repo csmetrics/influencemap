@@ -39,7 +39,6 @@ function makeSearchTable(entityType){
 
 // update searchTable
 function updateTable(data, table, resKeys, clear){
-  console.log("updateTable");
   if (clear) {table.clear();}
   for(var i in data) {
     var newRow = {};
@@ -92,8 +91,8 @@ continueButton.addEventListener('click', function(){
     name: latestSearchTerm
   };
 
-  console.log(data); 
-  window.location.href="/view_papers/?" + $.param(data);
+  postData('/view_papers/', data, "{% csrf_token %}");
+//  window.location.href="/view_papers/?" + $.param(data);
 });
 
 
@@ -112,7 +111,7 @@ function search(exp, clear){
 
   showProgressBar();
   $.ajax({
-    type: "GET",
+    type: "POST",
     url: "/search",
     data: { // input to the views.py - search()
       keyword: latestSearchTerm,
@@ -120,8 +119,6 @@ function search(exp, clear){
       expand: exp
     },
     success: function (result) { // return data if success
-      console.log("searchButton success");
-      console.log(result['entities']);
       updateTable(result["entities"], searchTable, responseKeys, clear);
       if (latestSearchOption !== 'author'){expandButton.style.display='none'} else {expandButton.style.display='inline'}
       tableContainer.classList.remove("invisible");

@@ -77,6 +77,7 @@ expanded_ids = dict()
 
 
 def main(request):
+    print(request)
     global keyword, optionlist, option, selfcite
     keyword = ""
     option = optionlist[0] # default selection
@@ -92,15 +93,14 @@ def main(request):
 
 @csrf_exempt
 def search(request):
+    print(request)
     request.session['id'] = 'id_' + str(datetime.now())
-    print('\n\n\n\n\nstart of search: {}\n\n\n\n\n\n'.format(request.session['id']))
     global saved_pids, expanded_ids
-    print("search!!", request.GET)
     entities = []
 
-    keyword = request.GET.get("keyword")
-    option = request.GET.get("option")
-    expand = True if request.GET.get("expand") == 'true' else False
+    keyword = request.POST.get("keyword")
+    option = request.POST.get("option")
+    expand = True if request.POST.get("expand") == 'true' else False
     if keyword not in expanded_ids.keys():
          expanded_ids[keyword] = list()
 
@@ -118,31 +118,25 @@ def search(request):
             entities = dataFunctionDict['get_ids'][option](keyword, progressCallback)
             saved_entities[keyword] = entities
     data = {"entities": entities,}
-    print('\n\n\n\n\nend of search: {}\n\n\n\n\n\n'.format(request.session['id']))
     return JsonResponse(data, safe=False)
 
 
 def view_papers(request):
-    print("\n\nrequest: {}\n\n".format(request))
+    print(request)
     resetProgress()
-    print('\n\n\n\n\nstart of view papers: {}\n\n\n\n\n\n'.format(request.session['id']))
-    selectedIds = request.GET.get('selectedIds').split(',')
-    selectedNames = request.GET.get('selectedNames').split(',')
-    entityType = request.GET.get('entityType')
-    expanded = request.GET.get('expanded') == 'true'
-    name = request.GET.get('name')
+    data = json.loads(request.POST.get('data'))
+    selectedIds = data.get('selectedIds').split(',')
+    selectedNames = data.get('selectedNames').split(',')
+    entityType = data.get('entityType')
+    expanded = data.get('expanded') == 'true'
+    name = data.get('name')
     if entityType == 'author':
-#        if expanded:
-#            entities, paper_dict = getAuthor(name=name, expand=True, cbfunc=progressCallback, nonExpandAID=expanded_ids[name])
-#        else:
-#            entities, paper_dict, _ = getAuthor(name=name, expand=False, cbfunc=progressCallback)
         entities = saved_entities[name]
         paper_dict = saved_pids[name]
         entities = [x for x in entities if x['id'] in selectedIds]
         for entity in entities:
             entity['field'] = ['_'.join([str(y) for y in x]) for x in entity['field']]
     else:
-#        entities = dataFunctionDict['get_ids'][entityType](name)
         entities = saved_entities[name]
         get_pid_params = [selectedIds] if entityType != 'institution' else ([{'id':selectedIds[i],'name':selectedNames[i]} for i in range(len(selectedIds))], name)
         paper_dict = dataFunctionDict['get_pids'][entityType](*get_pid_params)
@@ -163,16 +157,14 @@ def view_papers(request):
         'keyword': name
     }
 
-    print('\n\n\n\n\nend of view papers: {}\n\n\n\n\n\n'.format(request.session['id']))
-    print('expand {}'.format(expanded))
     return render(request, 'view_papers.html', data)
 
 
 
 @csrf_exempt
 def submit(request):
+    print(request)
     resetProgress()
-    print('\n\n\n\n\nstart of submit: {}\n\n\n\n\n\n'.format(request.session['id']))
     global option, saved_pids
     data = json.loads(request.POST.get('data'))
     papers_string = data['papers']   # 'eid1:pid,pid,...,pid_entity_eid2:pid,...'
@@ -220,19 +212,19 @@ def submit(request):
         }
     }
 
-    print('\n\n\n\n\nend of submit: {}\n\n\n\n\n\n'.format(request.session['id']))
     return render(request, "flower.html", data)
 
 
 def resubmit(request):
-    from_year = int(request.GET.get('from_year'))
-    to_year = int(request.GET.get('to_year'))
-    option = request.GET.get('option')
-    keyword = request.GET.get('keyword')
+    print(request)
+    data = json.loads(request.POST.get('data'))
+    from_year = int(data.get('from_year'))
+    to_year = int(data.get('to_year'))
+    option = data.get('option')
+    keyword = data.get('keyword')
     pre_flower_data = []
 
 
-    print( pre_flower_data_dict[request.session['id']])    
     flower_data = getFlower(data_df=pre_flower_data_dict[request.session['id']], name=keyword, ent_type=option, bot_year=from_year, top_year=to_year)
 
     data1 = processdata("author", flower_data[0])
@@ -246,7 +238,7 @@ def resubmit(request):
         "navbarOption": {
             "optionlist": optionlist,
             "selectedKeyword": keyword,
-            "selectedOption": [o for o in optionlist if o["id"] == option][0],
+            "selectedOption": option,
         },
     }
     return JsonResponse(data, safe=False)
