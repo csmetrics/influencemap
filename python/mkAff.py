@@ -477,7 +477,7 @@ def getAffPID(chosen,name): # chosen is the list of dict chosen by the user, nam
     
     affIDpIDList = list(map(lambda x: ((x[0],x[2]),x[1]), papers)) #a list of (affid, (paperID, affName))
     for paper, aff in affIDpIDList:
-        affID_pID.setdefault(aff,[]).append({'id':paper[0], 'affName':paper[1]}) #affID_pID is a dict of affid: {'id', 'affNanme'}
+        affID_pID.setdefault(aff,[]).append({'paperID':paper[0], 'affName':paper[1]}) #affID_pID is a dict of affid: {'id', 'affNanme'}
      
     output = {}
     for key in affID_pID:
