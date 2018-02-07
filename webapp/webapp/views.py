@@ -169,12 +169,13 @@ def view_papers(request):
 
 
 
+@csrf_exempt
 def submit(request):
     resetProgress()
     print('\n\n\n\n\nstart of submit: {}\n\n\n\n\n\n'.format(request.session['id']))
     global option, saved_pids
-
-    papers_string = request.GET.get('papers')   # 'eid1:pid,pid,...,pid_entity_eid2:pid,...'
+    data = json.loads(request.POST.get('data'))
+    papers_string = data['papers']   # 'eid1:pid,pid,...,pid_entity_eid2:pid,...'
     id_papers_strings = papers_string.split('_entity_')
     id_2_paper_id = dict()
 
@@ -182,7 +183,7 @@ def submit(request):
         eid, pids = id_papers_string.split(':')
         id_2_paper_id[eid] = pids.split(',')
 
-    unselected_papers_string = request.GET.get('unselected_papers')   # 'eid1:pid,pid,...,pid_entity_eid2:pid,...'
+    unselected_papers_string = data.get('unselected_papers')   # 'eid1:pid,pid,...,pid_entity_eid2:pid,...'
     unselected_id_papers_strings = unselected_papers_string.split('_entity_')
 
     unselected_id_2_paper_id = dict()
@@ -194,11 +195,11 @@ def submit(request):
     print(id_2_paper_id)
     print(unselected_id_2_paper_id)
 
-    option = request.GET.get("option")
-    keyword = request.GET.get('keyword')
-    selfcite = True if request.GET.get("selfcite") == "true" else False
-    bot_year_min = int(request.GET.get("bot_year_min"))
-    top_year_max = int(request.GET.get("top_year_max"))
+    option = data.get("option")
+    keyword = data.get('keyword')
+    selfcite = True if data.get("selfcite") == "true" else False
+    bot_year_min = int(data.get("bot_year_min"))
+    top_year_max = int(data.get("top_year_max"))
 
 
     pre_flower_data_dict[request.session['id']] = getPreFlowerData(id_2_paper_id, unselected_id_2_paper_id, ent_type = option, cbfunc=progressCallback)
