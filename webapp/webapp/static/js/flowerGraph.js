@@ -165,7 +165,7 @@ function drawFlower(svg_id, data, idx, w) {
         .attr("gtype", function(d) { return d.gtype; })
         .attr("x", 8)
         .attr("y", ".31em")
-        .text(function(d) { return d.name; })
+        .text(function(d) { if (d.coauthor == 'True') return "⭒" + d.name; else return d.name; })
         .style("font-style", function(d) { if (d.coauthor == 'False') return "normal"; else return "italic"; });
 
     // flower graph node text
@@ -177,7 +177,7 @@ function drawFlower(svg_id, data, idx, w) {
         .attr("gtype", function(d) { return d.gtype; })
         .attr("x", 8)
         .attr("y", ".31em")
-        .text(function(d) { return d.name; })
+        .text(function(d) { if (d.coauthor == 'True') return "⭒" + d.name; else return d.name; })
         .style("font-style", function(d) { if (d.coauthor == 'False') return "normal"; else return "italic"; });
 
     // flower graph chart layout
@@ -289,27 +289,28 @@ function transform_x(d) {
 }
 
 function transform_y(d) {
-  d.fy = center[0]+magf*d.ypos;
+  d.fy = center[1]+magf*d.ypos;
   return d.y
 }
 
 function transform_text_x(d) {
   shift = 0;
+  circ_dif = 5;
   d.fx = center[0]+magf*d.xpos;
 
-  if (d.xpos < -.3) shift -= 10;
-  if (d.xpos > .3) shift += 10;
+  if (d.xpos < -.3) shift -= 5 + 10 * d.size + circ_dif;
+  if (d.xpos > .3) shift += 5 + 10 * d.size + circ_dif;
   return d.x + shift
 }
 
 function transform_text_y(d) {
   shift = 0;
-  d.fx = center[0]+magf*d.xpos;
   d.fy = center[1]-magf*d.ypos;
 
-  if (d.id > 0 && -.3 < d.xpos && d.xpos < .3) shift -= 10;
-  if (d.id > 0 && -.2 < d.xpos && d.xpos < .2) shift -= 10;
-  if (d.id > 0 && -.1 < d.xpos && d.xpos < .1) shift -= 10;
+  if (d.id > 0 && -.5 < d.xpos && d.xpos < .5) shift -= 5;
+  if (d.id > 0 && -.4 < d.xpos && d.xpos < .4) shift -= 6;
+  if (d.id > 0 && -.3 < d.xpos && d.xpos < .3) shift -= 11;
+  if (d.id > 0 && -.1 < d.xpos && d.xpos < .1) shift -= 15;
   return d.y + shift
 }
 
