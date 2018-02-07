@@ -25,6 +25,25 @@ img.fit-wrapper {
   white-space: nowrap;
 }
 
+.innertable {
+  box-shadow: inset 0px 2px 1px 0px #bbb;
+}
+.innertable div {
+  padding: 8 50 3 50;
+}
+
+.innertable,
+.innertable div,
+.innertable table.dataTable thead th,
+.innertable table.dataTable thead tr,
+.innertable table.dataTable tbody tr {
+  background-color: #edf5f9;
+}
+.innertable table.dataTable thead th {
+  white-space: nowrap;
+}
+
+
 .link {
   fill: none;
   stroke: #666;
@@ -39,4 +58,11 @@ text {
   font: 15px sans-serif;
   pointer-events: none;
   text-shadow: 0 1px 0 #fff, 1px 0 0 #fff, 0 -1px 0 #fff, -1px 0 0 #fff;
+}
+
+.label-as-badge {
+    border-radius: 4px;
+    padding: 4px;
+    background-color: rgb(245, 245, 245);
+    border: 1px solid #e5e5e5;
 }

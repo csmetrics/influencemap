@@ -28,8 +28,8 @@ def gen_reference_df(conn, paper_ids):
     rows = list()
 
     for chunk in paper_chunks:
-        papers_citing_me_q = 'SELECT 1, paper_id, ref_count, paper_ref_id FROM paper_ref_count WHERE paper_ref_id IN ({})'.format(','.join(['?'] * len(chunk)))
-        papers_cited_by_me_q = 'SELECT 0, paper_id, ref_count, paper_ref_id FROM paper_ref_count WHERE paper_id IN ({})'.format(','.join(['?'] * len(chunk)))
+        papers_citing_me_q = 'SELECT paper_ref_id, 1, paper_id, ref_count, paper_ref_id FROM paper_ref_count WHERE paper_ref_id IN ({})'.format(','.join(['?'] * len(chunk)))
+        papers_cited_by_me_q = 'SELECT paper_id, 0, paper_id, ref_count, paper_ref_id FROM paper_ref_count WHERE paper_id IN ({})'.format(','.join(['?'] * len(chunk)))
 
         cur.execute(papers_citing_me_q, chunk)
         rows += cur.fetchall()
@@ -40,7 +40,7 @@ def gen_reference_df(conn, paper_ids):
         total_prog += len(chunk)
         print('{} finish query of paper chunk, total prog: {:.2f}%, papers: {}'.format(datetime.now(), total_prog/total_papers * 100, total_prog))
 
-    ref_df = pd.DataFrame.from_records(rows, columns=REF_LABELS)
+    ref_df = pd.DataFrame.from_records(rows, columns=["info_from"] + REF_LABELS)
 
     cur.close()
 
@@ -79,8 +79,8 @@ def test_sc(row):
 # joining operator to rename and combine dataframes
 def combine_df(ref_df, info_df):
     # Column names for citing and cited reference information
-    citing_cols = dict([(x, x + '_citing') for x in ['paper'] + INFO_COLS])
-    cited_cols = dict([(x, x + '_cited') for x in ['paper'] + INFO_COLS])
+    citing_cols = dict([(x, x + '_citing') for x in ['paper'] + INFO_COLS] + [('info_from', 'info_from')])
+    cited_cols = dict([(x, x + '_cited') for x in ['paper'] + INFO_COLS] + [('info_from', 'info_from')])
 
     # Calculate sc join index
     ref_df['paper_map'] = ref_df['paper_citing'] + '-' + ref_df['paper_cited']
@@ -93,10 +93,14 @@ def combine_df(ref_df, info_df):
     return res
 
 # generate score info from combined dataframe
-def score_information(df, entity_ids):
+def score_information(df, entity_ids, ignore_papers):
     # If empty return empty
     if df.empty:
         return df
+
+    print(df)
+    # Remove ignored papers
+    df = df[~df['info_from'].isin(ignore_papers)]
 
     # Calculate scores
     df['influence'] = df.apply(lambda x : get_weight(x), axis=1)
@@ -116,7 +120,7 @@ def score_information(df, entity_ids):
     
     return df.drop(columns=['paper_map'])
 
-def gen_combined_df(conn, entity, entity_ids, paper_ids):
+def gen_combined_df(conn, entity, entity_ids, paper_ids, ignore_papers):
     # If entity_id is None (theshold papers) with no caching
     if not entity:
         print('\n---\n{} start finding paper references for: threshold\n---'.format(datetime.now()))
@@ -162,10 +166,10 @@ def gen_combined_df(conn, entity, entity_ids, paper_ids):
             res_df.to_pickle(cache_path)
             os.chmod(cache_path, 0o777)
 
-    return score_information(res_df, entity_ids)
+    return score_information(res_df, entity_ids, ignore_papers)
 
 # Wraps above functions to produce a dictionary of pandas dataframes for relevent information
-def gen_search_df(conn, paper_map):
+def gen_search_df(conn, paper_map, unselect_paper_map):
     print(paper_map)
     entity_ids = list(map(lambda x : x.entity_id, paper_map.keys()))
 
@@ -173,13 +177,16 @@ def gen_search_df(conn, paper_map):
     threshold_papers = list()
     # Go through each of the entity types the user selects
     for entity, paper_tuple in paper_map.items():
-        paper_ids = paper_tuple #list(map(lambda x : x[0], paper_tuple))
+        paper_ids = paper_tuple
+
+        # Papers to unselect
+        ignore_papers = unselect_paper_map[entity]
 
         # Bin entity papers with papers less than threshold number
         if len(paper_ids) < PAPER_THRESHOLD:
             threshold_papers += paper_ids
         else:
-            res_dict[entity.name_str()] = gen_combined_df(conn, entity, entity_ids, paper_ids)
+            res_dict[entity.name_str()] = gen_combined_df(conn, entity, entity_ids, paper_ids, ignore_papers)
 
     # Calculate threshold values
     #res_dict[None] = gen_combined_df(conn, None, entity_ids, threshold_papers)

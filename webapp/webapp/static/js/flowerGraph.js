@@ -15,36 +15,35 @@ var selcolor = [colors(0.2), colors(0.8)],
     norcolor = [colors(0.25), colors(0.75)],
     hidcolor = [colors(0.4), colors(0.6)];
 
-var center;
-var link = [], flower_state = [], bar = [],
+var width, height, center, magf;
+var link = [], flower_split = [], bar = [],
     numnodes = [], svg = [], simulation = [],
+    bar_axis_x = [], bar_axis_y = [],
     node_in = [], node_out = [],
     text_in = [], text_out = [];
 
-function drawFlower(svg_id, data, idx) {
+function drawFlower(svg_id, data, idx, w) {
     var nodes = data["nodes"];
     var links = data["links"];
     var bars = data["bars"];
 
-    h_margin = 100;
+    h_margin = 225;
     v_margin = 200;
     yheight = 100;
     flower_margin = 50;
 
     svg[idx] = d3.select(svg_id),
-    width = svg[idx].attr("width"),
-    height = 600,
+    width = w, magf = Math.min(250, width/7),
+    height = 650,
     numnodes[idx] = nodes.length,
     center = [width/2, height/2 + flower_margin];
-    flower_state[idx] = false;
+    flower_split[idx] = false;
 
     // bar location
-    bar_width_ratio = 0.9,
+    bar_width_ratio = 0.6,
     bar_right_margin = 0,
-    bar_left = h_margin+width*(1-bar_width_ratio),
-    bar_right = width*bar_width_ratio-h_margin - bar_right_margin;
-
-    console.log(bar_right)
+    bar_left = center[0] - width * bar_width_ratio /2
+    bar_right = center[0] + width * bar_width_ratio /2
 
     var x = d3.scaleBand()
               .range([bar_left, bar_right])
@@ -60,25 +59,28 @@ function drawFlower(svg_id, data, idx) {
       .enter().append("rect")
         .attr("class", "bar")
         .attr("id", function(d) { return d.id; })
-        .attr("x", function(d) { if (d.type == "in") return x(d.name)+x.bandwidth()/2; else return x(d.name); })
-        .attr("width", x.bandwidth()/2)
+        .attr("x", function(d) { if (d.type == "out") return x(d.name)+x.bandwidth()/2; else return x(d.name); })
         .attr("y", function(d) { return y(d.weight)-v_margin; })
+        .attr("width", x.bandwidth()/2)
         .attr("height", function(d) { return yheight - y(d.weight); })
         .attr("transform", "translate(0," + height + ")")
+        .style("opacity", 1)
         .style("fill", function(d) { if (d.type == "in") return norcolor[0]; else return norcolor[1]; });
 
     // bar chart x axis
-    svg[idx].append("g")
+    bar_axis_x[idx] = svg[idx].append("g")
         .attr("transform", "translate(0," + (height+yheight-v_margin) + ")")
+        .attr("class", "hl-text")
         .call(d3.axisBottom(x))
         .selectAll("text")
+          .text(function(d) { if (d.length > 20) return d.slice(0, 20)+"..."; else return d.slice(0, 20); })
           .style("text-anchor", "end")
           .attr("dx", "-.8em")
           .attr("dy", "-.5em")
           .attr("transform", "rotate(-90)");;
 
     // bar chart y axis
-    svg[idx].append("g")
+    bar_axis_y[idx] = svg[idx].append("g")
         .attr("transform", "translate(" + bar_left + "," + (height-v_margin) + ")")
         .call(d3.axisLeft(y).ticks(5));
 
@@ -133,48 +135,50 @@ function drawFlower(svg_id, data, idx) {
         .data(nodes)
       .enter().append("circle")
         .attr("id", function(d) { return d.id; })
+        .attr("class", "hl-circle")
         .attr("gtype", function(d) { return d.gtype; })
         .attr("r", function(d) { return 5+10*d.size; })
         .style("fill", function (d, i) {if (d.id == 0) return "#ccc"; else return colors(d.weight);})
-        .style("stroke-width", function(d) { if (d.coauthor == 'False') return 3; else return 2; })
-        .style("stroke", function(d) { if (d.coauthor == 'False') return "grey"; else return "green"; })
-        .on("click", function(d) { click_node(idx, this, d); })
         .on("mouseover", function() { highlight_on(idx, this); })
-        .on("mouseout", function() { highlight_off(idx); });
+        .on("mouseout", function() { highlight_off(idx); })
+        .on("click", function(d) { toggle_split(idx, this); });
 
     // flower graph nodes
     node_out[idx] = svg[idx].append("g").selectAll("circle")
         .data(nodes)
       .enter().append("circle")
         .attr("id", function(d) { return d.id; })
+        .attr("class", "hl-circle")
         .attr("gtype", function(d) { return d.gtype; })
         .attr("r", function(d) { return 5+10*d.size; })
         .style("fill", function (d, i) {if (d.id == 0) return "#ccc"; else return colors(d.weight);})
-        .style("stroke-width", function(d) { if (d.coauthor == 'False') return 3; else return 2; })
-        .style("stroke", function(d) { if (d.coauthor == 'False') return "grey"; else return "green"; })
-        .on("click", function(d) { click_node(idx, this, d); })
         .on("mouseover", function() { highlight_on(idx, this); })
-        .on("mouseout", function() { highlight_off(idx); });
+        .on("mouseout", function() { highlight_off(idx); })
+        .on("click", function(d) { toggle_split(idx, this); });
 
     // flower graph node text
     text_in[idx] = svg[idx].append("g").selectAll("text")
         .data(nodes)
       .enter().append("text")
         .attr("id", function(d) { return d.id; })
+        .attr("class", "hl-text")
         .attr("gtype", function(d) { return d.gtype; })
         .attr("x", 8)
         .attr("y", ".31em")
-        .text(function(d) { return d.name; });
+        .text(function(d) { return d.name; })
+        .style("font-style", function(d) { if (d.coauthor == 'False') return "normal"; else return "italic"; });
 
     // flower graph node text
     text_out[idx] = svg[idx].append("g").selectAll("text")
         .data(nodes)
       .enter().append("text")
         .attr("id", function(d) { return d.id; })
+        .attr("class", "hl-text")
         .attr("gtype", function(d) { return d.gtype; })
         .attr("x", 8)
         .attr("y", ".31em")
-        .text(function(d) { return d.name; });
+        .text(function(d) { return d.name; })
+        .style("font-style", function(d) { if (d.coauthor == 'False') return "normal"; else return "italic"; });
 
     // flower graph chart layout
     simulation[idx] = d3.forceSimulation(nodes)
@@ -190,12 +194,28 @@ function highlight_on(idx, selected) {
   group = d3.select(selected).attr("gtype");
   console.log("selected", id, group);
   if (id == 0) return;
-  svg[idx].selectAll("rect")
-    .style("opacity", function (d) { if(id != d.id && d.id != 0 && group == d.gtype) return 0.4; else return 1; });
-  svg[idx].selectAll("text")
-    .style("opacity", function (d) { if(id != d.id && d.id != 0 && group == d.gtype) return 0.4; else return 1; });
-  svg[idx].selectAll("circle")
-    .style("opacity", function (d) { if(id != d.id && d.id != 0 && group == d.gtype) return 0.4; else return 1; });
+
+  // highlight rectangles
+  svg[idx].selectAll("rect").each(function() {
+    if (d3.select(this).attr("class") == "bar") {
+        d3.select(this).style("opacity", function (d) { if(id != d.id && d.id != 0 && group == d.gtype) return 0.4; else return 1; });
+    }
+  });
+
+  // highlight text
+  svg[idx].selectAll("text").each(function() {
+    if (d3.select(this).attr("class") == "hl-text") {
+        d3.select(this).style("opacity", function (d) { if(id != d.id && d.id != 0 && group == d.gtype) return 0.4; else return 1; });
+    }
+  });
+
+  // highlight circles
+  svg[idx].selectAll("circle").each(function() {
+    if (d3.select(this).attr("class") == "hl-circle") {
+        d3.select(this).style("opacity", function (d) { if(id != d.id && d.id != 0 && group == d.gtype) return 0.4; else return 1; });
+    }
+  });
+
   svg[idx].selectAll("path")
     .attr('marker-end', function(d) {
       if (d)
@@ -219,9 +239,27 @@ function highlight_off(idx) {
     .attr('marker-end', function(d) { if (d) return "url(#" + d.gtype+"_"+d.type+"_"+d.id + ")"; })
     .style("stroke", function (d) { if (d) if (d.type == "in") return norcolor[0]; else return norcolor[1]; })
     .style("opacity", function (d) { if (d) return 1; } );
-  svg[idx].selectAll("circle").style("opacity", function (d) { return 1; });
-  svg[idx].selectAll("text").style("opacity", function (d) { return 1; });
-  svg[idx].selectAll("rect").style("opacity", function (d) { return 1; });
+
+  // un-highlight rectangles
+  svg[idx].selectAll("rect").each(function() {
+    if (d3.select(this).attr("class") == "bar") {
+        d3.select(this).style("opacity", 1);
+    }
+  });
+
+  // un-highlight text
+  svg[idx].selectAll("text").each(function() {
+    if (d3.select(this).attr("class") == "hl-text") {
+        d3.select(this).style("opacity", 1);
+    }
+  });
+
+  // un-highlight circles
+  svg[idx].selectAll("circle").each(function() {
+    if (d3.select(this).attr("class") == "hl-circle") {
+        d3.select(this).style("opacity", 1);
+    }
+  });
 }
 
 function ticked(idx) {
@@ -246,27 +284,26 @@ function linkArc(d) {
 }
 
 function transform_x(d) {
-  magf = 250;
   d.fx = center[0]+magf*d.xpos;
   return d.x
 }
 
 function transform_y(d) {
-  magf = 250;
   d.fy = center[0]+magf*d.ypos;
   return d.y
 }
 
 function transform_text_x(d) {
-  magf = 250;
+  shift = 0;
   d.fx = center[0]+magf*d.xpos;
 
-  return d.x
+  if (d.xpos < -.3) shift -= 10;
+  if (d.xpos > .3) shift += 10;
+  return d.x + shift
 }
 
 function transform_text_y(d) {
-  magf = 250;
-  var shift = 0;
+  shift = 0;
   d.fx = center[0]+magf*d.xpos;
   d.fy = center[1]-magf*d.ypos;
 
@@ -329,19 +366,23 @@ function split_flower(idx, shift) {
     });
 }
 
-function click_node(idx, selected, d) {
-    var split_distance = 450
-    id = d3.select(selected).attr("id");
+function toggle_split(idx, selected) {
+    var split_distance = width/4,
+        id = d3.select(selected).attr("id");
+
+    if (id != 0) { return; }
 
     // If click the ego, then split flower
-    if (id == 0) {
-        if (flower_state[idx]) {
-            split_flower(idx, 0);
-            flower_state[idx] = false;
-        }
-        else {
-            split_flower(idx, split_distance); 
-            flower_state[idx] = true;
-        }
+    if (flower_split[idx]) {
+        split_flower(idx, 0);
+        flower_split[idx] = false;
+        split_button[idx].select("text")
+            .text("Split Flower")
+    }
+    else {
+        split_flower(idx, split_distance); 
+        flower_split[idx] = true;
+        split_button[idx].select("text")
+            .text("Combine Flower")
     }
 }

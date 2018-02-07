@@ -60,19 +60,32 @@ def drawFlower(conn, ent_type, ent_type2, data_df, dir_out, name, bot_year=None,
     return flower_graph
 
 
-def getPreFlowerData(id_2_paper_id, ent_type, cbfunc=None): # id_2_paper_id should be a dict eid: [pid] including all papers regardless if they were deselected
+def getPreFlowerData(id_2_paper_id, unselected_id_2_paper_id, ent_type, cbfunc=lambda x, y: print("{}\t{}".format(x,y))): # id_2_paper_id should be a dict eid: [pid] including all papers regardless if they were deselected
     conn = sqlite3.connect(DB_PATH)
 
     # get paper ids associated with input name
     cbfunc(10, "get paper ids associated with input name")
 
+    entity_map = dict()
+
     entity_id_2_paper_id = dict()
     for eid, papers in id_2_paper_id.items():
-        entity_id_2_paper_id[Entity(eid, e[ent_type])] = papers
+        entity = Entity(eid, e[ent_type])
+        entity_map[eid] = entity
+        entity_id_2_paper_id[entity] = papers
+
+    # Initiate the unselect dictionary
+    entity_unselected_id_2_paper_id = dict([(entity, []) for entity in entity_map.values()])
+
+    print(entity_unselected_id_2_paper_id)
+
+    # Set unselect values
+    for eid, papers in unselected_id_2_paper_id.items():
+        entity_unselected_id_2_paper_id[entity_map[eid]] = papers
 
     # filter ref papers
     cbfunc(20, "filter reference papers")
-    data_df = gen_search_df(conn, entity_id_2_paper_id)
+    data_df = gen_search_df(conn, entity_id_2_paper_id, entity_unselected_id_2_paper_id)
 
     conn.close()
 
@@ -81,7 +94,7 @@ def getPreFlowerData(id_2_paper_id, ent_type, cbfunc=None): # id_2_paper_id shou
 
 
 
-def getFlower(data_df, name, ent_type, cbfunc=None, bot_year=None, top_year=None):
+def getFlower(data_df, name, ent_type, cbfunc=lambda x, y: print("{}\t{}".format(x,y)), bot_year=None, top_year=None):
     conn = sqlite3.connect(DB_PATH)
 
     # Generate a self filter dictionary
