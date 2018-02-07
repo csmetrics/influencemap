@@ -16,7 +16,7 @@ def draw_flower(egoG=None, ax=None,
                                  "sns_palette": "RdBu", "out_palette": "Reds", "in_palette": "Blues", 
                                  "num_colors": 200, "delta_text":0.02}, filename=None):
 
-    print('{} start drawing flower\n---'.format(datetime.now()))
+    print('\n---\n{} start drawing flower'.format(datetime.now()))
 
     ps = plot_setting
     if not ax:

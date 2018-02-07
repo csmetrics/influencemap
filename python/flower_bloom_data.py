@@ -60,7 +60,7 @@ def normalise_double_log(series1, series2):
 # Additionally normalises influence values
 def score_df_to_graph(score_df):
 
-    print('{} start graph generation\n---'.format(datetime.now()))
+    print('\n---\n{} start graph generation'.format(datetime.now()))
 
     # Ego Graph
     ego=score_df.ego

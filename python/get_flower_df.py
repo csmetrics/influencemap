@@ -24,7 +24,6 @@ def gen_reference_df(conn, paper_ids):
     total_prog = 0
 
     paper_chunks = [paper_ids[x:x+BATCH_SIZE] for x in range(0, total_papers, BATCH_SIZE)]
-    print(paper_chunks)
     rows = list()
 
     for chunk in paper_chunks:
@@ -98,7 +97,6 @@ def score_information(df, entity_ids, ignore_papers):
     if df.empty:
         return df
 
-    print(df)
     # Remove ignored papers
     df = df[~df['info_from'].isin(ignore_papers)]
 
@@ -123,19 +121,19 @@ def score_information(df, entity_ids, ignore_papers):
 def gen_combined_df(conn, entity, entity_ids, paper_ids, ignore_papers):
     # If entity_id is None (theshold papers) with no caching
     if not entity:
-        print('\n---\n{} start finding paper references for: threshold\n---'.format(datetime.now()))
+        print('\n---\n{} start finding paper references for: threshold'.format(datetime.now()))
         ref_df = gen_reference_df(conn, paper_ids)
         print('{} finish finding paper references for: threshold\n---'.format(datetime.now()))
 
         # Get the papers to find info for
         info_papers = list(set(ref_df['paper_citing'].tolist()).union(set(ref_df['paper_cited'].tolist())))
 
-        print('{} start finding paper info for: threshold\n---'.format(datetime.now()))
+        print('\n---\n{} start finding paper info for: threshold'.format(datetime.now()))
         info_df = gen_info_df(conn, info_papers)
         print('{} finish finding paper info for: threshold\n---'.format(datetime.now()))
 
         # Combine and deal with possible unique
-        print('{} start joining dataframes\n---'.format(datetime.now()))
+        print('\n---\n{} start joining dataframes'.format(datetime.now()))
         res_df = combine_df(ref_df, info_df)
         print('{} finish joining dataframes\n---'.format(datetime.now()))
     else:
@@ -146,19 +144,19 @@ def gen_combined_df(conn, entity, entity_ids, paper_ids, ignore_papers):
             print('\n---\n{} found ref cache for: {}\n---'.format(datetime.now(), entity.entity_id))
         # If miss
         except FileNotFoundError:
-            print('\n---\n{} start finding paper references for: {}\n---'.format(datetime.now(), entity.entity_id))
+            print('\n---\n{} start finding paper references for: {}'.format(datetime.now(), entity.entity_id))
             ref_df = gen_reference_df(conn, paper_ids)
             print('{} finish finding paper references for: {}\n---'.format(datetime.now(), entity.entity_id))
 
             # Get the papers to find info for
             info_papers = list(set(ref_df['paper_citing'].tolist()).union(set(ref_df['paper_cited'].tolist())))
 
-            print('{} start finding paper info for: {}\n---'.format(datetime.now(), entity.entity_id))
+            print('\n---\n{} start finding paper info for: {}'.format(datetime.now(), entity.entity_id))
             info_df = gen_info_df(conn, info_papers)
             print('{} finish finding paper info for: {}\n---'.format(datetime.now(), entity.entity_id))
 
             # Combine and deal with possible unique
-            print('{} start joining dataframes\n---'.format(datetime.now()))
+            print('\n---\n{} start joining dataframes'.format(datetime.now()))
             res_df = combine_df(ref_df, info_df)
             print('{} finish joining dataframes\n---'.format(datetime.now()))
 
@@ -170,7 +168,6 @@ def gen_combined_df(conn, entity, entity_ids, paper_ids, ignore_papers):
 
 # Wraps above functions to produce a dictionary of pandas dataframes for relevent information
 def gen_search_df(conn, paper_map, unselect_paper_map):
-    print(paper_map)
     entity_ids = list(map(lambda x : x.entity_id, paper_map.keys()))
 
     res_dict = dict()
@@ -189,25 +186,6 @@ def gen_search_df(conn, paper_map, unselect_paper_map):
             res_dict[entity.name_str()] = gen_combined_df(conn, entity, entity_ids, paper_ids, ignore_papers)
 
     # Calculate threshold values
-    #res_dict[None] = gen_combined_df(conn, None, entity_ids, threshold_papers)
+    res_dict[None] = gen_combined_df(conn, None, entity_ids, threshold_papers, ignore_papers)
 
     return res_dict
-
-if __name__ == "__main__":
-    from mkAff import getAuthor
-    import os, sys
-
-    # input
-    user_in = sys.argv[1]
-
-    # get paper ids associated with input name
-    _, id_2_paper_id, _ = getAuthor(user_in)
-
-    conn = sqlite3.connect(DB_PATH)
-
-    # filter_references(conn, associated_papers)
-    test = gen_search_df(conn, id_2_paper_id)
-#    for k, v in test.items():
-#        print(v.dtypes)
-        #print(k)
-        #print(v)

@@ -29,8 +29,6 @@ def drawFlower(conn, ent_type, ent_type2, data_df, dir_out, name, bot_year=None,
     # Generate associated author scores for citing and cited
     e_map = getEntityMap(ent_type, ent_type2)
 
-
-
     influence_dict = generate_scores(conn, e_map, data_df)
 
     coauthors = generate_coauthors(e_map, data_df)
@@ -52,13 +50,7 @@ def drawFlower(conn, ent_type, ent_type2, data_df, dir_out, name, bot_year=None,
 
     image_path = os.path.join(plot_dir, image_filename)
 
-    print("drawing graph")
-    ##draw_flower(egoG=flower_graph, filename = image_path)
-    print("finished graph")
-    print(image_filename)
-    #return image_filename
     return flower_graph
-
 
 def getPreFlowerData(id_2_paper_id, unselected_id_2_paper_id, ent_type, cbfunc=lambda x, y: print("{}\t{}".format(x,y))): # id_2_paper_id should be a dict eid: [pid] including all papers regardless if they were deselected
     conn = sqlite3.connect(DB_PATH)
@@ -77,8 +69,6 @@ def getPreFlowerData(id_2_paper_id, unselected_id_2_paper_id, ent_type, cbfunc=l
     # Initiate the unselect dictionary
     entity_unselected_id_2_paper_id = dict([(entity, []) for entity in entity_map.values()])
 
-    print(entity_unselected_id_2_paper_id)
-
     # Set unselect values
     for eid, papers in unselected_id_2_paper_id.items():
         entity_unselected_id_2_paper_id[entity_map[eid]] = papers
@@ -91,8 +81,6 @@ def getPreFlowerData(id_2_paper_id, unselected_id_2_paper_id, ent_type, cbfunc=l
 
     cbfunc(30, "generating flower data")
     return data_df
-
-
 
 def getFlower(data_df, name, ent_type, cbfunc=lambda x, y: print("{}\t{}".format(x,y)), bot_year=None, top_year=None):
     conn = sqlite3.connect(DB_PATH)

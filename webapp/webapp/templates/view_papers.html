@@ -38,17 +38,17 @@ var selfCiteCheckbox = document.getElementById('self-cite');
 var papersTable = $('#papers-table').DataTable(outerConfig['tableSettings']);
 
 
-/*
-// function to create searchTable
-function makeSearchTable(entityType){
-  if ($.fn.DataTable.isDataTable("#papers-table")) {
-    $('#papers-table').DataTable().clear().destroy();
-    $('#papers-table').empty();
-  }
-  var tableSettings = papersTableConfig[entityType]['outerTable']['tableSettings'];
-  return $('#papers-table').DataTable(tableSettings);
+function sendPost(data) {
+  
+  var url = '/submit/';
+  data = JSON.stringify(data);
+  var form = $('<form action="' + url + '" method="post">' +
+    "<input type='text' name='data' value='" + data + "' />" +
+    '</form>');
+  $('body').append(form);
+  form.submit();
+
 }
-*/
 
 
 // update searchTable
@@ -201,7 +201,8 @@ submitButton.addEventListener('click', function(){
        bot_year_min: bot_year_min,
        top_year_max: top_year_max
    }
-   window.location.href = "/submit/?" + $.param(data);
+   sendPost(data)
+//   window.location.href = "/submit/?" + $.param(data);
 });
 
 
