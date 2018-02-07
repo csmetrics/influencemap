@@ -93,7 +93,8 @@ continueButton.addEventListener('click', function(){
   };
 
   console.log(data); 
-  window.location.href="/view_papers/?" + $.param(data);
+  postData('/view_papers/', data, "{% csrf_token %}");
+//  window.location.href="/view_papers/?" + $.param(data);
 });
 
 
@@ -112,7 +113,7 @@ function search(exp, clear){
 
   showProgressBar();
   $.ajax({
-    type: "GET",
+    type: "POST",
     url: "/search",
     data: { // input to the views.py - search()
       keyword: latestSearchTerm,
