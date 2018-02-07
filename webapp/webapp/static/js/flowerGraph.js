@@ -192,7 +192,6 @@ function drawFlower(svg_id, data, idx, w) {
 function highlight_on(idx, selected) {
   id = d3.select(selected).attr("id");
   group = d3.select(selected).attr("gtype");
-  console.log("selected", id, group);
   if (id == 0) return;
 
   // highlight rectangles
@@ -356,7 +355,6 @@ function split_flower(idx, shift) {
 
   link[idx].transition()
     .each(function() {
-        console.log()
         if (d3.select(this).attr("class") == "link in")
             { var move = -shift }
         else

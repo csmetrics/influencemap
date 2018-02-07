@@ -191,9 +191,6 @@ def submit(request):
             us_eid, us_pids = us_id_papers_string.split(':')
             unselected_id_2_paper_id[us_eid] = us_pids.split(',')
 
-    print(id_2_paper_id)
-    print(unselected_id_2_paper_id)
-
     option = request.GET.get("option")
     keyword = request.GET.get('keyword')
     selfcite = True if request.GET.get("selfcite") == "true" else False
@@ -202,7 +199,6 @@ def submit(request):
 
 
     pre_flower_data_dict[request.session['id']] = getPreFlowerData(id_2_paper_id, unselected_id_2_paper_id, ent_type = option, cbfunc=progressCallback)
-    print( pre_flower_data_dict[request.session['id']])    
     flower_data = getFlower(data_df=pre_flower_data_dict[request.session['id']], name=keyword, ent_type=option, cbfunc=progressCallback)
 
     data1 = processdata("author", flower_data[0])
