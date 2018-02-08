@@ -158,6 +158,83 @@ var  papersTableConfig = {
       yearCol: 1
     }
   },
+  journal: {
+    outerTable: {
+      tableSettings: {
+        "pageLength": 10, // default page
+        "lengthMenu": [ 10, 20, 50, 100 ], // page options
+        "lengthChange": true,
+        "columns": [
+        { title: "Name", className: "index dt-body-center" },
+        { title: "ID"},
+        ],
+  //      "columnDefs": [
+  //      {
+  //        "targets": 1,
+  //        "visible": false
+  //      },
+  //      ],
+        "createdRow": function(row, data, index) { $(row).addClass("outer-table-row") },
+        "select": {
+          "style": "multi"
+        },
+        "language": {
+          "emptyTable": "no search result"
+        },
+        "fixedColumns": true,
+        "paging": true,
+        "pagingType": "simple_numbers",
+        "ordering": true,
+        "order": [[0, "desc" ]],
+        "info": true,
+        "autoWidth": false,
+        "destroy": true,
+      },
+      responseKeys: [
+        'name', 'id'
+      ],
+      idCol: 1
+    },
+    innerTable: {
+      tableSettings: {
+        "pageLength": 10, // default page
+        "lengthChange": false,
+        "columns": [
+        { title: "Papers", className: "index dt-body-left" },
+        { title: "Publication year", className: "institution dt-body-right" },
+        { title: "ID"},
+        { title: "", orderable: false, className: 'paper-checkbox', 'render': function (data, type, full, meta){return '<input type="checkbox" checked>'}}
+        ],
+  //      "columnDefs": [
+  //      {
+  //        "targets": [3],
+  //        "visible": false
+  //      },
+  //      ],
+        "select": {
+          "style": "os",
+          "selector": 'td:last-child'
+        },
+        "language": {
+          "emptyTable": "no search result"
+        },
+        "fixedColumns": true,
+        "paging": true,
+        "pagingType": "simple_numbers",
+        "ordering": true,
+        "order": [[1, "desc" ]],
+        "info": true,
+        "autoWidth": false,
+        "destroy": true,
+        "searching": false
+      },
+      responseKeys: [
+        'title', 'year', 'paperID'
+      ],
+      idCol: 2,
+      yearCol: 1
+    }
+  },
   institution: {
     outerTable: {
       tableSettings: {
