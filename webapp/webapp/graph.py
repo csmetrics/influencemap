@@ -48,15 +48,31 @@ def processdata(gtype, egoG):
 
     nodekeys = [v["name"] for v in sorted(nodedata.values(), key=itemgetter("id"))]
 
-    linkdata = [{
+    linkin = [{
             "source": nodekeys.index(s),
             "target": nodekeys.index(t),
             "padding": nodedata[t]["size"],
-            "id": nodedata[t]["id"] if v["direction"] == "in" else nodedata[s]["id"],
+            "id": nodedata[t]["id"],
             "gtype": gtype,
             "type": v["direction"],
             "weight": v["nweight"]
-        } for s, t, v in links]
+        } for s, t, v in links if v["direction"] == "in"]
+
+    linkout = [{
+            "source": nodekeys.index(s),
+            "target": nodekeys.index(t),
+            "padding": nodedata[t]["size"],
+            "id": nodedata[s]["id"],
+            "gtype": gtype,
+            "type": v["direction"],
+            "weight": v["nweight"]
+        } for s, t, v in links if v["direction"] != "in"]
+
+    linkdata = list()
+
+    for i, (lin, lout) in enumerate(zip(linkin, linkout)):
+        linkdata.append(lin)
+        linkdata.append(lout)
 
     chartdata = [{
             "id": nodedata[t]["id"] if v["direction"] == "in" else nodedata[s]["id"],
