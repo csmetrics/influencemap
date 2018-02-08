@@ -27,12 +27,6 @@ pre_flower_data_dict = dict()
 
 # initialise as no autocomplete lists yet (wait until needed)
 autoCompleteLists = {}
-optionlist = [  # option list
-    {"id":"author", "name":"Author"},
-    {"id":"conference", "name":"Conference"},
-    {"id":"journal", "name":"Journal"},
-    {"id":"institution", "name":"Institution"}
-]
 
 # dictionary to store option specific functions
 dataFunctionDict = {

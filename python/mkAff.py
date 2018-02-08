@@ -101,7 +101,7 @@ def getAuthor(name, cbfunc=None, nonExpandAID=[], expand=False,use_cache=True, y
                             pInfo = cacheData[key][1]
                             tem_pInfo = {'name':pInfo['name'],'id':pInfo['authorID'],'numpaper':pInfo['numpaper'],'affiliation':pInfo['affiliation'],'field':pInfo['field'],'recentPaper':pInfo['recentPaper'],'publishedDate':pInfo['publishedDate']}
                             finalresult.append(tem_pInfo)
-                            aIDpaper[et.Entity(key, et.Entity_type.AUTH)] = list(map(lambda t:{'paperID':t[0],'title':t[1],'year':t[2],'date':t[2],'conf':''}, cacheData[key][2]))      
+                            aIDpaper[et.Entity(key, et.Entity_type.AUTH)] = list(map(lambda t:{'paperID':t[0],'title':t[1],'year':t[2],'date':t[2],'confName':''}, cacheData[key][2]))      
                       
 
                     else:
@@ -265,7 +265,7 @@ def getAuthor(name, cbfunc=None, nonExpandAID=[], expand=False,use_cache=True, y
         tem_field = sorted(tem_field, key=lambda x:x[1], reverse=True)
         field = []
         if len(tem_field) >= 3:
-             field = tem_field[0:3]            
+            field = tem_field[0:3]            
         else:
             field = tem_field
         aff = []
@@ -542,4 +542,4 @@ if __name__ == '__main__':
     #trial = getAff('harvard')
     #x = [s for s in trial if s['name'] == 'harvard business school']
     #x = trial
-    #z = getAffPID(x,'harvard')
+    #z = getAffPID(x,'harvard')`
