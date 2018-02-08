@@ -538,8 +538,8 @@ def matchForShort(name1, name2):
     ls2 = ''.join(ls2)
     return ls2 in name1
     
-if __name__ == '__main__':
+#if __name__ == '__main__':
     #trial = getAff('harvard')
     #x = [s for s in trial if s['name'] == 'harvard business school']
     #x = trial
-    #z = getAffPID(x,'harvard')`
+    #z = getAffPID(x,'harvard')
