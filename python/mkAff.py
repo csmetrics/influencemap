@@ -9,7 +9,7 @@ import entity_type as et
 from difflib import SequenceMatcher
 
 db_PAA = '/localdata/u5798145/influencemap/paper.db'
-#db_Authors = '/localdata/common/authors_test.db'
+#db_Authors = '/localdata/u6363358/data/test.db'
 db_Authors = '/localdata/u6363358/data/authors.db'
 db_key = '/localdata/u6363358/data/paperKeywords.db'
 db_FName = '/localdata/u6363358/data/FieldOfStudy.db'
@@ -110,7 +110,7 @@ def getAuthor(name, cbfunc=None, nonExpandAID=[], expand=False,use_cache=True, y
                             pInfo = cacheData[key][1]
                             tem_pInfo = {'name':pInfo['name'],'id':pInfo['authorID'],'numpaper':pInfo['numpaper'],'affiliation':pInfo['affiliation'],'field':pInfo['field'],'recentPaper':pInfo['recentPaper'],'publishedDate':pInfo['publishedDate']}
                             finalresult.append(tem_pInfo)
-                            aIDpaper[et.Entity(key, et.Entity_type.AUTH)] = list(map(lambda t:{'paperID':t[0],'title':t[1],'year':t[2],'date':t[2],'confName':''}, cacheData[key][2]))
+                            aIDpaper[et.Entity(key, et.Entity_type.AUTH)] = list(map(lambda t:{'paperID':t[0],'title':t[1],'year':t[2],'date':t[2],'conf':''}, cacheData[key][2]))
                 
                 
                 #for dic in finalresult: print(dic)
@@ -363,7 +363,7 @@ def getJourPID(jIDs, yearStart=0, yearEnd=2016): #thie function takes in a list 
 
     curP.close()
     dbPAA.close()
-    return jID_papers #jID_papers is a dict of jID:[(pID, paperTitle, year)]
+    return output #output is a dict of jID:[{pID, paperTitle, year}]
 
 def getConf(name, a=None):
     if len(name) == 0: return []
@@ -421,7 +421,7 @@ def getConfPID(cIDs, yearStart=0, yearEnd=2016): #this function takes in a list 
 
     curP.close()
     dbP.close()
-    return output # WAS: cID_papers #cID_papers is a dict of cID:[(pID, paperTitle, year)]
+    return output # output is a dict of cID:[{pID, paperTitle, year}]
      
 
 def getAff(aff, a=None):
@@ -493,7 +493,7 @@ def getAffPID(chosen,name): # chosen is the list of dict chosen by the user, nam
     #    for thing in output[key]: print(thing)
    
                
-    return output # WAS: affID_pID #affID_pID is a dict of affID:[pID]
+    return output # output is a dict of affID:[pID]
 
 
 def match(name1, name2): # name1 must be in name2
@@ -539,7 +539,7 @@ def matchForShort(name1, name2):
     return ls2 in name1
     
 if __name__ == '__main__':
-    trial = getAff('harvard')
+    #trial = getAff('harvard')
     #x = [s for s in trial if s['name'] == 'harvard business school']
-    x = trial
-    z = getAffPID(x,'harvard')
+    #x = trial
+    #z = getAffPID(x,'harvard')`
