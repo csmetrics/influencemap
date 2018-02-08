@@ -9,7 +9,7 @@ import entity_type as et
 from difflib import SequenceMatcher
 
 db_PAA = '/localdata/u5798145/influencemap/paper.db'
-#db_Authors = '/localdata/common/authors_test.db'
+#db_Authors = '/localdata/u6363358/data/test.db'
 db_Authors = '/localdata/u6363358/data/authors.db'
 db_key = '/localdata/u6363358/data/paperKeywords.db'
 db_FName = '/localdata/u6363358/data/FieldOfStudy.db'
@@ -110,7 +110,7 @@ def getAuthor(name, cbfunc=None, nonExpandAID=[], expand=False,use_cache=True, y
                             pInfo = cacheData[key][1]
                             tem_pInfo = {'name':pInfo['name'],'id':pInfo['authorID'],'numpaper':pInfo['numpaper'],'affiliation':pInfo['affiliation'],'field':pInfo['field'],'recentPaper':pInfo['recentPaper'],'publishedDate':pInfo['publishedDate']}
                             finalresult.append(tem_pInfo)
-                            aIDpaper[et.Entity(key, et.Entity_type.AUTH)] = list(map(lamda t:{'paperID':t[0],'title':t[1],'year':t[2],'date':t[2],'conf':''}, cacheData[key][2]))
+                            aIDpaper[et.Entity(key, et.Entity_type.AUTH)] = list(map(lambda t:{'paperID':t[0],'title':t[1],'year':t[2],'date':t[2],'conf':''}, cacheData[key][2]))
                 
                 
                 #for dic in finalresult: print(dic)
@@ -140,7 +140,7 @@ def getAuthor(name, cbfunc=None, nonExpandAID=[], expand=False,use_cache=True, y
     fstLetter = fstN[0]
     #middle = name.split(' ')[1:-1]
     print("{} getting all the aID".format(datetime.now()))
-    cbfunc(10, "getting all the aID")
+    #cbfunc(10, "getting all the aID")
     #curA.execute("SELECT * FROM authors WHERE authorName LIKE '% " + lstN + "' AND isSame(authorName,'" + name + "')")
  
  
@@ -160,7 +160,7 @@ def getAuthor(name, cbfunc=None, nonExpandAID=[], expand=False,use_cache=True, y
   
     
     print("{} finished getting all the aID".format(datetime.now()))
-    cbfunc(30, "finished getting all the aID")
+    #cbfunc(30, "finished getting all the aID")
     author = {} #authorID is the key and authorName is the value
 
     for a in allAuthor:
@@ -169,7 +169,7 @@ def getAuthor(name, cbfunc=None, nonExpandAID=[], expand=False,use_cache=True, y
     aID = list(author.keys())
  
     print("{} getting all the (authorID, paperID, affiliationName)".format(datetime.now()))
-    cbfunc(40, "getting all the (authorID, paperID, affiliationName)")
+    #cbfunc(40, "getting all the (authorID, paperID, affiliationName)")
     curP.execute(removeCon("SELECT auth_id, paper_id, affNameOri FROM paa WHERE auth_id IN {}".format(tuple(aID))))
     result = curP.fetchall()
 
@@ -182,10 +182,10 @@ def getAuthor(name, cbfunc=None, nonExpandAID=[], expand=False,use_cache=True, y
     #Getting paperInfo and most related fields    
     paperIDs = list(set(map(lambda x:x[2], finalres)))
     print("{} getting all the paperInfo".format(datetime.now()))
-    cbfunc(50, "getting all the paperInfo")
+    #cbfunc(50, "getting all the paperInfo")
     tem_paperNames = getPaperName(paperIDs) #tem_paperNames is a [(paperID, title, year, date, conferenceID)]
     print("{} getting all conference related".format(datetime.now()))
-    cbfunc(60, "getting all conference related")
+    #cbfunc(60, "getting all conference related")
     confIDs = list(set(map(lambda x:x[-1], tem_paperNames)))
     curC.execute(removeCon("SELECT ConfID, FullName FROM ConferenceSeries WHERE ConfID IN {}".format(tuple(confIDs))))
     cIDN = curC.fetchall() #cIDN is a list of (ConfID, confName)
@@ -203,7 +203,7 @@ def getAuthor(name, cbfunc=None, nonExpandAID=[], expand=False,use_cache=True, y
             paperNames.append((tup[0],tup[1],tup[2],tup[3],''))    
 
     print("{} getting related fieldIDs".format(datetime.now()))  
-    cbfunc(70, "getting related fieldIDs")
+    #cbfunc(70, "getting related fieldIDs")
     curK.execute(removeCon("SELECT PaperID, FieldID FROM paperKeywords WHERE PaperID IN {}".format(tuple(paperIDs))))
     pIDfID = curK.fetchall() #is a [(pID, fieldID)]
     fIDs = list(set(map(lambda x:x[1], pIDfID)))
@@ -236,7 +236,7 @@ def getAuthor(name, cbfunc=None, nonExpandAID=[], expand=False,use_cache=True, y
 
     #to modify finalresult
     print("{} getting related fields".format(datetime.now()))
-    cbfunc(90, "getting related fields")
+    #cbfunc(90, "getting related fields")
     used_ids = []
     for tup in tempres:
         tupname = tup[0]
@@ -265,7 +265,7 @@ def getAuthor(name, cbfunc=None, nonExpandAID=[], expand=False,use_cache=True, y
         tem_field = sorted(tem_field, key=lambda x:x[1], reverse=True)
         field = []
         if len(tem_field) >= 3:
-    e        field = tem_field[0:3]            
+             field = tem_field[0:3]            
         else:
             field = tem_field
         aff = []
@@ -291,7 +291,7 @@ def getAuthor(name, cbfunc=None, nonExpandAID=[], expand=False,use_cache=True, y
     '''  
 
     print("{} done".format(datetime.now()))
-    cbfunc(100, "done")
+    #cbfunc(100, "done")
     curC.close()
     dbConf.close()
     curK.close()
@@ -363,7 +363,7 @@ def getJourPID(jIDs, yearStart=0, yearEnd=2016): #thie function takes in a list 
 
     curP.close()
     dbPAA.close()
-    return jID_papers #jID_papers is a dict of jID:[(pID, paperTitle, year)]
+    return output #output is a dict of jID:[{pID, paperTitle, year}]
 
 def getConf(name, a=None):
     if len(name) == 0: return []
@@ -421,7 +421,7 @@ def getConfPID(cIDs, yearStart=0, yearEnd=2016): #this function takes in a list 
 
     curP.close()
     dbP.close()
-    return output # WAS: cID_papers #cID_papers is a dict of cID:[(pID, paperTitle, year)]
+    return output # output is a dict of cID:[{pID, paperTitle, year}]
      
 
 def getAff(aff, a=None):
@@ -493,7 +493,7 @@ def getAffPID(chosen,name): # chosen is the list of dict chosen by the user, nam
     #    for thing in output[key]: print(thing)
    
                
-    return output # WAS: affID_pID #affID_pID is a dict of affID:[pID]
+    return output # output is a dict of affID:[pID]
 
 
 def match(name1, name2): # name1 must be in name2
@@ -539,7 +539,7 @@ def matchForShort(name1, name2):
     return ls2 in name1
     
 if __name__ == '__main__':
-    trial = getAff('harvard')
+    #trial = getAff('harvard')
     #x = [s for s in trial if s['name'] == 'harvard business school']
-    x = trial
-    z = getAffPID(x,'harvard')
+    #x = trial
+    #z = getAffPID(x,'harvard')
