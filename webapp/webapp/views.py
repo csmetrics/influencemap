@@ -208,14 +208,13 @@ def submit(request):
 
     return render(request, "flower.html", data)
 
-
+@csrf_exempt
 def resubmit(request):
     print(request)
-    data = json.loads(request.POST.get('data'))
-    from_year = int(data.get('from_year'))
-    to_year = int(data.get('to_year'))
-    option = data.get('option')
-    keyword = data.get('keyword')
+    from_year = int(request.POST.get('from_year'))
+    to_year = int(request.POST.get('to_year'))
+    option = request.POST.get('option')
+    keyword = request.POST.get('keyword')
     pre_flower_data = []
 
 

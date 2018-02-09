@@ -50,7 +50,7 @@ drawFlower("#graph3", inst_data, 2, width);
 resubmitButton.addEventListener('click', function(){
   $.ajax({
     type: "POST",
-    url: "/resubmit",
+    url: "/resubmit/",
     data: {
       from_year: nodes[0].textContent,
       to_year: nodes[1].textContent,
