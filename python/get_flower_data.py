@@ -12,32 +12,13 @@ from influence_weight import get_weight
 # Config setup
 from config import *
 
-def gen_pred_score_df(data_df):
-    res = list()
-    # split data info citing and cited
-    for citing, info_df in data_df.groupby('citing'):
-        if citing:
-            s = '_citing'
-        else:
-            s = '_cited'
-
-        # Group by scoring paper
-        df = info_df.groupby('paper' + s).agg(lambda x : x.tolist()).reset_index()
-        df['citing'] = bool(citing)
-        for entity in Entity_type:
-            df[entity.prefix + '_self_cite'] = df[entity.prefix + '_self_cite'].apply(lambda x : x[0])
-
-        res.append(df)
-
-    return pd.concat(res)
-
 # Creates dictionaries for the weight scores
-def generate_scores(conn, e_map, data_df, inc_self=False, unique=False):
+def generate_scores(conn, e_map, data_df, inc_self=False):
 
     print('\n---\n{} start filtering influence'.format(datetime.now()))
 
     # Concat the tables together
-    df = gen_pred_score_df(pd.concat(data_df.values()))
+    df = pd.concat(data_df.values())
 
     influence_list = list()
     
@@ -54,31 +35,18 @@ def generate_scores(conn, e_map, data_df, inc_self=False, unique=False):
             func = lambda x : x + '_cited'
             score_col = lambda x : (0, x)
 
-        # Scoring depending if an entity can only score once per paper (take max)
-        if unique:
-            # Check each type
-            for id__type, name_type in zip(e_map.ids, e_map.keyn):
-                name_col = func(name_type)
-                # Make a small dataframe with influence and name to do a group by name
-                row_df = pd.concat([pd.Series(row['influence'], name='influence'), pd.Series(row[name_col], name=name_col)], axis=1)
+        # Check each type
+        for id_names in e_map.keyn:
+            # Add score for each series of type
+            influence = row['influence']
+            entity_name = row[func(id_names)]
 
-                # Group by leaf entities
-                for entity_name, score_df in row_df.groupby(name_col):
-                    if entity_name == None:
-                        continue
+            # Skip if empty
+            if entity_name == None:
+                continue
 
-                    # Add to score list
-                    influence_list.append((entity_name, row['pub_year_citing'][0]) + score_col(score_df['influence'].max()))
-        else:
-            # Check each type
-            for id_names in e_map.keyn:
-                # Add score for each series of type
-                for influence, entity_name in zip(row['influence'], row[func(id_names)]):
-                    if entity_name == None:
-                        continue
-
-                    # Add to score list
-                    influence_list.append((entity_name, row['pub_year_citing'][0]) + score_col(influence))
+            # Add to score list
+            influence_list.append((entity_name, row['pub_year_citing']) + score_col(influence))
 
     # Turn list to dataframe
     res = pd.DataFrame.from_records(influence_list, columns=['entity_id', 'influence_year', 'influenced', 'influencing'])
