@@ -69,19 +69,28 @@ def autocomplete(request):
 selfcite = False
 expanded_ids = dict()
 
-
+@csrf_exempt
 def main(request):
     print(request)
-    global keyword, optionlist, option, selfcite
-    keyword = ""
-    option = optionlist[0] # default selection
+ 
+    try:
+        data = json.loads(request.POST.get('data'))
+        keyword = data.get('keyword', '')
+        search = data.get('search') == 'true'
+        option = [opt for opt in optionlist if opt['id'] == data.get('option')][0]
+    except:
+        keyword = ""
+        search = False
+        option = optionlist[0] # default selection
+    print(search)    
     # render page with data
     return render(request, "main.html", {
 	"navbarOption": {
 	    "optionlist": optionlist,
 	    "selectedKeyword": keyword,
 	    "selectedOption": option,
-	}
+	},
+        "search": search
     })
 
 
@@ -123,6 +132,7 @@ def view_papers(request):
     selectedNames = data.get('selectedNames').split(',')
     entityType = data.get('entityType')
     expanded = data.get('expanded') == 'true'
+    option = data.get('option')
     name = data.get('name')
     if entityType == 'author':
         entities = saved_entities[name]
@@ -148,7 +158,13 @@ def view_papers(request):
         'papersDict': simplified_paper_dict,
         'entityType': entityType,
         'selectedInfo': selectedIds,
-        'keyword': name
+        'keyword': name,
+        "navbarOption": {
+            "optionlist": optionlist,
+            "selectedKeyword": name,
+            "selectedOption": [opt for opt in optionlist if opt['id'] == option][0],
+        }
+
     }
 
     return render(request, 'view_papers.html', data)
@@ -159,7 +175,7 @@ def view_papers(request):
 def submit(request):
     print(request)
     resetProgress()
-    global option, saved_pids
+    global saved_pids
     data = json.loads(request.POST.get('data'))
     papers_string = data['papers']   # 'eid1:pid,pid,...,pid_entity_eid2:pid,...'
     id_papers_strings = papers_string.split('_entity_')
@@ -203,7 +219,13 @@ def submit(request):
         "yearSlider": {
             "title": "Publications range",
             "range": [bot_year_min, top_year_max] # placeholder value, just for testing
+        },
+        "navbarOption": {
+            "optionlist": optionlist,
+            "selectedKeyword": keyword,
+            "selectedOption": [opt for opt in optionlist if opt['id'] == option][0],
         }
+
     }
 
     return render(request, "flower.html", data)
