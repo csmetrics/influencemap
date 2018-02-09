@@ -131,7 +131,7 @@ def view_papers(request):
     selectedIds = data.get('selectedIds').split(',')
     selectedNames = data.get('selectedNames').split(',')
     entityType = data.get('entityType')
-    expanded = data.get('expanded') == 'true'
+    expanded = data.get('expanded') 
     option = data.get('option')
     name = data.get('name')
     if entityType == 'author':
@@ -196,17 +196,19 @@ def submit(request):
 
     option = data.get("option")
     keyword = data.get('keyword')
-    selfcite = True if data.get("selfcite") == "true" else False
+    selfcite = data.get("selfcite") 
     bot_year_min = int(data.get("bot_year_min"))
     top_year_max = int(data.get("top_year_max"))
 
     pre_flower_data_dict[request.session['id']] = getPreFlowerData(id_2_paper_id, unselected_id_2_paper_id, ent_type = option, cbfunc=progressCallback)
-    flower_data = getFlower(data_df=pre_flower_data_dict[request.session['id']], name=keyword, ent_type=option, cbfunc=progressCallback)
+    flower_data = getFlower(data_df=pre_flower_data_dict[request.session['id']], name=keyword, ent_type=option, cbfunc=progressCallback, inc_self=selfcite)
 
     data1 = processdata("author", flower_data[0])
     data2 = processdata("conf", flower_data[1])
     data3 = processdata("inst", flower_data[2])
 
+    print(data)
+    print(selfcite)
     data = {
         "author": data1,
         "conf": data2,
@@ -227,7 +229,6 @@ def submit(request):
         }
 
     }
-
     return render(request, "flower.html", data)
 
 @csrf_exempt
@@ -238,9 +239,9 @@ def resubmit(request):
     option = request.POST.get('option')
     keyword = request.POST.get('keyword')
     pre_flower_data = []
+    selfcite = request.POST.get('selfcite') == 'true'
 
-
-    flower_data = getFlower(data_df=pre_flower_data_dict[request.session['id']], name=keyword, ent_type=option, bot_year=from_year, top_year=to_year)
+    flower_data = getFlower(data_df=pre_flower_data_dict[request.session['id']], name=keyword, ent_type=option, bot_year=from_year, top_year=to_year, inc_self=selfcite)
 
     data1 = processdata("author", flower_data[0])
     data2 = processdata("conf", flower_data[1])
