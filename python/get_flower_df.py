@@ -70,11 +70,6 @@ def gen_info_df(conn, paper_ids):
 
     return info_df
 
-def test_sc(row):
-    citing = set(row['citing'])
-    val = len(set(citing)) == 1
-    return val
-
 # joining operator to rename and combine dataframes
 def combine_df(ref_df, info_df):
     # Column names for citing and cited reference information
@@ -118,6 +113,7 @@ def score_information(df, entity_ids, ignore_papers):
     
     return df.drop(columns=['paper_map'])
 
+# Generates combined information tables + deals with caching
 def gen_combined_df(conn, entity, entity_ids, paper_ids, ignore_papers):
     # If entity_id is None (theshold papers) with no caching
     if not entity:
@@ -172,6 +168,7 @@ def gen_search_df(conn, paper_map, unselect_paper_map):
 
     res_dict = dict()
     threshold_papers = list()
+    threshold_ignore = list()
     # Go through each of the entity types the user selects
     for entity, paper_tuple in paper_map.items():
         paper_ids = paper_tuple
@@ -182,10 +179,11 @@ def gen_search_df(conn, paper_map, unselect_paper_map):
         # Bin entity papers with papers less than threshold number
         if len(paper_ids) < PAPER_THRESHOLD:
             threshold_papers += paper_ids
+            threshold_ignore += unselect_paper_map[entity]
         else:
             res_dict[entity.name_str()] = gen_combined_df(conn, entity, entity_ids, paper_ids, ignore_papers)
 
     # Calculate threshold values
-    res_dict[None] = gen_combined_df(conn, None, entity_ids, threshold_papers, ignore_papers)
+    res_dict[None] = gen_combined_df(conn, None, entity_ids, threshold_papers, threshold_ignore)
 
     return res_dict

@@ -65,7 +65,7 @@ def getPaperName(pID):
     #recent = max(res, key=lambda x: x[-1])
     return res
 
-def getAuthor(name, cbfunc=None, nonExpandAID=[], expand=False,use_cache=True, yearStart=0, yearEnd=2016):
+def getAuthor(name, cbfunc=lambda *x : None, nonExpandAID=[], expand=False,use_cache=True, yearStart=0, yearEnd=2016):
     
     if len(name) == 0:
         if expand: return ([],[],[])
