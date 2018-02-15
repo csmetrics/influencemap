@@ -29,7 +29,7 @@ def drawFlower(conn, ent_type, ent_type2, data_df, dir_out, name, bot_year=None,
     # Generate associated author scores for citing and cited
     e_map = getEntityMap(ent_type, ent_type2)
 
-    influence_dict = generate_scores(conn, e_map, data_df)
+    influence_dict = generate_scores(conn, e_map, data_df, inc_self=False)
 
     coauthors = generate_coauthors(e_map, data_df)
 

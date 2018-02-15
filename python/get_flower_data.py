@@ -86,21 +86,6 @@ def generate_score_df(influence_df, e_map, ego, coauthors=set([]), score_year_mi
     # Aggrigatge scores up
     score_df = score_df.groupby('entity_id').agg(np.sum).reset_index()
 
-    # calculate minimum scores to fill nan values (for ratio)
-    nan_influenced = score_df['influenced'].iloc[score_df['influenced'].nonzero()[0]].min() / 4
-    nan_influencing = score_df['influencing'].iloc[score_df['influencing'].nonzero()[0]].min() / 4
-
-    # Incase all zeroes
-    pos_vals = [x for x in [nan_influenced, nan_influencing] if str(x) != 'nan']
-    if pos_vals:
-        nan_val = min(pos_vals)
-    else:
-        nan_val = 0.001
-
-    # Remove zero values to remove divide by zero case
-    score_df.loc[score_df['influenced'] < nan_val, 'influenced'] = nan_val
-    score_df.loc[score_df['influencing'] < nan_val, 'influencing'] = nan_val
-
     # calculate sum
     score_df['sum'] = score_df['influenced'] + score_df['influencing']
 

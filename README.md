@@ -2,23 +2,24 @@
 
 Goal: Constructing maps of intellectual influence using academic data.
 
-Make it searchable and visualisable on the web.
+We aim to make a service which allows users to easily search and visualise the
+flow of academic influence through our influence flowers.
 
 ## methodology
-The influence of a person, institution or conference (an entity) on and from
-other entities is measured using citations. The influence flowers show a
-normalised influence score meaning that flowers for two different entities
-cannot be directly compared. The underlying influence scores depend on the
-number of citations to and from an entity and the number of authors involved in
-the publications recieving the citations.
+To quantify academic influence, we define influence as a function of paper
+citations. The scoring of influence is done with respect to entities
+(author, institute, journal, or conference) and how entities cite other
+entities. To visualise influence we use influence flowers. An influence
+flower aims to show a dense representation of the influence in which an
+entity (the center node, denoted as the ego) has with several other entities.
 
 ### calculating the influence one entity has on another entity
 
-#### removing self citations
+#### removing self-citations
 
-We define a self citation between papers and a cited paper as a relation
-defined by the overlap in authorship. If the overlap is not empty, then the
-citation is defined to be a self citation.
+We define a self-citation between papers and a cited paper as a relation
+dependent on the ego. A paper citation is a self-citation if both papers
+have the ego as an author.
 
 #### Why not remove all coauthor papers instead?
  
@@ -27,13 +28,11 @@ the referencing paper authors) we found the 'cut down' to be too extreme. This
 would greatly effect the produced flower, leaving one with little to no
 information.
 
-#### weighting the citations -- coauthors
+#### weighting the citations
 
-[AS]
+
 
 #### Normalisation
-
-[AS]
 
 Influence on an entity is calculated as the sum of the per author weight for each of the citations to a paper written by that entity, as shown below.
 
