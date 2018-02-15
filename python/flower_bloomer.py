@@ -25,11 +25,11 @@ e = {'author': Entity_type.AUTH, 'conference': Entity_type.CONF, 'institution': 
 def getEntityMap(ego, outer):
     return Entity_map(e[ego], [e[outer]])
 
-def drawFlower(conn, ent_type, ent_type2, data_df, dir_out, name, bot_year=None, top_year=None):
+def drawFlower(conn, ent_type, ent_type2, data_df, dir_out, name, bot_year=None, top_year=None, inc_self=False):
     # Generate associated author scores for citing and cited
     e_map = getEntityMap(ent_type, ent_type2)
 
-    influence_dict = generate_scores(conn, e_map, data_df, inc_self=False)
+    influence_dict = generate_scores(conn, e_map, data_df, inc_self=inc_self)
 
     coauthors = generate_coauthors(e_map, data_df)
 
@@ -82,18 +82,18 @@ def getPreFlowerData(id_2_paper_id, unselected_id_2_paper_id, ent_type, cbfunc=l
     cbfunc(30, "generating flower data")
     return data_df
 
-def getFlower(data_df, name, ent_type, cbfunc=lambda x, y: print("{}\t{}".format(x,y)), bot_year=None, top_year=None):
+def getFlower(data_df, name, ent_type, cbfunc=lambda x, y: print("{}\t{}".format(x,y)), bot_year=None, top_year=None, inc_self=False):
     conn = sqlite3.connect(DB_PATH)
 
     # Generate a self filter dictionary
     cbfunc(40, "draw entity_to_author flower")
-    entity_to_author = drawFlower(conn, ent_type, "author", data_df, OUT_DIR, name, bot_year=bot_year, top_year=top_year)
+    entity_to_author = drawFlower(conn, ent_type, "author", data_df, OUT_DIR, name, bot_year=bot_year, top_year=top_year, inc_self=inc_self)
 
     cbfunc(60, "draw entity_to_conference flower")
-    entity_to_conference = drawFlower(conn, ent_type, "conference", data_df, OUT_DIR, name, bot_year=bot_year, top_year=top_year)
+    entity_to_conference = drawFlower(conn, ent_type, "conference", data_df, OUT_DIR, name, bot_year=bot_year, top_year=top_year, inc_self=inc_self)
 
     cbfunc(80, "draw entity_to_affiliation flower")
-    entity_to_affiliation = drawFlower(conn, ent_type, "institution", data_df, OUT_DIR, name, bot_year=bot_year, top_year=top_year)
+    entity_to_affiliation = drawFlower(conn, ent_type, "institution", data_df, OUT_DIR, name, bot_year=bot_year, top_year=top_year, inc_self=inc_self)
  
     conn.close()
 

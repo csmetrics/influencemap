@@ -13,6 +13,15 @@
           </div>
         </div>
 {% include 'year_slider.html' %}
+      <div class="search-option">
+        <div class="checkbox">
+          <label>
+            <input class="self-cite" type="checkbox" name="self-cite" id="self-cite">
+            include self citations
+          </label>
+        </div>
+      </div>
+
         <span>To Author</span>
         <div align="center">
           <svg id="graph1" width=1800 height=700></svg>
@@ -34,12 +43,12 @@
 <script src="{% static 'js/d3-scale-chromatic.v1.min.js' %}"></script>
 <script src="{% static 'js/flowerGraph.js' %}"></script>
 <script>
-option = '{{ navbarOption.selectedOption }}';
+option = '{{ navbarOption.selectedOption.id }}';
 keyword = '{{ navbarOption.selectedKeyword }}';
 author_data = {{ author|safe }}
 conf_data = {{ conf|safe }}
 inst_data = {{ inst|safe }}
-
+var selfCiteCheckbox = document.getElementById('self-cite');
 
 var width = document.getElementById('image-container').offsetWidth;
 drawFlower("#graph1", author_data, 0, width);
@@ -55,6 +64,7 @@ resubmitButton.addEventListener('click', function(){
       from_year: nodes[0].textContent,
       to_year: nodes[1].textContent,
       option: option,
+      selfcite: selfCiteCheckbox.checked,
       keyword: keyword
     },
     success: function(result){

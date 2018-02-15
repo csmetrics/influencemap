@@ -69,19 +69,28 @@ def autocomplete(request):
 selfcite = False
 expanded_ids = dict()
 
-
+@csrf_exempt
 def main(request):
     print(request)
-    global keyword, optionlist, option, selfcite
-    keyword = ""
-    option = optionlist[0] # default selection
+ 
+    try:
+        data = json.loads(request.POST.get('data'))
+        keyword = data.get('keyword', '')
+        search = data.get('search') == 'true'
+        option = [opt for opt in optionlist if opt['id'] == data.get('option')][0]
+    except:
+        keyword = ""
+        search = False
+        option = optionlist[0] # default selection
+    print(search)    
     # render page with data
     return render(request, "main.html", {
 	"navbarOption": {
 	    "optionlist": optionlist,
 	    "selectedKeyword": keyword,
 	    "selectedOption": option,
-	}
+	},
+        "search": search
     })
 
 
@@ -122,7 +131,8 @@ def view_papers(request):
     selectedIds = data.get('selectedIds').split(',')
     selectedNames = data.get('selectedNames').split(',')
     entityType = data.get('entityType')
-    expanded = data.get('expanded') == 'true'
+    expanded = data.get('expanded') 
+    option = data.get('option')
     name = data.get('name')
     if entityType == 'author':
         entities = saved_entities[name]
@@ -148,7 +158,13 @@ def view_papers(request):
         'papersDict': simplified_paper_dict,
         'entityType': entityType,
         'selectedInfo': selectedIds,
-        'keyword': name
+        'keyword': name,
+        "navbarOption": {
+            "optionlist": optionlist,
+            "selectedKeyword": name,
+            "selectedOption": [opt for opt in optionlist if opt['id'] == option][0],
+        }
+
     }
 
     return render(request, 'view_papers.html', data)
@@ -159,7 +175,7 @@ def view_papers(request):
 def submit(request):
     print(request)
     resetProgress()
-    global option, saved_pids
+    global saved_pids
     data = json.loads(request.POST.get('data'))
     papers_string = data['papers']   # 'eid1:pid,pid,...,pid_entity_eid2:pid,...'
     id_papers_strings = papers_string.split('_entity_')
@@ -180,17 +196,19 @@ def submit(request):
 
     option = data.get("option")
     keyword = data.get('keyword')
-    selfcite = True if data.get("selfcite") == "true" else False
+    selfcite = data.get("selfcite") 
     bot_year_min = int(data.get("bot_year_min"))
     top_year_max = int(data.get("top_year_max"))
 
     pre_flower_data_dict[request.session['id']] = getPreFlowerData(id_2_paper_id, unselected_id_2_paper_id, ent_type = option, cbfunc=progressCallback)
-    flower_data = getFlower(data_df=pre_flower_data_dict[request.session['id']], name=keyword, ent_type=option, cbfunc=progressCallback)
+    flower_data = getFlower(data_df=pre_flower_data_dict[request.session['id']], name=keyword, ent_type=option, cbfunc=progressCallback, inc_self=selfcite)
 
     data1 = processdata("author", flower_data[0])
     data2 = processdata("conf", flower_data[1])
     data3 = processdata("inst", flower_data[2])
 
+    print(data)
+    print(selfcite)
     data = {
         "author": data1,
         "conf": data2,
@@ -203,9 +221,14 @@ def submit(request):
         "yearSlider": {
             "title": "Publications range",
             "range": [bot_year_min, top_year_max] # placeholder value, just for testing
+        },
+        "navbarOption": {
+            "optionlist": optionlist,
+            "selectedKeyword": keyword,
+            "selectedOption": [opt for opt in optionlist if opt['id'] == option][0],
         }
-    }
 
+    }
     return render(request, "flower.html", data)
 
 @csrf_exempt
@@ -216,9 +239,9 @@ def resubmit(request):
     option = request.POST.get('option')
     keyword = request.POST.get('keyword')
     pre_flower_data = []
+    selfcite = request.POST.get('selfcite') == 'true'
 
-
-    flower_data = getFlower(data_df=pre_flower_data_dict[request.session['id']], name=keyword, ent_type=option, bot_year=from_year, top_year=to_year)
+    flower_data = getFlower(data_df=pre_flower_data_dict[request.session['id']], name=keyword, ent_type=option, bot_year=from_year, top_year=to_year, inc_self=selfcite)
 
     data1 = processdata("author", flower_data[0])
     data2 = processdata("conf", flower_data[1])
