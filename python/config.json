@@ -1,6 +1,6 @@
 {
     "sqlite3":{
-        "directory":"/localdata2/common",
+        "directory":"/localdata/common",
         "name":"paper_info.db",
         "batch size": 999
     }, 
@@ -12,9 +12,16 @@
             "main":"/localdata/common/cache"
         },
         "paper threshold":20,
-        "time-out":0
+        "timeout":0
     },
     "flower":{
         "leaves":25
+    },
+    "mag_api":{
+        "prefix":"http://westus.api.cognitive.microsoft.com",
+        "json_postfix":"academic/v1.0/graph/search?mode=json",
+        "api_key_dir":"/localdata/common/api_keys",
+        "res_count":1000,
+        "timeout":10000
     }
 }
