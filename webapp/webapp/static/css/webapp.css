@@ -66,3 +66,19 @@ text {
     background-color: rgb(245, 245, 245);
     border: 1px solid #e5e5e5;
 }
+
+.custom-text-box {
+  border-radius: 25px;
+  background-color: rgba(200,200,200,.5);
+  text-align: left;
+  padding-bottom: 20;
+}
+
+.custom-text-box h1 {
+text-align: left;
+color: rgba(77, 77, 77, 1);
+padding-top: 25;
+padding-bottom:25;
+}
+
+

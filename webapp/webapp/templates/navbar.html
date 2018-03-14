@@ -88,7 +88,7 @@ var ac = new autoComplete({
       searchBar.value = term.split(" - ")[1]
     };
   
-    search(false,  true);
+    search();
   }
 });
 
@@ -109,27 +109,27 @@ return st;
 }
 
 
-function redirectAndSearch(){
-  var keyword = searchBar.value;
-  var option = $(".entity-option:checked").val();
-  postData('/', {'keyword': keyword, 'option': option, 'search': 'true'});
+// function redirectAndSearch(){
+//   var keyword = searchBar.value;
+//   var option = $(".entity-option:checked").val();
+//   postData('/create', {'keyword': keyword, 'option': option, 'search': 'true'});
 
-}
-
-
-
-searchButton.addEventListener('click', function(){
-  redirectAndSearch();
-});
+// }
 
 
-// Search when enter pressed in input bar
-searchBar.addEventListener('keypress', function (e) {
-  var key = e.which || e.keyCode;
-  if (key === 13) { // 13 is enter
-    redirectAndSearch(false, true);
-  }
-});
+
+// searchButton.addEventListener('click', function(){
+//   redirectAndSearch();
+// });
+
+
+// // Search when enter pressed in input bar
+// searchBar.addEventListener('keypress', function (e) {
+//   var key = e.which || e.keyCode;
+//   if (key === 13) { // 13 is enter
+//     redirectAndSearch(false, true);
+//   }
+// });
 
 
 
