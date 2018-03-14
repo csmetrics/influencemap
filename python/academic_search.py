@@ -4,8 +4,8 @@ import http.client, urllib.request, urllib.parse, urllib.error, base64
 MAS_URL_PREFIX = "http://westus.api.cognitive.microsoft.com"
 headers = {
     # Request headers
-   # 'Ocp-Apim-Subscription-Key': 'a27d17cc1a6044f5bb6accf68e10eefa',   # original
-    'Ocp-Apim-Subscription-Key': '39bb8495fc45478ebe88a2153a5031d5',    # bens
+    'Ocp-Apim-Subscription-Key': 'a27d17cc1a6044f5bb6accf68e10eefa',   # original
+   # 'Ocp-Apim-Subscription-Key': '39bb8495fc45478ebe88a2153a5031d5',    # bens
 }
 
 def query_academic_search(type, url, query):
