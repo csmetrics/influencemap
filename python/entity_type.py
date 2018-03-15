@@ -3,17 +3,20 @@ import os
 
 # Type of entities for the flower
 class Entity_type(Enum):
-    AUTH = ('AUTH', 'auth', 'auth_id', 'auth_name', 'Author')
-    AFFI = ('AFFI', 'affi', 'affi_id', 'affi_name', 'Affiliation')
-    CONF = ('CONF', 'conf', 'conf_id', 'conf_abv', 'Conference')
-    JOUR = ('JOUR', 'journ', 'journ_id', 'journ_name', 'Journal')
+    AUTH = ('AUTH', 'auth', 'auth_id', 'auth_name', 'Author', 'Author', 'AuthorIDs', 'DisplayAuthorName')
+    AFFI = ('AFFI', 'affi', 'affi_id', 'affi_name', 'Affiliation', 'Affiliation', 'AffiliationIDs', 'Name')
+    CONF = ('CONF', 'conf', 'conf_id', 'conf_abv', 'Conference', 'ConferenceSeries', 'ConferenceSeriesID', 'ShortName')
+    JOUR = ('JOUR', 'journ', 'journ_id', 'journ_name', 'Journal', 'Journal', 'JournalID', 'NormalizedShortName')
 
-    def __init__(self, indent, prefix, eid, ename, text):
+    def __init__(self, indent, prefix, eid, ename, text, api_type, api_id, api_name):
         self.ident = indent
         self.prefix = prefix
         self.eid = eid
         self.ename = ename
         self.text = text
+        self.api_type = api_type
+        self.api_id = api_id
+        self.api_name = api_name
 
 # Defines the type of the flower. (Center, Leaves)
 class Entity_map:

@@ -28,7 +28,10 @@ with open(CONFIG_PATH) as config_data:
     # MAG API
     MAG_URL_PREFIX = config['mag_api']['prefix']
     JSON_URL = os.path.join(MAG_URL_PREFIX, config['mag_api']['json_postfix'])
+
+    # API key setup
     API_KEYS = [line.strip() for line in open(config['mag_api']['api_key_dir'], 'r')]
     key_filter = re.compile(r'[a-z0-9]{32}')
     API_KEYS = list(filter(key_filter.search, API_KEYS))
+
     API_RES_COUNT = config['mag_api']['res_count']
