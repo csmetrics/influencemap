@@ -4,7 +4,8 @@ import http.client, urllib.request, urllib.parse, urllib.error, base64
 MAS_URL_PREFIX = "http://westus.api.cognitive.microsoft.com"
 headers = {
     # Request headers
-    'Ocp-Apim-Subscription-Key': 'a27d17cc1a6044f5bb6accf68e10eefa',
+    'Ocp-Apim-Subscription-Key': 'a27d17cc1a6044f5bb6accf68e10eefa',   # original
+   # 'Ocp-Apim-Subscription-Key': '39bb8495fc45478ebe88a2153a5031d5',    # bens
 }
 
 def query_academic_search(type, url, query):
@@ -95,3 +96,61 @@ def get_author_information(author_ids):
     }
     data = query_academic_search("post", url, query)
     return data
+
+entity_search_details = {
+  "author": {
+    "expr": "AuN='{}'",
+    "attributes": "AuN, DAuN, CC, ECC, E"
+  },
+  "institition": {
+    "expr": "AuN='{}'",
+    "attributes": "AuN, DAuN, CC, ECC, E"
+  },
+  "conference": {
+    "expr": "AuN='{}'",
+    "attributes": "AuN, DAuN, CC, ECC, E"
+  },
+  "journal": {
+    "expr": "AuN='{}'",
+    "attributes": "AuN, DAuN, CC, ECC, E"
+  },
+    "paper": {
+    "expr": "Ti='{}'",
+    "attributes": "Id,Ti,Y,CC,AA.AuN,AA.AuId,RId"
+  },
+
+}
+
+def get_search_results(keyword):
+    # url = os.path.join(MAS_URL_PREFIX, "academic/v1.0/interpret?mode=json")
+    # data = query_academic_search("get", url, {"query": keyword})
+    # data = data["interpretations"][0]["rules"][0]["output"]["value"]
+    url = os.path.join(MAS_URL_PREFIX, "academic/v1.0/evaluate?mode=json")
+    query = {
+      "expr": "AuN='{}'".format(keyword),
+      "count": 100,
+      "attributes": "AuN,DAuN,CC,ECC,E"
+    }
+    data = query_academic_search("get", url, query)
+
+    return data
+    
+    
+def get_papers_from_authorids(authorids):
+    url = os.path.join(MAS_URL_PREFIX, "academic/v1.0/evaluate")
+    expr
+    query = {
+      "expr": "Composite(AA.AuId=='{}')".format(authorid),
+      "count": 1000,
+      "offset": 0,
+      "attributes": "prob,Id,Ti,Y,CC,AA.AuN,AA.AuId,RId"
+    }
+    data = query_academic_search("get", url, query)
+    return data
+
+
+
+
+
+
+

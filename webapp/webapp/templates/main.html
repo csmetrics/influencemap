@@ -1,145 +1,32 @@
 {% load staticfiles %}
 
 <html>
-  {% include 'header.html' %}
-  <body>
-    <div class="wrapper" align="center">
-      {% include 'navbar.html' with navbar=navbarOption %}
-      <div id="table-container" class="container invisible">
-        <table id="searchtable" class="row-border hover order-column" cellspacing="0" width="100%">
-        </table>
-        <input id="expand-btn" type="submit" value="Expand search" name="expand search">
-        <input id="continue-btn" type="submit" value="Continue">
-      </div>
-    </div>
-  </body>
+{% include 'header.html' %}
+<body>
+	<div class="wrapper" align="center">
+		{% include 'pagehead.html' %}
+		<div class = "container" align = "center">
+			<div class="container custom-text-box" align="center">
+				<h1>About</h1>
+				<p>This is the about section. you can click <a href="/about">here</a> for more info</p>
+				<p>Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.</p>
+			</div>
+			<div class="row" style="height: 10em; padding-top: 20">
+				<div class="container" style="float: left; width: 30%; height: 100px">
+					<p>Browse influence maps of Nobel Laureates, Turing Award winners, Fields Medalists, Institutions and more...</p>
+					<a href="/browse"><button class="btn-primary">Browse</button></a>
+				</div>
+				<div  class="container" style="float: right; width: 30%; height: 100px">
+					<p>Curate your own influence maps by combining papers, people groups and institutions...</p>
+					<a href="/create"><button class="btn-primary">Create</button></a>
+				</div>        
+			</div>
+			<div class="container custom-text-box" align="center">
+				<h1>Methodology</h1>
+				<p>This is the methodology section. you can click <a href="/methodology">here</a> for more info</p>
+				<p>Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.</p>
+			</div>
+		</div>
+	</div>
+</body>
 </html>
-<script src="{% static 'js/searchTableConfig.js' %}"></script>
-<script>
-// keep track of whether search was expanded
-var expanded = false;
-var latestSearchTerm = "";
-var latestSearchOption = $(".entity-option:checked").val();
-
-
-
-// ----  data table  ----
-var tableContainer = document.getElementById("table-container");
-
-// function to create searchTable
-function makeSearchTable(entityType){
-  if ($.fn.DataTable.isDataTable("#searchtable")) {
-    $('#searchtable').DataTable().clear().destroy();
-    $('#searchtable').empty();
-  }
-  var tableSettings = searchTableConfig[entityType]['tableSettings'];
-  return $('#searchtable').DataTable(tableSettings);
-}
-
-// update searchTable
-function updateTable(data, table, resKeys, clear){
-  if (clear) {table.clear();}
-  for(var i in data) {
-    var newRow = {};
-    for(var j in resKeys) {
-       key = resKeys[j];
-       newRow[j] = data[i][key];
-    };
-    if (latestSearchOption == 'author'){
-    // fields
-    fields = "";
-    for (var f in newRow[3]) {
-      fields += "<li>" + newRow[3][f][0] + " (" + newRow[3][f][1] + ")</li>";
-    }
-    newRow[3] = "<ul>" + fields + "</ul>";
-    // Uppercase first letter
-    newRow[4] = newRow[4].charAt(0).toUpperCase() + newRow[4].slice(1);
-    }
-    table.row.add(newRow);
-  };
-  table.draw();
-}
-
-var expandButton = document.getElementById("expand-btn");
-var inputBar = document.getElementById("name-search-bar");
-var searchButton = document.getElementById("search-btn");
-var continueButton = document.getElementById("continue-btn");
-
-
-
-// ----  listeners  ----
-
-continueButton.addEventListener('click', function(){
-  latestSearchOption = $(".entity-option:checked").val();
-  var idColumnNumber = searchTableConfig[latestSearchOption].idCol;
-  var selected_indexes = searchTable.rows({selected:true})[0];
-  var selected_rows = searchTable.rows( selected_indexes ).data().toArray();
-  var selected_ids = [];
-  var selected_names = [];
-  for (var i in selected_rows) {
-    selected_ids.push(selected_rows[i][idColumnNumber]);
-    selected_names.push(selected_rows[i][0]);
-  };
-
-  data = {
-    selectedIds: selected_ids.join(),
-    selectedNames: selected_names.join(),
-    entityType: latestSearchOption,
-    load_json: false,
-    expanded: expanded,
-    name: latestSearchTerm,
-    option: latestSearchOption
-  };
-
-  postData('/view_papers/', data, "{% csrf_token %}");
-//  window.location.href="/view_papers/?" + $.param(data);
-});
-
-
-
-function search(exp, clear){
-  tableContainer.classList.add("invisible");
-  latestSearchOption = $(".entity-option:checked").val();
-  var responseKeys = searchTableConfig[latestSearchOption]['responseKeys'];
-  if (!exp){
-    searchTable = makeSearchTable(latestSearchOption);
-    expanded = false;
-    latestSearchTerm = inputBar.value;
-  } else {
-    expanded = true;
-  }
-
-  showProgressBar();
-  $.ajax({
-    type: "POST",
-    url: "/search",
-    data: { // input to the views.py - search()
-      keyword: latestSearchTerm,
-      option: latestSearchOption,
-      expand: exp
-    },
-    success: function (result) { // return data if success
-      updateTable(result["entities"], searchTable, responseKeys, clear);
-      if (latestSearchOption !== 'author'){expandButton.style.display='none'} else {expandButton.style.display='inline'}
-      tableContainer.classList.remove("invisible");
-    },
-    error: function (result) {
-      console.log("searchButton error");
-    }
-  });
-}
-
-
-{% if search %}
-search(false, true);
-{% endif %}
-
-
-
-// Search all event handler
-expandButton.addEventListener('click', function(){
-  search(true, false); // expand: true, clear: false
-});
-
-
-</script>

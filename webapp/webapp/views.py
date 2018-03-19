@@ -11,6 +11,9 @@ BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 PYTHON_DIR = os.path.join(os.path.dirname(BASE_DIR), 'python')
 sys.path.insert(0, PYTHON_DIR)
 
+from academic_search import get_search_results
+from flower_bloom_data import score_dict_to_graph
+from draw_flower_test import draw_flower
 from flower_bloomer import getFlower, getPreFlowerData
 from mkAff import getAuthor, getJournal, getConf, getAff, getConfPID, getJourPID, getConfPID, getAffPID
 # initialise as no saved pids
@@ -71,6 +74,10 @@ expanded_ids = dict()
 
 @csrf_exempt
 def main(request):
+    return render(request, "main.html")
+
+@csrf_exempt
+def create(request):
     print(request)
  
     try:
@@ -84,7 +91,7 @@ def main(request):
         option = optionlist[0] # default selection
     print(search)    
     # render page with data
-    return render(request, "main.html", {
+    return render(request, "create.html", {
 	"navbarOption": {
 	    "optionlist": optionlist,
 	    "selectedKeyword": keyword,
@@ -96,32 +103,44 @@ def main(request):
 
 @csrf_exempt
 def search(request):
-    print(request)
-    request.session['id'] = 'id_' + str(datetime.now())
-    global saved_pids, expanded_ids
-    entities = []
-
     keyword = request.POST.get("keyword")
-    option = request.POST.get("option")
-    expand = True if request.POST.get("expand") == 'true' else False
-    if keyword not in expanded_ids.keys():
-         expanded_ids[keyword] = list()
+    data = get_search_results(keyword)
 
-    if keyword:
-        if option == 'author':
-            try:
-                entities, saved_pids[keyword], expanded_ids[keyword] = getAuthor(keyword, progressCallback, nonExpandAID=expanded_ids[keyword], expand=expand)
-                saved_entities[keyword] = entities
-            except:
-                entities_and_saved_pids = getAuthor(keyword, progressCallback, nonExpandAID=expanded_ids[keyword], expand=expand)
-                entities = entities_and_saved_pids[0]
-                saved_entities[keyword] += entities
-                saved_pids[keyword] = {**entities_and_saved_pids[1], **saved_pids[keyword]}
+    author_key_change = [
+      ['eid', 'Id'],
+      ['normalisedName', 'AuN'],
+      ['name', 'DAuN'],
+      ['citations', 'CC'],
+      ['affiliation', 'E', 'LKA', 'AfN'],
+      ['affiliationid', 'E', 'LKA', 'AfId']
+    ]
+
+    author_keys_to_make_dictionaries = [
+        ['E']
+    ]
+
+    def get_nested_value(dictionary, keys, rtn_func=lambda x: x):
+        if keys == []:
+            return rtn_func(dictionary)
         else:
-            entities = dataFunctionDict['get_ids'][option](keyword, progressCallback)
-            saved_entities[keyword] = entities
-    data = {"entities": entities,}
-    return JsonResponse(data, safe=False)
+            return get_nested_value(dictionary[keys[0]], keys[1:], rtn_func)
+
+    def result_to_dictionary(result, key_change, keys_to_make_dictionaries):
+        out = dict()
+        for keys in keys_to_make_dictionaries:
+            result[keys[-1]] = get_nested_value(result, keys, json.loads)
+
+        for elem in key_change:
+            try:
+                out[elem[0]] = get_nested_value(result, elem[1:])
+            except:
+                #out[elem[0]] = get_nested_value(result, elem[1:])
+                out[elem[0]] = None
+        return out
+
+    data = [result_to_dictionary(entity, author_key_change, author_keys_to_make_dictionaries) for entity in data["entities"]]
+
+    return JsonResponse({'entities': data}, safe=False)
 
 
 def view_papers(request):
@@ -173,26 +192,28 @@ def view_papers(request):
 
 @csrf_exempt
 def submit(request):
-    print(request)
-    resetProgress()
-    global saved_pids
+
+    # print(request)
+    # resetProgress()
+    # global saved_pids
     data = json.loads(request.POST.get('data'))
-    papers_string = data['papers']   # 'eid1:pid,pid,...,pid_entity_eid2:pid,...'
-    id_papers_strings = papers_string.split('_entity_')
-    id_2_paper_id = dict()
+    # papers_string = data['papers']   # 'eid1:pid,pid,...,pid_entity_eid2:pid,...'
+    # id_papers_strings = papers_string.split('_entity_')
+    # id_2_paper_id = dict()
 
-    for id_papers_string in id_papers_strings:
-        eid, pids = id_papers_string.split(':')
-        id_2_paper_id[eid] = pids.split(',')
+    # for id_papers_string in id_papers_strings:
+    #     eid, pids = id_papers_string.split(':')
+    #     id_2_paper_id[eid] = pids.split(',')
 
-    unselected_papers_string = data.get('unselected_papers')   # 'eid1:pid,pid,...,pid_entity_eid2:pid,...'
-    unselected_id_papers_strings = unselected_papers_string.split('_entity_')
+    # unselected_papers_string = data.get('unselected_papers')   # 'eid1:pid,pid,...,pid_entity_eid2:pid,...'
+    # unselected_id_papers_strings = unselected_papers_string.split('_entity_')
 
-    unselected_id_2_paper_id = dict()
-    if unselected_papers_string != "":
-        for us_id_papers_string in unselected_id_papers_strings:
-            us_eid, us_pids = us_id_papers_string.split(':')
-            unselected_id_2_paper_id[us_eid] = us_pids.split(',')
+    # unselected_id_2_paper_id = dict()
+    # if unselected_papers_string != "":
+    #     for us_id_papers_string in unselected_id_papers_strings:
+    #         us_eid, us_pids = us_id_papers_string.split(':')
+    #         unselected_id_2_paper_id[us_eid] = us_pids.split(',')
+
 
     option = data.get("option")
     keyword = data.get('keyword')
@@ -200,19 +221,24 @@ def submit(request):
     bot_year_min = int(data.get("bot_year_min"))
     top_year_max = int(data.get("top_year_max"))
 
-    pre_flower_data_dict[request.session['id']] = getPreFlowerData(id_2_paper_id, unselected_id_2_paper_id, ent_type = option, cbfunc=progressCallback)
-    flower_data = getFlower(data_df=pre_flower_data_dict[request.session['id']], name=keyword, ent_type=option, cbfunc=progressCallback, inc_self=selfcite)
+    # pre_flower_data_dict[request.session['id']] = getPreFlowerData(id_2_paper_id, unselected_id_2_paper_id, ent_type = option, cbfunc=progressCallback)
+    # flower_data = getFlower(data_df=pre_flower_data_dict[request.session['id']], name=keyword, ent_type=option, cbfunc=progressCallback, inc_self=selfcite)
 
-    data1 = processdata("author", flower_data[0])
-    data2 = processdata("conf", flower_data[1])
-    data3 = processdata("inst", flower_data[2])
+    # data1 = processdata("author", flower_data[0])
+    # data2 = processdata("conf", flower_data[1])
+    # data3 = processdata("inst", flower_data[2])
 
-    print(data)
-    print(selfcite)
+
+    # print(data)
+    # print(selfcite)
+
+    data1 = processdata("conf", score_dict_to_graph(keyword, draw_flower(keyword)))
+
+
     data = {
         "author": data1,
-        "conf": data2,
-        "inst": data3,
+        "conf": data1,
+        "inst": data1,
         "navbarOption": {
             "optionlist": optionlist,
             "selectedKeyword": keyword,

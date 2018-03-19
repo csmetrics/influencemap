@@ -1,0 +1,177 @@
+{% load staticfiles %}
+
+<html>
+  {% include 'header.html' %}
+  <body>
+    <div class="wrapper" align="center">
+      {% include 'navbar.html' with navbar=navbarOption %}
+      <div id="tables-container" class="row" style="width: 80%; max-height: 500px">
+        <div id="searchtable-container" class="container" style="float: left; width: 70%; border-right: 1px solid rgb(15,15,15)">
+          <table id="searchtable" class="row-border hover order-column" cellspacing="0" width="100%"></table>
+        </div>
+        <div id="selectiontable-container" class="container" style="float: left; width: 30%; height: 100%">
+          <table id="selectiontable" class="row-border hover order-column" cellspacing="0" width="100%"%"></table>
+          <input id="continue-btn" type="submit" value="Go" float="bottom">
+        </div>
+      </div>
+    </div>
+  </body>
+</html>
+<script src="{% static 'js/searchTableConfig.js' %}"></script>
+<script src="{% static 'js/selectionTableConfig.js' %}"></script>
+<script>
+// keep track of whether search was expanded
+var latestSearchTerm = "";
+var latestSearchOption = $(".entity-option:checked").val();
+
+var selectiontable = $('#selectiontable').DataTable(selectionTableConfig['tableSettings']);
+var searchtable = $('#searchtable').DataTable(searchTableConfig[$(".entity-option:checked").val()]['tableSettings']);
+
+// ----  data table  ----
+var searchtableContainer = document.getElementById("searchtable-container");
+
+
+// function to create searchTable
+function makeSearchTable(entityType){
+  if ($.fn.DataTable.isDataTable("#searchtable")) {
+    $('#searchtable').DataTable().clear().destroy();
+    $('#searchtable').empty();
+  }
+  var tableSettings = searchTableConfig[entityType]['tableSettings'];
+  return $('#searchtable').DataTable(tableSettings);
+}
+
+
+// update searchTable
+function updateTable(data, table, resKeys){
+  table.clear();
+
+  for(var i in data) {
+    table.row.add(data[i]);
+  };
+  table.draw();
+}
+
+var inputBar = document.getElementById("name-search-bar");
+var searchButton = document.getElementById("search-btn");
+var continueButton = document.getElementById("continue-btn");
+
+
+
+// ----  listeners  ----
+
+continueButton.addEventListener('click', function(){
+   data = {
+       option: latestSearchOption,
+       keyword: latestSearchTerm,
+       selfcite: false, //selfCiteCheckbox.checked,
+       bot_year_min: 0,
+       top_year_max: 3000
+   }
+   postData('/submit/', data, "{% csrf_token %}")
+});
+
+function search(){
+  console.log("searching")
+  latestSearchOption = $(".entity-option:checked").val();
+  var responseKeys = searchTableConfig[latestSearchOption]['responseKeys'];
+  searchTable = makeSearchTable(latestSearchOption);
+  latestSearchTerm = inputBar.value;
+
+  // showProgressBar();
+  $.ajax({
+    type: "POST",
+    url: "/search",
+    data: { // input to the views.py - search()
+      keyword: latestSearchTerm,
+      option: latestSearchOption,
+    },
+    success: function (result) { // return data if success
+      updateTable(result["entities"], searchTable, responseKeys);
+      searchTableEventHandling();
+      selectionTableEventHandling();
+    },
+    error: function (result) {
+      console.log("searchButton error");
+    }
+  });
+}
+
+var searchButton = document.getElementById('search-btn');
+var searchBar = document.getElementById('name-search-bar')
+searchButton.addEventListener('click', function(){
+  search();
+});
+
+// Search when enter pressed in input bar
+searchBar.addEventListener('keypress', function (e) {
+  var key = e.which || e.keyCode;
+  if (key === 13) { // 13 is enter
+    search();
+  }
+});
+
+function searchTableEventHandling() {
+  $('#searchtable tr').on('click', function () {
+      var tr = $(this).closest('tr');
+      var row = searchTable.row( tr );
+      if (!tr.hasClass('selected')){
+        var newRow = row.data();
+        var name = newRow['name'];
+        var eid = newRow['eid'];
+        var citations = ", cited "+newRow['citations']+" times";
+        var affiliation = newRow['affiliation'] != null ? ", "+ newRow['affiliation'] : ""
+        newRow["name_id"] = name+"_"+eid;
+        newRow["display text"] = name+citations+affiliation;
+        selectiontable.row.add(newRow).draw();
+      }
+      else {
+        selectiontable.rows().nodes().each(function(a) {
+          var r = selectiontable.row(a);
+          var name_id = row.data()['name']+"_"+row.data()['eid'];
+          console.log("each selection table");
+          if(r.data()['name_id'] === name_id){
+            selectiontable.row(a).remove().draw();
+          }
+        });
+      }
+  })
+};
+
+function selectionTableEventHandling() {
+  $('#selectiontable tbody').on('click', 'tr', function () {
+      var tr = $(this).closest('tr');
+      var row = selectiontable.row( tr );
+      selectiontable.row(row).remove().draw();
+      searchtable.rows().nodes().each(function(a) {
+        var r = searchtable.row(a);
+        var name_id = r.data()['name']+"_"+r.data()['eid'];
+        console.log("hello");
+        if(row.data()['name_id'] === name_id){
+          searchtable.row(a).deselect();
+        };
+      });
+  })
+};
+
+
+   // // Close all open rows
+   //  $('.shown').each( function (i, elem) {
+   //    var tblRow = papersTable.row( elem );
+   //    elem.classList.remove('shown');
+   //    tblRow.child.hide();
+   //  });
+
+   //  if ( show ) {
+   //      // Open this row
+   //      row.child.show();
+   //      tr.addClass('shown');
+   //  }
+
+
+// {% if search %}
+// search(false, true);
+// {% endif %}
+
+
+</script>

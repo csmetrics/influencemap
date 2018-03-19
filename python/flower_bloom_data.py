@@ -92,6 +92,39 @@ def score_df_to_graph(score_df):
 
     return egoG
 
+def score_dict_to_graph(ego, score_dict):
+    
+    influenced_scores = [score_dict[name]["influenced"] for name in score_dict.keys()]
+    influencing_scores = [score_dict[name]["influencing"] for name in score_dict.keys()]
+
+    egoG = nx.DiGraph(ego=ego, max_influenced=max(influenced_scores), max_influencing=max(influencing_scores))
+
+    for value in score_dict.values():
+        value['sort_value'] = max(value['influenced'], value['influencing'])
+
+    score_list = [score_dict[key] for key in score_dict.keys()]
+
+    score_list = sorted(score_list, key=lambda x: x['sort_value'])
+
+    score_list_size = min(NUM_LEAVES, len(score_list))
+    score_list = score_list[:score_list_size]
+
+    egoG.add_node(ego, weight=None)
+
+    # Iterate over list
+    for row in score_list:
+        # Add ratio weight
+        egoG.add_node(row['name'], nratiow=row['ratio'], ratiow=row['ratiow'], sumw=row['sumw'], coauthor=False)
+
+        # Add influence weights
+        egoG.add_edge(row['name'], ego, weight=row['influencing'], nweight=row['in_nweight'], direction='out')
+        egoG.add_edge(ego, row['name'], weight=row['influenced'], nweight=row['out_nweight'], direction='in')
+
+    print('{} finish graph generation\n---'.format(datetime.now()))
+
+    return egoG
+
+
 if __name__ == "__main__":
     from mkAff import getAuthor
     from get_flower_df import gen_search_df
