@@ -6,7 +6,7 @@ import numpy as np
 from datetime import datetime
 
 # Generates pandas dataframe for scores
-def generate_score_df(influence_df, e_map, ego, coauthors=set([]), score_year_min=None, score_year_max=None, ratio_func=np.vectorize(lambda x, y : y - x), sort_func=np.maximum):
+def agg_score_df(influence_df, e_map, ego, coauthors=set([]), score_year_min=None, score_year_max=None, ratio_func=np.vectorize(lambda x, y : y - x), sort_func=np.maximum):
 
     print('\n---\n{} start score generation'.format(datetime.now()))
 
@@ -46,8 +46,8 @@ def generate_score_df(influence_df, e_map, ego, coauthors=set([]), score_year_mi
     score_df = score_df.assign(tmp = sort_func(score_df['influencing'], score_df['influenced']))
     score_df = score_df.sort_values('tmp', ascending=False).drop('tmp', axis=1)
 
-    # Flag coauthors
-    score_df['coauthor'] = score_df.apply(lambda row : row['entity_id'] in coauthors, axis=1)
+    # Flag coauthors TODO FIX
+    score_df['coauthor'] = False
 
     # Filter coauthors
     #score_df = score_df.loc[~score_df['entity_id'].isin(coauthors)]
@@ -64,18 +64,18 @@ def generate_score_df(influence_df, e_map, ego, coauthors=set([]), score_year_mi
 
     return score_df
 
-def generate_coauthors(e_map, data_df):
-    coauthors = list()
 
-    # Split into cases of citing and cited
-    for citing, info_df in pd.concat(data_df.values()).groupby('citing'):
-        if citing:
-            s = '_cited'
-        else:
-            s = '_citing'
+if __name__ == '__main__':
+    import entity_type as ent
+    from mag_interface import *
+    
+    name = sys.argv[1]
+    paper_map = auth_name_to_paper_map(name)
+    citation_score = paper_id_to_citation_score(paper_map, ent.Entity_type.AUTH)
+    reference_score = paper_id_to_reference_score(paper_map, ent.Entity_type.AUTH)
+    score_df = gen_score_df(citation_score, reference_score)
+    score = score_entity(score_df, ent.Entity_map(ent.Entity_type.AUTH, [ent.Entity_type.AUTH]))
 
-        # Find coauthoring for each type of leaf
-        for key in e_map.keyn:
-            coauthors += info_df[key + s].tolist()
-
-    return set(coauthors)
+    agg_score = agg_score_df(score, ent.Entity_map(ent.Entity_type.AUTH, [ent.Entity_type.AUTH]), '')
+    print(agg_score)
+    # print(agg_score[agg_score['coauthor']])

@@ -3,25 +3,27 @@ import http.client, urllib.request, urllib.parse, urllib.error, base64
 import pandas as pd
 import entity_type as ent
 import functools
+import itertools
+import sys
 from datetime import datetime
 from config import *
 
 header = {
     # Request headers
-    'Ocp-Apim-Subscription-Key': API_KEYS[0]
+    'Ocp-Apim-Subscription-Key': API_KEYS[1]
 }
 
 
 def query_academic_search(type, url, query):
-    """
-        Helper for requesting data from API.
-    """
     if type == "get":
         response = requests.get(url, params=urllib.parse.urlencode(query), headers=header)
     elif type == "post":
         response = requests.post(url, json=query, headers=header)
+    if response.status_code != 200:
+        print("return statue: " + str(response.status_code))
         print("ERROR: problem with the request.")
         print(response.content)
+        #exit()
     return json.loads((response.content).decode("utf-8"))
 
 
@@ -151,16 +153,33 @@ def auth_id_to_reference_mask(auth_ids):
     return pd.DataFrame(data_sc)
 
 
+def auth_name_to_paper_map(auth_name):
+    """
+    """
+    query = {
+        "path": "/author",
+        "author": {
+            "type": "Author",
+            "match": {
+                "Name": auth_name
+                },
+            "select": [ "PaperIDs" ]
+            }
+        }
 
+    data = query_academic_search('post', JSON_URL, query)
+    res_dict = dict()
+    for entity in data['Results']:
+        res_dict[entity[0]['CellID']] = entity[0]['PaperIDs']
+    return res_dict
 
 
 def paper_id_to_citation_score(paper_map, entity):
     """
         Turns an author ids into a list of papers associated to the ids.
     """
-    entity_ids = set([p['CellID'] for p in paper_map])
-    paper_ids = list(itertools.chain.from_iterable( \
-                    [p['PaperIDs'] for p in paper_map]))
+    entity_ids = set(paper_map.keys())
+    paper_ids = list(itertools.chain.from_iterable(paper_map.values()))
 
     query = {
         "path": "/paper/CitationIDs/cites",
@@ -169,13 +188,13 @@ def paper_id_to_citation_score(paper_map, entity):
             "id": paper_ids,
             "select": [
                 "PublishDate",
-                entity.api_key
+                entity.api_id
                 ]
             },
         "cites": {
             "select": [
                 "PublishDate",
-                entity.api_key
+                entity.api_id
                 ]
             }
         }
@@ -189,7 +208,7 @@ def paper_id_to_citation_score(paper_map, entity):
         row['paper_id'] = cite['CellID']
         row['influenced'] = 1 #/ len(ego['AuthorIDs'])
         row['influencing'] = 0
-        row['self_cite'] = 0 if entity_ids.disjoint(cite['AuthorIDs']) else 1
+        row['self_cite'] = 0 if entity_ids.isdisjoint(cite['AuthorIDs']) else 1
         #row['date_ego'] = ego['PublishDate']
         row['influence_year'] = cite['PublishDate']
         data_sc.append(row)
@@ -201,9 +220,8 @@ def paper_id_to_reference_score(paper_map, entity):
     """
         Turns an author ids into a list of papers associated to the ids.
     """
-    entity_ids = set([p['CellID'] for p in paper_map])
-    paper_ids = list(itertools.chain.from_iterable( \
-                    [p['PaperIDs'] for p in paper_map]))
+    entity_ids = set(paper_map.keys())
+    paper_ids = list(itertools.chain.from_iterable(paper_map.values()))
 
     query = {
         "path": "/paper/ReferenceIDs/refs",
@@ -212,13 +230,13 @@ def paper_id_to_reference_score(paper_map, entity):
             "id": paper_ids,
             "select": [
                 "PublishDate",
-                entity.api_key
+                entity.api_id
                 ]
             },
         "refs": {
             "select": [
                 "PublishDate",
-                entity.api_key
+                entity.api_id
                 ]
             }
         }
@@ -232,7 +250,7 @@ def paper_id_to_reference_score(paper_map, entity):
         row['paper_id'] = refs['CellID']
         row['influenced'] = 0
         row['influencing'] = 1 #/ len(refs['AuthorIDs'])
-        row['self_cite'] = 0 if entity_ids.disjoint(refs['AuthorIDs']) else 1
+        row['self_cite'] = 0 if entity_ids.isdisjoint(refs['AuthorIDs']) else 1
         row['influence_year'] = ego['PublishDate']
         #row['influence_year'] = cite['PublishDate']
         data_sc.append(row)
@@ -255,21 +273,32 @@ def score_entity(score_df, entity_map):
 
     for e_type in leaves:
         entity_query = {
-            "path": "/paper/{}/entity".format(e_type.api_key),
+            "path": "/paper/{}/entity".format(e_type.api_id),
             "paper": {
                  "type": "Paper",
-                 "id": paper_ids
+                 "id": paper_ids,
+                 "select": [ e_type.api_id ]
                  },
             "entity": {
                  "select": [ e_type.api_name ]
                  }
+            }
 
-        data = query_academic_search('post', JSON_URL, query)
-        for line in data['Results']:
+        data = query_academic_search('post', JSON_URL, entity_query)
+        for paper, entity in data['Results']:
             row = dict()
-            row['paper_id'] = line['CellID']
-            row['entity_id'] = line[e_type.api_name]
+            row['paper_id'] = paper['CellID']
+            row['entity_id'] = entity[e_type.api_name]
             data_dict.append(row)
 
-     entity_df = pd.DataFrame(data_dict)
-     return pd.merge(entity_df, score_df, on='paper_id', sort=False)
+    entity_df = pd.DataFrame(data_dict)
+    return pd.merge(entity_df, score_df, on='paper_id', sort=False)
+
+if __name__ == "__main__":
+    name = sys.argv[1]
+    paper_map = auth_name_to_paper_map(name)
+    citation_score = paper_id_to_citation_score(paper_map, ent.Entity_type.AUTH)
+    reference_score = paper_id_to_reference_score(paper_map, ent.Entity_type.AUTH)
+    score_df = gen_score_df(citation_score, reference_score)
+    score = score_entity(score_df, ent.Entity_map(ent.Entity_type.AUTH, [ent.Entity_type.AUTH]))
+    print(score)
