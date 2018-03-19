@@ -11,11 +11,16 @@ BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 PYTHON_DIR = os.path.join(os.path.dirname(BASE_DIR), 'python')
 sys.path.insert(0, PYTHON_DIR)
 
-from academic_search import get_search_results
-from flower_bloom_data import score_dict_to_graph
-from draw_flower_test import draw_flower
-from flower_bloomer import getFlower, getPreFlowerData
+import entity_type as ent
 from mkAff import getAuthor, getJournal, getConf, getAff, getConfPID, getJourPID, getConfPID, getAffPID
+from mag_flower_bloom import *
+
+#import entity_type as ent
+#from academic_search import get_search_results
+#from flower_bloom_data import score_dict_to_graph
+#from draw_flower_test import draw_flower
+#from flower_bloomer import getFlower, getPreFlowerData
+#from mkAff import getAuthor, getJournal, getConf, getAff, getConfPID, getJourPID, getConfPID, getAffPID
 # initialise as no saved pids
 saved_pids = dict()
 
@@ -224,21 +229,24 @@ def submit(request):
     # pre_flower_data_dict[request.session['id']] = getPreFlowerData(id_2_paper_id, unselected_id_2_paper_id, ent_type = option, cbfunc=progressCallback)
     # flower_data = getFlower(data_df=pre_flower_data_dict[request.session['id']], name=keyword, ent_type=option, cbfunc=progressCallback, inc_self=selfcite)
 
-    # data1 = processdata("author", flower_data[0])
-    # data2 = processdata("conf", flower_data[1])
-    # data3 = processdata("inst", flower_data[2])
+    entity_score_df = get_entity_score_df(keyword, ent.Entity_type.AUTH) # TODO other entities
+    flower_data = get_flowers(entity_score_df, cbfunc=progressCallback, \
+        bot_year=bot_year_min, top_year=top_year_max)
 
+    data1 = processdata("author", flower_data[0])
+    data2 = processdata("conf", flower_data[1])
+    data3 = processdata("inst", flower_data[2])
 
     # print(data)
     # print(selfcite)
 
-    data1 = processdata("conf", score_dict_to_graph(keyword, draw_flower(keyword)))
+    #data1 = processdata("conf", score_dict_to_graph(keyword, draw_flower(keyword)))
 
 
     data = {
         "author": data1,
-        "conf": data1,
-        "inst": data1,
+        "conf": data2,
+        "inst": data3,
         "navbarOption": {
             "optionlist": optionlist,
             "selectedKeyword": keyword,

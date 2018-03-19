@@ -64,10 +64,10 @@ def score_df_to_graph(score_df):
 
     # Ego Graph
     ego=score_df.ego
-    egoG = nx.DiGraph(ego=ego, max_influenced=score_df['influenced'].max(), max_influencing=score_df['influencing'].max(), mapping=score_df.mapping, date_range=score_df.date_range)
+    egoG = nx.DiGraph(ego=ego, max_influenced=score_df['influenced'].max(), max_influencing=score_df['influencing'].max())
 
     # Get top data for graph
-    score_df = score_df[score_df.entity_id != ego].head(n=NUM_LEAVES)
+    score_df = score_df[score_df['entity_id'] != ego].head(n=NUM_LEAVES)
 
     # Normalise values
     score_df['normed_sum'] = normalise_singular_linear(score_df['sum'])
@@ -87,38 +87,6 @@ def score_df_to_graph(score_df):
         # Add influence weights
         egoG.add_edge(row['entity_id'], ego, weight=row['influencing'], nweight=row['normed_influencing'], direction='out')
         egoG.add_edge(ego, row['entity_id'], weight=row['influenced'], nweight=row['normed_influenced'], direction='in')
-
-    print('{} finish graph generation\n---'.format(datetime.now()))
-
-    return egoG
-
-def score_dict_to_graph(ego, score_dict):
-    
-    influenced_scores = [score_dict[name]["influenced"] for name in score_dict.keys()]
-    influencing_scores = [score_dict[name]["influencing"] for name in score_dict.keys()]
-
-    egoG = nx.DiGraph(ego=ego, max_influenced=max(influenced_scores), max_influencing=max(influencing_scores))
-
-    for value in score_dict.values():
-        value['sort_value'] = max(value['influenced'], value['influencing'])
-
-    score_list = [score_dict[key] for key in score_dict.keys()]
-
-    score_list = sorted(score_list, key=lambda x: x['sort_value'])
-
-    score_list_size = min(NUM_LEAVES, len(score_list))
-    score_list = score_list[:score_list_size]
-
-    egoG.add_node(ego, weight=None)
-
-    # Iterate over list
-    for row in score_list:
-        # Add ratio weight
-        egoG.add_node(row['name'], nratiow=row['ratio'], ratiow=row['ratiow'], sumw=row['sumw'], coauthor=False)
-
-        # Add influence weights
-        egoG.add_edge(row['name'], ego, weight=row['influencing'], nweight=row['in_nweight'], direction='out')
-        egoG.add_edge(ego, row['name'], weight=row['influenced'], nweight=row['out_nweight'], direction='in')
 
     print('{} finish graph generation\n---'.format(datetime.now()))
 

@@ -6,7 +6,9 @@ import numpy as np
 from datetime import datetime
 
 # Generates pandas dataframe for scores
-def agg_score_df(influence_df, e_map, ego, coauthors=set([]), score_year_min=None, score_year_max=None, ratio_func=np.vectorize(lambda x, y : y - x), sort_func=np.maximum):
+def agg_score_df(influence_df, e_map, ego, coauthors=set([]), \
+    score_year_min=None, score_year_max=None, \
+    ratio_func=np.vectorize(lambda x, y : y - x), sort_func=np.maximum):
 
     print('\n---\n{} start score generation'.format(datetime.now()))
 
@@ -14,21 +16,27 @@ def agg_score_df(influence_df, e_map, ego, coauthors=set([]), score_year_min=Non
     if score_year_min == None and score_year_max == None:
         score_df = influence_df
     else:
+        no_nan_date = influence_df[ influence_df['influence_date'].notna() ]
+
         # Set minimum year if none set
         if score_year_min == None:
-            score_year_min = influence_df['influence_year'].min()
+            score_date_min = no_nan_date['influence_date'].min()
         else:
-            score_year_min = min(influence_df['influence_year'].max(), score_year_min)
+            score_date_min = min(no_nan_date['influence_date'].max(),\
+                datetime(max(score_year_min, 1), 1, 1))
             
 
         # Set maximum year if none set
         if score_year_max == None:
-            score_year_max = influence_df['influence_year'].max()
+            score_date_max = no_nan_date['influence_date'].max()
         else:
-            score_year_max = max(influence_df['influence_year'].min(), score_year_max)
+            score_date_max = max(no_nan_date['influence_date'].min(),\
+                datetime(max(score_year_max, 1), 1, 1))
 
         # Filter based on year
-        score_df = influence_df[(score_year_min <= influence_df['influence_year']) & (influence_df['influence_year'] <= score_year_max)]
+        score_df = no_nan_date[(score_date_min <= \
+            no_nan_date['influence_date']) & \
+            (no_nan_date['influence_date'] <= score_date_max)]
 
     # Remove year column
     score_df = score_df[['entity_id', 'influenced', 'influencing']]
@@ -49,18 +57,10 @@ def agg_score_df(influence_df, e_map, ego, coauthors=set([]), score_year_min=Non
     # Flag coauthors TODO FIX
     score_df['coauthor'] = False
 
-    # Filter coauthors
-    #score_df = score_df.loc[~score_df['entity_id'].isin(coauthors)]
-
-    # Add meta data
-    score_df.mapping = ' to '.join([e_map.get_center_text(), e_map.get_leave_text()])
-    
-    # Set publication year
-    score_df.date_range = '{} to {}'.format(score_year_min, score_year_max)
-
     score_df.ego = ego
 
     print('{} finish score generation\n---'.format(datetime.now()))
+    print(score_df)
 
     return score_df
 

@@ -31,7 +31,7 @@ def to_datetime(strtime):
     """
         Turns string format of MAG dates into datetime object.
     """
-    return datetime.datetime.strptime(strtime, '%Y-%m-%dT%X')
+    return datetime.strptime(strtime, '%Y-%m-%dT%X')
 
 
 def api_get_list(field_list):
@@ -210,7 +210,7 @@ def paper_id_to_citation_score(paper_map, entity):
         row['influencing'] = 0
         row['self_cite'] = 0 if entity_ids.isdisjoint(cite['AuthorIDs']) else 1
         #row['date_ego'] = ego['PublishDate']
-        row['influence_year'] = cite['PublishDate']
+        row['influence_date'] = to_datetime(cite['PublishDate'])
         data_sc.append(row)
 
     return pd.DataFrame(data_sc)
@@ -251,7 +251,7 @@ def paper_id_to_reference_score(paper_map, entity):
         row['influenced'] = 0
         row['influencing'] = 1 #/ len(refs['AuthorIDs'])
         row['self_cite'] = 0 if entity_ids.isdisjoint(refs['AuthorIDs']) else 1
-        row['influence_year'] = ego['PublishDate']
+        row['influence_date'] = to_datetime(ego['PublishDate'])
         #row['influence_year'] = cite['PublishDate']
         data_sc.append(row)
 
