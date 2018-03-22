@@ -4,6 +4,7 @@ import pandas as pd
 import entity_type as ent
 import functools
 import itertools
+import operator
 import sys
 from datetime import datetime
 from config import *
@@ -163,15 +164,22 @@ def auth_name_to_paper_map(auth_name):
             "match": {
                 "Name": auth_name
                 },
-            "select": [ "PaperIDs" ]
+            "select": [ "DisplayAuthorName", "PaperIDs" ]
             }
         }
 
     data = query_academic_search('post', JSON_URL, query)
     res_dict = dict()
+    name_dict = dict()
     for entity in data['Results']:
         res_dict[entity[0]['CellID']] = entity[0]['PaperIDs']
-    return res_dict
+        try:
+            name_dict[entity[0]['DisplayAuthorName']] += 1
+        except KeyError:
+            name_dict[entity[0]['DisplayAuthorName']] = 1
+    
+    return sorted(name_dict.items(), key=operator.itemgetter(1),
+                  reverse=True)[0][0], res_dict
 
 
 def paper_id_to_citation_score(paper_map, entity):

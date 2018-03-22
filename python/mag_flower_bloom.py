@@ -7,11 +7,11 @@ from mag_aggregate import *
 def get_auth_score_df(name):
     """
     """
-    paper_map = auth_name_to_paper_map(name)
+    ego_name, paper_map = auth_name_to_paper_map(name)
     citation_score = paper_id_to_citation_score(paper_map, ent.Entity_type.AUTH)
     reference_score = paper_id_to_reference_score(paper_map, ent.Entity_type.AUTH)
     score_df = gen_score_df(citation_score, reference_score)
-    score_df.ego = name
+    score_df.ego = ego_name
     score_df.ego_type = ent.Entity_type.AUTH
     return score_df
 
@@ -24,10 +24,13 @@ def get_entity_score_df(name, e_type):
 def get_flower(score_df, leaves, bot_year=None, top_year=None):
     """
     """
+    ego_name = score_df.ego
     flower_map = ent.Entity_map(score_df.ego_type, leaves)
     entity_score = score_entity(score_df, flower_map)
     agg_score = agg_score_df(entity_score, flower_map, score_df.ego, \
         score_year_min=bot_year, score_year_max=top_year)
+    agg_score = agg_score[agg_score['entity_id'] != ego_name]
+    agg_score.ego = ego_name
     return score_df_to_graph(agg_score)
 
 

@@ -57,8 +57,6 @@ def agg_score_df(influence_df, e_map, ego, coauthors=set([]), \
     # Flag coauthors TODO FIX
     score_df['coauthor'] = False
 
-    score_df.ego = ego
-
     print('{} finish score generation\n---'.format(datetime.now()))
     print(score_df)
 
