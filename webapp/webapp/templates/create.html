@@ -25,7 +25,7 @@ var latestSearchTerm = "";
 var latestSearchOption = $(".entity-option:checked").val();
 
 var selectiontable = $('#selectiontable').DataTable(selectionTableConfig['tableSettings']);
-var searchtable = $('#searchtable').DataTable(searchTableConfig[$(".entity-option:checked").val()]['tableSettings']);
+var searchtable = $('#searchtable').DataTable(searchTableConfig['tableSettings']);
 
 // ----  data table  ----
 var searchtableContainer = document.getElementById("searchtable-container");
@@ -37,13 +37,13 @@ function makeSearchTable(entityType){
     $('#searchtable').DataTable().clear().destroy();
     $('#searchtable').empty();
   }
-  var tableSettings = searchTableConfig[entityType]['tableSettings'];
+  var tableSettings = searchTableConfig['tableSettings'];
   return $('#searchtable').DataTable(tableSettings);
 }
 
 
 // update searchTable
-function updateTable(data, table, resKeys){
+function updateTable(data, table){
   table.clear();
 
   for(var i in data) {
@@ -74,8 +74,7 @@ continueButton.addEventListener('click', function(){
 function search(){
   console.log("searching")
   latestSearchOption = $(".entity-option:checked").val();
-  var responseKeys = searchTableConfig[latestSearchOption]['responseKeys'];
-  searchTable = makeSearchTable(latestSearchOption);
+  searchtable = makeSearchTable(latestSearchOption);
   latestSearchTerm = inputBar.value;
 
   // showProgressBar();
@@ -87,9 +86,17 @@ function search(){
       option: latestSearchOption,
     },
     success: function (result) { // return data if success
-      updateTable(result["entities"], searchTable, responseKeys);
+      updateTable(result["entities"], searchtable);
       searchTableEventHandling();
-      selectionTableEventHandling();
+      searchtable.rows().nodes().each(function(a) {
+        selectiontable.rows().nodes().each(function(b) {
+          var search_row = searchtable.row(a);
+          var selection_row = selectiontable.row(b);
+          if(search_row.data()['table-id'] === selection_row.data()['table-id']){
+            search_row.select();
+          }
+        })
+      });
     },
     error: function (result) {
       console.log("searchButton error");
@@ -114,45 +121,35 @@ searchBar.addEventListener('keypress', function (e) {
 function searchTableEventHandling() {
   $('#searchtable tr').on('click', function () {
       var tr = $(this).closest('tr');
-      var row = searchTable.row( tr );
+      var row = searchtable.row( tr );
       if (!tr.hasClass('selected')){
         var newRow = row.data();
-        var name = newRow['name'];
-        var eid = newRow['eid'];
-        var citations = ", cited "+newRow['citations']+" times";
-        var affiliation = newRow['affiliation'] != null ? ", "+ newRow['affiliation'] : ""
-        newRow["name_id"] = name+"_"+eid;
-        newRow["display text"] = name+citations+affiliation;
         selectiontable.row.add(newRow).draw();
       }
       else {
         selectiontable.rows().nodes().each(function(a) {
           var r = selectiontable.row(a);
-          var name_id = row.data()['name']+"_"+row.data()['eid'];
-          console.log("each selection table");
-          if(r.data()['name_id'] === name_id){
-            selectiontable.row(a).remove().draw();
+          if(r.data()['table-id'] === row.data()['table-id']){
+            r.remove().draw();
           }
         });
       }
   })
 };
 
-function selectionTableEventHandling() {
-  $('#selectiontable tbody').on('click', 'tr', function () {
-      var tr = $(this).closest('tr');
-      var row = selectiontable.row( tr );
-      selectiontable.row(row).remove().draw();
-      searchtable.rows().nodes().each(function(a) {
-        var r = searchtable.row(a);
-        var name_id = r.data()['name']+"_"+r.data()['eid'];
-        console.log("hello");
-        if(row.data()['name_id'] === name_id){
-          searchtable.row(a).deselect();
-        };
-      });
-  })
-};
+$('#selectiontable tbody').on('click', 'tr', function () {
+  var row = selectiontable.row( this );
+  try {
+    searchtable.rows().nodes().each(function(a) {
+      var r = searchtable.row(a);
+      if(r.data()['table-id'] === row.data()['table-id']){
+        r.deselect();
+      }
+    });
+    row.remove().draw();
+  } catch (e) {}
+});
+
 
 
    // // Close all open rows

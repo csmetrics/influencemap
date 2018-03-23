@@ -12,15 +12,14 @@ PYTHON_DIR = os.path.join(os.path.dirname(BASE_DIR), 'python')
 sys.path.insert(0, PYTHON_DIR)
 
 import entity_type as ent
+from parse_academic_search import parse_search_results
+from academic_search import *
+from flower_bloom_data import score_dict_to_graph
+from draw_flower_test import draw_flower
+from flower_bloomer import getFlower, getPreFlowerData
 from mkAff import getAuthor, getJournal, getConf, getAff, getConfPID, getJourPID, getConfPID, getAffPID
 from mag_flower_bloom import *
 
-#import entity_type as ent
-#from academic_search import get_search_results
-#from flower_bloom_data import score_dict_to_graph
-#from draw_flower_test import draw_flower
-#from flower_bloomer import getFlower, getPreFlowerData
-#from mkAff import getAuthor, getJournal, getConf, getAff, getConfPID, getJourPID, getConfPID, getAffPID
 # initialise as no saved pids
 saved_pids = dict()
 
@@ -53,7 +52,8 @@ optionlist = [  # option list
 	{"id":"author", "name":"Author"},
 	{"id":"conference", "name":"Conference"},
 	{"id":"journal", "name":"Journal"},
-	{"id":"institution", "name":"Institution"}]
+	{"id":"institution", "name":"Institution"},
+    {"id":"paper", "name": "Paper"}]
 
 
 def printDict(d):
@@ -63,7 +63,9 @@ def printDict(d):
 
 def loadList(entity):
     path = os.path.join(BASE_DIR, "webapp/cache/"+entity+"List.txt")
-    if entity not in autoCompleteLists.keys():
+    if entity == 'paper':
+        return []
+    elif entity not in autoCompleteLists.keys():
         with open(path, "r") as f:
             autoCompleteLists[entity] = [name.strip() for name in f]
         autoCompleteLists[entity] = list(set(autoCompleteLists[entity]))
@@ -105,46 +107,37 @@ def create(request):
         "search": search
     })
 
+s = {
+    'author': ('<h5>{name}</h5><p>{affiliation}</p>'
+        '<div style="float: left; width: 50%; padding: 0;"><p>Papers: {paperCount}</p></div>'
+        '<div style="float: right; width: 50%; text-align: right; padding: 0;"<p>Citations: {citations}</p></div>'),
+    'conference': ('<h5>{name}</h5>'
+        '<div style="float: left; width: 50%; padding: 0;"><p>Papers: {paperCount}</p></div>'
+        '<div style="float: right; width: 50%; text-align: right; padding: 0;"<p>Citations: {citations}</p></div>'),
+    'institution': ('<h5>{name}</h5>'
+        '<div style="float: left; width: 50%; padding: 0;"><p>Papers: {paperCount}</p></div>'
+        '<div style="float: right; width: 50%; text-align: right; padding: 0;"<p>Citations: {citations}</p></div>'),
+    'journal': ('<h5>{name}</h5>'
+        '<div style="float: left; width: 50%; padding: 0;"><p>Papers: {paperCount}</p></div>'
+        '<div style="float: right; width: 50%; text-align: right; padding: 0;"<p>Citations: {citations}</p></div>'),
+    'paper': ('<h5>{title}</h5>'
+        '<div><p>Citations: {citations}</p></div>')
+}
 
 @csrf_exempt
 def search(request):
     keyword = request.POST.get("keyword")
-    data = get_search_results(keyword)
+    entityType = request.POST.get("option")
+    data = get_entities_from_search(keyword, entityType)
 
-    author_key_change = [
-      ['eid', 'Id'],
-      ['normalisedName', 'AuN'],
-      ['name', 'DAuN'],
-      ['citations', 'CC'],
-      ['affiliation', 'E', 'LKA', 'AfN'],
-      ['affiliationid', 'E', 'LKA', 'AfId']
-    ]
-
-    author_keys_to_make_dictionaries = [
-        ['E']
-    ]
-
-    def get_nested_value(dictionary, keys, rtn_func=lambda x: x):
-        if keys == []:
-            return rtn_func(dictionary)
-        else:
-            return get_nested_value(dictionary[keys[0]], keys[1:], rtn_func)
-
-    def result_to_dictionary(result, key_change, keys_to_make_dictionaries):
-        out = dict()
-        for keys in keys_to_make_dictionaries:
-            result[keys[-1]] = get_nested_value(result, keys, json.loads)
-
-        for elem in key_change:
-            try:
-                out[elem[0]] = get_nested_value(result, elem[1:])
-            except:
-                #out[elem[0]] = get_nested_value(result, elem[1:])
-                out[elem[0]] = None
-        return out
-
-    data = [result_to_dictionary(entity, author_key_change, author_keys_to_make_dictionaries) for entity in data["entities"]]
-
+    for i in range(len(data)):
+        # print(entity)
+        entity = {'data': data[i]}
+        entity['display-info'] = s[entityType].format(**entity['data'])
+        entity['table-id'] = "{}_{}".format(entity['data']['entity-type'], entity['data']['eid'])
+        data[i] = entity
+        # print(entity)
+    print(data[0])
     return JsonResponse({'entities': data}, safe=False)
 
 

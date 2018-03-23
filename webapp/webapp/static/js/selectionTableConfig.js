@@ -5,19 +5,23 @@ var selectionTableConfig = {
     "sScrollY" : "400",
     "bSort" : true,
     "columns": [
-      { title: "Name", data: "name", className: "index dt-body-center"},
-      { title: "Citations", data: "citations", className: "institution dt-body-right"},
-      { title: "Affiliation", data: "affiliation", className: "dt-body-center"},
-      { title: "ID", data: "eid"},
-      { title: "Selected", data: "display text", className: "dt-body-left"},
-      { title: "Name_ID", data: "name_id"}
+    { title: "Selected", data: "display-info", className: "dt-body-left"},
+    // { data: "entity-type" },
+    { data: "table-id" },
+    // { data: "name" },
+    { data: "data" },
+    // { data: "citations" },
+    // { data: "affiliation" },
+    // { data: "affiliationId" },
+    // { data: "papers" },
+    // { data: "paperCount" }
     ],
-    "columnDefs": [
-        {
-        "targets": [0,1,2,3,5],
-        "visible": false
-        },
-     ],
+   "columnDefs": [
+   {
+     "targets": [1,2],
+     "visible": false
+   },
+   ],
     "searching": false,
     "paging": false,
   }
