@@ -14,7 +14,6 @@ sys.path.insert(0, PYTHON_DIR)
 import entity_type as ent
 from parse_academic_search import parse_search_results
 from academic_search import *
-from flower_bloom_data import score_dict_to_graph
 from draw_flower_test import draw_flower
 from flower_bloomer import getFlower, getPreFlowerData
 from mkAff import getAuthor, getJournal, getConf, getAff, getConfPID, getJourPID, getConfPID, getAffPID
