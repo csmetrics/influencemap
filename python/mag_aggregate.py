@@ -58,7 +58,6 @@ def agg_score_df(influence_df, e_map, ego, coauthors=set([]), \
     score_df['coauthor'] = False
 
     print('{} finish score generation\n---'.format(datetime.now()))
-    print(score_df)
 
     return score_df
 

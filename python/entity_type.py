@@ -5,7 +5,7 @@ import os
 class Entity_type(Enum):
     AUTH = ('AUTH', 'auth', 'auth_id', 'auth_name', 'Author', 'Author', 'AuthorIDs', 'DisplayAuthorName')
     AFFI = ('AFFI', 'affi', 'affi_id', 'affi_name', 'Affiliation', 'Affiliation', 'AffiliationIDs', 'Name')
-    CONF = ('CONF', 'conf', 'conf_id', 'conf_abv', 'Conference', 'ConferenceSeries', 'ConferenceSeriesID', 'ShortName')
+    CONF = ('CONF', 'conf', 'conf_id', 'conf_abv', 'Conference', 'ConferenceSeries', 'ConferenceSeriesIDs', 'ShortName')
     JOUR = ('JOUR', 'journ', 'journ_id', 'journ_name', 'Journal', 'Journal', 'JournalID', 'NormalizedShortName')
 
     def __init__(self, indent, prefix, eid, ename, text, api_type, api_id, api_name):
