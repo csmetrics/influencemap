@@ -1,4 +1,5 @@
 from enum import Enum
+from mag_interface import *
 import os
 
 # Type of entities for the flower
@@ -50,9 +51,50 @@ class Entity:
     def __init__(self, entity_id, entity_type):
         self.entity_id = entity_id
         self.entity_type = entity_type
+        self.paper_df = None
 
     def cache_str(self):
         return os.path.join(self.entity_type.ident, self.entity_id)
 
     def name_str(self):
         return self.entity_type.ident + '-' + self.entity_id
+
+    def get_entity_papers(self):
+        query = {
+            "path": "/entity/PaperIDs/paper",
+            "entity": {
+                "type": self.entity_type.api_type,
+                "id": [ self.entity_id ],
+                },
+            "paper": {
+                "select": ["NormalisedTitle", "CitationCount", "PublishDate"]
+                }
+            }
+
+        data = query_academic_search('post', JSON_URL, query)
+        papers = list()
+
+        for query_res in data['Results']:
+            row = dict()
+            result = query_res[1]            
+            row['paper_id'] = result['CellID']
+            row['paper_name'] = result['NormalisedTitle']
+            row['cite_count'] = result['CitationCount']
+            row['pub_date'] = to_datetime(result['PublishDate'])
+            papers.append(row)
+
+        return pd.DataFrame(papers)
+
+
+    def update_papers(self):
+        """
+        """
+        cache_path = os.path.join(CACHE_DIR, self.cache_str())
+        try:
+            self.paper_df = pd.read_pickle(cache_path)
+        except FileNotFoundError:
+            self.paper_df = self.get_entity_papers()
+        
+            # Cache 
+            self.paper_df.to_pickle(cache_path)
+            os.chmod(cache_path, 0o777)

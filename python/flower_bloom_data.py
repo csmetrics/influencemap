@@ -70,8 +70,7 @@ def score_df_to_graph(score_df):
     score_df = score_df[score_df['entity_id'] != ego].head(n=NUM_LEAVES)
 
     # Normalise values
-    score_df['normed_sum'] = normalise_singular_linear(score_df['sum'])
-    score_df['normed_ratio'] = normalise_colour_dif(score_df['ratio'])
+    score_df['normed_sum'] = normalise_singular_linear(score_df['sum']) score_df['normed_ratio'] = normalise_colour_dif(score_df['ratio'])
     norm_influenced, norm_influencing = normalise_double_log(score_df['influenced'], score_df['influencing'])
     score_df['normed_influenced'] = norm_influenced
     score_df['normed_influencing'] = norm_influencing
