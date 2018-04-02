@@ -97,6 +97,7 @@ function search(){
           }
         })
       });
+      addNestedRows();
     },
     error: function (result) {
       console.log("searchButton error");
@@ -152,23 +153,65 @@ $('#selectiontable tbody').on('click', 'tr', function () {
 
 
 
-   // // Close all open rows
-   //  $('.shown').each( function (i, elem) {
-   //    var tblRow = papersTable.row( elem );
-   //    elem.classList.remove('shown');
-   //    tblRow.child.hide();
-   //  });
+// nested papers tables
 
-   //  if ( show ) {
-   //      // Open this row
-   //      row.child.show();
-   //      tr.addClass('shown');
-   //  }
+var nested_tables = {};
+var nestedTableSettings = nestedTableConfig['tableSettings'];
+function addNestedRows(){
+  searchtable.rows().every(function(rowIdx, tableLoop, rowLoop){
+    console.log('triggered in searchtable row every');
+    var eid = this.data()['data']['eid'];
+    var tableId = eid;
+    var child_text = "<table id='"+tableId+"' class='papers_table compact'></table>";
+    this.child(child_text).show();
+    var nestedTable = $("#" + tableId);
+    nestedTable.closest("td").addClass("innertable");
+    nested_tables[eid] = nestedTable.DataTable(nestedTableSettings);
+    updateTable(this.data()['data']['papers'], nested_tables[eid]);
 
+    this.child.hide();
+  });
 
-// {% if search %}
-// search(false, true);
-// {% endif %}
+  addNestedRowToggle();
+}
 
+// Add event listener for opening and closing details
+function addNestedRowToggle (){
+  $('#searchtable tbody').on('click', 'td.details-control', function () {
+  console.log('triggered in searchtable onclick ');
+    var tr = $(this).closest('tr');
+    var row = searchtable.row( tr );
+    var show = !(row.child.isShown());
+ 
+   // Close all open rows
+    $('.shown').each( function (i, elem) {
+      var tblRow = searchtable.row( elem );
+      elem.classList.remove('shown');
+      tblRow.child.hide();
+    });
+
+    if ( show ) {
+        // Open this row
+        row.child.show();
+        tr.addClass('shown');
+    }
+  })
+}
 
 </script>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
