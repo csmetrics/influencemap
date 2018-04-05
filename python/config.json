@@ -9,7 +9,8 @@
     },
     "cache":{
         "directory":{
-            "main":"/localdata/common/cache"
+            "papers": "/localdata3/common/cache-papers",
+            "influence": "/localdata3/common/cache-influence"
         },
         "paper threshold":20,
         "timeout":0
@@ -20,7 +21,7 @@
     "mag_api":{
         "prefix":"https://api.labs.cognitive.microsoft.com",
         "json_postfix":"academic/v1.0/graph/search?mode=json",
-        "api_key_dir":"/localdata/common/api_keys",
+        "api_key_dir":"/localdata3/common/api_keys",
         "res_count":1000,
         "timeout":10000
     }

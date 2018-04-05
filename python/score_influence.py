@@ -1,3 +1,5 @@
+import pandas as pd
+from mag_interface import *
 
 
 def score_entity(score_df, entity_map):

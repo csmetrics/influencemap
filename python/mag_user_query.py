@@ -24,8 +24,9 @@ def name_to_entityq(name, e_type):
     name_dict = dict()
 
     for entity in data['Results']:
-        entity = ent.Entity(entity[0]['CellID'], e_type)
-        entity_list.append(entity)
+        entityq = ent.Entity(entity[0]['CellID'], e_type)
+        print(entity[0]['CellID'], e_type)
+        entity_list.append(entityq)
         try:
             name_dict[entity[0][name_tag]] += 1
         except KeyError:

@@ -9,10 +9,15 @@ import sys
 from datetime import datetime
 from config import *
 
+API_IDX = 1
+
 header = {
     # Request headers
-    'Ocp-Apim-Subscription-Key': API_KEYS[1]
+    'Ocp-Apim-Subscription-Key': API_KEYS[API_IDX]
 }
+
+
+print('Using key {} with key: {}'.format(API_IDX, API_KEYS[API_IDX]))
 
 
 def query_academic_search(type, url, query):

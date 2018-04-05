@@ -54,7 +54,7 @@ class Entity:
         self.paper_df = None
 
     def cache_str(self):
-        return os.path.join(self.entity_type.ident, self.entity_id)
+        return os.path.join(self.entity_type.ident, str(self.entity_id))
 
     def name_str(self):
         return self.entity_type.ident + '-' + self.entity_id
@@ -86,10 +86,10 @@ class Entity:
         return pd.DataFrame(papers)
 
 
-    def update_papers(self):
+    def get_papers(self):
         """
         """
-        cache_path = os.path.join(CACHE_DIR, self.cache_str())
+        cache_path = os.path.join(CACHE_PAPERS_DIR, self.cache_str())
         try:
             self.paper_df = pd.read_pickle(cache_path)
         except FileNotFoundError:
@@ -98,3 +98,4 @@ class Entity:
             # Cache 
             self.paper_df.to_pickle(cache_path)
             os.chmod(cache_path, 0o777)
+        return self.paper_df

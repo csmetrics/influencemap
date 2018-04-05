@@ -5,9 +5,9 @@ CONFIG_NAME = 'config.json'
 CONFIG_PATH = os.path.join(os.path.dirname(__file__), CONFIG_NAME)
 
 def set_path(path):
-    if not os.path.exists(path):
-        os.makedirs(path)
-    os.chmod(path, 0o777)
+    #if not os.path.exists(path):
+    #    os.makedirs(path)
+    #os.chmod(path, 0o777)
     return path
 
 # Config setup
@@ -20,7 +20,8 @@ with open(CONFIG_PATH) as config_data:
 
     #OUT_DIR = set_path(config['data']['out'])
 
-    CACHE_DIR = set_path(config['cache']['directory']['main'])
+    CACHE_PAPERS_DIR = set_path(config['cache']['directory']['papers'])
+    CACHE_INFLUENCE_DIR = set_path(config['cache']['directory']['influence'])
     #PAPER_THRESHOLD = config['cache']['paper threshold']
 
     NUM_LEAVES = config['flower']['leaves']

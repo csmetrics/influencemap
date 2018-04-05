@@ -19,6 +19,11 @@ from flower_bloomer import getFlower, getPreFlowerData
 from mkAff import getAuthor, getJournal, getConf, getAff, getConfPID, getJourPID, getConfPID, getAffPID
 from mag_flower_bloom import *
 
+
+from mag_user_query import name_to_entityq
+from influence_df import get_filtered_influence
+from score_influence import score_entity
+
 # initialise as no saved pids
 saved_pids = dict()
 
@@ -54,6 +59,12 @@ optionlist = [  # option list
 	{"id":"institution", "name":"Institution"},
     {"id":"paper", "name": "Paper"}]
 
+
+# flower_types
+flower_leaves = { 'author': [ent.Entity_type.AUTH]
+                , 'conf': [ent.Entity_type.CONF, ent.Entity_type.JOUR]
+                , 'inst': [ent.Entity_type.AFFI]
+                }
 
 def printDict(d):
     for k,v in d.items():
@@ -186,7 +197,6 @@ def view_papers(request):
     return render(request, 'view_papers.html', data)
 
 
-
 @csrf_exempt
 def submit(request):
 
@@ -215,25 +225,50 @@ def submit(request):
     option = data.get("option")
     keyword = data.get('keyword')
     selfcite = data.get("selfcite") 
-    bot_year_min = int(data.get("bot_year_min"))
-    top_year_max = int(data.get("top_year_max"))
+    min_year = int(data.get("bot_year_min"))
+    max_year = int(data.get("top_year_max"))
 
-    # pre_flower_data_dict[request.session['id']] = getPreFlowerData(id_2_paper_id, unselected_id_2_paper_id, ent_type = option, cbfunc=progressCallback)
-    # flower_data = getFlower(data_df=pre_flower_data_dict[request.session['id']], name=keyword, ent_type=option, cbfunc=progressCallback, inc_self=selfcite)
+    # Default Dates need fixing
+    min_year = None
+    max_year = None
 
-    entity_score_df = get_entity_score_df(keyword, ent.Entity_type.AUTH) # TODO other entities
-    flower_data = get_flowers(entity_score_df, cbfunc=progressCallback, \
-        bot_year=bot_year_min, top_year=top_year_max)
+    entity_type = ent.Entity_type.AUTH
+    entity_names, entity_list = name_to_entityq(keyword, entity_type)
+    filters = dict()
 
-    data1 = processdata("author", flower_data[0])
-    data2 = processdata("conf", flower_data[1])
-    data3 = processdata("inst", flower_data[2])
+    #entity_type = data.get('entity_type')
+    #entity_names = data.get('entity_names')
 
-    # print(data)
-    # print(selfcite)
+    # GET SOME FILTER HERE BEFORE
+#    entity_list = data.get('entity_list')
+#    filters = data.get('filter')
 
-    #data1 = processdata("conf", score_dict_to_graph(keyword, draw_flower(keyword)))
+    influence_df = get_filtered_influence(entity_list, filters)
 
+    cache_score = [None, None, None]
+    flower_score = [None, None, None]
+
+    for i, flower_item in enumerate(flower_leaves.items()):
+        name, leaf = flower_item
+        entity_map = ent.Entity_map(entity_type, leaf)
+
+        entity_score_cache = score_entity(influence_df, entity_map)
+
+        entity_score = entity_score_cache[~entity_score_cache['entity_id'].isin(
+                                          entity_names)]
+        
+        agg_score = agg_score_df(entity_score, entity_map, min_year, max_year)
+        agg_score.ego = entity_names[0]
+        print(agg_score)
+
+        score = score_df_to_graph(agg_score)
+
+        cache_score[i] = entity_score_cache
+        flower_score[i] = score
+
+    data1 = processdata("author", flower_score[0])
+    data2 = processdata("conf", flower_score[1])
+    data3 = processdata("inst", flower_score[2])
 
     data = {
         "author": data1,
@@ -246,7 +281,7 @@ def submit(request):
         },
         "yearSlider": {
             "title": "Publications range",
-            "range": [bot_year_min, top_year_max] # placeholder value, just for testing
+            "range": [min_year, max_year] # placeholder value, just for testing
         },
         "navbarOption": {
             "optionlist": optionlist,

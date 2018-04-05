@@ -22,11 +22,14 @@ influence_df = get_filtered_influence(entites, filters)
 CACHE influence_df AS PERSISTENT IN USER SESSION FOR name
 
 FUNCTION 3
-fFILTER influence_df DEPENDENT ON influence_year AND self_cite
-for leaf_var in leaves:
-   score_entity(influence_df, each map def rom leaf_var)
+FILTER influence_df DEPENDENT ON influence_year AND self_cite
+for leaf_var in leaves: (PARALLELISE?)
+    entity_score = score_entity(influence_df, each map def from leaf_var)
+    REMOVE SELFCITES FROM names
+    agg_score = agg_score_df(entity_score, each map def from leaf_var, name,
+                             min_year, max_year)
 
-
+return as tuples for each map
 """
 
 
