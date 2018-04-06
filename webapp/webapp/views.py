@@ -200,27 +200,7 @@ def view_papers(request):
 @csrf_exempt
 def submit(request):
 
-    # print(request)
-    # resetProgress()
-    # global saved_pids
     data = json.loads(request.POST.get('data'))
-    # papers_string = data['papers']   # 'eid1:pid,pid,...,pid_entity_eid2:pid,...'
-    # id_papers_strings = papers_string.split('_entity_')
-    # id_2_paper_id = dict()
-
-    # for id_papers_string in id_papers_strings:
-    #     eid, pids = id_papers_string.split(':')
-    #     id_2_paper_id[eid] = pids.split(',')
-
-    # unselected_papers_string = data.get('unselected_papers')   # 'eid1:pid,pid,...,pid_entity_eid2:pid,...'
-    # unselected_id_papers_strings = unselected_papers_string.split('_entity_')
-
-    # unselected_id_2_paper_id = dict()
-    # if unselected_papers_string != "":
-    #     for us_id_papers_string in unselected_id_papers_strings:
-    #         us_eid, us_pids = us_id_papers_string.split(':')
-    #         unselected_id_2_paper_id[us_eid] = us_pids.split(',')
-
 
     option = data.get("option")
     keyword = data.get('keyword')
@@ -233,17 +213,28 @@ def submit(request):
     max_year = None
 
     entity_type = ent.Entity_type.AUTH
-    entity_names, entity_list = name_to_entityq(keyword, entity_type)
-    filters = dict()
+    entity_list = name_to_entityq(keyword, entity_type)
 
     #entity_type = data.get('entity_type')
     #entity_names = data.get('entity_names')
 
-    # GET SOME FILTER HERE BEFORE
-#    entity_list = data.get('entity_list')
-#    filters = data.get('filter')
+    for entity in entity_list:
+        # Need to render and allow user selection here
+        print(entity.get_papers())
+        # User returns a reduced filtered entity list
+        # Futher returns a filter to select papers for each of the entities'
+        # papers
 
-    influence_df = get_filtered_influence(entity_list, filters)
+        # entity_list = data.get('entity_list')
+        # filters = data.get('filter')
+
+    filters = dict()
+    filtered_entity_list = entity_list
+
+    influence_df = get_filtered_influence(filtered_entity_list, filters)
+
+    # Get the entity names
+    entity_names = list(map(lambda x: x.entity_name, filtered_entity_list))
 
     cache_score = [None, None, None]
     flower_score = [None, None, None]
@@ -259,7 +250,6 @@ def submit(request):
         
         agg_score = agg_score_df(entity_score, entity_map, min_year, max_year)
         agg_score.ego = entity_names[0]
-        print(agg_score)
 
         score = score_df_to_graph(agg_score)
 

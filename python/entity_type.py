@@ -46,9 +46,11 @@ class Entity_map:
         else:
             return texts[0]
 
+
 # Class to wrap type and id together
 class Entity:
-    def __init__(self, entity_id, entity_type):
+    def __init__(self, entity_name, entity_id, entity_type):
+        self.entity_name = entity_name
         self.entity_id = entity_id
         self.entity_type = entity_type
         self.paper_df = None
@@ -59,7 +61,7 @@ class Entity:
     def name_str(self):
         return self.entity_type.ident + '-' + self.entity_id
 
-    def get_entity_papers(self):
+    def update_papers_from_api(self):
         query = {
             "path": "/entity/PaperIDs/paper",
             "entity": {
@@ -67,7 +69,7 @@ class Entity:
                 "id": [ self.entity_id ],
                 },
             "paper": {
-                "select": ["NormalisedTitle", "CitationCount", "PublishDate"]
+                "select": ["NormalizedTitle", "CitationCount", "PublishDate"]
                 }
             }
 
@@ -78,22 +80,25 @@ class Entity:
             row = dict()
             result = query_res[1]            
             row['paper_id'] = result['CellID']
-            row['paper_name'] = result['NormalisedTitle']
+            row['paper_name'] = result['NormalizedTitle']
             row['cite_count'] = result['CitationCount']
             row['pub_date'] = to_datetime(result['PublishDate'])
             papers.append(row)
 
-        return pd.DataFrame(papers)
+        self.paper_df = pd.DataFrame(papers)
 
 
     def get_papers(self):
         """
         """
+        if self.paper_df is not None:
+            return self.paper_df
+
         cache_path = os.path.join(CACHE_PAPERS_DIR, self.cache_str())
         try:
             self.paper_df = pd.read_pickle(cache_path)
         except FileNotFoundError:
-            self.paper_df = self.get_entity_papers()
+            self.update_papers_from_api()
         
             # Cache 
             self.paper_df.to_pickle(cache_path)
