@@ -1,29 +1,20 @@
 {% load staticfiles %}
 
-<div class="row">
-  <div class="col-md-12">
-    <a href="/"><div class="page-title"><b>Project influencemap</b></div></a>
-    <span class="text-muted">Constructing maps of intellectual influence using academic data</span>
-  </div>
-</div>
-<div class="row">
-  <div class="col-md-12">
-    <div class="search-bar">
-      <div class="input-group input-group-sm" style="width: 300px">
+<div class="search-bar" align="center">
+  <div class="row" style="width: 600px">
+    <div class="col-xs-3">
+      <select class="form-control select" name="type">
+        {% for opt in navbar.optionlist %}
+          <option value="{{opt.id}}" {% if opt.id == navbar.selectedOption.id %} selected {% endif %}>{{ opt.name }}</option>
+        {% endfor %}
+      </select>
+    </div>
+    <div class="col-xs-9">
+      <div class="input-group input-group-sm" style="width: 400px; height: 35px;">
         <input id="name-search-bar" type="text" name="keyword" class="form-control" {% if navbar.selectedKeyword %} value="{{ navbar.selectedKeyword }}" {% endif %}>
         <span class="input-group-btn">
           <button id="search-btn" type="submit" name="search" value="search" class="btn btn-primary btn-flat"><i class="fa fa-search"></i></button>
         </span>
-      </div>
-      <div class="search-option">
-        {% for opt in navbar.optionlist %}
-        <div class="radio">
-          <label>
-            <input class="entity-option" type="radio" name="option" id="{{opt.id}}" value="{{opt.id}}" {% if opt.id == navbar.selectedOption.id %} checked {% endif %}>
-            {{opt.name}}
-          </label>
-        </div>
-        {% endfor %}
       </div>
     </div>
   </div>
@@ -83,11 +74,11 @@ var ac = new autoComplete({
   },
   onSelect: function(e, term, item){
     if (term.indexOf(" - ") < 0) {
-      searchBar.value = term; 
+      searchBar.value = term;
     } else {
       searchBar.value = term.split(" - ")[1]
     };
-  
+
     search();
   }
 });
