@@ -1,16 +1,16 @@
 var searchTableConfig = {
     tableSettings: {
       "columns": [
-      { title: "Search results", data: "display-info", className: "dt-body-left"},
+      { title: "Search results", data: "display-info", className: "dt-body-left display-info"},
       { data: "table-id" },
       { data: "data" },
-      {
-         title: "",
-         className: 'details-control',
-         orderable: false,
-         data: null,
-         defaultContent: ''
-       },
+      { 
+        orderable: false,
+        data: null,
+        'render': function (data, type, full, meta){
+          return '<input type="checkbox" class="papers-outer-checkbox">'
+        }
+      }
       ],
      "createdRow": function(row, data, index) { 
         $(row).addClass("outer-table-row") 
@@ -21,9 +21,10 @@ var searchTableConfig = {
        "visible": false
      },
      ],
-      "select": {
-        "style": "multi"
-      },
+      // "select": {
+      //   "style": "multi",
+      //   "selector": 'td:last-child input[type="checkbox"]'
+      // },
       "language": {
         "emptyTable": "no search result"
       },
@@ -36,34 +37,42 @@ var searchTableConfig = {
       "info": true,
       "autoWidth": false,
       "destroy": true,
-    }
+    },
 };
 
 var nestedTableConfig = {
   tableSettings: {
-    "pageLength": 10, // default page
+    // "pageLength": 10, // default page
     "lengthChange": false,
     "columns": [
     { title: "Paper", data: 'title', className: "index dt-body-left" },
     { title: "Publication year", data: 'year', className: "institution dt-body-right" },
     { title: "Citations", data: 'citations'},
-    { title: "", orderable: false, className: 'paper-checkbox', 'render': function (data, type, full, meta){return '<input type="checkbox" checked>'}}
+    { 
+      title: "", 
+      orderable: false, 
+      'render': function (data, type, full, meta){
+        return '<input type="checkbox" class="papers-inner-checkbox">'
+      }
+    }
     ],
-    "select": {
-      "style": "os",
-      "selector": 'td:last-child'
-    },
+    // "select": {
+    //   "style": "os",
+    //   "selector": 'td:last-child input[type="checkbox"]'
+    // },
     "language": {
       "emptyTable": "no papers found"
     },
     "fixedColumns": true,
-    "paging": true,
-    "pagingType": "simple_numbers",
+    "paging": false,
+    // "pagingType": "simple_numbers",
     "ordering": true,
     "order": [[2, "desc" ]],
     "info": true,
+    'autoHeight': true,
     "autoWidth": false,
     "destroy": true,
-    "searching": false
+    "searching": false,
+    'background': 'transparent',
   },
 }

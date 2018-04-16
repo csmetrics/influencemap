@@ -20,41 +20,46 @@
 <script src="{% static 'js/searchTableConfig.js' %}"></script>
 <script src="{% static 'js/selectionTableConfig.js' %}"></script>
 <script>
-// keep track of whether search was expanded
+// elements
+var inputBar = document.getElementById("name-search-bar");
+var searchButton = document.getElementById("search-btn");
+var continueButton = document.getElementById("continue-btn");
+var searchBar = document.getElementById('name-search-bar');
+
+// latest search variables
 var latestSearchTerm = "";
 var latestSearchOption = $(".entity-option:checked").val();
 
+
+// data tables
 var selectiontable = $('#selectiontable').DataTable(selectionTableConfig['tableSettings']);
 var searchtable = $('#searchtable').DataTable(searchTableConfig['tableSettings']);
 
-// ----  data table  ----
-var searchtableContainer = document.getElementById("searchtable-container");
+//var searchtableContainer = document.getElementById("searchtable-container");
 
-
-// function to create searchTable
 function makeSearchTable(entityType){
   if ($.fn.DataTable.isDataTable("#searchtable")) {
     $('#searchtable').DataTable().clear().destroy();
     $('#searchtable').empty();
   }
   var tableSettings = searchTableConfig['tableSettings'];
-  return $('#searchtable').DataTable(tableSettings);
-}
+  return $('#searchtable').DataTable(tableSettings);}
 
-
-// update searchTable
 function updateTable(data, table){
   table.clear();
 
   for(var i in data) {
     table.row.add(data[i]);
   };
-  table.draw();
-}
+  table.draw();}
 
-var inputBar = document.getElementById("name-search-bar");
-var searchButton = document.getElementById("search-btn");
-var continueButton = document.getElementById("continue-btn");
+// data 
+var currentSearchTableData;
+var selectedData; // transition to this
+var selected_data = {}; // transition away from this
+var nestedTables = {}; // transition to this
+var nested_tables = {}; // transition away from this 
+var nestedTableSettings = nestedTableConfig['tableSettings'];
 
 
 
@@ -68,8 +73,16 @@ continueButton.addEventListener('click', function(){
        bot_year_min: 0,
        top_year_max: 3000
    }
-   postData('/submit/', data, "{% csrf_token %}")
-});
+   postData('/submit/', data, "{% csrf_token %}")});
+
+searchButton.addEventListener('click', function(){search()});
+
+searchBar.addEventListener('keypress', function (e) {
+  // Search when enter pressed in input bar
+  var key = e.which || e.keyCode;
+  if (key === 13) { // 13 is enter
+    search();
+  }});
 
 function search(){
   console.log("searching")
@@ -86,14 +99,17 @@ function search(){
       option: latestSearchOption,
     },
     success: function (result) { // return data if success
+      currentSearchTableData = result['entities'];
       updateTable(result["entities"], searchtable);
       searchTableEventHandling();
+
+      // select rows in search table if they have already been selected
       searchtable.rows().nodes().each(function(a) {
         selectiontable.rows().nodes().each(function(b) {
           var search_row = searchtable.row(a);
           var selection_row = selectiontable.row(b);
           if(search_row.data()['table-id'] === selection_row.data()['table-id']){
-            search_row.select();
+            toggleParentRowSelection(search_row, true);
           }
         })
       });
@@ -102,49 +118,168 @@ function search(){
     error: function (result) {
       console.log("searchButton error");
     }
+  });}
+
+function addNestedRows(){
+  searchtable.rows().every(function(rowIdx, tableLoop, rowLoop){
+    var eid = this.data()['data']['eid'];
+    var tableId = this.data()['table-id'];
+    var child_text = "<table id='"+tableId+"' class='papers_table compact'></table>";
+    this.child(child_text).show();
+    var nestedTable = $("#" + tableId);
+    nestedTable.closest("td").addClass("innertable");
+    nested_tables[tableId] = {};
+    nested_tables[tableId]['table'] = nestedTable.DataTable(nestedTableSettings);
+    nested_tables[tableId]['selectedPapers'] = [];
+    updateTable(this.data()['data']['papers'], nested_tables[tableId]['table']);
+    hideElement(this.child());
+  });
+
+  addNestedRowToggle('#searchtable', '.display-info');
+}
+
+function hideElement(elem){
+  elem.css({'display': 'none'});
+}
+
+function showElement(elem){
+  elem.css({'display': 'block'});
+}
+
+
+// ----  select data  ----
+
+// Search table click handling - open children rows when clicked
+function addNestedRowToggle (tableSelector, rowSelector){
+  $(tableSelector + ' tbody').on('click', rowSelector, function () {
+
+    var tr = $(this).closest('tr');
+    var row = searchtable.row( tr );
+    var show = !(tr[0].classList.contains('shown'));
+ 
+   // Close all open rows
+    $(tableSelector + ' .shown').each( function (i, elem) {
+      var tblRow = searchtable.row( elem );
+      elem.classList.remove('shown');
+      hideElement(tblRow.child());
+    });
+
+    if ( show ) {
+        // Open this row
+        showElement(row.child());
+        tr.addClass('shown');
+    
+      addInnerCheckboxListener();
+    }
   });
 }
 
-var searchButton = document.getElementById('search-btn');
-var searchBar = document.getElementById('name-search-bar')
-searchButton.addEventListener('click', function(){
-  search();
-});
 
-// Search when enter pressed in input bar
-searchBar.addEventListener('keypress', function (e) {
-  var key = e.which || e.keyCode;
-  if (key === 13) { // 13 is enter
-    search();
-  }
-});
-
+// Search table parent checkbox click handling - toggle child selection
 function searchTableEventHandling() {
-  $('#searchtable tr').on('click', function () {
-      var tr = $(this).closest('tr');
-      var row = searchtable.row( tr );
-      if (!tr.hasClass('selected')){
-        var newRow = row.data();
-        selectiontable.row.add(newRow).draw();
-      }
-      else {
-        selectiontable.rows().nodes().each(function(a) {
-          var r = selectiontable.row(a);
-          if(r.data()['table-id'] === row.data()['table-id']){
-            r.remove().draw();
-          }
-        });
-      }
+  $('.papers-outer-checkbox').on('change', function () {
+    var tr = $(this).closest('tr');
+    var row = searchtable.row( tr );
+    var select = this.checked;
+    toggleParentRowSelection(row, select);
   })
 };
 
+function toggleParentRowSelection(row, select){
+  // handle selection table changes
+  if (select){ 
+    var newRow = row.data();
+    selectiontable.row.add(newRow).draw();
+  }   
+
+  else {
+    selectiontable.rows().nodes().each(function(a) {
+      var r = selectiontable.row(a);
+      if(r.data()['table-id'] === row.data()['table-id']){
+        r.remove().draw();
+      }
+    });
+  }
+
+  // toggle selection of child rows - check/uncheck boxes and add/remove selected data
+  toggleChildRowsSelection(row, select);
+}
+
+function toggleChildRowsSelection(row, select){
+  var tableId = row.data()['table-id'];
+  var r = $('#'+tableId);
+    r.find('.papers-inner-checkbox').each(function(a){
+      this.checked = select;
+      $(this).change();
+    })
+
+  if (select){ // add all papers for parent row to selected data
+    selected_data[row.data()['table-id']] = new Set(row.data()['data']['papers']);
+
+  } else { // remove any exisiting selected data from this entity
+    try { 
+      delete selected_data[row.data()['table-id']];
+    } catch (e){console.log(e)}
+  }
+};
+
+
+// child row change
+function addInnerCheckboxListener (){
+  $('.papers-inner-checkbox').change(function(){
+    var inputElement = this;
+    var rowElement = inputElement.parentElement.parentElement;
+    var tableElement = rowElement.parentElement.parentElement;
+    var tableId = tableElement['id'];
+     table = nested_tables[tableId]['table'];
+    var row = table.row(rowElement);
+    var parentRowElement = $(tableElement.parentElement.parentElement.parentElement).closest('tr').prev();
+    var parentRowCheckbox = parentRowElement.find('input.papers-outer-checkbox')[0];
+
+    if (inputElement.checked){
+      parentRowCheckbox.checked = true;
+      if (!(selected_data[tableId] instanceof Set)){
+        selected_data[tableId] = new Set();
+      }
+      selected_data[tableId].add(row.data());
+
+    } else {
+      if (selected_data[tableId] instanceof Set){
+            selected_data[tableId].delete(row.data());
+      }
+      var someRowsChecked = false;
+
+      table.rows().nodes().each(function(a){
+        if ($(a).find('input')[0].checked){
+          someRowsChecked = true;
+        } 
+      })
+
+      parentRowCheckbox.checked = someRowsChecked;
+
+    }
+
+    for (var key in selected_data){
+      if (selected_data[key].size === 0)
+          delete selected_data[key]; 
+    }
+    console.log(selected_data)
+  })
+}
+
+// event handling to remove row from selection
 $('#selectiontable tbody').on('click', 'tr', function () {
   var row = selectiontable.row( this );
+  var row_id = row.data()['table-id'];
   try {
-    searchtable.rows().nodes().each(function(a) {
-      var r = searchtable.row(a);
-      if(r.data()['table-id'] === row.data()['table-id']){
-        r.deselect();
+    $('#searchtable .outer-table-row').each(function(a, b){
+      var r = searchtable.row(b);
+      if (r.data()['table-id'] === row_id){
+        $(b).find('.papers-outer-checkbox').each(function(c, d){
+          d.checked = false;
+          // r.deselect();
+          toggleChildRowsSelection(r, false);
+        });
       }
     });
     row.remove().draw();
@@ -153,50 +288,6 @@ $('#selectiontable tbody').on('click', 'tr', function () {
 
 
 
-// nested papers tables
-
-var nested_tables = {};
-var nestedTableSettings = nestedTableConfig['tableSettings'];
-function addNestedRows(){
-  searchtable.rows().every(function(rowIdx, tableLoop, rowLoop){
-    console.log('triggered in searchtable row every');
-    var eid = this.data()['data']['eid'];
-    var tableId = eid;
-    var child_text = "<table id='"+tableId+"' class='papers_table compact'></table>";
-    this.child(child_text).show();
-    var nestedTable = $("#" + tableId);
-    nestedTable.closest("td").addClass("innertable");
-    nested_tables[eid] = nestedTable.DataTable(nestedTableSettings);
-    updateTable(this.data()['data']['papers'], nested_tables[eid]);
-
-    this.child.hide();
-  });
-
-  addNestedRowToggle();
-}
-
-// Add event listener for opening and closing details
-function addNestedRowToggle (){
-  $('#searchtable tbody').on('click', 'td.details-control', function () {
-  console.log('triggered in searchtable onclick ');
-    var tr = $(this).closest('tr');
-    var row = searchtable.row( tr );
-    var show = !(row.child.isShown());
- 
-   // Close all open rows
-    $('.shown').each( function (i, elem) {
-      var tblRow = searchtable.row( elem );
-      elem.classList.remove('shown');
-      tblRow.child.hide();
-    });
-
-    if ( show ) {
-        // Open this row
-        row.child.show();
-        tr.addClass('shown');
-    }
-  })
-}
 
 </script>
 
