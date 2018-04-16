@@ -4,6 +4,35 @@ from mag_interface import *
 from mag_aggregate import *
 
 
+"""
+USER SEARHCES A name OF SOME e_type
+
+
+FUNCTION 1
+names, entity_list = name_to_entityq(name, e_type)
+for entity in entity_list:
+    disp to user
+       -> Expands using get_id_papers (USER SELECTS PAPERS)
+
+USER 1. RETURNS FILTER LIST
+     2. ENTITY LIST
+---
+FUNCTION 2
+influence_df = get_filtered_influence(entites, filters)
+CACHE influence_df AS PERSISTENT IN USER SESSION FOR name
+
+FUNCTION 3
+FILTER influence_df DEPENDENT ON influence_year AND self_cite
+for leaf_var in leaves: (PARALLELISE?)
+    entity_score = score_entity(influence_df, each map def from leaf_var)
+    REMOVE SELFCITES FROM names
+    agg_score = agg_score_df(entity_score, each map def from leaf_var, name,
+                             min_year, max_year)
+
+return as tuples for each map
+"""
+
+
 def get_auth_score_df(name):
     """
     """
