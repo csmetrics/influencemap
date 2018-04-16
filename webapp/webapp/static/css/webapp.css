@@ -2,6 +2,20 @@
   padding: 15px;
 }
 
+#pageintro-wrapper {
+  background: url('../images/background.jpg') no-repeat center;
+}
+#pageintro {
+  padding: 40px 0;
+}
+#footer{
+  padding: 20px 0;
+}
+.overlay::after{
+  color:inherit;
+  background-color:rgba(0,61,109,0.5);
+}
+
 .page-title {
   font-size: 30px;
   font-weight: bold;
@@ -80,5 +94,3 @@ color: rgba(77, 77, 77, 1);
 padding-top: 25;
 padding-bottom:25;
 }
-
-
