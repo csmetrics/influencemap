@@ -107,7 +107,7 @@ searchBar.addEventListener('keypress', function (e) {
 
 function search(){
   console.log("searching")
-  latestSearchOption = $('select[name="type"').val();
+  latestSearchOption = $(".entity-option:selected").val();
   searchtable = makeSearchTable(latestSearchOption);
   latestSearchTerm = inputBar.value;
 

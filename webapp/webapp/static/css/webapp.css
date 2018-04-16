@@ -34,6 +34,14 @@
   background-color: #eee;
 }
 
+th {
+  color: inherit;
+  background-color: #eee;
+}
+table, th, td, table.dataTable thead th, table.dataTable thead td {
+  border: 0;
+}
+
 .search-bar {
   padding: 32px 0;
 }
