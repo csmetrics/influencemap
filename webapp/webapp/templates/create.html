@@ -94,7 +94,7 @@ continueButton.addEventListener('click', function(){
 
 function search(){
   console.log("searching")
-  latestSearchOption = $(".entity-option:checked").val();
+  latestSearchOption = $(".entity-option:selected").val();
   searchtable = makeSearchTable(latestSearchOption);
   latestSearchTerm = inputBar.value;
 

@@ -5,7 +5,7 @@
     <div class="col-xs-3">
       <select class="form-control select" name="type">
         {% for opt in navbar.optionlist %}
-          <option value="{{opt.id}}" {% if opt.id == navbar.selectedOption.id %} selected {% endif %}>{{ opt.name }}</option>
+          <option class="entity-option" value="{{opt.id}}" {% if opt.id == navbar.selectedOption.id %} selected {% endif %}>{{ opt.name }}</option>
         {% endfor %}
       </select>
     </div>
@@ -13,7 +13,7 @@
       <div class="input-group input-group-sm" style="width: 400px; height: 35px;">
         <input id="name-search-bar" type="text" name="keyword" class="form-control" {% if navbar.selectedKeyword %} value="{{ navbar.selectedKeyword }}" {% endif %}>
         <span class="input-group-btn">
-          <button id="search-btn" type="submit" name="search" value="search" class="btn btn-primary btn-flat"><i class="fa fa-search"></i></button>
+          <button id="search-btn" type="submit" name="search" value="search" class="btn btn-primary btn-flat" style="width:35px"><i class="fa fa-search"></i></button>
         </span>
       </div>
     </div>
