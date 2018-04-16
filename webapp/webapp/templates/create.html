@@ -1,21 +1,42 @@
 {% load staticfiles %}
 
 <html>
-  {% include 'header.html' %}
-  <body>
-    <div class="wrapper" align="center">
-      {% include 'navbar.html' with navbar=navbarOption %}
-      <div id="tables-container" class="row" style="width: 80%; max-height: 500px">
-        <div id="searchtable-container" class="container" style="float: left; width: 70%; border-right: 1px solid rgb(15,15,15)">
-          <table id="searchtable" class="row-border hover order-column" cellspacing="0" width="100%"></table>
-        </div>
-        <div id="selectiontable-container" class="container" style="float: left; width: 30%; height: 100%">
-          <table id="selectiontable" class="row-border hover order-column" cellspacing="0" width="100%"%"></table>
-          <input id="continue-btn" type="submit" value="Go" float="bottom">
-        </div>
+{% include 'header.html' %}
+<body id="top">
+<div class="wrapper row1">
+  <header id="header" class="hoc clear">
+    <div id="logo" class="fl_left">
+      <h1><a href="/">Influence Map</a></h1>
+      <p>Constructing maps of intellectual influence using academic data</p>
+    </div>
+    <nav id="mainav" class="fl_right">
+      <ul class="clear">
+        <li class="active"><a href="index.html">Home</a></li>
+        <li><a href="#">Menu</a></li>
+        <li><a href="#">Contact</a></li>
+      </ul>
+    </nav>
+  </header>
+</div>
+<div id="searchbar" class="wrapper bgded overlay">
+  {% include 'navbar.html' with navbar=navbarOption %}
+</div>
+<div class="wrapper">
+  <div id="lefttable" class="hoc clear">
+    <div id="tables-container" style="width:75%; padding:5px;">
+      <div id="searchtable-container">
+        <table id="searchtable" class="row-border hover order-column" cellspacing="0" width="100%"></table>
       </div>
     </div>
-  </body>
+  </div>
+</div>
+<div id="rightslider">
+  <div id="selectiontable-container" style="width: 100%; height: 100%">
+    <table id="selectiontable" class="row-border hover order-column" cellspacing="0" width="100%"></table>
+    <input id="continue-btn" class="btn medium" type="submit" value="Go" float="bottom" style="width:100%" />
+  </div>
+</div>
+</body>
 </html>
 <script src="{% static 'js/searchTableConfig.js' %}"></script>
 <script src="{% static 'js/selectionTableConfig.js' %}"></script>
@@ -28,7 +49,7 @@ var searchBar = document.getElementById('name-search-bar');
 
 // latest search variables
 var latestSearchTerm = "";
-var latestSearchOption = $(".entity-option:checked").val();
+var latestSearchOption = $('select[name="type"').val();
 
 
 // data tables
@@ -86,7 +107,7 @@ searchBar.addEventListener('keypress', function (e) {
 
 function search(){
   console.log("searching")
-  latestSearchOption = $(".entity-option:checked").val();
+  latestSearchOption = $('select[name="type"').val();
   searchtable = makeSearchTable(latestSearchOption);
   latestSearchTerm = inputBar.value;
 

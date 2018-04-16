@@ -2,7 +2,10 @@
   padding: 15px;
 }
 
-#pageintro-wrapper {
+#header {
+  height: 80px;
+}
+.overlay {
   background: url('../images/background.jpg') no-repeat center;
 }
 #pageintro {
@@ -16,12 +19,23 @@
   background-color:rgba(0,61,109,0.5);
 }
 
-.page-title {
-  font-size: 30px;
-  font-weight: bold;
+#searchbar {
+  height: 100px;
+  padding: 0;
+  background-color: #ccc;
 }
+
+#rightslider {
+  position: absolute;
+  top: 210px;
+  right: 0;
+  width: 25%;
+  height: 100%;
+  background-color: #eee;
+}
+
 .search-bar {
-  padding: 20px 0;
+  padding: 32px 0;
 }
 .search-option .radio {
   display: inline-block;

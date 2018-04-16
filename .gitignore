@@ -3,3 +3,4 @@
 .ipynb_checkpoints
 __pycache__
 MSAPIKEYS.txt
+.DS_Store
