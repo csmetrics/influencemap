@@ -63,22 +63,17 @@ table {
 .nav-tabs {
   border: none;
 }
-.nav-tabs li {
+.tab-btn:hover, .tab-btn.inverse{
   padding: 10px 20px;
-  border: 1px #ddd solid;
-  border-top: 10px #B97D2D solid;
   border-radius: 0 0 5px 5px;
+  color:#B97D2D; background-color:transparent; border-color:#ddd;
+  border-top: 10px #B97D2D solid;
 }
-.nav-tabs li.active,
-.nav-tabs li:hover,
-.nav-tabs li:focus{
-  font-weight: bold;
-  background-color: #B97D2D;
-}
-.nav-tabs li.active > a,
-.nav-tabs li:hover > a,
-.nav-tabs li:focus > a {
-  color: white;
+.tab-btn, .tab-btn.active, .tab-btn.inverse:hover{
+  padding: 10px 20px;
+  border-radius: 0 0 5px 5px;
+  color:#FFFFFF; background-color:#B97D2D; border-color:#B97D2D;
+  border-top: 10px #B97D2D solid;
 }
 
 .search-bar {
