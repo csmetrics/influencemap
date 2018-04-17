@@ -3,9 +3,9 @@
 }
 
 #header {
-  height: 80px;
+  height: 70px;
 }
-.overlay {
+.bgded {
   background: url('../images/background.jpg') no-repeat center;
 }
 #pageintro {
@@ -25,29 +25,64 @@
   background-color: #ccc;
 }
 
-#rightslider {
-  position: absolute;
-  top: 210px;
-  right: 0;
-  width: 25%;
-  height: 100%;
-  background-color: #eee;
+#lefttable {
+  padding: 10px;
+}
+#searchtable-container th {
+  color: black;
+  background-color: #F7F7F7;
+  font-size: 16px;
 }
 
-th {
-  color: inherit;
-  background-color: #eee;
+#rightslider {
+  height: 100%;
+  border-top: 10px #B97D2D solid;
+  background-color: rgba(0,0,0,0.5);
 }
+
 table, th, td, table.dataTable thead th, table.dataTable thead td {
   border: 0;
+}
+table {
+  font-size: 14px;
+}
+#selectiontable tr {
+  color: black;
+  background: none;
+}
+#selectiontable-container th {
+  color: white;
+  font-size: 16px;
+  background-color: rgba(0,0,0,0.5);
+}
+#statpane {
+  border: 1px #ddd solid;
+  border-top: none;
+}
+
+.nav-tabs {
+  border: none;
+}
+.nav-tabs li {
+  padding: 10px 20px;
+  border: 1px #ddd solid;
+  border-top: 10px #B97D2D solid;
+  border-radius: 0 0 5px 5px;
+}
+.nav-tabs li.active,
+.nav-tabs li:hover,
+.nav-tabs li:focus{
+  font-weight: bold;
+  background-color: #B97D2D;
+}
+.nav-tabs li.active > a,
+.nav-tabs li:hover > a,
+.nav-tabs li:focus > a {
+  color: white;
 }
 
 .search-bar {
   padding: 32px 0;
-}
-.search-option .radio {
-  display: inline-block;
-  padding: 0 5px;
 }
 img.fit-wrapper {
   max-width: 100%;

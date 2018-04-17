@@ -21,19 +21,23 @@
 <div id="searchbar" class="wrapper bgded overlay">
   {% include 'navbar.html' with navbar=navbarOption %}
 </div>
-<div class="wrapper">
-  <div id="lefttable" class="hoc clear">
-    <div id="tables-container" style="width:75%; padding:5px;">
-      <div id="searchtable-container">
-        <table id="searchtable" class="row-border hover order-column" cellspacing="0" width="100%"></table>
+<div class="wrapper row2" style="padding-top:0">
+  <div class="hoc clear">
+    <div class="row">
+      <div id="lefttable" class="col-md-9">
+        <div id="tables-container" style="padding-right:25px;">
+          <div id="searchtable-container">
+            <table id="searchtable" class="row-border hover order-column" cellspacing="0" width="100%"></table>
+          </div>
+        </div>
+      </div>
+      <div id="rightslider" class="col-md-3">
+        <div id="selectiontable-container" style="width: 100%; height: 100%">
+          <table id="selectiontable" class="row-border hover order-column" cellspacing="0" width="100%"></table>
+          <input id="continue-btn" class="btn medium" type="submit" value="Go" float="bottom" style="width:100%; margin-top:10px" />
+        </div>
       </div>
     </div>
-  </div>
-</div>
-<div id="rightslider">
-  <div id="selectiontable-container" style="width: 100%; height: 100%">
-    <table id="selectiontable" class="row-border hover order-column" cellspacing="0" width="100%"></table>
-    <input id="continue-btn" class="btn medium" type="submit" value="Go" float="bottom" style="width:100%" />
   </div>
 </div>
 </body>

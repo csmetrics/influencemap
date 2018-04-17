@@ -30,7 +30,7 @@ var searchTableConfig = {
       "fixedColumns": true,
       "paging": false, // true,
       "searching": false,
-      "sScrollY": 480,
+      "sScrollY": 560,
       // "pagingType": "simple_numbers",
       "ordering": true,
       "order": [[1, "desc" ]],
