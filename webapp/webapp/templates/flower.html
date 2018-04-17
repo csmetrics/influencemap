@@ -1,42 +1,82 @@
 {% load staticfiles %}
 
 <html>
-  {% include 'header.html' %}
-  <body>
-    <div class="wrapper" align="center">
-      {% include 'navbar.html' with navbar=navbarOption %}
-      <div id="image-container" width=100%>
-        <div class="row">
-          <div class="col-md-12">
-            Keyword: <b>{{ navbarOption.selectedKeyword }}</b>
-            Type: <b>{{ navbarOption.selectedOption.name }}</b>
+{% include 'header.html' %}
+<body id="top">
+<div class="wrapper row1">
+  <header id="header" class="hoc clear">
+    <div id="logo" class="fl_left">
+      <h1><a href="/">Influence Map</a></h1>
+      <p>Constructing maps of intellectual influence using academic data</p>
+    </div>
+    <nav id="mainav" class="fl_right">
+      <ul class="clear">
+        <li class="active"><a href="index.html">Home</a></li>
+        <li><a href="#">Menu</a></li>
+        <li><a href="#">Contact</a></li>
+      </ul>
+    </nav>
+  </header>
+</div>
+<div id="searchbar" class="wrapper bgded overlay">
+  {% include 'navbar.html' with navbar=navbarOption %}
+</div>
+<div id="statpane" class="hoc clear collapse">
+  <div class="row">
+    <div class="col-md-7">
+      <div class="wrapper">
+        <h3 class="heading">Statistics</h3>
+        <p>Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.</p>
+      </div>
+    </div>
+    <div class="col-md-5" style="border-left:1px #ddd solid">
+      <div class="wrapper search-option">
+        <label>
+          <input class="self-cite" type="checkbox" name="self-cite" id="self-cite" />
+          include self citations
+        </label>
+      </div>
+      {% include 'year_slider.html' with yearSlider=yearSlider %}
+    </div>
+  </div>
+</div>
+<div class="hoc clear">
+  <div id="image-container" class="nav-tabs">
+    <ul class="nav nav-tabs">
+      <li><button class="btn tab-btn inverse active" href="#tab-author" data-toggle="tab"><i class="fa fa-user"></i>&nbsp;Author</button></li>
+      <li><button class="btn tab-btn inverse" href="#tab-conference" data-toggle="tab"><i class="fa fa-book"></i>&nbsp;Conference</button></li>
+      <li><button class="btn tab-btn inverse" href="#tab-institution" data-toggle="tab"><i class="fa fa-university"></i>&nbsp;Institution</button></li>
+    </ul>
+    <!-- Tab content -->
+    <div class="tab-content">
+      <div class="tab-pane active" id="tab-author">
+        <div class="wrapper">
+          <h4>To Author</h4>
+          <div align="center">
+            <svg id="graph1" width=1800 height=800></svg>
           </div>
         </div>
-{% include 'year_slider.html' %}
-      <div class="search-option">
-        <div class="checkbox">
-          <label>
-            <input class="self-cite" type="checkbox" name="self-cite" id="self-cite">
-            include self citations
-          </label>
+      </div>
+      <div class="tab-pane" id="tab-conference">
+        <div class="wrapper">
+          <h4>To Conference</h4>
+          <div align="center">
+            <svg id="graph2" width=1800 height=800></svg>
+          </div>
         </div>
       </div>
-
-        <span>To Author</span>
-        <div align="center">
-          <svg id="graph1" width=1800 height=700></svg>
-        </div>
-        <span>To conference</span>
-        <div align="center">
-          <svg id="graph2" width=1800 height=700></svg>
-        </div>
-        <span>To institution</span>
-        <div align="center">
-          <svg id="graph3" width=1800 height=700></svg>
+      <div class="tab-pane" id="tab-institution">
+        <div class="wrapper">
+          <h4>To Institution</h4>
+          <div align="center">
+            <svg id="graph3" width=1800 height=800></svg>
+          </div>
         </div>
       </div>
     </div>
-  </body>
+  </div>
+</div>
+</body>
 </html>
 <script src="{% static 'js/d3.v4.min.js' %}"></script>
 <script src="{% static 'js/d3-selection-multi.v1.js' %}"></script>
@@ -83,7 +123,7 @@ resubmitButton.addEventListener('click', function(){
       drawFlower("#graph2", conf_data, 1, width);
       drawFlower("#graph3", inst_data, 2, width);
 
-      
+
     }
   });
 });
