@@ -214,12 +214,7 @@ function toggleParentRowSelection(row, select){
   }   
 
   else {
-    selectiontable.rows().nodes().each(function(a) {
-      var r = selectiontable.row(a);
-      if(r.data()['table-id'] === row.data()['table-id']){
-        r.remove().draw();
-      }
-    });
+    removeRowFromSelectionTable(row);
   }
 
   // toggle selection of child rows - check/uncheck boxes and add/remove selected data
@@ -255,6 +250,7 @@ function addInnerCheckboxListener (){
      table = nested_tables[tableId]['table'];
     var row = table.row(rowElement);
     var parentRowElement = $(tableElement.parentElement.parentElement.parentElement).closest('tr').prev();
+     parentRow = searchtable.row(parentRowElement);
     var parentRowCheckbox = parentRowElement.find('input.papers-outer-checkbox')[0];
 
     if (inputElement.checked){
@@ -263,6 +259,19 @@ function addInnerCheckboxListener (){
         selected_data[tableId] = new Set();
       }
       selected_data[tableId].add(row.data());
+
+      var rowInSelection = false;
+      selectiontable.rows().nodes().each(function(a) {
+         r = selectiontable.row(a);
+        if(r.data()['table-id'] === parentRow.data()['table-id']){
+          rowInSelection = true;
+        }
+      });
+      if (!rowInSelection){
+        var newRow = parentRow.data();
+        selectiontable.row.add(newRow).draw();
+      }
+
 
     } else {
       if (selected_data[tableId] instanceof Set){
@@ -278,6 +287,9 @@ function addInnerCheckboxListener (){
 
       parentRowCheckbox.checked = someRowsChecked;
 
+      if (!someRowsChecked){
+        removeRowFromSelectionTable(parentRow);
+      }
     }
 
     for (var key in selected_data){
@@ -298,7 +310,6 @@ $('#selectiontable tbody').on('click', 'tr', function () {
       if (r.data()['table-id'] === row_id){
         $(b).find('.papers-outer-checkbox').each(function(c, d){
           d.checked = false;
-          // r.deselect();
           toggleChildRowsSelection(r, false);
         });
       }
@@ -307,23 +318,14 @@ $('#selectiontable tbody').on('click', 'tr', function () {
   } catch (e) {}
 });
 
-
+function removeRowFromSelectionTable(row){
+  selectiontable.rows().nodes().each(function(a) {
+    var r = selectiontable.row(a);
+    if(r.data()['table-id'] === row.data()['table-id']){
+      r.remove().draw();
+    }
+  });
+}
 
 
 </script>
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
