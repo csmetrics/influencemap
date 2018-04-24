@@ -125,7 +125,7 @@ function drawFlower(svg_id, data, idx, w) {
         .attr("class", function(d) { return "link " + d.type; })
         .attr('marker-end', function(d) { return "url(#" + d.gtype+"_"+d.type+"_"+d.id + ")"; })
         .attr("type", function(d) {d.type})
-        .style("stroke-width", function (d) { return 1+8*d.weight; })
+        .style("stroke-width", function (d) { return arrow_width_calc(d.weight); })
         .style("stroke", function (d) { if (d.type == "in") return norcolor[0]; else return norcolor[1]; })
         .on("mouseover", function() { highlight_on(idx, this); })
         .on("mouseout", function() { highlight_off(idx); });
@@ -165,7 +165,7 @@ function drawFlower(svg_id, data, idx, w) {
         .attr("gtype", function(d) { return d.gtype; })
         .attr("x", 8)
         .attr("y", ".31em")
-        .text(function(d) { if (d.coauthor == 'True') return "⭒" + d.name; else return d.name; })
+        .text(function(d) { if (d.coauthor == 'True') return "*" + d.name; else return d.name; })
         .style("font-style", function(d) { if (d.coauthor == 'False') return "normal"; else return "italic"; });
 
     // flower graph node text
@@ -177,7 +177,7 @@ function drawFlower(svg_id, data, idx, w) {
         .attr("gtype", function(d) { return d.gtype; })
         .attr("x", 8)
         .attr("y", ".31em")
-        .text(function(d) { if (d.coauthor == 'True') return "⭒" + d.name; else return d.name; })
+        .text(function(d) { if (d.coauthor == 'True') return "*" + d.name; else return d.name; })
         .style("font-style", function(d) { if (d.coauthor == 'False') return "normal"; else return "italic"; });
 
     // flower graph chart layout
@@ -385,3 +385,8 @@ function toggle_split(idx, selected) {
             .text("Combine Flower")
     }
 }
+
+function arrow_width_calc(width) {
+    if (width == 0) { return 0; }
+    else { return 1+8*weight; }
+    }
