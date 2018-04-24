@@ -3,51 +3,85 @@ import pandas as pd
 from mag_interface import *
 
 
-def name_to_entityq(name, e_type):
+def paperq_to_dict(paper_query):
+    paper_row_dict = {
+            'paper_id': paper_query['CellID'],
+            'paper_name': paper_query['NormalizedTitle'],
+            'cite_count': paper_query['CitationCount'],
+            'pub_date': to_datetime(paper_query['PublishDate'])
+        }
+
+    return paper_row_dict
+
+def get_ent_paper_df_gen(entity):
     """
     """
-    name_tag = e_type.api_name
+    entity_id = entity.entity_id
+    e_type = entity.entity_type
     query = {
-       "path": "/entity",
-       "entity": {
-           "type": e_type.api_type,
-           "match": {
-               "Name": name
-               },
-           "select": [ name_tag ]
-           }
-       }
+        "path": "/entity/PaperIDs/papers",
+        "entity": {
+            "type": e_type.api_type,
+            "id": [ entity_id ],
+            },
+        "papers": {
+                "select": ["NormalizedTitle", "CitationCount", "PublishDate"]
+            }
+        }
 
     data = query_academic_search('post', JSON_URL, query)
+    paper_res = data['Results']
 
-    entity_list = list()
+    if not paper_res:
+        return None
 
-    for entity in data['Results']:
-        entityq = ent.Entity(entity[0][name_tag], entity[0]['CellID'], e_type)
-        # Filter entities with no papers attached to them
-        if entityq.get_papers().empty:
-            continue
+    paper_list = list()
+    for res_row in paper_res:
+        paper = res_row[1]
+        paper_list.append(paperq_to_dict(paper))
 
-        # Otherwise append to entity list
-        entity_list.append(entityq)
+    entity.paper_df = pd.DataFrame(paper_list)
 
-    return entity_list
+    return entity.paper_df
 
+def get_ent_paper_df_conf(entity):
+    """
+    """
+    entity_id = entity.entity_id
+    e_type = entity.entity_type
+    query = {
+        "path": "/paper",
+        "paper": {
+            "type": "Paper",
+            "match": {
+                "NormalizedVenue": entity_id
+                },
+            "select": [ "OriginalVenue", "NormalizedTitle", "CitationCount",
+                        "PublishDate" ]
+            }
+        }
 
-#def get_id_papers(entity):
-#    """
-#    """
-#    cache_path = os.path.join(CACHE_PAPERS_DIR, entity.cache_str())
-#    try:
-#        id_df = pd.read_pickle(cache_path)
-#    except FileNotFoundError:
-#        id_df = entity.get_entity_papers()
-#    
-#        # Cache 
-#        id_df.to_pickle(cache_path)
-#        os.chmod(cache_path, 0o777)
-#
-#    return id_df
+    data = query_academic_search('post', JSON_URL, query)
+    paper_res = data['Results']
 
+    if not paper_res:
+        return None
 
-#def get_paper_user_info
+    paper_list = list()
+    for res_row in paper_res:
+        paper = res_row[0]
+        paper_list.append(paperq_to_dict(paper))
+
+    entity.paper_df = pd.DataFrame(paper_list)
+
+    return entity.paper_df
+
+def ent_paper_df(entity):
+    """
+    """
+    if entity.entity_type == ent.Entity_type.CONF:
+        entity_update = get_ent_paper_df_conf(entity)
+    else:
+        entity_update = get_ent_paper_df_gen(entity)
+
+    return entity_update

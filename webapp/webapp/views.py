@@ -20,9 +20,9 @@ from mkAff import getAuthor, getJournal, getConf, getAff, getConfPID, getJourPID
 from mag_flower_bloom import *
 
 
-from mag_user_query import name_to_entityq
+from get_entity import entity_from_name
 from influence_df import get_filtered_influence
-from score_influence import score_entity
+from score_influence import score_entities
 
 # initialise as no saved pids
 saved_pids = dict()
@@ -213,20 +213,26 @@ def submit(request):
     max_year = None
 
     entity_type = ent.Entity_type.AUTH
-    entity_list = name_to_entityq(keyword, entity_type)
+
+    # USER NEEDS TO SELECT ENTITIES FIRST
+    entity_list_init = entity_from_name(keyword, entity_type)
 
     #entity_type = data.get('entity_type')
     #entity_names = data.get('entity_names')
 
-    for entity in entity_list:
+    entity_list = list()
+    for entity in entity_list_init:
         # Need to render and allow user selection here
-        print(entity.get_papers())
+        print(entity.entity_id, entity.get_papers())
+        if entity.get_papers() is not None:
+            entity_list.append(entity)
         # User returns a reduced filtered entity list
         # Futher returns a filter to select papers for each of the entities'
         # papers
 
         # entity_list = data.get('entity_list')
         # filters = data.get('filter')
+    print(entity_list)
 
     filters = dict()
     filtered_entity_list = entity_list
@@ -235,20 +241,22 @@ def submit(request):
 
     # Get the entity names
     entity_names = list(map(lambda x: x.entity_name, filtered_entity_list))
+    entity_names.append('')
+    print(entity_names)
 
     cache_score = [None, None, None]
     flower_score = [None, None, None]
 
     for i, flower_item in enumerate(flower_leaves.items()):
         name, leaf = flower_item
-        entity_map = ent.Entity_map(entity_type, leaf)
 
-        entity_score_cache = score_entity(influence_df, entity_map)
+        entity_score_cache = score_entities(influence_df, leaf)
 
-        entity_score = entity_score_cache[~entity_score_cache['entity_id'].isin(
+        entity_score = entity_score_cache[~entity_score_cache['entity_id'].str.lower().isin(
                                           entity_names)]
-        
-        agg_score = agg_score_df(entity_score, entity_map, min_year, max_year)
+        print(entity_score)
+
+        agg_score = agg_score_df(entity_score, min_year, max_year)
         agg_score.ego = entity_names[0]
 
         score = score_df_to_graph(agg_score)

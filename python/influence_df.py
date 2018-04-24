@@ -43,7 +43,10 @@ def entity_to_citation_score(entity):
         row['influence_date'] = to_datetime(cite['PublishDate'])
         data_sc.append(row)
 
-    return pd.DataFrame(data_sc)
+    cite_df = pd.DataFrame(data_sc)
+    cite_df['e_type'] = e_type
+
+    return cite_df
 
 
 def entity_to_reference_score(entity):
@@ -86,7 +89,10 @@ def entity_to_reference_score(entity):
         #row['influence_year'] = cite['PublishDate']
         data_sc.append(row)
 
-    return pd.DataFrame(data_sc)
+    ref_df = pd.DataFrame(data_sc)
+    ref_df['e_type'] = e_type
+
+    return ref_df
 
 
 def get_influence_df(entity):

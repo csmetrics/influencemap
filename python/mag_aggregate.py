@@ -6,7 +6,7 @@ import numpy as np
 from datetime import datetime
 
 # Generates pandas dataframe for scores
-def agg_score_df(influence_df, e_map, coauthors=set([]), \
+def agg_score_df(influence_df, coauthors=set([]), \
     score_year_min=None, score_year_max=None, \
     ratio_func=np.vectorize(lambda x, y : y - x), sort_func=np.maximum):
 

@@ -46,6 +46,7 @@ class Entity_map:
         else:
             return texts[0]
 
+from mag_user_query import *
 
 # Class to wrap type and id together
 class Entity:
@@ -61,33 +62,6 @@ class Entity:
     def name_str(self):
         return self.entity_type.ident + '-' + self.entity_id
 
-    def update_papers_from_api(self):
-        query = {
-            "path": "/entity/PaperIDs/paper",
-            "entity": {
-                "type": self.entity_type.api_type,
-                "id": [ self.entity_id ],
-                },
-            "paper": {
-                "select": ["NormalizedTitle", "CitationCount", "PublishDate"]
-                }
-            }
-
-        data = query_academic_search('post', JSON_URL, query)
-        papers = list()
-
-        for query_res in data['Results']:
-            row = dict()
-            result = query_res[1]            
-            row['paper_id'] = result['CellID']
-            row['paper_name'] = result['NormalizedTitle']
-            row['cite_count'] = result['CitationCount']
-            row['pub_date'] = to_datetime(result['PublishDate'])
-            papers.append(row)
-
-        self.paper_df = pd.DataFrame(papers)
-
-
     def get_papers(self):
         """
         """
@@ -98,9 +72,11 @@ class Entity:
         try:
             self.paper_df = pd.read_pickle(cache_path)
         except FileNotFoundError:
-            self.update_papers_from_api()
-        
-            # Cache 
-            self.paper_df.to_pickle(cache_path)
-            os.chmod(cache_path, 0o777)
+            self.paper_df = ent_paper_df(self)
+
+            if self.paper_df is not None:
+                # Cache 
+                self.paper_df.to_pickle(cache_path)
+                os.chmod(cache_path, 0o777)
+
         return self.paper_df

@@ -15,7 +15,7 @@ def normalise_singular_linear(series):
 
     # Cases if max equal to min
     if max_min_dif == 0:
-        series = 0.5
+        series = min_val
         return series
 
     # Normalise
