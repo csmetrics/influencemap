@@ -5,8 +5,8 @@ from parse_academic_search import *
 MAS_URL_PREFIX = "https://api.labs.cognitive.microsoft.com"
 headers = {
     # Request headers
-    'Ocp-Apim-Subscription-Key': 'a27d17cc1a6044f5bb6accf68e10eefa',   # original
-    #'Ocp-Apim-Subscription-Key': '4698d5e7b0244e828d1dc21134238650',    # bens
+    #'Ocp-Apim-Subscription-Key': 'a27d17cc1a6044f5bb6accf68e10eefa',   # original
+    'Ocp-Apim-Subscription-Key': '4698d5e7b0244e828d1dc21134238650',    # bens
 }
 
 def query_academic_search(type, url, query):

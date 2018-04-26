@@ -118,9 +118,9 @@ def create(request):
     })
 
 s = {
-    'author': ('<h5>{name}</h5><p>{affiliation}</p>'
-        '<div style="float: left; width: 50%; padding: 0;"><p>Papers: {paperCount}</p></div>'
-        '<div style="float: right; width: 50%; text-align: right; padding: 0;"<p>Citations: {citations}</p></div>'),
+    'author': ('<h5>{name}</h5><p>{affiliation}, Papers: {paperCount}, Citations: {citations}</p></div>'),
+         # '<div style="float: left; width: 50%; padding: 0;"><p>Papers: {paperCount}</p></div>'
+         # '<div style="float: right; width: 50%; text-align: right; padding: 0;"<p>Citations: {citations}</p></div>'),
     'conference': ('<h5>{name}</h5>'
         '<div style="float: left; width: 50%; padding: 0;"><p>Papers: {paperCount}</p></div>'
         '<div style="float: right; width: 50%; text-align: right; padding: 0;"<p>Citations: {citations}</p></div>'),

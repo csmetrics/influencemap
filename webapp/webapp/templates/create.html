@@ -1,60 +1,90 @@
 {% load staticfiles %}
 
 <html>
-  {% include 'header.html' %}
-  <body>
-    <div class="wrapper" align="center">
-      {% include 'navbar.html' with navbar=navbarOption %}
-      <div id="tables-container" class="row" style="width: 80%; max-height: 500px">
-        <div id="searchtable-container" class="container" style="float: left; width: 70%; border-right: 1px solid rgb(15,15,15)">
-          <table id="searchtable" class="row-border hover order-column" cellspacing="0" width="100%"></table>
+{% include 'header.html' %}
+<body id="top">
+<div class="wrapper row1">
+  <header id="header" class="hoc clear">
+    <div id="logo" class="fl_left">
+      <h1><a href="/">Influence Map</a></h1>
+      <p>Constructing maps of intellectual influence using academic data</p>
+    </div>
+    <nav id="mainav" class="fl_right">
+      <ul class="clear">
+        <li class="active"><a href="index.html">Home</a></li>
+        <li><a href="#">Menu</a></li>
+        <li><a href="#">Contact</a></li>
+      </ul>
+    </nav>
+  </header>
+</div>
+<div id="searchbar" class="wrapper bgded overlay">
+  {% include 'navbar.html' with navbar=navbarOption %}
+</div>
+<div class="wrapper row2" style="padding-top:0">
+  <div class="hoc clear">
+    <div class="row">
+      <div id="lefttable" class="col-md-9">
+        <div id="tables-container" style="padding-right:25px;">
+          <div id="searchtable-container">
+            <table id="searchtable" class="row-border hover order-column" cellspacing="0" width="100%"></table>
+          </div>
         </div>
-        <div id="selectiontable-container" class="container" style="float: left; width: 30%; height: 100%">
-          <table id="selectiontable" class="row-border hover order-column" cellspacing="0" width="100%"%"></table>
-          <input id="continue-btn" type="submit" value="Go" float="bottom">
+      </div>
+      <div id="rightslider" class="col-md-3">
+        <div id="selectiontable-container" style="width: 100%; height: 100%">
+          <table id="selectiontable" class="row-border hover order-column" cellspacing="0" width="100%"></table>
+          <input id="continue-btn" class="btn medium" type="submit" value="Go" float="bottom" style="width:100%; margin-top:10px" />
         </div>
       </div>
     </div>
-  </body>
+  </div>
+</div>
+</body>
 </html>
 <script src="{% static 'js/searchTableConfig.js' %}"></script>
 <script src="{% static 'js/selectionTableConfig.js' %}"></script>
 <script>
-// keep track of whether search was expanded
-var latestSearchTerm = "";
-var latestSearchOption = $(".entity-option:checked").val();
+// elements
+var inputBar = document.getElementById("name-search-bar");
+var searchButton = document.getElementById("search-btn");
+var continueButton = document.getElementById("continue-btn");
+var searchBar = document.getElementById('name-search-bar');
 
+// latest search variables
+var latestSearchTerm = "";
+var latestSearchOption = $('select[name="type"').val();
+
+
+// data tables
 var selectiontable = $('#selectiontable').DataTable(selectionTableConfig['tableSettings']);
 var searchtable = $('#searchtable').DataTable(searchTableConfig['tableSettings']);
 
-// ----  data table  ----
-var searchtableContainer = document.getElementById("searchtable-container");
+//var searchtableContainer = document.getElementById("searchtable-container");
 
-
-// function to create searchTable
 function makeSearchTable(entityType){
   if ($.fn.DataTable.isDataTable("#searchtable")) {
     $('#searchtable').DataTable().clear().destroy();
     $('#searchtable').empty();
   }
   var tableSettings = searchTableConfig['tableSettings'];
-  return $('#searchtable').DataTable(tableSettings);
-}
+  return $('#searchtable').DataTable(tableSettings);}
 
-
-// update searchTable
 function updateTable(data, table){
   table.clear();
 
   for(var i in data) {
     table.row.add(data[i]);
   };
-  table.draw();
-}
+  table.draw();}
 
-var inputBar = document.getElementById("name-search-bar");
-var searchButton = document.getElementById("search-btn");
-var continueButton = document.getElementById("continue-btn");
+// data 
+var currentSearchTableData;
+var selectedData; // transition to this
+var selected_data = {}; // transition away from this
+var nestedTables = {}; // transition to this
+var nested_tables = {}; // transition away from this 
+var nestedTableSettings = nestedTableConfig['tableSettings'];
 
 
 
@@ -68,12 +98,20 @@ continueButton.addEventListener('click', function(){
        bot_year_min: 0,
        top_year_max: 3000
    }
-   postData('/submit/', data, "{% csrf_token %}")
-});
+   postData('/submit/', data, "{% csrf_token %}")});
+
+searchButton.addEventListener('click', function(){search()});
+
+searchBar.addEventListener('keypress', function (e) {
+  // Search when enter pressed in input bar
+  var key = e.which || e.keyCode;
+  if (key === 13) { // 13 is enter
+    search();
+  }});
 
 function search(){
   console.log("searching")
-  latestSearchOption = $(".entity-option:checked").val();
+  latestSearchOption = $(".entity-option:selected").val();
   searchtable = makeSearchTable(latestSearchOption);
   latestSearchTerm = inputBar.value;
 
@@ -86,89 +124,212 @@ function search(){
       option: latestSearchOption,
     },
     success: function (result) { // return data if success
+      currentSearchTableData = result['entities'];
       updateTable(result["entities"], searchtable);
       searchTableEventHandling();
+
+      // select rows in search table if they have already been selected
       searchtable.rows().nodes().each(function(a) {
         selectiontable.rows().nodes().each(function(b) {
           var search_row = searchtable.row(a);
           var selection_row = selectiontable.row(b);
           if(search_row.data()['table-id'] === selection_row.data()['table-id']){
-            search_row.select();
+            toggleParentRowSelection(search_row, true);
           }
         })
       });
+      addNestedRows();
     },
     error: function (result) {
       console.log("searchButton error");
     }
+  });}
+
+function addNestedRows(){
+  searchtable.rows().every(function(rowIdx, tableLoop, rowLoop){
+    var eid = this.data()['data']['eid'];
+    var tableId = this.data()['table-id'];
+    var child_text = "<table id='"+tableId+"' class='papers_table compact'></table>";
+    this.child(child_text).show();
+    var nestedTable = $("#" + tableId);
+    nestedTable.closest("td").addClass("innertable");
+    nested_tables[tableId] = {};
+    nested_tables[tableId]['table'] = nestedTable.DataTable(nestedTableSettings);
+    nested_tables[tableId]['selectedPapers'] = [];
+    updateTable(this.data()['data']['papers'], nested_tables[tableId]['table']);
+    hideElement(this.child());
+  });
+
+  addNestedRowToggle('#searchtable', '.display-info');
+}
+
+function hideElement(elem){
+  elem.css({'display': 'none'});
+}
+
+function showElement(elem){
+  elem.css({'display': 'block'});
+}
+
+
+// ----  select data  ----
+
+// Search table click handling - open children rows when clicked
+function addNestedRowToggle (tableSelector, rowSelector){
+  $(tableSelector + ' tbody').on('click', rowSelector, function () {
+
+    var tr = $(this).closest('tr');
+    var row = searchtable.row( tr );
+    var show = !(tr[0].classList.contains('shown'));
+ 
+   // Close all open rows
+    $(tableSelector + ' .shown').each( function (i, elem) {
+      var tblRow = searchtable.row( elem );
+      elem.classList.remove('shown');
+      hideElement(tblRow.child());
+    });
+
+    if ( show ) {
+        // Open this row
+        showElement(row.child());
+        tr.addClass('shown');
+    
+      addInnerCheckboxListener();
+    }
   });
 }
 
-var searchButton = document.getElementById('search-btn');
-var searchBar = document.getElementById('name-search-bar')
-searchButton.addEventListener('click', function(){
-  search();
-});
 
-// Search when enter pressed in input bar
-searchBar.addEventListener('keypress', function (e) {
-  var key = e.which || e.keyCode;
-  if (key === 13) { // 13 is enter
-    search();
-  }
-});
-
+// Search table parent checkbox click handling - toggle child selection
 function searchTableEventHandling() {
-  $('#searchtable tr').on('click', function () {
-      var tr = $(this).closest('tr');
-      var row = searchtable.row( tr );
-      if (!tr.hasClass('selected')){
-        var newRow = row.data();
-        selectiontable.row.add(newRow).draw();
-      }
-      else {
-        selectiontable.rows().nodes().each(function(a) {
-          var r = selectiontable.row(a);
-          if(r.data()['table-id'] === row.data()['table-id']){
-            r.remove().draw();
-          }
-        });
-      }
+  $('.papers-outer-checkbox').on('change', function () {
+    var tr = $(this).closest('tr');
+    var row = searchtable.row( tr );
+    var select = this.checked;
+    toggleParentRowSelection(row, select);
   })
 };
 
+function toggleParentRowSelection(row, select){
+  // handle selection table changes
+  if (select){ 
+    var newRow = row.data();
+    selectiontable.row.add(newRow).draw();
+  }   
+
+  else {
+    removeRowFromSelectionTable(row);
+  }
+
+  // toggle selection of child rows - check/uncheck boxes and add/remove selected data
+  toggleChildRowsSelection(row, select);
+}
+
+function toggleChildRowsSelection(row, select){
+  var tableId = row.data()['table-id'];
+  var r = $('#'+tableId);
+    r.find('.papers-inner-checkbox').each(function(a){
+      this.checked = select;
+      $(this).change();
+    })
+
+  if (select){ // add all papers for parent row to selected data
+    selected_data[row.data()['table-id']] = new Set(row.data()['data']['papers']);
+
+  } else { // remove any exisiting selected data from this entity
+    try { 
+      delete selected_data[row.data()['table-id']];
+    } catch (e){console.log(e)}
+  }
+};
+
+
+// child row change
+function addInnerCheckboxListener (){
+  $('.papers-inner-checkbox').change(function(){
+    var inputElement = this;
+    var rowElement = inputElement.parentElement.parentElement;
+    var tableElement = rowElement.parentElement.parentElement;
+    var tableId = tableElement['id'];
+     table = nested_tables[tableId]['table'];
+    var row = table.row(rowElement);
+    var parentRowElement = $(tableElement.parentElement.parentElement.parentElement).closest('tr').prev();
+     parentRow = searchtable.row(parentRowElement);
+    var parentRowCheckbox = parentRowElement.find('input.papers-outer-checkbox')[0];
+
+    if (inputElement.checked){
+      parentRowCheckbox.checked = true;
+      if (!(selected_data[tableId] instanceof Set)){
+        selected_data[tableId] = new Set();
+      }
+      selected_data[tableId].add(row.data());
+
+      var rowInSelection = false;
+      selectiontable.rows().nodes().each(function(a) {
+         r = selectiontable.row(a);
+        if(r.data()['table-id'] === parentRow.data()['table-id']){
+          rowInSelection = true;
+        }
+      });
+      if (!rowInSelection){
+        var newRow = parentRow.data();
+        selectiontable.row.add(newRow).draw();
+      }
+
+
+    } else {
+      if (selected_data[tableId] instanceof Set){
+            selected_data[tableId].delete(row.data());
+      }
+      var someRowsChecked = false;
+
+      table.rows().nodes().each(function(a){
+        if ($(a).find('input')[0].checked){
+          someRowsChecked = true;
+        } 
+      })
+
+      parentRowCheckbox.checked = someRowsChecked;
+
+      if (!someRowsChecked){
+        removeRowFromSelectionTable(parentRow);
+      }
+    }
+
+    for (var key in selected_data){
+      if (selected_data[key].size === 0)
+          delete selected_data[key]; 
+    }
+    console.log(selected_data)
+  })
+}
+
+// event handling to remove row from selection
 $('#selectiontable tbody').on('click', 'tr', function () {
   var row = selectiontable.row( this );
+  var row_id = row.data()['table-id'];
   try {
-    searchtable.rows().nodes().each(function(a) {
-      var r = searchtable.row(a);
-      if(r.data()['table-id'] === row.data()['table-id']){
-        r.deselect();
+    $('#searchtable .outer-table-row').each(function(a, b){
+      var r = searchtable.row(b);
+      if (r.data()['table-id'] === row_id){
+        $(b).find('.papers-outer-checkbox').each(function(c, d){
+          d.checked = false;
+          toggleChildRowsSelection(r, false);
+        });
       }
     });
     row.remove().draw();
   } catch (e) {}
 });
 
-
-
-   // // Close all open rows
-   //  $('.shown').each( function (i, elem) {
-   //    var tblRow = papersTable.row( elem );
-   //    elem.classList.remove('shown');
-   //    tblRow.child.hide();
-   //  });
-
-   //  if ( show ) {
-   //      // Open this row
-   //      row.child.show();
-   //      tr.addClass('shown');
-   //  }
-
-
-// {% if search %}
-// search(false, true);
-// {% endif %}
+function removeRowFromSelectionTable(row){
+  selectiontable.rows().nodes().each(function(a) {
+    var r = selectiontable.row(a);
+    if(r.data()['table-id'] === row.data()['table-id']){
+      r.remove().draw();
+    }
+  });
+}
 
 
 </script>

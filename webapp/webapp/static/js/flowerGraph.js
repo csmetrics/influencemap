@@ -30,13 +30,13 @@ function drawFlower(svg_id, data, idx, w) {
     h_margin = 225;
     v_margin = 200;
     yheight = 100;
-    flower_margin = 50;
+    flower_margin = 0;
 
     svg[idx] = d3.select(svg_id),
     width = w, magf = Math.min(250, width/7),
-    height = 650,
+    height = 600,
     numnodes[idx] = nodes.length,
-    center = [width/2, height/2 + flower_margin];
+    center = [width/2, height/2 - flower_margin];
     flower_split[idx] = false;
 
     // bar location
@@ -379,7 +379,7 @@ function toggle_split(idx, selected) {
             .text("Split Flower")
     }
     else {
-        split_flower(idx, split_distance); 
+        split_flower(idx, split_distance);
         flower_split[idx] = true;
         split_button[idx].select("text")
             .text("Combine Flower")

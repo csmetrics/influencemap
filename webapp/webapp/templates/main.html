@@ -1,32 +1,77 @@
 {% load staticfiles %}
 
+<!--
+Template Name: Corklow
+Author: <a href="http://www.os-templates.com/">OS Templates</a>
+Author URI: http://www.os-templates.com/
+Licence: Free to use under our free template licence terms
+Licence URI: http://www.os-templates.com/template-terms
+-->
 <html>
 {% include 'header.html' %}
-<body>
-	<div class="wrapper" align="center">
-		{% include 'pagehead.html' %}
-		<div class = "container" align = "center">
-			<div class="container custom-text-box" align="center">
-				<h1>About</h1>
-				<p>This is the about section. you can click <a href="/about">here</a> for more info</p>
-				<p>Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.</p>
-			</div>
-			<div class="row" style="height: 10em; padding-top: 20">
-				<div class="container" style="float: left; width: 30%; height: 100px">
-					<p>Browse influence maps of Nobel Laureates, Turing Award winners, Fields Medalists, Institutions and more...</p>
-					<a href="/browse"><button class="btn-primary">Browse</button></a>
-				</div>
-				<div  class="container" style="float: right; width: 30%; height: 100px">
-					<p>Curate your own influence maps by combining papers, people groups and institutions...</p>
-					<a href="/create"><button class="btn-primary">Create</button></a>
-				</div>        
-			</div>
-			<div class="container custom-text-box" align="center">
-				<h1>Methodology</h1>
-				<p>This is the methodology section. you can click <a href="/methodology">here</a> for more info</p>
-				<p>Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.</p>
-			</div>
-		</div>
-	</div>
+<body id="top">
+<div class="wrapper row1">
+  <header id="header" class="hoc clear">
+    <div id="logo" class="fl_left">
+      <h1><a href="/">Influence Map</a></h1>
+      <p>Constructing maps of intellectual influence using academic data</p>
+    </div>
+    <nav id="mainav" class="fl_right">
+      <ul class="clear">
+        <li class="active"><a href="index.html">Home</a></li>
+        <li><a href="#">Menu</a></li>
+        <li><a href="#">Contact</a></li>
+      </ul>
+    </nav>
+  </header>
+</div>
+<div id="pageintro-wrapper" class="wrapper bgded overlay">
+  <div id="pageintro" class="hoc clear">
+    <article>
+			<p>About Project Influence Map</p>
+			<p>Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.</p>
+      <footer><a href="/about">more info</a></footer>
+    </article>
+  </div>
+</div>
+<div class="wrapper row2" style="padding-top:0">
+  <div id="services" class="hoc clear">
+    <div class="table">
+      <div class="table-row">
+        <div class="table-cell">
+          <article><a href="/browse"><i class="fa fa-trophy"></i></a>
+            <h6 class="heading">Award winners</h6>
+						<p>Browse influence maps of Nobel Laureates, Turing Award winners, Fields Medalists, Institutions and more...</p>
+						<footer><a href="/browse">Browse</a></footer>
+          </article>
+        </div>
+        <div class="table-cell">
+          <article><a href="/create"><i class="fa fa-users"></i></a>
+            <h6 class="heading">Create new flowers</h6>
+						<p>Curate your own influence maps by combining papers, people groups and institutions...</p>
+						<footer><a href="/create">Create</a></footer>
+          </article>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+<div class="wrapper" style="background-color:#eee">
+  <article class="hoc clear center" style="padding: 20px">
+    <h3 class="heading">Methodology</h3>
+		<p>This is the methodology section. </p>
+		<p>Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.</p>
+    <footer><a class="btn medium" href="/methodology">More Information &raquo;</a></footer>
+  </article>
+</div>
+<div class="wrapper row3">
+  <footer id="footer" class="hoc clear">
+    <div id="copyright">
+      <p>Copyright &copy; 2018 - All Rights Reserved - <a href="http://http://cm.cecs.anu.edu.au/">ANU Computational Media Lab.</a></p>
+      <p class="font-xs">Template by <a target="_blank" href="http://www.os-templates.com/" title="Free Website Templates">OS Templates</a></p>
+    </div>
+  </footer>
+</div>
+
 </body>
 </html>

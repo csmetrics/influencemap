@@ -2,7 +2,7 @@ var selectionTableConfig = {
   tableSettings: {
     "destroy" : true,
     "bAutoWidth" : true,
-    "sScrollY" : "400",
+    "sScrollY" : "560",
     "bSort" : true,
     "columns": [
     { title: "Selected", data: "display-info", className: "dt-body-left"},
@@ -24,5 +24,6 @@ var selectionTableConfig = {
    ],
     "searching": false,
     "paging": false,
+    "info": false,
   }
 }

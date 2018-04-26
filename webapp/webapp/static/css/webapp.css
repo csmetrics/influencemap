@@ -2,16 +2,82 @@
   padding: 15px;
 }
 
-.page-title {
-  font-size: 30px;
-  font-weight: bold;
+#header {
+  height: 70px;
 }
-.search-bar {
+.bgded {
+  background: url('../images/background.jpg') no-repeat center;
+}
+#pageintro {
+  padding: 40px 0;
+}
+#footer{
   padding: 20px 0;
 }
-.search-option .radio {
-  display: inline-block;
-  padding: 0 5px;
+.overlay::after{
+  color:inherit;
+  background-color:rgba(0,61,109,0.5);
+}
+
+#searchbar {
+  height: 100px;
+  padding: 0;
+  background-color: #ccc;
+}
+
+#lefttable {
+  padding: 10px;
+}
+#searchtable-container th {
+  color: black;
+  background-color: #F7F7F7;
+  font-size: 16px;
+}
+
+#rightslider {
+  height: 100%;
+  border-top: 10px #B97D2D solid;
+  background-color: rgba(0,0,0,0.5);
+}
+
+table, th, td, table.dataTable thead th, table.dataTable thead td {
+  border: 0;
+}
+table {
+  font-size: 14px;
+}
+#selectiontable tr {
+  color: black;
+  background: none;
+}
+#selectiontable-container th {
+  color: white;
+  font-size: 16px;
+  background-color: rgba(0,0,0,0.5);
+}
+#statpane {
+  border: 1px #ddd solid;
+  border-top: none;
+}
+
+.nav-tabs {
+  border: none;
+}
+.tab-btn:hover, .tab-btn.inverse{
+  padding: 10px 20px;
+  border-radius: 0 0 5px 5px;
+  color:#B97D2D; background-color:transparent; border-color:#ddd;
+  border-top: 10px #B97D2D solid;
+}
+.tab-btn, .tab-btn.active, .tab-btn.inverse:hover{
+  padding: 10px 20px;
+  border-radius: 0 0 5px 5px;
+  color:#FFFFFF; background-color:#B97D2D; border-color:#B97D2D;
+  border-top: 10px #B97D2D solid;
+}
+
+.search-bar {
+  padding: 32px 0;
 }
 img.fit-wrapper {
   max-width: 100%;
@@ -80,5 +146,3 @@ color: rgba(77, 77, 77, 1);
 padding-top: 25;
 padding-bottom:25;
 }
-
-
