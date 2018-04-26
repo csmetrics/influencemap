@@ -25,6 +25,7 @@ def query_academic_search(type, url, query):
         response = requests.get(url, params=urllib.parse.urlencode(query), headers=header)
     elif type == "post":
         response = requests.post(url, json=query, headers=header)
+        print(response.status_code)
     if response.status_code != 200:
         print("return statue: " + str(response.status_code))
         print("ERROR: problem with the request.")

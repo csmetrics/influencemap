@@ -4,10 +4,10 @@ import os
 
 # Type of entities for the flower
 class Entity_type(Enum):
-    AUTH = ('AUTH', 'auth', 'auth_id', 'auth_name', 'Author', 'Author', 'AuthorIDs', 'DisplayAuthorName')
-    AFFI = ('AFFI', 'affi', 'affi_id', 'affi_name', 'Affiliation', 'Affiliation', 'AffiliationIDs', 'Name')
-    CONF = ('CONF', 'conf', 'conf_id', 'conf_abv', 'Conference', 'ConferenceSeries', 'ConferenceSeriesIDs', 'ShortName')
-    JOUR = ('JOUR', 'journ', 'journ_id', 'journ_name', 'Journal', 'Journal', 'JournalID', 'NormalizedShortName')
+    AUTH = ('AUTH', 'auth', 'author', 'auth_name', 'Author', 'Author', 'AuthorIDs', 'DisplayAuthorName')
+    AFFI = ('AFFI', 'affi', 'institution', 'affi_name', 'Affiliation', 'Affiliation', 'AffiliationIDs', 'Name')
+    CONF = ('CONF', 'conf', 'conference', 'conf_abv', 'Conference', 'ConferenceSeries', 'ConferenceSeriesIDs', 'ShortName')
+    JOUR = ('JOUR', 'journ', 'journal', 'journ_name', 'Journal', 'Journal', 'JournalID', 'NormalizedShortName')
 
     def __init__(self, indent, prefix, eid, ename, text, api_type, api_id, api_name):
         self.ident = indent
@@ -54,6 +54,7 @@ class Entity:
         self.entity_name = entity_name
         self.entity_id = entity_id
         self.entity_type = entity_type
+        self.display_info = None
         self.paper_df = None
 
     def cache_str(self):

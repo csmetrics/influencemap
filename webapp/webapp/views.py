@@ -60,6 +60,14 @@ optionlist = [  # option list
     {"id":"paper", "name": "Paper"}]
 
 
+str_to_ent = {
+	"author": ent.Entity_type.AUTH,
+	"conference": ent.Entity_type.CONF,
+	"journal": ent.Entity_type.JOUR,
+	"institution": ent.Entity_type.AFFI
+    }
+
+
 # flower_types
 flower_leaves = { 'author': [ent.Entity_type.AUTH]
                 , 'conf': [ent.Entity_type.CONF, ent.Entity_type.JOUR]
@@ -208,15 +216,22 @@ def submit(request):
     min_year = int(data.get("bot_year_min"))
     max_year = int(data.get("top_year_max"))
 
+    selection = list(data.get("selection").values())
+    print("submit")
+
     # Default Dates need fixing
     min_year = None
     max_year = None
 
-    entity_type = ent.Entity_type.AUTH
-
     # USER NEEDS TO SELECT ENTITIES FIRST
-    entity_list_init = entity_from_name(keyword, entity_type)
+    #entity_list_init = entity_from_name(keyword, entity_type)
+    entity_list_init = list()
+    for row in selection:
+        print(row['name'])
+        entity_list_init.append(ent.Entity(row['name'], row['eid'], str_to_ent[row['entity-type']]))
 
+
+    print(entity_list_init)
     #entity_type = data.get('entity_type')
     #entity_names = data.get('entity_names')
 
@@ -232,7 +247,7 @@ def submit(request):
 
         # entity_list = data.get('entity_list')
         # filters = data.get('filter')
-    print(entity_list)
+    #print(entity_list)
 
     filters = dict()
     filtered_entity_list = entity_list

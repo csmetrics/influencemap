@@ -29,8 +29,11 @@ def get_ent_paper_df_gen(entity):
             }
         }
 
+    print("Test")
+    print(query)
     data = query_academic_search('post', JSON_URL, query)
     paper_res = data['Results']
+    print(paper_res)
 
     if not paper_res:
         return None
@@ -79,9 +82,11 @@ def get_ent_paper_df_conf(entity):
 def ent_paper_df(entity):
     """
     """
+    print("Generating scores for:", entity.entity_id)
     if entity.entity_type == ent.Entity_type.CONF:
         entity_update = get_ent_paper_df_conf(entity)
     else:
         entity_update = get_ent_paper_df_gen(entity)
+    print("Finishing generating scores for:", entity.entity_id)
 
     return entity_update

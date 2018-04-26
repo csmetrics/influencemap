@@ -164,3 +164,14 @@ def parse_search_results(results, entityType):
     data = [cleaning_func_combined(entity) for entity in results["entities"]]
 
     return data
+
+def parse_search_resrow(row, entityType):
+    key_change = entity_config[entityType]['key_change']
+    keys_to_make_dictionaries = entity_config[entityType]['keys_to_make_dictionaries']
+    composite_aggregation = entity_config[entityType]['composite_aggregation']
+
+    cleaning_func_1 = lambda x: aggregate_composite_values(x, composite_aggregation)
+    cleaning_func_2 = lambda x: turn_strings_to_dictionaries(cleaning_func_1(x), keys_to_make_dictionaries)
+    cleaning_func_combined = lambda x: result_to_dictionary(cleaning_func_2(x), key_change)
+
+    return cleaning_func_combined(row)

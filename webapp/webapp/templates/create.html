@@ -86,6 +86,7 @@ var nestedTables = {}; // transition to this
 var nested_tables = {}; // transition away from this 
 var nestedTableSettings = nestedTableConfig['tableSettings'];
 
+var entity_data = {};
 
 
 // ----  listeners  ----
@@ -96,7 +97,8 @@ continueButton.addEventListener('click', function(){
        keyword: latestSearchTerm,
        selfcite: false, //selfCiteCheckbox.checked,
        bot_year_min: 0,
-       top_year_max: 3000
+       top_year_max: 3000,
+       selection: entity_data
    }
    postData('/submit/', data, "{% csrf_token %}")});
 
@@ -138,7 +140,7 @@ function search(){
           }
         })
       });
-      addNestedRows();
+      //addNestedRows();
     },
     error: function (result) {
       console.log("searchButton error");
@@ -234,11 +236,15 @@ function toggleChildRowsSelection(row, select){
     })
 
   if (select){ // add all papers for parent row to selected data
+    entity_data[row.data()['table-id']] = row.data()['data']
+    console.log(entity_data);
     selected_data[row.data()['table-id']] = new Set(row.data()['data']['papers']);
 
   } else { // remove any exisiting selected data from this entity
+    console.log("untick");
     try { 
       delete selected_data[row.data()['table-id']];
+      delete entity_data[row.data()['table-id']];
     } catch (e){console.log(e)}
   }
 };

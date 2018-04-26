@@ -176,17 +176,3 @@ def printDict(d):
         if k == 'papers':
             v = v[:1]
         print("\t{}\t{}".format(k,v))
-
-
-
-
-
-
-
-
-
-
-
-
-
-
