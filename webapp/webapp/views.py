@@ -102,6 +102,18 @@ def main(request):
     return render(request, "main.html")
 
 @csrf_exempt
+def browse(request):
+
+    browse_list_filename = '/localdata3/common/browse_lists.json'
+    with open(browse_list_filename, 'r') as fp:
+        browse_list = json.load(fp)
+
+    data = {'list': browse_list}
+
+    return render(request, "browse.html", data)
+
+
+@csrf_exempt
 def create(request):
     print(request)
  
