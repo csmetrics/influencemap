@@ -92,8 +92,8 @@ function drawFlower(svg_id, data, idx, w) {
         .attr("viewBox", "0 -5 10 10")
         .attr("refX", function (d) { return 10+10*d.padding; })
         .attr("refY", 0)
-        .attr("markerWidth", 15)
-        .attr("markerHeight", 15)
+        .attr("markerWidth", function (d) { return arrow_size_calc(d.weight); })
+        .attr("markerHeight", function (d) { return arrow_size_calc(d.weight); })
         .attr("markerUnits", "userSpaceOnUse")
         .attr("orient", "auto")
       .append("path")
@@ -108,8 +108,8 @@ function drawFlower(svg_id, data, idx, w) {
         .attr("viewBox", "0 -5 10 10")
         .attr("refX", function (d) { return 10+10*d.padding; })
         .attr("refY", 0)
-        .attr("markerWidth", 15)
-        .attr("markerHeight", 15)
+        .attr("markerWidth", function (d) { return arrow_size_calc(d.weight); })
+        .attr("markerHeight", function (d) { return arrow_size_calc(d.weight); })
         .attr("markerUnits", "userSpaceOnUse")
         .attr("orient", "auto")
       .append("path")
@@ -386,7 +386,12 @@ function toggle_split(idx, selected) {
     }
 }
 
-function arrow_width_calc(width) {
-    if (width == 0) { return 0; }
+function arrow_width_calc(weight) {
+    if (weight == 0) { return 0; }
     else { return 1+8*weight; }
+    }
+
+function arrow_size_calc(weight) {
+    if (weight == 0) { return 0; }
+    else { return 15; }
     }
