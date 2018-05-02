@@ -1,0 +1,140 @@
+{% load staticfiles %}
+
+<html>
+{% include 'header.html' %}
+
+<body id="top">
+    <div class="wrapper row1">
+        <header id="header" class="hoc clear">
+            <div id="logo" class="fl_left">
+                <h1><a href="/">Influence Map</a></h1>
+                <p>Constructing maps of intellectual influence using academic data</p>
+            </div>
+            <nav id="mainav" class="fl_right">
+                <ul class="clear">
+                    <li class="active"><a href="index.html">Home</a></li>
+                    <li><a href="#">Menu</a></li>
+                    <li><a href="#">Contact</a></li>
+                </ul>
+            </nav>
+        </header>
+    </div>
+    <div id="searchbar" class="wrapper bgded overlay">
+        {% include 'browse_navbar.html' %}
+    </div>
+    <div class="wrapper row2" style="padding-top:0">
+        <div class="hoc clear">
+        </div>
+    </div>
+    <div class="wrapper row2" style="padding-top:0">
+        <div class="hoc row2">
+            <div class="row">
+                <div class="tab">
+                    <button class="tablinks" onclick="openTab(event, 'Categories')">Categories</button> {% for category in list %}
+                    <button class="tablinks" onclick="openTab(event, '{{category.tab_id}}')">{{ category.display }}</button> {% endfor %}
+                </div>
+
+                <div id="Categories" class="tabcontent" style="display: block">
+                    {% for category in list %}
+                    <h3>{{category.display}}</h3>
+                    <p>{{category.info}}</p>
+                    {% endfor %}
+                </div>
+
+                {% for category in list %}
+                <div id="{{category.tab_id}}" class="tabcontent" style="display: none">
+<!--                     <h3>{{category.display}}</h3>
+                    <p>{{category.info}}</p> -->
+                    <table id="{{category.table_id}}">
+                        <!-- <thead><th></th></thead></thead> -->
+                        <tbody>
+                            {% for entity in category.list %}
+                            <tr class="testtest">
+                                <td>
+                                    {{entity}}
+                                </td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+                {% endfor %}
+            </div>
+        </div>
+        <!-- Trigger/Open The Modal -->
+
+    </div>
+    <!-- The Modal -->
+    <div id="myModal" class="modal">
+
+        <!-- Modal content -->
+        <div class="modal-content right">
+            <span class="close">&times;</span>
+            <div class="hoc cntr" style="border-bottom: 1px solid grey; width: 80%; padding: 10px">
+                <button class="btn">Take me to the flower!</button>
+            </div>
+            <div class='center'>
+                <p>Alternatively, <a href="#" id="closer-look-btn">take a closer look</a> at the papers that are included in this curated flower and add or deselect papers yourself.</p>
+            </div>
+        </div>
+
+    </div>
+</body>
+<script src="{% static 'js/browseTableConfig.js' %}"></script>
+<script type="text/javascript">
+    /*  ---    Modal    ---   */
+    // Get the modal
+    var modal = document.getElementById('myModal');
+    
+    // Get the <span> element that closes the modal
+    var span = document.getElementsByClassName("close")[0];
+    
+    // When the user clicks on <span> (x), close the modal
+    span.onclick = function() {
+        modal.style.display = "none";
+    }
+    
+    // When the user clicks anywhere outside of the modal, close it
+    window.onclick = function(event) {
+        if (event.target == modal) {
+            modal.style.display = "none";
+        }
+    }
+    
+    
+    /*  ---    Control tab selection    ---   */
+    function openTab(evt, tabId) {
+      // Declare all variables
+      var i, tabcontent, tablinks;
+    
+      // Get all elements with class="tabcontent" and hide them
+      tabcontent = document.getElementsByClassName("tabcontent");
+      for (i = 0; i < tabcontent.length; i++) {
+          tabcontent[i].style.display = "none";
+      }
+    
+      // Get all elements with class="tablinks" and remove the class "active"
+      tablinks = document.getElementsByClassName("tablinks");
+      for (i = 0; i < tablinks.length; i++) {
+          tablinks[i].className = tablinks[i].className.replace(" active", "");
+      }
+    
+      // Show the current tab, and add an "active" class to the link that opened the tab
+      document.getElementById(tabId).style.display = "block";
+      evt.currentTarget.className += " active";
+    }
+    
+    /*  ---    Convert tables to JQuery DataTables    ---   */
+    $(document).ready(function(){
+      $('table').each(function(a,b){
+        var table = $('#' + this.id).DataTable(browseTableConfig['tableSettings']);
+        
+        // add on click listeners for all table rows to show modal
+        $('#' + this.id + ' tbody').on('click', 'tr', function(){
+          modal.style.display = "block";
+        })
+      });
+    });
+</script>
+
+</html>
