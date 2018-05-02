@@ -21,8 +21,7 @@ from mag_flower_bloom import *
 
 
 from get_entity import entity_from_name
-from influence_df import get_filtered_influence
-from score_influence import score_entities
+from influence_df import get_filtered_score
 
 # initialise as no saved pids
 saved_pids = dict()
@@ -216,7 +215,10 @@ def submit(request):
     min_year = int(data.get("bot_year_min"))
     max_year = int(data.get("top_year_max"))
 
-    selection = list(data.get("selection").values())
+    selection = data.get("selection")
+    entity_data = data.get("entity_data")
+    print(selection)
+    print(entity_data)
     print("submit")
 
     # Default Dates need fixing
@@ -226,10 +228,13 @@ def submit(request):
     # USER NEEDS TO SELECT ENTITIES FIRST
     #entity_list_init = entity_from_name(keyword, entity_type)
     entity_list_init = list()
-    for row in selection:
-        print(row['name'])
-        entity_list_init.append(ent.Entity(row['name'], row['eid'], str_to_ent[row['entity-type']]))
-
+    filters = dict()
+    for eid, row in entity_data.items():
+        print(row['name'], eid)
+        entity = ent.Entity(row['name'], row['eid'], str_to_ent[row['entity-type']])
+        entity_list_init.append(entity)
+        #filters[entity] = selection[eid]['eid']
+    filters = {}
 
     print(entity_list_init)
     #entity_type = data.get('entity_type')
@@ -249,13 +254,12 @@ def submit(request):
         # filters = data.get('filter')
     #print(entity_list)
 
-    filters = dict()
-    filtered_entity_list = entity_list
 
-    influence_df = get_filtered_influence(filtered_entity_list, filters)
+    print(filters)
+    #influence_df = get_filtered_influence(entity_list, filters)
 
     # Get the entity names
-    entity_names = list(map(lambda x: x.entity_name, filtered_entity_list))
+    entity_names = list(map(lambda x: x.entity_name, entity_list))
     entity_names.append('')
     print(entity_names)
 
@@ -263,18 +267,21 @@ def submit(request):
     flower_score = [None, None, None]
 
     for i, flower_item in enumerate(flower_leaves.items()):
-        name, leaf = flower_item
+        name, leaves= flower_item
 
-        entity_score_cache = score_entities(influence_df, leaf)
+        #entity_score_cache = score_entities(influence_df, leaf)
+        entity_score_cache = get_filtered_score(entity_list, filters, leaves)
 
         entity_score = entity_score_cache[~entity_score_cache['entity_id'].str.lower().isin(
                                           entity_names)]
-        print(entity_score)
 
+        print(entity_score)
         agg_score = agg_score_df(entity_score, min_year, max_year)
         agg_score.ego = entity_names[0]
+        print(agg_score)
 
         score = score_df_to_graph(agg_score)
+        print(score)
 
         cache_score[i] = entity_score_cache
         flower_score[i] = score

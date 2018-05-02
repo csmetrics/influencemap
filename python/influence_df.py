@@ -2,6 +2,7 @@ import os
 import pandas as pd
 from config import *
 from mag_interface import *
+from score_influence import score_entities
 
 def entity_to_citation_score(entity):
     """
@@ -94,41 +95,38 @@ def entity_to_reference_score(entity):
 
     return ref_df
 
-
-def get_influence_df(entity):
-    """
-    """
-    cache_path = os.path.join(CACHE_INFLUENCE_DIR, entity.cache_str())
-
+def get_score_df(entity, leaf):
+    cache_str = entity.cache_str() + leaf.ident
+    cache_path = os.path.join(CACHE_INFLUENCE_DIR, cache_str)
+    
     try:
-        influence_df = pd.read_pickle(cache_path)
+        score_df = pd.read_pickle(cache_path)
 
     except FileNotFoundError:
         cites = entity_to_citation_score(entity)
         refs = entity_to_reference_score(entity)
-
+        
         influence_df = pd.concat([cites, refs])
+        score_df = score_entities(influence_df, [leaf])
 
-        influence_df.to_pickle(cache_path)
+        score_df.to_pickle(cache_path)
         os.chmod(cache_path, 0o777)
 
-    return influence_df
+    return score_df
+        
 
-
-def get_filtered_influence(entity_list, filters):
-    """
-    """
-    influence_list = list()
-    influence_dict = dict()
+def get_filtered_score(entity_list, filters, leaves):
+    score_list = list()
     for entity in entity_list:
-        info_df = get_influence_df(entity)
+        for leaf in leaves:
+            info_df = get_score_df(entity, leaf)
 
-        try:
-            ignores = filters[entity.entity_id]
-            info_df = info_df[~info_df['info_from'].isin(ignores)]
-        except KeyError:
-            pass
+            try:
+                selects = filters[entity]
+                info_df = info_df[info_df['info_from'].isin(selects)]
+            except KeyError:
+                pass
 
-        influence_list.append(info_df)
+            score_list.append(info_df)
 
-    return pd.concat(influence_list)
+    return pd.concat(score_list)

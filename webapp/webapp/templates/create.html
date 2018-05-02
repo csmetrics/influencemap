@@ -98,7 +98,8 @@ continueButton.addEventListener('click', function(){
        selfcite: false, //selfCiteCheckbox.checked,
        bot_year_min: 0,
        top_year_max: 3000,
-       selection: entity_data
+       selection: selected_data,
+       entity_data: entity_data,
    }
    postData('/submit/', data, "{% csrf_token %}")});
 
@@ -140,7 +141,7 @@ function search(){
           }
         })
       });
-      //addNestedRows();
+      addNestedRows();
     },
     error: function (result) {
       console.log("searchButton error");
@@ -236,9 +237,14 @@ function toggleChildRowsSelection(row, select){
     })
 
   if (select){ // add all papers for parent row to selected data
-    entity_data[row.data()['table-id']] = row.data()['data']
-    console.log(entity_data);
+    entity_data[row.data()['table-id']] = {
+        'eid' : row.data()['data']['eid'],
+        'name' : row.data()['data']['name'],
+        'entity-type' : row.data()['data']['entity-type'],
+    }
     selected_data[row.data()['table-id']] = new Set(row.data()['data']['papers']);
+    console.log("entity", entity_data);
+    console.log("selected", selected_data);
 
   } else { // remove any exisiting selected data from this entity
     console.log("untick");
@@ -253,6 +259,7 @@ function toggleChildRowsSelection(row, select){
 // child row change
 function addInnerCheckboxListener (){
   $('.papers-inner-checkbox').change(function(){
+    console.log("child row change");
     var inputElement = this;
     var rowElement = inputElement.parentElement.parentElement;
     var tableElement = rowElement.parentElement.parentElement;
