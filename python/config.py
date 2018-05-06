@@ -22,6 +22,7 @@ with open(CONFIG_PATH) as config_data:
 
     CACHE_PAPERS_DIR = set_path(config['cache']['directory']['papers'])
     CACHE_INFLUENCE_DIR = set_path(config['cache']['directory']['influence'])
+    CACHE_SCORE_DIR = set_path(config['cache']['directory']['score'])
     #PAPER_THRESHOLD = config['cache']['paper threshold']
 
     NUM_LEAVES = config['flower']['leaves']

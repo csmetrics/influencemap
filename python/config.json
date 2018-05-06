@@ -10,7 +10,8 @@
     "cache":{
         "directory":{
             "papers": "/localdata3/common/cache-papers",
-            "influence": "/localdata3/common/cache-influence"
+            "influence": "/localdata3/common/cache-influence",
+            "score": "/localdata3/common/cache-score"
         },
         "paper threshold":20,
         "timeout":0
