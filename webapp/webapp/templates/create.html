@@ -92,13 +92,18 @@ var entity_data = {};
 // ----  listeners  ----
 
 continueButton.addEventListener('click', function(){
+    var entity_papers = {};
+    for (key in selected_data) {
+        entity_papers[key] = Array.from(selected_data[key]);
+    }
+
    data = {
        option: latestSearchOption,
        keyword: latestSearchTerm,
        selfcite: false, //selfCiteCheckbox.checked,
        bot_year_min: 0,
        top_year_max: 3000,
-       selection: selected_data,
+       selection: entity_papers,
        entity_data: entity_data,
    }
    postData('/submit/', data, "{% csrf_token %}")});

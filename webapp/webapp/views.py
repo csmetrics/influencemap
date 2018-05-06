@@ -229,8 +229,6 @@ def submit(request):
 
     selection = data.get("selection")
     entity_data = data.get("entity_data")
-    print(selection)
-    print(entity_data)
     print("submit")
 
     # Default Dates need fixing
@@ -245,8 +243,8 @@ def submit(request):
         print(row['name'], eid)
         entity = ent.Entity(row['name'], row['eid'], str_to_ent[row['entity-type']])
         entity_list_init.append(entity)
-        #filters[entity] = selection[eid]['eid']
-    filters = {}
+        filters[entity] = list(map(lambda x : x['eid'], selection[eid]))
+    #filters = {}
 
     print(entity_list_init)
     #entity_type = data.get('entity_type')
