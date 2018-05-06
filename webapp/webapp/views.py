@@ -271,7 +271,7 @@ def submit(request):
     #influence_df = get_filtered_influence(entity_list, filters)
 
     # Get the entity names
-    entity_names = list(map(lambda x: x.entity_name, entity_list))
+    entity_names = list(map(lambda x: str.lower(x.entity_name), entity_list))
     entity_names.append('')
     print(entity_names)
 
