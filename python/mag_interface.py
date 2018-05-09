@@ -9,7 +9,7 @@ import sys
 from datetime import datetime
 from config import *
 
-API_IDX = 7
+API_IDX = 1
 
 header = {
     # Request headers
