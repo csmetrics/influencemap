@@ -11,6 +11,7 @@ $ rdesktop -g 1280x1024 server_ip
 ### 1) Windows system settings
 
 #### Change network setting to allow file download
+
 - Click Search, search for Control Panel, and then click Control Panel.
 - Click Network and Internet > Internet Options.
 - On the Security tab, click Custom level.
@@ -47,12 +48,66 @@ $ az dls fs download --account academicgraph --source-path /graph/2018-04-24 --d
 Alive[##############################                             ] 55.1332%
 ```
 
-### 5) Clone the repository
+### 5) ENV Path settings
 
-#### Graph Engine repository
-https://github.com/Microsoft/GraphEngine
+- Open `graph/YYYY-MM-DD/samples/CreateFunctions.usql` in VisualStudio
+- Go to Tools > Data Lake > Options and Settings
+- Change DataRoot
+- Change Path for the AppData Cache as it requires huge disk space.
+  - AppData Cache path change: https://answers.microsoft.com/en-us/windows/forum/windows_7-files/change-location-of-temp-files-folder-to-another/19f13330-dde1-404c-aa27-a76c0b450818?auth=1
 
-- Make sure to run "graph/YYYY-MM-DD/samples/CreateFunctions.usql" first before running scripts of Academic Knowledge Analytics.
+#### Note
 
-#### Academic Knowledge Analytics repository
-https://github.com/Azure-Samples/academic-knowledge-analytics-visualization
+- `graph/YYYY-MM-DD/samples/AcademicGraphSample.usql` requires 9.25GB temporal cache space.
+
+
+### 6) Run the scripts in graph/YYYY-MM-DD/samples
+
+#### Submit CreateFunctions.usql
+
+- Error Note:
+```
+The failure might be due to unexpected metadata changes since the script was compiled, recompile the script to resolve.
+Completed with 'Error' : 22/05/2018 9:41:24 AM
+Execution failed with error 'The failure might be due to unexpected metadata changes since the script was compiled, recompile the script to resolve.'
+```
+  - Solution: remove all the cache data and rerun.
+
+
+#### Submit AcademicGraphSample.usql
+  - Path Settings
+  ```
+  DECLARE @graphDir   string = "/graph/2018-04-24/";
+DECLARE @affiliationId long = 201448701; // Affiliation Id for University of Washington
+DECLARE @OutAffiliationTopAuthors string = "/output/UWTopAuthors.tsv";
+```
+  - Make sure you have enough space (>9.25GB) in temporal cache directory.
+```
+Start : 22/05/2018 10:29:59 AM
+Initialize : 22/05/2018 10:29:59 AM
+GraphParse : 22/05/2018 10:29:59 AM
+Run : 22/05/2018 10:29:59 AM
+Start 'Root' : 22/05/2018 10:29:59 AM
+End 'Root(Success)' : 22/05/2018 10:29:59 AM
+Start '1_SV1_Extract' : 22/05/2018 10:29:59 AM
+Start '2_SV2_Extract' : 22/05/2018 10:45:30 AM
+End '1_SV1_Extract(Success)' : 22/05/2018 10:45:30 AM
+Start '3_SV3_Extract' : 22/05/2018 10:51:42 AM
+End '2_SV2_Extract(Success)' : 22/05/2018 10:51:42 AM
+Start '4_SV4_Combine' : 22/05/2018 10:57:41 AM
+End '3_SV3_Extract(Success)' : 22/05/2018 10:57:41 AM
+Start '5_SV4_Combine' : 22/05/2018 10:58:41 AM
+End '4_SV4_Combine(Success)' : 22/05/2018 10:58:41 AM
+End '5_SV4_Combine(Success)' : 22/05/2018 10:58:42 AM
+PostExecution : 22/05/2018 10:58:42 AM
+Completed with 'Success' : 22/05/2018 10:58:42 AM
+Press any key to continue . . .
+```
+
+- Result will be stored in output directory.
+
+### 7) Run GraphEngine project
+
+#### Clone the repository
+
+- Graph Engine repository: https://github.com/Microsoft/GraphEngine
