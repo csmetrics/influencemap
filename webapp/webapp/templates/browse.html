@@ -35,9 +35,14 @@
                 </div>
 
                 <div id="Categories" class="tabcontent" style="display: block">
+                    <p></p>
                     {% for category in list %}
-                    <h3>{{category.display}}</h3>
+                    <h4>{{category.display}}</h4>
                     <p>{{category.info}}</p>
+                        {% for entity in category.list %}
+                                <a href=>{{entity}}</a>, 
+                        {% endfor %}
+                    <p></p>
                     {% endfor %}
                 </div>
 
