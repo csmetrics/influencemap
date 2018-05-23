@@ -103,7 +103,7 @@ def main(request):
 @csrf_exempt
 def browse(request):
 
-    browse_list_filename = '/localdata3/common/browse_lists.json'
+    browse_list_filename = '../static/browse_lists.json'
     with open(browse_list_filename, 'r') as fp:
         browse_list = json.load(fp)
 
