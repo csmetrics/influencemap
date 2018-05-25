@@ -96,11 +96,11 @@ def autocomplete(request):
 selfcite = False
 expanded_ids = dict()
 
-def get_navbar_option(keyword = "", option = optionlist[0]):
+def get_navbar_option(keyword = "", option = ""):
     return {
         "optionlist": optionlist,
         "selectedKeyword": keyword,
-        "selectedOption": option,
+        "selectedOption": [opt for opt in optionlist if opt['id'] == option][0] if option != "" else optionlist[0],
     }
 
 
@@ -131,11 +131,12 @@ def create(request):
         data = json.loads(request.POST.get('data'))
         keyword = data.get('keyword', '')
         search = data.get('search') == 'true'
-        option = [opt for opt in optionlist if opt['id'] == data.get('option')][0]
+        option = data.get('option')
     except:
         keyword = ""
+        option = ""
         search = False
-        option = optionlist[0]
+
     print(search)
     # render page with data
     return render(request, "create.html", {
@@ -212,7 +213,7 @@ def view_papers(request):
         'entityType': entityType,
         'selectedInfo': selectedIds,
         'keyword': name,
-        "navbarOption": get_navbar_option(name, [opt for opt in optionlist if opt['id'] == option][0]),
+        "navbarOption": get_navbar_option(name, option),
     }
 
     return render(request, 'view_papers.html', data)
@@ -310,7 +311,7 @@ def submit(request):
             "title": "Publications range",
             "range": [min_year, max_year] # placeholder value, just for testing
         },
-        "navbarOption": get_navbar_option(keyword, [opt for opt in optionlist if opt['id'] == option][0])
+        "navbarOption": get_navbar_option(keyword, option)
     }
     return render(request, "flower.html", data)
 
