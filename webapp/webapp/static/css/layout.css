@@ -38,17 +38,18 @@ File: Layout CSS
 #header #logo{margin-top:25px;}
 #header #logo *{margin:0; padding:0; line-height:1;}
 #header #logo h1{font-size:22px; font-variant:small-caps;}
-#header #logo p{font-size:12px; text-transform:lowercase;}
+#header #logo p{font-size:12px; margin-top: 2px;}
 
 
 /* Page Intro
 --------------------------------------------------------------------------------------------------------------- */
 #pageintro{padding:150px 0;}
 
-#pageintro article *{text-transform:uppercase;}
+/* #pageintro article *{text-transform:uppercase;} */
 #pageintro article .heading{margin:0 0 50px 0; padding:0; line-height:1; font-size:64px;}
-#pageintro article p:first-of-type{margin-bottom:20px; font-size:26px;}
-#pageintro article footer{margin-top:80px;}
+#pageintro article p:first-of-type{margin-bottom:20px; font-size:22px;}
+#pageintro article p{margin-bottom:15px; font-size:16px;}
+#pageintro article footer{margin-top:30px;}
 #pageintro article footer a{padding-bottom:5px; border-bottom:2px solid;}
 
 
