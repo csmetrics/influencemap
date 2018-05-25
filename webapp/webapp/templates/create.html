@@ -3,21 +3,7 @@
 <html>
 {% include 'header.html' %}
 <body id="top">
-<div class="wrapper row1">
-  <header id="header" class="hoc clear">
-    <div id="logo" class="fl_left">
-      <h1><a href="/">Influence Map</a></h1>
-      <p>Constructing maps of intellectual influence using academic data</p>
-    </div>
-    <nav id="mainav" class="fl_right">
-      <ul class="clear">
-        <li class="active"><a href="index.html">Home</a></li>
-        <li><a href="#">Menu</a></li>
-        <li><a href="#">Contact</a></li>
-      </ul>
-    </nav>
-  </header>
-</div>
+{% include 'pagehead.html' %}
 <div id="searchbar" class="wrapper bgded overlay">
   {% include 'navbar.html' with navbar=navbarOption %}
 </div>
@@ -78,12 +64,12 @@ function updateTable(data, table){
   };
   table.draw();}
 
-// data 
+// data
 var currentSearchTableData;
 var selectedData; // transition to this
 var selected_data = {}; // transition away from this
 var nestedTables = {}; // transition to this
-var nested_tables = {}; // transition away from this 
+var nested_tables = {}; // transition away from this
 var nestedTableSettings = nestedTableConfig['tableSettings'];
 
 var entity_data = {};
@@ -189,7 +175,7 @@ function addNestedRowToggle (tableSelector, rowSelector){
     var tr = $(this).closest('tr');
     var row = searchtable.row( tr );
     var show = !(tr[0].classList.contains('shown'));
- 
+
    // Close all open rows
     $(tableSelector + ' .shown').each( function (i, elem) {
       var tblRow = searchtable.row( elem );
@@ -201,7 +187,7 @@ function addNestedRowToggle (tableSelector, rowSelector){
         // Open this row
         showElement(row.child());
         tr.addClass('shown');
-    
+
       addInnerCheckboxListener();
     }
   });
@@ -220,10 +206,10 @@ function searchTableEventHandling() {
 
 function toggleParentRowSelection(row, select){
   // handle selection table changes
-  if (select){ 
+  if (select){
     var newRow = row.data();
     selectiontable.row.add(newRow).draw();
-  }   
+  }
 
   else {
     removeRowFromSelectionTable(row);
@@ -253,7 +239,7 @@ function toggleChildRowsSelection(row, select){
 
   } else { // remove any exisiting selected data from this entity
     console.log("untick");
-    try { 
+    try {
       delete selected_data[row.data()['table-id']];
       delete entity_data[row.data()['table-id']];
     } catch (e){console.log(e)}
@@ -304,7 +290,7 @@ function addInnerCheckboxListener (){
       table.rows().nodes().each(function(a){
         if ($(a).find('input')[0].checked){
           someRowsChecked = true;
-        } 
+        }
       })
 
       parentRowCheckbox.checked = someRowsChecked;
@@ -316,7 +302,7 @@ function addInnerCheckboxListener (){
 
     for (var key in selected_data){
       if (selected_data[key].size === 0)
-          delete selected_data[key]; 
+          delete selected_data[key];
     }
     console.log(selected_data)
   })

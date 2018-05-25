@@ -48,7 +48,7 @@ File: Layout CSS
 /* #pageintro article *{text-transform:uppercase;} */
 #pageintro article .heading{margin:0 0 50px 0; padding:0; line-height:1; font-size:64px;}
 #pageintro article p:first-of-type{margin-bottom:20px; font-size:22px;}
-#pageintro article p{margin-bottom:15px; font-size:16px;}
+#pageintro article p{margin-bottom:10px; font-size:16px;}
 #pageintro article footer{margin-top:30px;}
 #pageintro article footer a{padding-bottom:5px; border-bottom:2px solid;}
 
@@ -58,7 +58,7 @@ File: Layout CSS
 #services{position:relative;}
 
 #services .table{}
-#services .table-cell{margin-top:-1px; padding:3%; border:1px solid; border-top:none;}
+#services .table-cell{margin-top:-1px; padding:2%; border:1px solid; border-top:none;}
 
 #services article{text-align:center;}
 #services article *{margin:0; line-height:1;}

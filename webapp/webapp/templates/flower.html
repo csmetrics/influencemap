@@ -3,21 +3,7 @@
 <html>
 {% include 'header.html' %}
 <body id="top">
-<div class="wrapper row1">
-  <header id="header" class="hoc clear">
-    <div id="logo" class="fl_left">
-      <h1><a href="/">Influence Map</a></h1>
-      <p>Constructing maps of intellectual influence using academic data</p>
-    </div>
-    <nav id="mainav" class="fl_right">
-      <ul class="clear">
-        <li class="active"><a href="index.html">Home</a></li>
-        <li><a href="#">Menu</a></li>
-        <li><a href="#">Contact</a></li>
-      </ul>
-    </nav>
-  </header>
-</div>
+{% include 'pagehead.html' %}
 <div id="searchbar" class="wrapper bgded overlay">
   {% include 'navbar.html' with navbar=navbarOption %}
 </div>
