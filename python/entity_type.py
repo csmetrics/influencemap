@@ -1,5 +1,6 @@
 from enum import Enum
 from mag_interface import *
+from mag_user_query import *
 import os
 
 # Type of entities for the flower
@@ -46,7 +47,6 @@ class Entity_map:
         else:
             return texts[0]
 
-from mag_user_query import *
 
 # Class to wrap type and id together
 class Entity:
@@ -76,7 +76,7 @@ class Entity:
             self.paper_df = ent_paper_df(self)
 
             if self.paper_df is not None:
-                # Cache 
+                # Cache
                 self.paper_df.to_pickle(cache_path)
                 os.chmod(cache_path, 0o777)
 
