@@ -13,6 +13,7 @@
       <div id="lefttable" class="col-md-9">
         <div id="tables-container" style="padding-right:25px;">
           <div id="searchtable-container">
+            <div id="loading" style="display: none;"></div>
             <table id="searchtable" class="row-border hover order-column" cellspacing="0" width="100%"></table>
           </div>
         </div>
@@ -32,7 +33,6 @@
 <script src="{% static 'js/selectionTableConfig.js' %}"></script>
 <script>
 // elements
-var inputBar = document.getElementById("name-search-bar");
 var searchButton = document.getElementById("search-btn");
 var continueButton = document.getElementById("continue-btn");
 var searchBar = document.getElementById('name-search-bar');
@@ -105,9 +105,10 @@ searchBar.addEventListener('keypress', function (e) {
 
 function search(){
   console.log("searching")
+  $("#loading").show();
   latestSearchOption = $(".entity-option:selected").val();
   searchtable = makeSearchTable(latestSearchOption);
-  latestSearchTerm = inputBar.value;
+  latestSearchTerm = searchBar.value;
 
   // showProgressBar();
   $.ajax({
@@ -133,6 +134,7 @@ function search(){
         })
       });
       addNestedRows();
+      $("#loading").hide();
     },
     error: function (result) {
       console.log("searchButton error");
@@ -335,5 +337,10 @@ function removeRowFromSelectionTable(row){
   });
 }
 
+$(document).ready(function(){
+  if (searchBar.value) {
+    search();
+  }
+});
 
 </script>
