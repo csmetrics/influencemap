@@ -4,23 +4,9 @@
 {% include 'header.html' %}
 
 <body id="top">
-    <div class="wrapper row1">
-        <header id="header" class="hoc clear">
-            <div id="logo" class="fl_left">
-                <h1><a href="/">Influence Map</a></h1>
-                <p>Mapping intellectual influence using citation data</p>
-            </div>
-            <nav id="mainav" class="fl_right">
-                <ul class="clear">
-                    <li class="active"><a href="index.html">Home</a></li>
-                    <li><a href="#">Menu</a></li>
-                    <li><a href="#">Contact</a></li>
-                </ul>
-            </nav>
-        </header>
-    </div>
+    {% include 'pagehead.html' %}
     <div id="searchbar" class="wrapper bgded overlay">
-        {% include 'browse_navbar.html' %}
+        {% include 'navbar.html' with navbar=navbarOption %}
     </div>
     <div class="wrapper row2" style="padding-top:0">
         <div class="hoc clear">
@@ -40,7 +26,7 @@
                     <h4>{{category.display}}</h4>
                     <p>{{category.info}}</p>
                         {% for entity in category.list %}
-                                <a href=>{{entity}}</a>, 
+                                <a href=>{{entity}}</a>,
                         {% endfor %}
                     <p></p>
                     {% endfor %}
@@ -90,50 +76,50 @@
     /*  ---    Modal    ---   */
     // Get the modal
     var modal = document.getElementById('myModal');
-    
+
     // Get the <span> element that closes the modal
     var span = document.getElementsByClassName("close")[0];
-    
+
     // When the user clicks on <span> (x), close the modal
     span.onclick = function() {
         modal.style.display = "none";
     }
-    
+
     // When the user clicks anywhere outside of the modal, close it
     window.onclick = function(event) {
         if (event.target == modal) {
             modal.style.display = "none";
         }
     }
-    
-    
+
+
     /*  ---    Control tab selection    ---   */
     function openTab(evt, tabId) {
       // Declare all variables
       var i, tabcontent, tablinks;
-    
+
       // Get all elements with class="tabcontent" and hide them
       tabcontent = document.getElementsByClassName("tabcontent");
       for (i = 0; i < tabcontent.length; i++) {
           tabcontent[i].style.display = "none";
       }
-    
+
       // Get all elements with class="tablinks" and remove the class "active"
       tablinks = document.getElementsByClassName("tablinks");
       for (i = 0; i < tablinks.length; i++) {
           tablinks[i].className = tablinks[i].className.replace(" active", "");
       }
-    
+
       // Show the current tab, and add an "active" class to the link that opened the tab
       document.getElementById(tabId).style.display = "block";
       evt.currentTarget.className += " active";
     }
-    
+
     /*  ---    Convert tables to JQuery DataTables    ---   */
     $(document).ready(function(){
       $('table').each(function(a,b){
         var table = $('#' + this.id).DataTable(browseTableConfig['tableSettings']);
-        
+
         // add on click listeners for all table rows to show modal
         $('#' + this.id + ' tbody').on('click', 'tr', function(){
           modal.style.display = "block";

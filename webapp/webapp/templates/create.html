@@ -3,21 +3,7 @@
 <html>
 {% include 'header.html' %}
 <body id="top">
-<div class="wrapper row1">
-  <header id="header" class="hoc clear">
-    <div id="logo" class="fl_left">
-      <h1><a href="/">Influence Map</a></h1>
-      <p>Constructing maps of intellectual influence using academic data</p>
-    </div>
-    <nav id="mainav" class="fl_right">
-      <ul class="clear">
-        <li class="active"><a href="index.html">Home</a></li>
-        <li><a href="#">Menu</a></li>
-        <li><a href="#">Contact</a></li>
-      </ul>
-    </nav>
-  </header>
-</div>
+{% include 'pagehead.html' %}
 <div id="searchbar" class="wrapper bgded overlay">
   {% include 'navbar.html' with navbar=navbarOption %}
 </div>
@@ -27,6 +13,7 @@
       <div id="lefttable" class="col-md-9">
         <div id="tables-container" style="padding-right:25px;">
           <div id="searchtable-container">
+            <div id="loading" style="display: none;"></div>
             <table id="searchtable" class="row-border hover order-column" cellspacing="0" width="100%"></table>
           </div>
         </div>
@@ -46,7 +33,6 @@
 <script src="{% static 'js/selectionTableConfig.js' %}"></script>
 <script>
 // elements
-var inputBar = document.getElementById("name-search-bar");
 var searchButton = document.getElementById("search-btn");
 var continueButton = document.getElementById("continue-btn");
 var searchBar = document.getElementById('name-search-bar');
@@ -78,12 +64,12 @@ function updateTable(data, table){
   };
   table.draw();}
 
-// data 
+// data
 var currentSearchTableData;
 var selectedData; // transition to this
 var selected_data = {}; // transition away from this
 var nestedTables = {}; // transition to this
-var nested_tables = {}; // transition away from this 
+var nested_tables = {}; // transition away from this
 var nestedTableSettings = nestedTableConfig['tableSettings'];
 
 var entity_data = {};
@@ -96,13 +82,23 @@ continueButton.addEventListener('click', function(){
     for (key in selected_data) {
         entity_papers[key] = Array.from(selected_data[key]);
     }
+   var top_year = Math.max(... Object.keys(selected_data).map(function(x){
+		return Math.max(...[...selected_data[x]].map(function(y){
+			return y.year;
+		}))
+	}))
+   var bot_year = Math.min(... Object.keys(selected_data).map(function(x){
+                return Math.min(...[...selected_data[x]].map(function(y){
+                        return y.year;
+                }))
+        }))
 
    data = {
        option: latestSearchOption,
        keyword: latestSearchTerm,
        selfcite: false, //selfCiteCheckbox.checked,
-       bot_year_min: 0,
-       top_year_max: 3000,
+       bot_year_min: bot_year,
+       top_year_max: top_year,
        selection: entity_papers,
        entity_data: entity_data,
    }
@@ -119,9 +115,10 @@ searchBar.addEventListener('keypress', function (e) {
 
 function search(){
   console.log("searching")
+  $("#loading").show();
   latestSearchOption = $(".entity-option:selected").val();
   searchtable = makeSearchTable(latestSearchOption);
-  latestSearchTerm = inputBar.value;
+  latestSearchTerm = searchBar.value;
 
   // showProgressBar();
   $.ajax({
@@ -147,6 +144,7 @@ function search(){
         })
       });
       addNestedRows();
+      $("#loading").hide();
     },
     error: function (result) {
       console.log("searchButton error");
@@ -189,7 +187,7 @@ function addNestedRowToggle (tableSelector, rowSelector){
     var tr = $(this).closest('tr');
     var row = searchtable.row( tr );
     var show = !(tr[0].classList.contains('shown'));
- 
+
    // Close all open rows
     $(tableSelector + ' .shown').each( function (i, elem) {
       var tblRow = searchtable.row( elem );
@@ -201,7 +199,7 @@ function addNestedRowToggle (tableSelector, rowSelector){
         // Open this row
         showElement(row.child());
         tr.addClass('shown');
-    
+
       addInnerCheckboxListener();
     }
   });
@@ -220,10 +218,10 @@ function searchTableEventHandling() {
 
 function toggleParentRowSelection(row, select){
   // handle selection table changes
-  if (select){ 
+  if (select){
     var newRow = row.data();
     selectiontable.row.add(newRow).draw();
-  }   
+  }
 
   else {
     removeRowFromSelectionTable(row);
@@ -253,7 +251,7 @@ function toggleChildRowsSelection(row, select){
 
   } else { // remove any exisiting selected data from this entity
     console.log("untick");
-    try { 
+    try {
       delete selected_data[row.data()['table-id']];
       delete entity_data[row.data()['table-id']];
     } catch (e){console.log(e)}
@@ -304,7 +302,7 @@ function addInnerCheckboxListener (){
       table.rows().nodes().each(function(a){
         if ($(a).find('input')[0].checked){
           someRowsChecked = true;
-        } 
+        }
       })
 
       parentRowCheckbox.checked = someRowsChecked;
@@ -316,7 +314,7 @@ function addInnerCheckboxListener (){
 
     for (var key in selected_data){
       if (selected_data[key].size === 0)
-          delete selected_data[key]; 
+          delete selected_data[key];
     }
     console.log(selected_data)
   })
@@ -349,5 +347,10 @@ function removeRowFromSelectionTable(row){
   });
 }
 
+$(document).ready(function(){
+  if (searchBar.value) {
+    search();
+  }
+});
 
 </script>

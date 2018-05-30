@@ -96,6 +96,14 @@ def autocomplete(request):
 selfcite = False
 expanded_ids = dict()
 
+def get_navbar_option(keyword = "", option = ""):
+    return {
+        "optionlist": optionlist,
+        "selectedKeyword": keyword,
+        "selectedOption": [opt for opt in optionlist if opt['id'] == option][0] if option != "" else optionlist[0],
+    }
+
+
 @csrf_exempt
 def main(request):
     return render(request, "main.html")
@@ -107,7 +115,10 @@ def browse(request):
     with open(browse_list_filename, 'r') as fp:
         browse_list = json.load(fp)
 
-    data = {'list': browse_list}
+    data = {
+        'list': browse_list,
+        "navbarOption": get_navbar_option()
+    }
 
     return render(request, "browse.html", data)
 
@@ -115,24 +126,21 @@ def browse(request):
 @csrf_exempt
 def create(request):
     print(request)
- 
+
     try:
         data = json.loads(request.POST.get('data'))
         keyword = data.get('keyword', '')
         search = data.get('search') == 'true'
-        option = [opt for opt in optionlist if opt['id'] == data.get('option')][0]
+        option = data.get('option')
     except:
         keyword = ""
+        option = ""
         search = False
-        option = optionlist[0] # default selection
-    print(search)    
+
+    print(search)
     # render page with data
     return render(request, "create.html", {
-	"navbarOption": {
-	    "optionlist": optionlist,
-	    "selectedKeyword": keyword,
-	    "selectedOption": option,
-	},
+        "navbarOption": get_navbar_option(keyword, option),
         "search": search
     })
 
@@ -177,7 +185,7 @@ def view_papers(request):
     selectedIds = data.get('selectedIds').split(',')
     selectedNames = data.get('selectedNames').split(',')
     entityType = data.get('entityType')
-    expanded = data.get('expanded') 
+    expanded = data.get('expanded')
     option = data.get('option')
     name = data.get('name')
     if entityType == 'author':
@@ -205,12 +213,7 @@ def view_papers(request):
         'entityType': entityType,
         'selectedInfo': selectedIds,
         'keyword': name,
-        "navbarOption": {
-            "optionlist": optionlist,
-            "selectedKeyword": name,
-            "selectedOption": [opt for opt in optionlist if opt['id'] == option][0],
-        }
-
+        "navbarOption": get_navbar_option(name, option),
     }
 
     return render(request, 'view_papers.html', data)
@@ -223,7 +226,7 @@ def submit(request):
 
     option = data.get("option")
     keyword = data.get('keyword')
-    selfcite = data.get("selfcite") 
+    selfcite = data.get("selfcite")
     min_year = int(data.get("bot_year_min"))
     max_year = int(data.get("top_year_max"))
 
@@ -304,21 +307,11 @@ def submit(request):
         "author": data1,
         "conf": data2,
         "inst": data3,
-        "navbarOption": {
-            "optionlist": optionlist,
-            "selectedKeyword": keyword,
-            "selectedOption": option,
-        },
         "yearSlider": {
             "title": "Publications range",
             "range": [min_year, max_year] # placeholder value, just for testing
         },
-        "navbarOption": {
-            "optionlist": optionlist,
-            "selectedKeyword": keyword,
-            "selectedOption": [opt for opt in optionlist if opt['id'] == option][0],
-        }
-
+        "navbarOption": get_navbar_option(keyword, option)
     }
     return render(request, "flower.html", data)
 
@@ -342,11 +335,6 @@ def resubmit(request):
         "author": data1,
         "conf": data2,
         "inst": data3,
-        "navbarOption": {
-            "optionlist": optionlist,
-            "selectedKeyword": keyword,
-            "selectedOption": option,
-        },
+        "navbarOption": get_navbar_option(keyword, option)
     }
     return JsonResponse(data, safe=False)
-
