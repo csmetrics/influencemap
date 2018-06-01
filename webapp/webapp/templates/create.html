@@ -82,13 +82,23 @@ continueButton.addEventListener('click', function(){
     for (key in selected_data) {
         entity_papers[key] = Array.from(selected_data[key]);
     }
+   var top_year = Math.max(... Object.keys(selected_data).map(function(x){
+		return Math.max(...[...selected_data[x]].map(function(y){
+			return y.year;
+		}))
+	}))
+   var bot_year = Math.min(... Object.keys(selected_data).map(function(x){
+                return Math.min(...[...selected_data[x]].map(function(y){
+                        return y.year;
+                }))
+        }))
 
    data = {
        option: latestSearchOption,
        keyword: latestSearchTerm,
        selfcite: false, //selfCiteCheckbox.checked,
-       bot_year_min: 0,
-       top_year_max: 3000,
+       bot_year_min: bot_year,
+       top_year_max: top_year,
        selection: entity_papers,
        entity_data: entity_data,
    }
