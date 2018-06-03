@@ -39,7 +39,7 @@ class Papers(DocType):
     PaperTitle = Text(required = True, analyzer = "standard")
     OriginalTitle = Text(required = True, analyzer = "standard")
     BookTitle = Text()
-    Year = Integer(required = True)
+    Year = Integer()
     date = Date()   # Date --> date (type conflict)
     Publisher = Text()
 
@@ -58,9 +58,19 @@ class Papers(DocType):
     LanguageCode = Keyword() # from PaperLanguages
     FieldOfStudyId = Long() # from PaperFieldsOfStudy
     Similarity = Float() # from PaperFieldsOfStudy
+    SourceType = Integer() # from PaperUrls
+    SourceUrl = Text() # from PaperUrls
 
     class Meta:
         index = 'Papers'.lower()
+
+
+class PaperReferences(DocType):
+    PaperId = Long(required = True)
+    PaperReferenceId = Long(required = True)
+
+    class Meta:
+        index = 'PaperReferences'.lower()
 
 
 class PaperAuthorAffiliations(DocType):
