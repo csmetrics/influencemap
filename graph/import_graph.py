@@ -15,7 +15,7 @@ def init_es():
 def import_Authors(filepath):
     print("Starting", filepath)
     init_es()
-    reader = csv.reader(open(filepath), delimiter="\t")
+    reader = csv.reader(open(filepath), delimiter="\t", quoting=csv.QUOTE_NONE)
     for r in reader:
         doc = Authors()
         doc.meta.id = doc.AuthorId = int(r[0])
@@ -33,7 +33,7 @@ def import_Authors(filepath):
 def import_Affiliations(filepath):
     print("Starting", filepath)
     init_es()
-    reader = csv.reader(open(filepath), delimiter="\t")
+    reader = csv.reader(open(filepath), delimiter="\t", quoting=csv.QUOTE_NONE)
     for r in reader:
         doc = Affiliations()
         doc.meta.id = doc.AffiliationId = int(r[0])
@@ -95,7 +95,7 @@ def import_Papers(filepath):
 def import_PaperReferences(filepath):
     print("Starting", filepath)
     init_es()
-    reader = csv.reader(open(filepath), delimiter="\t")
+    reader = csv.reader(open(filepath), delimiter="\t", quoting=csv.QUOTE_NONE)
     for r in reader:
         doc = PaperReferences()
         doc.PaperId = int(r[0])
@@ -108,7 +108,7 @@ def import_PaperReferences(filepath):
 def import_PaperAuthorAffiliations(filepath):
     print("Starting", filepath)
     init_es()
-    reader = csv.reader(open(filepath), delimiter="\t")
+    reader = csv.reader(open(filepath), delimiter="\t", quoting=csv.QUOTE_NONE)
     for r in reader:
         doc = PaperAuthorAffiliations()
         doc.PaperId = int(r[0])
