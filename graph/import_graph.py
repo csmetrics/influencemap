@@ -14,6 +14,7 @@ def init_es():
 
 def import_Authors(filepath):
     print("Starting", filepath)
+    init_es()
     reader = csv.reader(open(filepath), delimiter="\t")
     for r in reader:
         doc = Authors()
@@ -31,6 +32,7 @@ def import_Authors(filepath):
 
 def import_Affiliations(filepath):
     print("Starting", filepath)
+    init_es()
     reader = csv.reader(open(filepath), delimiter="\t")
     for r in reader:
         doc = Affiliations()
@@ -50,6 +52,7 @@ def import_Affiliations(filepath):
 
 def import_Papers(filepath):
     print("Starting", filepath)
+    init_es()
     reader = csv.reader(open(filepath), delimiter="\t", quoting=csv.QUOTE_NONE)
     for r in reader:
         try:
@@ -91,6 +94,7 @@ def import_Papers(filepath):
 
 def import_PaperReferences(filepath):
     print("Starting", filepath)
+    init_es()
     reader = csv.reader(open(filepath), delimiter="\t")
     for r in reader:
         doc = PaperReferences()
@@ -103,6 +107,7 @@ def import_PaperReferences(filepath):
 
 def import_PaperAuthorAffiliations(filepath):
     print("Starting", filepath)
+    init_es()
     reader = csv.reader(open(filepath), delimiter="\t")
     for r in reader:
         doc = PaperAuthorAffiliations()
@@ -117,6 +122,7 @@ def import_PaperAuthorAffiliations(filepath):
 
 def import_ConferenceInstances(filepath):
     print("Starting", filepath)
+    init_es()
     reader = csv.reader(open(filepath), delimiter="\t", quoting=csv.QUOTE_NONE)
     for r in reader:
         doc = ConferenceInstances()
@@ -142,6 +148,7 @@ def import_ConferenceInstances(filepath):
 
 def import_ConferenceSeries(filepath):
     print("Starting", filepath)
+    init_es()
     reader = csv.reader(open(filepath), delimiter="\t", quoting=csv.QUOTE_NONE)
     for r in reader:
         doc = ConferenceSeries()
@@ -158,6 +165,7 @@ def import_ConferenceSeries(filepath):
 
 def import_Journals(filepath):
     print("Starting", filepath)
+    init_es()
     reader = csv.reader(open(filepath), delimiter="\t", quoting=csv.QUOTE_NONE)
     for r in reader:
         doc = Journals()
@@ -177,6 +185,7 @@ def import_Journals(filepath):
 
 def import_FieldsOfStudy(filepath):
     print("Starting", filepath)
+    init_es()
     reader = csv.reader(open(filepath), delimiter="\t", quoting=csv.QUOTE_NONE)
     for r in reader:
         doc = FieldsOfStudy()
@@ -195,6 +204,7 @@ def import_FieldsOfStudy(filepath):
 
 def import_FieldOfStudyChildren(filepath):
     print("Starting", filepath)
+    init_es()
     reader = csv.reader(open(filepath), delimiter="\t")
     for r in reader:
         doc = FieldOfStudyChildren()
@@ -223,12 +233,11 @@ def main(argv):
 
     p = Pool(8)
     if data_file in options:
-        init_es()
         filepath = os.path.join(filedir, data_file)
         print("Reading files in dir", )
-        files = [f for f in os.listdir(filepath)]
+        files = [os.path.join(filedir, data_file, f) for f in os.listdir(filepath)]
         print(files)
-        p.map(options[data_file](), files)
+        p.map(options[data_file], files)
 
 if __name__ == "__main__":
     main(sys.argv)
