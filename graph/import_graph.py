@@ -1,4 +1,5 @@
 import os, sys, csv
+from multiprocessing import Pool
 from elasticsearch_dsl.connections import connections
 from datetime import datetime
 from schema import *
@@ -11,10 +12,8 @@ def init_es():
 	print("Elasticsearch connections initialized")
 
 
-def import_Authors():
-    file="Authors"
-    print("Starting", file)
-    filepath = os.path.join(filedir, "{}.txt".format(file))
+def import_Authors(filepath):
+    print("Starting", filepath)
     reader = csv.reader(open(filepath), delimiter="\t")
     for r in reader:
         doc = Authors()
@@ -27,13 +26,11 @@ def import_Authors():
         doc.CitationCount = int(r[6]) if r[6] != "" else None
         doc.CreatedDate = datetime.strptime(r[7], "%Y-%m-%d")
         doc.save()
-    print("Finished", file)
+    print("Finished", filepath)
 
 
-def import_Affiliations():
-    file="Affiliations"
-    print("Starting", file)
-    filepath = os.path.join(filedir, "{}.txt".format(file))
+def import_Affiliations(filepath):
+    print("Starting", filepath)
     reader = csv.reader(open(filepath), delimiter="\t")
     for r in reader:
         doc = Affiliations()
@@ -48,13 +45,11 @@ def import_Affiliations():
         doc.CitationCount = int(r[8]) if r[8] != "" else None
         doc.CreatedDate = datetime.strptime(r[9], "%Y-%m-%d")
         doc.save()
-    print("Finished", file)
+    print("Finished", filepath)
 
 
-def import_Papers():
-    file="Papers"
-    print("Starting", file)
-    filepath = os.path.join(filedir, "{}.txt".format(file))
+def import_Papers(filepath):
+    print("Starting", filepath)
     reader = csv.reader(open(filepath), delimiter="\t", quoting=csv.QUOTE_NONE)
     for r in reader:
         try:
@@ -91,13 +86,11 @@ def import_Papers():
         except Exception as e:
             print("[Error]", e)
             print("in Paper:", r)
-    print("Finished", file)
+    print("Finished", filepath)
 
 
-def import_PaperReferences():
-    file="PaperReferences"
-    print("Starting", file)
-    filepath = os.path.join(filedir, "{}.txt".format(file))
+def import_PaperReferences(filepath):
+    print("Starting", filepath)
     reader = csv.reader(open(filepath), delimiter="\t")
     for r in reader:
         doc = PaperReferences()
@@ -105,13 +98,11 @@ def import_PaperReferences():
         doc.PaperReferenceId = int(r[1])
         doc.meta.id = "{}_{}".format(doc.PaperId, doc.PaperReferenceId)
         doc.save()
-    print("Finished", file)
+    print("Finished", filepath)
 
 
-def import_PaperAuthorAffiliations():
-    file="PaperAuthorAffiliations"
-    print("Starting", file)
-    filepath = os.path.join(filedir, "{}.txt".format(file))
+def import_PaperAuthorAffiliations(filepath):
+    print("Starting", filepath)
     reader = csv.reader(open(filepath), delimiter="\t")
     for r in reader:
         doc = PaperAuthorAffiliations()
@@ -121,14 +112,12 @@ def import_PaperAuthorAffiliations():
         doc.AffiliationId = int(r[2]) if r[2] != "" else None
         doc.AuthorSequenceNumber = int(r[3])
         doc.save()
-    print("Finished", file)
+    print("Finished", filepath)
 
 
-def import_ConferenceInstances():
-    file="ConferenceInstances"
-    print("Starting", file)
-    filepath = os.path.join(filedir, "{}.txt".format(file))
-    reader = csv.reader(open(filepath), delimiter="\t")
+def import_ConferenceInstances(filepath):
+    print("Starting", filepath)
+    reader = csv.reader(open(filepath), delimiter="\t", quoting=csv.QUOTE_NONE)
     for r in reader:
         doc = ConferenceInstances()
         doc.meta.id = doc.ConferenceInstanceId = int(r[0])
@@ -148,14 +137,98 @@ def import_ConferenceInstances():
         doc.CitationCount = int(r[14]) if r[14] != "" else None
         doc.CreatedDate = datetime.strptime(r[15], "%Y-%m-%d")
         doc.save()
-    print("Finished", file)
+    print("Finished", filepath)
+
+
+def import_ConferenceSeries(filepath):
+    print("Starting", filepath)
+    reader = csv.reader(open(filepath), delimiter="\t", quoting=csv.QUOTE_NONE)
+    for r in reader:
+        doc = ConferenceSeries()
+        doc.meta.id = doc.ConferenceSeriesId = int(r[0])
+        doc.Rank = int(r[1])
+        doc.NormalizedName = r[2]
+        doc.DisplayName = r[3]
+        doc.PaperCount = int(r[4]) if r[4] != "" else None
+        doc.CitationCount = int(r[5]) if r[5] != "" else None
+        doc.CreatedDate = datetime.strptime(r[6], "%Y-%m-%d")
+        doc.save()
+    print("Finished", filepath)
+
+
+def import_Journals(filepath):
+    print("Starting", filepath)
+    reader = csv.reader(open(filepath), delimiter="\t", quoting=csv.QUOTE_NONE)
+    for r in reader:
+        doc = Journals()
+        doc.meta.id = doc.JournalId = int(r[0])
+        doc.Rank = int(r[1])
+        doc.NormalizedName = r[2]
+        doc.DisplayName = r[3]
+        doc.Issn = r[4]
+        doc.Publisher = r[5]
+        doc.Webpage = r[6]
+        doc.PaperCount = int(r[7]) if r[7] != "" else None
+        doc.CitationCount = int(r[8]) if r[8] != "" else None
+        doc.CreatedDate = datetime.strptime(r[9], "%Y-%m-%d")
+        doc.save()
+    print("Finished", filepath)
+
+
+def import_FieldsOfStudy(filepath):
+    print("Starting", filepath)
+    reader = csv.reader(open(filepath), delimiter="\t", quoting=csv.QUOTE_NONE)
+    for r in reader:
+        doc = FieldsOfStudy()
+        doc.meta.id = doc.FieldOfStudyId = int(r[0])
+        doc.Rank = int(r[1])
+        doc.NormalizedName = r[2]
+        doc.DisplayName = r[3]
+        doc.MainType = r[4]
+        doc.Level = int(r[5]) if r[5] != "" else None
+        doc.PaperCount = int(r[6]) if r[6] != "" else None
+        doc.CitationCount = int(r[7]) if r[7] != "" else None
+        doc.CreatedDate = datetime.strptime(r[8], "%Y-%m-%d")
+        doc.save()
+    print("Finished", filepath)
+
+
+def import_FieldOfStudyChildren(filepath):
+    print("Starting", filepath)
+    reader = csv.reader(open(filepath), delimiter="\t")
+    for r in reader:
+        doc = FieldOfStudyChildren()
+        doc.FieldOfStudyId = int(r[0])
+        doc.ChildFieldOfStudyId = int(r[1])
+        doc.meta.id = "{}_{}".format(doc.FieldOfStudyId, doc.ChildFieldOfStudyId)
+        doc.save()
+    print("Finished", filepath)
+
 
 def main(argv):
-    init_es()
-    #import_Authors()
-    import_Papers()
-    #import_Affiliations()
-    #import_ConferenceInstances()
+    data_file = argv[1]
+    print(data_file)
+    options = {
+        "Authors": import_Authors,
+        "Affiliations": import_Affiliations,
+        "Papers": import_Papers,
+        "PaperReferences": import_PaperReferences,
+        "PaperAuthorAffiliations": import_PaperAuthorAffiliations,
+        "ConferenceInstances": import_ConferenceInstances,
+        "ConferenceSeries": import_ConferenceSeries,
+        "Journals": import_Journals,
+        "FieldsOfStudy": import_FieldsOfStudy,
+        "FieldOfStudyChildren": import_FieldOfStudyChildren
+    }
+
+    p = Pool(8)
+    if data_file in options:
+        init_es()
+        filepath = os.path.join(filedir, data_file)
+        print("Reading files in dir", )
+        files = [f for f in os.listdir(filepath)]
+        print(files)
+        p.map(options[data_file](), files)
 
 if __name__ == "__main__":
     main(sys.argv)
