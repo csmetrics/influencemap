@@ -29,8 +29,9 @@ def import_Authors(filepath):
             doc.CreatedDate = datetime.strptime(r[7], "%Y-%m-%d")
             doc.save(op_type="create")
         except Exception as e:
-            print("[Error]", e)
-     print("Finished", filepath)
+            pass
+            #print("[Error]", e)
+    print("Finished", filepath)
 
 
 def import_Affiliations(filepath):
@@ -107,7 +108,8 @@ def import_PaperReferences(filepath):
             doc.meta.id = "{}_{}".format(doc.PaperId, doc.PaperReferenceId)
             doc.save(op_type="create")
         except Exception as e:
-            print("[Error]", e)
+            pass
+            #print("[Error]", e)
     print("Finished", filepath)
 
 
@@ -125,7 +127,8 @@ def import_PaperAuthorAffiliations(filepath):
             doc.AuthorSequenceNumber = int(r[3])
             doc.save(op_type="create")
         except Exception as e:
-            print("[Error]", e)
+            pass
+            #print("[Error]", e)
     print("Finished", filepath)
 
 
@@ -244,7 +247,7 @@ def main(argv):
     if data_file in options:
         filepath = os.path.join(filedir, data_file)
         print("Reading files in dir", )
-        files = [os.path.join(filedir, data_file, f) for f in os.listdir(filepath)]
+        files = [os.path.join(filedir, data_file, f) for f in sorted(os.listdir(filepath))]
         print(files)
         p.map(options[data_file], files)
 
