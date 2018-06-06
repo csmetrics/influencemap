@@ -8,29 +8,29 @@ es_host = "130.56.248.105:9200"
 filedir = "/localdata/MAG2018/data/graph/2018-04-13"
 
 def init_es():
-	connections.create_connection(hosts = es_host, timeout=20)
-	print("Elasticsearch connections initialized")
+    connections.create_connection(hosts = es_host, timeout=20)
+    print("Elasticsearch connections initialized")
 
 
 def import_Authors(filepath):
-	print("Starting", filepath)
-	init_es()
-	reader = csv.reader(open(filepath), delimiter="\t", quoting=csv.QUOTE_NONE)
-	for r in reader:
-		try:
-			doc = Authors()
-			doc.meta.id = doc.AuthorId = int(r[0])
-			doc.Rank = int(r[1])
-			doc.NormalizedName = r[2]
-			doc.DisplayName = r[3]
-			doc.LastKnownAffiliationId = int(r[4]) if r[4] != "" else None
-			doc.PaperCount = int(r[5]) if r[5] != "" else None
-			doc.CitationCount = int(r[6]) if r[6] != "" else None
-			doc.CreatedDate = datetime.strptime(r[7], "%Y-%m-%d")
-			doc.save(op_type="create")
-		except Exception as e:
-			print("[Error]", e)
-	print("Finished", filepath)
+    print("Starting", filepath)
+    init_es()
+    reader = csv.reader(open(filepath), delimiter="\t", quoting=csv.QUOTE_NONE)
+    for r in reader:
+        try:
+            doc = Authors()
+            doc.meta.id = doc.AuthorId = int(r[0])
+            doc.Rank = int(r[1])
+            doc.NormalizedName = r[2]
+            doc.DisplayName = r[3]
+            doc.LastKnownAffiliationId = int(r[4]) if r[4] != "" else None
+            doc.PaperCount = int(r[5]) if r[5] != "" else None
+            doc.CitationCount = int(r[6]) if r[6] != "" else None
+            doc.CreatedDate = datetime.strptime(r[7], "%Y-%m-%d")
+            doc.save(op_type="create")
+        except Exception as e:
+            print("[Error]", e)
+     print("Finished", filepath)
 
 
 def import_Affiliations(filepath):
@@ -99,15 +99,15 @@ def import_PaperReferences(filepath):
     print("Starting", filepath)
     init_es()
     reader = csv.reader(open(filepath), delimiter="\t", quoting=csv.QUOTE_NONE)
-	for r in reader:
-		try:
-			doc = PaperReferences()
-			doc.PaperId = int(r[0])
-			doc.PaperReferenceId = int(r[1])
-			doc.meta.id = "{}_{}".format(doc.PaperId, doc.PaperReferenceId)
-			doc.save(op_type="create")
-		except Exception as e:
-			print("[Error]", e)
+    for r in reader:
+        try:
+            doc = PaperReferences()
+            doc.PaperId = int(r[0])
+            doc.PaperReferenceId = int(r[1])
+            doc.meta.id = "{}_{}".format(doc.PaperId, doc.PaperReferenceId)
+            doc.save(op_type="create")
+        except Exception as e:
+            print("[Error]", e)
     print("Finished", filepath)
 
 
@@ -116,16 +116,16 @@ def import_PaperAuthorAffiliations(filepath):
     init_es()
     reader = csv.reader(open(filepath), delimiter="\t", quoting=csv.QUOTE_NONE)
     for r in reader:
-		try:
-			doc = PaperAuthorAffiliations()
-			doc.PaperId = int(r[0])
-			doc.AuthorId = int(r[1])
-			doc.meta.id = "{}_{}".format(doc.PaperId, doc.AuthorId)
-			doc.AffiliationId = int(r[2]) if r[2] != "" else None
-			doc.AuthorSequenceNumber = int(r[3])
-			doc.save(op_type="create")
-		except Exception as e:
-			print("[Error]", e)
+        try:
+            doc = PaperAuthorAffiliations()
+            doc.PaperId = int(r[0])
+            doc.AuthorId = int(r[1])
+            doc.meta.id = "{}_{}".format(doc.PaperId, doc.AuthorId)
+            doc.AffiliationId = int(r[2]) if r[2] != "" else None
+            doc.AuthorSequenceNumber = int(r[3])
+            doc.save(op_type="create")
+        except Exception as e:
+            print("[Error]", e)
     print("Finished", filepath)
 
 
@@ -240,7 +240,7 @@ def main(argv):
         "FieldOfStudyChildren": import_FieldOfStudyChildren
     }
 
-    p = Pool(8)
+    p = Pool(4)
     if data_file in options:
         filepath = os.path.join(filedir, data_file)
         print("Reading files in dir", )
