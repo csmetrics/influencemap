@@ -1,0 +1,100 @@
+858948344	11171	canadian foundation for healthcare improvement	Canadian Foundation for Healthcare Improvement	grid.413296.b	http://www.cfhi-fcass.ca/	http://en.wikipedia.org/wiki/Canadian_Foundation_for_Healthcare_Improvement	57	3609	2016-06-24
+35427347	12842	islamic university of indonesia	Islamic University of Indonesia	grid.444633.2	http://www.uii.ac.id/	http://en.wikipedia.org/wiki/Islamic_University_of_Indonesia	2240	1458	2016-06-24
+35462925	9820	southern connecticut state university	Southern Connecticut State University	grid.263848.3	http://www.southernct.edu/	http://en.wikipedia.org/wiki/Southern_Connecticut_State_University	2458	33375	2016-06-24
+98298690	9938	i shou university	I-Shou University	grid.411447.3	http://www.isu.edu.tw/en1/index.htm	http://en.wikipedia.org/wiki/I-Shou_University	8703	141254	2016-06-24
+165075387	12736	trine university	Trine University	grid.465721.3	http://www.trine.edu/	http://en.wikipedia.org/wiki/Trine_University	99	529	2016-06-24
+102254642	13545	university of kirkuk	University of Kirkuk	grid.442850.f	http://www.uokirkuk.edu.iq/	http://en.wikipedia.org/wiki/University_of_Kirkuk	73	235	2016-06-24
+59081768	12564	gorno altaisk state university	Gorno-Altaisk State University	grid.440628.c	http://www.gasu.ru/	http://en.wikipedia.org/wiki/Gorno-Altaisk_State_University	86	838	2016-06-24
+215330179	14064	lupane state university	Lupane State University	grid.449024.f	http://www.lsu.ac.zw/	http://en.wikipedia.org/wiki/Lupane_State_University	79	136	2016-06-24
+133731052	7048	university of helsinki	University of Helsinki	grid.7737.4	https://www.helsinki.fi/en	http://en.wikipedia.org/wiki/University_of_Helsinki	159880	10284831	2016-06-24
+188740104	9900	baskent university	Başkent University	grid.411548.d	http://www.baskent.edu.tr/english/	http://en.wikipedia.org/wiki/Başkent_University	14345	260437	2016-06-24
+864622339	12994	benteler international	Benteler International	grid.467272.2	http://www.benteler.com/	http://en.wikipedia.org/wiki/Benteler_International	116	564	2016-06-24
+71001175	10416	national oilwell varco	National Oilwell Varco	grid.480249.3	http://www.nov.com/	http://en.wikipedia.org/wiki/National_Oilwell_Varco	2879	23912	2016-06-24
+153514249	11918	california department of justice	California Department of Justice		https://oag.ca.gov/	http://en.wikipedia.org/wiki/California_Department_of_Justice	88	2810	2016-06-24
+392282	7817	university at albany suny	University at Albany, SUNY	grid.265850.c	http://www.albany.edu/	http://en.wikipedia.org/wiki/University_at_Albany,_SUNY	30157	1232520	2016-06-24
+867474933	11840	algorithmics inc	Algorithmics Inc.		http://www-01.ibm.com/software/analytics/algorithmics/	http://en.wikipedia.org/wiki/Algorithmics_Inc.	81	1681	2016-06-24
+137913330	12621	mizuno corporation	Mizuno Corporation		http://mizuno.com/	http://en.wikipedia.org/wiki/Mizuno_Corporation	454	1975	2016-06-24
+47605537	12904	hang seng management college	Hang Seng Management College	grid.462298.3	http://www.hsmc.edu.hk/	http://en.wikipedia.org/wiki/Hang_Seng_Management_College	319	886	2016-06-24
+169335092	8735	university of north carolina at greensboro	University of North Carolina at Greensboro	grid.266860.c	http://www.uncg.edu/	http://en.wikipedia.org/wiki/University_of_North_Carolina_at_Greensboro	17792	480498	2016-06-24
+227586296	9153	american physical therapy association	American Physical Therapy Association	grid.453536.2	http://www.apta.org/	http://en.wikipedia.org/wiki/American_Physical_Therapy_Association	18816	294684	2016-06-24
+98899809	10070	national bank of belgium	National Bank of Belgium	grid.484482.6	http://www.nbb.be/	http://en.wikipedia.org/wiki/National_Bank_of_Belgium	738	20832	2016-06-24
+20442775	10153	kyoto women s university	Kyoto Women's University	grid.411223.7	http://www.kyoto-wu.ac.jp/	http://en.wikipedia.org/wiki/Kyoto_Women's_University	2072	37681	2016-06-24
+75420372	12150	university of novi sad faculty of technical sciences	University of Novi Sad Faculty of Technical Sciences		http://www.ftn.uns.ac.rs/	http://en.wikipedia.org/wiki/University_of_Novi_Sad_Faculty_of_Technical_Sciences	1067	5147	2016-06-24
+59807433	9922	university of lille nord de france	University of Lille Nord de France	grid.412304.0	http://www.pres-ulnf.fr/	http://en.wikipedia.org/wiki/University_of_Lille_Nord_de_France	1424	30918	2016-06-24
+24571045	8323	university of north dakota	University of North Dakota	grid.266862.e	http://www.und.edu/	http://en.wikipedia.org/wiki/University_of_North_Dakota	16742	488121	2016-06-24
+244923355	13530	mangalayatan university	Mangalayatan University	grid.449073.d	http://www.mangalayatan.in/	http://en.wikipedia.org/wiki/Mangalayatan_University	82	301	2016-06-24
+130823665	10253	ural federal university	Ural Federal University	grid.412761.7	http://urfu.ru/	http://en.wikipedia.org/wiki/Ural_Federal_University	7117	39418	2016-06-24
+119055964	12675	lockheed martin systems integration owego	Lockheed Martin Systems Integration – Owego			http://en.wikipedia.org/wiki/Lockheed_Martin_Systems_Integration_–_Owego	53	577	2016-06-24
+1300976906	14219	andijan state university	Andijan State University	grid.444569.e			27	22	2016-06-24
+99464096	7183	katholieke universiteit leuven	Katholieke Universiteit Leuven	grid.5596.f	http://www.kuleuven.be/english/	http://en.wikipedia.org/wiki/Katholieke_Universiteit_Leuven	281385	11226385	2016-06-24
+83790822	11675	lenzing ag	Lenzing AG		http://www.lenzing.com/en/	http://en.wikipedia.org/wiki/Lenzing_AG	933	7242	2016-06-24
+24897511	13787	hellenic military academy	Hellenic Military Academy	grid.465918.7	http://sse.army.gr/	http://en.wikipedia.org/wiki/Hellenic_Military_Academy	99	170	2016-06-24
+885158817	12320	chartered institute of public relations	Chartered Institute of Public Relations		http://www.cipr.co.uk/	http://en.wikipedia.org/wiki/Chartered_Institute_of_Public_Relations	316	3890	2016-06-24
+123119031	10661	philips design	Philips Design			http://en.wikipedia.org/wiki/Philips_Design	79	2842	2016-06-24
+5336590	12080	virbac	Virbac	grid.452323.1	http://www.virbac.com/	http://en.wikipedia.org/wiki/Virbac	595	6660	2016-06-24
+48560098	12104	newmont mining corporation	Newmont Mining Corporation	grid.480943.2	http://www.newmont.com/	http://en.wikipedia.org/wiki/Newmont_Mining_Corporation	123	2560	2016-06-24
+262776074	12924	sergio arboleda university	Sergio Arboleda University	grid.442191.b	http://www.usergioarboleda.edu.co/	http://en.wikipedia.org/wiki/Sergio_Arboleda_University	900	546	2016-06-24
+272649133	13143	universidad argentina john f kennedy	Universidad Argentina John F. Kennedy	grid.441609.e	http://www.kennedy.edu.ar/	http://en.wikipedia.org/wiki/Universidad_Argentina_John_F._Kennedy	67	328	2016-06-24
+52993809	10243	university of provence	University of Provence		https://web.archive.org/web/20061010125054/http://www.univ-provence.fr/	http://en.wikipedia.org/wiki/University_of_Provence	1280	23873	2016-06-24
+37318280	12041	penn state college of communications	Penn State College of Communications		http://bellisario.psu.edu/	http://en.wikipedia.org/wiki/Penn_State_College_of_Communications	1309	3799	2016-06-24
+162976800	12400	powerwave technologies	Powerwave Technologies		http://www.powerwave.com/	http://en.wikipedia.org/wiki/Powerwave_Technologies	314	2181	2016-06-24
+182616263	11773	society for biodemography and social biology	Society for Biodemography and Social Biology		http://www.biodemog.org/	http://en.wikipedia.org/wiki/Society_for_Biodemography_and_Social_Biology	68	203	2016-06-24
+1312987727	13412	university of neyshabur	University of Neyshabur		http://www.Neyshabur.ac.ir/	http://en.wikipedia.org/wiki/University_of_Neyshabur	178	365	2016-06-24
+45280688	13491	nscad university	NSCAD University	grid.260413.2	http://nscad.ca/	http://en.wikipedia.org/wiki/NSCAD_University	53	124	2016-06-24
+900075041	8522	cgi group	CGI Group	grid.465168.8	http://www.cgi.com/	http://en.wikipedia.org/wiki/CGI_Group	963	550236	2016-06-24
+124015162	13104	indian national science academy	Indian National Science Academy	grid.467648.f	http://www.insaindia.res.in/	http://en.wikipedia.org/wiki/Indian_National_Science_Academy	47	287	2016-06-24
+45487847	12406	chittagong veterinary and animal sciences university	Chittagong Veterinary and Animal Sciences University	grid.442958.6	http://www.cvasu.ac.bd/	http://en.wikipedia.org/wiki/Chittagong_Veterinary_and_Animal_Sciences_University	503	3379	2016-06-24
+45533404	13167	university of technology and management	University of Technology and Management	grid.460894.7	http://www.utm.ac.in/	http://en.wikipedia.org/wiki/University_of_Technology_and_Management	166	293	2016-06-24
+30002821	11309	manhattanville college	Manhattanville College	grid.419401.9	http://www.mville.edu/	http://en.wikipedia.org/wiki/Manhattanville_College	458	5671	2016-06-24
+92864154	9461	university of buckingham	University of Buckingham	grid.90685.32	http://www.buckingham.ac.uk/	http://en.wikipedia.org/wiki/University_of_Buckingham	2045	36038	2016-06-24
+1322892066	11579	population reference bureau	Population Reference Bureau	grid.438462.f	http://www.prb.org/	http://en.wikipedia.org/wiki/Population_Reference_Bureau	160	1902	2016-06-24
+191240316	7580	university of hull	University of Hull	grid.9481.4	http://www.hull.ac.uk/	http://en.wikipedia.org/wiki/University_of_Hull	30724	767653	2016-06-24
+108839631	9987	royal meteorological institute	Royal Meteorological Institute	grid.424737.1	http://www.meteo.be/	http://en.wikipedia.org/wiki/Royal_Meteorological_Institute	1105	24614	2016-06-24
+310941836	13916	krylov state research center	Krylov State Research Center	grid.482526.f	http://krylov-center.ru/eng/	http://en.wikipedia.org/wiki/Krylov_State_Research_Center	38	175	2016-06-24
+136446963	9700	okayama university of science	Okayama University of Science	grid.444568.f	http://www.ous.ac.jp/	http://en.wikipedia.org/wiki/Okayama_University_of_Science	9377	145694	2016-06-24
+148243192	12092	africa fighting malaria	Africa Fighting Malaria			http://en.wikipedia.org/wiki/Africa_Fighting_Malaria	48	1554	2016-06-24
+152171566	10420	aetna	Aetna	grid.413341.0	http://www.aetna.com/	http://en.wikipedia.org/wiki/Aetna	649	14257	2016-06-24
+97231232	12824	nelson mandela african institute of science and technology	Nelson Mandela African Institute of Science and Technology	grid.451346.1	http://nm-aist.ac.tz/	http://en.wikipedia.org/wiki/Nelson_Mandela_African_Institute_of_Science_and_Technology	172	816	2016-06-24
+112991645	11062	airbus group	Airbus Group	grid.424413.4	http://www.airbus.com/	http://en.wikipedia.org/wiki/Airbus_Group	1910	11591	2016-06-24
+1329807341	12021	senai	SENAI	grid.454338.d	http://www.portaldaindustria.com.br/senai/	http://en.wikipedia.org/wiki/SENAI	1489	4607	2016-06-24
+1330185648	11675	financial conduct authority	Financial Conduct Authority		http://www.fca.org.uk/	http://en.wikipedia.org/wiki/Financial_Conduct_Authority	693	6290	2016-06-24
+101290598	13274	syed ammal engineering college	Syed Ammal Engineering College		http://www.syedengg.ac.in/	http://en.wikipedia.org/wiki/Syed_Ammal_Engineering_College	174	720	2016-06-24
+164142322	13016	university of guelph humber	University of Guelph-Humber	grid.449724.8	http://www.guelphhumber.ca/	http://en.wikipedia.org/wiki/University_of_Guelph-Humber	76	424	2016-06-24
+195608997	13198	dar es salaam institute of technology	Dar es Salaam Institute of Technology	grid.462080.8	http://dit.ac.tz/	http://en.wikipedia.org/wiki/Dar_es_Salaam_Institute_of_Technology	108	280	2016-06-24
+176010741	11832	indian institute of forest management	Indian Institute of Forest Management		http://www.iifm.ac.in/	http://en.wikipedia.org/wiki/Indian_Institute_of_Forest_Management	278	2373	2016-06-24
+1333680995	13885	richmond football club	Richmond Football Club			http://en.wikipedia.org/wiki/Richmond_Football_Club_(VFL)	7	81	2016-06-24
+1334364371	8713	harris corporation	Harris Corporation	grid.421991.6	http://www.harris.com/	http://en.wikipedia.org/wiki/Harris_Corporation	6936	101105	2016-06-24
+136978897	10240	biocity nottingham	BioCity Nottingham		http://www.biocity.co.uk/	http://en.wikipedia.org/wiki/BioCity_Nottingham	181	6266	2016-06-24
+1336915759	13663	gangwon provincial university	Gangwon Provincial University	grid.448825.7			46	115	2016-06-24
+336106212	11672	the college of family physicians canada	The College of Family Physicians Canada		http://www.cfpc.ca/	http://en.wikipedia.org/wiki/College_of_Family_Physicians_of_Canada	371	2090	2016-06-24
+152743029	8754	kaohsiung medical university	Kaohsiung Medical University	grid.412019.f	http://www.kmu.edu.tw/	http://en.wikipedia.org/wiki/Kaohsiung_Medical_University	18495	720698	2016-06-24
+82245763	12966	tokyo christian university	Tokyo Christian University	grid.449590.5	http://acts.tci.ac.jp/	http://en.wikipedia.org/wiki/Tokyo_Christian_University	10	114	2016-06-24
+35141943	9468	breast international group	Breast International Group	grid.427828.3	http://www.bigagainstbreastcancer.org/	http://en.wikipedia.org/wiki/Breast_International_Group	430	18204	2016-06-24
+3780104	11832	maharaja surajmal institute of technology	Maharaja Surajmal Institute of Technology		http://www.msit.in/	http://en.wikipedia.org/wiki/Maharaja_Surajmal_Institute_of_Technology	374	1360	2016-06-24
+62720582	13128	penn state dubois	Penn State DuBois	grid.447417.5	http://www.psuduboisathletics.com/sports/bsb/	http://en.wikipedia.org/wiki/Penn_State_DuBois	30	369	2016-06-24
+90264356	12737	stallergenes	Stallergenes	grid.420215.0	http://www.stallergenesgreer.com/	http://en.wikipedia.org/wiki/Stallergenes	103	2184	2016-06-24
+31439502	11470	university of benghazi	University of Benghazi	grid.411736.6	http://uob.edu.ly/	http://en.wikipedia.org/wiki/University_of_Benghazi	577	5869	2016-06-24
+184574504	13121	samrat ashok technological institute	Samrat Ashok Technological Institute		http://www.satiengg.in/	http://en.wikipedia.org/wiki/Samrat_Ashok_Technological_Institute	206	1222	2016-06-24
+137506752	11090	north china university of science and technology	North China University of Science and Technology	grid.440734.0	http://www.ncst.edu.cn/	http://en.wikipedia.org/wiki/North_China_University_of_Science_and_Technology	1642	24808	2016-06-24
+157227730	9926	university of east london	University of East London	grid.60969.30	http://www.uel.ac.uk/	http://en.wikipedia.org/wiki/University_of_East_London	11557	137587	2016-06-24
+31595395	10567	chengdu university of technology	Chengdu University of Technology	grid.411288.6	http://www.cdut.edu.cn/	http://en.wikipedia.org/wiki/Chengdu_University_of_Technology	9823	52757	2016-06-24
+2776106942	11546	archimage	Archimage			http://en.wikipedia.org/wiki/Archimage	44	1602	2018-01-05
+15922215	12554	national center for university entrance examinations	National Center for University Entrance Examinations	grid.460033.2	http://www.dnc.ac.jp/	http://en.wikipedia.org/wiki/National_Center_for_University_Entrance_Examinations	164	582	2016-06-24
+196576671	9036	landau institute for theoretical physics	Landau Institute for Theoretical Physics	grid.436090.8	http://www.itp.ac.ru/en/	http://en.wikipedia.org/wiki/Landau_Institute_for_Theoretical_Physics	5672	132077	2016-06-24
+169137262	13487	draxlmaier group	Dräxlmaier Group		http://www.draexlmaier.com/en/	http://en.wikipedia.org/wiki/Dräxlmaier_Group	82	49	2016-06-24
+180941496	8867	university of hyogo	University of Hyogo	grid.266453.0	http://www.u-hyogo.ac.jp/english/index.html	http://en.wikipedia.org/wiki/University_of_Hyogo	21767	363177	2016-06-24
+19970341	13009	university of sudbury	University of Sudbury	grid.449671.9	http://www.usudbury.ca/	http://en.wikipedia.org/wiki/University_of_Sudbury	159	407	2016-06-24
+63327873	13261	gulf university	Gulf University	grid.448935.7	http://www.gulfuniversity.edu.bh/	http://en.wikipedia.org/wiki/Gulf_University,_Bahrain	80	287	2016-06-24
+177214220	10635	nutrasweet	NutraSweet		http://www.nutrasweet.com/	http://en.wikipedia.org/wiki/NutraSweet	506	9005	2016-06-24
+870593139	10942	life insurance corporation of india	Life Insurance Corporation of India		http://www.licindia.in/	http://en.wikipedia.org/wiki/Life_Insurance_Corporation_of_India	1606	12209	2016-06-24
+32046576	13442	rafael landivar university	Rafael Landívar University	grid.441529.f	http://principal.url.edu.gt/	http://en.wikipedia.org/wiki/Rafael_Landívar_University	138	179	2016-06-24
+189109744	10688	indian school of mines	Indian School of Mines	grid.417984.7	http://www.ismdhanbad.ac.in/	http://en.wikipedia.org/wiki/Indian_School_of_Mines	5773	67189	2016-06-24
+1290190913	12540	german statistical office	German Statistical Office	grid.432326.2	http://www.destatis.de/	http://en.wikipedia.org/wiki/Federal_Statistical_Office_of_Germany	190	1056	2016-06-24
+59615845	12027	awadhesh pratap singh university	Awadhesh Pratap Singh University	grid.411073.0	http://apsurewa.ac.in/	http://en.wikipedia.org/wiki/Awadhesh_Pratap_Singh_University	436	4863	2016-06-24
+134219563	12594	awr corporation	AWR Corporation		http://awrcorp.com/	http://en.wikipedia.org/wiki/AWR_Corporation	21	172	2016-06-24
+204954614	11535	kangnam university	Kangnam University	grid.444138.e	http://www.kangnam.ac.kr/	http://en.wikipedia.org/wiki/Kangnam_University	470	1983	2016-06-24
+63664421	9205	swiss federal institute of aquatic science and technology	Swiss Federal Institute of Aquatic Science and Technology	grid.418656.8	http://www.eawag.ch/	http://en.wikipedia.org/wiki/Swiss_Federal_Institute_of_Aquatic_Science_and_Technology	8470	582950	2016-06-24
+87253917	10539	manchester university	Manchester University	grid.449071.f	http://www.manchester.edu/	http://en.wikipedia.org/wiki/Manchester_University_(Indiana)	290	4384	2016-06-24
+110813580	12661	st andrews university	St. Andrews University	grid.422527.4	http://www.sa.edu/	http://en.wikipedia.org/wiki/St._Andrews_University_(North_Carolina)	132	800	2016-06-24
+165830163	11321	kyushu women s university	Kyushu Women's University	grid.444083.f	http://www.kwuc.ac.jp/	http://en.wikipedia.org/wiki/Kyushu_Women's_University	480	5930	2016-06-24
+44206873	10714	morehead state university	Morehead State University	grid.260234.1	http://www.moreheadstate.edu/	http://en.wikipedia.org/wiki/Morehead_State_University	1463	19012	2016-06-24

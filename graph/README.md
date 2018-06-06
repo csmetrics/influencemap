@@ -27,12 +27,12 @@ The [Dev Tools page in Kibana](http://130.56.248.105:5601/app/kibana#/dev_tools/
 GET _cat/indices?v
 ```
 
-- Get `papers` index properties
+- Get *papers* index properties
 ```
 GET papers/_mapping
 ```
 
-- Search matching authors with confidence score.
+- Search matching *authors* with confidence score.
 ```
   GET authors/_search
   {
@@ -45,7 +45,7 @@ GET papers/_mapping
   }
 ```
 
-- Get (AuthorId, NormalizedName, PaperCount) if the PaperCount is greater than 500.
+- Get *(AuthorId, NormalizedName, PaperCount)* if the *PaperCount* is greater than 500.
 ```
   GET authors/_search
   {
@@ -61,13 +61,27 @@ GET papers/_mapping
   }
 ```
 
-- Get all the (paperId, AffiliationId) from AuthorIDs: 1983005719 and 2556241304
+- Get all the *(paperId, AffiliationId)* from *AuthorIDs: 1983005719 and 2556241304*
 ```
   GET paperauthoraffiliations/_search
   {
     "query": {
       "terms" : {
         "AuthorId" : [1983005719,2556241304]
+      }
+    }
+  }
+```
+
+- Search all coauthors of *paper 2758385003* and sort them by *AuthorSequenceNumber*.
+```
+  GET paperauthoraffiliations/_search
+  {
+    "sort" : "AuthorSequenceNumber",
+    "_source": ["AuthorId", "AffiliationId"],
+    "query": {
+      "terms" : {
+        "PaperId" : [2758385003]
       }
     }
   }
