@@ -57,7 +57,8 @@ def import_Affiliations(filepath):
 def import_Papers(filepath):
     print("Starting", filepath)
     init_es()
-    reader = csv.reader(open(filepath), delimiter="\t", quoting=csv.QUOTE_NONE)
+    myfile = (line.replace('\0','') for line in open(filepath))
+    reader = csv.reader(myfile, delimiter="\t", quoting=csv.QUOTE_NONE)
     for r in reader:
         try:
             doc = Papers()
@@ -89,10 +90,11 @@ def import_Papers(filepath):
             doc.Similarity = None
             doc.SourceType = None
             doc.SourceUrl = None
-            doc.save()
+            doc.save(op_type="create")
         except Exception as e:
-            print("[Error]", e)
-            print("in Paper:", r)
+            pass
+            #print("[Error]", e)
+            #print("in Paper:", r)
     print("Finished", filepath)
 
 
