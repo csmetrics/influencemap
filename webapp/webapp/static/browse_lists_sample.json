@@ -1,0 +1,30 @@
+{
+	"_id": "uuid",
+	"_type": "ANU Researcher",
+	"display name": "Stephen Blackburn",
+	"name": "stephen m blackburn",
+	"ids": [20000011, 20000002, 12222234],
+	"papers": [
+		{"20000011": [34343, 23423432, 23423]},
+		{"20000002": [12323, 12324, 45454]},
+		{"12222234": [34343, 2343, 5454]}
+	],
+	"affiliation": "CECS",
+	"keywords": ["computer science", "programming Language"]
+},
+{
+	"_id": "uuid",
+	"_type": "Fields Medalists",
+	"display name": "Lars Ahlfors",
+	"name": "lars ahlfors",
+	"year": 2007,
+	"ids": [20000011, 20000002, 12222234],
+	"papers": [
+		{"20000011": [34343, 23423432, 23423]},
+		{"20000002": [12323, 12324, 45454]},
+		{"12222234": [34343, 2343, 5454]}
+	],
+	"affiliation": "CECS",
+	"citations": "",
+	"keywords": ["donno", "programming Language"]
+}
