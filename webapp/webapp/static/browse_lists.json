@@ -10,9 +10,9 @@
 			"A sample list of researchers/projects/groups from the ANU (curation in progress)",
 		"list":
 			["Stephen Blackburn", "Kylie Catchpole", "Brendan Mckay", "Andrew Blakers", 
-			"Brian Anderson", "Wojciech Lipinski", 
-			"Graham Farquhar", "Chennupati Jagadish", "Susan Scott", 
-			"Philip Noel Pettit"]
+			"Brian Anderson", "Wojciech Lipinski", "Robert Williamson", 
+			"Graham Farquhar", "Chennupati Jagadish", "Susan Scott", "Peter MW Gill", 
+			"Philip Noel Pettit", "Craig Moritz", "David Lindenmayer", "Anna Wierzbicka"]
 	},
 	{
 		"display":
@@ -58,6 +58,35 @@
 			"Charles P. Thacker", "Leslie G. Valiant", "Judea Pearl[33]", "Silvio Micali", "Shafi Goldwasser", "Leslie Lamport", 
 			"Michael Stonebraker", "Martin E. Hellman", "Whitfield Diffie", "Tim Berners-Lee", "John L. Hennessy", "David A. Patterson"]
 	},
+	{
+		"display": "Publication Venues", 
+		"tab_id": "journal-conf-tab", 
+		"table_id": "journal-conf-table", 
+		"info": 
+			"A sample list of publication venues to plot, for debugging purposes.", 
+		"list":[
+				"Journal of the ACM", "The Lancet", "Nature Materials", "IEEE Transactions on Pattern Analysis and Machine Intelligence", 
+				"CVPR - Computer Vision and Pattern Recognition", "NIPS - Neural Information Processing Systems", "International World Wide Web Conferences"
+			]
+
+	}, 
+	{
+		"display": 
+			"University-Research-Field",
+		"tab_id": 
+			"univ-field-tab",
+		"table_id": 
+			"univ-field-table",
+		"info": 
+			"Examples list of (universities, field of research) tuples.",
+		"list":
+			["The Australian National University, Philosophy of science", "Oxford University, Philosophy of science", 
+			"The Australian National University, Photovoltaics", "Massachusetts Institute of Technology (MIT), Photovoltaics",
+			"The Australian National University, Nanotechnology", "Stanford University, Nanotechnology", 
+			"The Australian National University, Labour Economics", "London School of Economics and Political Science, Labour Economics", 
+			"The Australian National University, Artificial Intelligence", "California institute of technology, Artificial Intelligence"
+			]
+	}
 	{
 		"display": 
 			"Universities",
