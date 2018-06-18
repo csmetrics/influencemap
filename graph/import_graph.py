@@ -230,6 +230,10 @@ def import_FieldOfStudyChildren(filepath):
 
 
 def main(argv):
+    ### usage: e.g. `python import_graph Papers`
+    ### use csplit to split the huge file into small files.
+    ### need raw files under filedir/Papers/
+
     data_file = argv[1]
     print(data_file)
     options = {

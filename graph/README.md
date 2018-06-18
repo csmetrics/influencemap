@@ -6,7 +6,24 @@
 pip install -r requirements.txt
 ```
 
-2) run import_graph.ph
+2) pre-process raw files
+
+Use `csplit` to split the huge file into small files.
+`csplit` command splits a file into sections determined by context lines. Output pieces of FILE separated to files 'xx00', 'xx01', ..., and output byte counts of each piece to standard output.
+
+usage: `csplit -k filename numlines {repeat}`
+
+*-k* option forces csplit to not remove output files in case of error.
+
+```
+### need raw files under {filedir}/Papers/
+mkdir Papers
+cd Papers
+csplit -k ../Papers.txt 1000000 {500}
+```
+
+
+3) run import_graph.ph
 
 ```
 nohup python import_grapy.py Authors > log_authors &
