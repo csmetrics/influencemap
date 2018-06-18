@@ -1,0 +1,100 @@
+2775832036	14950	bifidobacterium asteroides	Bifidobacterium asteroides	media_common.cataloged_instance	3	5	125	2018-01-05
+2775844904	14278	enmap	EnMAP		3	213	1435	2018-01-05
+2775859947	25000	least darter	Least darter	biology.organism_classification	3	8	40	2018-01-05
+133522229	12319	international earth rotation and reference systems service	International Earth Rotation and Reference Systems Service	education.field_of_study	3	756	5290	2016-06-24
+2775870133	14359	hits clip	HITS-CLIP		3	61	6429	2018-01-05
+11821877	10967	distributive property	Distributive property	education.field_of_study	2	8639	69797	2016-06-24
+2775895684	14649	leiosporoceros	Leiosporoceros	biology.organism_classification	2	15	259	2018-01-05
+74645175	11627	symbol rate	Symbol rate	measurement_unit.dimension	3	3780	39709	2016-06-24
+2775905019	10337	in silico	In silico	education.field_of_study	2	14282	165772	2018-01-05
+51460	15088	zermelo fraenkel set theory	Zermelo–Fraenkel set theory	education.field_of_study	2	1335	10322	2016-06-24
+2775910822	15869	xylogone	Xylogone	biology.organism_classification	2	13	33	2018-01-05
+2775922542	14450	non monogamy	Non-monogamy		2	108	1043	2018-01-05
+2775932868	15438	medical slang	Medical slang		3	20	61	2018-01-05
+2775933424	13997	model minority	Model minority		2	835	13036	2018-01-05
+2775935837	10353	sudden cardiac death	Sudden cardiac death	medicine.disease	2	17957	372936	2018-01-05
+76975	15869	quantitative behavioral finance	Quantitative behavioral finance	education.field_of_study	2	7	11	2016-06-24
+2775943088	15869	felderimyia	Felderimyia	biology.organism_classification	3	4	0	2018-01-05
+2775959044	15869	protosquillidae	Protosquillidae	biology.organism_classification	3	5	21	2018-01-05
+2775963940	25000	rocket turbine engine	Rocket turbine engine		2	1	0	2018-01-05
+2775964013	13050	transposon tagging	Transposon tagging	education.field_of_study	4	415	19818	2018-01-05
+2775964785	15835	alburnoides eichwaldii	Alburnoides eichwaldii	biology.organism_classification	3	20	13	2018-01-05
+2775965589	14695	nyctalopia	Nyctalopia	medicine.symptom	2	223	1859	2018-01-05
+2775966113	14485	maxillopoda	Maxillopoda	biology.organism_classification	3	161	1924	2018-01-05
+2775969318	10582	diencephalon	Diencephalon	medicine.brain	2	4614	162672	2018-01-05
+2775973192	13646	indian shield	Indian Shield		3	479	9733	2018-01-05
+2775977032	25000	plated ware	Plated ware		2	3	2	2018-01-05
+2775979441	13334	bipolar signal	Bipolar signal	education.field_of_study	2	208	2398	2018-01-05
+2775985582	25000	lactarius rufulus	Lactarius rufulus	biology.organism_classification	3	1	0	2018-01-05
+2775998707	13034	declaration of helsinki	Declaration of Helsinki	education.field_of_study	2	954	17913	2018-01-05
+2775999396	15298	microscopy and microanalysis	Microscopy and Microanalysis		3	204	1070	2018-01-05
+2776014081	15869	false etymology	False etymology		2	12	9	2018-01-05
+2776018674	25000	narceus gordanus	Narceus gordanus		3	3	8	2018-01-05
+66879421	13656	ingress filtering	Ingress filtering	education.field_of_study	4	210	3439	2016-06-24
+2776028057	25000	typhlodromina	Typhlodromina	biology.organism_classification	3	3	14	2018-01-05
+2776031049	25000	acrobrycon	Acrobrycon	biology.organism_classification	2	2	8	2018-01-05
+2776034654	25000	iodocephalus	Iodocephalus	biology.organism_classification	3	1	1	2018-01-05
+2776036158	13916	ettingshausen effect	Ettingshausen effect	education.field_of_study	3	136	638	2018-01-05
+2776041671	15762	crepidium	Crepidium	biology.organism_classification	3	22	10	2018-01-05
+2776057901	14346	weber christian disease	Weber–Christian disease	medicine.disease	3	403	1926	2018-01-05
+98318862	15869	core plus mathematics project	Core-Plus Mathematics Project	education.field_of_study	3	17420	103916	2016-06-24
+2776065491	15810	ceracini	Ceracini	biology.organism_classification	3	6	2	2018-01-05
+2776093600	14929	neochloridaceae	Neochloridaceae	biology.organism_classification	2	8	129	2018-01-05
+35519122	11710	segmented regression	Segmented regression	education.field_of_study	3	2909	138870	2016-06-24
+2776100452	13790	entamoeba invadens	Entamoeba invadens		3	327	4971	2018-01-05
+2776104166	11856	major urinary proteins	Major urinary proteins		2	215	9090	2018-01-05
+2776104994	15869	abrophyllum	Abrophyllum	biology.organism_classification	2	2	40	2018-01-05
+2776107696	15789	conus brunneus	Conus brunneus	biology.organism_classification	2	8	19	2018-01-05
+2776122643	25000	xylyl bromide	Xylyl bromide	medicine.drug	2	5	14	2018-01-05
+2776129358	25000	pseudoliparis amblystomopsis	Pseudoliparis amblystomopsis	biology.organism_classification	2	3	71	2018-01-05
+200446496	11335	rosenbrock function	Rosenbrock function	education.field_of_study	2	241	3301	2016-06-24
+2776137096	25000	alligator shear	Alligator shear		2	3	17	2018-01-05
+2776140751	25000	principles of grid generation	Principles of grid generation	education.field_of_study	2	3	4	2018-01-05
+31627804	11244	clique	Clique (graph theory)	education.field_of_study	5	713	16457	2016-06-24
+2776143102	14906	howel evans syndrome	Howel–Evans syndrome	medicine.disease	2	6	101	2018-01-05
+2776143424	14222	phase perturbation	Phase perturbation		2	237	1736	2018-01-05
+2776153732	25000	pollalesta	Pollalesta	biology.organism_classification	3	8	24	2018-01-05
+2776165358	15732	seddera	Seddera	biology.organism_classification	3	4	5	2018-01-05
+165150422	12929	paddle	Paddle	education.field_of_study	2	7026	32803	2016-06-24
+2776180966	25000	irish syntax	Irish syntax		2	12	79	2018-01-05
+2776187335	14826	drepanidae	Drepanidae	biology.organism_classification	3	129	658	2018-01-05
+2776193557	15727	proterix	Proterix	biology.organism_classification	2	5	14	2018-01-05
+39511729	25000	prevalent and shy sets	Prevalent and shy sets	education.field_of_study	2	5	56	2016-06-24
+2776219138	13905	hslvu	HslVU	biology.protein	3	79	5399	2018-01-05
+2776225496	14132	coarse grained modeling	Coarse-grained modeling		2	137	1070	2018-01-05
+2776228810	14316	blepharochalasis	Blepharochalasis	medicine.disease	3	199	956	2018-01-05
+2776236669	25000	nepenthes chaniana	Nepenthes chaniana	biology.organism_classification	2	1	4	2018-01-05
+2776238801	15869	marine steam engine	Marine steam engine		2	26	12	2018-01-05
+2776244197	15869	melanopsis buccinoidea	Melanopsis buccinoidea	biology.organism_classification	3	7	16	2018-01-05
+141650431	9858	soil salinity	Soil salinity	education.field_of_study	2	19453	206752	2016-06-24
+2776271787	25000	crotyl chloride	Crotyl chloride	chemistry.chemical_compound	4	28	262	2018-01-05
+2776272983	10704	risk of infection	Risk of infection		2	8581	167585	2018-01-05
+2776274671	12803	political opportunism	Political opportunism		3	209	2151	2018-01-05
+2776283344	14802	hyracodontidae	Hyracodontidae	biology.organism_classification	2	12	131	2018-01-05
+59218005	14329	horizontal and vertical	Horizontal and vertical	education.field_of_study	2	46397	433377	2016-06-24
+2776297934	14870	thunbergia	Thunbergia	biology.organism_classification	2	153	707	2018-01-05
+8184842	12088	microform	Microform	law.invention	2	6777	5741	2016-06-24
+2776315941	12845	alternative tourism	Alternative tourism		4	1073	10404	2018-01-05
+2776316633	15869	pleurodema somuncurense	Pleurodema somuncurense	biology.organism_classification	3	3	2	2018-01-05
+27826641	10659	magnetization transfer	Magnetization transfer	education.field_of_study	2	7199	122518	2016-06-24
+2776336204	11948	variable speed wind turbine	Variable speed wind turbine		3	1373	17078	2018-01-05
+2776339971	25000	xorides rufipes	Xorides rufipes	biology.organism_classification	3	2	2	2018-01-05
+2776345819	25000	hextet	Hextet	education.field_of_study	2	3	44	2018-01-05
+2776350102	14519	phallusia	Phallusia	biology.organism_classification	2	152	1413	2018-01-05
+2776350326	12917	tresor	TRESOR		2	2195	768	2018-01-05
+2776351454	15595	cyclocarya	Cyclocarya	biology.organism_classification	2	319	1456	2018-01-05
+137789499	13736	bond insurance	Bond insurance	education.field_of_study	4	4496	21742	2016-06-24
+2776358728	15389	sabella	Sabella	biology.organism_classification	2	164	1472	2018-01-05
+137798554	10123	instantaneous phase	Instantaneous phase	education.field_of_study	2	6082	70336	2016-06-24
+2776373337	25000	geckonia	Geckonia	biology.organism_classification	3	5	193	2018-01-05
+177076380	12775	foundationalism	Foundationalism	education.field_of_study	2	1590	11253	2016-06-24
+51427946	11346	apodization	Apodization	education.field_of_study	2	3350	27382	2016-06-24
+2776391627	15831	patia	Patia	biology.organism_classification	2	197	202	2018-01-05
+90697248	11796	character animation	Character animation	education.field_of_study	4	1240	12414	2016-06-24
+94624221	13060	equivalent weight	Equivalent weight	education.field_of_study	2	1777	11252	2016-06-24
+2776399085	15278	luciocephalus	Luciocephalus	biology.organism_classification	3	4	17	2018-01-05
+2776399217	13895	food chemicals codex	Food Chemicals Codex		3	35	742	2018-01-05
+2776403107	15765	dyscravia	Dyscravia	medicine.disease	2	2	6	2018-01-05
+2776406884	15313	cranaidae	Cranaidae	biology.organism_classification	4	35	187	2018-01-05
+165315851	15597	reference designator	Reference designator	education.field_of_study	2	13	10	2016-06-24
+2776413552	25000	strategy stealing argument	Strategy-stealing argument		2	1	5	2018-01-05

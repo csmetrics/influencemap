@@ -1,3 +1,5 @@
+*Obsoleted - no longer use GraphEngine (2018-06-18)*
+
 ## Running GraphEngine on Windows server + Remote Desktop from Linux
 
 ### 0) Remote Desktop from a Linux Computer with RDesktop
