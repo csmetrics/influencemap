@@ -1,0 +1,30 @@
+[
+  {
+  	"Type": "anu_researchers",
+  	"NormalizedName": "Stephen Blackburn",
+  	"DisplayName": "stephen m blackburn",
+  	"AuthorIds": [20000011, 20000002, 12222234],
+  	"Papers": [
+  		{"AuthorId": 20000011, "PaperIds": [34343, 23423432, 23423]},
+  		{"AuthorId": 20000002, "PaperIds": [12323, 12324, 45454]},
+  		{"AuthorId": 12222234, "PaperIds": [34343, 2343, 5454]}
+  	],
+  	"Affiliation": "CECS",
+  	"Keywords": ["computer science", "programming Language"]
+  },
+  {
+  	"Type": "fields_medalists",
+  	"NormalizedName": "Lars Ahlfors",
+  	"DisplayName": "lars ahlfors",
+  	"Year": 2007,
+  	"AuthorIds": [20000011, 20000002, 12222234],
+  	"Papers": [
+  		{"AuthorId": 20000011, "PaperIds": [34343, 23423432, 23423]},
+  		{"AuthorId": 20000002, "PaperIds": [12323, 12324, 45454]},
+  		{"AuthorId": 12222234, "PaperIds": [34343, 2343, 5454]}
+  	],
+  	"Affiliation": "CECS",
+  	"Keywords": ["computer science", "programming Language"],
+  	"Citation": ""
+  }
+]
