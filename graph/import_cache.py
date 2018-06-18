@@ -3,7 +3,7 @@ from multiprocessing import Pool
 from elasticsearch_dsl.connections import connections
 from datetime import datetime
 from config import conf
-from schema_cache import AuthorGroup, PaperGroup
+from schema_cache import AuthorGroup, PaperGroup, AuthorInfo, PaperInfo
 
 cache_types = {
     "author_group": [
@@ -67,6 +67,84 @@ def import_paper_group_cache(filepath):
     print("Finished", filepath)
 
 
+# sample
+def import_author_info():
+    init_es()
+    author = AuthorInfo()
+    author.NormalizedName = "lexing xie"
+    author.DisplayName = "Lexing Xie"
+    author.AuthorIds = [2100918400, 2799110339]
+    author.Papers = [{
+            "AuthorId": 2100918400,
+            "PaperIds": [111111, 222222, 333333]
+        },{
+            "AuthorId": 2799110339,
+            "PaperIds": [444444, 555555, 666666]
+        }]
+    author.CreatedDate = datetime.now()
+    author.meta.id = generate_uuid(author.NormalizedName)
+    author.save()
+    print("Cache added", author.NormalizedName)
+
+# sample
+def import_paper_info():
+    init_es()
+    paper = PaperInfo()
+    paper.meta.id = paper.PaperId = 2771061228
+    paper.Authors = [{
+        "AuthorId": 111111,
+        "AffiliationId": 100000
+    },{
+        "AuthorId": 222222,
+        "AffiliationId": 100000
+    }]
+    paper.References = [{
+        "PaperId": 2394483183,
+        "Author": [{
+            "AuthorId": 111111,
+            "AffiliationId": 100000
+        },{
+            "AuthorId": 222222,
+            "AffiliationId": 100000
+        }],
+        "ConferenceId": 232323
+    },{
+        "PaperId": 1294483183,
+        "Author": [{
+            "AuthorId": 333333,
+            "AffiliationId": 400000
+        },{
+            "AuthorId": 222222,
+            "AffiliationId": 100000
+        }],
+        "JournalId": 454545
+    }]
+    paper.Citations = [{
+        "PaperId": 2394483183,
+        "Author": [{
+            "AuthorId": 111111,
+            "AffiliationId": 100000
+        },{
+            "AuthorId": 222222,
+            "AffiliationId": 100000
+        }],
+        "ConferenceId": 232323
+    },{
+        "PaperId": 1294483183,
+        "Author": [{
+            "AuthorId": 333333,
+            "AffiliationId": 400000
+        },{
+            "AuthorId": 222222,
+            "AffiliationId": 100000
+        }],
+        "JournalId": 454545
+    }]
+    paper.CreatedDate = datetime.now()
+    paper.save()
+    print("Cache added - paper", paper.PaperId)
+
+
 def main(argv):
     data_dir = "cache_sample"
     for data_file in os.listdir(data_dir):
@@ -78,4 +156,6 @@ def main(argv):
             import_paper_group_cache(filepath)
 
 if __name__ == "__main__":
-    main(sys.argv)
+    # main(sys.argv)
+    # import_author_info()
+    import_paper_info()

@@ -4,6 +4,7 @@ from elasticsearch_dsl import DocType, Date, Integer, \
 
 # e.g. anu_researchers, fields_medalists, turing_award_winners
 class AuthorGroup(DocType):
+    # meta.id = hash(Type-NormalizedName)
     Type = Keyword()
     NormalizedName = Text(required = True, analyzer = "standard")
     DisplayName = Text(required = True, analyzer = "standard")
@@ -19,6 +20,7 @@ class AuthorGroup(DocType):
 
 # e.g. conf/journals, univ+field
 class PaperGroup(DocType):
+    # meta.id = hash(Year-Field-NormalizedName)
     Type = Keyword()
     NormalizedName = Text(required = True, analyzer = "standard")
     DisplayName = Text(required = True, analyzer = "standard")
@@ -30,3 +32,68 @@ class PaperGroup(DocType):
 
     class Meta:
         index = "browse_paper_group"
+
+
+# general Author information cache
+class AuthorInfo(DocType):
+    # meta.id = hash(NormalizedName)
+    NormalizedName = Text(required = True, analyzer = "standard")
+    DisplayName = Text(required = True, analyzer = "standard")
+    AuthorIds = Long(multi = True)
+    Papers = Object(
+        multi = True,
+        properties = {
+            "AuthorId": Long(required = True),
+            "PaperIds": Long(multi = True)
+        }
+    )
+    CreatedDate = Date(required = True)
+
+    class Meta:
+        index = "author_info"
+
+# general Paper information cache
+class PaperInfo(DocType):
+    # meta.id = PaperId
+    PaperId = Long(required = True)
+    Authors = Object(
+        multi = True,
+        properties = {
+            "AuthorId": Long(required = True),
+            "AffiliationId": Long(required = True)
+        }
+    )
+    References = Object(
+        multi = True,
+        properties = {
+            "PaperId": Long(required = True),
+            "Authors": Object(
+                multi = True,
+                properties = {
+                    "AuthorId": Long(required = True),
+                    "AffiliationId": Long(required = True)
+                }
+            ),
+            "ConferenceId": Long(),
+            "JournalId": Long()
+        }
+    )
+    Citations = Object(
+        multi = True,
+        properties = {
+            "PaperId": Long(required = True),
+            "Authors": Object(
+                multi = True,
+                properties = {
+                    "AuthorId": Long(required = True),
+                    "AffiliationId": Long(required = True)
+                }
+            ),
+            "ConferenceId": Long(),
+            "JournalId": Long()
+        }
+    )
+    CreatedDate = Date(required = True)
+
+    class Meta:
+        index = "paper_info"
