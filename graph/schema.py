@@ -22,7 +22,7 @@ class BrowseCache(DocType):
     CreatedDate = Date(required = True)
 
     class Meta:
-        index = "cache"
+        index = "browse_cache"
 
 
 class Authors(DocType):

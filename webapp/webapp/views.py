@@ -5,6 +5,7 @@ from django.views.decorators.csrf import csrf_exempt
 from datetime import datetime
 from .utils import progressCallback, resetProgress
 from .graph import processdata
+from .elastic import search_cache
 
 
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
@@ -114,6 +115,10 @@ def browse(request):
     browse_list_filename = os.path.join(BASE_DIR, 'webapp/static/browse_lists.json')
     with open(browse_list_filename, 'r') as fp:
         browse_list = json.load(fp)
+
+    for entity in browse_list:
+        res = search_cache(entity["cache_index"], entity["cache_type"])
+        entity["names"] = [n["_source"]["DisplayName"] for n in res]
 
     data = {
         'list': browse_list,

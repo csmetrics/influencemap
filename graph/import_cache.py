@@ -9,6 +9,7 @@ cache_types = [
     "anu_researchers",
     "fields_medalists",
     "turing_award_winners",
+    "universities",
     "conferences"
 ]
 
