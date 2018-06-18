@@ -2,13 +2,11 @@ import os, sys, csv
 from multiprocessing import Pool
 from elasticsearch_dsl.connections import connections
 from datetime import datetime
+from config import conf
 from schema import *
 
-es_host = "130.56.248.105:9200"
-filedir = "/localdata/MAG2018/data/graph/2018-04-13"
-
 def init_es():
-    connections.create_connection(hosts = es_host, timeout=20)
+    connections.create_connection(hosts = conf.get("elasticsearch.hostname"), timeout=20)
     print("Elasticsearch connections initialized")
 
 
@@ -234,8 +232,10 @@ def main(argv):
     ### use csplit to split the huge file into small files.
     ### need raw files under filedir/Papers/
 
+    filedir = os.path.join(conf.get("data.filedir"), conf.get("data.version"))
     data_file = argv[1]
-    print(data_file)
+    print("Importing", data_file)
+
     options = {
         "Authors": import_Authors,
         "Affiliations": import_Affiliations,
@@ -252,7 +252,7 @@ def main(argv):
     p = Pool(4)
     if data_file in options:
         filepath = os.path.join(filedir, data_file)
-        print("Reading files in dir", )
+        print("Reading files in dir", filepath)
         files = [os.path.join(filedir, data_file, f) for f in sorted(os.listdir(filepath))]
         print(files)
         p.map(options[data_file], files)
