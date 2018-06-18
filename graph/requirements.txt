@@ -1,2 +1,0 @@
-elasticsearch_dsl
-pyhocon

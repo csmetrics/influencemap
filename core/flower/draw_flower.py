@@ -9,11 +9,11 @@ from datetime import datetime
 from matplotlib import rc
 
 # Config setup
-from config import *
+from core.config import *
 
-def draw_flower(egoG=None, ax=None, 
-                   plot_setting={'max_marker':30, 'max_line': 6., 'min_line': 2, 
-                                 "sns_palette": "RdBu", "out_palette": "Reds", "in_palette": "Blues", 
+def draw_flower(egoG=None, ax=None,
+                   plot_setting={'max_marker':30, 'max_line': 6., 'min_line': 2,
+                                 "sns_palette": "RdBu", "out_palette": "Reds", "in_palette": "Blues",
                                  "num_colors": 200, "delta_text":0.02}, filename=None):
 
     print('\n---\n{} start drawing flower'.format(datetime.now()))
@@ -29,7 +29,7 @@ def draw_flower(egoG=None, ax=None,
 
     # Get center node string
     center_node = egoG.graph['ego']
-        
+
     xroot = 0.
     yroot = 0.
     ax.plot(xroot, yroot, 'o', c=[.5, .5, .5], markersize=1.2*ps['max_marker'], fillstyle='full', mec='0.5')
@@ -82,7 +82,7 @@ def draw_flower(egoG=None, ax=None,
 
         # draw the node
         ax.plot(xp, yp, 'o', markersize=int(size), c=dot_colors[int(colour)],
-                alpha=.9, mec=node_mec, mew=node_mew) 
+                alpha=.9, mec=node_mec, mew=node_mew)
 
         # Angle of text dependent on side of flower
         if i < NUM_LEAVES / 2:
@@ -168,11 +168,11 @@ def draw_cite_volume(egoG=None, ax=None, filename=None):
     fig.text(0, 0, 'Pub Dates: ' + egoG.graph['date_range'], horizontalalignment='left', verticalalignment='bottom', size=10)
     fig.text(0, 0 + 0.035, 'Flower Type: ' + egoG.graph['mapping'], horizontalalignment='left', verticalalignment='bottom', size=10)
     fig.text(0, 0 + 0.07, 'Ego: ' + center_node, horizontalalignment='left', verticalalignment='bottom', size=10)
-    
+
     #for tl in ax.get_yticklabels():
     #    tl.set_color(bar_colrs3[mdx])
     #for tl in ax2.get_yticklabels():
-    #    tl.set_color(bar_colrs2[mdx]) 
+    #    tl.set_color(bar_colrs2[mdx])
     plt.tight_layout()
 
     if filename != None:

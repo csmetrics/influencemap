@@ -15,12 +15,12 @@ Including another URLconf
 """
 from django.conf.urls import url
 from django.contrib import admin
-from . import views, utils
+from webapp import views, utils
 
 urlpatterns = [
     url(r'^$', views.main),
     url(r'^create', views.create),
-    url(r'^browse', views.browse), 
+    url(r'^browse', views.browse),
     url(r'^search', views.search),
     url(r'^submit/', views.submit),
     url(r'^progress', utils.progress),

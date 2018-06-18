@@ -1,6 +1,4 @@
 from enum import Enum
-from mag_interface import *
-from mag_user_query import *
 import os
 
 # Type of entities for the flower

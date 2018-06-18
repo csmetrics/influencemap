@@ -1,12 +1,6 @@
 ### How to import graph data to Elasticsearch
 
-1) install prerequisites
-
-```
-pip install -r requirements.txt
-```
-
-2) pre-process raw files
+#### 1) pre-process raw files
 
 Use `csplit` to split the huge file into small files.
 `csplit` command splits a file into sections determined by context lines. Output pieces of FILE separated to files 'xx00', 'xx01', ..., and output byte counts of each piece to standard output.
@@ -23,7 +17,7 @@ csplit -k ../Papers.txt 1000000 {500}
 ```
 
 
-3) run import_graph.ph
+#### 2) run import_graph.ph
 
 ```
 nohup python import_grapy.py Authors > log_authors &

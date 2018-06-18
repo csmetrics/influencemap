@@ -4,13 +4,13 @@ import sys
 import pandas as pd
 import numpy as np
 from datetime import datetime
-from mkAff import getAuthor
-from entity_type import *
-from flower_helpers import *
-from influence_weight import get_weight
+from core.utils.mkAff import getAuthor
+from core.search.entity_type import *
+from core.flower.flower_helpers import *
+from core.utils.influence_weight import get_weight
 
 # Config setup
-from config import *
+from core.config import *
 
 # Creates dictionaries for the weight scores
 def generate_scores(conn, e_map, data_df, inc_self=False):
@@ -21,7 +21,7 @@ def generate_scores(conn, e_map, data_df, inc_self=False):
     df = pd.concat(data_df.values())
 
     influence_list = list()
-    
+
     for i, row in df.iterrows():
         # Filter self-citations
         if not inc_self and row[e_map.get_center_prefix() + '_self_cite']:
@@ -69,7 +69,7 @@ def generate_score_df(influence_df, e_map, ego, coauthors=set([]), score_year_mi
             score_year_min = influence_df['influence_year'].min()
         else:
             score_year_min = min(influence_df['influence_year'].max(), score_year_min)
-            
+
 
         # Set maximum year if none set
         if score_year_max == None:
@@ -104,7 +104,7 @@ def generate_score_df(influence_df, e_map, ego, coauthors=set([]), score_year_mi
 
     # Add meta data
     score_df.mapping = ' to '.join([e_map.get_center_text(), e_map.get_leave_text()])
-    
+
     # Set publication year
     score_df.date_range = '{} to {}'.format(score_year_min, score_year_max)
 

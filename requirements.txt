@@ -1,5 +1,0 @@
-networkx
-seaborn
-requests
-django
-numpy

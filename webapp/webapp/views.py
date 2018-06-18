@@ -3,26 +3,21 @@ from django.shortcuts import render
 from django.http import JsonResponse
 from django.views.decorators.csrf import csrf_exempt
 from datetime import datetime
-from .utils import progressCallback, resetProgress
-from .graph import processdata
-from .elastic import search_cache
+from webapp.utils import progressCallback, resetProgress
+from webapp.graph import processdata
+from webapp.elastic import search_cache
 
+import core.search.entity_type as ent
+from core.search.parse_academic_search import parse_search_results
+from core.search.academic_search import *
+from core.flower.draw_flower_test import draw_flower
+from core.flower.flower_bloomer import getFlower, getPreFlowerData
+from core.utils.mkAff import getAuthor, getJournal, getConf, getAff, getConfPID, getJourPID, getConfPID, getAffPID
+from core.search.mag_flower_bloom import *
+from core.search.get_entity import entity_from_name
+from core.search.influence_df import get_filtered_score
 
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
-PYTHON_DIR = os.path.join(os.path.dirname(BASE_DIR), 'python')
-sys.path.insert(0, PYTHON_DIR)
-
-import entity_type as ent
-from parse_academic_search import parse_search_results
-from academic_search import *
-from draw_flower_test import draw_flower
-from flower_bloomer import getFlower, getPreFlowerData
-from mkAff import getAuthor, getJournal, getConf, getAff, getConfPID, getJourPID, getConfPID, getAffPID
-from mag_flower_bloom import *
-
-
-from get_entity import entity_from_name
-from influence_df import get_filtered_score
 
 # initialise as no saved pids
 saved_pids = dict()

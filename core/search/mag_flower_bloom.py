@@ -1,7 +1,7 @@
-import entity_type as ent
-from flower_bloom_data import score_df_to_graph
-from mag_interface import *
-from mag_aggregate import *
+import core.search.entity_type as ent
+from core.flower.flower_bloom_data import score_df_to_graph
+from core.search.mag_interface import *
+from core.search.mag_aggregate import *
 
 
 """
@@ -49,7 +49,7 @@ def get_entity_score_df(name, e_type):
     if e_type == ent.Entity_type.AUTH:
         return get_auth_score_df(name)
 
-    
+
 def get_flower(score_df, leaves, bot_year=None, top_year=None):
     """
     """

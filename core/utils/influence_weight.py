@@ -1,6 +1,6 @@
 import operator
 import pandas as pd
-from entity_type import *
+from core.search.entity_type import *
 from functools import reduce
 
 weights = {

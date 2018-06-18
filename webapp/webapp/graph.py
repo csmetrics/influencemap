@@ -2,10 +2,6 @@ import os, sys, json
 import numpy as np
 from operator import itemgetter
 
-BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
-PYTHON_DIR = os.path.join(os.path.dirname(BASE_DIR), 'python')
-sys.path.insert(0, PYTHON_DIR)
-
 def processdata(gtype, egoG):
     center_node = egoG.graph['ego']
 
@@ -84,4 +80,3 @@ def processdata(gtype, egoG):
         } for s, t, v in links]
     chartdata = sorted(chartdata, key=itemgetter("sum"))
     return { "nodes": list(nodedata.values()), "links": linkdata, "bars": chartdata }
-

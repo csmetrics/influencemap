@@ -1,8 +1,8 @@
 import os
 import pandas as pd
-from config import *
-from mag_interface import *
-from score_influence import score_entities
+from core.config import *
+from core.search.mag_interface import *
+from core.search.score_influence import score_entities
 
 def entity_to_citation_score(entity):
     """
@@ -119,7 +119,7 @@ def get_influence_df(entity):
 def get_score_df(entity, leaf):
     cache_str = entity.cache_str() + leaf.ident
     cache_path = os.path.join(CACHE_SCORE_DIR, cache_str)
-    
+
     try:
         score_df = pd.read_pickle(cache_path)
 
@@ -131,7 +131,7 @@ def get_score_df(entity, leaf):
         os.chmod(cache_path, 0o777)
 
     return score_df
-        
+
 
 def get_filtered_score(entity_list, filters, leaves):
     score_list = list()

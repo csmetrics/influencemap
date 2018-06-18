@@ -1,13 +1,12 @@
 import os, json, requests
 import http.client, urllib.request, urllib.parse, urllib.error, base64
 import pandas as pd
-import entity_type as ent
 import functools
 import itertools
 import operator
 import sys
 from datetime import datetime
-from config import *
+from core.config import *
 
 API_IDX = 1
 

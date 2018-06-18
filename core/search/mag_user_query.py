@@ -1,6 +1,6 @@
-import entity_type as ent
 import pandas as pd
-from mag_interface import *
+from core.search.mag_interface import *
+import core.search.entity_type as ent
 
 
 def paperq_to_dict(paper_query):

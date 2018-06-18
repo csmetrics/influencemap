@@ -4,7 +4,7 @@ import numpy as np
 from datetime import datetime
 
 # Config setup
-from config import *
+from core.config import *
 
 # Function to normalise data for a singular series
 def normalise_singular_linear(series):
@@ -25,7 +25,7 @@ def normalise_singular_linear(series):
 def normalise_colour_dif(series):
     max_val = series.max()
     min_val = series.min()
-    
+
     normalisation = max(abs(max_val), abs(min_val))
 
     # Cases if max equal to min
@@ -135,7 +135,7 @@ if __name__ == "__main__":
 
     #for year in range(influence_df_min_year(influence_dict), 2018):
     #    score_df = generate_score_df(influence_dict, e_map, user_in, coauthors=coauthors, score_year_max=year)
-    #    
+    #
     #    flower_graph = score_df_to_graph(score_df)
 
     #    path_name = os.path.join(plot_dir, '{}_flower_{}.png'.format(user_in, year))

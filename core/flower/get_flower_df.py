@@ -5,12 +5,12 @@ import numpy as np
 import json
 import os
 from datetime import datetime
-from flower_helpers import is_self_cite
-from entity_type import *
-from influence_weight import get_weight
+from core.flower.flower_helpers import is_self_cite
+from core.search.entity_type import *
+from core.utils.influence_weight import get_weight
 
 # Config setup
-from config import *
+from core.config import *
 
 REF_LABELS = ['citing', 'paper_citing', 'rc_citing', 'paper_cited']
 INFO_COLS = ['auth_id', 'auth_name', 'auth_count', 'conf_id', 'conf_abv', 'conf_name', 'journ_id', 'journ_name', 'affi_id', 'affi_name', 'pub_year']
@@ -110,7 +110,7 @@ def score_information(df, entity_ids, ignore_papers):
 
     # Join selfcite
     df = pd.merge(df, sc_df, on='paper_map', sort=False)
-    
+
     return df.drop(columns=['paper_map'])
 
 # Generates combined information tables + deals with caching

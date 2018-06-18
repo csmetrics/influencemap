@@ -1,6 +1,6 @@
 import pandas as pd
-import entity_type as ent
-from mag_interface import *
+import core.search.entity_type as ent
+from core.search.mag_interface import *
 
 
 def score_entity_conf(score_df, entity_map):

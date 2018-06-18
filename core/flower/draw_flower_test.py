@@ -3,7 +3,7 @@ import itertools
 from datetime import datetime
 from collections import Counter
 from operator import itemgetter
-from academic_search import *
+from core.search.academic_search import *
 
 SIZE_OF_FLOWER = 25
 

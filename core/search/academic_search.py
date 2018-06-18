@@ -1,6 +1,6 @@
 import os, json, requests, sys
 import http.client, urllib.request, urllib.parse, urllib.error, base64
-from parse_academic_search import *
+from core.search.parse_academic_search import *
 
 MAS_URL_PREFIX = "https://api.labs.cognitive.microsoft.com"
 headers = {
@@ -107,17 +107,17 @@ entity_search_details = {
   "institution": {
     "expr": "AfN='{}'",
     "attributes": "Id,AfN,DAfN,CC,ECC,E",
-    "link_to_paper": "AA.AfId" 
+    "link_to_paper": "AA.AfId"
   },
   "conference": {
     "expr": "CN='{}'",
     "attributes": "Id,CN,DCN,CC,ECC,F.FN,F.FId,PC",
-    "link_to_paper": "C.CId" 
+    "link_to_paper": "C.CId"
   },
   "journal": {
     "expr": "JN='{}'",
     "attributes": "Id,DJN,JN,CC,ECC,PC",
-    "link_to_paper": "J.JId" 
+    "link_to_paper": "J.JId"
   },
     "paper": {
     "expr": "Ti='{}'",
@@ -137,7 +137,7 @@ def get_search_results(keyword, entityType):
     data = query_academic_search("get", url, query)
 
     return data
-    
+
 
 def get_papers_from_entity_ids(entity_ids, entityType):
     url = os.path.join(MAS_URL_PREFIX, "academic/v1.0/evaluate")
