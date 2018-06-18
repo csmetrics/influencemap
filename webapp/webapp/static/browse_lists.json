@@ -1,19 +1,19 @@
 [
 	{
-		"display": 
+		"display":
 			"ANU Researchers",
-		"tab_id": 
+		"tab_id":
 			"anu-tab",
-		"table_id": 
+		"table_id":
 			"anu-table",
-		"info": 
+		"info":
 			"A sample list of researchers/projects/groups from the ANU (curation in progress)",
 		"list":
-			["Stephen Blackburn", "Kylie Catchpole", "Brendan Mckay", "Andrew Blakers", 
-			"Brian Anderson", "Wojciech Lipinski", "Robert Williamson", 
-			"Graham Farquhar", "Chennupati Jagadish", "Susan Scott", "Peter MW Gill", 
+			["Stephen Blackburn", "Kylie Catchpole", "Brendan Mckay", "Andrew Blakers",
+			"Brian Anderson", "Wojciech Lipinski", "Robert Williamson",
+			"Graham Farquhar", "Chennupati Jagadish", "Susan Scott", "Peter MW Gill",
 			"Philip Noel Pettit", "Craig Moritz", "David Lindenmayer", "Anna Wierzbicka"],
-		"cache_index": "browse_cache",
+		"cache_index": "browse_author_group",
 		"cache_type": "anu_researchers"
 	},
 	{
@@ -21,7 +21,7 @@
 		"tab_id": "fields-medalists-tab",
 		"table_id": "fields-medalists-table",
 		"info": "The Fields Medal is awarded every four years to distinguished academics who make significant contributions to Mathematics.",
-		"cache_index": "browse_cache",
+		"cache_index": "browse_author_group",
 		"cache_type": "fields_medalists"
 	},
 	{
@@ -29,62 +29,60 @@
 		"tab_id":	"turing-awards-tab",
 		"table_id": "turing-awards-table",
 		"info": "The Turing Award is presented by the ACM and is commonly considered to be the most prestigous award in Computer Science.",
-		"cache_index": "browse_cache",
+		"cache_index": "browse_author_group",
 		"cache_type": "turing_award_winners"
 	},
 	{
-		"display": "Publication Venues", 
-		"tab_id": "journal-conf-tab", 
-		"table_id": "journal-conf-table", 
-		"info": 
-			"A sample list of publication venues to plot, for debugging purposes.", 
+		"display": "Publication Venues",
+		"tab_id": "journal-conf-tab",
+		"table_id": "journal-conf-table",
+		"info":
+			"A sample list of publication venues to plot, for debugging purposes.",
 		"list":[
-				"Journal of the ACM", "The Lancet", "Nature Materials", "IEEE Transactions on Pattern Analysis and Machine Intelligence", 
+				"Journal of the ACM", "The Lancet", "Nature Materials", "IEEE Transactions on Pattern Analysis and Machine Intelligence",
 				"CVPR - Computer Vision and Pattern Recognition", "NIPS - Neural Information Processing Systems", "International World Wide Web Conferences"
 			],
-		"cache_index": "browse_cache",
+		"cache_index": "browse_paper_group",
 		"cache_type": "publication_venue"
-
-	}, 
+	},
 	{
-		"display": 
+		"display":
 			"University-Research-Field",
-		"tab_id": 
+		"tab_id":
 			"univ-field-tab",
-		"table_id": 
+		"table_id":
 			"univ-field-table",
-		"info": 
+		"info":
 			"Examples list of (universities, field of research) tuples.",
 		"list":
-			["The Australian National University, Philosophy of science", "Oxford University, Philosophy of science", 
+			["The Australian National University, Philosophy of science", "Oxford University, Philosophy of science",
 			"The Australian National University, Photovoltaics", "Massachusetts Institute of Technology (MIT), Photovoltaics",
-			"The Australian National University, Nanotechnology", "Stanford University, Nanotechnology", 
-			"The Australian National University, Labour Economics", "London School of Economics and Political Science, Labour Economics", 
+			"The Australian National University, Nanotechnology", "Stanford University, Nanotechnology",
+			"The Australian National University, Labour Economics", "London School of Economics and Political Science, Labour Economics",
 			"The Australian National University, Artificial Intelligence", "California institute of technology, Artificial Intelligence"
 			],
-		"cache_index": "browse_cache",
+		"cache_index": "browse_paper_group",
 		"cache_type": "univ_field"
-	
-	}
+	},
 	{
-		"display": 
+		"display":
 			"Universities",
-		"tab_id": 
+		"tab_id":
 			"universities-tab",
-		"table_id": 
+		"table_id":
 			"universities-table",
-		"info": 
+		"info":
 			"Browse from a range of some of the most prestigous universities in the world.",
 		"list":
-			["Massachusetts Institute of Technology (MIT)", "Stanford University", "Harvard University", 
-			"University of Cambridge", "California Institute of Technology (Caltech)", "University of Oxford", 
-			"UCL (University College London)", "ETH Zurich - Swiss Federal Institute of Technology", 
-			"Imperial College London", "University of Chicago", "Princeton University", "National University of Singapore (NUS)", 
-			"Nanyang Technological University, Singapore (NTU)", "Ecole Polytechnique F\u00e9d\u00e9rale de Lausanne (EPFL)", 
-			"Yale University", "Cornell University", "Johns Hopkins University", "University of Pennsylvania", 
-			"The University of Edinburgh", "Columbia University", "King's College London", "The Australian National University", 
+			["Massachusetts Institute of Technology (MIT)", "Stanford University", "Harvard University",
+			"University of Cambridge", "California Institute of Technology (Caltech)", "University of Oxford",
+			"UCL (University College London)", "ETH Zurich - Swiss Federal Institute of Technology",
+			"Imperial College London", "University of Chicago", "Princeton University", "National University of Singapore (NUS)",
+			"Nanyang Technological University, Singapore (NTU)", "Ecole Polytechnique F\u00e9d\u00e9rale de Lausanne (EPFL)",
+			"Yale University", "Cornell University", "Johns Hopkins University", "University of Pennsylvania",
+			"The University of Edinburgh", "Columbia University", "King's College London", "The Australian National University",
 			"University of Michigan", "Tsinghua University", "Duke University"],
-		"cache_index": "browse_cache",
+		"cache_index": "browse_paper_group",
 		"cache_type": "universities"
 	}
 ]

@@ -3,28 +3,6 @@ from elasticsearch_dsl import DocType, Date, Integer, \
         Float, Long, Text, Keyword, analyzer, Object
 
 
-class BrowseCache(DocType):
-    Type = Keyword()
-    NormalizedName = Text(required = True, analyzer = "standard")
-    DisplayName = Text(required = True, analyzer = "standard")
-    Year = Integer()
-    AuthorIds = Long(multi = True)
-    Papers = Object(
-        multi = True,
-        properties = {
-            "AuthorId": Long(required = True),
-            "PaperIds": Long(multi = True)
-        }
-    )
-    Affiliation = Text(analyzer = "standard")
-    Citation = Text(analyzer = "standard")
-    Keywords = Keyword(multi = True)
-    CreatedDate = Date(required = True)
-
-    class Meta:
-        index = "browse_cache"
-
-
 class Authors(DocType):
     AuthorId = Long(required = True)
     Rank = Integer(required = True)

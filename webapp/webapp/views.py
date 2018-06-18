@@ -118,7 +118,7 @@ def browse(request):
 
     for entity in browse_list:
         res = search_cache(entity["cache_index"], entity["cache_type"])
-        entity["names"] = [n["_source"]["DisplayName"] for n in res]
+        entity["names"] = list(set([n["_source"]["DisplayName"] for n in res]))
 
     data = {
         'list': browse_list,
