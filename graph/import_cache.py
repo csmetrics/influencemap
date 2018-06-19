@@ -156,6 +156,6 @@ def main(argv):
             import_paper_group_cache(filepath)
 
 if __name__ == "__main__":
-    # main(sys.argv)
+    main(sys.argv)
     # import_author_info()
-    import_paper_info()
+    # import_paper_info()

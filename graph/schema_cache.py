@@ -11,7 +11,7 @@ class AuthorGroup(DocType):
     Year = Integer()
     Affiliation = Text(analyzer = "standard")
     Citation = Text(analyzer = "standard")
-    Keywords = Keyword(multi = True)
+    Keywords = Text(multi = True, analyzer = "standard")
     CreatedDate = Date(required = True)
 
     class Meta:
@@ -27,7 +27,7 @@ class PaperGroup(DocType):
     Year = Integer()
     PaperIds = Long(multi = True)
     Field = Text(analyzer = "standard")
-    Keywords = Keyword(multi = True)
+    Keywords = Text(multi = True, analyzer = "standard")
     CreatedDate = Date(required = True)
 
     class Meta:
@@ -63,6 +63,9 @@ class PaperInfo(DocType):
             "AffiliationId": Long(required = True)
         }
     )
+    ConferenceId = Long()
+    JournalId = Long()
+    Year = Integer()
     References = Object(
         multi = True,
         properties = {
@@ -75,7 +78,8 @@ class PaperInfo(DocType):
                 }
             ),
             "ConferenceId": Long(),
-            "JournalId": Long()
+            "JournalId": Long(),
+            "Year": Integer()
         }
     )
     Citations = Object(
@@ -90,7 +94,8 @@ class PaperInfo(DocType):
                 }
             ),
             "ConferenceId": Long(),
-            "JournalId": Long()
+            "JournalId": Long(),
+            "Year": Integer()
         }
     )
     CreatedDate = Date(required = True)
