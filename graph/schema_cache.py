@@ -60,7 +60,7 @@ class PaperInfo(DocType):
         multi = True,
         properties = {
             "AuthorId": Long(required = True),
-            "AffiliationId": Long(required = True)
+            "AffiliationId": Long()
         }
     )
     ConferenceId = Long()
@@ -74,7 +74,7 @@ class PaperInfo(DocType):
                 multi = True,
                 properties = {
                     "AuthorId": Long(required = True),
-                    "AffiliationId": Long(required = True)
+                    "AffiliationId": Long()
                 }
             ),
             "ConferenceId": Long(),
@@ -90,7 +90,7 @@ class PaperInfo(DocType):
                 multi = True,
                 properties = {
                     "AuthorId": Long(required = True),
-                    "AffiliationId": Long(required = True)
+                    "AffiliationId": Long()
                 }
             ),
             "ConferenceId": Long(),
