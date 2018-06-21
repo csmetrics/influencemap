@@ -13,6 +13,8 @@ class AuthorGroup(DocType):
     Citation = Text(analyzer = "standard")
     Keywords = Text(multi = True, analyzer = "standard")
     CreatedDate = Date(required = True)
+    AuthorIDs = Long(multi = True)
+    Url = Text()
 
     class Meta:
         index = "browse_author_group"
