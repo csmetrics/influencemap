@@ -52,6 +52,39 @@ def import_Affiliations(filepath):
     print("Finished", filepath)
 
 
+def update_Papers_FieldsOfStudy(filepath):
+    ### need preprocessing on PaperFieldsOfStudy
+    ### sort --parallel=8 -T /mnt/tmp -uo sorted_PaperFieldsOfStudy.txt PaperFieldsOfStudy.txt
+    print("Starting", filepath)
+    init_es()
+    myfile = (line.replace('\0','') for line in open(filepath))
+    reader = csv.reader(myfile, delimiter="\t", quoting=csv.QUOTE_NONE)
+
+    last_paperid = 0
+    fields = []
+    for r in reader:
+        paperid = int(r[0])
+        if last_paperid != 0 and last_paperid != paperid:
+            try:
+                p = Papers.get(id=last_paperid)
+                p.update(FieldOfStudy=fields)
+            except Exception as e:
+                pass
+            fields = []
+
+        fields.append({
+            "FieldOfStudyId": int(r[1]),
+            "Similarity": float(r[2])
+        })
+        last_paperid = paperid
+
+    try:
+        p = Papers.get(id=last_paperid)
+        p.update(FieldOfStudy=fields)
+    except Exception as e:
+        pass
+
+
 def import_Papers(filepath):
     print("Starting", filepath)
     init_es()
@@ -84,8 +117,7 @@ def import_Papers(filepath):
             doc.CreatedDate = datetime.strptime(r[20], "%Y-%m-%d")
 
             doc.LanguageCode = None
-            doc.FieldOfStudyId = None
-            doc.Similarity = None
+            doc.FieldOfStudy = None
             doc.SourceType = None
             doc.SourceUrl = None
             doc.save(op_type="create")
@@ -99,7 +131,8 @@ def import_Papers(filepath):
 def import_PaperReferences(filepath):
     print("Starting", filepath)
     init_es()
-    reader = csv.reader(open(filepath), delimiter="\t", quoting=csv.QUOTE_NONE)
+    myfile = (line.replace('\0','') for line in open(filepath))
+    reader = csv.reader(myfile, delimiter="\t", quoting=csv.QUOTE_NONE)
     for r in reader:
         try:
             doc = PaperReferences()
@@ -258,4 +291,6 @@ def main(argv):
         p.map(options[data_file], files)
 
 if __name__ == "__main__":
-    main(sys.argv)
+    # main(sys.argv)
+    filename = os.path.join(conf.get("data.filedir"), conf.get("data.version"), "sorted_PaperFieldsOfStudy.txt")
+    update_Papers_FieldsOfStudy(filename)
