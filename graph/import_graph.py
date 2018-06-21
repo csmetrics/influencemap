@@ -65,8 +65,11 @@ def update_Papers_FieldsOfStudy(filepath):
     for r in reader:
         paperid = int(r[0])
         if last_paperid != 0 and last_paperid != paperid:
-            p = Papers.get(id=last_paperid)
-            p.update(FieldOfStudy=fields)
+            try:
+                p = Papers.get(id=last_paperid)
+                p.update(FieldOfStudy=fields)
+            except Exception as e:
+                pass
             fields = []
 
         fields.append({
@@ -75,8 +78,11 @@ def update_Papers_FieldsOfStudy(filepath):
         })
         last_paperid = paperid
 
-    p = Papers.get(id=last_paperid)
-    p.update(FieldOfStudy=fields)
+    try:
+        p = Papers.get(id=last_paperid)
+        p.update(FieldOfStudy=fields)
+    except Exception as e:
+        pass
 
 
 def import_Papers(filepath):
@@ -286,5 +292,5 @@ def main(argv):
 
 if __name__ == "__main__":
     # main(sys.argv)
-    filename = os.path.join(conf.get("data.filedir"), conf.get("data.version"), "PaperFieldsOfStudy.txt")
+    filename = os.path.join(conf.get("data.filedir"), conf.get("data.version"), "sorted_PaperFieldsOfStudy.txt")
     update_Papers_FieldsOfStudy(filename)
