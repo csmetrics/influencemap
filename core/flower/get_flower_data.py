@@ -5,7 +5,7 @@ import pandas as pd
 import numpy as np
 from datetime import datetime
 from core.utils.mkAff import getAuthor
-from core.search.entity_type import *
+from core.utils.entity_type import *
 from core.flower.flower_helpers import *
 from core.utils.influence_weight import get_weight
 

@@ -5,7 +5,7 @@ import operator
 import sys
 import re
 import json
-import core.search.entity_type as et 
+import core.utils.entity_type as et 
 from difflib import SequenceMatcher
 
 db_PAA = '/localdata/u5798145/influencemap/paper.db'

@@ -1,5 +1,5 @@
 import pandas as pd
-import core.search.entity_type as ent
+import core.utils.entity_type as ent
 from core.search.mag_interface import *
 
 
