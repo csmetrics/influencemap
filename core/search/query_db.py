@@ -4,332 +4,215 @@ Functions for querying database for specific information:
   - Paper information
 
 Each query goes through a cache layer before presenting information.
+Without Pandas.
 
-date:   19.06.18
+date:   24.06.18
 author: Alexander Soen
 '''
 
-import pandas as pd
 from graph.config import conf
 from elasticsearch import Elasticsearch
 from elasticsearch_dsl import Search
-from graph.schema_cache import PaperInfo
-from datetime import datetime
+from core.search.query_cache import base_paper_cache_query
 
+get_paper_id = lambda x: x['PaperId']
 
-def from_query(query, q_key, res_dict, r_key):
-    try:
-        res_dict[r_key] = query[q_key]
-    except KeyError:
-        res_dict[r_key] = None
-
-
-def nan_to_none(df):
-    ''' Convert dataframe with NaN values to None.
+def papers_prop_query(paper_id):
+    ''' Get properties of a paper.
     '''
-    return df.where((pd.notnull(df)), None)
-
-
-def author_name_db_query(author_name):
-    '''
-    Query database for results.
-
-    TODO: Add query limit for papers, possibly return generator to continuously
-          query for new papers.
-    '''
-    # Normalise author name
-    author_name = author_name.lower()
-
     # Elastic search client
     client = Elasticsearch(conf.get("elasticsearch.hostname"))
-    
-    # Search for authors
-    authors_targets = ['AuthorId', 'NormalizedName', 'DisplayName']
-
-    authors_s = Search(index = 'authors', using = client)
-    authors_s = authors_s.query('match_phrase', NormalizedName = author_name)
-    authors_s = authors_s.source(authors_targets)
-
-    # Convert authors to dictionary format
-    authors_list = list()
-    for authors in authors_s.scan():
-        row_dict = dict()
-        for target in authors_targets:
-            from_query(authors, target, row_dict, target)
-            #row_dict[target] = authors[target]
-
-        authors_list.append(row_dict)
-
-    # Authors dataframe
-    authors_df = pd.DataFrame(authors_list)
-    
-    # Check for empty results
-    if authors_df.empty:
-        # Return None
-        return None
-    
-    # Author IDs to search over PAA
-    author_ids = authors_df['AuthorId']
-
-    paa_list = list()
-    paa_targets = ['AuthorId', 'PaperId']
-
-    # For each of the authors ids
-    for author_id in author_ids:
-        # Search PAA database for papers
-        paa_s = Search(index = 'paperauthoraffiliations', using = client)
-        paa_s = paa_s.query('match', AuthorId = author_id)
-        paa_s = paa_s.source(paa_targets)
-
-        # Convert to dictionary format
-        for paa in paa_s.scan():
-            row_dict = dict()
-            for target in paa_targets:
-                from_query(paa, target, row_dict, target)
-                row_dict[target] = paa[target]
-
-            paa_list.append(row_dict)
-
-    # PAA dataframe
-    paa_df = pd.DataFrame(paa_list)
-
-    # Return join of dataframes
-    res_df = pd.merge(authors_df, paa_df, how = 'inner', on = 'AuthorId')
-    return None if res_df.empty else res_df
-
-
-def paper_prop_query(paper_id_list):
-    ''' Generates pandas dataframe for all fields in paper_info cache apart
-        from citation and reference information.
-    '''
-    # Remove duplicates in paper id list
-    paper_id_list = list(set(paper_id_list))
-
-    # Elastic search client
-    client = Elasticsearch(conf.get("elasticsearch.hostname"))
-
-    papers_list = list()
-    paa_list    = list()
 
     # Targets
     papers_targets = ['PaperId', 'ConferenceInstanceId', 'JournalId', 'Year']
-    paa_targets    = ['PaperId', 'AuthorId', 'AffiliationId']
 
-    # Iterate through the paper ids
-    for paper_id in paper_id_list:
-        # Query for papers
-        papers_s = Search(index = 'papers', using = client)
-        papers_s = papers_s.query('match', PaperId = paper_id)
-        papers_s = papers_s.source(papers_targets)
+    # Query results
+    papers_res = dict()
 
-        # Query for paper affiliation
-        paa_s = Search(index = 'paperauthoraffiliations', using = client)
-        paa_s = paa_s.query('match', PaperId = paper_id)
-        paa_s = paa_s.source(paa_targets)
+    # Query for papers
+    papers_s = Search(index = 'papers', using = client)
+    papers_s = papers_s.query('match', PaperId = paper_id)
+    papers_s = papers_s.source(papers_targets)
 
-        # Convert papers into dictionary format
-        for paper in papers_s.scan():
-            row_dict = dict()
-            for target in papers_targets:
-                from_query(paper, target, row_dict, target)
-                #row_dict[target] = paper[target]
+    # Convert papers into dictionary format
+    for paper in papers_s.scan():
+        # Parse results to dictionaries
+        for target in papers_targets:
+            try:
+                papers_res[target] = paper[target]
+            except KeyError:
+                pass
 
-            papers_list.append(row_dict)
+        # There only should be a single results per paper id
+        break
 
-        # Convert paa into dictionary format
-        for paa in paa_s.scan():
-            row_dict = dict()
-            for target in paa_targets:
-                from_query(paa, target, row_dict, target)
-                #row_dict[target] = paa[target]
-
-            paa_list.append(row_dict)
-
-    # After parsing paper ids, convert into dataframes and join
-    papers_df = pd.DataFrame(papers_list, columns = papers_targets)
-    paa_df    = pd.DataFrame(paa_list   , columns = paa_targets)
-
-    # Renaming conference
-    papers_df = papers_df.rename(columns = \
-                    {'ConferenceInstanceId': 'ConferenceId'})
-
-    res_df = pd.merge(papers_df, paa_df, how = 'inner', on = 'PaperId')
-    return res_df
+    # Check for no results and return
+    return papers_res if papers_res else None
 
 
-def paper_cite_info_query(paper_id_list):
-    ''' Generates pandas dataframe for all fields in paper_info cache apart
-        from citation and reference information.
+def paa_prop_query(paper_id):
+    ''' Get properties of a paper.
     '''
-    # Remove duplicates in paper id list
-    paper_id_list = list(set(paper_id_list))
-
+    
     # Elastic search client
     client = Elasticsearch(conf.get("elasticsearch.hostname"))
 
-    # Query fields
-    ref_f    = ['PaperId', 'PaperReferenceId']
-    #col_name = ['PaperTo', 'PaperFrom'] #TODO Verify ordering here is correct
+    # Targets
+    paa_targets = ['AuthorId', 'AffiliationId']
 
-    cite_info_list = list()
-    cite_me = list()
-    me_cite = list()
-    
-    for paper_id in paper_id_list:
-        pref_s = Search(index = 'paperreferences', using = client)
-        pref_s = pref_s.query('multi_match', query = paper_id, fields = ref_f)
+    # Query results
+    paa_list = list()
 
-        # Convert into dictionary format
-        for cite_info in pref_s.scan():
-            row_dict = dict()
+    # Query for paper affiliation
+    paa_s = Search(index = 'paperauthoraffiliations', using = client)
+    paa_s = paa_s.query('match', PaperId = paper_id)
+    paa_s = paa_s.source(paa_targets)
 
-            # Determine what type of citation
-            if paper_id == cite_info[ref_f[0]]:
-                row_dict['PaperId'] = cite_info[ref_f[1]]
-                cite_me.append(row_dict)
-            else:
-                row_dict['PaperId'] = cite_info[ref_f[0]]
-                me_cite.append(row_dict)
-
-
-    # After parsing paper ids, convert into dataframes
-    ref  = pd.DataFrame(me_cite, columns = ['PaperId'])
-    cite = pd.DataFrame(cite_me, columns = ['PaperId'])
-    return ref, cite
-
-
-def paper_ids_db_query(paper_id_list):
-    ''' Generates pandas dataframe for paper_info
-    '''
-    #res_dict = dict()
-    res_list = list()
-
-    # Iterate through paper ids
-    for paper_id in paper_id_list:
-        # Get properties
-        paper_prop = paper_prop_query([paper_id])
-
-        # Check if properties empty
-        if paper_prop.empty:
-            continue
-
-        # Get paper links
-        ref, cite  = paper_cite_info_query([paper_id])
-
-        # Get properties of citation papers
-        ref  = paper_prop_query(list(ref['PaperId']))
-        cite = paper_prop_query(list(cite['PaperId']))
-
-        # Put data into dictionary format, also convert nan to none
-        paper_res = dict()
-        paper_res['Properties'] = nan_to_none(paper_prop)
-        paper_res['References'] = nan_to_none(ref)
-        paper_res['Citations']  = nan_to_none(cite)
-
-        # Add to result dictionary
-        #res_dict[paper_id] = paper_res
-        res_list.append(paper_res)
-
-    return res_list #res_dict
-
-
-def df_to_doc_dict(df, targets):
-    ''' Converts dataframe into list of dictionary of targets.
-    '''
-    # Subcolumns of properties for authors
-    sub_df = df[targets].drop_duplicates()
-
-    res_list = list()
-
-    # Iterate through the author information
-    for _, row in sub_df.iterrows():
+    # Convert paa into dictionary format
+    for paa in paa_s.scan():
         row_dict = dict()
-        for target in targets:
-            row_dict[target] = row[target]
 
-        res_list.append(row_dict)
+        # Parse results to dictionaries
+        for target in paa_targets:
+            try:
+                row_dict[target] = paa[target]
+            except KeyError:
+                pass
+
+        # Add to query list
+        paa_list.append(row_dict)
+
+    # Return as dictionary
+    return {'Authors': paa_list}
     
-    return res_list
 
-
-def paper_df_to_doc(paper_df_dict):
-    ''' Converts from dictionary of pandas dataframes to PaperInfo DocType.
+def pr_links_query(paper_id):
+    ''' Get properties of a paper.
     '''
-    paper = PaperInfo()
+    # Elastic search client
+    client = Elasticsearch(conf.get("elasticsearch.hostname"))
 
-    # Target lists
-    property_targets = ['PaperId', 'ConferenceId', 'JournalId', 'Year']
-    author_targets = ['AuthorId', 'AffiliationId']
+    # Targets
+    pr_targets = ['PaperId', 'PaperReferenceId']
 
-    # Property values
-    paper_id      = list(paper_df_dict['Properties']['PaperId'])[0]
-    conference_id = list(paper_df_dict['Properties']['ConferenceId'])[0]
-    journal_id    = list(paper_df_dict['Properties']['JournalId'])[0]
-    year          = list(paper_df_dict['Properties']['Year'])[0]
+    # Query results
+    references = list()
+    citations  = list()
 
-    # Update property values
-    paper.meta.id      = paper_id
-    paper.PaperId      = paper_id
-    paper.ConferenceId = conference_id
-    paper.JournalId    = journal_id
-    paper.Year         = year
+    # Query for paper references
+    pref_s = Search(index = 'paperreferences', using = client)
+    pref_s = pref_s.query('multi_match', query = paper_id, fields = pr_targets)
 
-    # Authors
-    paper.Authors = df_to_doc_dict(paper_df_dict['Properties'], author_targets)
+    # Convert into dictionary format
+    for cite_info in pref_s.scan():
 
-    # Do same as above for each reference paper
-    ref_list = list()
-    ref_gp = paper_df_dict['References'].groupby(property_targets)
-    for ref_prop, ref_df in ref_gp:
-        ref_dict = dict()
+        # Determine what type of citation
+        if paper_id == cite_info[pr_targets[0]]:
+            citations.append(cite_info[pr_targets[1]])
+        else:
+            references.append(cite_info[pr_targets[0]])
 
-        # Add properties
-        for prop, val in zip(property_targets, ref_prop):
-            ref_dict[prop] = val
+    # Return results as a dictionary
+    return {'References': references, 'Citations': citations}
+
+
+def base_paper_db_query(paper_id):
+    ''' Generates basic paper_info dictionary/json from basic databases (not
+        cache).
+    '''
+    # Get paper ids
+    papers_prop = papers_prop_query(paper_id)
+
+    # Check for empty results
+    if not papers_prop:
+        return None
+
+    # Get author information
+    paa_prop = paa_prop_query(paper_id)
+
+    # Combine results for the basic paper information
+    return dict(papers_prop, **paa_prop)
+
+
+def link_paper_info_query(paper_id, cache = True):
+    ''' Gets the basic paper information required for the links.
+    '''
+    # Get citation links
+    pr_links = pr_links_query(paper_id)
+
+    # Query results
+    link_res = dict()
+
+    # Iterate through the link types
+    for link_type, link_papers in pr_links.items():
+
+        # Resulting link results
+        link_res[link_type] = list()
+
+        # Iterate through the papers
+        for link_paper in link_papers:
+
+            # If cache true
+            if cache:
+                # Check cache for entries
+                link_paper_prop = base_paper_cache_query(link_paper)
+            else:
+                # Set default to None
+                link_paper_prop = None
+            
+            # If empty result
+            if not link_paper_prop:
+                # Do full search
+                link_paper_prop = base_paper_db_query(link_paper)
+
+            # Check if query has result
+            if link_paper_prop:
+                link_res[link_type].append(link_paper_prop)
+
+        # Return results
+        return link_res
+
+
+def paper_info_db_query(paper_id):
+    ''' Generate paper info dictionary/json from base databases (not cache).
+    '''
+    # Query basic properties
+    paper_info = base_paper_db_query(paper_id)
+
+    # Check if result is empty
+    if not paper_info:
+        return None
+
+    # Add citation link information
+    paper_info.update(link_paper_info_query(paper_id))
     
-        # Add authors
-        ref_dict['Authors'] = df_to_doc_dict(ref_df, author_targets)
-        
-        ref_list.append(ref_dict)
+    # Return paper_info
+    return paper_info
 
-    # Do same as above for each citation paper
-    cite_list = list()
-    cite_gp = paper_df_dict['Citations'].groupby(property_targets)
-    for cite_prop, cite_df in cite_gp:
-        cite_dict = dict()
-
-        # Add properties
-        for prop, val in zip(property_targets, cite_prop):
-            cite_dict[prop] = val
-    
-        # Add authors
-        cite_dict['Authors'] = df_to_doc_dict(cite_df, author_targets)
-        
-        cite_list.append(cite_dict)
-
-    print(cite_list)
-    # Attach reference and citations lists to paper
-    paper.References = ref_list
-    paper.Citations  = cite_list
-
-    # Creation date
-    paper.CreatedDate = datetime.now()
-
-    return paper
 
 if __name__ == '__main__':
     # TESTING
+    from core.search.query_db import author_name_db_query
+    from elasticsearch import helpers
+    from core.search.query_utility import paper_info_to_cache_json
+    from core.search.query_cache import paper_info_cache_query
+
     author_df = author_name_db_query('antony l hosking')
-    print(author_df)
 
     a_papers = list(author_df['PaperId'])
-    paper_ids = paper_ids_db_query(a_papers)
-    print(paper_ids)
+    cache_json = list()
 
-    from elasticsearch_dsl.connections import connections
-    connections.create_connection(hosts = conf.get("elasticsearch.hostname"), timeout=20)
+    for paper in a_papers:
+        paper_info_cache_query(paper)
 
-    for paper_id in paper_ids:
-        paper_doc = paper_df_to_doc(paper_id)
-        print(paper_doc)
-        paper_doc.save()
+'''
+    for paper in a_papers:
+        print(paper)
+        paper_info = paper_info_db_query(paper)
+        if paper_info:
+            cache_json.append(paper_info_to_cache_json(paper_info))
+        print('---\n')
+
+    client = Elasticsearch(conf.get("elasticsearch.hostname"))
+    helpers.bulk(client, cache_json)
+'''
