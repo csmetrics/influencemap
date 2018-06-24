@@ -58,8 +58,13 @@ class Papers(DocType):
     CreatedDate = Date(required = True)
 
     LanguageCode = Keyword() # from PaperLanguages
-    FieldOfStudyId = Long() # from PaperFieldsOfStudy
-    Similarity = Float() # from PaperFieldsOfStudy
+    FieldOfStudy = Object( # from PaperFieldsOfStudy
+        multi = True,
+        properties = {
+            "FieldOfStudyId": Long(required = True),
+            "Similarity": Float()
+        }
+    )
     SourceType = Integer() # from PaperUrls
     SourceUrl = Text() # from PaperUrls
 
