@@ -6,7 +6,7 @@ import json
 import os
 from datetime import datetime
 from core.flower.flower_helpers import is_self_cite
-from core.search.entity_type import *
+from core.utils.entity_type import *
 from core.utils.influence_weight import get_weight
 
 # Config setup

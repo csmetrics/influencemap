@@ -1,6 +1,6 @@
 import pandas as pd
 from core.search.mag_interface import *
-import core.search.entity_type as ent
+import core.utils.entity_type as ent
 
 entity_search_details = {
   "AUTH": {

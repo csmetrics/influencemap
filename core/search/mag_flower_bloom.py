@@ -1,4 +1,4 @@
-import core.search.entity_type as ent
+import core.utils.entity_type as ent
 from core.flower.flower_bloom_data import score_df_to_graph
 from core.search.mag_interface import *
 from core.search.mag_aggregate import *

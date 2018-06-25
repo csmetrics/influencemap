@@ -1,4 +1,7 @@
 from enum import Enum
+from core.config import *
+from core.search.mag_user_query import *
+import pandas as pd
 import os
 
 # Type of entities for the flower
@@ -73,9 +76,21 @@ class Entity:
         except FileNotFoundError:
             self.paper_df = ent_paper_df(self)
 
-            if self.paper_df is not None:
+#            if self.paper_df is not None:
                 # Cache
-                self.paper_df.to_pickle(cache_path)
-                os.chmod(cache_path, 0o777)
+#                self.paper_df.to_pickle(cache_path)
+#                os.chmod(cache_path, 0o777)
 
         return self.paper_df
+
+def ent_paper_df(entity):
+    """
+    """
+    print("Generating scores for:", entity.entity_id)
+    if entity.entity_type == Entity_type.CONF:
+        entity_update = get_ent_paper_df_conf(entity)
+    else:
+        entity_update = get_ent_paper_df_gen(entity)
+    print("Finishing generating scores for:", entity.entity_id)
+
+    return entity_update

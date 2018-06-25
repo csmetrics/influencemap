@@ -7,15 +7,18 @@ from webapp.utils import progressCallback, resetProgress
 from webapp.graph import processdata
 from webapp.elastic import search_cache
 
-import core.search.entity_type as ent
+import core.utils.entity_type as ent
 from core.search.parse_academic_search import parse_search_results
 from core.search.academic_search import *
 from core.flower.draw_flower_test import draw_flower
 from core.flower.flower_bloomer import getFlower, getPreFlowerData
 from core.utils.mkAff import getAuthor, getJournal, getConf, getAff, getConfPID, getJourPID, getConfPID, getAffPID
 from core.search.mag_flower_bloom import *
-from core.search.get_entity import entity_from_name
+from core.utils.get_entity import entity_from_name
 from core.search.influence_df import get_filtered_score
+from core.search.search import search_name
+from graph.save_cache import saveNewAuthorCache
+from core.flower.high_level_get_flower import get_flower_data_high_level
 
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 
@@ -114,6 +117,12 @@ def browse(request):
     for entity in browse_list:
         res = search_cache(entity["cache_index"], entity["cache_type"])
         entity["names"] = list(set([n["_source"]["DisplayName"] for n in res]))
+        entity["entities"] = [n["_source"] for n in res]
+        for e in (entity["entities"]):
+            if "Keywords" in e:
+                e["Keywords"] = ", ".join(e["Keywords"])
+            if "AuthorIds" in e:
+                e["AuthorIds"] = json.dumps(e["AuthorIds"])
 
     data = {
         'list': browse_list,
@@ -177,6 +186,63 @@ def search(request):
     print(data[0])
     return JsonResponse({'entities': data}, safe=False)
 
+
+'''
+s = {
+    'author': ('<h5>{DisplayName}</h5><p>Papers: {PaperCount}, Citations: {CitationCount}</p></div>'),
+         # '<div style="float: left; width: 50%; padding: 0;"><p>Papers: {paperCount}</p></div>'
+         # '<div style="float: right; width: 50%; text-align: right; padding: 0;"<p>Citations: {citations}</p></div>'),
+    'conference': ('<h5>{DisplayName}</h5>'
+        '<div style="float: left; width: 50%; padding: 0;"><p>Papers: {PaperCount}</p></div>'
+        '<div style="float: right; width: 50%; text-align: right; padding: 0;"<p>Citations: {CitationCount}</p></div>'),
+    'institution': ('<h5>{DisplayName}</h5>'
+        '<div style="float: left; width: 50%; padding: 0;"><p>Papers: {PaperCount}</p></div>'
+        '<div style="float: right; width: 50%; text-align: right; padding: 0;"<p>Citations: {CitationCount}</p></div>'),
+    'journal': ('<h5>{DisplayName}</h5>'
+        '<div style="float: left; width: 50%; padding: 0;"><p>Papers: {PaperCount}</p></div>'
+        '<div style="float: right; width: 50%; text-align: right; padding: 0;"<p>Citations: {CitationCount}</p></div>'),
+    'paper': ('<h5>{PaperTitle}</h5>'
+        '<div><p>Citations: {CitationCount}</p></div>')
+}
+
+idkeys = {'paper': 'PaperId', 'author': 'AuthorId', 'institution': 'AffiliationId', 'journal': 'JournalId', 'conference': 'ConferenceSeriesId'}
+
+@csrf_exempt
+def search(request):
+    global idkeys
+    keyword = request.POST.get("keyword")
+    entity_type = request.POST.get("option")
+    data = search_name(keyword, entity_type)
+    idkey = idkeys[entity_type]
+    for i in range(len(data)):
+        # print(entity)
+        entity = {'data': data[i]}
+        entity['display-info'] = s[entity_type].format(**entity['data'])
+        entity['table-id'] = "{}_{}".format(entity_type, entity['data'][idkey])
+        data[i] = entity
+        # print(entity)
+    print(data[0])
+    return JsonResponse({'entities': data}, safe=False)
+'''
+
+@csrf_exempt
+def manualcache(request):
+    print(request.POST.get('type'))
+    data = (json.loads(request.POST.get('ent_data')))
+    print(request)
+    print(request.POST)
+    print((data))
+    if 'Keywords' in data:
+        for i, keyword in enumerate(data['Keywords']):
+            data['Keywords'][i] = keyword.strip()
+    saveNewAuthorCache(data)
+#    with open('/localdata3/common/elastic_cache_test.json', 'r') as fh:
+#        cache = json.load(fh)
+#    with open('/localdata3/common/elastic_cache_test.json', 'w') as fh:
+#        cache.append(data)
+#        json.dump(cache, fh)
+
+    return JsonResponse({},safe=False)
 
 def view_papers(request):
     print(request)
@@ -314,6 +380,44 @@ def submit(request):
         "navbarOption": get_navbar_option(keyword, option)
     }
     return render(request, "flower.html", data)
+
+
+
+@csrf_exempt
+def submit_from_browse(request):
+
+    data = json.loads(request.POST.get('data'))
+
+    option = data.get("option")
+    keyword = data.get('keyword')
+    authorids = data.get('AuthorIds')
+    normalizedname = data.get('NormalizedName')
+
+    selection = data.get("selection")
+    print('\n\n\n\n\n{}\n\n\n\n\n\n'.format(selection))
+    entity_data = data.get("entity_data")
+    print("submit")
+
+    # Default Dates need fixing
+    min_year = None
+    max_year = None
+
+    data1, data2, data3  = get_flower_data_high_level(option, authorids, normalizedname)
+
+    data = {
+        "author": data1,
+        "conf": data2,
+        "inst": data3,
+        "yearSlider": {
+            "title": "Publications range",
+            "range": [min_year, max_year] # placeholder value, just for testing
+        },
+        "navbarOption": get_navbar_option(keyword, option),
+        "statistics": {}
+    }
+    return render(request, "flower.html", data)
+
+
 
 @csrf_exempt
 def resubmit(request):

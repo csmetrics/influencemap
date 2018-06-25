@@ -1,6 +1,6 @@
 import pandas as pd
 from core.search.mag_interface import *
-import core.search.entity_type as ent
+#import core.utils.entity_type as ent
 
 
 def paperq_to_dict(paper_query):
@@ -78,7 +78,7 @@ def get_ent_paper_df_conf(entity):
     entity.paper_df = pd.DataFrame(paper_list)
 
     return entity.paper_df
-
+'''
 def ent_paper_df(entity):
     """
     """
@@ -90,3 +90,4 @@ def ent_paper_df(entity):
     print("Finishing generating scores for:", entity.entity_id)
 
     return entity_update
+'''
