@@ -31,9 +31,13 @@ def score_author(paper_info):
                 except KeyError:
                     continue
 
+                # Influence weight
+                weight = 1 / len(reference['Authors']) if reference['Authors'] \
+                        else 1
+
                 # Important fields
-                row_dict['entity_tuple']      = entity_tuple
-                row_dict['influenced']     = 1 / len(reference['Authors'])
+                row_dict['entity_tuple']   = entity_tuple
+                row_dict['influenced']     = weight
                 row_dict['influencing']    = 0
                 row_dict['influence_date'] = paper_info['Year']
 
@@ -53,10 +57,14 @@ def score_author(paper_info):
                 except KeyError:
                     continue
 
+                # Influence weight
+                weight = 1 / len(paper_info['Authors']) if \
+                         paper_info['Authors'] else 1
+
                 # Important fields
-                row_dict['entity_tuple']      = entity_tuple
+                row_dict['entity_tuple']   = entity_tuple
                 row_dict['influenced']     = 0
-                row_dict['influencing']    = 1 / len(paper_info['Authors'])
+                row_dict['influencing']    = weight
                 row_dict['influence_date'] = citation['Year']
 
                 score_list.append(row_dict)
@@ -85,9 +93,13 @@ def score_affiliation(paper_info):
                 except KeyError:
                     continue
 
+                # Influence weight
+                weight = 1 / len(reference['Authors']) if reference['Authors'] \
+                         else 1
+
                 # Important fields
-                row_dict['entity_tuple']      = entity_tuple
-                row_dict['influenced']     = 1 / len(reference['Authors'])
+                row_dict['entity_tuple']   = entity_tuple
+                row_dict['influenced']     = weight
                 row_dict['influencing']    = 0
                 row_dict['influence_date'] = paper_info['Year']
 
@@ -107,10 +119,14 @@ def score_affiliation(paper_info):
                 except KeyError:
                     continue
 
+                # Influence weight
+                weight = 1 / len(paper_info['Authors']) if \
+                         paper_info['Authors'] else 1
+
                 # Important fields
-                row_dict['entity_tuple']      = entity_tuple
+                row_dict['entity_tuple']   = entity_tuple
                 row_dict['influenced']     = 0
-                row_dict['influencing']    = 1 / len(paper_info['Authors'])
+                row_dict['influencing']    = weight
                 row_dict['influence_date'] = citation['Year']
 
                 score_list.append(row_dict)
@@ -139,7 +155,7 @@ def score_conference(paper_info):
                 continue
 
             # Important fields
-            row_dict['entity_tuple']      = entity_tuple
+            row_dict['entity_tuple']   = entity_tuple
             row_dict['influenced']     = 1
             row_dict['influencing']    = 0
             row_dict['influence_date'] = paper_info['Year']
@@ -159,7 +175,7 @@ def score_conference(paper_info):
                 continue
 
             # Important fields
-            row_dict['entity_tuple']      = entity_tuple
+            row_dict['entity_tuple']   = entity_tuple
             row_dict['influenced']     = 0
             row_dict['influencing']    = 1
             row_dict['influence_date'] = citation['Year']
@@ -189,7 +205,7 @@ def score_journal(paper_info):
                 continue
 
             # Important fields
-            row_dict['entity_tuple']      = entity_tuple
+            row_dict['entity_tuple']   = entity_tuple
             row_dict['influenced']     = 1
             row_dict['influencing']    = 0
             row_dict['influence_date'] = paper_info['Year']
@@ -209,7 +225,7 @@ def score_journal(paper_info):
                 continue
 
             # Important fields
-            row_dict['entity_tuple']      = entity_tuple
+            row_dict['entity_tuple']   = entity_tuple
             row_dict['influenced']     = 0
             row_dict['influencing']    = 1
             row_dict['influence_date'] = citation['Year']

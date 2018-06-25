@@ -1,9 +1,0 @@
-{
-  "elasticsearch":{
-    "hostname":"130.56.248.105:9200",
-  },
-  "data":{
-    "filedir":"/localdata/MAG2018/data/graph",
-    "version":"2018-04-13"
-  }
-}

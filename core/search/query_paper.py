@@ -6,6 +6,7 @@ author: Alexander Soen
 '''
 
 from graph.config import conf
+from core.utils.entity_type import Entity_type
 
 from elasticsearch import Elasticsearch
 from elasticsearch_dsl import Search
@@ -104,6 +105,30 @@ def journal_paper_query(jour_id):
         jour_paper_res.append(papers[papers_target])
 
     return jour_paper_res
+
+
+def paper_query(entity_type, entity_id):
+    ''' Query entity id for papers depending on type.
+    '''
+    # Call query functions depending on type given
+    # Author
+    if entity_type == Entity_type.AUTH:
+        return author_paper_query(entity_id)
+
+    # Affiliation
+    if entity_type == Entity_type.AFFI:
+        return affiliation_paper_query(entity_id)
+
+    # Conference
+    if entity_type == Entity_type.CONF:
+        return conference_paper_query(entity_id)
+
+    # Journal
+    if entity_type == Entity_type.JOUR:
+        return journal_paper_query(entity_id)
+
+    # Otherwise
+    return None
 
 
 if __name__ == '__main__':

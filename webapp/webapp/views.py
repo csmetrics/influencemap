@@ -20,6 +20,11 @@ from core.search.search import search_name
 from graph.save_cache import saveNewAuthorCache
 from core.flower.high_level_get_flower import get_flower_data_high_level
 
+# Imports for submit
+from core.search.query_paper   import paper_query
+from core.search.query_info    import paper_info_check_query
+from core.score.agg_paper_info import score_paper_info_list
+
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 
 # initialise as no saved pids
@@ -304,54 +309,27 @@ def submit(request):
     min_year = None
     max_year = None
 
-    # USER NEEDS TO SELECT ENTITIES FIRST
-    #entity_list_init = entity_from_name(keyword, entity_type)
-    entity_list_init = list()
-    filters = dict()
+    # Get the selected paper
+    selected_papers = list()
+    entity_names    = list()
     for eid, row in entity_data.items():
-        print(row['name'], eid)
-        entity = ent.Entity(row['name'], row['eid'], str_to_ent[row['entity-type']])
-        entity_list_init.append(entity)
-        filters[entity] = list(map(lambda x : x['eid'], selection[eid]))
-    #filters = {}
+        entity_names.append(row['name'])
+        selected_papers = list(map(lambda x : x['eid'], selection[eid]))
 
-    print(entity_list_init)
-    #entity_type = data.get('entity_type')
-    #entity_names = data.get('entity_names')
+    # Turn selected paper into information dictionary list
+    paper_information = list()
+    for paper in selected_papers:
+        paper_info = paper_info_check_query(paper)
+        if paper_info:
+            paper_information.append(paper_info)
 
-    entity_list = list()
-    for entity in entity_list_init:
-        # Need to render and allow user selection here
-        print(entity.entity_id, entity.get_papers())
-        if entity.get_papers() is not None:
-            entity_list.append(entity)
-        # User returns a reduced filtered entity list
-        # Futher returns a filter to select papers for each of the entities'
-        # papers
-
-        # entity_list = data.get('entity_list')
-        # filters = data.get('filter')
-    #print(entity_list)
-
-
-    print(filters)
-    #influence_df = get_filtered_influence(entity_list, filters)
-
-    # Get the entity names
-    entity_names = list(map(lambda x: str.lower(x.entity_name), entity_list))
-    entity_names.append('')
-    print(entity_names)
-
-    cache_score = [None, None, None]
+    # Generate score for each type of flower
     flower_score = [None, None, None]
-
     for i, flower_item in enumerate(flower_leaves.items()):
-        name, leaves= flower_item
+        name, leaves = flower_item
 
-        #entity_score_cache = score_entities(influence_df, leaf)
-        entity_score_cache = get_filtered_score(entity_list, filters, leaves)
-
-        entity_score = entity_score_cache[~entity_score_cache['entity_id'].str.lower().isin(
+        entity_score = score_paper_info_list(paper_information, leaves)
+        entity_score = entity_score[~entity_score['entity_id'].str.lower().isin(
                                           entity_names)]
 
         print(entity_score)
@@ -362,7 +340,6 @@ def submit(request):
         score = score_df_to_graph(agg_score)
         print(score)
 
-        cache_score[i] = entity_score_cache
         flower_score[i] = score
 
     data1 = processdata("author", flower_score[0])

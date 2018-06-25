@@ -5,7 +5,10 @@ from core.flower.draw_flower_test import draw_flower
 from core.flower.flower_bloomer import getFlower, getPreFlowerData
 from core.search.mag_flower_bloom import *
 from core.utils.get_entity import entity_from_name
-from core.search.influence_df import get_filtered_score, get_unfiltered_score
+
+from core.search.query_paper   import paper_query
+from core.search.query_info    import paper_info_check_query
+from core.score.agg_paper_info import score_paper_info_list
 
 flower_leaves = { 'author': [ent.Entity_type.AUTH]
                 , 'conf': [ent.Entity_type.CONF, ent.Entity_type.JOUR]
@@ -24,52 +27,48 @@ def get_flower_data_high_level(entitytype, authorids, normalizedname, selection=
     min_year = None
     max_year = None
 
-    # USER NEEDS TO SELECT ENTITIES FIRST
-    entity_list_init = list()
-    filters = dict()
-    for eid in authorids:
-        entity = ent.Entity(normalizedname, eid, str_to_ent[entitytype])
-        entity_list_init.append(entity)
-        if selection != None:
-            filters[entity] = list(map(lambda x : x['eid'], selection[eid]))
+    # Get the selected paper
+    selected_papers = list()
+    if selection:
+        # If selection is not None, they follow selection
+        for eid in authorids:
+            selected_papers += list(map(lambda x : x['eid'], selection[eid]))
+    else:
+        for eid in authorids:
+            papers = paper_query(str_to_ent[entitytype], eid)
+            print(eid, str_to_ent[entitytype])
+            print(papers)
+            if papers:
+                selected_papers += papers
 
-    print(entity_list_init)
+    # Turn selected paper into information dictionary list
+    paper_information = list()
+    for paper in selected_papers:
+        paper_info = paper_info_check_query(paper)
+        if paper_info:
+            paper_information.append(paper_info)
 
-    entity_list = list()
-    for entity in entity_list_init:
-        # Need to render and allow user selection here
-        print(entity.entity_id, entity.get_papers())
-        if entity.get_papers() is not None:
-            entity_list.append(entity)
+    print(paper_information)
+    if not paper_information:
+        return None
 
-    # Get the entity names
-    entity_names = list(map(lambda x: str.lower(x.entity_name), entity_list))
-    entity_names.append('')
-    print(entity_names)
-
-    cache_score = [None, None, None]
+    # Generate score for each type of flower
     flower_score = [None, None, None]
-
     for i, flower_item in enumerate(flower_leaves.items()):
-        name, leaves= flower_item
+        name, leaves = flower_item
 
-        if selection != None:
-            entity_score_cache = get_filtered_score(entity_list, filters, leaves)
-        else:
-            entity_score_cache = get_unfiltered_score(entity_list, leaves)
-
-        entity_score = entity_score_cache[~entity_score_cache['entity_id'].str.lower().isin(
-                                          entity_names)]
+        entity_score = score_paper_info_list(paper_information, leaves)
+        entity_score = entity_score[entity_score['entity_id'] != normalizedname]
 
         print(entity_score)
+
         agg_score = agg_score_df(entity_score, min_year, max_year)
-        agg_score.ego = entity_names[0]
+        agg_score.ego = normalizedname[0]
         print(agg_score)
 
         score = score_df_to_graph(agg_score)
         print(score)
 
-        cache_score[i] = entity_score_cache
         flower_score[i] = score
 
     author_data = processdata("author", flower_score[0])
