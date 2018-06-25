@@ -167,8 +167,8 @@ def link_paper_info_query(paper_id, cache = True):
             if link_paper_prop:
                 link_res[link_type].append(link_paper_prop)
 
-        # Return results
-        return link_res
+    # Return results
+    return link_res
 
 
 def paper_info_db_query(paper_id):
