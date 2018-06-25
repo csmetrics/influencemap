@@ -1,0 +1,102 @@
+name,year,citation,url
+Alan J Perlis,1966,For his influence in the area of advanced programming techniques and compiler construction.,https://amturing.acm.org/award_winners/perlis_0132439.cfm
+Maurice V. Wilkes,1967,"Professor Wilkes is best known as the builder and designer of the EDSAC, the first computer with an internally stored program. Built in 1949, the EDSAC used a mercury delay line memory. He is also known as the author, with Wheeler and Gill, of a volume on ""Preparation of Programs for Electronic Digital Computers"" in 1951, in which program libraries were effectively introduced.",https://amturing.acm.org/award_winners/wilkes_1001395.cfm
+Richard W. Hamming,1968,"For his work on numerical methods, automatic coding systems, and error-detecting and error-correcting codes.",https://amturing.acm.org/award_winners/hamming_1000652.cfm
+Marvin Minsky ,1969,"For his central role in creating, shaping, promoting, and advancing the field of Artificial Intelligence.",https://amturing.acm.org/award_winners/minsky_7440781.cfm
+James Hardy  Wilkinson,1970,"For his research in numerical analysis to facilitiate the use of the high-speed digital computer, having received special recognition for his work in computations in linear algebra and ""backward"" error analysis.",https://amturing.acm.org/award_winners/wilkinson_0671216.cfm
+John McCarthy,1971,"Dr. McCarthy's lecture ""The Present State of Research on Artificial Intelligence"" is a topic that covers the area in which he has achieved considerable recognition for his work.",https://amturing.acm.org/award_winners/mccarthy_1118322.cfm
+Edsger Wybe Dijkstra,1972,"For fundamental contributions to programming as a high, intellectual challenge; for eloquent insistence and practical demonstration that programs should be composed correctly, not just debugged into correctness; for illuminating perception of problems at the foundations of program design.",https://amturing.acm.org/award_winners/dijkstra_1053701.cfm
+Charles William Bachman,1973,For his outstanding contributions to database technology.,https://amturing.acm.org/award_winners/bachman_9385610.cfm
+Donald  Ervin Knuth,1974,"For his major contributions to the analysis of algorithms and the design
+of programming languages, and in particular for his contributions to the ""art of computer programming""
+through his well-known books in a continuous series by this title.",https://amturing.acm.org/award_winners/knuth_1013846.cfm
+Allen Newell ,1975,"In joint scientific efforts extending over twenty years, initially in collaboration with J. C. Shaw at the RAND Corporation, and subsequentially with numerous faculty and student collegues at Carnegie-Mellon University, Newell and co-recipient Herbert A. Simon made basic contributions to artificial intelligence, the psychology of human cognition, and list processing.",https://amturing.acm.org/award_winners/newell_3167755.cfm
+Herbert  Alexander Simon,1975,"In joint scientific efforts extending over twenty years, initially in collaboration with J. C. Shaw at the RAND Corporation, and subsequentially with numerous faculty and student collegues at Carnegie-Mellon University, Simon and co-recipient Allen Newell made basic contributions to artificial intelligence, the psychology of human cognition, and list processing.",https://amturing.acm.org/award_winners/simon_1031467.cfm
+Michael O. Rabin,1976,"Along with Dana S. Scott, for their joint paper ""Finite Automata and Their Decision Problem,"" which introduced the idea of nondeterministic machines, which has proved to be an enormously valuable concept. Their (Scott & Rabin) classic paper has been a continuous source of inspiration for subsequent work in this field.",https://amturing.acm.org/award_winners/rabin_9681074.cfm
+Dana Stewart Scott,1976,"Along with Michael O. Rabin, for their joint paper ""Finite Automata and Their Decision Problem,"" which introduced the idea of nondeterministic machines, which has proved to be an enormously valuable concept. Their (Scott & Rabin) classic paper has been a continuous source of inspiration for subsequent work in this field.",https://amturing.acm.org/award_winners/scott_1193622.cfm
+John Backus ,1977,"For profound, influential, and lasting contributions to the design of practical
+high-level programming systems, notably through his work on FORTRAN, and for seminal publication of formal
+procedures for the specification of programming languages.",https://amturing.acm.org/award_winners/backus_0703524.cfm
+Robert  W Floyd,1978,"For having a clear influence on methodologies for the creation of efficient
+and reliable software, and for helping to found the following important subfields of computer science:
+the theory of parsing, the semantics of programming languages, automatic program verification, automatic
+program synthesis, and analysis of algorithms.",https://amturing.acm.org/award_winners/floyd_3720707.cfm
+Kenneth E.  Iverson,1979,"For his pioneering effort in programming languages and mathematical
+notation resulting in what the computing field now knows as APL, for his contributions to
+the implementation of interactive systems, to educational uses of APL, and to programming
+language theory and practice.",https://amturing.acm.org/award_winners/iverson_9147499.cfm
+C. Antony  R. Hoare,1980,"For his fundamental contributions to the definition and design
+of programming languages.",https://amturing.acm.org/award_winners/hoare_4622167.cfm
+Edgar F.  Codd,1981,For his fundamental and continuing contributions to the theory and practice of database management systems.,https://amturing.acm.org/award_winners/codd_1000892.cfm
+Stephen Arthur Cook,1982,"For his advancement of our understanding of the complexity of computation in a significant and profound way. His seminal paper, ""The Complexity of Theorem Proving Procedures,"" presented at the 1971 ACM SIGACT Symposium on the Theory of Computing, laid the foundations for the theory of NP-Completeness. The ensuing exploration of the boundaries and nature of NP-complete class of problems has been one of the most active and important research activities in computer science for the last decade.",https://amturing.acm.org/award_winners/cook_n991950.cfm
+Dennis M. Ritchie ,1983,"With Ken Thompson, for their development of generic operating systems theory and specifically for the implementation of the UNIX operating system.",https://amturing.acm.org/award_winners/ritchie_1506389.cfm
+Kenneth Lane Thompson,1983,"With Dennis M. Ritchie, for their development of generic operating systems theory and specifically for the implementation of the UNIX operating system.",https://amturing.acm.org/award_winners/thompson_4588371.cfm
+Niklaus E. Wirth,1984,"For developing a sequence of innovative computer languages, EULER,
+ALGOL-W, MODULA and PASCAL. PASCAL has become pedagogically significant and has provided a
+foundation for future computer language, systems, and architectural research.",https://amturing.acm.org/award_winners/wirth_1025774.cfm
+Richard  Manning Karp,1985,"For his continuing contributions to the theory of algorithms including the
+development of efficient algorithms for network flow and other combinatorial optimization problems,
+the identification of polynomial-time computability with the intuitive notion of algorithmic efficiency,
+and, most notably, contributions to the theory of NP-completeness. Karp introduced the now standard
+methodology for proving problems to be NP-complete which has led to the identification of many
+theoretical and practical problems as being computationally difficult.",https://amturing.acm.org/award_winners/karp_3256708.cfm
+John E Hopcroft,1986,"With Robert E Tarjan, for fundamental achievements in the design and analysis of algorithms and data structures.",https://amturing.acm.org/award_winners/hopcroft_1053917.cfm
+Robert  Endre Tarjan,1986,"With John E Hopcroft, for fundamental achievements in the design and analysis of algorithms and data structures.",https://amturing.acm.org/award_winners/tarjan_1092048.cfm
+John Cocke ,1987,"For significant contributions in the design and theory of compilers,
+the architecture of large systems and the development of reduced instruction set computers (RISC);
+for discovering and systematizing many fundamental transformations now used in optimizing compilers
+including reduction of operator strength, elimination of common subexpressions, register allocation,
+constant propagation, and dead code elimination.",https://amturing.acm.org/award_winners/cocke_2083115.cfm
+Ivan Sutherland,1988,"For his pioneering and visionary contributions to computer graphics, starting with Sketchpad, and continuing after.",https://amturing.acm.org/award_winners/sutherland_3467412.cfm
+William  Morton Kahan,1989,"For his fundamental contributions to numerical analysis. One of the foremost
+experts on floating-point computations. Kahan has dedicated himself to ""making the world safe for
+numerical computations""!",https://amturing.acm.org/award_winners/kahan_1023746.cfm
+Fernando J  Corbato,1990,"For his pioneering work organizing the concepts and leading the
+development of the general-purpose, large-scale, time-sharing and resource-sharing computer
+systems, CTSS and Multics.",https://amturing.acm.org/award_winners/corbato_1009471.cfm
+Arthur John Robin Gorell  Milner,1991,"For three distinct and complete achievements:
+LCF, the mechanization of Scott's Logic of Computable Functions, probably the first theoretically based yet practical tool for machine assisted proof construction;ML, the first language to include polymorphic type inference together with a type-safe exception-handling mechanism;CCS, a general theory of concurrency.In addition, he formulated and strongly advanced full abstraction, the study of the relationship between operational and denotational semantics.",https://amturing.acm.org/award_winners/milner_1569367.cfm
+Butler W Lampson,1992,"For contributions to the development of distributed, personal computing
+environments and the technology for their implementation: workstations, networks, operating systems,
+programming systems, displays, security and document publishing.",https://amturing.acm.org/award_winners/lampson_1142421.cfm
+Juris Hartmanis,1993,"With Richard E. Stearns, in recognition of their seminal paper which established the foundations for the field of computational complexity theory.",https://amturing.acm.org/award_winners/hartmanis_1059260.cfm
+Richard  Edwin Stearns,1993,"With Juris Hartmanis, in recognition of their seminal paper which established the foundations for the field of computational complexity theory.",https://amturing.acm.org/award_winners/stearns_1081900.cfm
+Edward A  Feigenbaum,1994,"For pioneering the design and construction of large scale artificial
+intelligence systems, demonstrating the practical importance and potential commercial impact
+of artificial intelligence technology.",https://amturing.acm.org/award_winners/feigenbaum_4167235.cfm
+Dabbala Rajagopal  Reddy,1994,"For pioneering the design and construction of large scale artificial
+intelligence systems, demonstrating the practical importance and potential commercial impact
+of artificial intelligence technology.",https://amturing.acm.org/award_winners/reddy_9634208.cfm
+Manuel Blum,1995,In recognition of his contributions to the foundations of computational complexity theory and its application to cryptography and program checking.,https://amturing.acm.org/award_winners/blum_4659082.cfm
+Amir Pnueli,1996,For seminal work introducing temporal logic into computing science and for outstanding contributions to program and system verification.,https://amturing.acm.org/award_winners/pnueli_4725172.cfm
+Douglas Engelbart,1997,For an inspiring vision of the future of interactive computing and the invention of key technologies to help realize this vision.,https://amturing.acm.org/award_winners/engelbart_5078811.cfm
+James  Nicholas Gray,1998,For seminal contributions to database and transaction processing research and technical leadership in system implementation.,https://amturing.acm.org/award_winners/gray_3649936.cfm
+Frederick  Brooks,1999,"For landmark contributions to computer architecture, operating systems, and software engineering.",https://amturing.acm.org/award_winners/brooks_1002187.cfm
+Andrew Chi-Chih Yao,2000,"In recognition of his fundamental contributions to the theory of computation, including the complexity-based theory of pseudorandom number generation, cryptography, and communication complexity.",https://amturing.acm.org/award_winners/yao_1611524.cfm
+Ole-Johan Dahl ,2001,"With Kristen Nygaard, for ideas fundamental to the emergence of object oriented programming, through their design of the programming languages Simula I and Simula 67.",https://amturing.acm.org/award_winners/dahl_6917600.cfm
+Kristen Nygaard ,2001,"With Ole-Johan Dahl, for ideas fundamental to the emergence of object oriented programming, through their design of the programming languages Simula I and Simula 67.",https://amturing.acm.org/award_winners/nygaard_5916220.cfm
+Leonard  Max Adleman,2002,"Together with Ronald Rivest and Adi Shamir, for their ingenious contribution to making public-key cryptography useful in practice.",https://amturing.acm.org/award_winners/adleman_7308544.cfm
+Ronald  Linn Rivest,2002,"Together with Leonard M. Adleman and Adi Shamir, for their ingenious contribution to making public-key cryptography useful in practice.",https://amturing.acm.org/award_winners/rivest_1403005.cfm
+Adi Shamir,2002,"Together with Leonard M. Adleman and Ronald Rivest, for their ingenious contribution to making public-key cryptography useful in practice.",https://amturing.acm.org/award_winners/shamir_2327856.cfm
+Alan Kay,2003,"For pioneering many of the ideas at the root of contemporary object-oriented programming languages, leading the team that developed Smalltalk, and for fundamental contributions to personal computing.",https://amturing.acm.org/award_winners/kay_3972189.cfm
+Vinton  Gray Cerf,2004,"With Robert E. Kahn, for pioneering work on internetworking, including the design and implementation of the Internet's basic communications protocols, TCP/IP, and for inspired leadership in networking.",https://amturing.acm.org/award_winners/cerf_1083211.cfm
+Robert  Elliot Kahn,2004,"With Vinton Cerf, for pioneering work on internetworking, including the design and implementation of the Internet's basic communications protocols, TCP/IP, and for inspired leadership in networking.",https://amturing.acm.org/award_winners/kahn_4598637.cfm
+Peter Naur,2005,"For fundamental contributions to programming language design and the definition of Algol 60, to compiler design, and to the art and practice of computer programming.",https://amturing.acm.org/award_winners/naur_1024454.cfm
+Frances  Elizabeth Allen,2006,"For pioneering contributions to the theory and practice of optimizing compiler techniques that laid the foundation for modern optimizing compilers and automatic parallel execution.
+press release",https://amturing.acm.org/award_winners/allen_1012327.cfm
+Edmund Melson Clarke,2007,"Together with E. Allen Emerson and Joseph Sifakis, for their role in developing Model-Checking into a highly effective verification technology that is widely adopted in the hardware and software industries.",https://amturing.acm.org/award_winners/clarke_1167964.cfm
+E. Allen Emerson,2007,"Together with Edmund Clarke and Joseph Sifakis, for their role in developing Model-Checking into a highly effective verification technology that is widely adopted in the hardware and software industries.",https://amturing.acm.org/award_winners/emerson_1671460.cfm
+Joseph Sifakis,2007,"Together with Edmund Clarke and E. Allen Emerson, for their role in developing Model-Checking into a highly effective verification technology that is widely adopted in the hardware and software industries.",https://amturing.acm.org/award_winners/sifakis_1701095.cfm
+Barbara Liskov,2008,"For contributions to practical and theoretical foundations of programming language and system design, especially related to data abstraction, fault tolerance, and distributed computing.",https://amturing.acm.org/award_winners/liskov_1108679.cfm
+Charles P.  Thacker,2009,"For the pioneering design and realization of the first modern personal computer -- the Alto at Xerox PARC -- and seminal inventions and contributions to local area networks (including the Ethernet), multiprocessor workstations, snooping cache coherence protocols, and tablet personal computers.",https://amturing.acm.org/award_winners/thacker_1336106.cfm
+Leslie Gabriel Valiant,2010,"For transformative contributions to the theory of computation, including the theory of probably approximately correct (PAC) learning, the complexity of enumeration and of algebraic computation, and the theory of parallel and distributed computing.",https://amturing.acm.org/award_winners/valiant_2612174.cfm
+Judea Pearl,2011,For fundamental contributions to artificial intelligence through the development of a calculus for probabilistic and causal reasoning.,https://amturing.acm.org/award_winners/pearl_2658896.cfm
+Shafi Goldwasser ,2012,"Along with Silvio Micali, for transformative work that laid the complexity-theoretic foundations for the science of cryptography, and in the process pioneered new methods for efficient verification of mathematical proofs in complexity theory.",https://amturing.acm.org/award_winners/goldwasser_8627889.cfm
+Silvio Micali,2012,"Along with Shafi Goldwasser, for transformative work that laid the complexity-theoretic foundations for the science of cryptography, and in the process pioneered new methods for efficient verification of mathematical proofs in complexity theory.",https://amturing.acm.org/award_winners/micali_9954407.cfm
+Leslie Lamport,2013,"For fundamental contributions to the theory and practice of distributed and concurrent systems, notably the invention of concepts such as causality and logical clocks, safety and liveness, replicated state machines, and sequential consistency.",https://amturing.acm.org/award_winners/lamport_1205376.cfm
+Michael Stonebraker,2014,For fundamental contributions to the concepts and practices underlying modern database systems.,https://amturing.acm.org/award_winners/stonebraker_1172121.cfm
+Whitfield Diffie ,2015,"For inventing and promulgating both asymmetric public-key cryptography, including its application to digital signatures, and a practical cryptographic key-exchange method.",https://amturing.acm.org/award_winners/diffie_8371646.cfm
+Martin Hellman ,2015,"For inventing and promulgating both asymmetric public-key cryptography, including its application to digital signatures, and a practical cryptographic key-exchange method.",https://amturing.acm.org/award_winners/hellman_4055781.cfm
+Sir Tim Berners-Lee,2016,"For inventing the World Wide Web, the first web browser, and the fundamental protocols and algorithms allowing the Web to scale.",https://amturing.acm.org/award_winners/berners-lee_8087960.cfm
+John L Hennessy,2017,"For pioneering a systematic, quantitative approach to the design and evaluation of computer architectures with enduring impact on the microprocessor industry.",https://amturing.acm.org/award_winners/hennessy_1426931.cfm
+David Patterson ,2017,"For pioneering a systematic, quantitative approach to the design and evaluation of computer architectures with enduring impact on the microprocessor industry.",https://amturing.acm.org/award_winners/patterson_2316693.cfm
