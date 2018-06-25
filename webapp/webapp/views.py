@@ -18,7 +18,7 @@ from core.utils.get_entity import entity_from_name
 from core.search.influence_df import get_filtered_score
 from core.search.search import search_name
 from graph.save_cache import saveNewAuthorCache
-
+from core.flower.high_level_get_flower import get_flower_data_high_level
 
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 
@@ -117,6 +117,12 @@ def browse(request):
     for entity in browse_list:
         res = search_cache(entity["cache_index"], entity["cache_type"])
         entity["names"] = list(set([n["_source"]["DisplayName"] for n in res]))
+        entity["entities"] = [n["_source"] for n in res]
+        for e in (entity["entities"]):
+            if "Keywords" in e:
+                e["Keywords"] = ", ".join(e["Keywords"])
+            if "AuthorIds" in e:
+                e["AuthorIds"] = json.dumps(e["AuthorIds"])
 
     data = {
         'list': browse_list,
@@ -374,6 +380,44 @@ def submit(request):
         "navbarOption": get_navbar_option(keyword, option)
     }
     return render(request, "flower.html", data)
+
+
+
+@csrf_exempt
+def submit_from_browse(request):
+
+    data = json.loads(request.POST.get('data'))
+
+    option = data.get("option")
+    keyword = data.get('keyword')
+    authorids = data.get('AuthorIds')
+    normalizedname = data.get('NormalizedName')
+
+    selection = data.get("selection")
+    print('\n\n\n\n\n{}\n\n\n\n\n\n'.format(selection))
+    entity_data = data.get("entity_data")
+    print("submit")
+
+    # Default Dates need fixing
+    min_year = None
+    max_year = None
+
+    data1, data2, data3  = get_flower_data_high_level(option, authorids, normalizedname)
+
+    data = {
+        "author": data1,
+        "conf": data2,
+        "inst": data3,
+        "yearSlider": {
+            "title": "Publications range",
+            "range": [min_year, max_year] # placeholder value, just for testing
+        },
+        "navbarOption": get_navbar_option(keyword, option),
+        "statistics": {}
+    }
+    return render(request, "flower.html", data)
+
+
 
 @csrf_exempt
 def resubmit(request):

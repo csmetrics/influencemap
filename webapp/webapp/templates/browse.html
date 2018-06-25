@@ -37,13 +37,36 @@
 <!--                     <h3>{{category.display}}</h3>
                     <p>{{category.info}}</p> -->
                     <table id="{{category.table_id}}">
-                        <!-- <thead><th></th></thead></thead> -->
-                        <tbody>
-                            {% for entity in category.names %}
-                            <tr class="testtest">
+                       <thead>
+                           <th>Name</th>
+                           <th>Affiliation</th>
+                           <th>Year</th>
+                           <th>Citation</th>
+                           <th>Keywords</th>
+                           <th></th>
+                       </thead>
+                       <tbody>
+                            {% for entity in category.entities %}
+                            <tr AuthorIds='{{entity.AuthorIds | safe }}' normalizedname="{{ entity.NormalizedName | safe }}" class="testtest">
                                 <td>
-                                    {{entity}}
+                                    {{entity.DisplayName}}
                                 </td>
+                                <td>
+                                    {{entity.Affiliations}}
+                                </td>
+                                <td>
+                                    {{entity.Year}}
+                                </td>
+                                <td>
+                                    {{entity.Citation}}
+                                </td>
+                                <td>
+                                    {{entity.Keywords}}
+                                </td>
+                                <td>
+                                    <a href="{{entity.Url}}" target="_blank">more info</a>
+                                </td>
+
                             </tr>
                             {% endfor %}
                         </tbody>
@@ -73,6 +96,17 @@
 </body>
 <script src="{% static 'js/browseTableConfig.js' %}"></script>
 <script type="text/javascript">
+
+$('tr.testtest').on('click', function(){
+  var AuthorIds = (JSON.parse($(this).attr('authorids')));
+  var data = {"AuthorIds": AuthorIds};
+  data['option'] = "author";
+  data['keyword'] = "";
+  data['NormalizedName'] = $(this).attr('normalizedname');
+  postData('/submit_from_browse/', data, "{% csrf_token %}")  
+});
+
+
     /*  ---    Modal    ---   */
     // Get the modal
     var modal = document.getElementById('myModal');
@@ -119,11 +153,12 @@
     $(document).ready(function(){
       $('table').each(function(a,b){
         var table = $('#' + this.id).DataTable(browseTableConfig['tableSettings']);
+        //var table = $('#' + this.id).DataTable();
 
         // add on click listeners for all table rows to show modal
-        $('#' + this.id + ' tbody').on('click', 'tr', function(){
-          modal.style.display = "block";
-        })
+//        $('#' + this.id + ' tbody').on('click', 'tr', function(){
+//          modal.style.display = "block";
+//        })
       });
     });
 </script>
