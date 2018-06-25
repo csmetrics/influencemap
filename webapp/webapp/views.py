@@ -7,14 +7,14 @@ from webapp.utils import progressCallback, resetProgress
 from webapp.graph import processdata
 from webapp.elastic import search_cache
 
-import core.search.entity_type as ent
+import core.utils.entity_type as ent
 from core.search.parse_academic_search import parse_search_results
 from core.search.academic_search import *
 from core.flower.draw_flower_test import draw_flower
 from core.flower.flower_bloomer import getFlower, getPreFlowerData
 from core.utils.mkAff import getAuthor, getJournal, getConf, getAff, getConfPID, getJourPID, getConfPID, getAffPID
 from core.search.mag_flower_bloom import *
-from core.search.get_entity import entity_from_name
+from core.utils.get_entity import entity_from_name
 from core.search.influence_df import get_filtered_score
 
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
@@ -176,6 +176,45 @@ def search(request):
         # print(entity)
     print(data[0])
     return JsonResponse({'entities': data}, safe=False)
+
+
+'''
+s = {
+    'author': ('<h5>{DisplayName}</h5><p>Papers: {PaperCount}, Citations: {CitationCount}</p></div>'),
+         # '<div style="float: left; width: 50%; padding: 0;"><p>Papers: {paperCount}</p></div>'
+         # '<div style="float: right; width: 50%; text-align: right; padding: 0;"<p>Citations: {citations}</p></div>'),
+    'conference': ('<h5>{DisplayName}</h5>'
+        '<div style="float: left; width: 50%; padding: 0;"><p>Papers: {PaperCount}</p></div>'
+        '<div style="float: right; width: 50%; text-align: right; padding: 0;"<p>Citations: {CitationCount}</p></div>'),
+    'institution': ('<h5>{DisplayName}</h5>'
+        '<div style="float: left; width: 50%; padding: 0;"><p>Papers: {PaperCount}</p></div>'
+        '<div style="float: right; width: 50%; text-align: right; padding: 0;"<p>Citations: {CitationCount}</p></div>'),
+    'journal': ('<h5>{DisplayName}</h5>'
+        '<div style="float: left; width: 50%; padding: 0;"><p>Papers: {PaperCount}</p></div>'
+        '<div style="float: right; width: 50%; text-align: right; padding: 0;"<p>Citations: {CitationCount}</p></div>'),
+    'paper': ('<h5>{PaperTitle}</h5>'
+        '<div><p>Citations: {CitationCount}</p></div>')
+}
+
+idkeys = {'paper': 'PaperId', 'author': 'AuthorId', 'institution': 'AffiliationId', 'journal': 'JournalId', 'conference': 'ConferenceSeriesId'}
+
+@csrf_exempt
+def search(request):
+    global idkeys
+    keyword = request.POST.get("keyword")
+    entity_type = request.POST.get("option")
+    data = search_name(keyword, entity_type)
+    idkey = idkeys[entity_type]
+    for i in range(len(data)):
+        # print(entity)
+        entity = {'data': data[i]}
+        entity['display-info'] = s[entity_type].format(**entity['data'])
+        entity['table-id'] = "{}_{}".format(entity_type, entity['data'][idkey])
+        data[i] = entity
+        # print(entity)
+    print(data[0])
+    return JsonResponse({'entities': data}, safe=False)
+'''
 
 
 def view_papers(request):
