@@ -6,9 +6,9 @@ date:   24.06.18
 author: Alexander Soen
 '''
 
-from core.search.cache_data  import cache_paper_info
-from core.search.query_cache import paper_info_cache_query
-from core.search.query_db    import paper_info_db_query
+from core.search.cache_data       import cache_paper_info
+from core.search.query_info_cache import paper_info_cache_query
+from core.search.query_info_db    import paper_info_db_query
 
 def paper_info_check_query(paper_id):
     ''' Query which checks cache for existence first. Otherwise tries to
