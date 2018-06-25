@@ -30,7 +30,7 @@ def author_name_query(author_id):
 
     for authors in authors_s.scan():
         # Set name
-        auth_name_res[author_id] = authors[author_target]
+        auth_name_res[author_id] = authors[authors_target]
         
         # Should only be one result
         break
@@ -82,9 +82,11 @@ def conference_name_query(conference_id):
     conf_s = conf_s.query('match', ConferenceInstanceId = conference_id)
     conf_s = conf_s.source([conf_target])
 
-    for conf in conf_s.scan():
+    for conference in conf_s.scan():
         # Set name
-        conf_name_res[conference_id] = conf[conf_target]
+        #conf_name_res[conference_id] = conference[conf_target]
+        # quick fix for conference name
+        conf_name_res[conference_id] = ' '.join(conference[conf_target].split()[:-1])
         
         # Should only be one result
         break

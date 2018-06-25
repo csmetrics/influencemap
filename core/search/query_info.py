@@ -36,9 +36,9 @@ def paper_info_check_query(paper_id):
 if __name__ == '__main__':
     # TESTING
     from core.search.query_db_pd import author_name_db_query
-    from elasticsearch import helpers
     from core.search.query_utility import paper_info_to_cache_json
-    from core.score.agg_paper_info import score_author, score_affiliation, score_conference, score_journal
+    from core.score.agg_paper_info import score_paper_info_list
+    from core.utils.entity_type import Entity_type
 
     author_df = author_name_db_query('antony l hosking')
 
@@ -48,9 +48,7 @@ if __name__ == '__main__':
     for paper in a_papers:
         print(paper)
         paper_info = paper_info_check_query(paper)
-        print(paper_info)
         if paper_info:
-            print(score_author(paper_info))
-            print(score_affiliation(paper_info))
-            print(score_conference(paper_info))
-            print(score_journal(paper_info))
+            paper_info_list.append(paper_info)
+
+    print(score_paper_info_list(paper_info_list, [Entity_type.JOUR]))
