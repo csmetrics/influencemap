@@ -16,6 +16,7 @@ from core.utils.mkAff import getAuthor, getJournal, getConf, getAff, getConfPID,
 from core.search.mag_flower_bloom import *
 from core.utils.get_entity import entity_from_name
 from core.search.influence_df import get_filtered_score
+from core.search.search import search_name
 
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 
