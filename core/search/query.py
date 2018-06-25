@@ -38,13 +38,19 @@ if __name__ == '__main__':
     from core.search.query_db_pd import author_name_db_query
     from elasticsearch import helpers
     from core.search.query_utility import paper_info_to_cache_json
+    from core.score.agg_paper_info import score_author, score_affiliation, score_conference, score_journal
 
     author_df = author_name_db_query('antony l hosking')
 
     a_papers = list(author_df['PaperId'])
-    cache_json = list()
 
+    paper_info_list = list()
     for paper in a_papers:
-        print(paper_info_check_query(paper))
-
-    print(paper_info_check_query(paper+1))
+        print(paper)
+        paper_info = paper_info_check_query(paper)
+        print(paper_info)
+        if paper_info:
+            print(score_author(paper_info))
+            print(score_affiliation(paper_info))
+            print(score_conference(paper_info))
+            print(score_journal(paper_info))
