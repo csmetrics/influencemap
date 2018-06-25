@@ -17,6 +17,8 @@ from core.search.mag_flower_bloom import *
 from core.utils.get_entity import entity_from_name
 from core.search.influence_df import get_filtered_score
 from core.search.search import search_name
+from graph.save_cache import saveNewAuthorCache
+
 
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 
@@ -217,6 +219,24 @@ def search(request):
     return JsonResponse({'entities': data}, safe=False)
 '''
 
+@csrf_exempt
+def manualcache(request):
+    print(request.POST.get('type'))
+    data = (json.loads(request.POST.get('ent_data')))
+    print(request)
+    print(request.POST)
+    print((data))
+    if 'Keywords' in data:
+        for i, keyword in enumerate(data['Keywords']):
+            data['Keywords'][i] = keyword.strip()
+    saveNewAuthorCache(data)
+#    with open('/localdata3/common/elastic_cache_test.json', 'r') as fh:
+#        cache = json.load(fh)
+#    with open('/localdata3/common/elastic_cache_test.json', 'w') as fh:
+#        cache.append(data)
+#        json.dump(cache, fh)
+
+    return JsonResponse({},safe=False)
 
 def view_papers(request):
     print(request)
