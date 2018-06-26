@@ -36,6 +36,7 @@ try:
         API_KEYS = [line.strip() for line in open(config['mag_api']['api_key_dir'], 'r')]
         key_filter = re.compile(r'[a-z0-9]{32}')
         API_KEYS = list(filter(key_filter.search, API_KEYS))
+        MAX_API  = len(API_KEYS)
 
         API_RES_COUNT = config['mag_api']['res_count']
 

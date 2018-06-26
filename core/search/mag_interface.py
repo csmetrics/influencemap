@@ -8,28 +8,38 @@ import sys
 from datetime import datetime
 from core.config import *
 
-API_IDX = 1
-
-header = {
+get_header = lambda x : {
     # Request headers
-    'Ocp-Apim-Subscription-Key': API_KEYS[API_IDX]
+    'Ocp-Apim-Subscription-Key': API_KEYS[x]
 }
 
 
-print('Using key {} with key: {}'.format(API_IDX, API_KEYS[API_IDX]))
+#print('Using key {} with key: {}'.format(API_IDX, API_KEYS[API_IDX]))
 
 
 def query_academic_search(type, url, query):
-    if type == "get":
-        response = requests.get(url, params=urllib.parse.urlencode(query), headers=header)
-    elif type == "post":
-        response = requests.post(url, json=query, headers=header)
-        print(response.status_code)
-    if response.status_code != 200:
-        print("return statue: " + str(response.status_code))
-        print("ERROR: problem with the request.")
-        print(response.content)
-        #exit()
+    i = 0
+    processing = True
+    header = get_header(i)
+
+    # Keep trying API keys until failure or results
+    while processing:
+        if type == "get":
+            response = requests.get(url, params=urllib.parse.urlencode(query), headers=header)
+        elif type == "post":
+            response = requests.post(url, json=query, headers=header)
+            #print(response.status_code)
+        if response.status_code != 200:
+            print("return statue: " + str(response.status_code))
+            print("ERROR: problem with the request.")
+            print(response.content)
+            #exit()
+        if response.status_code != 429 or i >= MAX_API - 1:
+            processing = False
+        else:
+            i += 1
+            header = get_header(i)
+
     return json.loads((response.content).decode("utf-8"))
 
 
