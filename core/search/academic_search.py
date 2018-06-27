@@ -47,6 +47,23 @@ def get_paperinfo_from_title(paper_title):
     data = query_academic_search("get", url, query)
     return data
 
+def get_morepaperinfo_from_title(paper_title):
+    url = os.path.join(MAS_URL_PREFIX, "academic/v1.0/interpret")
+    data = query_academic_search("get", url, {"query": paper_title})
+    # print(data)
+    interpret_expr = data["interpretations"][0]["rules"][0]["output"]["value"]
+    # print(interpret_expr)
+    url = os.path.join(MAS_URL_PREFIX, "academic/v1.0/evaluate")
+    query = {
+      "expr": interpret_expr,
+      "count": 1000,
+      "attributes": "Id,Ti,Y,D,CC,ECC,AA.AuN,AA.AuId,AA.AfN,AA.AfId,F.FN,F.FId,J.JN,J.JId,C.CN,C.CId"
+    }
+    data = query_academic_search("get", url, query)
+    return data
+
+
+
 
 def get_papers_from_author(author):
     url = os.path.join(MAS_URL_PREFIX, "academic/v1.0/evaluate")
@@ -156,8 +173,13 @@ def get_papers_from_entity_ids(entity_ids, entityType):
     return data
 
 def get_entities_from_search(keyword, entityType):
-  data = get_search_results(keyword, entityType)
+  data = get_morepaperinfo_from_title(keyword) if entityType == "paper"  else get_search_results(keyword, entityType)
+  print('\n\n\n\n\n\n\n\n')
+  print(data)
+  print('\n\n\n\n\n\n\n\n\n')
   data = parse_search_results(data, entityType)
+  print(data)
+
   if entityType in ['author', 'conference', 'institution', 'journal']:
       eids = [entity['eid'] for entity in data]
       papers = get_papers_from_entity_ids(eids, entityType)
