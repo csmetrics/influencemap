@@ -2,14 +2,16 @@ from webapp.utils import progressCallback, resetProgress
 from webapp.graph import processdata
 import core.utils.entity_type as ent
 from core.flower.draw_flower_test import draw_flower
-from core.flower.flower_bloomer import getFlower, getPreFlowerData
-from core.search.mag_flower_bloom import *
 from core.utils.get_entity import entity_from_name
 
-from core.search.query_paper     import paper_query
-from core.search.query_paper_mag import paper_mag_query
-from core.search.query_info      import paper_info_check_query, paper_info_mag_check_multiquery
-from core.score.agg_paper_info   import score_paper_info_list
+from core.search.query_paper       import paper_query
+from core.search.query_paper_mag   import paper_mag_query
+from core.search.query_info        import paper_info_check_query, paper_info_mag_check_multiquery
+from core.score.agg_paper_info     import score_paper_info_list
+from core.score.agg_score          import agg_score_df
+from core.flower.flower_bloom_data import score_df_to_graph
+
+from datetime import datetime
 
 flower_leaves = { 'author': [ent.Entity_type.AUTH]
                 , 'conf': [ent.Entity_type.CONF, ent.Entity_type.JOUR]
@@ -23,10 +25,47 @@ str_to_ent = {
         "institution": ent.Entity_type.AFFI
     }
 
+
+def gen_flower_data(score_dfs, flower_name, min_year=None, max_year=None):
+    ''' Generates processed data for flowers given a list of score dataframes.
+    '''
+    flower_score = [None, None, None]
+    for i, flower_item in enumerate(flower_leaves.items()):
+        name, leaves = flower_item
+
+        time_cur = datetime.now()
+
+        agg_score = agg_score_df(score_dfs[i],
+                                 score_year_min=min_year,
+                                 score_year_max=max_year)
+        agg_score.ego = flower_name
+
+        print()
+        print('Aggregated score for', leaves)
+        print('Time taken: ', datetime.now() - time_cur)
+        print()
+
+        time_cur = datetime.now()
+
+        score = score_df_to_graph(agg_score)
+
+        print()
+        print('Score to graph for', leaves)
+        print('Time taken: ', datetime.now() - time_cur)
+        print()
+
+        flower_score[i] = score
+
+    author_data = processdata("author", flower_score[0])
+    conf_data   = processdata("conf", flower_score[1])
+    inst_data   = processdata("inst", flower_score[2])
+
+    return author_data, conf_data, inst_data
+
+
 def get_flower_data_high_level(entitytype, authorids, normalizedname, selection=None):
 
-    min_year = None
-    max_year = None
+    time_cur = datetime.now()
 
     # Get the selected paper
     selected_papers = list()
@@ -45,7 +84,10 @@ def get_flower_data_high_level(entitytype, authorids, normalizedname, selection=
 
     print()
     print('Number of Papers Found: ', len(selected_papers))
+    print('Time taken: ', datetime.now() - time_cur)
     print()
+
+    time_cur = datetime.now()
 
     # Turn selected paper into information dictionary list
     paper_information = paper_info_mag_check_multiquery(selected_papers) # API
@@ -56,33 +98,47 @@ def get_flower_data_high_level(entitytype, authorids, normalizedname, selection=
 
     print()
     print('Number of Paper Information Found: ', len(paper_information))
+    print('Time taken: ', datetime.now() - time_cur)
     print()
     if not paper_information:
         return None
 
+    # Get min and maximum year
+    years = [info['Year'] for info in paper_information if 'Year' in info]
+    min_year = min(years)
+    max_year = max(years)
+
     # Generate score for each type of flower
-    flower_score = [None, None, None]
+    cache         = [None, None, None]
+    entity_scores = [None, None, None]
     for i, flower_item in enumerate(flower_leaves.items()):
         name, leaves = flower_item
 
+        time_cur = datetime.now()
+
         entity_score = score_paper_info_list(paper_information, leaves)
         entity_score = entity_score[entity_score['entity_id'] != normalizedname]
+        entity_scores[i] = entity_score
+        cache[i] = entity_score.to_json(orient = 'index')
 
-        print(entity_score)
+        print()
+        print('Scored for', leaves)
+        print('Time taken: ', datetime.now() - time_cur)
+        print()
 
-        agg_score = agg_score_df(entity_score, min_year, max_year)
-        agg_score.ego = normalizedname[0]
-        print(agg_score)
+    # Generate flower data
+    author_data, conf_data, inst_data = gen_flower_data(entity_scores,
+                                                        normalizedname)
 
-        score = score_df_to_graph(agg_score)
-        print(score)
+    data = {
+        "author": author_data,
+        "conf":   conf_data,
+        "inst":   inst_data,
+        "yearSlider": {
+            "title": "Publications range",
+            "range": [min_year, max_year] # placeholder value, just for testing
+        },
+        "statistics": {}
+    }
 
-        flower_score[i] = score
-
-    author_data = processdata("author", flower_score[0])
-    conf_data = processdata("conf", flower_score[1])
-    inst_data = processdata("inst", flower_score[2])
-
-    return (author_data, conf_data, inst_data)
-
-
+    return cache, data

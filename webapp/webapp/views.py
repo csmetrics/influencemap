@@ -1,4 +1,4 @@
-import os, sys, json
+import os, sys, json, pandas
 from django.shortcuts import render
 from django.http import JsonResponse
 from django.views.decorators.csrf import csrf_exempt
@@ -18,7 +18,7 @@ from core.utils.get_entity import entity_from_name
 from core.search.influence_df import get_filtered_score
 from core.search.search import search_name
 from graph.save_cache import saveNewAuthorCache
-from core.flower.high_level_get_flower import get_flower_data_high_level
+from core.flower.high_level_get_flower import get_flower_data_high_level, gen_flower_data
 
 # Imports for submit
 from core.search.query_paper   import paper_query
@@ -305,9 +305,7 @@ def submit(request):
     entity_data = data.get("entity_data")
     print("submit")
 
-    # Default Dates need fixing
-    min_year = None
-    max_year = None
+    time_cur = datetime.now()
 
     # Get the selected paper
     selected_papers = list()
@@ -316,6 +314,13 @@ def submit(request):
         entity_names.append(row['name'])
         selected_papers = list(map(lambda x : x['eid'], selection[eid]))
 
+    print()
+    print('Number of Papers Found: ', len(selected_papers))
+    print('Time taken: ', datetime.now() - time_cur)
+    print()
+
+    time_cur = datetime.now()
+
     # Turn selected paper into information dictionary list
     paper_information = paper_info_mag_check_multiquery(selected_papers) # API
     #for paper in selected_papers:
@@ -323,28 +328,43 @@ def submit(request):
     #    if paper_info:
     #        paper_information.append(paper_info)
 
+    print()
+    print('Number of Paper Information Found: ', len(paper_information))
+    print('Time taken: ', datetime.now() - time_cur)
+    print()
+
+    # Get min and maximum year
+    years = [info['Year'] for info in paper_information if 'Year' in info]
+    min_year = min(years)
+    max_year = max(years) 
+
+    # Normalised entity names
+    entity_names = list(set(entity_names))
+    normal_names = list(map(lambda x: x.lower(), entity_names))
+
     # Generate score for each type of flower
-    flower_score = [None, None, None]
+    cache         = [None, None, None]
+    entity_scores = [None, None, None]
     for i, flower_item in enumerate(flower_leaves.items()):
         name, leaves = flower_item
 
+        # Timer
+        time_cur = datetime.now()
+
         entity_score = score_paper_info_list(paper_information, leaves)
         entity_score = entity_score[~entity_score['entity_id'].str.lower().isin(
-                                          entity_names)]
+                                          normal_names)]
+        entity_scores[i] = entity_score
+        cache[i] = entity_score.to_json(orient = 'index')
 
-        print(entity_score)
-        agg_score = agg_score_df(entity_score, min_year, max_year)
-        agg_score.ego = entity_names[0]
-        print(agg_score)
+        print()
+        print('Scored for', leaves)
+        print('Time taken: ', datetime.now() - time_cur)
+        print()
 
-        score = score_df_to_graph(agg_score)
-        print(score)
-
-        flower_score[i] = score
-
-    data1 = processdata("author", flower_score[0])
-    data2 = processdata("conf", flower_score[1])
-    data3 = processdata("inst", flower_score[2])
+    flower_name = '-'.join(entity_names)
+    data1, data2, data3 = gen_flower_data(entity_scores,
+                                          flower_name)
 
     data = {
         "author": data1,
@@ -356,6 +376,9 @@ def submit(request):
         },
         "navbarOption": get_navbar_option(keyword, option)
     }
+
+    request.session['cache'] = cache
+    request.session['name']  = flower_name
     return render(request, "flower.html", data)
 
 
@@ -379,19 +402,11 @@ def submit_from_browse(request):
     min_year = None
     max_year = None
 
-    data1, data2, data3  = get_flower_data_high_level(option, authorids, normalizedname)
+    cache, data = get_flower_data_high_level(option, authorids, normalizedname)
+    data["navbarOption"] = get_navbar_option(keyword, option)
 
-    data = {
-        "author": data1,
-        "conf": data2,
-        "inst": data3,
-        "yearSlider": {
-            "title": "Publications range",
-            "range": [min_year, max_year] # placeholder value, just for testing
-        },
-        "navbarOption": get_navbar_option(keyword, option),
-        "statistics": {}
-    }
+    request.session['cache'] = cache
+    request.session['name']  = normalizedname
     return render(request, "flower.html", data)
 
 
@@ -406,11 +421,13 @@ def resubmit(request):
     pre_flower_data = []
     selfcite = request.POST.get('selfcite') == 'true'
 
-    flower_data = getFlower(data_df=pre_flower_data_dict[request.session['id']], name=keyword, ent_type=option, bot_year=from_year, top_year=to_year, inc_self=selfcite)
-
-    data1 = processdata("author", flower_data[0])
-    data2 = processdata("conf", flower_data[1])
-    data3 = processdata("inst", flower_data[2])
+    cache  = request.session['cache']
+    scores = [pd.read_json(c, orient = 'index') for c in cache]
+    name   = request.session['name']
+    data1, data2, data3 = gen_flower_data(scores,
+                                          name,
+                                          min_year = from_year,
+                                          max_year = to_year)
 
     data = {
         "author": data1,

@@ -53,11 +53,8 @@ def affiliation_name_mag_multiquery(affiliation_ids):
     # Query result
     affi_name_res = dict()
 
-    print(affiliation_ids)
     for query in queries:
-        print(query)
         data = query_academic_search('get', url, query)
-        print(data)
 
         for res in data['entities']:
             # Set name
@@ -87,6 +84,23 @@ def conference_name_mag_multiquery(conference_ids):
         for res in data['entities']:
             # Set name
             conf_name_res[res['Id']] = res['PCS']['CN']
+
+    # Try Series now
+    # Query
+    url = os.path.join(MAS_URL_PREFIX, "academic/v1.0/evaluate")
+    queries = ({
+        'expr': expr,
+        'count': 10000,
+        'offset': 0,
+        'attributes': 'CN'
+        } for expr in or_query_builder_list('Id={}', conference_ids))
+
+    for query in queries:
+        data = query_academic_search('get', url, query)
+
+        for res in data['entities']:
+            # Set name
+            conf_name_res[res['Id']] = res['CN']
 
     return conf_name_res
 
@@ -155,7 +169,6 @@ def name_try_mag_multiquery(entity_type, entity_ids):
     #        print(entity_id, "Failed ES lookup on index \
     #                '{}s'".format(entity_type.text))
     to_process = entity_ids
-    print(entity_ids)
 
     # Use API search for the remainding papers
     name_maps.update(name_mag_multiquery(entity_type, to_process))
