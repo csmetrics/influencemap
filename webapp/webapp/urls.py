@@ -20,6 +20,8 @@ from webapp import views, utils
 urlpatterns = [
     url(r'^$', views.main),
     url(r'^create', views.create),
+    url(r'^curate_load_file', views.curate_load_file),
+    url(r'^curate', views.curate),
     url(r'^manualcache', views.manualcache),
     url(r'^browse', views.browse),
     url(r'^search', views.search),

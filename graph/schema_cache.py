@@ -6,10 +6,10 @@ from elasticsearch_dsl import DocType, Date, Integer, \
 class AuthorGroup(DocType):
     # meta.id = hash(Type-NormalizedName)
     Type = Keyword()
-    NormalizedName = Text(required = True, analyzer = "standard")
+    NormalizedNames = Text(multi=True, required = True, analyzer = "standard")
     DisplayName = Text(required = True, analyzer = "standard")
     Year = Integer()
-    Affiliation = Text(analyzer = "standard")
+    Affiliations = Text(multi=True, analyzer = "standard")
     Citation = Text(analyzer = "standard")
     Keywords = Text(multi = True, analyzer = "standard")
     CreatedDate = Date(required = True)

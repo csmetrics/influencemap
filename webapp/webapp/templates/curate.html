@@ -1,0 +1,444 @@
+  {% load staticfiles %}
+
+  <html>
+  {% include 'header.html' %}
+  <body id="top">
+    <div class="wrapper row2">
+      <h1 id="heading"></h1>
+      <div id="table_div">
+      </div>
+      <button id="previous" class="btn medium">Previous</button>
+      <button id="next" class="btn medium">Next</button>
+    </div>
+    <div id="searchbar" class="wrapper bgded overlay">
+      {% include 'navbar.html' with navbar=navbarOption %}
+    </div>
+    <div class="wrapper row2" style="padding-top:0">
+      <div class="hoc clear">
+        <div class="row">
+          <div id="lefttable" class="col-md-9">
+            <div id="tables-container" style="padding-right:25px;">
+              <div id="searchtable-container">
+                <div id="loading" style="display: none;"></div>
+                <table id="searchtable" class="row-border hover order-column" cellspacing="0" width="100%"></table>
+              </div>
+            </div>
+          </div>
+          <div id="rightslider" class="col-md-3">
+            <div id="selectiontable-container" style="width: 100%; height: 100%">
+              <table id="selectiontable" class="row-border hover order-column" cellspacing="0" width="100%"></table>
+              <input id="continue-btn" class="btn medium" type="submit" value="Go" float="bottom" style="width:100%; margin-top:10px" />
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+</body>
+</html>
+<script src="{% static 'js/searchTableConfig.js' %}"></script>
+<script src="{% static 'js/selectionTableConfig.js' %}"></script>
+<script src="{% static 'js/modal.js' %}"></script>
+<script>
+
+  ////  --------  Define/initialise varibles  --------  ////
+
+  var searchButton = document.getElementById("search-btn");
+  var continueButton = document.getElementById("continue-btn");
+  var searchBar = document.getElementById('name-search-bar');
+  var nestedTableSettings = nestedTableConfig['tableSettings'];
+
+  // latest search variables
+  var latestSearchTerm = "";
+  var latestSearchOption = $('select[name="type"').val();
+
+  // data tables
+  var selectiontable = $('#selectiontable').DataTable(selectionTableConfig['tableSettings']);
+  var searchtable = $('#searchtable').DataTable(searchTableConfig['tableSettings']);
+
+
+
+  ////  --------  Set listeners  --------  ////
+
+  // ----  Continue to flower page ---- //
+  continueButton.addEventListener('click', function(){ // different to create
+    saveCache();
+  });
+
+  // ---- Event handling to remove row from selection ---- //
+  $('#selectiontable tbody').on('click', 'tr', function () {
+    handleSelectionTableRowClick(this);
+  });
+
+  searchButton.addEventListener('click', function(){
+    search()
+  });
+
+  searchBar.addEventListener('keypress', function (e) {
+  // Search when enter pressed in input bar
+  var key = e.which || e.keyCode;
+  if (key === 13) { // 13 is enter
+    search();
+  }
+});
+
+
+
+  ////  --------  Define functions  --------  ////
+
+  function search(){
+    console.log("searching")
+    $("#loading").show();
+    latestSearchOption = $(".entity-option:selected").val();
+    latestSearchTerm = searchBar.value;
+    searchtable = makeSearchTable(latestSearchOption);
+
+    $.ajax({
+      type: "POST",
+      url: "/search",
+  data: { // input to the views.py - search()
+    keyword: latestSearchTerm,
+    option: latestSearchOption,
+  },
+  success: function (result) { // return data if success
+    updateTable(result["entities"], searchtable);
+    searchTableEventHandling();
+    checkSelectedRows();
+    addNestedRows();
+    $("#loading").hide();
+  },
+  error: function (result) {
+    console.log("searchButton error");
+  }
+});
+  }
+
+  function makeSearchTable(entityType){
+    if ($.fn.DataTable.isDataTable("#searchtable")) {
+      $('#searchtable').DataTable().clear().destroy();
+      $('#searchtable').empty();
+    }
+    var tableSettings = searchTableConfig['tableSettings'];
+    return $('#searchtable').DataTable(tableSettings);
+  }
+
+  function updateTable(data, table){
+    table.clear();
+    for(var i in data) {
+      table.row.add(data[i]);
+    };
+    table.draw();}
+
+    function searchTableEventHandling() {
+      $('.papers-outer-checkbox').on('change', function () {
+        var tr = $(this).closest('tr');
+        var row = searchtable.row( tr );
+        var select = this.checked;
+        toggleParentRowSelection(row, select);
+      })
+    }
+
+    function toggleParentRowSelection(row, select){
+  // handle selection table changes
+  if (select){
+    var newRow = row.data();
+    selectiontable.row.add(newRow).draw();
+  }
+  else {
+    removeRowFromSelectionTable(row);
+  }
+}
+
+function removeRowFromSelectionTable(row){
+  selectiontable.rows().nodes().each(function(a) {
+    var r = selectiontable.row(a);
+    if(r.data()['table-id'] === row.data()['table-id']){
+      r.remove().draw();
+    }
+  });
+}
+
+function checkSelectedRows(){
+  // select rows in search table if they have already been selected
+  console.log("checkSelectedRows called");
+  searchtable.rows().nodes().each(function(searchtable_tr_element) {
+    selectiontable.rows().nodes().each(function(selectiontable_tr_element) {
+      var search_row = searchtable.row(searchtable_tr_element);
+      var selection_row = selectiontable.row(selectiontable_tr_element);
+      if(search_row.data()['table-id'] === selection_row.data()['table-id']){
+        searchtable_tr_element.children[1].children[0].checked = true;
+      }
+    })
+  });
+}
+
+function addNestedRows(){
+  searchtable.rows().every(function(rowIdx, tableLoop, rowLoop){
+    var eid = this.data()['data']['eid'];
+    var tableId = this.data()['table-id'];
+    var child_text = "<table id='"+tableId+"' class='papers_table compact'></table>";
+    this.child(child_text).show();
+    var nestedTable = $("#" + tableId);
+    nestedTable.closest("td").addClass("innertable");
+  //nested_tables[tableId] = {};
+  //nested_tables[tableId]['table'] = nestedTable.DataTable(nestedTableSettings);
+  //updateTable(this.data()['data']['papers'], nested_tables[tableId]['table']);
+
+  var nestedDataTable= nestedTable.DataTable(nestedTableSettings);
+  updateTable(this.data()['data']['papers'], nestedDataTable);
+  hideElement(this.child());
+});
+  addNestedRowToggle('#searchtable', '.display-info');
+}
+
+function addNestedRowToggle (tableSelector, rowSelector){
+  $(tableSelector + ' tbody').on('click', rowSelector, function () {
+    var tr = $(this).closest('tr');
+    var row = searchtable.row( tr );
+    var show = !(tr[0].classList.contains('shown'));
+  // Close all open rows
+  $(tableSelector + ' .shown').each( function (i, elem) {
+    var tblRow = searchtable.row( elem );
+    elem.classList.remove('shown');
+    hideElement(tblRow.child());
+  });
+  if ( show ) {
+  // Open this row
+  showElement(row.child());
+  tr.addClass('shown');
+}
+});
+}
+
+function handleSelectionTableRowClick(element){
+  var row = selectiontable.row( element );
+  var row_id = row.data()['table-id'];
+  $('#searchtable .outer-table-row').each(function(a, b){
+    var r = searchtable.row(b);
+    if (r.data()['table-id'] === row_id){
+      $(b).find('.papers-outer-checkbox').each(function(c, d){
+        d.checked = false;
+      });
+    }
+  });
+  row.remove().draw();
+}
+
+  function saveCache(){ // different to create
+    var data = getEntityData();  
+
+    $.ajax({
+      type: "POST",
+      url: "/manualcache",
+  data: { // input to the views.py - search()
+    ent_data: JSON.stringify(data['entity_data']),
+    cache_type: data['cache_type']
+  },
+  success: function (result) { // return data if success
+    if (current < current_data.length-1){
+      set_current(current+1);
+      searchtable = makeSearchTable(latestSearchOption); 
+    } else
+      location.reload();
+  },
+  error: function (result) {
+    console.log("error saving cache");
+  }
+});
+  }
+
+  function getEntityData(){ // different to create
+    var authorIds = new Set();
+    var normalisedNames = new Set();
+    var papers = new Set();
+    var paperIds = new Set();
+    var cache_type = "authorGroup";
+    selectiontable.rows().nodes().each(function(a) {
+      var row_data = selectiontable.row(a).data()['data'];
+      if (row_data['entity-type'] === "author") {
+        authorIds.add(row_data['eid']);
+        normalisedNames.add(row_data['normalisedName']);
+        for (i in row_data['papers']){
+          papers.add(row_data['papers'][i]['eid']);
+        }
+      }
+      if (row_data['entity-type'] === "paper") {
+        paperIds.add(row_data['eid']);
+        cache_type = "paperGroup";
+      }
+    });
+    var entity_data = jQuery.extend({}, current_data[current]);
+    if (cache_type === "authorGroup"){
+      entity_data['AuthorIds'] = Array.from(authorIds);
+      entity_data['NormalizedNames'] = Array.from(normalisedNames);
+      entity_data['Papers'] = Array.from(papers);
+      entity_data['Affiliations'] = splitStrip(entity_data['Affiliations']); 
+    }
+    if (cache_type === "paperGroup"){
+    entity_data['PaperIds'] = Array.from(paperIds);
+    }
+    entity_data['Keywords'] = splitStrip(entity_data['Keywords']); 
+    console.log(entity_data);
+
+    return {"entity_data": entity_data, "cache_type": cache_type};
+  }
+
+  function hideElement(elem){
+    elem.css({'display': 'none'});
+  }
+
+  function showElement(elem){
+    elem.css({'display': 'block'});
+  }
+
+  function splitStrip(str){
+    var split = str.split(',');
+    for (i in split){
+      split[i] = split[i].trim();
+    }
+    return split;
+  }
+  var prevBtn = document.getElementById('previous');
+  var nextBtn = document.getElementById('next');
+
+  prevBtn.addEventListener('click', function(){
+    set_current(current-1)
+  });
+
+  nextBtn.addEventListener('click', function(){
+    set_current(current+1)
+  });
+
+  function set_current(i){
+    if (i <= current_data.length && i >= 0){
+      Object.keys(current_data[i]).forEach(function(key){
+        $('#'+key).text(current_data[i][key]);
+      });
+      current = i;
+      if (i === 0){prevBtn.disabled = true} else {prevBtn.disabled = false};
+      if (i >= current_data.length-1){nextBtn.disabled = true} else {nextBtn.disabled = false};
+    }
+
+  }
+
+  function proceed(data=null){
+    $('#heading').text($('input[name="cache_type"]:checked').val());
+    infoTable($('input[name="cache_type"]:checked').val());
+    if ($('input[name="cache_type"]:checked').val()=="paperGroup"){
+      $("#entity-type-option").val("paper").change();
+    }
+    if (data == null) {
+      current_data = [{}];
+      var keys = cacheKeys[$('input[name="cache_type"]:checked').val()];
+      for (i in keys){
+        current_data[0][keys[i]] = "";
+      }  
+  } else {
+      current_data = data;
+    }
+    set_current(0);
+    modal.style.display = "none";
+  }
+
+  var current;
+  var current_data;
+
+  function makeModal(content, disable=true){
+
+    var start = '<div id="myModal" class="modal"><div class="modal-content right"><span class="close">&times;</span><div class="hoc cntr">';
+    var end = '</div></div></div>';
+    var htmlString = start+content+end;
+    var htmlElem = new DOMParser().parseFromString(htmlString, 'text/html').body.childNodes;
+    document.body.appendChild(htmlElem[0]);
+
+  // Get the modal
+  var modal = document.getElementById('myModal');
+
+  // Get the <span> element that closes the modal
+  var span = document.getElementsByClassName("close")[0];
+
+  if (disable){
+
+  // When the user clicks on <span> (x), close the modal
+  span.onclick = function() {
+    modal.style.display = "none";
+  }
+
+
+  // When the user clicks anywhere outside of the modal, close it
+  window.onclick = function(event) {
+    if (event.target == modal) {
+      modal.style.display = "none";
+      console.log("closed by window click")}
+    }
+  };
+
+  $('#continue').on('click', function(){
+  /*                      $('#heading').text($('input[name="cache_type"]:checked').val());
+  infoTable($('input[name="cache_type"]:checked').val());
+  modal.style.display = "none";
+  current_data = [{}];
+  set_current(0);
+  */ 
+  proceed();  
+});
+
+
+
+  $('#open').on('click', function(){
+    $.ajax({
+      type: "POST",
+      url: "/curate_load_file/",
+  data: { // input to the views.py - search()
+    filename: $('#filename').val(),
+  },
+  success: function (result) { // return data if success
+    if (result.success == "true"){
+      proceed(result.data);
+    } else {alert("Failed to open"+$('#filename').val())}
+  },
+  error: function (result) {
+    alert("Failed to open"+$('#filename').val());
+  }
+});
+  });
+
+  return modal;
+}
+
+var cacheKeys = {
+  "authorGroup": ["DisplayName", "Type", "Affiliations", "Year", "Keywords", "Citation"],
+  "paperGroup": ["DisplayName", "NormalizedName", "Type", "Field", "Year", "Keywords"],
+};
+
+function infoTable(cacheType){
+  var start = '<table id="info_table"><tbody>';
+  var middle = '';
+  var end = '</tbody></table>';
+  var keys = cacheKeys[cacheType];
+  for (i in keys){
+    middle +=  '<tr><td>'+keys[i]+':</td><td class="attribute" contenteditable="true" id="'+keys[i]+'"></td></tr>';
+  }
+  var htmlString = start+middle+end;
+  var htmlElem = new DOMParser().parseFromString(htmlString, 'text/html').body.childNodes;
+  document.getElementById('table_div').appendChild(htmlElem[0]);
+
+var attribute_class = document.getElementsByClassName("attribute");
+for (i=0;i < attribute_class.length; i++){
+  attribute_class[i].addEventListener("input", function() {
+    current_data[current][this.id] = this.textContent;
+  }, false);
+};
+}
+
+
+$(document).ready(function(){
+  modal = makeModal('<div class="hoc wrapper cntr" style="display: block"><h4>Select a cache type</h3><input type="radio" value="authorGroup" name="cache_type" checked>Author Group<br><input type="radio" value="paperGroup" name="cache_type">Paper Group</div><div class="hoc wrapper" style="display: block"><div class="hoc wrapper" style="display: block"><input class="form-control" id="filename" placeholder="Filepath" type="txt"/><button id="open" class="btn">Open</button></div><div class="hoc wrapper" style="display: block"><button id="continue" class="btn">Continue</button></div><hr></div>', false);
+  modal.style.display = "block";
+  if (searchBar.value) {
+    search();
+  }
+});
+
+</script>
+
+

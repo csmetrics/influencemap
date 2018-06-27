@@ -17,9 +17,9 @@ from core.search.mag_flower_bloom import *
 from core.utils.get_entity import entity_from_name
 from core.search.influence_df import get_filtered_score
 from core.search.search import search_name
-from graph.save_cache import saveNewAuthorCache
+from graph.save_cache import *
 from core.flower.high_level_get_flower import get_flower_data_high_level
-
+from core.utils.load_tsv import tsv_to_dict
 # Imports for submit
 from core.search.query_paper   import paper_query
 from core.search.query_info    import paper_info_check_query
@@ -158,6 +158,45 @@ def create(request):
         "search": search
     })
 
+
+
+@csrf_exempt
+def curate(request):
+    print(request)
+
+    try:
+        data = json.loads(request.POST.get('data'))
+        keyword = data.get('keyword', '')
+        search = data.get('search') == 'true'
+        option = data.get('option')
+    except:
+        keyword = ""
+        option = ""
+        search = False
+
+    print(search)
+    # render page with data
+    return render(request, "curate.html", {
+        "navbarOption": get_navbar_option(keyword, option),
+        "search": search
+    })
+
+
+@csrf_exempt
+def curate_load_file(request):
+    print("this is in the curate_load_file func")
+    filename = request.POST.get("filename")
+    print("filename: ", filename)
+    try:
+        data = tsv_to_dict(filename)
+        success = "true"
+    except FileNotFoundError:
+        data = {}
+        success = "false"
+    return JsonResponse({'data': data, 'success': success}, safe=False)
+
+
+
 s = {
     'author': ('<h5>{name}</h5><p>{affiliation}, Papers: {paperCount}, Citations: {citations}</p></div>'),
          # '<div style="float: left; width: 50%; padding: 0;"><p>Papers: {paperCount}</p></div>'
@@ -172,7 +211,7 @@ s = {
         '<div style="float: left; width: 50%; padding: 0;"><p>Papers: {paperCount}</p></div>'
         '<div style="float: right; width: 50%; text-align: right; padding: 0;"<p>Citations: {citations}</p></div>'),
     'paper': ('<h5>{title}</h5>'
-        '<div><p>Citations: {citations}</p></div>')
+        '<div><p>Citations: {citations}, Field: {fieldOfStudy}</p><p>Authors: {authorName}</p></div>')
 }
 
 @csrf_exempt
@@ -232,21 +271,12 @@ def search(request):
 
 @csrf_exempt
 def manualcache(request):
-    print(request.POST.get('type'))
     data = (json.loads(request.POST.get('ent_data')))
-    print(request)
-    print(request.POST)
-    print((data))
-    if 'Keywords' in data:
-        for i, keyword in enumerate(data['Keywords']):
-            data['Keywords'][i] = keyword.strip()
-    saveNewAuthorCache(data)
-#    with open('/localdata3/common/elastic_cache_test.json', 'r') as fh:
-#        cache = json.load(fh)
-#    with open('/localdata3/common/elastic_cache_test.json', 'w') as fh:
-#        cache.append(data)
-#        json.dump(cache, fh)
-
+    cache_type = request.POST.get('cache_type')
+    if cache_type == "authorGroup":
+        saveNewAuthorGroupCache(data)
+    elif cache_type == "paperGroup":
+        saveNewPaperGroupCache(data)
     return JsonResponse({},safe=False)
 
 def view_papers(request):
@@ -304,7 +334,7 @@ def submit(request):
     selection = data.get("selection")
     entity_data = data.get("entity_data")
     print("submit")
-
+    
     # Default Dates need fixing
     min_year = None
     max_year = None

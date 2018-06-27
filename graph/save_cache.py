@@ -15,6 +15,7 @@ cache_types = {
     "paper_group": [
         "publication_venue",
         "univ_field",
+        "project",
         "universities"
     ]
 }
@@ -27,21 +28,37 @@ def init_es():
     connections.create_connection(hosts = hostname, timeout=20)
     print("Elasticsearch connections initialized")
 
-def saveNewAuthorCache(cache):
+def saveNewAuthorGroupCache(cache):
     print("starting cache")
     init_es()
     assert cache["Type"] in cache_types["author_group"]
     doc = AuthorGroup()
     doc.Type = cache["Type"]
-    doc.NormalizedName = cache["NormalizedName"]
+    doc.NormalizedNames = cache["NormalizedNames"]
     doc.DisplayName = cache["DisplayName"]
     doc.Year = cache["Year"] if ("Year" in cache and cache['Year'].isdigit()) else None
-    doc.Affiliations = cache["Affiliation"] if "Affiliation" in cache else None
+    doc.Affiliations = cache["Affiliations"] if "Affiliations" in cache else None
     doc.Keywords = cache["Keywords"] if "Keywords" in cache else None
     doc.Url = cache['Url'] if 'Url' in cache else None
     doc.Citation = cache['Citation']
     doc.AuthorIds = cache['AuthorIds'] if 'AuthorIds' in cache else None
     doc.CreatedDate = datetime.now()
-    doc.meta.id = generate_uuid("{}-{}".format(doc.Type, doc.NormalizedName))
+    doc.meta.id = generate_uuid("{}-{}".format(doc.Type, doc.DisplayName))
     doc.save()
     print("finished caching")
+
+def saveNewPaperGroupCache(cache):
+    print("starting cache")
+    init_es()
+    assert cache["Type"] in cache_types["paper_group"]
+    doc = PaperGroup()
+    doc.Type = cache["Type"]
+    doc.NormalizedName = cache["NormalizedName"]
+    doc.DisplayName = cache["DisplayName"]
+    doc.PaperIds = cache["PaperIds"]
+    doc.Year = cache["Year"] if ("Year" in cache and cache['Year'].isdigit()) else None
+    doc.Field = cache["Field"] if "Field" in cache else None
+    doc.Keywords = cache["Keywords"] if "Keywords" in cache else None
+    doc.CreatedDate = datetime.now()
+    doc.meta.id = generate_uuid("{}-{}={}".format(doc.Year, doc.Field, doc.NormalizedName))
+    doc.save()
