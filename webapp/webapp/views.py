@@ -22,7 +22,7 @@ from core.flower.high_level_get_flower import get_flower_data_high_level
 
 # Imports for submit
 from core.search.query_paper   import paper_query
-from core.search.query_info    import paper_info_check_query
+from core.search.query_info    import paper_info_check_query, paper_info_mag_check_multiquery
 from core.score.agg_paper_info import score_paper_info_list
 
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
@@ -317,11 +317,11 @@ def submit(request):
         selected_papers = list(map(lambda x : x['eid'], selection[eid]))
 
     # Turn selected paper into information dictionary list
-    paper_information = list()
-    for paper in selected_papers:
-        paper_info = paper_info_check_query(paper)
-        if paper_info:
-            paper_information.append(paper_info)
+    paper_information = paper_info_mag_check_multiquery(selected_papers) # API
+    #for paper in selected_papers:
+    #    paper_info = paper_info_check_query(paper)
+    #    if paper_info:
+    #        paper_information.append(paper_info)
 
     # Generate score for each type of flower
     flower_score = [None, None, None]

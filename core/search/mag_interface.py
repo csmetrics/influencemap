@@ -4,13 +4,14 @@ import pandas as pd
 import functools
 import itertools
 import operator
+import random
 import sys
 from datetime import datetime
 from core.config import *
 
-get_header = lambda x : {
+get_header = lambda x, keys : {
     # Request headers
-    'Ocp-Apim-Subscription-Key': API_KEYS[x]
+    'Ocp-Apim-Subscription-Key': keys[x]
 }
 
 
@@ -20,7 +21,9 @@ get_header = lambda x : {
 def query_academic_search(type, url, query):
     i = 0
     processing = True
-    header = get_header(i)
+    keys = API_KEYS
+    random.shuffle(keys)
+    header = get_header(i, keys)
 
     # Keep trying API keys until failure or results
     while processing:
@@ -29,6 +32,8 @@ def query_academic_search(type, url, query):
         elif type == "post":
             response = requests.post(url, json=query, headers=header)
             #print(response.status_code)
+        if response.status_code == 401:
+            print(keys[i])
         if response.status_code != 200:
             print("return statue: " + str(response.status_code))
             print("ERROR: problem with the request.")
@@ -38,7 +43,7 @@ def query_academic_search(type, url, query):
             processing = False
         else:
             i += 1
-            header = get_header(i)
+            header = get_header(i, keys)
 
     return json.loads((response.content).decode("utf-8"))
 

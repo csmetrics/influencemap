@@ -152,6 +152,32 @@ def or_query_builder(base_query, inputs):
         out = ""
     return out
 
+def or_query_builder_list(base_query, inputs):
+    ''' or_query_builder, but returns a list of expressions to prevent url
+        being too long.
+    '''
+    query_list = list()
+    while inputs:
+        if len(inputs) > 1:
+            out = "Or({})"
+            sub_constraints = list()
+            # Incrementally add constraints
+            while len(', '.join(sub_constraints)) + len(out) < 1500 and inputs:
+                sub_constraints.append(base_query.format(inputs.pop(0)))
+                
+            out = out.format(", ".join(sub_constraints))
+        elif len(inputs) == 1:
+            out = base_query.format(inputs.pop(0))
+        else:
+            out = ""
+
+        # Add current string
+        query_list.append(out)
+
+    return query_list
+    
+    
+
 def parse_search_results(results, entityType):
     key_change = entity_config[entityType]['key_change']
     keys_to_make_dictionaries = entity_config[entityType]['keys_to_make_dictionaries']

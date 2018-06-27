@@ -35,6 +35,7 @@ try:
         # API key setup
         API_KEYS = [line.strip() for line in open(config['mag_api']['api_key_dir'], 'r')]
         key_filter = re.compile(r'[a-z0-9]{32}')
+        API_KEYS = list(filter(lambda r: len(r) == 32, API_KEYS))
         API_KEYS = list(filter(key_filter.search, API_KEYS))
         MAX_API  = len(API_KEYS)
 

@@ -6,9 +6,10 @@ from core.flower.flower_bloomer import getFlower, getPreFlowerData
 from core.search.mag_flower_bloom import *
 from core.utils.get_entity import entity_from_name
 
-from core.search.query_paper   import paper_query
-from core.search.query_info    import paper_info_check_query
-from core.score.agg_paper_info import score_paper_info_list
+from core.search.query_paper     import paper_query
+from core.search.query_paper_mag import paper_mag_query
+from core.search.query_info      import paper_info_check_query, paper_info_mag_check_multiquery
+from core.score.agg_paper_info   import score_paper_info_list
 
 flower_leaves = { 'author': [ent.Entity_type.AUTH]
                 , 'conf': [ent.Entity_type.CONF, ent.Entity_type.JOUR]
@@ -35,20 +36,27 @@ def get_flower_data_high_level(entitytype, authorids, normalizedname, selection=
             selected_papers += list(map(lambda x : x['eid'], selection[eid]))
     else:
         for eid in authorids:
-            papers = paper_query(str_to_ent[entitytype], eid)
+            #papers = paper_query(str_to_ent[entitytype], eid)
+            papers = paper_mag_query(str_to_ent[entitytype], eid) # API
             print(eid, str_to_ent[entitytype])
             print(papers)
             if papers:
                 selected_papers += papers
 
-    # Turn selected paper into information dictionary list
-    paper_information = list()
-    for paper in selected_papers:
-        paper_info = paper_info_check_query(paper)
-        if paper_info:
-            paper_information.append(paper_info)
+    print()
+    print('Number of Papers Found: ', len(selected_papers))
+    print()
 
-    print(paper_information)
+    # Turn selected paper into information dictionary list
+    paper_information = paper_info_mag_check_multiquery(selected_papers) # API
+    #for paper in selected_papers:
+    #    paper_info = paper_info_check_query(paper)
+    #    if paper_info:
+    #        paper_information.append(paper_info)
+
+    print()
+    print('Number of Paper Information Found: ', len(paper_information))
+    print()
     if not paper_information:
         return None
 
