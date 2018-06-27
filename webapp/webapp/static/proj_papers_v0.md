@@ -6,10 +6,13 @@
 * Have a local author/champion, who can give input on paper selection and interpreting results. 
 * Span different topics in CECS and ANU
 
+## Project list - in no particualar order
 
-Project Name (person involved): 
+1. Project Name (person involved): 
 Dacapo Programming Language Benchmark (Steve Balckburn)
+
 List of Papers:
+
 * The DaCapo benchmarks: java benchmarking development and analysis. OOPSLA 2006: 169-190
 https://academic.microsoft.com/#/detail/2166091242
 * The Jikes Research Virtual Machine project: Building an open-source research community.
@@ -20,3 +23,7 @@ https://academic.microsoft.com/#/detail/2159928435
 * Looking back on the language and hardware revolutions: measured power, performance, and scaling. ASPLOS 2011: 319-332
 https://academic.microsoft.com/#/detail/2167464511
 
+2. One-class SVM (Bob Williamson)
+
+* Support vector method for novelty detection, 2000 https://scholar.google.com.au/scholar?cluster=13152476582289052321&hl=en&as_sdt=2005&sciodt=0,5
+* Estimating the support of a high-dimensional distribution, 2001 https://academic.microsoft.com/#/detail/2132870739
