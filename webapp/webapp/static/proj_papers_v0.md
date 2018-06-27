@@ -61,3 +61,8 @@ Z Ouyang, S Pillai, F Beck, O Kunz, S Varlamov, KR Catchpole, Applied Physics Le
 * The tableaux work bench, P Abate, R Goré, International Conference on Automated Reasoning with Analytic Tableaux and …
 * EXPTIME tableaux with global caching for description logics with transitive roles, inverse roles and role hierarchies, R Goré, LA Nguyen, International Conference on Automated Reasoning with Analytic Tableaux and …	62	2007
 * An on-the-fly tableau-based decision procedure for PDL-satisfiability, P Abate, R Goré, F Widmann, Electronic Notes in Theoretical Computer Science 231, 191-209
+
+7. **Sound field reproduction (Thushara Abhayapala)**
+* Reproduction of a plane-wave sound field using an array of loudspeakers, DB Ward, TD Abhayapala, IEEE Transactions on speech and audio processing 9 (6), 697-707	2001
+* Theory and design of high order sound field microphones using spherical microphone array, TD Abhayapala, DB Ward, Acoustics, Speech, and Signal Processing (ICASSP), 2002 IEEE International …	2002
+* Theory and design of sound field reproduction in reverberant rooms, T Betlehem, TD Abhayapala, The Journal of the Acoustical Society of America 117 (4), 2100-2111
