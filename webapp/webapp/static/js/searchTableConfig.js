@@ -49,13 +49,6 @@ var nestedTableConfig = {
     { title: "Paper", data: 'title', className: "index dt-body-left" },
     { title: "Publication year", data: 'year', className: "institution dt-body-right" },
     { title: "Citations", data: 'citations'},
-    { 
-      title: "", 
-      orderable: false, 
-      'render': function (data, type, full, meta){
-        return '<input type="checkbox" class="papers-inner-checkbox">'
-      }
-    }
     ],
     // "select": {
     //   "style": "os",

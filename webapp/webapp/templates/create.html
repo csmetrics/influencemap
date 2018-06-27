@@ -33,95 +33,65 @@
 <script src="{% static 'js/selectionTableConfig.js' %}"></script>
 <script src="{% static 'js/manual_cache_form.js' %}"></script>
 <script>
-// elements
+
+////  --------  Define/initialise varibles  --------  ////
+
 var searchButton = document.getElementById("search-btn");
 var continueButton = document.getElementById("continue-btn");
 var searchBar = document.getElementById('name-search-bar');
+var nestedTableSettings = nestedTableConfig['tableSettings'];
 
 // latest search variables
 var latestSearchTerm = "";
 var latestSearchOption = $('select[name="type"').val();
 
-
 // data tables
 var selectiontable = $('#selectiontable').DataTable(selectionTableConfig['tableSettings']);
 var searchtable = $('#searchtable').DataTable(searchTableConfig['tableSettings']);
 
-//var searchtableContainer = document.getElementById("searchtable-container");
 
-function makeSearchTable(entityType){
-  if ($.fn.DataTable.isDataTable("#searchtable")) {
-    $('#searchtable').DataTable().clear().destroy();
-    $('#searchtable').empty();
+
+////  --------  Set listeners  --------  ////
+
+$(document).ready(function(){
+  if (searchBar.value) {
+    search();
   }
-  var tableSettings = searchTableConfig['tableSettings'];
-  return $('#searchtable').DataTable(tableSettings);}
+});
 
-function updateTable(data, table){
-  table.clear();
-
-  for(var i in data) {
-    table.row.add(data[i]);
-  };
-  table.draw();}
-
-// data
-var currentSearchTableData;
-var selectedData; // transition to this
-var selected_data = {}; // transition away from this
-var nestedTables = {}; // transition to this
-var nested_tables = {}; // transition away from this
-var nestedTableSettings = nestedTableConfig['tableSettings'];
-
-var entity_data = {};
-
-
-// ----  listeners  ----
-
+// ----  Continue to flower page ---- //
 continueButton.addEventListener('click', function(){
-    var entity_papers = {};
-    for (key in selected_data) {
-        entity_papers[key] = Array.from(selected_data[key]);
-    }
-   var top_year = Math.max(... Object.keys(selected_data).map(function(x){
-		return Math.max(...[...selected_data[x]].map(function(y){
-			return y.year;
-		}))
-	}))
-   var bot_year = Math.min(... Object.keys(selected_data).map(function(x){
-                return Math.min(...[...selected_data[x]].map(function(y){
-                        return y.year;
-                }))
-        }))
+   goToFlower();
+});
 
-   data = {
-       option: latestSearchOption,
-       keyword: latestSearchTerm,
-       selfcite: false, //selfCiteCheckbox.checked,
-       bot_year_min: bot_year,
-       top_year_max: top_year,
-       selection: entity_papers,
-       entity_data: entity_data,
-   }
-   postData('/submit/', data, "{% csrf_token %}")});
+// ---- Event handling to remove row from selection ---- //
+$('#selectiontable tbody').on('click', 'tr', function () {
+   handleSelectionTableRowClick(this);
+});
 
-searchButton.addEventListener('click', function(){search()});
+searchButton.addEventListener('click', function(){
+  search()
+});
 
 searchBar.addEventListener('keypress', function (e) {
   // Search when enter pressed in input bar
   var key = e.which || e.keyCode;
   if (key === 13) { // 13 is enter
     search();
-  }});
+  }
+});
+
+
+
+////  --------  Define functions  --------  ////
 
 function search(){
   console.log("searching")
   $("#loading").show();
   latestSearchOption = $(".entity-option:selected").val();
-  searchtable = makeSearchTable(latestSearchOption);
   latestSearchTerm = searchBar.value;
+  searchtable = makeSearchTable(latestSearchOption);
 
-  // showProgressBar();
   $.ajax({
     type: "POST",
     url: "/search",
@@ -130,84 +100,34 @@ function search(){
       option: latestSearchOption,
     },
     success: function (result) { // return data if success
-      currentSearchTableData = result['entities'];
       updateTable(result["entities"], searchtable);
       searchTableEventHandling();
-
-      // select rows in search table if they have already been selected
-      searchtable.rows().nodes().each(function(a) {
-        selectiontable.rows().nodes().each(function(b) {
-          var search_row = searchtable.row(a);
-          var selection_row = selectiontable.row(b);
-          if(search_row.data()['table-id'] === selection_row.data()['table-id']){
-            toggleParentRowSelection(search_row, true);
-          }
-        })
-      });
+      checkSelectedRows();
       addNestedRows();
       $("#loading").hide();
     },
     error: function (result) {
       console.log("searchButton error");
     }
-  });}
-
-function addNestedRows(){
-  searchtable.rows().every(function(rowIdx, tableLoop, rowLoop){
-    var eid = this.data()['data']['eid'];
-    var tableId = this.data()['table-id'];
-    var child_text = "<table id='"+tableId+"' class='papers_table compact'></table>";
-    this.child(child_text).show();
-    var nestedTable = $("#" + tableId);
-    nestedTable.closest("td").addClass("innertable");
-    nested_tables[tableId] = {};
-    nested_tables[tableId]['table'] = nestedTable.DataTable(nestedTableSettings);
-    nested_tables[tableId]['selectedPapers'] = [];
-    updateTable(this.data()['data']['papers'], nested_tables[tableId]['table']);
-    hideElement(this.child());
-  });
-
-  addNestedRowToggle('#searchtable', '.display-info');
-}
-
-function hideElement(elem){
-  elem.css({'display': 'none'});
-}
-
-function showElement(elem){
-  elem.css({'display': 'block'});
-}
-
-
-// ----  select data  ----
-
-// Search table click handling - open children rows when clicked
-function addNestedRowToggle (tableSelector, rowSelector){
-  $(tableSelector + ' tbody').on('click', rowSelector, function () {
-
-    var tr = $(this).closest('tr');
-    var row = searchtable.row( tr );
-    var show = !(tr[0].classList.contains('shown'));
-
-   // Close all open rows
-    $(tableSelector + ' .shown').each( function (i, elem) {
-      var tblRow = searchtable.row( elem );
-      elem.classList.remove('shown');
-      hideElement(tblRow.child());
-    });
-
-    if ( show ) {
-        // Open this row
-        showElement(row.child());
-        tr.addClass('shown');
-
-      addInnerCheckboxListener();
-    }
   });
 }
 
+function makeSearchTable(entityType){
+  if ($.fn.DataTable.isDataTable("#searchtable")) {
+    $('#searchtable').DataTable().clear().destroy();
+    $('#searchtable').empty();
+  }
+  var tableSettings = searchTableConfig['tableSettings'];
+  return $('#searchtable').DataTable(tableSettings);
+}
 
-// Search table parent checkbox click handling - toggle child selection
+function updateTable(data, table){
+  table.clear();
+  for(var i in data) {
+    table.row.add(data[i]);
+  };
+  table.draw();}
+
 function searchTableEventHandling() {
   $('.papers-outer-checkbox').on('change', function () {
     var tr = $(this).closest('tr');
@@ -215,7 +135,7 @@ function searchTableEventHandling() {
     var select = this.checked;
     toggleParentRowSelection(row, select);
   })
-};
+}
 
 function toggleParentRowSelection(row, select){
   // handle selection table changes
@@ -223,121 +143,10 @@ function toggleParentRowSelection(row, select){
     var newRow = row.data();
     selectiontable.row.add(newRow).draw();
   }
-
   else {
     removeRowFromSelectionTable(row);
   }
-
-  // toggle selection of child rows - check/uncheck boxes and add/remove selected data
-  toggleChildRowsSelection(row, select);
 }
-
-function toggleChildRowsSelection(row, select){
-  var tableId = row.data()['table-id'];
-  var r = $('#'+tableId);
-    r.find('.papers-inner-checkbox').each(function(a){
-      this.checked = select;
-      $(this).change();
-    })
-
-  if (select){ // add all papers for parent row to selected data
-    entity_data[row.data()['table-id']] = {
-        'eid' : row.data()['data']['eid'],
-        'name' : row.data()['data']['name'],
-        'entity-type' : row.data()['data']['entity-type'],
-    }
-    selected_data[row.data()['table-id']] = new Set(row.data()['data']['papers']);
-    console.log("entity", entity_data);
-    console.log("selected", selected_data);
-
-  } else { // remove any exisiting selected data from this entity
-    console.log("untick");
-    try {
-      delete selected_data[row.data()['table-id']];
-      delete entity_data[row.data()['table-id']];
-    } catch (e){console.log(e)}
-  }
-};
-
-
-// child row change
-function addInnerCheckboxListener (){
-  $('.papers-inner-checkbox').change(function(){
-    console.log("child row change");
-    var inputElement = this;
-    var rowElement = inputElement.parentElement.parentElement;
-    var tableElement = rowElement.parentElement.parentElement;
-    var tableId = tableElement['id'];
-     table = nested_tables[tableId]['table'];
-    var row = table.row(rowElement);
-    var parentRowElement = $(tableElement.parentElement.parentElement.parentElement).closest('tr').prev();
-     parentRow = searchtable.row(parentRowElement);
-    var parentRowCheckbox = parentRowElement.find('input.papers-outer-checkbox')[0];
-
-    if (inputElement.checked){
-      parentRowCheckbox.checked = true;
-      if (!(selected_data[tableId] instanceof Set)){
-        selected_data[tableId] = new Set();
-      }
-      selected_data[tableId].add(row.data());
-
-      var rowInSelection = false;
-      selectiontable.rows().nodes().each(function(a) {
-         r = selectiontable.row(a);
-        if(r.data()['table-id'] === parentRow.data()['table-id']){
-          rowInSelection = true;
-        }
-      });
-      if (!rowInSelection){
-        var newRow = parentRow.data();
-        selectiontable.row.add(newRow).draw();
-      }
-
-
-    } else {
-      if (selected_data[tableId] instanceof Set){
-            selected_data[tableId].delete(row.data());
-      }
-      var someRowsChecked = false;
-
-      table.rows().nodes().each(function(a){
-        if ($(a).find('input')[0].checked){
-          someRowsChecked = true;
-        }
-      })
-
-      parentRowCheckbox.checked = someRowsChecked;
-
-      if (!someRowsChecked){
-        removeRowFromSelectionTable(parentRow);
-      }
-    }
-
-    for (var key in selected_data){
-      if (selected_data[key].size === 0)
-          delete selected_data[key];
-    }
-    console.log(selected_data)
-  })
-}
-
-// event handling to remove row from selection
-$('#selectiontable tbody').on('click', 'tr', function () {
-  var row = selectiontable.row( this );
-  var row_id = row.data()['table-id'];
-  try {
-    $('#searchtable .outer-table-row').each(function(a, b){
-      var r = searchtable.row(b);
-      if (r.data()['table-id'] === row_id){
-        $(b).find('.papers-outer-checkbox').each(function(c, d){
-          d.checked = false;
-          toggleChildRowsSelection(r, false);
-        });
-      }
-    });
-    row.remove().draw();
-  } catch (e) {}
-});
 
 function removeRowFromSelectionTable(row){
   selectiontable.rows().nodes().each(function(a) {
@@ -348,11 +157,98 @@ function removeRowFromSelectionTable(row){
   });
 }
 
-$(document).ready(function(){
-  if (searchBar.value) {
-    search();
-  }
-});
+function checkSelectedRows(){
+  // select rows in search table if they have already been selected
+  console.log("checkSelectedRows called");
+  searchtable.rows().nodes().each(function(searchtable_tr_element) {
+    selectiontable.rows().nodes().each(function(selectiontable_tr_element) {
+      var search_row = searchtable.row(searchtable_tr_element);
+      var selection_row = selectiontable.row(selectiontable_tr_element);
+      if(search_row.data()['table-id'] === selection_row.data()['table-id']){
+        searchtable_tr_element.children[1].children[0].checked = true;
+      }
+    })
+  });
+}
+
+function addNestedRows(){
+  searchtable.rows().every(function(rowIdx, tableLoop, rowLoop){
+    var eid = this.data()['data']['eid'];
+    var tableId = this.data()['table-id'];
+    var child_text = "<table id='"+tableId+"' class='papers_table compact'></table>";
+    this.child(child_text).show();
+    var nestedTable = $("#" + tableId);
+    nestedTable.closest("td").addClass("innertable");
+    //nested_tables[tableId] = {};
+    //nested_tables[tableId]['table'] = nestedTable.DataTable(nestedTableSettings);
+    //updateTable(this.data()['data']['papers'], nested_tables[tableId]['table']);
+
+    var nestedDataTable= nestedTable.DataTable(nestedTableSettings);
+    updateTable(this.data()['data']['papers'], nestedDataTable);
+    hideElement(this.child());
+  });
+  addNestedRowToggle('#searchtable', '.display-info');
+}
+
+function addNestedRowToggle (tableSelector, rowSelector){
+  $(tableSelector + ' tbody').on('click', rowSelector, function () {
+    var tr = $(this).closest('tr');
+    var row = searchtable.row( tr );
+    var show = !(tr[0].classList.contains('shown'));
+   // Close all open rows
+    $(tableSelector + ' .shown').each( function (i, elem) {
+      var tblRow = searchtable.row( elem );
+      elem.classList.remove('shown');
+      hideElement(tblRow.child());
+    });
+    if ( show ) {
+        // Open this row
+        showElement(row.child());
+        tr.addClass('shown');
+    }
+  });
+}
+
+function handleSelectionTableRowClick(element){
+  var row = selectiontable.row( element );
+  var row_id = row.data()['table-id'];
+    $('#searchtable .outer-table-row').each(function(a, b){
+      var r = searchtable.row(b);
+      if (r.data()['table-id'] === row_id){
+        $(b).find('.papers-outer-checkbox').each(function(c, d){
+          d.checked = false;
+        });
+      }
+    });
+    row.remove().draw();
+}
+
+function goToFlower(){
+   var data = getSelectedData();  
+   data['option'] = latestSearchOption;
+   data['keyword'] = latestSearchTerm;
+   console.log(data);
+   //postData('/submit/', data, "{% csrf_token %}");
+}
+
+function getSelectedData(){
+   var entities = [];
+   var most_papers = {"paperCount": -1};
+   selectiontable.rows().nodes().each(function(a) {
+     var row_data = selectiontable.row(a).data()['data'];
+     var entity = {'eid': row_data['eid'], 'entity_type': row_data['entity-type'], 'normalisedName': row_data['normalisedName'], 'papers': row_data['papers']}
+     if (row_data['paperCount'] > most_papers['paperCount']){most_papers = {"name": row_data['normalisedName'], "paperCount": row_data['paperCount']}}
+     entities.push(entity);
+   });
+   return {"entities": entities, "normalisedName": most_papers["name"]};
+}
+
+function hideElement(elem){
+  elem.css({'display': 'none'});
+}
+
+function showElement(elem){
+  elem.css({'display': 'block'});
+}
 
 </script>
-

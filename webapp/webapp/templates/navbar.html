@@ -3,7 +3,7 @@
 <div class="search-bar" align="center">
   <div class="row" style="width: 600px">
     <div class="col-xs-3">
-      <select class="form-control select" name="type" style="width:150px; height:40px">
+      <select id="entity-type-option" class="form-control select" name="type" style="width:150px; height:40px">
         {% for opt in navbar.optionlist %}
           <option class="entity-option" value="{{opt.id}}" {% if opt.id == navbar.selectedOption.id %} selected {% endif %}>{{ opt.name }}</option>
         {% endfor %}
