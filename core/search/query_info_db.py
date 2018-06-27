@@ -107,9 +107,9 @@ def pr_links_query(paper_id):
 
         # Determine what type of citation
         if paper_id == cite_info[pr_targets[0]]:
-            citations.append(cite_info[pr_targets[1]])
+            references.append(cite_info[pr_targets[1]])
         else:
-            references.append(cite_info[pr_targets[0]])
+            citations.append(cite_info[pr_targets[0]])
 
     # Return results as a dictionary
     return {'References': references, 'Citations': citations}

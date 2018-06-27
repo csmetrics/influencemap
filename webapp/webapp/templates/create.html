@@ -226,8 +226,7 @@ function goToFlower(){
    var data = getSelectedData();  
    data['option'] = latestSearchOption;
    data['keyword'] = latestSearchTerm;
-   console.log(data);
-   //postData('/submit/', data, "{% csrf_token %}");
+   postData('/submit/', data, "{% csrf_token %}");
 }
 
 function getSelectedData(){

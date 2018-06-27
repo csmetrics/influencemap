@@ -1,11 +1,14 @@
 from enum import Enum
+from functools import total_ordering
 from core.config import *
 from core.search.mag_user_query import *
 import pandas as pd
 import os
 
-# Type of entities for the flower
+@ total_ordering
 class Entity_type(Enum):
+    ''' Type of entities for the flower
+    '''
     AUTH = ('AUTH', 'auth', 'author', 'auth_name', 'Author', 'Author', 'AuthorIDs', 'DisplayAuthorName')
     AFFI = ('AFFI', 'affi', 'institution', 'affi_name', 'Affiliation', 'Affiliation', 'AffiliationIDs', 'Name')
     CONF = ('CONF', 'conf', 'conference', 'conf_abv', 'Conference', 'ConferenceSeries', 'ConferenceSeriesIDs', 'ShortName')
@@ -20,6 +23,9 @@ class Entity_type(Enum):
         self.api_type = api_type
         self.api_id = api_id
         self.api_name = api_name
+
+    def __lt__(self, other):
+        return self.ident < other.ident
 
 # Defines the type of the flower. (Center, Leaves)
 class Entity_map:

@@ -2,13 +2,14 @@
 Aggregates paper information dictionaries into scoring tables/statistics to
 display pass to the front-end (Draw flower or display statistics).
 
-date:   25.06.18
+date:   26.06.18
 author: Alexander Soen
 '''
 
 import pandas as pd
-from core.utils.entity_type import Entity_type
-from core.search.query_name import name_query
+from core.utils.entity_type     import Entity_type
+#from core.search.query_name     import name_query
+from core.search.query_name_mag import name_try_mag_multiquery
 
 def score_author(paper_info):
     ''' Turns a paper information dictionary into a list of scoring
@@ -25,21 +26,19 @@ def score_author(paper_info):
             for ref_author in reference['Authors']:
                 row_dict = dict()
 
-                # Make entity id
-                try:
-                    entity_tuple = (Entity_type.AUTH, ref_author['AuthorId'])
-                except KeyError:
-                    continue
-
                 # Influence weight
                 weight = 1 / len(reference['Authors']) if reference['Authors'] \
                         else 1
 
                 # Important fields
-                row_dict['entity_tuple']   = entity_tuple
-                row_dict['influenced']     = weight
-                row_dict['influencing']    = 0
-                row_dict['influence_date'] = paper_info['Year']
+                row_dict['entity_id']   = ref_author['AuthorId']
+                row_dict['entity_type'] = Entity_type.AUTH
+                row_dict['influenced']  = weight
+                row_dict['influencing'] = 0
+                try:
+                    row_dict['influence_date'] = paper_info['Year']
+                except KeyError:
+                    row_dict['influence_date'] = None
 
                 score_list.append(row_dict)
 
@@ -51,21 +50,19 @@ def score_author(paper_info):
             for cite_author in citation['Authors']:
                 row_dict = dict()
 
-                # Make entity id
-                try:
-                    entity_tuple = (Entity_type.AUTH, cite_author['AuthorId'])
-                except KeyError:
-                    continue
-
                 # Influence weight
                 weight = 1 / len(paper_info['Authors']) if \
                          paper_info['Authors'] else 1
 
                 # Important fields
-                row_dict['entity_tuple']   = entity_tuple
-                row_dict['influenced']     = 0
-                row_dict['influencing']    = weight
-                row_dict['influence_date'] = citation['Year']
+                row_dict['entity_id']   = cite_author['AuthorId']
+                row_dict['entity_type'] = Entity_type.AUTH
+                row_dict['influenced']  = 0
+                row_dict['influencing'] = weight
+                try:
+                    row_dict['influence_date'] = citation['Year']
+                except KeyError:
+                    row_dict['influence_date'] = None
 
                 score_list.append(row_dict)
 
@@ -89,7 +86,7 @@ def score_affiliation(paper_info):
 
                 # Make entity id
                 try:
-                    entity_tuple = (Entity_type.AFFI, ref_author['AffiliationId'])
+                    entity_tuple = (Entity_type.AFFI, )
                 except KeyError:
                     continue
 
@@ -98,10 +95,14 @@ def score_affiliation(paper_info):
                          else 1
 
                 # Important fields
-                row_dict['entity_tuple']   = entity_tuple
-                row_dict['influenced']     = weight
-                row_dict['influencing']    = 0
-                row_dict['influence_date'] = paper_info['Year']
+                row_dict['entity_id']   = ref_author['AffiliationId']
+                row_dict['entity_type'] = Entity_type.AFFI
+                row_dict['influenced']  = weight
+                row_dict['influencing'] = 0
+                try:
+                    row_dict['influence_date'] = paper_info['Year']
+                except KeyError:
+                    row_dict['influence_date'] = None
 
                 score_list.append(row_dict)
 
@@ -113,21 +114,19 @@ def score_affiliation(paper_info):
             for cite_author in citation['Authors']:
                 row_dict = dict()
 
-                # Make entity id
-                try:
-                    entity_tuple = (Entity_type.AFFI, cite_author['AffiliationId'])
-                except KeyError:
-                    continue
-
                 # Influence weight
                 weight = 1 / len(paper_info['Authors']) if \
                          paper_info['Authors'] else 1
 
                 # Important fields
-                row_dict['entity_tuple']   = entity_tuple
-                row_dict['influenced']     = 0
-                row_dict['influencing']    = weight
-                row_dict['influence_date'] = citation['Year']
+                row_dict['entity_id']   = cite_author['AffiliationId']
+                row_dict['entity_type'] = Entity_type.AFFI
+                row_dict['influenced']  = 0
+                row_dict['influencing'] = weight
+                try:
+                    row_dict['influence_date'] = citation['Year']
+                except KeyError:
+                    row_dict['influence_date'] = None
 
                 score_list.append(row_dict)
 
@@ -149,16 +148,22 @@ def score_conference(paper_info):
 
             # Make entity id
             try:
-                entity_tuple = (Entity_type.CONF,
-                             reference['ConferenceInstanceId'])
+                entity_id = reference['ConferenceInstanceId']
             except KeyError:
-                continue
+                try:
+                    entity_id = reference['ConferenceSeriesId']
+                except KeyError:
+                    continue
 
             # Important fields
-            row_dict['entity_tuple']   = entity_tuple
-            row_dict['influenced']     = 1
-            row_dict['influencing']    = 0
-            row_dict['influence_date'] = paper_info['Year']
+            row_dict['entity_id']   = entity_id
+            row_dict['entity_type'] = Entity_type.CONF
+            row_dict['influenced']  = 1
+            row_dict['influencing'] = 0
+            try:
+                row_dict['influence_date'] = paper_info['Year']
+            except KeyError:
+                row_dict['influence_date'] = None
 
             score_list.append(row_dict)
 
@@ -170,15 +175,22 @@ def score_conference(paper_info):
 
             # Make entity id
             try:
-                entity_tuple = (Entity_type.CONF, citation['ConferenceInstanceId'])
+                entity_id = citation['ConferenceInstanceId']
             except KeyError:
-                continue
+                try:
+                    entity_id = citation['ConferenceSeriesId']
+                except KeyError:
+                    continue
 
             # Important fields
-            row_dict['entity_tuple']   = entity_tuple
-            row_dict['influenced']     = 0
-            row_dict['influencing']    = 1
-            row_dict['influence_date'] = citation['Year']
+            row_dict['entity_id']   = entity_id
+            row_dict['entity_type'] = Entity_type.CONF
+            row_dict['influenced']  = 0
+            row_dict['influencing'] = 1
+            try:
+                row_dict['influence_date'] = citation['Year']
+            except KeyError:
+                row_dict['influence_date'] = None
 
             score_list.append(row_dict)
 
@@ -200,15 +212,19 @@ def score_journal(paper_info):
 
             # Make entity id
             try:
-                entity_tuple = (Entity_type.JOUR, reference['JournalId'])
+                entity_id = reference['JournalId']
             except KeyError:
                 continue
 
             # Important fields
-            row_dict['entity_tuple']   = entity_tuple
-            row_dict['influenced']     = 1
-            row_dict['influencing']    = 0
-            row_dict['influence_date'] = paper_info['Year']
+            row_dict['entity_id']   = entity_id
+            row_dict['entity_type'] = Entity_type.JOUR
+            row_dict['influenced']  = 1
+            row_dict['influencing'] = 0
+            try:
+                row_dict['influence_date'] = paper_info['Year']
+            except KeyError:
+                row_dict['influence_date'] = None
 
             score_list.append(row_dict)
 
@@ -220,15 +236,19 @@ def score_journal(paper_info):
 
             # Make entity id
             try:
-                entity_tuple = (Entity_type.JOUR, citation['JournalId'])
+                entity_id = citation['JournalId']
             except KeyError:
                 continue
 
             # Important fields
-            row_dict['entity_tuple']   = entity_tuple
-            row_dict['influenced']     = 0
-            row_dict['influencing']    = 1
-            row_dict['influence_date'] = citation['Year']
+            row_dict['entity_id']   = entity_id
+            row_dict['entity_type'] = Entity_type.JOUR
+            row_dict['influenced']  = 0
+            row_dict['influencing'] = 1
+            try:
+                row_dict['influence_date'] = citation['Year']
+            except KeyError:
+                row_dict['influence_date'] = None
 
             score_list.append(row_dict)
 
@@ -259,6 +279,13 @@ def score_paper_info(paper_info, entity_type):
     return None
 
 
+def apply_name_mapping(row, name_mapping):
+    try:
+        return name_mapping[row['entity_type']][row['entity_id']]
+    except KeyError:
+        return None
+
+
 def score_paper_info_list(paper_info_list, leaves):
     ''' Provides a scoring pandas dataframe given a list of paper information
         and leaf configuration of flower to represent the scoring.
@@ -279,29 +306,21 @@ def score_paper_info_list(paper_info_list, leaves):
     # Score dataframe
     score_df = pd.DataFrame(score_list)
 
-    # Get entity id tuples (filter unique)
-    entity_tuple_tags = list(set(score_df['entity_tuple']))
+    # Create name mapping dictionary
+    name_mapping = dict()
+    for entity_type, entity_df in score_df.groupby('entity_type'):
+        entity_ids =  list(set(entity_df['entity_id']))
 
-    name_map_list = list()
+        # Naming dictionary for specific type
+        name_map = name_try_mag_multiquery(entity_type, entity_ids)
+        name_mapping[entity_type] = name_map
 
-    # For each tuple
-    for entity_tuple in entity_tuple_tags:
-        name_map = dict()
+    # Update entity ids to names
+    name_update = lambda r: apply_name_mapping(r, name_mapping)
+    score_df['entity_id'] = score_df.apply(name_update, axis = 1)
 
-        # Create map from tuples to names
-        name_dict = name_query(*entity_tuple)
-        if name_dict:
-            name_map['entity_tuple'] = entity_tuple
-            name_map['entity_id']    = name_dict[entity_tuple[1]]
-            name_map_list.append(name_map)
-
-    # Name map dataframe
-    name_map_df = pd.DataFrame(name_map_list)
-
-    # Generate entity ids
-    score_df = pd.merge(score_df, name_map_df, how = 'inner',
-                        on = 'entity_tuple')
-    score_df.drop('entity_tuple', axis = 1, inplace = True)
+    # Remove typing
+    score_df.drop('entity_type', axis = 1, inplace = True)
 
     # Return scoring
     return score_df

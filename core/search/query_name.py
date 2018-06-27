@@ -91,6 +91,23 @@ def conference_name_query(conference_id):
         # Should only be one result
         break
 
+    if conf_name_res:
+        return conf_name_res
+
+    # Query for paa
+    conf_s = Search(index = 'conferenceseries', using = client)
+    conf_s = conf_s.query('match', ConferenceSeriesId = conference_id)
+    conf_s = conf_s.source([conf_target])
+
+    for conference in conf_s.scan():
+        # Set name
+        #conf_name_res[conference_id] = conference[conf_target]
+        # quick fix for conference name
+        conf_name_res[conference_id] = ' '.join(conference[conf_target].split()[:-1])
+        
+        # Should only be one result
+        break
+
     return conf_name_res
 
 

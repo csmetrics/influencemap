@@ -1,3 +1,6 @@
+'''
+'''
+
 import pandas as pd
 import networkx as nx
 import numpy as np
@@ -6,8 +9,9 @@ from datetime import datetime
 # Config setup
 from core.config import *
 
-# Function to normalise data for a singular series
 def normalise_singular_linear(series):
+    ''' Function to normalise data for a singular series
+    '''
     max_val = series.max()
     min_val = series.min()
 
@@ -21,8 +25,9 @@ def normalise_singular_linear(series):
     # Normalise
     return series.apply(lambda x : (x - min_val) / max_min_dif)
 
-# Function to normalise color
 def normalise_colour_dif(series):
+    ''' Function to normalise color
+    '''
     max_val = series.max()
     min_val = series.min()
 
@@ -36,8 +41,9 @@ def normalise_colour_dif(series):
     # Normalise
     return series.apply(lambda x : (x + normalisation) / (2 * normalisation))
 
-# Normalise two series logwise
 def normalise_double_log(series1, series2):
+    ''' Normalise two series logwise
+    '''
     max_val = max(series1.max(), series2.max())
     min_val = min(series1.min(), series2.min())
 
@@ -56,9 +62,10 @@ def normalise_double_log(series1, series2):
     # Log down to 0 to 1
     return scaled1.apply(np.log2), scaled2.apply(np.log2)
 
-# Turns the dataframe for flower into networkx graph
-# Additionally normalises influence values
 def score_df_to_graph(score_df):
+    ''' Turns the dataframe for flower into networkx graph.
+        Additionally normalises influence values.
+    '''
 
     print('\n---\n{} start graph generation'.format(datetime.now()))
 
@@ -91,58 +98,3 @@ def score_df_to_graph(score_df):
     print('{} finish graph generation\n---'.format(datetime.now()))
 
     return egoG
-
-
-if __name__ == "__main__":
-    from mkAff import getAuthor
-    from get_flower_df import gen_search_df
-    from get_flower_data import generate_scores, generate_score_df, generate_coauthors
-    from entity_type import *
-    from draw_flower import draw_flower, draw_cite_volume
-    from flower_helpers import *
-    import os, sys
-    import sqlite3
-    import imageio
-
-    # out
-    plot_dir = os.path.join(OUT_DIR, 'figures')
-
-    # map
-    e_map = Entity_map(Entity_type.AUTH, [Entity_type.AUTH])
-
-    # input
-    user_in = sys.argv[1]
-
-    # get paper ids associated with input name
-    _, id_2_paper_id, _ = getAuthor(user_in)
-
-    conn = sqlite3.connect(DB_PATH)
-
-    data_df = gen_search_df(conn, id_2_paper_id, [])
-
-    influence_dict = generate_scores(conn, e_map, data_df, inc_self=False)
-
-    coauthors = generate_coauthors(e_map, data_df)
-
-    score_df = generate_score_df(influence_dict, e_map, user_in, coauthors=coauthors)
-
-    flower_graph = score_df_to_graph(score_df)
-
-    draw_flower(egoG=flower_graph, filename=os.path.join(plot_dir, '{}_flower.png'.format(user_in)))
-    draw_cite_volume(egoG=flower_graph, filename=os.path.join(plot_dir, '{}_bar.png'.format(user_in)))
-
-    #images = list()
-
-    #for year in range(influence_df_min_year(influence_dict), 2018):
-    #    score_df = generate_score_df(influence_dict, e_map, user_in, coauthors=coauthors, score_year_max=year)
-    #
-    #    flower_graph = score_df_to_graph(score_df)
-
-    #    path_name = os.path.join(plot_dir, '{}_flower_{}.png'.format(user_in, year))
-    #    draw_flower(egoG=flower_graph, filename=path_name)
-
-    #    images.append(imageio.imread(path_name))
-
-    #    draw_cite_volume(egoG=flower_graph, filename=os.path.join(plot_dir, '{}_bar_{}.png'.format(user_in, year)))
-
-    #imageio.mimsave(os.path.join(plot_dir, '{}_flower.gif'.format(user_in)), images, duration=5)
