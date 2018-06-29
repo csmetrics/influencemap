@@ -376,7 +376,7 @@ def submit(request):
     normal_names = list(map(lambda x: x.lower(), entity_names))
 
     # Generate score for each type of flower
-    entity_scores = gen_entity_score(paper_information, entity_names)
+    entity_scores = gen_entity_score(paper_information, entity_names, self_cite=False)
 
     # Make flower
     flower_name = '-'.join(entity_names)
@@ -438,7 +438,7 @@ def resubmit(request):
     option = request.POST.get('option')
     keyword = request.POST.get('keyword')
     pre_flower_data = []
-    selfcite = request.POST.get('selfcite') == 'true'
+    self_cite = request.POST.get('selfcite') == 'true'
 
     cache        = request.session['cache']
     flower_name  = request.session['flower_name']
@@ -449,7 +449,7 @@ def resubmit(request):
     paper_information = paper_info_mag_check_multiquery(cache) # API
 
     # Generate score for each type of flower
-    scores = gen_entity_score(paper_information, entity_names)
+    scores = gen_entity_score(paper_information, entity_names, self_cite=self_cite)
 
     data1, data2, data3 = gen_flower_data(scores,
                                           flower_name,

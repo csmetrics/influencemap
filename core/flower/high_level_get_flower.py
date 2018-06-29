@@ -26,7 +26,7 @@ str_to_ent = {
     }
 
 
-def gen_entity_score(paper_information, names):
+def gen_entity_score(paper_information, names, self_cite=True):
     ''' Generates the non-aggregated entity scores
     '''
     entity_scores = [None, None, None]
@@ -36,9 +36,13 @@ def gen_entity_score(paper_information, names):
         # Timer
         time_cur = datetime.now()
 
-        entity_score = score_paper_info_list(paper_information, leaves)
+        entity_score = score_paper_info_list(paper_information, leaves, self=names)
         entity_score = entity_score[~entity_score['entity_id'].str.lower().isin(
                                           names)]
+
+        if not self_cite:
+            entity_score = entity_score[~entity_score['self_cite']]
+
         entity_scores[i] = entity_score
 
     return entity_scores
@@ -123,7 +127,8 @@ def get_flower_data_high_level(entitytype, authorids, normalizedname, selection=
     max_year = max(years)
 
     # Generate score for each type of flower
-    entity_scores = gen_entity_score(paper_information, [normalizedname])
+    entity_scores = gen_entity_score(paper_information, [normalizedname],
+                                     self_cite=False)
 
     # Generate flower data
     author_data, conf_data, inst_data = gen_flower_data(entity_scores,

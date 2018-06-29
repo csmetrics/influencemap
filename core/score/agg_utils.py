@@ -30,3 +30,36 @@ def apply_name_mapping(row, name_mapping):
         return name_mapping[row['entity_type']][row['entity_id']]
     except KeyError:
         return None
+
+
+def is_self_cite(paper_prop, self):
+    ''' Determines if a paper property is a self citation depending on a list
+        of self names.
+    '''
+    # If no self names
+    if not self:
+        return False
+
+    names = list()
+
+    # Get all author names and affiliation names
+    if 'Authors' in paper_prop:
+        for author in paper_prop['Authors']:
+            if 'AuthorName' in author:
+                names.append(author['AuthorName'])
+            if 'AffiliationName' in author:
+                names.append(author['AffiliationName'])
+
+    # Get field of study names
+    if 'FieldOfStudies' in paper_prop:
+        for fos in paper_prop['FieldOfStudies']:
+            if 'FieldOfStudyName' in fos:
+                names.append(fos['FieldOfStudyName'])
+
+    # Add other potential fields
+    fields = ['ConferenceName', 'JournalName']
+    for field in fields:
+        if field in paper_prop:
+            names.append(paper_prop[field])
+
+    return any(i in self for i in names)

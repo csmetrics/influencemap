@@ -7,10 +7,12 @@ author: Alexander Soen
 '''
 
 import pandas as pd
-from core.utils.entity_type     import Entity_type
-from core.score.agg_utils import get_name_mapping, apply_name_mapping
+from core.utils.entity_type import Entity_type
+from core.score.agg_utils   import get_name_mapping
+from core.score.agg_utils   import apply_name_mapping
+from core.score.agg_utils   import is_self_cite
 
-def score_author(paper_info):
+def score_author(paper_info, self=list()):
     ''' Turns a paper information dictionary into a list of scoring
         dictionaries for authors.
     '''
@@ -21,6 +23,9 @@ def score_author(paper_info):
     if 'References' in paper_info:
         # Iterate through the references
         for reference in paper_info['References']:
+            # Determine if self cite
+            self_cite = is_self_cite(reference, self)
+
             # Go through each of the authors
             for ref_author in reference['Authors']:
                 row_dict = dict()
@@ -33,6 +38,7 @@ def score_author(paper_info):
                 row_dict['entity_id']   = ref_author['AuthorName']
                 row_dict['influenced']  = 0
                 row_dict['influencing'] = weight
+                row_dict['self_cite']   = self_cite
                 try:
                     row_dict['influence_date'] = paper_info['Year']
                 except KeyError:
@@ -44,6 +50,9 @@ def score_author(paper_info):
     if 'Citations' in paper_info:
         # Iterate through the citations
         for citation in paper_info['Citations']:
+            # Determine if self cite
+            self_cite = is_self_cite(citation, self)
+
             # Go through each of the authors
             for cite_author in citation['Authors']:
                 row_dict = dict()
@@ -56,6 +65,7 @@ def score_author(paper_info):
                 row_dict['entity_id']   = cite_author['AuthorName']
                 row_dict['influenced']  = weight
                 row_dict['influencing'] = 0
+                row_dict['self_cite']   = self_cite
                 try:
                     row_dict['influence_date'] = citation['Year']
                 except KeyError:
@@ -66,7 +76,7 @@ def score_author(paper_info):
     return score_list
 
 
-def score_affiliation(paper_info):
+def score_affiliation(paper_info, self=list()):
     ''' Turns a paper information dictionary into a list of scoring
         dictionary for affiliations.
     '''
@@ -77,6 +87,9 @@ def score_affiliation(paper_info):
     if 'References' in paper_info:
         # Iterate through the references
         for reference in paper_info['References']:
+            # Determine if self cite
+            self_cite = is_self_cite(reference, self)
+
             # Go through each of the authors
             for ref_author in reference['Authors']:
                 row_dict = dict()
@@ -92,6 +105,7 @@ def score_affiliation(paper_info):
                     continue
                 row_dict['influenced']  = 0
                 row_dict['influencing'] = weight
+                row_dict['self_cite']   = self_cite
                 try:
                     row_dict['influence_date'] = paper_info['Year']
                 except KeyError:
@@ -103,6 +117,9 @@ def score_affiliation(paper_info):
     if 'Citations' in paper_info:
         # Iterate through the citations
         for citation in paper_info['Citations']:
+            # Determine if self cite
+            self_cite = is_self_cite(citation, self)
+
             # Go through each of the authors
             for cite_author in citation['Authors']:
                 row_dict = dict()
@@ -118,6 +135,7 @@ def score_affiliation(paper_info):
                     continue
                 row_dict['influenced']  = weight
                 row_dict['influencing'] = 0
+                row_dict['self_cite']   = self_cite
                 try:
                     row_dict['influence_date'] = citation['Year']
                 except KeyError:
@@ -128,7 +146,7 @@ def score_affiliation(paper_info):
     return score_list
 
 
-def score_conference(paper_info):
+def score_conference(paper_info, self=list()):
     ''' Turns a paper information dictionary into a list of scoring
         dictionary for conferences.
     '''
@@ -154,6 +172,7 @@ def score_conference(paper_info):
             row_dict['entity_id']   = entity_id
             row_dict['influenced']  = 0
             row_dict['influencing'] = 1
+            row_dict['self_cite']   = is_self_cite(reference, self)
             try:
                 row_dict['influence_date'] = paper_info['Year']
             except KeyError:
@@ -180,6 +199,7 @@ def score_conference(paper_info):
             row_dict['entity_id']   = entity_id
             row_dict['influenced']  = 1
             row_dict['influencing'] = 0
+            row_dict['self_cite']   = is_self_cite(citation, self)
             try:
                 row_dict['influence_date'] = citation['Year']
             except KeyError:
@@ -190,7 +210,7 @@ def score_conference(paper_info):
     return score_list
 
 
-def score_journal(paper_info):
+def score_journal(paper_info, self=list()):
     ''' Turns a paper information dictionary into a list of scoring
         dictionary for journals.
     '''
@@ -213,6 +233,7 @@ def score_journal(paper_info):
             row_dict['entity_id']   = entity_id
             row_dict['influenced']  = 0
             row_dict['influencing'] = 1
+            row_dict['self_cite']   = is_self_cite(reference, self)
             try:
                 row_dict['influence_date'] = paper_info['Year']
             except KeyError:
@@ -236,6 +257,7 @@ def score_journal(paper_info):
             row_dict['entity_id']   = entity_id
             row_dict['influenced']  = 1
             row_dict['influencing'] = 0
+            row_dict['self_cite']   = is_self_cite(citation, self)
             try:
                 row_dict['influence_date'] = citation['Year']
             except KeyError:
@@ -246,31 +268,31 @@ def score_journal(paper_info):
     return score_list
 
 
-def score_paper_info(paper_info, entity_type):
+def score_paper_info(paper_info, entity_type, self=list()):
     ''' Score paper information depending on specific target type.
     '''
     # Call query functions depending on type given
     # Author
     if entity_type == Entity_type.AUTH:
-        return score_author(paper_info)
+        return score_author(paper_info, self = self)
 
     # Affiliation
     if entity_type == Entity_type.AFFI:
-        return score_affiliation(paper_info)
+        return score_affiliation(paper_info, self = self)
 
     # Conference
     if entity_type == Entity_type.CONF:
-        return score_conference(paper_info)
+        return score_conference(paper_info, self = self)
 
     # Journal
     if entity_type == Entity_type.JOUR:
-        return score_journal(paper_info)
+        return score_journal(paper_info, self = self)
 
     # Otherwise
     return None
 
 
-def score_paper_info_list(paper_info_list, leaves):
+def score_paper_info_list(paper_info_list, leaves, self=list()):
     ''' Provides a scoring pandas dataframe given a list of paper information
         and leaf configuration of flower to represent the scoring.
     '''
@@ -281,7 +303,7 @@ def score_paper_info_list(paper_info_list, leaves):
     for paper_info in paper_info_list:
         for leaf in leaves:
             # Get score
-            score = score_paper_info(paper_info, leaf)
+            score = score_paper_info(paper_info, leaf, self)
 
             # Check if valid score
             if score:
