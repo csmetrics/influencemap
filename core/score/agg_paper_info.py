@@ -33,8 +33,8 @@ def score_author(paper_info):
                 # Important fields
                 row_dict['entity_id']   = ref_author['AuthorId']
                 row_dict['entity_type'] = Entity_type.AUTH
-                row_dict['influenced']  = weight
-                row_dict['influencing'] = 0
+                row_dict['influenced']  = 0
+                row_dict['influencing'] = weight
                 try:
                     row_dict['influence_date'] = paper_info['Year']
                 except KeyError:
@@ -57,8 +57,8 @@ def score_author(paper_info):
                 # Important fields
                 row_dict['entity_id']   = cite_author['AuthorId']
                 row_dict['entity_type'] = Entity_type.AUTH
-                row_dict['influenced']  = 0
-                row_dict['influencing'] = weight
+                row_dict['influenced']  = weight
+                row_dict['influencing'] = 0
                 try:
                     row_dict['influence_date'] = citation['Year']
                 except KeyError:
@@ -100,8 +100,8 @@ def score_affiliation(paper_info):
                 except KeyError:
                     continue
                 row_dict['entity_type'] = Entity_type.AFFI
-                row_dict['influenced']  = weight
-                row_dict['influencing'] = 0
+                row_dict['influenced']  = 0
+                row_dict['influencing'] = weight
                 try:
                     row_dict['influence_date'] = paper_info['Year']
                 except KeyError:
@@ -127,8 +127,8 @@ def score_affiliation(paper_info):
                 except KeyError:
                     continue
                 row_dict['entity_type'] = Entity_type.AFFI
-                row_dict['influenced']  = 0
-                row_dict['influencing'] = weight
+                row_dict['influenced']  = weight
+                row_dict['influencing'] = 0
                 try:
                     row_dict['influence_date'] = citation['Year']
                 except KeyError:
@@ -164,8 +164,8 @@ def score_conference(paper_info):
             # Important fields
             row_dict['entity_id']   = entity_id
             row_dict['entity_type'] = Entity_type.CONF
-            row_dict['influenced']  = 1
-            row_dict['influencing'] = 0
+            row_dict['influenced']  = 0
+            row_dict['influencing'] = 1
             try:
                 row_dict['influence_date'] = paper_info['Year']
             except KeyError:
@@ -191,8 +191,8 @@ def score_conference(paper_info):
             # Important fields
             row_dict['entity_id']   = entity_id
             row_dict['entity_type'] = Entity_type.CONF
-            row_dict['influenced']  = 0
-            row_dict['influencing'] = 1
+            row_dict['influenced']  = 1
+            row_dict['influencing'] = 0
             try:
                 row_dict['influence_date'] = citation['Year']
             except KeyError:
@@ -225,8 +225,8 @@ def score_journal(paper_info):
             # Important fields
             row_dict['entity_id']   = entity_id
             row_dict['entity_type'] = Entity_type.JOUR
-            row_dict['influenced']  = 1
-            row_dict['influencing'] = 0
+            row_dict['influenced']  = 0
+            row_dict['influencing'] = 1
             try:
                 row_dict['influence_date'] = paper_info['Year']
             except KeyError:
@@ -249,8 +249,8 @@ def score_journal(paper_info):
             # Important fields
             row_dict['entity_id']   = entity_id
             row_dict['entity_type'] = Entity_type.JOUR
-            row_dict['influenced']  = 0
-            row_dict['influencing'] = 1
+            row_dict['influenced']  = 1
+            row_dict['influencing'] = 0
             try:
                 row_dict['influence_date'] = citation['Year']
             except KeyError:
