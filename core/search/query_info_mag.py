@@ -13,98 +13,103 @@ from core.search.parse_academic_search import or_query_builder_list
 
 MAS_URL_PREFIX = "https://api.labs.cognitive.microsoft.com"
 
-def papers_prop_mag_multiquery(paper_ids):
+basic_attr = {'Id': 'PaperId',
+              'Y' : 'Year'}
+
+compound_attr = {
+             'C': {
+                'CId': 'ConferenceSeriesId',
+                'CN' : 'ConferenceName',
+                },
+             'J': {
+                'JId': 'JournalId',
+                'JN' : 'JournalName',
+                },
+             'AA': {
+                'AuId': 'AuthorId',
+                'AuN' : 'AuthorName',
+                'AfId': 'AffiliationId',
+                'AfN' : 'AffiliationName',
+                },
+             'F': {
+                'FId': 'FieldOfStudyId',
+                'FN' : 'FieldOfStudyName',
+                }
+             }
+
+list_attr_names = {'AA': 'Authors',
+                   'F' : 'FieldOfStudies'}
+
+# Create search
+compound_snames = list(basic_attr.keys())
+for attr_type, attr in compound_attr.items():
+    # Create name to search
+    to_name = lambda x: '.'.join([attr_type, x])
+    compound_snames += list(map(to_name, attr.keys()))
+# Turn into string
+compound_snames = ','.join(compound_snames)
+
+
+def base_paper_mag_multiquery(paper_ids):
+    ''' Returns all basic fields of a paper with API.
     '''
-    '''
-    print("TEST", len(paper_ids))
-    # Query
     url = os.path.join(MAS_URL_PREFIX, "academic/v1.0/evaluate")
     queries = ({
         'expr': expr,
         'count': 1000,
         'offset': 0,
-        'attributes': 'Id, Y, C.CId, J.JId'
+        'attributes': compound_snames
         } for expr in or_query_builder_list('Id={}', paper_ids))
 
     # Query result
-    result = dict()
+    results = dict()
 
     for query in queries:
-        print(query)
         data = query_academic_search('get', url, query)
-
         for res in data['entities']:
             res_row = dict()
 
-            # Set name
-            res_row['PaperId'] = res['Id']
-            try:
-                res_row['Year'] = res['Y']
-            except KeyError:
-                pass
+            # Get basic attributes
+            for a, n in basic_attr.items():
+                if a in res:
+                    res_row[n] = res[a]
 
-            try:
-                res_row['ConferenceSeriesId'] = res['C.CId']
-            except KeyError:
-                pass
+            # Get compound attributes
+            for t, ca in compound_attr.items():
+                # Check if result exists for type
+                if t not in res:
+                    continue
 
-            try:
-                res_row['JournalId'] = res['J.JId']
-            except KeyError:
-                pass
+                # If field type, need to process list
+                if t in list_attr_names.keys():
+                    attr_res = list()
 
-            result[res['Id']] = res_row
+                    # Go through each value in list
+                    for a_dict in res[t]:
+                        suba_dict = dict()
+                        # Get values for single entry
+                        for a, n in ca.items():
+                            if a in a_dict:
+                                suba_dict[n] = a_dict[a]
 
-    return result
+                        attr_res.append(suba_dict)
 
+                    # Add field
+                    res_row[list_attr_names[t]] = attr_res
 
-def paa_prop_mag_multiquery(paper_ids):
-    ''' Get the authors for a paper in paper information format.
-    '''
-    # Query
-    query = {
-        'path': '/paper',
-        'paper': {
-            'type': 'Paper',
-            'id': paper_ids,
-            'select': [
-                    'AuthorIDs',
-                    'AffiliationIDs'
-                ]
-            }
-        }
+                # Other singular types
+                else:
+                    for a, n in ca.items():
+                        try:
+                            res_row[n] = res[t][a]
+                        except KeyError:
+                            pass
 
-    # Call to API
-    data = query_academic_search('post', JSON_URL, query)
+            # Add paper
+            results[res['Id']] = res_row
 
-    # Query results
-    paa_res_dict = dict()
-
-    # Check for empty results
-    if not data['Results']:
-        return paa_res_dict
-
-    # Initialise results
-    for paper_id in paper_ids:
-        paa_res_dict[paper_id] = {'Authors': list()}
-
-    # Iterate through the results
-    for results in data['Results']:
-        res_row = list()
-        paper_res = results[0]
-
-        # Covert into authors object in ES
-        paa = zip(paper_res['AuthorIDs'], paper_res['AffiliationIDs'])
-        for author, affiliation in paa:
-            paa_row = dict()
-            paa_row['AuthorId']      = author
-            paa_row['AffiliationId'] = affiliation
-
-            res_row.append(paa_row)
-
-        paa_res_dict[paper_res['CellID']] = {'Authors': res_row}
-
-    return paa_res_dict
+    # Return results
+    return results
 
 
 def pr_links_mag_multiquery(paper_ids):
@@ -150,92 +155,64 @@ def pr_links_mag_multiquery(paper_ids):
     return results
 
 
-def base_paper_mag_multiquery(paper_ids):
+def paper_info_mag_multiquery(paper_ids):
+    ''' Find paper information with MAG, "optimised"
     '''
-    '''
-    # Author information
-    paa_props = paa_prop_mag_multiquery(paper_ids)
+    # Get paper links
+    paper_links = pr_links_mag_multiquery(paper_ids)
 
-    base_res   = dict()
-    to_process = dict()
+    # Get all papers relevent to this query
+    all_papers = list() + paper_ids
+    for paper_link in paper_links.values():
+        all_papers += paper_link['References'] + paper_link['Citations']
 
-    # Get properties for each author information dictionaries
-    for paper_id, auth_dict in paa_props.items():
-        paper_props = papers_prop_query(paper_id)
-        if not paper_props:
-            print(paper_id, "Failed ES lookup on index 'Papers'")
-            to_process[paper_id] = auth_dict
-        else:
-            base_res[paper_id] = dict(paper_props, **auth_dict)
+    all_papers = list(set(all_papers))
 
-    # Get from MAG now
-    processed_props = papers_prop_mag_multiquery(list(to_process.keys()))
-    for paper_id, auth_dict in to_process.items():
-        try:
-            paper_props = processed_props[paper_id]
-            base_res[paper_id] = dict(paper_props, **auth_dict)
-        except KeyError:
-            pass
+    # Find all basic properties of all the papers
+    paper_props = base_paper_mag_multiquery(all_papers)
 
-    return base_res
-
-
-def link_paper_info_mag_multiquery(paper_ids):
-    '''
-    '''
-
-    # Get citation links
-    pr_link_dict = pr_links_mag_multiquery(paper_ids)
-
-    # Query results
-    link_paper_res  = dict()
-    link_cache_dict = dict()
-
-    for paper_id, pr_links in pr_link_dict.items():
-
-        # Results per paper
+    # Add properties to links
+    paper_prop_links = dict()
+    for paper_id, links in paper_links.items():
         link_res = dict()
 
-        # Iterate through the link types
-        for link_type, link_papers in pr_links.items():
+        # For each type of link
+        for link_type, link_papers in links.items():
+            link_type_res = list()
 
-            # Initialise the type result
-            link_res[link_type] = list()
-            to_process          = list()
-
+            # Iterate through the link papers to get properties
             for link_paper in link_papers:
-                try:
-                    link_cache_dict[link_type].append(link_paper)
-                except:
-                    to_process.append(link_paper)
+                if link_paper in paper_props:
+                    link_type_res.append(paper_props[link_paper])
 
-            # Resulting link results
-            link_vals = base_paper_mag_multiquery(to_process)
-            link_cache_dict.update(link_vals)
-            link_res[link_type] += list(link_vals.values())
+            # Add result of link type
+            link_res[link_type] = link_type_res
 
-        # Add to final result
-        link_paper_res[paper_id] = link_res
+        # Add to updated links
+        paper_prop_links[paper_id] = link_res
 
-    return link_paper_res
-
-
-def paper_info_mag_multiquery(paper_ids):
-    '''
-    '''
-    # Query basic properties
-    paper_bases = base_paper_mag_multiquery(paper_ids)
-    paper_links = link_paper_info_mag_multiquery(paper_ids)
-
-    # Combine queries
+    # Turn into paper_info dictionaries
     paper_info_res = list()
-    for paper_id, paper_base in paper_bases.items():
-        paper_info_res.append(dict(paper_base, **paper_links[paper_id]))
+    
+    for paper_id in paper_ids:
+        try:
+            # Combine queries
+            paper_prop = paper_props[paper_id]
+            paper_link = paper_prop_links[paper_id]
+            paper_info_res.append(dict(paper_prop, **paper_link))
+        except KeyError:
+            pass
 
     return paper_info_res
 
 
 if __name__ == '__main__':
     # TEST
+    from query_paper_mag import author_paper_mag_query
 #    print(paa_prop_multiquery([2279671314]))
-    print(pr_links_mag_multiquery([2279671314]))
+    #print(pr_links_mag_multiquery([2279671314]))
+    #base_paper_mag_multiquery_test([2010977797, 2279671314, 2059658980])
+    papers = author_paper_mag_query(2100918400)
+    paper_info = paper_info_mag_multiquery(papers)
+    print(paper_info)
+    #print(paa_prop_mag_multiquery([2010977797]))

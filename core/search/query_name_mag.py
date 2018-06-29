@@ -83,7 +83,10 @@ def conference_name_mag_multiquery(conference_ids):
 
         for res in data['entities']:
             # Set name
-            conf_name_res[res['Id']] = res['PCS']['CN']
+            try:
+                conf_name_res[res['Id']] = res['PCS']['CN']
+            except KeyError:
+                pass
 
     # Try Series now
     # Query
@@ -100,7 +103,10 @@ def conference_name_mag_multiquery(conference_ids):
 
         for res in data['entities']:
             # Set name
-            conf_name_res[res['Id']] = res['CN']
+            try:
+                conf_name_res[res['Id']] = res['CN']
+            except KeyError:
+                pass
 
     return conf_name_res
 
@@ -125,7 +131,10 @@ def journal_name_mag_multiquery(journal_ids):
 
         for res in data['entities']:
             # Set name
-            jour_name_res[res['Id']] = res['DJN']
+            try:
+                jour_name_res[res['Id']] = res['DJN']
+            except KeyError:
+                pass
 
     return jour_name_res
 

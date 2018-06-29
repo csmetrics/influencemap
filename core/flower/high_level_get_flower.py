@@ -26,6 +26,24 @@ str_to_ent = {
     }
 
 
+def gen_entity_score(paper_information, names):
+    ''' Generates the non-aggregated entity scores
+    '''
+    entity_scores = [None, None, None]
+    for i, flower_item in enumerate(flower_leaves.items()):
+        name, leaves = flower_item
+
+        # Timer
+        time_cur = datetime.now()
+
+        entity_score = score_paper_info_list(paper_information, leaves)
+        entity_score = entity_score[~entity_score['entity_id'].str.lower().isin(
+                                          names)]
+        entity_scores[i] = entity_score
+
+    return entity_scores
+
+
 def gen_flower_data(score_dfs, flower_name, min_year=None, max_year=None):
     ''' Generates processed data for flowers given a list of score dataframes.
     '''
@@ -91,10 +109,6 @@ def get_flower_data_high_level(entitytype, authorids, normalizedname, selection=
 
     # Turn selected paper into information dictionary list
     paper_information = paper_info_mag_check_multiquery(selected_papers) # API
-    #for paper in selected_papers:
-    #    paper_info = paper_info_check_query(paper)
-    #    if paper_info:
-    #        paper_information.append(paper_info)
 
     print()
     print('Number of Paper Information Found: ', len(paper_information))
@@ -109,26 +123,16 @@ def get_flower_data_high_level(entitytype, authorids, normalizedname, selection=
     max_year = max(years)
 
     # Generate score for each type of flower
-    cache         = [None, None, None]
-    entity_scores = [None, None, None]
-    for i, flower_item in enumerate(flower_leaves.items()):
-        name, leaves = flower_item
-
-        time_cur = datetime.now()
-
-        entity_score = score_paper_info_list(paper_information, leaves)
-        entity_score = entity_score[entity_score['entity_id'] != normalizedname]
-        entity_scores[i] = entity_score
-        cache[i] = entity_score.to_json(orient = 'index')
-
-        print()
-        print('Scored for', leaves)
-        print('Time taken: ', datetime.now() - time_cur)
-        print()
+    entity_scores = gen_entity_score(paper_information, [normalizedname])
 
     # Generate flower data
     author_data, conf_data, inst_data = gen_flower_data(entity_scores,
                                                         normalizedname)
+
+    # Set cache
+    #cache = [score.to_json(orient = 'index') for score in entity_scores]
+    cache = selected_papers
+    print(cache)
 
     data = {
         "author": author_data,
