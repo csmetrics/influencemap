@@ -10,6 +10,7 @@ from core.search.query_info        import paper_info_check_query, paper_info_mag
 from core.score.agg_paper_info     import score_paper_info_list
 from core.score.agg_score          import agg_score_df
 from core.flower.flower_bloom_data import score_df_to_graph
+from core.utils.get_stats          import get_stats
 
 from datetime import datetime
 
@@ -134,6 +135,8 @@ def get_flower_data_high_level(entitytype, authorids, normalizedname, selection=
     cache = selected_papers
     print(cache)
 
+    stats = get_stats(paper_information)
+
     data = {
         "author": author_data,
         "conf":   conf_data,
@@ -142,7 +145,7 @@ def get_flower_data_high_level(entitytype, authorids, normalizedname, selection=
             "title": "Publications range",
             "range": [min_year, max_year] # placeholder value, just for testing
         },
-        "statistics": {}
+        "stats": stats
     }
 
     return cache, data
