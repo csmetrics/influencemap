@@ -28,6 +28,7 @@ from core.flower.high_level_get_flower import gen_entity_score
 from core.search.query_paper   import paper_query
 from core.search.query_info    import paper_info_check_query, paper_info_mag_check_multiquery
 from core.score.agg_paper_info import score_paper_info_list
+from core.utils.get_stats import get_stats
 
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 
@@ -279,8 +280,10 @@ def manualcache(request):
     cache_type = request.POST.get('cache_type')
     if cache_type == "authorGroup":
         saveNewAuthorGroupCache(data)
+        paper_info_mag_check_multiquery(data['Papers'])
     elif cache_type == "paperGroup":
         saveNewPaperGroupCache(data)
+        paper_info_mag_check_multiquery(data['PaperIds'])
     return JsonResponse({},safe=False)
 
 def view_papers(request):
@@ -339,7 +342,7 @@ def submit(request):
                                        #  'citations','conferenceSeriesId','conferenceSeriesName','data','eid',
                                        #  'estimatedCitations', 'fieldOfStudy'[],'journalId','journalName',
                                        #  'languageCode','year'}]
-    
+
     # Default Dates need fixing
     min_year = None
     max_year = None
@@ -396,6 +399,9 @@ def submit(request):
     # Set cache
     cache = selected_papers
 
+    stats = get_stats(paper_information)
+    data['stats'] = stats
+
     request.session['cache']        = cache
     request.session['flower_name']  = flower_name
     request.session['entity_names'] = entity_names
@@ -412,11 +418,6 @@ def submit_from_browse(request):
     authorids = data.get('AuthorIds')
     normalizedname = data.get('NormalizedName')
 
-    selection = data.get("selection")
-    print('\n\n\n\n\n{}\n\n\n\n\n\n'.format(selection))
-    entity_data = data.get("entity_data")
-    print("submit")
-
     # Default Dates need fixing
     min_year = None
     max_year = None
@@ -428,7 +429,6 @@ def submit_from_browse(request):
     request.session['flower_name']  = normalizedname
     request.session['entity_names'] = [normalizedname]
     return render(request, "flower.html", data)
-
 
 @csrf_exempt
 def resubmit(request):
@@ -462,4 +462,9 @@ def resubmit(request):
         "inst": data3,
         "navbarOption": get_navbar_option(keyword, option)
     }
+
+    stats = get_stats(paper_information, from_year, to_year)
+    print(stats)
+    data['stats'] = stats
+
     return JsonResponse(data, safe=False)
