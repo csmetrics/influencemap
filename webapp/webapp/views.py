@@ -25,6 +25,7 @@ from core.flower.high_level_get_flower import get_flower_data_high_level, gen_fl
 from core.search.query_paper   import paper_query
 from core.search.query_info    import paper_info_check_query, paper_info_mag_check_multiquery
 from core.score.agg_paper_info import score_paper_info_list
+from core.utils.get_stats import get_stats
 
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 
@@ -276,8 +277,10 @@ def manualcache(request):
     cache_type = request.POST.get('cache_type')
     if cache_type == "authorGroup":
         saveNewAuthorGroupCache(data)
+        paper_info_mag_check_multiquery(data['Papers'])
     elif cache_type == "paperGroup":
         saveNewPaperGroupCache(data)
+        paper_info_mag_check_multiquery(data['PaperIds'])
     return JsonResponse({},safe=False)
 
 def view_papers(request):
@@ -399,7 +402,6 @@ def submit(request):
     flower_name = '-'.join(entity_names)
     data1, data2, data3 = gen_flower_data(entity_scores,
                                           flower_name)
-
     data = {
         "author": data1,
         "conf": data2,
