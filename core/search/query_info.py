@@ -54,6 +54,8 @@ def paper_info_mag_check_multiquery(paper_ids):
     if to_process:
         # Get from API and add to cache
         process_res = paper_info_mag_multiquery(to_process)
+
+        # Cache
         cache_paper_info(process_res)
 
         paper_info_res += process_res

@@ -95,7 +95,10 @@ def score_affiliation(paper_info):
                          else 1
 
                 # Important fields
-                row_dict['entity_id']   = ref_author['AffiliationId']
+                try:
+                    row_dict['entity_id']   = ref_author['AffiliationId']
+                except KeyError:
+                    continue
                 row_dict['entity_type'] = Entity_type.AFFI
                 row_dict['influenced']  = weight
                 row_dict['influencing'] = 0
@@ -119,7 +122,10 @@ def score_affiliation(paper_info):
                          paper_info['Authors'] else 1
 
                 # Important fields
-                row_dict['entity_id']   = cite_author['AffiliationId']
+                try:
+                    row_dict['entity_id']   = cite_author['AffiliationId']
+                except KeyError:
+                    continue
                 row_dict['entity_type'] = Entity_type.AFFI
                 row_dict['influenced']  = 0
                 row_dict['influencing'] = weight

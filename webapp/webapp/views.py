@@ -19,7 +19,10 @@ from core.search.influence_df import get_filtered_score
 from core.search.search import search_name
 from graph.save_cache import *
 from core.utils.load_tsv import tsv_to_dict
-from core.flower.high_level_get_flower import get_flower_data_high_level, gen_flower_data
+
+from core.flower.high_level_get_flower import get_flower_data_high_level
+from core.flower.high_level_get_flower import gen_flower_data
+from core.flower.high_level_get_flower import gen_entity_score
 
 # Imports for submit
 from core.search.query_paper   import paper_query
@@ -357,10 +360,6 @@ def submit(request):
 
     # Turn selected paper into information dictionary list
     paper_information = paper_info_mag_check_multiquery(selected_papers) # API
-    #for paper in selected_papers:
-    #    paper_info = paper_info_check_query(paper)
-    #    if paper_info:
-    #        paper_information.append(paper_info)
 
     print()
     print('Number of Paper Information Found: ', len(paper_information))
@@ -377,28 +376,11 @@ def submit(request):
     normal_names = list(map(lambda x: x.lower(), entity_names))
 
     # Generate score for each type of flower
-    cache         = [None, None, None]
-    entity_scores = [None, None, None]
-    for i, flower_item in enumerate(flower_leaves.items()):
-        name, leaves = flower_item
+    entity_scores = gen_entity_score(paper_information, entity_names)
 
-        # Timer
-        time_cur = datetime.now()
-
-        entity_score = score_paper_info_list(paper_information, leaves)
-        entity_score = entity_score[~entity_score['entity_id'].str.lower().isin(
-                                          normal_names)]
-        entity_scores[i] = entity_score
-        cache[i] = entity_score.to_json(orient = 'index')
-
-        print()
-        print('Scored for', leaves)
-        print('Time taken: ', datetime.now() - time_cur)
-        print()
-
+    # Make flower
     flower_name = '-'.join(entity_names)
-    data1, data2, data3 = gen_flower_data(entity_scores,
-                                          flower_name)
+    data1, data2, data3 = gen_flower_data(entity_scores, flower_name)
 
     data = {
         "author": data1,
@@ -411,10 +393,13 @@ def submit(request):
         "navbarOption": get_navbar_option(keyword, option)
     }
 
-    request.session['cache'] = cache
-    request.session['name']  = flower_name
-    return render(request, "flower.html", data)
+    # Set cache
+    cache = selected_papers
 
+    request.session['cache']        = cache
+    request.session['flower_name']  = flower_name
+    request.session['entity_names'] = entity_names
+    return render(request, "flower.html", data)
 
 
 @csrf_exempt
@@ -439,10 +424,10 @@ def submit_from_browse(request):
     cache, data = get_flower_data_high_level(option, authorids, normalizedname)
     data["navbarOption"] = get_navbar_option(keyword, option)
 
-    request.session['cache'] = cache
-    request.session['name']  = normalizedname
+    request.session['cache']        = cache
+    request.session['flower_name']  = normalizedname
+    request.session['entity_names'] = [normalizedname]
     return render(request, "flower.html", data)
-
 
 
 @csrf_exempt
@@ -455,11 +440,19 @@ def resubmit(request):
     pre_flower_data = []
     selfcite = request.POST.get('selfcite') == 'true'
 
-    cache  = request.session['cache']
-    scores = [pd.read_json(c, orient = 'index') for c in cache]
-    name   = request.session['name']
+    cache        = request.session['cache']
+    flower_name  = request.session['flower_name']
+    entity_names = request.session['entity_names']
+    #scores = [pd.read_json(c, orient = 'index') for c in cache]
+
+    # Recompute flowers
+    paper_information = paper_info_mag_check_multiquery(cache) # API
+
+    # Generate score for each type of flower
+    scores = gen_entity_score(paper_information, entity_names)
+
     data1, data2, data3 = gen_flower_data(scores,
-                                          name,
+                                          flower_name,
                                           min_year = from_year,
                                           max_year = to_year)
 
