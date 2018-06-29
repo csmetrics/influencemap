@@ -19,16 +19,21 @@ basic_attr = {'Id': 'PaperId',
 compound_attr = {
              'C': {
                 'CId': 'ConferenceSeriesId',
+                'CN' : 'ConferenceName',
                 },
              'J': {
                 'JId': 'JournalId',
+                'JN' : 'JournalName',
                 },
              'AA': {
                 'AuId': 'AuthorId',
-                'AfId': 'AffiliationId'
+                'AuN' : 'AuthorName',
+                'AfId': 'AffiliationId',
+                'AfN' : 'AffiliationName',
                 },
              'F': {
-                'FId': 'FieldOfStudyId'
+                'FId': 'FieldOfStudyId',
+                'FN' : 'FieldOfStudyName',
                 }
              }
 
