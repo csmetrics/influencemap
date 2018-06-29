@@ -5,7 +5,7 @@ from core.flower.draw_flower_test import draw_flower
 from core.utils.get_entity import entity_from_name
 
 from core.search.query_paper       import paper_query
-from core.search.query_paper_mag   import paper_mag_query
+from core.search.query_paper_mag   import paper_mag_multiquery
 from core.search.query_info        import paper_info_check_query, paper_info_mag_check_multiquery
 from core.score.agg_paper_info     import score_paper_info_list
 from core.score.agg_score          import agg_score_df
@@ -97,13 +97,7 @@ def get_flower_data_high_level(entitytype, authorids, normalizedname, selection=
         for eid in authorids:
             selected_papers += list(map(lambda x : x['eid'], selection[eid]))
     else:
-        for eid in authorids:
-            #papers = paper_query(str_to_ent[entitytype], eid)
-            papers = paper_mag_query(str_to_ent[entitytype], eid) # API
-            print(eid, str_to_ent[entitytype])
-            print(papers)
-            if papers:
-                selected_papers += papers
+        selected_papers = paper_mag_query(str_to_ent[entitytype], authorids)
 
     print()
     print('Number of Papers Found: ', len(selected_papers))
@@ -138,8 +132,8 @@ def get_flower_data_high_level(entitytype, authorids, normalizedname, selection=
     # Set cache
     #cache = [score.to_json(orient = 'index') for score in entity_scores]
     cache = selected_papers
-    print(cache)
 
+    # Set statistics
     stats = get_stats(paper_information)
 
     data = {
