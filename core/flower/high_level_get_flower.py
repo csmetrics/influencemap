@@ -97,7 +97,7 @@ def get_flower_data_high_level(entitytype, authorids, normalizedname, selection=
         for eid in authorids:
             selected_papers += list(map(lambda x : x['eid'], selection[eid]))
     else:
-        selected_papers = paper_mag_query(str_to_ent[entitytype], authorids)
+        selected_papers = paper_mag_multiquery(str_to_ent[entitytype], authorids)
 
     print()
     print('Number of Papers Found: ', len(selected_papers))
