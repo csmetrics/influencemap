@@ -9,7 +9,7 @@
 ## Project list - in no particualar order
 
 1. Project Name (person involved): 
-**Dacapo Programming Language Benchmark (Steve Balckburn)**
+**Dacapo Programming Language Benchmark (Steve Blackburn)**
 
 * The DaCapo benchmarks: java benchmarking development and analysis. OOPSLA 2006: 169-190
 https://academic.microsoft.com/#/detail/2166091242
