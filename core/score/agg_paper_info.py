@@ -8,8 +8,7 @@ author: Alexander Soen
 
 import pandas as pd
 from core.utils.entity_type     import Entity_type
-#from core.search.query_name     import name_query
-from core.search.query_name_mag import name_try_mag_multiquery
+from core.score.agg_utils import get_name_mapping, apply_name_mapping
 
 def score_author(paper_info):
     ''' Turns a paper information dictionary into a list of scoring
@@ -285,12 +284,6 @@ def score_paper_info(paper_info, entity_type):
     return None
 
 
-def apply_name_mapping(row, name_mapping):
-    try:
-        return name_mapping[row['entity_type']][row['entity_id']]
-    except KeyError:
-        return None
-
 
 def score_paper_info_list(paper_info_list, leaves):
     ''' Provides a scoring pandas dataframe given a list of paper information
@@ -312,14 +305,8 @@ def score_paper_info_list(paper_info_list, leaves):
     # Score dataframe
     score_df = pd.DataFrame(score_list)
 
-    # Create name mapping dictionary
-    name_mapping = dict()
-    for entity_type, entity_df in score_df.groupby('entity_type'):
-        entity_ids =  list(set(entity_df['entity_id']))
-
-        # Naming dictionary for specific type
-        name_map = name_try_mag_multiquery(entity_type, entity_ids)
-        name_mapping[entity_type] = name_map
+    # Get name mapping
+    name_mapping = get_name_mapping(score_df)
 
     # Update entity ids to names
     name_update = lambda r: apply_name_mapping(r, name_mapping)
