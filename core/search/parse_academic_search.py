@@ -152,11 +152,12 @@ def or_query_builder(base_query, inputs):
         out = ""
     return out
 
-def or_query_builder_list(base_query, inputs):
+def or_query_builder_list(base_query, ids):
     ''' or_query_builder, but returns a list of expressions to prevent url
         being too long.
     '''
     query_list = list()
+    inputs = list() + ids
     while inputs:
         if len(inputs) > 1:
             out = "Or({})"

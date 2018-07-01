@@ -171,7 +171,7 @@ def author_paper_mag_multiquery(author_ids):
     url = os.path.join(MAS_URL_PREFIX, "academic/v1.0/evaluate")
     queries = ({
         'expr': expr,
-        'count': 1000,
+        'count': 10000,
         'offset': 0,
         'attributes': 'Id'
         } for expr in or_query_builder_list('Composite(AA.AuId={})', author_ids))
@@ -196,7 +196,7 @@ def affiliation_paper_mag_multiquery(affiliation_ids):
     url = os.path.join(MAS_URL_PREFIX, "academic/v1.0/evaluate")
     queries = ({
         'expr': expr,
-        'count': 1000,
+        'count': 10000,
         'offset': 0,
         'attributes': 'Id'
         } for expr in or_query_builder_list('Composite(AA.AfId={})', affiliation_ids))
@@ -221,7 +221,7 @@ def conference_paper_mag_multiquery(conference_ids):
     url = os.path.join(MAS_URL_PREFIX, "academic/v1.0/evaluate")
     queries = ({
         'expr': expr,
-        'count': 1000,
+        'count': 10000,
         'offset': 0,
         'attributes': 'Id'
         } for expr in or_query_builder_list('Composite(C.CId={})', conference_ids))
@@ -246,7 +246,7 @@ def journal_paper_mag_multiquery(journal_ids):
     url = os.path.join(MAS_URL_PREFIX, "academic/v1.0/evaluate")
     queries = ({
         'expr': expr,
-        'count': 1000,
+        'count': 10000,
         'offset': 0,
         'attributes': 'Id'
         } for expr in or_query_builder_list('Composite(J.JId={})', journal_ids))

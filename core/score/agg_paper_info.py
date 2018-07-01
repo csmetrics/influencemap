@@ -311,6 +311,7 @@ def score_paper_info_list(paper_info_list, leaves, self=list()):
 
     # Score dataframe
     score_df = pd.DataFrame(score_list)
+    print(score_df.shape)
 
     # Return scoring
     return score_df

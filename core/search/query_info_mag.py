@@ -56,7 +56,7 @@ def base_paper_mag_multiquery(paper_ids):
     url = os.path.join(MAS_URL_PREFIX, "academic/v1.0/evaluate")
     queries = ({
         'expr': expr,
-        'count': 1000,
+        'count': 10000,
         'offset': 0,
         'attributes': compound_snames
         } for expr in or_query_builder_list('Id={}', paper_ids))
@@ -115,42 +115,46 @@ def base_paper_mag_multiquery(paper_ids):
 def pr_links_mag_multiquery(paper_ids):
     ''' Get the citation links for a paper in paper information format.
     '''
-    
-    # Query
-    ref_query = {
-        'path': '/paper/ReferenceIDs/cites',
-        'paper': {
-            'type': 'Paper',
-            'id': paper_ids,
-            }
-        }
-
-    cite_query = {
-        'path': '/paper/CitationIDs/cites',
-        'paper': {
-            'type': 'Paper',
-            'id': paper_ids,
-            }
-        }
-
     # Query results
     results = dict()
 
     # Initalise results
     for paper_id in paper_ids:
         results[paper_id] = {'References': list(), 'Citations': list()}
-        
 
-    # Call to API
-    ref_data = query_academic_search('post', JSON_URL, ref_query)
-    cite_data = query_academic_search('post', JSON_URL, cite_query)
+    # Calculate references
+    url = os.path.join(MAS_URL_PREFIX, "academic/v1.0/evaluate")
+    queries = ({
+        'expr': expr,
+        'count': 10000,
+        'offset': 0,
+        'attributes': 'RId'
+        } for expr in or_query_builder_list('Id={}', paper_ids))
 
-    # Add references and citations to results
-    for ego, other in ref_data['Results']:
-        results[ego['CellID']]['References'].append(other['CellID'])
+    for query in queries:
+        data = query_academic_search('get', url, query)
 
-    for ego, other in cite_data['Results']:
-        results[ego['CellID']]['Citations'].append(other['CellID'])
+        # Add references
+        for res in data['entities']:
+            if 'RId' in res:
+                results[res['Id']]['References'] += res['RId']
+
+    for paper_id in paper_ids:
+        query = {
+        'expr': 'RId={}'.format(paper_id),
+        'count': 10000,
+        'offset': 0,
+        'attributes': 'Id,RId'
+        }
+
+        data = query_academic_search('get', url, query)
+
+        # Add citations
+        for res in data['entities']:
+            if 'RId' in res:
+                for rid in res['RId']:
+                    if rid in paper_ids:
+                        results[rid]['Citations'].append(res['Id'])
 
     return results
 
