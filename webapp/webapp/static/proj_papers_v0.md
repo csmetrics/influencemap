@@ -11,15 +11,37 @@
 1. Project Name (person involved): 
 **Dacapo Programming Language Benchmark (Steve Blackburn)**
 
-* The DaCapo benchmarks: java benchmarking development and analysis. OOPSLA 2006: 169-190
-https://academic.microsoft.com/#/detail/2166091242
-* The Jikes Research Virtual Machine project: Building an open-source research community.
-bm Systems Journal volume 44 issue 2 pp 399-417 DOI: 10.1147/sj.442.0399, 2005
-https://academic.microsoft.com/#/detail/2146766856  (the dacapo predecessor)
-* Wake up and smell the coffee: evaluation methodology for the 21st century. Commun. ACM 51(8): 83-89 (2008)
-https://academic.microsoft.com/#/detail/2159928435
-* Looking back on the language and hardware revolutions: measured power, performance, and scaling. ASPLOS 2011: 319-332
-https://academic.microsoft.com/#/detail/2167464511
+##### Key People
+
+[Eliot Moss](https://scholar.google.com/citations?user=yYtaDFUAAAAJ&hl=en&oi=ao) (PI) 
+[Kathryn McKinley](https://scholar.google.com/citations?user=Rt1a5-6vh4UC&hl=en&oi=ao) (PI)
+[Darko Stafanovic](https://scholar.google.com/citations?user=hd6nAfsAAAAJ&hl=en&oi=ao) (PI)
+[Amer Diwan](https://scholar.google.com/citations?user=KuhLaAYAAAAJ&hl=en&oi=ao) (PI)
+[Antony Hosking](https://scholar.google.com/citations?user=5LINiuEAAAAJ&hl=en&oi=sra) (PI)
+[Stephen Blackburn](https://scholar.google.com/citations?user=HgSTO7oAAAAJ&hl=en) (post doc)
+[Emery Berger](https://scholar.google.com/citations?user=RaHaArkAAAAJ&hl=en&oi=ao) (student)
+[Michael Bond](https://scholar.google.com/citations?user=zoBZ_FMAAAAJ&hl=en) (student)
+[Matthias Hauswirth](https://scholar.google.com/citations?user=rIy8rOoAAAAJ&hl=en&oi=ao) (student)
+[Martin Hirzel](https://scholar.google.com/citations?user=SV0T7_cAAAAJ&hl=en&oi=ao) (student)
+
+##### Key Publications (from the era when the project was active)
+
+* The DaCapo benchmarks: java benchmarking development and analysis https://doi.org/10.1145/1167473.1167488
+* Randomized instruction set emulation to disrupt binary code injection attacks https://doi.org/10.1145/948109.948147
+* The Jikes Research Virtual Machine project: Building an open-source research community  https://doi.org/10.1147/sj.442.0399
+* Producing wrong data without doing anything obviously wrong!  https://doi.org/10.1145/1508244.1508275
+* Myths and realities: The performance impact of garbage collection https://doi.org/10.1145/1005686.1005693 
+* CatchUp! Capturing and replaying refactorings to support API evolution https://doi.org/10.1109/ICSE.2005.1553570
+* Open nesting in software transactional memory https://doi.org/10.1145/1229428.1229442
+* Dynamic hot data stream prefetching for general-purpose programs https://doi.org/10.1145/512529.512554
+* Reconsidering custom memory allocation https://doi.org/10.1145/2502508.2502522
+* Oil and water? High performance garbage collection in Java with MMTk https://doi.org/10.1109/ICSE.2004.1317436 
+* Safe futures for Java https://doi.org/10.1145/1103845.1094845
+* Data flow analysis for software prefetching linked data structures in Java https://doi.org/10.1109/PACT.2001.953309
+* Nested transactional memory: Model and architecture sketches http://dx.doi.org/10.1016/j.scico.2006.05.010
+* Discovering Algebraic Specifications from Java Classes https://doi.org/10.1007/978-3-540-45070-2_19
+* The garbage collection advantage: improving program locality https://doi.org/10.1145/1035292.1028983
+* Vertical profiling: understanding the behavior of object-priented applications https://doi.org/10.1145/1035292.1028998
 
 2. **One-class SVM (Bob Williamson)**
 
@@ -43,7 +65,7 @@ Z Ouyang, S Pillai, F Beck, O Kunz, S Varlamov, KR Catchpole, Applied Physics Le
 
 * Tomography-based heat and mass transfer characterization of reticulate porous ceramics for high-temperature processing, S Haussener, P Coray, W Lipiński, P Wyss, A Steinfeld, Journal of Heat Transfer 132 (2), 023305	2009
 * Efficiency of two-step solar thermochemical non-stoichiometric redox cycles with heat recovery, J Lapp, JH Davidson, W Lipiński, Energy 37 (1), 591-600	2012
-* Thermodynamic analysis of isothermal redox cycling of ceria for solar fuel production, R Bader, LJ Venstrom, JH Davidson, W Lipiński, Energy & Fuels 27 (9), 5533-5544	2013
+* Thermodynamic analysis of isothermal redox cycling of ceria for solar fuel production, R Bader, LJ Venstrom, JH Davidson, W Lipiński, Energy & Fuels 27 (9), 5533-5544	2013
 * Heat transfer model of a solar receiver-reactor for the thermal dissociation of ZnO—Experimental validation at 10kW and scale-up to 1MW, LO Schunk, W Lipiński, A Steinfeld, Chemical Engineering Journal 150 (2), 502-508
 
 5. **Logic programming book (John Lloyd)**
