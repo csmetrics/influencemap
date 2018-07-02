@@ -3,6 +3,8 @@ from django.shortcuts import render
 from django.http import JsonResponse
 from django.views.decorators.csrf import csrf_exempt
 from datetime import datetime
+from collections import Counter
+from operator import itemgetter
 from webapp.utils import progressCallback, resetProgress
 from webapp.graph import processdata
 from webapp.elastic import search_cache
@@ -372,7 +374,11 @@ def submit(request):
     # Get min and maximum year
     years = [info['Year'] for info in paper_information if 'Year' in info]
     min_year = min(years)
-    max_year = max(years) 
+    max_year = max(years)
+    year_counter = sorted(list(Counter(years).items()), key=itemgetter(0))
+    year_chart = [["Year", "Num of Papers"]]
+    year_chart.extend([[k,v] for k,v in year_counter])
+    print(year_chart)
 
     # Normalised entity names
     entity_names = list(set(entity_names))
@@ -391,7 +397,8 @@ def submit(request):
         "inst": data3,
         "yearSlider": {
             "title": "Publications range",
-            "range": [min_year, max_year] # placeholder value, just for testing
+            "range": [min_year, max_year], # placeholder value, just for testing
+            "counter": year_chart
         },
         "navbarOption": get_navbar_option(keyword, option)
     }
