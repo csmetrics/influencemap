@@ -29,7 +29,9 @@
       'containerId': 'filter_div',
       'options': {
         'filterColumnLabel': 'Year',
-        'ui': {'format': { 'pattern':'0' }}
+        'ui': {
+          'format': { 'pattern':'0' }
+        }
       }
     });
 
@@ -40,7 +42,10 @@
       'options': {
         'width': 400,
         'height': 200,
+        'chartArea': {'width': '90%', 'height': '70%'},
         'legend': 'top',
+        'backgroundColor': '#F7F7F7',
+        'vAxis': {'format': '0'},
         'hAxis': {'format': '0'}
       }
     });
