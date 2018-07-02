@@ -61,6 +61,12 @@ Z Ouyang, S Pillai, F Beck, O Kunz, S Varlamov, KR Catchpole, Applied Physics Le
 * Plasmon-enhanced internal photoemission for photovoltaics: theoretical efficiency limits, TP White, KR Catchpole, Applied physics letters 101 (7), 073905
 * Surface plasmons for enhanced silicon light-emitting diodes and solar cells, KR Catchpole, S Pillai, Journal of Luminescence 121 (2), 315-318
 
+4. **Sound field reproduction (Thushara Abhayapala)**
+* Reproduction of a plane-wave sound field using an array of loudspeakers, DB Ward, TD Abhayapala, IEEE Transactions on speech and audio processing 9 (6), 697-707	2001
+* Theory and design of high order sound field microphones using spherical microphone array, TD Abhayapala, DB Ward, Acoustics, Speech, and Signal Processing (ICASSP), 2002 IEEE International …	2002
+* Theory and design of sound field reproduction in reverberant rooms, T Betlehem, TD Abhayapala, The Journal of the Acoustical Society of America 117 (4), 2100-2111
+
+
 4. **Heat transfer from solar energy (Wojciech Lipiński)**
 
 * Tomography-based heat and mass transfer characterization of reticulate porous ceramics for high-temperature processing, S Haussener, P Coray, W Lipiński, P Wyss, A Steinfeld, Journal of Heat Transfer 132 (2), 023305	2009
@@ -84,7 +90,3 @@ Z Ouyang, S Pillai, F Beck, O Kunz, S Varlamov, KR Catchpole, Applied Physics Le
 * EXPTIME tableaux with global caching for description logics with transitive roles, inverse roles and role hierarchies, R Goré, LA Nguyen, International Conference on Automated Reasoning with Analytic Tableaux and …	62	2007
 * An on-the-fly tableau-based decision procedure for PDL-satisfiability, P Abate, R Goré, F Widmann, Electronic Notes in Theoretical Computer Science 231, 191-209
 
-7. **Sound field reproduction (Thushara Abhayapala)**
-* Reproduction of a plane-wave sound field using an array of loudspeakers, DB Ward, TD Abhayapala, IEEE Transactions on speech and audio processing 9 (6), 697-707	2001
-* Theory and design of high order sound field microphones using spherical microphone array, TD Abhayapala, DB Ward, Acoustics, Speech, and Signal Processing (ICASSP), 2002 IEEE International …	2002
-* Theory and design of sound field reproduction in reverberant rooms, T Betlehem, TD Abhayapala, The Journal of the Acoustical Society of America 117 (4), 2100-2111
