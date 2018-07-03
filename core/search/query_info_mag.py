@@ -38,7 +38,7 @@ compound_attr = {
              }
 
 list_attr_names = {'AA': 'Authors',
-                   'F' : 'FieldOfStudies'}
+                   'F' : 'FieldOfStudy'}
 
 # Create search
 compound_snames = list(basic_attr.keys())

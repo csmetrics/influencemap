@@ -30,7 +30,9 @@ from core.flower.high_level_get_flower import gen_entity_score
 from core.search.query_paper   import paper_query
 from core.search.query_info    import paper_info_check_query, paper_info_mag_check_multiquery
 from core.score.agg_paper_info import score_paper_info_list
-from core.utils.get_stats import get_stats
+from core.score.agg_utils      import get_coauthor_mapping
+from core.score.agg_utils      import flag_coauthor
+from core.utils.get_stats      import get_stats
 
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 
@@ -338,23 +340,17 @@ def submit(request):
 
     option = data.get("option")   # last searched entity type (confusing for multiple entities)
     keyword = data.get('keyword') # last searched term (doesn't really work for multiple searches)
-    normalisedName = data.get('normalisedName') # normalised name of entity with most papers
-    entity_list = data.get("entities") # [{'normalisedName','eid','entity_type', 'papers'[]}] where papers :=
-                                       # [{'title','affiliationId'[],'affiliationName'[],'authorId'[],'authorName'[],
-                                       #  'citations','conferenceSeriesId','conferenceSeriesName','data','eid',
-                                       #  'estimatedCitations', 'fieldOfStudy'[],'journalId','journalName',
-                                       #  'languageCode','year'}]
 
-    # Default Dates need fixing
+    # Default Dates
     min_year = None
     max_year = None
 
     time_cur = datetime.now()
 
     # Get the selected paper
-    list_of_list_of_papers = sum([entity['papers'] for entity in entity_list],[])
-    selected_papers = [paper['eid'] for paper in list_of_list_of_papers]
-    entity_names    = [entity['normalisedName'] for entity in entity_list]
+    selected_papers = data.get('papers')
+    entity_names    = data.get('names')
+    flower_name     = data.get('flower_name')
 
     print()
     print('Number of Papers Found: ', len(selected_papers))
@@ -365,6 +361,9 @@ def submit(request):
 
     # Turn selected paper into information dictionary list
     paper_information = paper_info_mag_check_multiquery(selected_papers) # API
+
+    # Get coauthors
+    coauthors = get_coauthor_mapping(paper_information)
 
     print()
     print('Number of Paper Information Found: ', len(paper_information))
@@ -394,8 +393,8 @@ def submit(request):
     entity_scores = gen_entity_score(paper_information, entity_names, self_cite=False)
 
     # Make flower
-    flower_name = '-'.join(entity_names)
-    data1, data2, data3 = gen_flower_data(entity_scores, flower_name)
+    data1, data2, data3 = gen_flower_data(entity_scores, flower_name,
+                                          coauthors = coauthors)
 
     data = {
         "author": data1,
@@ -411,12 +410,15 @@ def submit(request):
     }
 
     # Set cache
-    cache = selected_papers
+    cache = {'cache': selected_papers, 'coauthors': coauthors}
 
     stats = get_stats(paper_information)
     data['stats'] = stats
 
-    request.session['cache']        = cache
+    # Cache from flower data
+    for key, value in cache.items():
+        request.session[key] = value
+
     request.session['flower_name']  = flower_name
     request.session['entity_names'] = entity_names
     return render(request, "flower.html", data)
@@ -439,7 +441,10 @@ def submit_from_browse(request):
     cache, data = get_flower_data_high_level(option, authorids, normalizedname)
     data["navbarOption"] = get_navbar_option(keyword, option)
 
-    request.session['cache']        = cache
+    # Cache from flower data
+    for key, value in cache.items():
+        request.session[key] = value
+
     request.session['flower_name']  = normalizedname
     request.session['entity_names'] = [normalizedname]
     return render(request, "flower.html", data)
@@ -455,6 +460,7 @@ def resubmit(request):
     self_cite = request.POST.get('selfcite') == 'true'
 
     cache        = request.session['cache']
+    coauthors    = request.session['coauthors']
     flower_name  = request.session['flower_name']
     entity_names = request.session['entity_names']
     #scores = [pd.read_json(c, orient = 'index') for c in cache]
@@ -467,8 +473,9 @@ def resubmit(request):
 
     data1, data2, data3 = gen_flower_data(scores,
                                           flower_name,
-                                          min_year = from_year,
-                                          max_year = to_year)
+                                          min_year  = from_year,
+                                          max_year  = to_year,
+                                          coauthors = coauthors)
 
     data = {
         "author": data1,

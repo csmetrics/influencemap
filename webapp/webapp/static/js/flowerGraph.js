@@ -139,6 +139,9 @@ function drawFlower(svg_id, data, idx, w) {
         .attr("gtype", function(d) { return d.gtype; })
         .attr("r", function(d) { return 5+10*d.size; })
         .style("fill", function (d, i) {if (d.id == 0) return "#ccc"; else return colors(d.weight);})
+        .style("stroke", function (d, i) { if ((d.coauthor == 'True') && (d.id != 0)) return "green";
+                                          else return ""; })
+        .style("stroke-width", 2)
         .on("mouseover", function() { highlight_on(idx, this); })
         .on("mouseout", function() { highlight_off(idx); })
         .on("click", function(d) { toggle_split(idx, this); });
@@ -152,6 +155,9 @@ function drawFlower(svg_id, data, idx, w) {
         .attr("gtype", function(d) { return d.gtype; })
         .attr("r", function(d) { return 5+10*d.size; })
         .style("fill", function (d, i) {if (d.id == 0) return "#ccc"; else return colors(d.weight);})
+        .style("stroke", function (d, i) { if ((d.coauthor == 'True') && (d.id != 0)) return "green";
+                                          else return ""; })
+        .style("stroke-width", 2)
         .on("mouseover", function() { highlight_on(idx, this); })
         .on("mouseout", function() { highlight_off(idx); })
         .on("click", function(d) { toggle_split(idx, this); });
