@@ -20,27 +20,27 @@ def agg_score_df(influence_df, coauthors=set([]), \
     if score_year_min == None and score_year_max == None:
         score_df = influence_df
     else:
-        no_nan_date = influence_df[ influence_df['influence_date'].notna() ]
+        no_nan_date = influence_df[ influence_df['self_year'].notna() ]
 
         # Set minimum year if none set
         if score_year_min == None:
-            score_date_min = no_nan_date['influence_date'].min()
+            score_date_min = no_nan_date['self_year'].min()
         else:
-            score_date_min = min(no_nan_date['influence_date'].max(),\
+            score_date_min = min(no_nan_date['self_year'].max(),\
                 score_year_min)
             
 
         # Set maximum year if none set
         if score_year_max == None:
-            score_date_max = no_nan_date['influence_date'].max()
+            score_date_max = no_nan_date['self_year'].max()
         else:
-            score_date_max = max(no_nan_date['influence_date'].min(),\
+            score_date_max = max(no_nan_date['self_year'].min(),\
                 score_year_max)
 
         # Filter based on year
         score_df = no_nan_date[(score_date_min <= \
-            no_nan_date['influence_date']) & \
-            (no_nan_date['influence_date'] <= score_date_max)]
+            no_nan_date['self_year']) & \
+            (no_nan_date['self_year'] <= score_date_max)]
 
     # Remove year column
     score_cols = ['entity_id', 'influenced', 'influencing']
@@ -60,6 +60,9 @@ def agg_score_df(influence_df, coauthors=set([]), \
     # sort by union max score
     score_df = score_df.assign(tmp = sort_func(score_df['influencing'], score_df['influenced']))
     score_df = score_df.sort_values('tmp', ascending=False)
+
+    print(score_df)
+    print(score_df.head(n=25))
     score_df = score_df.drop('tmp', axis=1)
 
     # Flag coauthors TODO FIX
