@@ -125,7 +125,8 @@ function updateTable(data, table){
   for(var i in data) {
     table.row.add(data[i]);
   };
-  table.draw();}
+  table.draw();
+}
 
 function searchTableEventHandling() {
   $('.papers-outer-checkbox').on('change', function () {
@@ -223,7 +224,7 @@ function handleSelectionTableRowClick(element){
 }
 
 function goToFlower(){
-   var data = getSelectedData();  
+   var data = getSelectedData();
    data['option'] = latestSearchOption;
    data['keyword'] = latestSearchTerm;
    postData('/submit/', data, "{% csrf_token %}");

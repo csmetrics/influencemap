@@ -43,7 +43,6 @@
       </div>
     </div>
     <div class="col-md-6" style="border-left:1px #ddd solid">
-      <!-- {% include 'year_slider.html' with yearSlider=yearSlider %} -->
       {% include 'statchart.html' with yearSlider=yearSlider %}
       <div class="search-option">
         <input class="self-cite" type="checkbox" style="float:left; margin:5 10 0 10" name="self-cite" id="self-cite" />
@@ -92,7 +91,7 @@
 </body>
 </html>
 <script src="{% static 'js/d3.v4.min.js' %}"></script>
-<script src="{% static 'js/d3-selection-multi.v1.js' %}"></script>
+<script src="{% static 'js/d3-selection-multi.v1.min.js' %}"></script>
 <script src="{% static 'js/d3-scale-chromatic.v1.min.js' %}"></script>
 <script src="{% static 'js/flowerGraph.js' %}"></script>
 <script>
@@ -116,8 +115,6 @@ function updateStats(stats){
     }
   });
 }
-
-var nodes = document.getElementsByClassName('google-visualization-controls-rangefilter-thumblabel');
 
 resubmitButton.addEventListener('click', function(){
   $.ajax({

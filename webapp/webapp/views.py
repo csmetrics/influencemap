@@ -375,10 +375,16 @@ def submit(request):
     years = [info['Year'] for info in paper_information if 'Year' in info]
     min_year = min(years)
     max_year = max(years)
-    year_counter = sorted(list(Counter(years).items()), key=itemgetter(0))
-    year_chart = [["Year", "Num of Papers"]]
-    year_chart.extend([[k,v] for k,v in year_counter])
-    print(year_chart)
+
+    # caculate pub/cite chart data
+    contyears = range(min_year, max_year+1)
+    pub_chart = [{"year":k,"value":Counter(years)[k]} for k in contyears]
+    citecounter = {k:[] for k in contyears}
+    for info in paper_information:
+        if 'Citations' in info:
+            for entity in info['Citations']:
+                citecounter[info['Year']].append(entity["Year"])
+    cite_chart = [{"year":k,"value":[{"year":y,"value":Counter(v)[y]} for y in contyears]} for k,v in citecounter.items()]
 
     # Normalised entity names
     entity_names = list(set(entity_names))
@@ -398,7 +404,8 @@ def submit(request):
         "yearSlider": {
             "title": "Publications range",
             "range": [min_year, max_year], # placeholder value, just for testing
-            "counter": year_chart
+            "pubChart": pub_chart,
+            "citeChart": cite_chart
         },
         "navbarOption": get_navbar_option(keyword, option)
     }

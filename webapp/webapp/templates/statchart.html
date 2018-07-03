@@ -1,67 +1,94 @@
 {% load staticfiles%}
-<!--Load the AJAX API-->
-<script type="text/javascript" src="https://www.gstatic.com/charts/loader.js"></script>
-<script type="text/javascript">
-
-  // Load the Visualization API and the controls package.
-  google.charts.load('current', {'packages':['corechart', 'controls']});
-
-  // Set a callback to run when the Google Visualization API is loaded.
-  google.charts.setOnLoadCallback(drawDashboard);
-
-  // Callback that creates and populates a data table,
-  // instantiates a dashboard, a range slider and a pie chart,
-  // passes in the data and draws it.
-  function drawDashboard() {
-
-    // Create our data table.
-    var yearcounter = {{ yearSlider.counter | safe }};
-    console.log(yearcounter)
-    var data = google.visualization.arrayToDataTable(yearcounter);
-
-    // Create a dashboard.
-    var dashboard = new google.visualization.Dashboard(
-        document.getElementById('dashboard_div'));
-
-    // Create a range slider, passing some options
-    var donutRangeSlider = new google.visualization.ControlWrapper({
-      'controlType': 'NumberRangeFilter',
-      'containerId': 'filter_div',
-      'options': {
-        'filterColumnLabel': 'Year',
-        'ui': {
-          'format': { 'pattern':'0' }
-        }
-      }
-    });
-
-    // Create a column chart, passing some options
-    var columnChart = new google.visualization.ChartWrapper({
-      'chartType': 'ColumnChart',
-      'containerId': 'chart_div',
-      'options': {
-        'width': 400,
-        'height': 200,
-        'chartArea': {'width': '90%', 'height': '70%'},
-        'legend': 'top',
-        'backgroundColor': '#F7F7F7',
-        'vAxis': {'format': '0'},
-        'hAxis': {'format': '0'}
-      }
-    });
-
-    // Establish dependencies, declaring that 'filter' drives 'pieChart',
-    // so that the pie chart will only display entries that are let through
-    // given the chosen slider range.
-    dashboard.bind(donutRangeSlider, columnChart);
-
-    // Draw the dashboard.
-    dashboard.draw(data);
-  }
-</script>
 <!--Div that will hold the dashboard-->
-<div id="dashboard_div">
-  <!--Divs that will hold each control and chart-->
-  <div id="chart_div"></div>
-  <div id="filter_div"></div>
+<div id="div_charts" style="height: 300px;">
+  <div id="pub_chart" class="statchart"></div>
+  <table style="width:300px">
+    <tbody>
+      <tr>
+        <td style="padding: 8px 30px">
+          <div class="text-right">
+            <span class="label-as-badge"><span id="pub-lower-value"></span></span>
+          </div>
+        </td>
+        <td style="padding: 8px 0">
+          <div id="publication-range" style="width: 200px" class="yearslider"></div>
+        </td>
+        <td style="padding: 8px 30px">
+          <div class="text-left">
+            <span class="label-as-badge"><span id="pub-upper-value"></span></span>
+          </div>
+        </td>
+      </tr>
+    </tbody>
+  </table>
+  <div id="cite_chart" class="statchart"></div>
 </div>
+<script src="{% static 'js/d3.v4.min.js' %}"></script>
+<script src="{% static 'js/statchart.js' %}"></script>
+<script type="text/javascript">
+var yearcounter = {{ yearSlider.pubChart | safe }};
+var citationcounter = {{ yearSlider.citeChart | safe }};
+var yearrange = {{ yearSlider.range | safe }};
+
+var pubchart = new PubChart("#pub_chart");
+var citechart = new CiteChart("#cite_chart");
+var h = ($("#div_charts").height()-20)/2;
+var option = {
+  min: yearrange[0], max: yearrange[1],
+  xticks: 4, yticks: 3,
+  width:440, height:h,
+  top: 20, right: 40, bottom: 20, left: 40};
+
+var pubSlider = document.getElementById('publication-range');
+noUiSlider.create(pubSlider, {
+  connect: true,
+  behaviour: 'tap',
+  start: [ yearrange[0], yearrange[1] ],
+  step: 1,
+  animate: false,
+  range: {
+    'min': [ yearrange[0] ],
+    'max': [ yearrange[1] ]
+  }
+});
+
+pubSlider.noUiSlider.on('update', function ( values, handle, unencoded, isTap, positions ) {
+  var nodes = [
+    document.getElementById('pub-lower-value'),
+    document.getElementById('pub-upper-value'),
+  ];
+  nodes[handle].innerText = parseInt(values[handle]);
+  updateCharts(citationcounter, parseInt(values[0]), parseInt(values[1]));
+});
+
+function updateCharts(data, s_min, s_max){
+  if (!pubchart.isInitialized()) {
+    pubchart.initChart(yearcounter, option);
+  }
+  pubchart.updateRange(s_min, s_max);
+  var sum = {};
+  for (var i = 0; i < data.length; i++){
+    sum[data[i]["year"]] = 0;
+  }
+  for (var i = 0; i < data.length; i++){
+    if (s_min <= data[i]["year"] && data[i]["year"] <= s_max) {
+      for (var j = 0; j < data[i]["value"].length; j++){
+        sum[data[i]["value"][j]["year"]] += data[i]["value"][j]["value"];
+      }
+    }
+  }
+  var newdata = []
+  for (var k in sum) {
+    newdata.push({"year": +k, "value": sum[k]});
+  }
+  console.log("newdata", newdata);
+  if (!citechart.isInitialized()) {
+    citechart.initChart(newdata, option);
+  }
+  citechart.updateRange(newdata, option);
+}
+
+
+
+
+</script>
