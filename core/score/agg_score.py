@@ -65,7 +65,7 @@ def agg_score_df(influence_df, coauthors=set([]), \
     print(score_df.head(n=25))
     score_df = score_df.drop('tmp', axis=1)
 
-    # Flag coauthors TODO FIX
+    # Default value
     score_df['coauthor'] = False
 
     print('{} finish score generation\n---'.format(datetime.now()))

@@ -7,6 +7,8 @@ from core.search.query_paper_mag   import paper_mag_multiquery
 from core.search.query_info        import paper_info_check_query, paper_info_mag_check_multiquery
 from core.score.agg_paper_info     import score_paper_info_list
 from core.score.agg_score          import agg_score_df
+from core.score.agg_utils          import get_coauthor_mapping
+from core.score.agg_utils          import flag_coauthor
 from core.flower.flower_bloom_data import score_df_to_graph
 from core.utils.get_stats          import get_stats
 
@@ -51,7 +53,8 @@ def gen_entity_score(paper_information, names, self_cite=True):
     return entity_scores
 
 
-def gen_flower_data(score_dfs, flower_name, min_year=None, max_year=None):
+def gen_flower_data(score_dfs, flower_name, min_year=None, max_year=None,
+                    coauthors=None):
     ''' Generates processed data for flowers given a list of score dataframes.
     '''
     flower_score = [None, None, None]
@@ -63,6 +66,7 @@ def gen_flower_data(score_dfs, flower_name, min_year=None, max_year=None):
         agg_score = agg_score_df(score_dfs[i],
                                  score_year_min=min_year,
                                  score_year_max=max_year)
+        agg_score = flag_coauthor(agg_score, coauthors)
         agg_score.ego = flower_name
 
         print()
@@ -111,6 +115,9 @@ def get_flower_data_high_level(entitytype, authorids, normalizedname, selection=
     # Turn selected paper into information dictionary list
     paper_information = paper_info_mag_check_multiquery(selected_papers) # API
 
+    # Get coauthors
+    coauthors = get_coauthor_mapping(paper_information)
+
     print()
     print('Number of Paper Information Found: ', len(paper_information))
     print('Time taken: ', datetime.now() - time_cur)
@@ -133,11 +140,11 @@ def get_flower_data_high_level(entitytype, authorids, normalizedname, selection=
 
     # Generate flower data
     author_data, conf_data, inst_data = gen_flower_data(entity_scores,
-                                                        normalizedname)
+                                                        normalizedname,
+                                                        coauthors = coauthors)
 
     # Set cache
-    #cache = [score.to_json(orient = 'index') for score in entity_scores]
-    cache = selected_papers
+    cache = {'cache': selected_papers, 'coauthors': coauthors}
 
     # Set statistics
     stats = get_stats(paper_information)

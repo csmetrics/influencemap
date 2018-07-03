@@ -63,3 +63,37 @@ def is_self_cite(paper_prop, self):
             names.append(paper_prop[field])
 
     return any(i in self for i in names)
+
+
+def get_coauthor_mapping(paper_info_list):
+    ''' Returns a list of coauthors given paper_infos.
+    '''
+    coauthors = set()
+    for paper_info in paper_info_list:
+        # Names in 'Authors' field
+        for author in paper_info['Authors']:
+            if 'AuthorName' in author:
+                coauthors.add(author['AuthorName'])
+            if 'AffiliationName' in author:
+                coauthors.add(author['AffiliationName'])
+
+        if 'ConferenceName' in paper_info:
+            coauthors.add(paper_info['ConferenceName'])
+        if 'JournalName' in paper_info:
+            coauthors.add(paper_info['JournalName'])
+
+    return list(coauthors)
+
+
+def flag_coauthor(score_df, coauthors):
+    ''' Flags the coauthors of a dataframe.
+    '''
+    # Check if coauthor set exists
+    if not coauthors:
+        return score_df
+
+    # Set flag
+    score_df['coauthor'] = score_df.apply(lambda x: x['entity_id'] in coauthors,
+                                          axis = 1)
+
+    return score_df
