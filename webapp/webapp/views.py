@@ -397,7 +397,7 @@ def submit(request):
         "inst": data3,
         "yearSlider": {
             "title": "Publications range",
-            "range": [min_year, max_year], # placeholder value, just for testing
+            "range": [min_year, max_year],
             "counter": year_chart
         },
         "navbarOption": get_navbar_option(keyword, option)

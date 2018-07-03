@@ -1,9 +1,7 @@
-from webapp.utils import progressCallback, resetProgress
-from webapp.graph import processdata
-import core.utils.entity_type as ent
-from core.flower.draw_flower_test import draw_flower
-from core.utils.get_entity import entity_from_name
-
+from webapp.utils                  import progressCallback, resetProgress
+from webapp.graph                  import processdata
+from core.flower.draw_flower_test  import draw_flower
+from core.utils.get_entity         import entity_from_name
 from core.search.query_paper       import paper_query
 from core.search.query_paper_mag   import paper_mag_multiquery
 from core.search.query_info        import paper_info_check_query, paper_info_mag_check_multiquery
@@ -12,7 +10,11 @@ from core.score.agg_score          import agg_score_df
 from core.flower.flower_bloom_data import score_df_to_graph
 from core.utils.get_stats          import get_stats
 
-from datetime import datetime
+from datetime    import datetime
+from collections import Counter
+from operator    import itemgetter
+
+import core.utils.entity_type as ent
 
 flower_leaves = { 'author': [ent.Entity_type.AUTH]
                 , 'conf': [ent.Entity_type.CONF, ent.Entity_type.JOUR]
@@ -120,6 +122,10 @@ def get_flower_data_high_level(entitytype, authorids, normalizedname, selection=
     years = [info['Year'] for info in paper_information if 'Year' in info]
     min_year = min(years)
     max_year = max(years)
+    year_counter = sorted(list(Counter(years).items()), key=itemgetter(0))
+    year_chart = [["Year", "Num of Papers"]]
+    year_chart.extend([[k,v] for k,v in year_counter])
+    print(year_chart)
 
     # Generate score for each type of flower
     entity_scores = gen_entity_score(paper_information, [normalizedname],
@@ -142,7 +148,8 @@ def get_flower_data_high_level(entitytype, authorids, normalizedname, selection=
         "inst":   inst_data,
         "yearSlider": {
             "title": "Publications range",
-            "range": [min_year, max_year] # placeholder value, just for testing
+            "range": [min_year, max_year],
+            "counter": year_chart
         },
         "stats": stats
     }
