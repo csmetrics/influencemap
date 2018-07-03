@@ -40,13 +40,11 @@ def score_author(paper_info, self=list()):
                 row_dict['influencing'] = weight
                 row_dict['self_cite']   = self_cite
                 try:
-                    row_dict['self_year'] = paper_info['Year']
+                    row_dict['publication_year'] = paper_info['Year']
+                    row_dict['influence_year']   = paper_info['Year']
                 except KeyError:
-                    row_dict['self_year'] = None
-                try:
-                    row_dict['link_year'] = reference['Year']
-                except KeyError:
-                    row_dict['link_year'] = None
+                    row_dict['publication_year'] = None
+                    row_dict['influence_year']   = None
 
                 score_list.append(row_dict)
 
@@ -71,13 +69,13 @@ def score_author(paper_info, self=list()):
                 row_dict['influencing'] = 0
                 row_dict['self_cite']   = self_cite
                 try:
-                    row_dict['self_year'] = paper_info['Year']
+                    row_dict['publication_year'] = paper_info['Year']
                 except KeyError:
-                    row_dict['self_year'] = None
+                    row_dict['publication_year'] = None
                 try:
-                    row_dict['link_year'] = citation['Year']
+                    row_dict['influence_year']   = citation['Year']
                 except KeyError:
-                    row_dict['link_year'] = None
+                    row_dict['influence_year']   = None
 
                 score_list.append(row_dict)
 
@@ -115,13 +113,11 @@ def score_affiliation(paper_info, self=list()):
                 row_dict['influencing'] = weight
                 row_dict['self_cite']   = self_cite
                 try:
-                    row_dict['self_year'] = paper_info['Year']
+                    row_dict['publication_year'] = paper_info['Year']
+                    row_dict['influence_year']   = paper_info['Year']
                 except KeyError:
-                    row_dict['self_year'] = None
-                try:
-                    row_dict['link_year'] = reference['Year']
-                except KeyError:
-                    row_dict['link_year'] = None
+                    row_dict['publication_year'] = None
+                    row_dict['influence_year']   = None
 
                 score_list.append(row_dict)
 
@@ -149,13 +145,13 @@ def score_affiliation(paper_info, self=list()):
                 row_dict['influencing'] = 0
                 row_dict['self_cite']   = self_cite
                 try:
-                    row_dict['self_year'] = paper_info['Year']
+                    row_dict['publication_year'] = paper_info['Year']
                 except KeyError:
-                    row_dict['self_year'] = None
+                    row_dict['publication_year'] = None
                 try:
-                    row_dict['link_year'] = citation['Year']
+                    row_dict['influence_year']   = citation['Year']
                 except KeyError:
-                    row_dict['link_year'] = None
+                    row_dict['influence_year']   = None
 
                 score_list.append(row_dict)
 
@@ -190,13 +186,11 @@ def score_conference(paper_info, self=list()):
             row_dict['influencing'] = 1
             row_dict['self_cite']   = is_self_cite(reference, self)
             try:
-                row_dict['self_year'] = paper_info['Year']
+                row_dict['publication_year'] = paper_info['Year']
+                row_dict['influence_year']   = paper_info['Year']
             except KeyError:
-                row_dict['self_year'] = None
-            try:
-                row_dict['link_year'] = reference['Year']
-            except KeyError:
-                row_dict['link_year'] = None
+                row_dict['publication_year'] = None
+                row_dict['influence_year']   = None
 
             score_list.append(row_dict)
 
@@ -221,13 +215,13 @@ def score_conference(paper_info, self=list()):
             row_dict['influencing'] = 0
             row_dict['self_cite']   = is_self_cite(citation, self)
             try:
-                row_dict['self_year'] = paper_info['Year']
+                row_dict['publication_year'] = paper_info['Year']
             except KeyError:
-                row_dict['self_year'] = None
+                row_dict['publication_year'] = None
             try:
-                row_dict['link_year'] = citation['Year']
+                row_dict['influence_year']   = citation['Year']
             except KeyError:
-                row_dict['link_year'] = None
+                row_dict['influence_year']   = None
 
             score_list.append(row_dict)
 
@@ -259,13 +253,11 @@ def score_journal(paper_info, self=list()):
             row_dict['influencing'] = 1
             row_dict['self_cite']   = is_self_cite(reference, self)
             try:
-                row_dict['self_year'] = paper_info['Year']
+                row_dict['publication_year'] = paper_info['Year']
+                row_dict['influence_year']   = paper_info['Year']
             except KeyError:
-                row_dict['self_year'] = None
-            try:
-                row_dict['link_year'] = reference['Year']
-            except KeyError:
-                row_dict['link_year'] = None
+                row_dict['publication_year'] = None
+                row_dict['influence_year']   = None
 
             score_list.append(row_dict)
 
@@ -287,13 +279,13 @@ def score_journal(paper_info, self=list()):
             row_dict['influencing'] = 0
             row_dict['self_cite']   = is_self_cite(citation, self)
             try:
-                row_dict['self_year'] = paper_info['Year']
+                row_dict['publication_year'] = paper_info['Year']
             except KeyError:
-                row_dict['self_year'] = None
+                row_dict['publication_year'] = None
             try:
-                row_dict['link_year'] = citation['Year']
+                row_dict['influence_year']   = citation['Year']
             except KeyError:
-                row_dict['link_year'] = None
+                row_dict['influence_year']   = None
 
             score_list.append(row_dict)
 

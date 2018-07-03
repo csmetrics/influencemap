@@ -9,6 +9,7 @@ from core.score.agg_paper_info     import score_paper_info_list
 from core.score.agg_score          import agg_score_df
 from core.score.agg_utils          import get_coauthor_mapping
 from core.score.agg_utils          import flag_coauthor
+from core.score.agg_filter         import filter_year
 from core.flower.flower_bloom_data import score_df_to_graph
 from core.utils.get_stats          import get_stats
 
@@ -63,9 +64,10 @@ def gen_flower_data(score_dfs, flower_name, min_year=None, max_year=None,
 
         time_cur = datetime.now()
 
-        agg_score = agg_score_df(score_dfs[i],
-                                 score_year_min=min_year,
-                                 score_year_max=max_year)
+        # Filter score dfs first
+        agg_score = filter_year(score_dfs[i], min_year, max_year)
+
+        agg_score = agg_score_df(agg_score)
         agg_score = flag_coauthor(agg_score, coauthors)
         agg_score.ego = flower_name
 

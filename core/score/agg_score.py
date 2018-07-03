@@ -9,42 +9,15 @@ import numpy as np
 from datetime import datetime
 
 def agg_score_df(influence_df, coauthors=set([]), \
-    score_year_min=None, score_year_max=None, \
     ratio_func=np.vectorize(lambda x, y : y - x), sort_func=np.maximum):
     ''' Aggregates the scoring generated from ES paper information values.
     '''
 
     print('\n---\n{} start score generation'.format(datetime.now()))
 
-    # Check if any range set
-    if score_year_min == None and score_year_max == None:
-        score_df = influence_df
-    else:
-        no_nan_date = influence_df[ influence_df['self_year'].notna() ]
-
-        # Set minimum year if none set
-        if score_year_min == None:
-            score_date_min = no_nan_date['self_year'].min()
-        else:
-            score_date_min = min(no_nan_date['self_year'].max(),\
-                score_year_min)
-            
-
-        # Set maximum year if none set
-        if score_year_max == None:
-            score_date_max = no_nan_date['self_year'].max()
-        else:
-            score_date_max = max(no_nan_date['self_year'].min(),\
-                score_year_max)
-
-        # Filter based on year
-        score_df = no_nan_date[(score_date_min <= \
-            no_nan_date['self_year']) & \
-            (no_nan_date['self_year'] <= score_date_max)]
-
     # Remove year column
     score_cols = ['entity_id', 'influenced', 'influencing']
-    score_df   = score_df[score_cols]
+    score_df   = influence_df[score_cols]
 
     # Aggrigatge scores up
     agg_cols = ['entity_id']
