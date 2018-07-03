@@ -9,7 +9,7 @@
 </div>
 <div id="statpane" class="hoc clear collapse">
   <div class="row">
-    <div class="col-md-7">
+    <div class="col-md-6">
       <div class="wrapper">
         <h3 class="heading">Statistics from {{ stats.min_year }} to {{ stats.max_year }} </h3>
         <table>
@@ -42,15 +42,14 @@
         </table>
       </div>
     </div>
-    <div class="col-md-5" style="border-left:1px #ddd solid">
-      <div class="wrapper search-option">
-        <label>
-          <input class="self-cite" type="checkbox" name="self-cite" id="self-cite" />
-          include self citations
-        </label>
-      </div>
+    <div class="col-md-6" style="border-left:1px #ddd solid">
       <!-- {% include 'year_slider.html' with yearSlider=yearSlider %} -->
       {% include 'statchart.html' with yearSlider=yearSlider %}
+      <div class="search-option">
+        <input class="self-cite" type="checkbox" style="float:left; margin:5 10 0 10" name="self-cite" id="self-cite" />
+        <label>include self citations</label>
+      </div>
+      <button class="btn btn-success" style="width:100px; height:30px; padding:0" id="resubmitButton">Update</button>
     </div>
   </div>
 </div>
@@ -117,6 +116,8 @@ function updateStats(stats){
     }
   });
 }
+
+var nodes = document.getElementsByClassName('google-visualization-controls-rangefilter-thumblabel');
 
 resubmitButton.addEventListener('click', function(){
   $.ajax({
