@@ -51,8 +51,8 @@ def is_self_cite(paper_prop, self):
                 names.append(author['AffiliationName'])
 
     # Get field of study names
-    if 'FieldOfStudies' in paper_prop:
-        for fos in paper_prop['FieldOfStudies']:
+    if 'FieldOfStudy' in paper_prop:
+        for fos in paper_prop['FieldOfStudy']:
             if 'FieldOfStudyName' in fos:
                 names.append(fos['FieldOfStudyName'])
 
