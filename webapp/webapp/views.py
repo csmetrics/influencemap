@@ -338,23 +338,26 @@ def submit(request):
 
     option = data.get("option")   # last searched entity type (confusing for multiple entities)
     keyword = data.get('keyword') # last searched term (doesn't really work for multiple searches)
-    normalisedName = data.get('normalisedName') # normalised name of entity with most papers
-    entity_list = data.get("entities") # [{'normalisedName','eid','entity_type', 'papers'[]}] where papers :=
+    #normalisedName = data.get('normalisedName') # normalised name of entity with most papers
+    #entity_list = data.get("entities") # [{'normalisedName','eid','entity_type', 'papers'[]}] where papers :=
                                        # [{'title','affiliationId'[],'affiliationName'[],'authorId'[],'authorName'[],
                                        #  'citations','conferenceSeriesId','conferenceSeriesName','data','eid',
                                        #  'estimatedCitations', 'fieldOfStudy'[],'journalId','journalName',
                                        #  'languageCode','year'}]
 
-    # Default Dates need fixing
+    # Default Dates
     min_year = None
     max_year = None
 
     time_cur = datetime.now()
 
     # Get the selected paper
-    list_of_list_of_papers = sum([entity['papers'] for entity in entity_list],[])
-    selected_papers = [paper['eid'] for paper in list_of_list_of_papers]
-    entity_names    = [entity['normalisedName'] for entity in entity_list]
+    #list_of_list_of_papers = sum([entity['papers'] for entity in entity_list],[])
+    #selected_papers = [paper['eid'] for paper in list_of_list_of_papers]
+    #entity_names    = [entity['normalisedName'] for entity in entity_list]
+    selected_papers = data.get('papers')
+    entity_names    = data.get('names')
+    flower_name     = data.get('flower_name')
 
     print()
     print('Number of Papers Found: ', len(selected_papers))
@@ -388,7 +391,6 @@ def submit(request):
     entity_scores = gen_entity_score(paper_information, entity_names, self_cite=False)
 
     # Make flower
-    flower_name = '-'.join(entity_names)
     data1, data2, data3 = gen_flower_data(entity_scores, flower_name)
 
     data = {

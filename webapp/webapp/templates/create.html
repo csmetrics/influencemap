@@ -230,15 +230,32 @@ function goToFlower(){
 }
 
 function getSelectedData(){
-   var entities = [];
-   var most_papers = {"paperCount": -1};
+   var papers = [];
+   var names  = [];
+   var most_papers = {"paperCount": -1, 'name': ''};
+
+   // For each of the selected
    selectiontable.rows().nodes().each(function(a) {
      var row_data = selectiontable.row(a).data()['data'];
-     var entity = {'eid': row_data['eid'], 'entity_type': row_data['entity-type'], 'normalisedName': row_data['normalisedName'], 'papers': row_data['papers']}
-     if (row_data['paperCount'] > most_papers['paperCount']){most_papers = {"name": row_data['normalisedName'], "paperCount": row_data['paperCount']}}
-     entities.push(entity);
+     // If not a paper
+     if (row_data['entity-type'] != 'paper') {
+       // Determine flower name
+       if (row_data['paperCount'] > most_papers['paperCount']) {
+         most_papers = {"name": row_data['normalisedName'], "paperCount": row_data['paperCount']}
+       };
+
+       // Add names and papers
+       names.push(row_data['normalisedName']);
+       for (var i = 0; i < row_data['papers'].length; i++) {
+         papers.push(row_data['papers'][i]['eid']);
+       }
+     }
+     // Otherwise just pass id
+     else {
+       papers.push(row_data['eid']);
+     };
    });
-   return {"entities": entities, "normalisedName": most_papers["name"]};
+   return {'papers': papers, 'flower_name': most_papers['name'], 'names': names}
 }
 
 function hideElement(elem){
