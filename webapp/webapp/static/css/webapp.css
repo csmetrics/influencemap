@@ -67,6 +67,19 @@ table {
   border-top: none;
 }
 
+.yearslider {
+  height: 20px;
+  width: 400px;
+  margin: 15 40 10 40;
+}
+.noUi-horizontal .noUi-handle {
+  width: auto;
+  padding: 1.5 5;
+}
+.noUi-horizontal .noUi-handle:after {
+  content: none;
+}
+
 .nav-tabs {
   border: none;
 }
@@ -131,10 +144,6 @@ text {
   font: 15px sans-serif;
   pointer-events: none;
   text-shadow: 0 1px 0 #fff, 1px 0 0 #fff, 0 -1px 0 #fff, -1px 0 0 #fff;
-}
-
-.statchart {
-  height: 160px;
 }
 
 .label-as-badge {

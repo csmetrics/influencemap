@@ -8,49 +8,7 @@
   {% include 'navbar.html' with navbar=navbarOption %}
 </div>
 <div id="statpane" class="hoc clear collapse">
-  <div class="row">
-    <div class="col-md-6">
-      <div class="wrapper">
-        <h3 class="heading">Statistics from {{ stats.min_year }} to {{ stats.max_year }} </h3>
-        <table>
-          <tbody>
-            <tr>
-              <td>Number of Papers</td>
-              <td id="num_papers" >{{ stats.num_papers  }}</td>
-            </tr>
-            <tr>
-              <td>Average papers per year</td>
-              <td id="avg_papers">{{ stats.avg_papers  }}</td>
-            </tr>
-            <tr>
-              <td>Number citations</td>
-              <td id="num_cites">{{ stats.num_cites  }}</td>
-            </tr>
-            <tr>
-              <td>Average citations per paper</td>
-              <td id="avg_cites">{{ stats.avg_cites  }}</td>
-            </tr>
-            <tr>
-              <td>Number of references</td>
-              <td id="num_refs">{{ stats.num_refs  }}</td>
-            </tr>
-            <tr>
-              <td>Average references per paper</td>
-              <td id="avg_refs">{{ stats.avg_refs  }}</td>
-            </tr>
-          </tbody>
-        </table>
-      </div>
-    </div>
-    <div class="col-md-6" style="border-left:1px #ddd solid">
-      {% include 'statchart.html' with yearSlider=yearSlider %}
-      <div class="search-option">
-        <input class="self-cite" type="checkbox" style="float:left; margin:5 10 0 10" name="self-cite" id="self-cite" />
-        <label>include self citations</label>
-      </div>
-      <button class="btn btn-success" style="width:100px; height:30px; padding:0" id="resubmitButton">Update</button>
-    </div>
-  </div>
+  {% include 'statchart.html' with stats=stats yearSlider=yearSlider %}
 </div>
 <div class="hoc clear">
   <div id="image-container" class="nav-tabs">
@@ -106,47 +64,5 @@ var width = document.getElementById('image-container').offsetWidth;
 drawFlower("#graph1", author_data, 0, width);
 drawFlower("#graph2", conf_data, 1, width);
 drawFlower("#graph3", inst_data, 2, width);
-
-
-function updateStats(stats){
-  Object.entries(stats).forEach(function([key, value]){
-    if (document.getElementById(key)){
-      document.getElementById(key).textContent = value
-    }
-  });
-}
-
-resubmitButton.addEventListener('click', function(){
-  $.ajax({
-    type: "POST",
-    url: "/resubmit/",
-    data: {
-      from_year: nodes[0].textContent,
-      to_year: nodes[1].textContent,
-      option: option,
-      selfcite: selfCiteCheckbox.checked,
-      keyword: keyword
-    },
-    success: function(result){
-      $("#graph1").empty();
-      $("#graph2").empty();
-      $("#graph3").empty();
-
-
-
-      author_data = result.author;
-      conf_data = result.conf;
-      inst_data = result.inst;
-
-
-      drawFlower("#graph1", author_data, 0, width);
-      drawFlower("#graph2", conf_data, 1, width);
-      drawFlower("#graph3", inst_data, 2, width);
-
-      updateStats(result.stats);
-    }
-  });
-});
-
 
 </script>

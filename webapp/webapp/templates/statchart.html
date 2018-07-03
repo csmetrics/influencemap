@@ -1,28 +1,54 @@
 {% load staticfiles%}
-<!--Div that will hold the dashboard-->
-<div id="div_charts" style="height: 300px;">
-  <div id="pub_chart" class="statchart"></div>
-  <table style="width:300px">
-    <tbody>
-      <tr>
-        <td style="padding: 8px 30px">
-          <div class="text-right">
-            <span class="label-as-badge"><span id="pub-lower-value"></span></span>
-          </div>
-        </td>
-        <td style="padding: 8px 0">
-          <div id="publication-range" style="width: 200px" class="yearslider"></div>
-        </td>
-        <td style="padding: 8px 30px">
-          <div class="text-left">
-            <span class="label-as-badge"><span id="pub-upper-value"></span></span>
-          </div>
-        </td>
-      </tr>
-    </tbody>
-  </table>
-  <div id="cite_chart" class="statchart"></div>
+<div class="row">
+  <div class="col-md-6">
+    <div class="wrapper">
+      <h3 class="heading">Statistics from
+        <span class="label-as-badge"><span id="pub-lower-value"></span></span>
+        to <span class="label-as-badge"><span id="pub-upper-value"></span></span> </h3>
+      <table>
+        <tbody>
+          <tr>
+            <td>Number of Papers</td>
+            <td id="num_papers" >{{ stats.num_papers  }}</td>
+          </tr>
+          <tr>
+            <td>Average papers per year</td>
+            <td id="avg_papers">{{ stats.avg_papers  }}</td>
+          </tr>
+          <tr>
+            <td>Number citations</td>
+            <td id="num_cites">{{ stats.num_cites  }}</td>
+          </tr>
+          <tr>
+            <td>Average citations per paper</td>
+            <td id="avg_cites">{{ stats.avg_cites  }}</td>
+          </tr>
+          <tr>
+            <td>Number of references</td>
+            <td id="num_refs">{{ stats.num_refs  }}</td>
+          </tr>
+          <tr>
+            <td>Average references per paper</td>
+            <td id="avg_refs">{{ stats.avg_refs  }}</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+  <div class="col-md-6" style="border-left:1px #ddd solid">
+    <div id="div_charts" style="width:450px;height:250px;">
+      <div id="pub_chart" style="height:110px;"></div>
+      <div id="publication-range" class="yearslider"></div>
+      <div id="cite_chart" style="height:110px;"></div>
+    </div>
+    <div class="search-option">
+      <input class="self-cite" type="checkbox" style="float:left; margin:5 10 0 10" name="self-cite" id="self-cite" />
+      <label>include self citations</label>
+    </div>
+    <button class="btn btn-success" style="width:100px; height:30px; padding:0" id="resubmitButton">Update</button>
+  </div>
 </div>
+
 <script src="{% static 'js/d3.v4.min.js' %}"></script>
 <script src="{% static 'js/statchart.js' %}"></script>
 <script type="text/javascript">
@@ -33,11 +59,11 @@ var yearrange = {{ yearSlider.range | safe }};
 var pubchart = new PubChart("#pub_chart");
 var citechart = new CiteChart("#cite_chart");
 var h = ($("#div_charts").height()-20)/2;
-var option = {
+var chartoption = {
   min: yearrange[0], max: yearrange[1],
   xticks: 4, yticks: 3,
   width:440, height:h,
-  top: 20, right: 40, bottom: 20, left: 40};
+  top: 40, right: 0, bottom: 40, left: 40};
 
 var pubSlider = document.getElementById('publication-range');
 noUiSlider.create(pubSlider, {
@@ -53,17 +79,22 @@ noUiSlider.create(pubSlider, {
 });
 
 pubSlider.noUiSlider.on('update', function ( values, handle, unencoded, isTap, positions ) {
-  var nodes = [
+  var handles = [
+    pubSlider.getElementsByClassName('noUi-handle-lower')[0],
+    pubSlider.getElementsByClassName('noUi-handle-upper')[0]
+  ];
+  var labels = [
     document.getElementById('pub-lower-value'),
     document.getElementById('pub-upper-value'),
   ];
-  nodes[handle].innerText = parseInt(values[handle]);
+  handles[handle].innerText = parseInt(values[handle]);
+  labels[handle].innerText = parseInt(values[handle]);
   updateCharts(citationcounter, parseInt(values[0]), parseInt(values[1]));
 });
 
 function updateCharts(data, s_min, s_max){
   if (!pubchart.isInitialized()) {
-    pubchart.initChart(yearcounter, option);
+    pubchart.initChart(yearcounter, chartoption);
   }
   pubchart.updateRange(s_min, s_max);
   var sum = {};
@@ -81,14 +112,46 @@ function updateCharts(data, s_min, s_max){
   for (var k in sum) {
     newdata.push({"year": +k, "value": sum[k]});
   }
-  console.log("newdata", newdata);
-  if (!citechart.isInitialized()) {
-    citechart.initChart(newdata, option);
-  }
-  citechart.updateRange(newdata, option);
+  // console.log("newdata", newdata);
+  citechart.drawChart(newdata, chartoption);
 }
 
+function updateStats(stats){
+  Object.entries(stats).forEach(function([key, value]){
+    if (document.getElementById(key)){
+      document.getElementById(key).textContent = value
+    }
+  });
+}
 
+resubmitButton.addEventListener('click', function(){
+  $.ajax({
+    type: "POST",
+    url: "/resubmit/",
+    data: {
+      from_year: document.getElementById('pub-lower-value').textContent,
+      to_year: document.getElementById('pub-upper-value').textContent,
+      option: option,
+      selfcite: selfCiteCheckbox.checked,
+      keyword: keyword
+    },
+    success: function(result){
+      $("#graph1").empty();
+      $("#graph2").empty();
+      $("#graph3").empty();
+
+      author_data = result.author;
+      conf_data = result.conf;
+      inst_data = result.inst;
+
+      drawFlower("#graph1", author_data, 0, width);
+      drawFlower("#graph2", conf_data, 1, width);
+      drawFlower("#graph3", inst_data, 2, width);
+
+      updateStats(result.stats);
+    }
+  });
+});
 
 
 </script>
