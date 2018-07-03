@@ -55,10 +55,12 @@ def agg_score_df(influence_df, coauthors=set([]), \
 
     # calculate influence ratios
     score_df['ratio'] = ratio_func(score_df['influenced'], score_df['influencing'])
+    score_df['ratio'] = score_df['ratio'] / score_df['sum']
 
     # sort by union max score
     score_df = score_df.assign(tmp = sort_func(score_df['influencing'], score_df['influenced']))
-    score_df = score_df.sort_values('tmp', ascending=False).drop('tmp', axis=1)
+    score_df = score_df.sort_values('tmp', ascending=False)
+    score_df = score_df.drop('tmp', axis=1)
 
     # Flag coauthors TODO FIX
     score_df['coauthor'] = False
