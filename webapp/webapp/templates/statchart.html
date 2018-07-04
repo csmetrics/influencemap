@@ -18,8 +18,8 @@
   <div class="col-md-6" style="padding:0; border-left:1px #ddd solid">
     <div>
       <div class="wrapper">
-        <b> Statictics: Total</b> <span class="stat">{{ yearSlider.range.2 }}</span> years of publication
-        <span class="stat">{{ yearSlider.range.0 }}~{{ yearSlider.range.1 }}</span><br>
+        <b> Statictics: Total</b> <span class="stat">{{ yearSlider.pubrange.2 }}</span> years of publication
+        <span class="stat">{{ yearSlider.pubrange.0 }}~{{ yearSlider.pubrange.1 }}</span><br>
         <div style="padding-left:10px">
           <span id="num_papers" class="stat">{{ stats.num_papers }}</span> papers total,
           average <span id="avg_papers" class="stat">{{ stats.avg_papers }}</span> per year<br>
@@ -61,13 +61,15 @@
 var yearcounter = {{ yearSlider.pubChart | safe }};
 var citationcounter = {{ yearSlider.citeChart | safe }};
 var processedcites = [];
-var yearrange = {{ yearSlider.range | safe }};
+var pub_range = {{ yearSlider.pubrange | safe }};
+var cite_range = {{ yearSlider.citerange | safe }};
 
 var pubchart = new PubChart("#pub_chart");
 var citechart = new CiteChart("#cite_chart");
 var h = ($("#div_charts").height()-20)/2;
 var chartoption = {
-  min: yearrange[0], max: yearrange[1],
+  min: Math.min(pub_range[0], cite_range[0]),
+  max: Math.max(pub_range[1], cite_range[1]),
   xticks: 3, yticks: 3,
   width:440, height:h,
   top: 40, right: 0, bottom: 40, left: 60};
@@ -77,23 +79,23 @@ var citSlider = document.getElementById('citation-range');
 noUiSlider.create(pubSlider, {
   connect: true,
   behaviour: 'tap',
-  start: [ yearrange[0], yearrange[1] ],
+  start: [ pub_range[0], pub_range[1] ],
   step: 1,
   animate: false,
   range: {
-    'min': [ yearrange[0] ],
-    'max': [ yearrange[1] ]
+    'min': [ chartoption.min ],
+    'max': [ chartoption.max ]
   }
 });
 noUiSlider.create(citSlider, {
   connect: true,
   behaviour: 'tap',
-  start: [ yearrange[0], yearrange[1] ],
+  start: [ cite_range[0], cite_range[1] ],
   step: 1,
   animate: false,
   range: {
-    'min': [ yearrange[0] ],
-    'max': [ yearrange[1] ]
+    'min': [ chartoption.min ],
+    'max': [ chartoption.max ]
   }
 });
 

@@ -372,18 +372,23 @@ def submit(request):
 
     # Get min and maximum year
     years = [info['Year'] for info in paper_information if 'Year' in info]
-    min_year = min(years)
-    max_year = max(years)
+    min_pub_year, max_pub_year = min(years), max(years)
 
     # caculate pub/cite chart data
-    contyears = range(min_year, max_year+1)
-    pub_chart = [{"year":k,"value":Counter(years)[k]} for k in contyears]
-    citecounter = {k:[] for k in contyears}
+    cont_pub_years = range(min_pub_year, max_pub_year+1)
+    cite_years = []
+    for info in paper_information:
+        if 'Citations' in info:
+            cite_years.extend([entity["Year"] for entity in info['Citations'] if "Year" in entity])
+    min_cite_year, max_cite_year = min(cite_years), max(cite_years)
+    cont_cite_years = range(min(cite_years), max(cite_years)+1)
+    pub_chart = [{"year":k,"value":Counter(years)[k] if k in Counter(years) else 0} for k in cont_cite_years]
+    citecounter = {k:[] for k in cont_cite_years}
     for info in paper_information:
         if 'Citations' in info:
             for entity in info['Citations']:
                 citecounter[info['Year']].append(entity["Year"])
-    cite_chart = [{"year":k,"value":[{"year":y,"value":Counter(v)[y]} for y in contyears]} for k,v in citecounter.items()]
+    cite_chart = [{"year":k,"value":[{"year":y,"value":Counter(v)[y]} for y in cont_cite_years]} for k,v in citecounter.items()]
 
     # Normalised entity names
     entity_names = list(set(entity_names))
@@ -402,7 +407,8 @@ def submit(request):
         "inst": data3,
         "yearSlider": {
             "title": "Publications range",
-            "range": [min_year, max_year, (max_year-min_year+1)],
+            "pubrange": [min_pub_year, max_pub_year, (max_pub_year-min_pub_year+1)],
+            "citerange": [min_cite_year, max_cite_year],
             "pubChart": pub_chart,
             "citeChart": cite_chart
         },
@@ -458,7 +464,7 @@ def resubmit(request):
     cit_lower = int(request.POST.get('from_cit_year'))
     cit_upper = int(request.POST.get('to_cit_year'))
 
-    
+
     option = request.POST.get('option')
     keyword = request.POST.get('keyword')
     pre_flower_data = []

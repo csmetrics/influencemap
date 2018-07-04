@@ -28,13 +28,13 @@ function drawFlower(svg_id, data, idx, w) {
     var bars = data["bars"];
 
     h_margin = 225;
-    v_margin = 200;
+    v_margin = 250;
     yheight = 100;
     flower_margin = 0;
 
     svg[idx] = d3.select(svg_id),
     width = w, magf = Math.min(250, width/5),
-    height = 600,
+    height = 650,
     numnodes[idx] = nodes.length,
     center = [width/2, height/2 - flower_margin];
     flower_split[idx] = false;
