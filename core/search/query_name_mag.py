@@ -18,10 +18,10 @@ def author_name_mag_multiquery(author_ids):
     '''
     # Query
     url = os.path.join(MAS_URL_PREFIX, "academic/v1.0/evaluate")
-    queries = ({
+    queries = (lambda x: {
         'expr': expr,
         'count': 10000,
-        'offset': 0,
+        'offset': x,
         'attributes': 'AuN'
         } for expr in or_query_builder_list('Id={}', author_ids))
 
@@ -29,11 +29,21 @@ def author_name_mag_multiquery(author_ids):
     auth_name_res = dict()
 
     for query in queries:
-        data = query_academic_search('get', url, query)
+        # Checking offsets
+        finished = False
+        count    = 0
 
-        for res in data['entities']:
-            # Set name
-            auth_name_res[res['Id']] = res['AuN']
+        while not finished:
+            data = query_academic_search('get', url, query(count))
+
+            if len(data['entities']) > 0:
+                count += len(data['entities'])
+            else:
+                finished = True
+
+            for res in data['entities']:
+                # Set name
+                auth_name_res[res['Id']] = res['AuN']
 
     return auth_name_res
 
@@ -43,10 +53,10 @@ def affiliation_name_mag_multiquery(affiliation_ids):
     '''
     # Query
     url = os.path.join(MAS_URL_PREFIX, "academic/v1.0/evaluate")
-    queries = ({
+    queries = (lambda x: {
         'expr': expr,
         'count': 10000,
-        'offset': 0,
+        'offset': x,
         'attributes': 'AfN'
         } for expr in or_query_builder_list('Id={}', affiliation_ids))
 
@@ -54,11 +64,21 @@ def affiliation_name_mag_multiquery(affiliation_ids):
     affi_name_res = dict()
 
     for query in queries:
-        data = query_academic_search('get', url, query)
+        # Checking offsets
+        finished = False
+        count    = 0
 
-        for res in data['entities']:
-            # Set name
-            affi_name_res[res['Id']] = res['AfN']
+        while not finished:
+            data = query_academic_search('get', url, query(count))
+
+            if len(data['entities']) > 0:
+                count += len(data['entities'])
+            else:
+                finished = True
+
+            for res in data['entities']:
+                # Set name
+                affi_name_res[res['Id']] = res['AfN']
 
     return affi_name_res
 
@@ -68,10 +88,10 @@ def conference_name_mag_multiquery(conference_ids):
     '''
     # Query
     url = os.path.join(MAS_URL_PREFIX, "academic/v1.0/evaluate")
-    queries = ({
+    queries = (lambda x: {
         'expr': expr,
         'count': 10000,
-        'offset': 0,
+        'offset': x,
         'attributes': 'PCS.CN'
         } for expr in or_query_builder_list('Id={}', conference_ids))
 
@@ -79,34 +99,54 @@ def conference_name_mag_multiquery(conference_ids):
     conf_name_res = dict()
 
     for query in queries:
-        data = query_academic_search('get', url, query)
+        # Checking offsets
+        finished = False
+        count    = 0
 
-        for res in data['entities']:
-            # Set name
-            try:
-                conf_name_res[res['Id']] = res['PCS']['CN']
-            except KeyError:
-                pass
+        while not finished:
+            data = query_academic_search('get', url, query(count))
+
+            if len(data['entities']) > 0:
+                count += len(data['entities'])
+            else:
+                finished = True
+
+            for res in data['entities']:
+                # Set name
+                try:
+                    conf_name_res[res['Id']] = res['PCS']['CN']
+                except KeyError:
+                    pass
 
     # Try Series now
     # Query
     url = os.path.join(MAS_URL_PREFIX, "academic/v1.0/evaluate")
-    queries = ({
+    queries = (lambda x: {
         'expr': expr,
         'count': 10000,
-        'offset': 0,
+        'offset': x,
         'attributes': 'CN'
         } for expr in or_query_builder_list('Id={}', conference_ids))
 
     for query in queries:
-        data = query_academic_search('get', url, query)
+        # Checking offsets
+        finished = False
+        count    = 0
 
-        for res in data['entities']:
-            # Set name
-            try:
-                conf_name_res[res['Id']] = res['CN']
-            except KeyError:
-                pass
+        while not finished:
+            data = query_academic_search('get', url, query(count))
+
+            if len(data['entities']) > 0:
+                count += len(data['entities'])
+            else:
+                finished = True
+
+            for res in data['entities']:
+                # Set name
+                try:
+                    conf_name_res[res['Id']] = res['CN']
+                except KeyError:
+                    pass
 
     return conf_name_res
 
@@ -116,10 +156,10 @@ def journal_name_mag_multiquery(journal_ids):
     '''
     # Query
     url = os.path.join(MAS_URL_PREFIX, "academic/v1.0/evaluate")
-    queries = ({
+    queries = (lambda x: {
         'expr': expr,
         'count': 10000,
-        'offset': 0,
+        'offset': x,
         'attributes': 'DJN'
         } for expr in or_query_builder_list('Id={}', journal_ids))
 
@@ -127,14 +167,24 @@ def journal_name_mag_multiquery(journal_ids):
     jour_name_res = dict()
 
     for query in queries:
-        data = query_academic_search('get', url, query)
+        # Checking offsets
+        finished = False
+        count    = 0
 
-        for res in data['entities']:
-            # Set name
-            try:
-                jour_name_res[res['Id']] = res['DJN']
-            except KeyError:
-                pass
+        while not finished:
+            data = query_academic_search('get', url, query(count))
+
+            if len(data['entities']) > 0:
+                count += len(data['entities'])
+            else:
+                finished = True
+
+            for res in data['entities']:
+                # Set name
+                try:
+                    jour_name_res[res['Id']] = res['DJN']
+                except KeyError:
+                    pass
 
     return jour_name_res
 

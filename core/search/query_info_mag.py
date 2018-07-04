@@ -126,7 +126,7 @@ def pr_links_mag_multiquery(paper_ids):
     url = os.path.join(MAS_URL_PREFIX, "academic/v1.0/evaluate")
     queries = ({
         'expr': expr,
-        'count': 10000,
+        'count': 100000,
         'offset': 0,
         'attributes': 'RId'
         } for expr in or_query_builder_list('Id={}', paper_ids))
@@ -140,21 +140,32 @@ def pr_links_mag_multiquery(paper_ids):
                 results[res['Id']]['References'] += res['RId']
 
     for paper_id in paper_ids:
-        query = {
-        'expr': 'RId={}'.format(paper_id),
-        'count': 10000,
-        'offset': 0,
-        'attributes': 'Id,RId'
-        }
+        # Checking offsets
+        finished = False
+        count    = 0
 
-        data = query_academic_search('get', url, query)
+        while not finished:
+            query = lambda x: {
+            'expr': 'RId={}'.format(paper_id),
+            'count': 10000,
+            'offset': x,
+            'attributes': 'Id,RId'
+            }
 
-        # Add citations
-        for res in data['entities']:
-            if 'RId' in res:
-                for rid in res['RId']:
-                    if rid in paper_ids:
-                        results[rid]['Citations'].append(res['Id'])
+            data = query_academic_search('get', url, query(count))
+
+            print(count, len(data['entities']))
+            if len(data['entities']) > 0:
+                count += len(data['entities'])
+            else:
+                finished = True
+
+            # Add citations
+            for res in data['entities']:
+                if 'RId' in res:
+                    for rid in res['RId']:
+                        if rid in paper_ids:
+                            results[rid]['Citations'].append(res['Id'])
 
     return results
 
