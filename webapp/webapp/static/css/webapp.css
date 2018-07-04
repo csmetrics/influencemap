@@ -81,14 +81,12 @@ table {
 }
 div#publication-range .noUI-connect {
   background: #F47E60;
-  text: "test";
 }
 div#citation-range .noUi-connect {
   background: #ABBD81;
 }
-
-.tick line{
-  stroke: "#ddd";
+.axis path, .grid path, .tick line {
+  stroke: #ccc;
 }
 
 .nav-tabs {

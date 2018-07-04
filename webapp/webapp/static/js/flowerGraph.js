@@ -33,7 +33,7 @@ function drawFlower(svg_id, data, idx, w) {
     flower_margin = 0;
 
     svg[idx] = d3.select(svg_id),
-    width = w, magf = Math.min(250, width/7),
+    width = w, magf = Math.min(250, width/5),
     height = 600,
     numnodes[idx] = nodes.length,
     center = [width/2, height/2 - flower_margin];
@@ -372,24 +372,24 @@ function split_flower(idx, shift) {
 }
 
 function toggle_split(idx, selected) {
-    var split_distance = width/4,
-        id = d3.select(selected).attr("id");
-
-    if (id != 0) { return; }
-
-    // If click the ego, then split flower
-    if (flower_split[idx]) {
-        split_flower(idx, 0);
-        flower_split[idx] = false;
-        split_button[idx].select("text")
-            .text("Split Flower")
-    }
-    else {
-        split_flower(idx, split_distance);
-        flower_split[idx] = true;
-        split_button[idx].select("text")
-            .text("Combine Flower")
-    }
+    // var split_distance = width/4,
+    //     id = d3.select(selected).attr("id");
+    //
+    // if (id != 0) { return; }
+    //
+    // // If click the ego, then split flower
+    // if (flower_split[idx]) {
+    //     split_flower(idx, 0);
+    //     flower_split[idx] = false;
+    //     split_button[idx].select("text")
+    //         .text("Split Flower")
+    // }
+    // else {
+    //     split_flower(idx, split_distance);
+    //     flower_split[idx] = true;
+    //     split_button[idx].select("text")
+    //         .text("Combine Flower")
+    // }
 }
 
 function arrow_width_calc(weight) {
