@@ -163,7 +163,7 @@ def or_query_builder_list(base_query, ids):
             out = "Or({})"
             sub_constraints = list()
             # Incrementally add constraints
-            while len(', '.join(sub_constraints)) + len(out) < 1500 and inputs:
+            while len(', '.join(sub_constraints)) + len(out) < 1000 and inputs:
                 sub_constraints.append(base_query.format(inputs.pop(0)))
                 
             out = out.format(", ".join(sub_constraints))
