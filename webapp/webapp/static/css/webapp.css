@@ -36,7 +36,7 @@
 
 #rightslider {
   height: 100%;
-  border-top: 10px #B97D2D solid;
+  border-top: 10px #292F61 solid;
   background-color: rgba(0,0,0,0.5);
 }
 
@@ -68,13 +68,14 @@ table {
 }
 
 .yearslider {
-  height: 20px;
+  height: 15px;
   width: 380px;
   margin: 12 40 6 60;
 }
 .noUi-horizontal .noUi-handle {
   width: auto;
-  padding: 1.5 5;
+  height: 24;
+  padding: 0 5;
 }
 .noUi-horizontal .noUi-handle:after {
   content: none;
@@ -86,23 +87,23 @@ div#citation-range .noUi-connect {
   background: #ABBD81;
 }
 .axis path, .grid path, .tick line {
-  stroke: #ccc;
+  stroke: #ddd;
 }
 
 .nav-tabs {
   border: none;
 }
 .tab-btn:hover, .tab-btn.inverse{
-  padding: 10px 20px;
+  padding: 8px 20px;
   border-radius: 0 0 5px 5px;
-  color:#B97D2D; background-color:transparent; border-color:#ddd;
-  border-top: 10px #B97D2D solid;
+  color:#292F61; background-color:transparent; border-color:#ddd;
+  border-bottom: 5px #292F61 solid;
 }
 .tab-btn, .tab-btn.active, .tab-btn.inverse:hover{
-  padding: 10px 20px;
+  padding: 8px 20px;
   border-radius: 0 0 5px 5px;
-  color:#FFFFFF; background-color:#B97D2D; border-color:#B97D2D;
-  border-top: 10px #B97D2D solid;
+  color:#FFFFFF; background-color:#859EB6; border-color:#859EB6;
+  border-bottom: 5px #292F61 solid;
 }
 
 .search-bar {
