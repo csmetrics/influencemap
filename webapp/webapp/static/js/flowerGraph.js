@@ -22,6 +22,24 @@ var link = [], flower_split = [], bar = [],
     node_in = [], node_out = [],
     text_in = [], text_out = [];
 
+function drawLegend() {
+  var colorScale = d3.scaleSequential(colors).domain([0, 500]);
+  var svg = d3.select("#flower-legend")
+    .append("svg")
+    .attr("width", 700)
+    .attr("height", 15)
+    .append("g");
+  var bars = svg.selectAll(".bars")
+    .data(d3.range(700), function(d) { return d; })
+  .enter().append("rect")
+    .attr("class", "bars")
+    .attr("x", function(d, i) { return i; })
+    .attr("y", 0)
+    .attr("height", 15)
+    .attr("width", 1)
+    .style("fill", function(d, i ) { return colorScale(d); })
+}
+
 function drawFlower(svg_id, data, idx, w) {
     var nodes = data["nodes"];
     var links = data["links"];
