@@ -54,29 +54,29 @@ autoCompleteLists = {}
 # dictionary to store option specific functions
 dataFunctionDict = {
     'get_ids':{
-	'author': getAuthor,
-	'conference': getConf,
-	'institution': getAff,
-	'journal': getJournal},
+    'author': getAuthor,
+    'conference': getConf,
+    'institution': getAff,
+    'journal': getJournal},
     'get_pids':{
-	'conference': getConfPID,
-	'journal': getJourPID,
-	'institution': getAffPID}}
+    'conference': getConfPID,
+    'journal': getJourPID,
+    'institution': getAffPID}}
 
 # option list for radios
 optionlist = [  # option list
-	{"id":"author", "name":"Author"},
-	{"id":"conference", "name":"Conference"},
-	{"id":"journal", "name":"Journal"},
-	{"id":"institution", "name":"Institution"},
+    {"id":"author", "name":"Author"},
+    {"id":"conference", "name":"Conference"},
+    {"id":"journal", "name":"Journal"},
+    {"id":"institution", "name":"Institution"},
     {"id":"paper", "name": "Paper"}]
 
 
 str_to_ent = {
-	"author": ent.Entity_type.AUTH,
-	"conference": ent.Entity_type.CONF,
-	"journal": ent.Entity_type.JOUR,
-	"institution": ent.Entity_type.AFFI
+    "author": ent.Entity_type.AUTH,
+    "conference": ent.Entity_type.CONF,
+    "journal": ent.Entity_type.JOUR,
+    "institution": ent.Entity_type.AFFI
     }
 
 
@@ -402,7 +402,7 @@ def submit(request):
         "inst": data3,
         "yearSlider": {
             "title": "Publications range",
-            "range": [min_year, max_year], # placeholder value, just for testing
+            "range": [min_year, max_year, (max_year-min_year+1)],
             "pubChart": pub_chart,
             "citeChart": cite_chart
         },
