@@ -36,6 +36,7 @@ def author_name_mag_multiquery(author_ids):
         while not finished:
             data = query_academic_search('get', url, query(count))
 
+            # Check if no more data
             if len(data['entities']) > 0:
                 count += len(data['entities'])
             else:
@@ -71,6 +72,7 @@ def affiliation_name_mag_multiquery(affiliation_ids):
         while not finished:
             data = query_academic_search('get', url, query(count))
 
+            # Check if no more data
             if len(data['entities']) > 0:
                 count += len(data['entities'])
             else:
@@ -106,6 +108,7 @@ def conference_name_mag_multiquery(conference_ids):
         while not finished:
             data = query_academic_search('get', url, query(count))
 
+            # Check if no more data
             if len(data['entities']) > 0:
                 count += len(data['entities'])
             else:
@@ -136,6 +139,7 @@ def conference_name_mag_multiquery(conference_ids):
         while not finished:
             data = query_academic_search('get', url, query(count))
 
+            # Check if no more data
             if len(data['entities']) > 0:
                 count += len(data['entities'])
             else:
@@ -174,6 +178,7 @@ def journal_name_mag_multiquery(journal_ids):
         while not finished:
             data = query_academic_search('get', url, query(count))
 
+            # Check if no more data
             if len(data['entities']) > 0:
                 count += len(data['entities'])
             else:

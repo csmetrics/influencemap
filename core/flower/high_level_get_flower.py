@@ -54,8 +54,9 @@ def gen_entity_score(paper_information, names, self_cite=True):
     return entity_scores
 
 
-def gen_flower_data(score_dfs, flower_name, min_year=None, max_year=None,
-                    coauthors=None):
+def gen_flower_data(score_dfs, flower_name, pub_lower=None, pub_upper=None,
+                                            cit_lower=None, cit_upper=None,
+                                            coauthors=None):
     ''' Generates processed data for flowers given a list of score dataframes.
     '''
     flower_score = [None, None, None]
@@ -65,8 +66,11 @@ def gen_flower_data(score_dfs, flower_name, min_year=None, max_year=None,
         time_cur = datetime.now()
 
         # Filter score dfs first
-        agg_score = filter_year(score_dfs[i], min_year, max_year)
+        agg_score = filter_year(score_dfs[i], pub_lower, pub_upper)
+        agg_score = filter_year(score_dfs[i], cit_lower, cit_upper,
+                                index = 'influence_year')
 
+        # Aggregate
         agg_score = agg_score_df(agg_score)
         agg_score = flag_coauthor(agg_score, coauthors)
         agg_score.ego = flower_name

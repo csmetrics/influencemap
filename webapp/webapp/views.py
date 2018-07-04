@@ -452,8 +452,13 @@ def submit_from_browse(request):
 @csrf_exempt
 def resubmit(request):
     print(request)
-    from_year = int(request.POST.get('from_year'))
-    to_year = int(request.POST.get('to_year'))
+    # Get year filter data
+    pub_lower = int(request.POST.get('from_pub_year'))
+    pub_upper = int(request.POST.get('to_pub_year'))
+    cit_lower = int(request.POST.get('from_cit_year'))
+    cit_upper = int(request.POST.get('to_cit_year'))
+
+    
     option = request.POST.get('option')
     keyword = request.POST.get('keyword')
     pre_flower_data = []
@@ -473,8 +478,10 @@ def resubmit(request):
 
     data1, data2, data3 = gen_flower_data(scores,
                                           flower_name,
-                                          min_year  = from_year,
-                                          max_year  = to_year,
+                                          pub_lower = pub_lower,
+                                          pub_upper = pub_upper,
+                                          cit_lower = cit_lower,
+                                          cit_upper = cit_upper,
                                           coauthors = coauthors)
 
     data = {
@@ -484,7 +491,7 @@ def resubmit(request):
         "navbarOption": get_navbar_option(keyword, option)
     }
 
-    stats = get_stats(paper_information, from_year, to_year)
+    stats = get_stats(paper_information, pub_lower, pub_upper)
     print(stats)
     data['stats'] = stats
 
