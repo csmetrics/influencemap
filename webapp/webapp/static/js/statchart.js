@@ -130,11 +130,9 @@ class CiteChart {
   }
 
   updateRange(minyear, maxyear){
-    console.log("updateRange", minyear, maxyear)
     var bars = $(".bar-cite");
     for (var i = 0; i < bars.length; i++) {
       var item = $(bars[i]);
-      console.log(minyear, )
       if (minyear > item.attr("id") || item.attr("id") > maxyear){
         item.css("fill", "#DDD");
       } else {

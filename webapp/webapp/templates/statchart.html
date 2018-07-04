@@ -110,23 +110,33 @@ var labels = [
   document.getElementById('cit-upper-value'),
 ];
 
+
 pubSlider.noUiSlider.on('update', function ( values, handle, unencoded, isTap, positions ) {
   handles[handle].innerText = parseInt(values[handle]);
   labels[handle].innerText = parseInt(values[handle]);
-  updatePubNumbers(yearcounter, parseInt(values[0]), parseInt(values[1]));
+  updateNumbers();
   updateCharts(citationcounter);
 });
 
 citSlider.noUiSlider.on('update', function ( values, handle, unencoded, isTap, positions ) {
   handles[handle+2].innerText = parseInt(values[handle]);
   labels[handle+2].innerText = parseInt(values[handle]);
-  updateCiteNumbers(processedcites, parseInt(values[0]), parseInt(values[1]))
+  updateNumbers();
   citechart.updateRange(parseInt(values[0]), parseInt(values[1]));
 });
 
+function updateNumbers() {
+  p_min = parseInt(handles[0].innerText)
+  p_max = parseInt(handles[1].innerText)
+  c_min = parseInt(handles[2].innerText)
+  c_max = parseInt(handles[3].innerText)
+  updatePubNumbers(yearcounter, p_min, p_max);
+  updateCiteNumbers(citationcounter, p_min, p_max, c_min, c_max);
+}
+
 function updatePubNumbers(data, min, max){
   // calculate total paper number in selected year range
-  selected_papers = 0
+  var selected_papers = 0
   for (var i = 0; i < data.length; i++){
     if (min <= data[i]["year"] && data[i]["year"] <= max) {
       selected_papers += data[i]["value"]
@@ -135,12 +145,16 @@ function updatePubNumbers(data, min, max){
   document.getElementById("selected_num_papers").innerText = selected_papers;
 }
 
-function updateCiteNumbers(data, min, max){
-  // calculate total paper number in selected year range
-  selected_papers = 0
+function updateCiteNumbers(data, p_min, p_max, c_min, c_max){
+  // calculate total citation number in selected year range
+  var selected_papers = 0
   for (var i = 0; i < data.length; i++){
-    if (min <= data[i]["year"] && data[i]["year"] <= max) {
-      selected_papers += data[i]["value"]
+    if (p_min <= data[i]["year"] && data[i]["year"] <= p_max) {
+      for (var j = 0; j < data[i]["value"].length; j++){
+        if (c_min <= data[i]["value"][j]["year"] && data[i]["value"][j]["year"] <= c_max) {
+          selected_papers += data[i]["value"][j]["value"];
+        }
+      }
     }
   }
   document.getElementById("selected_num_cites").innerText = selected_papers;
@@ -167,12 +181,12 @@ function updateCharts(data){
       }
     }
   }
-  processedcites = []
+  var newdata = []
   for (var k in sum) {
-    processedcites.push({"year": +k, "value": sum[k]});
+    newdata.push({"year": +k, "value": sum[k]});
   }
   // console.log("newdata", newdata);
-  citechart.drawChart(processedcites, chartoption);
+  citechart.drawChart(newdata, chartoption);
   citechart.updateRange(cit_min, cit_max);
 }
 
@@ -210,7 +224,8 @@ resubmitButton.addEventListener('click', function(){
       drawFlower("#graph2", conf_data, 1, width);
       drawFlower("#graph3", inst_data, 2, width);
 
-      updateStats(result.stats);
+      // do not update stat for resubmit
+      // updateStats(result.stats);
     }
   });
 });
