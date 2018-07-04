@@ -155,9 +155,13 @@ text {
   text-shadow: 0 1px 0 #fff, 1px 0 0 #fff, 0 -1px 0 #fff, -1px 0 0 #fff;
 }
 
+.stat {
+  font-style: italic;
+}
+
 .label-as-badge {
     border-radius: 4px;
-    padding: 4px;
+    padding: 2px;
     background-color: rgb(245, 245, 245);
     border: 1px solid #e5e5e5;
 }

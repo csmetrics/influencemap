@@ -1,6 +1,6 @@
 {% load staticfiles%}
 <div class="row">
-  <div class="col-md-6" style="width:480px;border-right:1px #ddd solid">
+  <div class="col-md-6" style="min-width:480px">
     <div class="wrapper">
       <b>Select YearRange</b>
       <div style="float:right;padding:0 3">
@@ -15,54 +15,44 @@
       </div>
     </div>
   </div>
-  <div class="col-md-6">
-    <div class="wrapper">
-      <b>Publications from
-        <span class="label-as-badge"><span id="pub-lower-value"></span></span>
-        to <span class="label-as-badge"><span id="pub-upper-value"></span></span> </b><br>
-      <b>Citations from
-        <span class="label-as-badge"><span id="cit-lower-value"></span></span>
-        to <span class="label-as-badge"><span id="cit-upper-value"></span></span> </b>
-      <table>
-        <tbody>
-          <tr>
-            <td>Number of Papers</td>
-            <td id="num_papers" >{{ stats.num_papers  }}</td>
-          </tr>
-          <tr>
-            <td>Average papers per year</td>
-            <td id="avg_papers">{{ stats.avg_papers  }}</td>
-          </tr>
-          <tr>
-            <td>Number citations</td>
-            <td id="num_cites">{{ stats.num_cites  }}</td>
-          </tr>
-          <tr>
-            <td>Average citations per paper</td>
-            <td id="avg_cites">{{ stats.avg_cites  }}</td>
-          </tr>
-          <tr>
-            <td>Number of references</td>
-            <td id="num_refs">{{ stats.num_refs  }}</td>
-          </tr>
-          <tr>
-            <td>Average references per paper</td>
-            <td id="avg_refs">{{ stats.avg_refs  }}</td>
-          </tr>
-        </tbody>
-      </table>
-    </div>
-    <div class="wrapper" style="border-top:1px #ddd solid;">
-      <div>
-        <b>Include self citations</b>
-        <input class="self-cite" type="checkbox" style="float:left; margin:5 10 0 10" name="self-cite" id="self-cite" />
+  <div class="col-md-6" style="padding:0; border-left:1px #ddd solid">
+    <div>
+      <div class="wrapper">
+        <b> Statictics: Total</b> <span class="stat">{{ yearSlider.range.2 }}</span> years of publication
+        <span class="stat">{{ yearSlider.range.0 }}~{{ yearSlider.range.1 }}</span><br>
+        <div style="padding-left:10px">
+          <span id="num_papers" class="stat">{{ stats.num_papers }}</span> papers total,
+          average <span id="avg_papers" class="stat">{{ stats.avg_papers }}</span> per year<br>
+          <span id="num_refs" class="stat">{{ stats.num_refs }}</span> references total,
+          average <span id="avg_refs" class="stat">{{ stats.avg_refs }}</span> per paper<br>
+          <span id="num_cites" class="stat">{{ stats.num_cites }}</span> citations total,
+          average <span id="avg_cites" class="stat">{{ stats.avg_cites }}</span> per paper<br>
+        </div>
       </div>
-      <div align=center style="padding-top:5px;">
-        <button class="btn btn-success" style="width:200px; height:30px; padding:0" id="resubmitButton">Update Flower</button>
+    </div>
+    <div style="border-top:1px #ddd solid;">
+      <div class="wrapper" >
+        <b>Selected Range (for flower)</b>
+        <div style="padding-left:10px">
+          <b>Publications:
+            <span class="label-as-badge" id="pub-lower-value"></span>~
+            <span class="label-as-badge" id="pub-upper-value"></span> </b>
+          <b>Citations:
+            <span class="label-as-badge" id="cit-lower-value"></span>~
+            <span class="label-as-badge" id="cit-upper-value"></span> </b><br>
+          <span id="selected_num_papers" class="stat">???</span> papers,
+          <span id="selected_num_cites" class="stat">???</span> citations
+        </div>
+        <div style="padding-top:10px">
+          <b>Include self citations</b>
+          <input class="self-cite" type="checkbox" style="float:left; margin:5 10 0 0" name="self-cite" id="self-cite" />
+        </div>
+        <div align=center style="padding-top:5px;">
+          <button class="btn btn-success" style="width:200px; height:30px; padding:0" id="resubmitButton">Update Flower</button>
+        </div>
       </div>
     </div>
   </div>
-
 </div>
 
 <script src="{% static 'js/d3.v4.min.js' %}"></script>
@@ -70,6 +60,7 @@
 <script type="text/javascript">
 var yearcounter = {{ yearSlider.pubChart | safe }};
 var citationcounter = {{ yearSlider.citeChart | safe }};
+var processedcites = [];
 var yearrange = {{ yearSlider.range | safe }};
 
 var pubchart = new PubChart("#pub_chart");
@@ -122,14 +113,38 @@ var labels = [
 pubSlider.noUiSlider.on('update', function ( values, handle, unencoded, isTap, positions ) {
   handles[handle].innerText = parseInt(values[handle]);
   labels[handle].innerText = parseInt(values[handle]);
+  updatePubNumbers(yearcounter, parseInt(values[0]), parseInt(values[1]));
   updateCharts(citationcounter);
 });
 
 citSlider.noUiSlider.on('update', function ( values, handle, unencoded, isTap, positions ) {
   handles[handle+2].innerText = parseInt(values[handle]);
   labels[handle+2].innerText = parseInt(values[handle]);
+  updateCiteNumbers(processedcites, parseInt(values[0]), parseInt(values[1]))
   citechart.updateRange(parseInt(values[0]), parseInt(values[1]));
 });
+
+function updatePubNumbers(data, min, max){
+  // calculate total paper number in selected year range
+  selected_papers = 0
+  for (var i = 0; i < data.length; i++){
+    if (min <= data[i]["year"] && data[i]["year"] <= max) {
+      selected_papers += data[i]["value"]
+    }
+  }
+  document.getElementById("selected_num_papers").innerText = selected_papers;
+}
+
+function updateCiteNumbers(data, min, max){
+  // calculate total paper number in selected year range
+  selected_papers = 0
+  for (var i = 0; i < data.length; i++){
+    if (min <= data[i]["year"] && data[i]["year"] <= max) {
+      selected_papers += data[i]["value"]
+    }
+  }
+  document.getElementById("selected_num_cites").innerText = selected_papers;
+}
 
 function updateCharts(data){
   var pub_min = parseInt(handles[0].innerText)
@@ -152,12 +167,12 @@ function updateCharts(data){
       }
     }
   }
-  var newdata = []
+  processedcites = []
   for (var k in sum) {
-    newdata.push({"year": +k, "value": sum[k]});
+    processedcites.push({"year": +k, "value": sum[k]});
   }
   // console.log("newdata", newdata);
-  citechart.drawChart(newdata, chartoption);
+  citechart.drawChart(processedcites, chartoption);
   citechart.updateRange(cit_min, cit_max);
 }
 
