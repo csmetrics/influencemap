@@ -402,7 +402,7 @@ def submit(request):
         "inst": data3,
         "yearSlider": {
             "title": "Publications range",
-            "range": [min_year, max_year], # placeholder value, just for testing
+            "range": [min_year, max_year, (max_year-min_year+1)],
             "pubChart": pub_chart,
             "citeChart": cite_chart
         },
