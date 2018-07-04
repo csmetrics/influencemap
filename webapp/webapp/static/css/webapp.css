@@ -69,8 +69,8 @@ table {
 
 .yearslider {
   height: 20px;
-  width: 400px;
-  margin: 15 40 10 40;
+  width: 380px;
+  margin: 12 40 6 60;
 }
 .noUi-horizontal .noUi-handle {
   width: auto;
@@ -78,6 +78,17 @@ table {
 }
 .noUi-horizontal .noUi-handle:after {
   content: none;
+}
+div#publication-range .noUI-connect {
+  background: #F47E60;
+  text: "test";
+}
+div#citation-range .noUi-connect {
+  background: #ABBD81;
+}
+
+.tick line{
+  stroke: "#ddd";
 }
 
 .nav-tabs {

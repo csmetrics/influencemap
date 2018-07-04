@@ -51,7 +51,7 @@ class PubChart {
         .attr("y", function(d) { return pub_y(d.value); })
         .attr("width", x.bandwidth())
         .attr("height", function(d) { return (height-pub_y(d.value)); })
-        .style("fill", "#fe3344");
+        .style("fill", "#F47E60");
 
     this.initflag = true;
   }
@@ -67,7 +67,7 @@ class PubChart {
       if (minyear > item.attr("id") || item.attr("id") > maxyear){
         item.css("fill", "#DDD");
       } else {
-        item.css("fill", "#fe3344");
+        item.css("fill", "#F47E60");
       }
     }
   }
@@ -121,10 +121,25 @@ class CiteChart {
       .data(data)
       .enter().append("rect")
       .attr("class", "bar-cite")
+      .attr("id", function(d) { return d.year; })
       .attr("x", function(d) { return x(d.year); })
       .attr("y", function(d) { return cit_y(d.value); })
       .attr("width", x.bandwidth())
       .attr("height", function(d) { return (height-cit_y(d.value)); })
-      .style("fill", "blue");
+      .style("fill", "#ABBD81");
+  }
+
+  updateRange(minyear, maxyear){
+    console.log("updateRange", minyear, maxyear)
+    var bars = $(".bar-cite");
+    for (var i = 0; i < bars.length; i++) {
+      var item = $(bars[i]);
+      console.log(minyear, )
+      if (minyear > item.attr("id") || item.attr("id") > maxyear){
+        item.css("fill", "#DDD");
+      } else {
+        item.css("fill", "#ABBD81");
+      }
+    }
   }
 }
