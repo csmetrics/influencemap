@@ -376,10 +376,15 @@ def submit(request):
 
     # caculate pub/cite chart data
     cont_pub_years = range(min_pub_year, max_pub_year+1)
-    cite_years = []
+    cite_years = set()
     for info in paper_information:
         if 'Citations' in info:
-            cite_years.extend([entity["Year"] for entity in info['Citations'] if "Year" in entity])
+            cite_years.update({entity["Year"] for entity in info['Citations'] if "Year" in entity})
+
+    # Add publication years as well
+    cite_years.add(min_pub_year)
+    cite_years.add(max_pub_year)
+
     min_cite_year, max_cite_year = min(cite_years), max(cite_years)
     cont_cite_years = range(min(cite_years), max(cite_years)+1)
     pub_chart = [{"year":k,"value":Counter(years)[k] if k in Counter(years) else 0} for k in cont_cite_years]
@@ -388,6 +393,7 @@ def submit(request):
         if 'Citations' in info:
             for entity in info['Citations']:
                 citecounter[info['Year']].append(entity["Year"])
+
     cite_chart = [{"year":k,"value":[{"year":y,"value":Counter(v)[y]} for y in cont_cite_years]} for k,v in citecounter.items()]
 
     # Normalised entity names

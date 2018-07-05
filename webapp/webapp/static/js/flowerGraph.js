@@ -93,6 +93,18 @@ function drawFlower(svg_id, data, idx, w) {
         .selectAll("text")
           .text(function(d) { if (d.length > 20) return d.slice(0, 20)+"..."; else return d.slice(0, 20); })
           .style("text-anchor", "end")
+          .style("fill", function(d) { 
+            for (var i in nodes) {
+                if (nodes[i]['name'] == d) {
+                    if (nodes[i]['coauthor'] == 'True') {
+                        return "gray";
+                    }
+                    else {
+                        return "black";
+                    }
+                }
+            };
+            return "black"; } )
           .attr("dx", "-.8em")
           .attr("dy", "-.5em")
           .attr("transform", "rotate(-90)");;
@@ -189,8 +201,9 @@ function drawFlower(svg_id, data, idx, w) {
         .attr("gtype", function(d) { return d.gtype; })
         .attr("x", 8)
         .attr("y", ".31em")
-        .text(function(d) { if (d.coauthor == 'True') return "*" + d.name; else return d.name; })
-        .style("font-style", function(d) { if (d.coauthor == 'False') return "normal"; else return "italic"; });
+        .text(function(d) { return d.name; })
+        .style("fill", function(d) { if (d.coauthor == 'False') return "black"; else return "gray"; });
+//        .style("font-style", function(d) { if (d.coauthor == 'False') return "normal"; else return "italic"; });
 
     // flower graph node text
     text_out[idx] = svg[idx].append("g").selectAll("text")
@@ -201,8 +214,9 @@ function drawFlower(svg_id, data, idx, w) {
         .attr("gtype", function(d) { return d.gtype; })
         .attr("x", 8)
         .attr("y", ".31em")
-        .text(function(d) { if (d.coauthor == 'True') return "*" + d.name; else return d.name; })
-        .style("font-style", function(d) { if (d.coauthor == 'False') return "normal"; else return "italic"; });
+        .text(function(d) { d.name; })
+        .style("fill", function(d) { if (d.coauthor == 'False') return "black"; else return "gray"; });
+//        .style("font-style", function(d) { if (d.coauthor == 'False') return "normal"; else return "italic"; });
 
     // flower graph chart layout
     simulation[idx] = d3.forceSimulation(nodes)
