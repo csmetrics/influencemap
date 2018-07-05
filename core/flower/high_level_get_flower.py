@@ -1,4 +1,3 @@
-from webapp.utils                  import progressCallback, resetProgress
 from webapp.graph                  import processdata
 from core.flower.draw_flower_test  import draw_flower
 from core.utils.get_entity         import entity_from_name

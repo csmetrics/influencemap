@@ -15,7 +15,7 @@ Including another URLconf
 """
 from django.conf.urls import url
 from django.contrib import admin
-from webapp import views, utils
+from webapp import views
 
 urlpatterns = [
     url(r'^$', views.main),
@@ -27,7 +27,6 @@ urlpatterns = [
     url(r'^search', views.search),
     url(r'^submit_from_browse/', views.submit_from_browse),
     url(r'^submit/', views.submit),
-    url(r'^progress', utils.progress),
     url(r'^admin/', admin.site.urls),
     url(r'^autocomplete', views.autocomplete),
     url(r'^view_papers/', views.view_papers),

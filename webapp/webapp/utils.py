@@ -1,22 +1,55 @@
-from django.views.decorators.csrf import csrf_exempt
-from django.http import JsonResponse
+import os
+from webapp.elastic import query_cache_paper_info
+BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 
-progressmsg = "start searching"
-percent = 0
+# option list for radios
+optionlist = [  # option list
+    {"id":"author", "name":"Author"},
+    {"id":"conference", "name":"Conference"},
+    {"id":"journal", "name":"Journal"},
+    {"id":"institution", "name":"Institution"},
+    {"id":"paper", "name": "Paper"}]
 
-@csrf_exempt
-def progress(request):
-    global progressmsg, percent
-    return JsonResponse({"msg": progressmsg, "percent": percent})
+# initialise as no autocomplete lists yet (wait until needed)
+autoCompleteLists = {}
 
-def resetProgress():
-    global progressmsg, percent
-    percent = 0
-    progressmsg = "start searching"
+def printDict(d):
+    for k,v in d.items():
+        print('k: {}\tv: {}'.format(k,v))
 
-# call back function for progress bar
-def progressCallback(progress, msg):
-    global progressmsg, percent
-    percent = progress
-    progressmsg = msg
-    print("progressCallback", percent, progressmsg)
+def loadList(entity):
+    path = os.path.join(BASE_DIR, "webapp/cache/"+entity+"List.txt")
+    if entity == 'paper':
+        return []
+    elif entity not in autoCompleteLists.keys():
+        with open(path, "r") as f:
+            autoCompleteLists[entity] = [name.strip() for name in f]
+        autoCompleteLists[entity] = list(set(autoCompleteLists[entity]))
+    return autoCompleteLists[entity]
+
+def get_navbar_option(keyword = "", option = ""):
+    return {
+        "optionlist": optionlist,
+        "selectedKeyword": keyword,
+        "selectedOption": [opt for opt in optionlist if opt['id'] == option][0] if option != "" else optionlist[0],
+    }
+
+def get_url_query(query):
+    query_type = [
+        "author_id",
+        "browse_paper_group",
+        "browse_author_group"
+    ]
+    data = {}
+    option = query.get("type")
+    if option == query_type[0]:
+        aid = query.get("id")
+        aname = query.get("name").replace("_", " ")
+        data["papers"] = query_cache_paper_info(aid)
+        data["names"] = [aname]
+        data["flower_name"] = aname
+        return data, "author", aname
+    else:
+        group_name = query.get('name')
+        group_type = query.get('type')
+        return

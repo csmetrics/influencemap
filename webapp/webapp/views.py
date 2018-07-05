@@ -5,9 +5,9 @@ from django.views.decorators.csrf import csrf_exempt
 from datetime import datetime
 from collections import Counter
 from operator import itemgetter
-from webapp.utils import progressCallback, resetProgress
 from webapp.graph import processdata
 from webapp.elastic import search_cache
+from webapp.utils import *
 
 import core.utils.entity_type as ent
 from core.search.parse_academic_search import parse_search_results
@@ -48,9 +48,6 @@ expanded_ids = dict()
 # initialise no stored flower data frames
 pre_flower_data_dict = dict()
 
-# initialise as no autocomplete lists yet (wait until needed)
-autoCompleteLists = {}
-
 # dictionary to store option specific functions
 dataFunctionDict = {
     'get_ids':{
@@ -63,15 +60,6 @@ dataFunctionDict = {
     'journal': getJourPID,
     'institution': getAffPID}}
 
-# option list for radios
-optionlist = [  # option list
-    {"id":"author", "name":"Author"},
-    {"id":"conference", "name":"Conference"},
-    {"id":"journal", "name":"Journal"},
-    {"id":"institution", "name":"Institution"},
-    {"id":"paper", "name": "Paper"}]
-
-
 str_to_ent = {
     "author": ent.Entity_type.AUTH,
     "conference": ent.Entity_type.CONF,
@@ -79,27 +67,12 @@ str_to_ent = {
     "institution": ent.Entity_type.AFFI
     }
 
-
 # flower_types
 flower_leaves = { 'author': [ent.Entity_type.AUTH]
                 , 'conf': [ent.Entity_type.CONF, ent.Entity_type.JOUR]
                 , 'inst': [ent.Entity_type.AFFI]
                 }
 
-def printDict(d):
-    for k,v in d.items():
-        print('k: {}\tv: {}'.format(k,v))
-
-
-def loadList(entity):
-    path = os.path.join(BASE_DIR, "webapp/cache/"+entity+"List.txt")
-    if entity == 'paper':
-        return []
-    elif entity not in autoCompleteLists.keys():
-        with open(path, "r") as f:
-            autoCompleteLists[entity] = [name.strip() for name in f]
-        autoCompleteLists[entity] = list(set(autoCompleteLists[entity]))
-    return autoCompleteLists[entity]
 
 def autocomplete(request):
     entity_type = request.GET.get('option')
@@ -108,13 +81,6 @@ def autocomplete(request):
 
 selfcite = False
 expanded_ids = dict()
-
-def get_navbar_option(keyword = "", option = ""):
-    return {
-        "optionlist": optionlist,
-        "selectedKeyword": keyword,
-        "selectedOption": [opt for opt in optionlist if opt['id'] == option][0] if option != "" else optionlist[0],
-    }
 
 
 @csrf_exempt
@@ -334,12 +300,16 @@ def view_papers(request):
 @csrf_exempt
 def submit(request):
 
-    data = json.loads(request.POST.get('data'))
-     # normalisedName: <string>   # the normalised name from entity with highest paper count of selected entities
-     # entities: {"normalisedName": <string>, "eid": <int>, "entity_type": <author | conference | institution | journal | paper>
-
-    option = data.get("option")   # last searched entity type (confusing for multiple entities)
-    keyword = data.get('keyword') # last searched term (doesn't really work for multiple searches)
+    if request.method == "GET":
+        # from url e.g. /submit/?type=author_id&id=2146610949&name=stephen_m_blackburn
+        # data should be pre-processed and cached
+        data, option, keyword = get_url_query(request.GET)
+    else:
+        data = json.loads(request.POST.get('data'))
+         # normalisedName: <string>   # the normalised name from entity with highest paper count of selected entities
+         # entities: {"normalisedName": <string>, "eid": <int>, "entity_type": <author | conference | institution | journal | paper>
+        option = data.get("option")   # last searched entity type (confusing for multiple entities)
+        keyword = data.get('keyword') # last searched term (doesn't really work for multiple searches)
 
     # Default Dates
     min_year = None
@@ -351,6 +321,7 @@ def submit(request):
     selected_papers = data.get('papers')
     entity_names    = data.get('names')
     flower_name     = data.get('flower_name')
+
 
     print()
     print('Number of Papers Found: ', len(selected_papers))
