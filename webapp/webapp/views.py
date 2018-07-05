@@ -301,7 +301,9 @@ def view_papers(request):
 def submit(request):
 
     if request.method == "GET":
-        # from url e.g. /submit/?type=author_id&id=2146610949&name=stephen_m_blackburn
+        # from url e.g.
+        # /submit/?type=author_id&id=2146610949&name=stephen_m_blackburn
+        # /submit/?type=browse_author_group&name=lexing_xie
         # data should be pre-processed and cached
         data, option, keyword = get_url_query(request.GET)
     else:

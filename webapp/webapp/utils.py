@@ -1,5 +1,5 @@
 import os
-from webapp.elastic import query_cache_paper_info
+from webapp.elastic import query_cache_paper_info, query_author_group
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 
 # option list for radios
@@ -37,8 +37,8 @@ def get_navbar_option(keyword = "", option = ""):
 def get_url_query(query):
     query_type = [
         "author_id",
-        "browse_paper_group",
-        "browse_author_group"
+        "browse_author_group",
+        "browse_paper_group"
     ]
     data = {}
     option = query.get("type")
@@ -49,7 +49,9 @@ def get_url_query(query):
         data["names"] = [aname]
         data["flower_name"] = aname
         return data, "author", aname
-    else:
-        group_name = query.get('name')
-        group_type = query.get('type')
-        return
+    elif option == query_type[1]:
+        gname = query.get('name').replace("_", " ")
+        data["papers"] = query_author_group(gname)
+        data["names"] = [gname]
+        data["flower_name"] = gname
+        return data, "author", gname
