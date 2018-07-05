@@ -22,7 +22,7 @@ def query_academic_search(type, url, query):
     i = 0
     processing = True
     keys = API_KEYS
-    random.shuffle(keys)
+    #random.shuffle(keys)
     header = get_header(i, keys)
 
     # Keep trying API keys until failure or results
