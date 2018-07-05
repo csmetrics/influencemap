@@ -40,7 +40,7 @@ def query_academic_search(type, url, query):
             print("ERROR: problem with the request.")
             print(response.content)
             #exit()
-        if response.status_code != 429 or i >= MAX_API - 1:
+        if response.status_code not in [429, 403] or i >= MAX_API - 1: # 429 Rate limit, 403 Quota Exceeded
             processing = False
         else:
             i += 1
