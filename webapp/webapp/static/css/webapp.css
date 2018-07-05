@@ -121,6 +121,9 @@ img.fit-wrapper {
   white-space: nowrap;
 }
 
+table th {
+  background-color: #001F3F;
+}
 .innertable {
   box-shadow: inset 0px 2px 1px 0px #bbb;
 }
@@ -175,10 +178,10 @@ text {
 }
 
 .custom-text-box h1 {
-text-align: left;
-color: rgba(77, 77, 77, 1);
-padding-top: 25;
-padding-bottom:25;
+  text-align: left;
+  color: rgba(77, 77, 77, 1);
+  padding-top: 25;
+  padding-bottom:25;
 }
 
 

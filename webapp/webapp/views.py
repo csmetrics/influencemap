@@ -103,6 +103,8 @@ def browse(request):
                 e["Keywords"] = ", ".join(e["Keywords"])
             if "AuthorIds" in e:
                 e["AuthorIds"] = json.dumps(e["AuthorIds"])
+            if "NormalizedNames" in e:
+                e["NormalizedName"] = e["NormalizedNames"][0]
 
     data = {
         'list': browse_list,
