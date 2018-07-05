@@ -69,7 +69,11 @@ def gen_flower_data(score_dfs, flower_name, pub_lower=None, pub_upper=None,
         time_cur = datetime.now()
 
         # Filter score dfs first
+        print(pub_lower, pub_upper, cit_lower, cit_upper)
+        print(score_dfs[i])
+        print(score_dfs[i][score_dfs[i]['influence_year'] > cit_lower])
         agg_score = filter_year(score_dfs[i], pub_lower, pub_upper)
+        print(agg_score)
         agg_score = filter_year(agg_score, cit_lower, cit_upper,
                                 index = 'influence_year')
         print(agg_score)
