@@ -177,7 +177,6 @@ def pr_links_mag_multiquery(paper_ids):
 
             data = query_academic_search('get', url, query(count))
 
-            print(count, len(data['entities']))
             # Check if no more data
             if len(data['entities']) > 0:
                 count += len(data['entities'])

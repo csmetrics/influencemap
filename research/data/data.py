@@ -16,6 +16,7 @@ MAS_URL_PREFIX = "https://api.labs.cognitive.microsoft.com"
 
 rename_dict = { 'name'     : 'AuthorName',
                 'Q'        : 'QScore',
+                'c_10'     : 'CC10',
                 'paper'    : 'NumberPapers',
                 'citations': 'CitationCountVector' }
 
@@ -41,10 +42,7 @@ def get_author_ids(names):
 
     results = dict()
 
-    test = 0
-
     for query in queries:
-        test += 1
 
         # Check offset
         finished = False

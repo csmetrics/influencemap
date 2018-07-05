@@ -13,7 +13,7 @@ def q_score_paper_info_list(paper_info_list):
         are included for scoring (ie. time ranges for the citations).
     '''
     # Counts
-    cites_per_paper = list(map(lambda x: len(x['References']), paper_info))
+    cites_per_paper = list(map(lambda x: len(x['Citations']), paper_info_list))
 
     return np.average(cites_per_paper)
 

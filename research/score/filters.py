@@ -5,10 +5,13 @@ date:   30.06.18
 author: Alexander Soen
 '''
 
+import copy
+
 def filter_pub_year_diff(paper_info_list, diff=10):
     ''' Filter the citations for paper information depending on the year of
         citation publication.
     '''
+    updated_list = list()
     for paper_info in paper_info_list:
         # If no year data skip
         paper_year = paper_info['Year']
@@ -26,10 +29,14 @@ def filter_pub_year_diff(paper_info_list, diff=10):
             if paper_year - citation['Year'] <= diff:
                 update_citation.append(citation)
 
-        # Update paper_info
-        paper_info['Citations'] = update_citation
+        new_paper_info = copy.deepcopy(paper_info)
 
-    return paper_info_list
+        # Update paper_info
+        new_paper_info['Citations'] = update_citation
+
+        updated_list.append(new_paper_info)
+
+    return updated_list
 
 
 def filter_year_range(paper_info_list, bot_year, top_year):

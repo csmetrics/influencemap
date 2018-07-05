@@ -36,6 +36,7 @@ def query_academic_search(type, url, query):
             print(keys[i])
         if response.status_code != 200:
             print("return statue: " + str(response.status_code))
+            print(header)
             print("ERROR: problem with the request.")
             print(response.content)
             #exit()
