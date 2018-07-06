@@ -8,58 +8,19 @@
   {% include 'navbar.html' with navbar=navbarOption %}
 </div>
 <div id="statpane" class="hoc clear collapse">
-  <div class="row">
-    <div class="col-md-7">
-      <div class="wrapper">
-        <h3 class="heading">Statistics from {{ stats.min_year }} to {{ stats.max_year }} </h3>
-        <table>
-          <tbody>
-            <tr>
-              <td>Number of Papers</td>
-              <td id="num_papers" >{{ stats.num_papers  }}</td>
-            </tr>
-            <tr>
-              <td>Average papers per year</td>
-              <td id="avg_papers">{{ stats.avg_papers  }}</td>
-            </tr>
-            <tr>
-              <td>Number citations</td>
-              <td id="num_cites">{{ stats.num_cites  }}</td>
-            </tr>
-            <tr>
-              <td>Average citations per paper</td>
-              <td id="avg_cites">{{ stats.avg_cites  }}</td>
-            </tr>
-            <tr>
-              <td>Number of references</td>
-              <td id="num_refs">{{ stats.num_refs  }}</td>
-            </tr>
-            <tr>
-              <td>Average references per paper</td>
-              <td id="avg_refs">{{ stats.avg_refs  }}</td>
-            </tr>
-          </tbody>
-        </table>
-      </div>
-    </div>
-    <div class="col-md-5" style="border-left:1px #ddd solid">
-      <div class="wrapper search-option">
-        <label>
-          <input class="self-cite" type="checkbox" name="self-cite" id="self-cite" />
-          include self citations
-        </label>
-      </div>
-      {% include 'year_slider.html' with yearSlider=yearSlider %}
-    </div>
-  </div>
+  {% include 'statchart.html' with stats=stats yearSlider=yearSlider %}
 </div>
 <div class="hoc clear">
   <div id="image-container" class="nav-tabs">
-    <ul class="nav nav-tabs">
+    <ul class="nav nav-tabs" style="float:right">
       <li><button class="btn tab-btn inverse active" href="#tab-author" data-toggle="tab"><i class="fa fa-user"></i>&nbsp;Author</button></li>
       <li><button class="btn tab-btn inverse" href="#tab-conference" data-toggle="tab"><i class="fa fa-book"></i>&nbsp;Conference</button></li>
       <li><button class="btn tab-btn inverse" href="#tab-institution" data-toggle="tab"><i class="fa fa-university"></i>&nbsp;Institution</button></li>
     </ul>
+    <!-- <div align="center" >
+      legend-testtest (fix later)
+      <div id="flower-legend"></div>
+    </div> -->
     <!-- Tab content -->
     <div class="tab-content">
       <div class="tab-pane active" id="tab-author">
@@ -92,7 +53,7 @@
 </body>
 </html>
 <script src="{% static 'js/d3.v4.min.js' %}"></script>
-<script src="{% static 'js/d3-selection-multi.v1.js' %}"></script>
+<script src="{% static 'js/d3-selection-multi.v1.min.js' %}"></script>
 <script src="{% static 'js/d3-scale-chromatic.v1.min.js' %}"></script>
 <script src="{% static 'js/flowerGraph.js' %}"></script>
 <script>
@@ -104,50 +65,9 @@ inst_data = {{ inst|safe }}
 var selfCiteCheckbox = document.getElementById('self-cite');
 
 var width = document.getElementById('image-container').offsetWidth;
+drawLegend();
 drawFlower("#graph1", author_data, 0, width);
 drawFlower("#graph2", conf_data, 1, width);
 drawFlower("#graph3", inst_data, 2, width);
-
-
-function updateStats(stats){
-  Object.entries(stats).forEach(function([key, value]){
-    if (document.getElementById(key)){
-      document.getElementById(key).textContent = value
-    }
-  });
-}
-
-resubmitButton.addEventListener('click', function(){
-  $.ajax({
-    type: "POST",
-    url: "/resubmit/",
-    data: {
-      from_year: nodes[0].textContent,
-      to_year: nodes[1].textContent,
-      option: option,
-      selfcite: selfCiteCheckbox.checked,
-      keyword: keyword
-    },
-    success: function(result){
-      $("#graph1").empty();
-      $("#graph2").empty();
-      $("#graph3").empty();
-
-
-
-      author_data = result.author;
-      conf_data = result.conf;
-      inst_data = result.inst;
-
-
-      drawFlower("#graph1", author_data, 0, width);
-      drawFlower("#graph2", conf_data, 1, width);
-      drawFlower("#graph3", inst_data, 2, width);
-
-      updateStats(result.stats);
-    }
-  });
-});
-
 
 </script>

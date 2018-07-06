@@ -38,7 +38,7 @@ compound_attr = {
              }
 
 list_attr_names = {'AA': 'Authors',
-                   'F' : 'FieldOfStudies'}
+                   'F' : 'FieldOfStudy'}
 
 # Create search
 compound_snames = list(basic_attr.keys())
@@ -54,10 +54,10 @@ def base_paper_mag_multiquery(paper_ids):
     ''' Returns all basic fields of a paper with API.
     '''
     url = os.path.join(MAS_URL_PREFIX, "academic/v1.0/evaluate")
-    queries = ({
+    queries = (lambda x: {
         'expr': expr,
-        'count': 1000,
-        'offset': 0,
+        'count': 10000,
+        'offset': x,
         'attributes': compound_snames
         } for expr in or_query_builder_list('Id={}', paper_ids))
 
@@ -65,48 +65,60 @@ def base_paper_mag_multiquery(paper_ids):
     results = dict()
 
     for query in queries:
-        data = query_academic_search('get', url, query)
-        for res in data['entities']:
-            res_row = dict()
+        # Checking offsets
+        finished = False
+        count    = 0
 
-            # Get basic attributes
-            for a, n in basic_attr.items():
-                if a in res:
-                    res_row[n] = res[a]
+        while not finished:
+            data = query_academic_search('get', url, query(count))
 
-            # Get compound attributes
-            for t, ca in compound_attr.items():
-                # Check if result exists for type
-                if t not in res:
-                    continue
+            # Check if no more data
+            if len(data['entities']) > 0:
+                count += len(data['entities'])
+            else:
+                finished = True
 
-                # If field type, need to process list
-                if t in list_attr_names.keys():
-                    attr_res = list()
+            for res in data['entities']:
+                res_row = dict()
 
-                    # Go through each value in list
-                    for a_dict in res[t]:
-                        suba_dict = dict()
-                        # Get values for single entry
+                # Get basic attributes
+                for a, n in basic_attr.items():
+                    if a in res:
+                        res_row[n] = res[a]
+
+                # Get compound attributes
+                for t, ca in compound_attr.items():
+                    # Check if result exists for type
+                    if t not in res:
+                        continue
+
+                    # If field type, need to process list
+                    if t in list_attr_names.keys():
+                        attr_res = list()
+
+                        # Go through each value in list
+                        for a_dict in res[t]:
+                            suba_dict = dict()
+                            # Get values for single entry
+                            for a, n in ca.items():
+                                if a in a_dict:
+                                    suba_dict[n] = a_dict[a]
+
+                            attr_res.append(suba_dict)
+
+                        # Add field
+                        res_row[list_attr_names[t]] = attr_res
+
+                    # Other singular types
+                    else:
                         for a, n in ca.items():
-                            if a in a_dict:
-                                suba_dict[n] = a_dict[a]
+                            try:
+                                res_row[n] = res[t][a]
+                            except KeyError:
+                                pass
 
-                        attr_res.append(suba_dict)
-
-                    # Add field
-                    res_row[list_attr_names[t]] = attr_res
-
-                # Other singular types
-                else:
-                    for a, n in ca.items():
-                        try:
-                            res_row[n] = res[t][a]
-                        except KeyError:
-                            pass
-
-            # Add paper
-            results[res['Id']] = res_row
+                # Add paper
+                results[res['Id']] = res_row
 
     # Return results
     return results
@@ -115,42 +127,68 @@ def base_paper_mag_multiquery(paper_ids):
 def pr_links_mag_multiquery(paper_ids):
     ''' Get the citation links for a paper in paper information format.
     '''
-    
-    # Query
-    ref_query = {
-        'path': '/paper/ReferenceIDs/cites',
-        'paper': {
-            'type': 'Paper',
-            'id': paper_ids,
-            }
-        }
-
-    cite_query = {
-        'path': '/paper/CitationIDs/cites',
-        'paper': {
-            'type': 'Paper',
-            'id': paper_ids,
-            }
-        }
-
     # Query results
     results = dict()
 
     # Initalise results
     for paper_id in paper_ids:
         results[paper_id] = {'References': list(), 'Citations': list()}
-        
 
-    # Call to API
-    ref_data = query_academic_search('post', JSON_URL, ref_query)
-    cite_data = query_academic_search('post', JSON_URL, cite_query)
+    # Calculate references
+    url = os.path.join(MAS_URL_PREFIX, "academic/v1.0/evaluate")
+    queries = (lambda x: {
+        'expr': expr,
+        'count': 10000,
+        'offset': x,
+        'attributes': 'RId'
+        } for expr in or_query_builder_list('Id={}', paper_ids))
 
-    # Add references and citations to results
-    for ego, other in ref_data['Results']:
-        results[ego['CellID']]['References'].append(other['CellID'])
+    for query in queries:
+        # Checking offsets
+        finished = False
+        count    = 0
 
-    for ego, other in cite_data['Results']:
-        results[ego['CellID']]['Citations'].append(other['CellID'])
+        while not finished:
+            data = query_academic_search('get', url, query(count))
+
+            # Check if no more data
+            if len(data['entities']) > 0:
+                count += len(data['entities'])
+            else:
+                finished = True
+
+            # Add references
+            for res in data['entities']:
+                if 'RId' in res:
+                    results[res['Id']]['References'] += res['RId']
+
+    for paper_id in paper_ids:
+        # Checking offsets
+        finished = False
+        count    = 0
+
+        while not finished:
+            query = lambda x: {
+            'expr': 'RId={}'.format(paper_id),
+            'count': 10000,
+            'offset': x,
+            'attributes': 'Id,RId'
+            }
+
+            data = query_academic_search('get', url, query(count))
+
+            # Check if no more data
+            if len(data['entities']) > 0:
+                count += len(data['entities'])
+            else:
+                finished = True
+
+            # Add citations
+            for res in data['entities']:
+                if 'RId' in res:
+                    for rid in res['RId']:
+                        if rid in paper_ids:
+                            results[rid]['Citations'].append(res['Id'])
 
     return results
 

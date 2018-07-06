@@ -46,8 +46,8 @@
                            <th></th>
                        </thead>
                        <tbody>
-                            {% for entity in category.entities %}
-                            <tr AuthorIds='{{entity.AuthorIds | safe }}' normalizedname="{{ entity.NormalizedName | safe }}" class="testtest">
+                          {% for entity in category.entities %}
+                            <tr AuthorIds='{{entity.AuthorIds | safe }}' normalizedname="{{ entity.NormalizedName | safe }}">
                                 <td>
                                     {{entity.DisplayName}}
                                 </td>
@@ -64,11 +64,10 @@
                                     {{entity.Keywords}}
                                 </td>
                                 <td>
-                                    <a href="{{entity.Url}}" target="_blank">more info</a>
+                                    <a href="/submit/?type=browse_author_group&name={{ entity.NormalizedName | safe }}">more info</a>
                                 </td>
-
                             </tr>
-                            {% endfor %}
+                          {% endfor %}
                         </tbody>
                     </table>
                 </div>
@@ -97,14 +96,14 @@
 <script src="{% static 'js/browseTableConfig.js' %}"></script>
 <script type="text/javascript">
 
-$('tr.testtest').on('click', function(){
-  var AuthorIds = (JSON.parse($(this).attr('authorids')));
-  var data = {"AuthorIds": AuthorIds};
-  data['option'] = "author";
-  data['keyword'] = "";
-  data['NormalizedName'] = $(this).attr('normalizedname');
-  postData('/submit_from_browse/', data, "{% csrf_token %}")  
-});
+// $('tr.entity').on('click', function(){
+//   var AuthorIds = (JSON.parse($(this).attr('authorids')));
+//   var data = {"AuthorIds": AuthorIds};
+//   data['option'] = "author";
+//   data['keyword'] = "";
+//   data['NormalizedName'] = $(this).attr('normalizedname');
+//   postData('/submit_from_browse/', data, "{% csrf_token %}")
+// });
 
 
     /*  ---    Modal    ---   */

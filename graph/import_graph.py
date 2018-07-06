@@ -37,18 +37,21 @@ def import_Affiliations(filepath):
     init_es()
     reader = csv.reader(open(filepath), delimiter="\t", quoting=csv.QUOTE_NONE)
     for r in reader:
-        doc = Affiliations()
-        doc.meta.id = doc.AffiliationId = int(r[0])
-        doc.Rank = int(r[1])
-        doc.NormalizedName = r[2]
-        doc.DisplayName = r[3]
-        doc.GridId = r[4]
-        doc.OfficialPage = r[5]
-        doc.WikiPage = r[6]
-        doc.PaperCount = int(r[7]) if r[7] != "" else None
-        doc.CitationCount = int(r[8]) if r[8] != "" else None
-        doc.CreatedDate = datetime.strptime(r[9], "%Y-%m-%d")
-        doc.save()
+        try:
+            doc = Affiliations()
+            doc.meta.id = doc.AffiliationId = int(r[0])
+            doc.Rank = int(r[1])
+            doc.NormalizedName = r[2]
+            doc.DisplayName = r[3]
+            doc.GridId = r[4]
+            doc.OfficialPage = r[5]
+            doc.WikiPage = r[6]
+            doc.PaperCount = int(r[7]) if r[7] != "" else None
+            doc.CitationCount = int(r[8]) if r[8] != "" else None
+            doc.CreatedDate = datetime.strptime(r[9], "%Y-%m-%d")
+            doc.save(op_type="create")
+        except Exception as e:
+            pass
     print("Finished", filepath)
 
 
@@ -213,18 +216,21 @@ def import_Journals(filepath):
     init_es()
     reader = csv.reader(open(filepath), delimiter="\t", quoting=csv.QUOTE_NONE)
     for r in reader:
-        doc = Journals()
-        doc.meta.id = doc.JournalId = int(r[0])
-        doc.Rank = int(r[1])
-        doc.NormalizedName = r[2]
-        doc.DisplayName = r[3]
-        doc.Issn = r[4]
-        doc.Publisher = r[5]
-        doc.Webpage = r[6]
-        doc.PaperCount = int(r[7]) if r[7] != "" else None
-        doc.CitationCount = int(r[8]) if r[8] != "" else None
-        doc.CreatedDate = datetime.strptime(r[9], "%Y-%m-%d")
-        doc.save()
+        try:
+            doc = Journals()
+            doc.meta.id = doc.JournalId = int(r[0])
+            doc.Rank = int(r[1])
+            doc.NormalizedName = r[2]
+            doc.DisplayName = r[3]
+            doc.Issn = r[4]
+            doc.Publisher = r[5]
+            doc.Webpage = r[6]
+            doc.PaperCount = int(r[7]) if r[7] != "" else None
+            doc.CitationCount = int(r[8]) if r[8] != "" else None
+            doc.CreatedDate = datetime.strptime(r[9], "%Y-%m-%d")
+            doc.save(op_type="create")
+        except Exception as e:
+            pass
     print("Finished", filepath)
 
 
@@ -291,6 +297,6 @@ def main(argv):
         p.map(options[data_file], files)
 
 if __name__ == "__main__":
-    # main(sys.argv)
-    filename = os.path.join(conf.get("data.filedir"), conf.get("data.version"), "sorted_PaperFieldsOfStudy.txt")
-    update_Papers_FieldsOfStudy(filename)
+    main(sys.argv)
+    #filename = os.path.join(conf.get("data.filedir"), conf.get("data.version"), "sorted_PaperFieldsOfStudy.txt")
+    #update_Papers_FieldsOfStudy(filename)

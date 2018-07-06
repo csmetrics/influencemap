@@ -152,17 +152,18 @@ def or_query_builder(base_query, inputs):
         out = ""
     return out
 
-def or_query_builder_list(base_query, inputs):
+def or_query_builder_list(base_query, ids):
     ''' or_query_builder, but returns a list of expressions to prevent url
         being too long.
     '''
     query_list = list()
+    inputs = list() + ids
     while inputs:
         if len(inputs) > 1:
             out = "Or({})"
             sub_constraints = list()
             # Incrementally add constraints
-            while len(', '.join(sub_constraints)) + len(out) < 1500 and inputs:
+            while len(', '.join(sub_constraints)) + len(out) < 1000 and inputs:
                 sub_constraints.append(base_query.format(inputs.pop(0)))
                 
             out = out.format(", ".join(sub_constraints))

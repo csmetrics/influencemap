@@ -50,6 +50,8 @@ def paper_info_mag_check_multiquery(paper_ids):
         else:
             to_process.append(paper_id)
 
+    print("To call API:", len(to_process))
+
     # Check if items do not exist in cache
     if to_process:
         # Get from API and add to cache
@@ -76,7 +78,6 @@ if __name__ == '__main__':
 
     paper_info_list = list()
     for paper in a_papers:
-        print(paper)
         paper_info = paper_info_check_query(paper)
         if paper_info:
             paper_info_list.append(paper_info)

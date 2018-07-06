@@ -1,0 +1,236 @@
+{% load staticfiles%}
+<div class="row">
+  <div class="col-md-6" style="min-width:480px">
+    <div class="wrapper">
+      <b>Select YearRange</b>
+      <div style="float:right;padding:0 3">
+        <i class="fa fa-circle" style="color:#F47E60"></i> Publication
+        <i class="fa fa-circle" style="color:#ABBD81"></i> Citation
+      </div>
+      <div id="div_charts" style="width:450px;height:210px;">
+        <div id="pub_chart" style="height:90px;"></div>
+        <div id="publication-range" class="yearslider"></div>
+        <div id="citation-range" class="yearslider"></div>
+        <div id="cite_chart" style="height:110px;"></div>
+      </div>
+    </div>
+  </div>
+  <div class="col-md-6" style="padding:0 15 0 0; border-left:1px #ddd solid">
+    <div>
+      <div class="wrapper">
+        <b> Statictics: Total</b> <span class="stat">{{ yearSlider.pubrange.2 }}</span> years of publication
+        <span class="stat">{{ yearSlider.pubrange.0 }}~{{ yearSlider.pubrange.1 }}</span><br>
+        <div style="padding-left:10px">
+          <span id="num_papers" class="stat">{{ stats.num_papers }}</span> papers total,
+          average <span id="avg_papers" class="stat">{{ stats.avg_papers }}</span> per year<br>
+          <span id="num_refs" class="stat">{{ stats.num_refs }}</span> references total,
+          average <span id="avg_refs" class="stat">{{ stats.avg_refs }}</span> per paper<br>
+          <span id="num_cites" class="stat">{{ stats.num_cites }}</span> citations total,
+          average <span id="avg_cites" class="stat">{{ stats.avg_cites }}</span> per paper<br>
+        </div>
+      </div>
+    </div>
+    <div style="border-top:1px #ddd solid;">
+      <div class="wrapper" >
+        <b>Selected Range (for flower)</b>
+        <div style="padding-left:10px">
+          <b>Publications:
+            <span class="label-as-badge" id="pub-lower-value"></span>~
+            <span class="label-as-badge" id="pub-upper-value"></span> </b>
+          <b>Citations:
+            <span class="label-as-badge" id="cit-lower-value"></span>~
+            <span class="label-as-badge" id="cit-upper-value"></span> </b><br>
+          <span id="selected_num_papers" class="stat">???</span> papers,
+          <span id="selected_num_cites" class="stat">???</span> citations
+        </div>
+        <div style="padding-top:10px">
+          <b>Include self citations</b>
+          <input class="self-cite" type="checkbox" style="float:left; margin:5 10 0 0" name="self-cite" id="self-cite" />
+        </div>
+        <div align=center style="padding-top:5px;">
+          <button class="btn btn-success" style="width:200px; height:30px; padding:0" id="resubmitButton">Update Flower</button>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script src="{% static 'js/d3.v4.min.js' %}"></script>
+<script src="{% static 'js/statchart.js' %}"></script>
+<script type="text/javascript">
+var yearcounter = {{ yearSlider.pubChart | safe }};
+var citationcounter = {{ yearSlider.citeChart | safe }};
+var processedcites = [];
+var pub_range = {{ yearSlider.pubrange | safe }};
+var cite_range = {{ yearSlider.citerange | safe }};
+
+var pubchart = new PubChart("#pub_chart");
+var citechart = new CiteChart("#cite_chart");
+var h = ($("#div_charts").height()-20)/2;
+var chartoption = {
+  min: Math.min(pub_range[0], cite_range[0]),
+  max: Math.max(pub_range[1], cite_range[1]),
+  xticks: 3, yticks: 3,
+  width:440, height:h,
+  top: 40, right: 0, bottom: 40, left: 60};
+
+var pubSlider = document.getElementById('publication-range');
+var citSlider = document.getElementById('citation-range');
+noUiSlider.create(pubSlider, {
+  connect: true,
+  behaviour: 'tap',
+  start: [ pub_range[0], pub_range[1] ],
+  step: 1,
+  animate: false,
+  range: {
+    'min': [ chartoption.min ],
+    'max': [ chartoption.max ]
+  }
+});
+noUiSlider.create(citSlider, {
+  connect: true,
+  behaviour: 'tap',
+  start: [ cite_range[0], cite_range[1] ],
+  step: 1,
+  animate: false,
+  range: {
+    'min': [ chartoption.min ],
+    'max': [ chartoption.max ]
+  }
+});
+
+var handles = [
+  pubSlider.getElementsByClassName('noUi-handle-lower')[0],
+  pubSlider.getElementsByClassName('noUi-handle-upper')[0],
+  citSlider.getElementsByClassName('noUi-handle-lower')[0],
+  citSlider.getElementsByClassName('noUi-handle-upper')[0]
+];
+var labels = [
+  document.getElementById('pub-lower-value'),
+  document.getElementById('pub-upper-value'),
+  document.getElementById('cit-lower-value'),
+  document.getElementById('cit-upper-value'),
+];
+
+
+pubSlider.noUiSlider.on('update', function ( values, handle, unencoded, isTap, positions ) {
+  handles[handle].innerText = parseInt(values[handle]);
+  labels[handle].innerText = parseInt(values[handle]);
+  updateNumbers();
+  updateCharts(citationcounter);
+});
+
+citSlider.noUiSlider.on('update', function ( values, handle, unencoded, isTap, positions ) {
+  handles[handle+2].innerText = parseInt(values[handle]);
+  labels[handle+2].innerText = parseInt(values[handle]);
+  updateNumbers();
+  citechart.updateRange(parseInt(values[0]), parseInt(values[1]));
+});
+
+function updateNumbers() {
+  p_min = parseInt(handles[0].innerText)
+  p_max = parseInt(handles[1].innerText)
+  c_min = parseInt(handles[2].innerText)
+  c_max = parseInt(handles[3].innerText)
+  updatePubNumbers(yearcounter, p_min, p_max);
+  updateCiteNumbers(citationcounter, p_min, p_max, c_min, c_max);
+}
+
+function updatePubNumbers(data, min, max){
+  // calculate total paper number in selected year range
+  var selected_papers = 0
+  for (var i = 0; i < data.length; i++){
+    if (min <= data[i]["year"] && data[i]["year"] <= max) {
+      selected_papers += data[i]["value"]
+    }
+  }
+  document.getElementById("selected_num_papers").innerText = selected_papers;
+}
+
+function updateCiteNumbers(data, p_min, p_max, c_min, c_max){
+  // calculate total citation number in selected year range
+  var selected_papers = 0
+  for (var i = 0; i < data.length; i++){
+    if (p_min <= data[i]["year"] && data[i]["year"] <= p_max) {
+      for (var j = 0; j < data[i]["value"].length; j++){
+        if (c_min <= data[i]["value"][j]["year"] && data[i]["value"][j]["year"] <= c_max) {
+          selected_papers += data[i]["value"][j]["value"];
+        }
+      }
+    }
+  }
+  document.getElementById("selected_num_cites").innerText = selected_papers;
+}
+
+function updateCharts(data){
+  var pub_min = parseInt(handles[0].innerText)
+  var pub_max = parseInt(handles[1].innerText)
+  var cit_min = parseInt(handles[2].innerText)
+  var cit_max = parseInt(handles[3].innerText)
+
+  if (!pubchart.isInitialized()) {
+    pubchart.initChart(yearcounter, chartoption);
+  }
+  pubchart.updateRange(pub_min, pub_max);
+  var sum = {};
+  for (var i = 0; i < data.length; i++){
+    sum[data[i]["year"]] = 0;
+  }
+  for (var i = 0; i < data.length; i++){
+    if (pub_min <= data[i]["year"] && data[i]["year"] <= pub_max) {
+      for (var j = 0; j < data[i]["value"].length; j++){
+        sum[data[i]["value"][j]["year"]] += data[i]["value"][j]["value"];
+      }
+    }
+  }
+  var newdata = []
+  for (var k in sum) {
+    newdata.push({"year": +k, "value": sum[k]});
+  }
+  // console.log("newdata", newdata);
+  citechart.drawChart(newdata, chartoption);
+  citechart.updateRange(cit_min, cit_max);
+}
+
+function updateStats(stats){
+  Object.entries(stats).forEach(function([key, value]){
+    if (document.getElementById(key)){
+      document.getElementById(key).textContent = value
+    }
+  });
+}
+
+resubmitButton.addEventListener('click', function(){
+  $.ajax({
+    type: "POST",
+    url: "/resubmit/",
+    data: {
+      from_pub_year: document.getElementById('pub-lower-value').textContent,
+      to_pub_year: document.getElementById('pub-upper-value').textContent,
+      from_cit_year: document.getElementById('cit-lower-value').textContent,
+      to_cit_year: document.getElementById('cit-upper-value').textContent,
+      option: option,
+      selfcite: selfCiteCheckbox.checked,
+      keyword: keyword
+    },
+    success: function(result){
+      $("#graph1").empty();
+      $("#graph2").empty();
+      $("#graph3").empty();
+
+      author_data = result.author;
+      conf_data = result.conf;
+      inst_data = result.inst;
+
+      drawFlower("#graph1", author_data, 0, width);
+      drawFlower("#graph2", conf_data, 1, width);
+      drawFlower("#graph3", inst_data, 2, width);
+
+      // do not update stat for resubmit
+      // updateStats(result.stats);
+    }
+  });
+});
+
+
+</script>

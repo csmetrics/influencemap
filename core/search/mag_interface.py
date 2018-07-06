@@ -22,7 +22,7 @@ def query_academic_search(type, url, query):
     i = 0
     processing = True
     keys = API_KEYS
-    random.shuffle(keys)
+    #random.shuffle(keys)
     header = get_header(i, keys)
 
     # Keep trying API keys until failure or results
@@ -36,10 +36,11 @@ def query_academic_search(type, url, query):
             print(keys[i])
         if response.status_code != 200:
             print("return statue: " + str(response.status_code))
+            print(header)
             print("ERROR: problem with the request.")
             print(response.content)
             #exit()
-        if response.status_code != 429 or i >= MAX_API - 1:
+        if response.status_code not in [429, 403] or i >= MAX_API - 1: # 429 Rate limit, 403 Quota Exceeded
             processing = False
         else:
             i += 1

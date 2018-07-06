@@ -3,9 +3,11 @@ from django.shortcuts import render
 from django.http import JsonResponse
 from django.views.decorators.csrf import csrf_exempt
 from datetime import datetime
-from webapp.utils import progressCallback, resetProgress
+from collections import Counter
+from operator import itemgetter
 from webapp.graph import processdata
 from webapp.elastic import search_cache
+from webapp.utils import *
 
 import core.utils.entity_type as ent
 from core.search.parse_academic_search import parse_search_results
@@ -28,7 +30,9 @@ from core.flower.high_level_get_flower import gen_entity_score
 from core.search.query_paper   import paper_query
 from core.search.query_info    import paper_info_check_query, paper_info_mag_check_multiquery
 from core.score.agg_paper_info import score_paper_info_list
-from core.utils.get_stats import get_stats
+from core.score.agg_utils      import get_coauthor_mapping
+from core.score.agg_utils      import flag_coauthor
+from core.utils.get_stats      import get_stats
 
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 
@@ -44,37 +48,24 @@ expanded_ids = dict()
 # initialise no stored flower data frames
 pre_flower_data_dict = dict()
 
-# initialise as no autocomplete lists yet (wait until needed)
-autoCompleteLists = {}
-
 # dictionary to store option specific functions
 dataFunctionDict = {
     'get_ids':{
-	'author': getAuthor,
-	'conference': getConf,
-	'institution': getAff,
-	'journal': getJournal},
+    'author': getAuthor,
+    'conference': getConf,
+    'institution': getAff,
+    'journal': getJournal},
     'get_pids':{
-	'conference': getConfPID,
-	'journal': getJourPID,
-	'institution': getAffPID}}
-
-# option list for radios
-optionlist = [  # option list
-	{"id":"author", "name":"Author"},
-	{"id":"conference", "name":"Conference"},
-	{"id":"journal", "name":"Journal"},
-	{"id":"institution", "name":"Institution"},
-    {"id":"paper", "name": "Paper"}]
-
+    'conference': getConfPID,
+    'journal': getJourPID,
+    'institution': getAffPID}}
 
 str_to_ent = {
-	"author": ent.Entity_type.AUTH,
-	"conference": ent.Entity_type.CONF,
-	"journal": ent.Entity_type.JOUR,
-	"institution": ent.Entity_type.AFFI
+    "author": ent.Entity_type.AUTH,
+    "conference": ent.Entity_type.CONF,
+    "journal": ent.Entity_type.JOUR,
+    "institution": ent.Entity_type.AFFI
     }
-
 
 # flower_types
 flower_leaves = { 'author': [ent.Entity_type.AUTH]
@@ -82,20 +73,6 @@ flower_leaves = { 'author': [ent.Entity_type.AUTH]
                 , 'inst': [ent.Entity_type.AFFI]
                 }
 
-def printDict(d):
-    for k,v in d.items():
-        print('k: {}\tv: {}'.format(k,v))
-
-
-def loadList(entity):
-    path = os.path.join(BASE_DIR, "webapp/cache/"+entity+"List.txt")
-    if entity == 'paper':
-        return []
-    elif entity not in autoCompleteLists.keys():
-        with open(path, "r") as f:
-            autoCompleteLists[entity] = [name.strip() for name in f]
-        autoCompleteLists[entity] = list(set(autoCompleteLists[entity]))
-    return autoCompleteLists[entity]
 
 def autocomplete(request):
     entity_type = request.GET.get('option')
@@ -104,13 +81,6 @@ def autocomplete(request):
 
 selfcite = False
 expanded_ids = dict()
-
-def get_navbar_option(keyword = "", option = ""):
-    return {
-        "optionlist": optionlist,
-        "selectedKeyword": keyword,
-        "selectedOption": [opt for opt in optionlist if opt['id'] == option][0] if option != "" else optionlist[0],
-    }
 
 
 @csrf_exempt
@@ -133,6 +103,8 @@ def browse(request):
                 e["Keywords"] = ", ".join(e["Keywords"])
             if "AuthorIds" in e:
                 e["AuthorIds"] = json.dumps(e["AuthorIds"])
+            if "NormalizedNames" in e:
+                e["NormalizedName"] = e["NormalizedNames"][0]
 
     data = {
         'list': browse_list,
@@ -330,29 +302,30 @@ def view_papers(request):
 @csrf_exempt
 def submit(request):
 
-    data = json.loads(request.POST.get('data'))
-     # normalisedName: <string>   # the normalised name from entity with highest paper count of selected entities
-     # entities: {"normalisedName": <string>, "eid": <int>, "entity_type": <author | conference | institution | journal | paper>
+    if request.method == "GET":
+        # from url e.g.
+        # /submit/?type=author_id&id=2146610949&name=stephen_m_blackburn
+        # /submit/?type=browse_author_group&name=lexing_xie
+        # data should be pre-processed and cached
+        data, option, keyword = get_url_query(request.GET)
+    else:
+        data = json.loads(request.POST.get('data'))
+         # normalisedName: <string>   # the normalised name from entity with highest paper count of selected entities
+         # entities: {"normalisedName": <string>, "eid": <int>, "entity_type": <author | conference | institution | journal | paper>
+        option = data.get("option")   # last searched entity type (confusing for multiple entities)
+        keyword = data.get('keyword') # last searched term (doesn't really work for multiple searches)
 
-    option = data.get("option")   # last searched entity type (confusing for multiple entities)
-    keyword = data.get('keyword') # last searched term (doesn't really work for multiple searches)
-    normalisedName = data.get('normalisedName') # normalised name of entity with most papers
-    entity_list = data.get("entities") # [{'normalisedName','eid','entity_type', 'papers'[]}] where papers :=
-                                       # [{'title','affiliationId'[],'affiliationName'[],'authorId'[],'authorName'[],
-                                       #  'citations','conferenceSeriesId','conferenceSeriesName','data','eid',
-                                       #  'estimatedCitations', 'fieldOfStudy'[],'journalId','journalName',
-                                       #  'languageCode','year'}]
-
-    # Default Dates need fixing
+    # Default Dates
     min_year = None
     max_year = None
 
     time_cur = datetime.now()
 
     # Get the selected paper
-    list_of_list_of_papers = sum([entity['papers'] for entity in entity_list],[])
-    selected_papers = [paper['eid'] for paper in list_of_list_of_papers]
-    entity_names    = [entity['normalisedName'] for entity in entity_list]
+    selected_papers = data.get('papers')
+    entity_names    = data.get('names')
+    flower_name     = data.get('flower_name')
+
 
     print()
     print('Number of Papers Found: ', len(selected_papers))
@@ -364,6 +337,9 @@ def submit(request):
     # Turn selected paper into information dictionary list
     paper_information = paper_info_mag_check_multiquery(selected_papers) # API
 
+    # Get coauthors
+    coauthors = get_coauthor_mapping(paper_information)
+
     print()
     print('Number of Paper Information Found: ', len(paper_information))
     print('Time taken: ', datetime.now() - time_cur)
@@ -371,19 +347,40 @@ def submit(request):
 
     # Get min and maximum year
     years = [info['Year'] for info in paper_information if 'Year' in info]
-    min_year = min(years)
-    max_year = max(years) 
+    min_pub_year, max_pub_year = min(years), max(years)
+
+    # caculate pub/cite chart data
+    cont_pub_years = range(min_pub_year, max_pub_year+1)
+    cite_years = set()
+    for info in paper_information:
+        if 'Citations' in info:
+            cite_years.update({entity["Year"] for entity in info['Citations'] if "Year" in entity})
+
+    # Add publication years as well
+    cite_years.add(min_pub_year)
+    cite_years.add(max_pub_year)
+
+    min_cite_year, max_cite_year = min(cite_years), max(cite_years)
+    cont_cite_years = range(min(cite_years), max(cite_years)+1)
+    pub_chart = [{"year":k,"value":Counter(years)[k] if k in Counter(years) else 0} for k in cont_cite_years]
+    citecounter = {k:[] for k in cont_cite_years}
+    for info in paper_information:
+        if 'Citations' in info:
+            for entity in info['Citations']:
+                citecounter[info['Year']].append(entity["Year"])
+
+    cite_chart = [{"year":k,"value":[{"year":y,"value":Counter(v)[y]} for y in cont_cite_years]} for k,v in citecounter.items()]
 
     # Normalised entity names
     entity_names = list(set(entity_names))
     normal_names = list(map(lambda x: x.lower(), entity_names))
 
     # Generate score for each type of flower
-    entity_scores = gen_entity_score(paper_information, entity_names)
+    entity_scores = gen_entity_score(paper_information, entity_names, self_cite=False)
 
     # Make flower
-    flower_name = '-'.join(entity_names)
-    data1, data2, data3 = gen_flower_data(entity_scores, flower_name)
+    data1, data2, data3 = gen_flower_data(entity_scores, flower_name,
+                                          coauthors = coauthors)
 
     data = {
         "author": data1,
@@ -391,18 +388,24 @@ def submit(request):
         "inst": data3,
         "yearSlider": {
             "title": "Publications range",
-            "range": [min_year, max_year] # placeholder value, just for testing
+            "pubrange": [min_pub_year, max_pub_year, (max_pub_year-min_pub_year+1)],
+            "citerange": [min_cite_year, max_cite_year],
+            "pubChart": pub_chart,
+            "citeChart": cite_chart
         },
         "navbarOption": get_navbar_option(keyword, option)
     }
 
     # Set cache
-    cache = selected_papers
+    cache = {'cache': selected_papers, 'coauthors': coauthors}
 
     stats = get_stats(paper_information)
     data['stats'] = stats
 
-    request.session['cache']        = cache
+    # Cache from flower data
+    for key, value in cache.items():
+        request.session[key] = value
+
     request.session['flower_name']  = flower_name
     request.session['entity_names'] = entity_names
     return render(request, "flower.html", data)
@@ -425,7 +428,10 @@ def submit_from_browse(request):
     cache, data = get_flower_data_high_level(option, authorids, normalizedname)
     data["navbarOption"] = get_navbar_option(keyword, option)
 
-    request.session['cache']        = cache
+    # Cache from flower data
+    for key, value in cache.items():
+        request.session[key] = value
+
     request.session['flower_name']  = normalizedname
     request.session['entity_names'] = [normalizedname]
     return render(request, "flower.html", data)
@@ -433,14 +439,20 @@ def submit_from_browse(request):
 @csrf_exempt
 def resubmit(request):
     print(request)
-    from_year = int(request.POST.get('from_year'))
-    to_year = int(request.POST.get('to_year'))
+    # Get year filter data
+    pub_lower = int(request.POST.get('from_pub_year'))
+    pub_upper = int(request.POST.get('to_pub_year'))
+    cit_lower = int(request.POST.get('from_cit_year'))
+    cit_upper = int(request.POST.get('to_cit_year'))
+
+
     option = request.POST.get('option')
     keyword = request.POST.get('keyword')
     pre_flower_data = []
-    selfcite = request.POST.get('selfcite') == 'true'
+    self_cite = request.POST.get('selfcite') == 'true'
 
     cache        = request.session['cache']
+    coauthors    = request.session['coauthors']
     flower_name  = request.session['flower_name']
     entity_names = request.session['entity_names']
     #scores = [pd.read_json(c, orient = 'index') for c in cache]
@@ -449,12 +461,15 @@ def resubmit(request):
     paper_information = paper_info_mag_check_multiquery(cache) # API
 
     # Generate score for each type of flower
-    scores = gen_entity_score(paper_information, entity_names)
+    scores = gen_entity_score(paper_information, entity_names, self_cite=self_cite)
 
     data1, data2, data3 = gen_flower_data(scores,
                                           flower_name,
-                                          min_year = from_year,
-                                          max_year = to_year)
+                                          pub_lower = pub_lower,
+                                          pub_upper = pub_upper,
+                                          cit_lower = cit_lower,
+                                          cit_upper = cit_upper,
+                                          coauthors = coauthors)
 
     data = {
         "author": data1,
@@ -463,7 +478,7 @@ def resubmit(request):
         "navbarOption": get_navbar_option(keyword, option)
     }
 
-    stats = get_stats(paper_information, from_year, to_year)
+    stats = get_stats(paper_information, pub_lower, pub_upper)
     print(stats)
     data['stats'] = stats
 
