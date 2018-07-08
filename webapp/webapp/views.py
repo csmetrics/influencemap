@@ -97,14 +97,23 @@ def browse(request):
     for entity in browse_list:
         res = search_cache(entity["cache_index"], entity["cache_type"])
         entity["names"] = list(set([n["_source"]["DisplayName"] for n in res]))
-        entity["entities"] = [n["_source"] for n in res]
-        for e in (entity["entities"]):
+        entity["entities"] = res
+
+        for i in range(len(entity["entities"])):
+            e = entity["entities"][i]
+            document_id = e["_id"]
+            e = e["_source"]
+            e["document_id"] = document_id
+ 
             if "Keywords" in e:
                 e["Keywords"] = ", ".join(e["Keywords"])
             if "AuthorIds" in e:
                 e["AuthorIds"] = json.dumps(e["AuthorIds"])
             if "NormalizedNames" in e:
                 e["NormalizedName"] = e["NormalizedNames"][0]
+            e['CacheIndex'] = entity["cache_index"]
+            entity["entities"][i] = e
+        print(entity["entities"])
 
     data = {
         'list': browse_list,
@@ -326,7 +335,6 @@ def submit(request):
     entity_names    = data.get('names')
     flower_name     = data.get('flower_name')
 
-
     print()
     print('Number of Papers Found: ', len(selected_papers))
     print('Time taken: ', datetime.now() - time_cur)
@@ -373,7 +381,7 @@ def submit(request):
 
     # Normalised entity names
     entity_names = list(set(entity_names))
-    normal_names = list(map(lambda x: x.lower(), entity_names))
+#    normal_names = list(map(lambda x: x.lower(), entity_names))
 
     # Generate score for each type of flower
     entity_scores = gen_entity_score(paper_information, entity_names, self_cite=False)
@@ -405,6 +413,9 @@ def submit(request):
     # Cache from flower data
     for key, value in cache.items():
         request.session[key] = value
+
+    for p in paper_information:
+        len(p['Citations'])
 
     request.session['flower_name']  = flower_name
     request.session['entity_names'] = entity_names

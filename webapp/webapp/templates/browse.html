@@ -64,7 +64,7 @@
                                     {{entity.Keywords}}
                                 </td>
                                 <td>
-                                    <a href="/submit/?type=browse_author_group&name={{ entity.NormalizedName | safe }}">more info</a>
+                                    <a href="/submit/?type={{ entity.CacheIndex }}&name={{ entity.NormalizedName | safe }}&id={{ entity.document_id }}">more info</a>
                                 </td>
                             </tr>
                           {% endfor %}

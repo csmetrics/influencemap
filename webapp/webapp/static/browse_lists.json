@@ -32,6 +32,20 @@
 		"cache_index": "browse_author_group",
 		"cache_type": "turing_award_winners"
 	},
+
+	{
+		"display": "ANU Projects",
+		"tab_id": "anu_projects-tab",
+		"table_id": "anu_projects-table",
+		"info":
+			"A sample list of projects invovling ANU reserchers.",
+		"list":[
+				"Plasmonic Solar Cells", "Logic Programming Book", "Tableau methods for logic"
+			],
+		"cache_index": "browse_paper_group",
+		"cache_type": "project"
+	},
+
 	{
 		"display": "Publication Venues",
 		"tab_id": "journal-conf-tab",
