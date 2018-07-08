@@ -52,7 +52,11 @@
                                     {{entity.DisplayName}}
                                 </td>
                                 <td>
-                                    {{entity.Affiliations}}
+                                  <ul>
+                                    {% for aff in entity.Affiliations %}
+                                      <li>{{ aff }}</li>
+                                    {% endfor %}
+                                  </ul>
                                 </td>
                                 <td>
                                     {{entity.Year}}
@@ -61,7 +65,11 @@
                                     {{entity.Citation}}
                                 </td>
                                 <td>
-                                    {{entity.Keywords}}
+                                  <ul>
+                                    {% for keyword in entity.Keywords %}
+                                      <li>{{ keyword }}</li>
+                                    {% endfor %}
+                                  </ul>
                                 </td>
                                 <td>
                                     <a href="/submit/?type={{ entity.CacheIndex }}&name={{ entity.NormalizedName | safe }}&id={{ entity.document_id }}">more info</a>

@@ -104,9 +104,8 @@ def browse(request):
             document_id = e["_id"]
             e = e["_source"]
             e["document_id"] = document_id
- 
             if "Keywords" in e:
-                e["Keywords"] = ", ".join(e["Keywords"])
+                e["Keywords"] = [] if len("".join(e["Keywords"])) == 0 else e["Keywords"]
             if "AuthorIds" in e:
                 e["AuthorIds"] = json.dumps(e["AuthorIds"])
             if "NormalizedNames" in e:
