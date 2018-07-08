@@ -190,6 +190,10 @@ def pr_links_mag_multiquery(paper_ids):
                         if rid in paper_ids:
                             results[rid]['Citations'].append(res['Id'])
 
+    # Remove doubles
+    for paper_id, cite_dict in results.items():
+        results[paper_id]['Citations'] = list(set(cite_dict['Citations']))
+
     return results
 
 
