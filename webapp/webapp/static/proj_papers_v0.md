@@ -65,7 +65,8 @@ Z Ouyang, S Pillai, F Beck, O Kunz, S Varlamov, KR Catchpole, Applied Physics Le
 * Reproduction of a plane-wave sound field using an array of loudspeakers, DB Ward, TD Abhayapala, IEEE Transactions on speech and audio processing 9 (6), 697-707	2001
 * Theory and design of high order sound field microphones using spherical microphone array, TD Abhayapala, DB Ward, Acoustics, Speech, and Signal Processing (ICASSP), 2002 IEEE International …	2002
 * Theory and design of sound field reproduction in reverberant rooms, T Betlehem, TD Abhayapala, The Journal of the Acoustical Society of America 117 (4), 2100-2111
-
+* Theory and design of soundfield reproduction using continuous loudspeaker concept YJ Wu, TD Abhayapala IEEE Transactions on Audio, Speech, and Language Processing 17 (1), 107-116 97    2009
+* Spatial Multizone Soundfield Reproduction: Theory and Design Y JENNIFER WU, TD ABHAYAPALA IEEE transactions on audio, speech, and language processing 19 (6), 1711-1720
 
 4. **Heat transfer from solar energy (Wojciech Lipiński)**
 
