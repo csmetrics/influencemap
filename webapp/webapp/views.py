@@ -14,7 +14,6 @@ from core.search.parse_academic_search import parse_search_results
 from core.search.academic_search import *
 from core.flower.draw_flower_test import draw_flower
 from core.flower.flower_bloomer import getFlower, getPreFlowerData
-from core.utils.mkAff import getAuthor, getJournal, getConf, getAff, getConfPID, getJourPID, getConfPID, getAffPID
 from core.search.mag_flower_bloom import *
 from core.utils.get_entity import entity_from_name
 from core.search.influence_df import get_filtered_score
@@ -36,52 +35,10 @@ from core.utils.get_stats      import get_stats
 
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 
-# initialise as no saved pids
-saved_pids = dict()
-
-# initialise as no saved entities
-saved_entities = dict()
-
-# initialise as no expanded ids
-expanded_ids = dict()
-
-# initialise no stored flower data frames
-pre_flower_data_dict = dict()
-
-# dictionary to store option specific functions
-dataFunctionDict = {
-    'get_ids':{
-    'author': getAuthor,
-    'conference': getConf,
-    'institution': getAff,
-    'journal': getJournal},
-    'get_pids':{
-    'conference': getConfPID,
-    'journal': getJourPID,
-    'institution': getAffPID}}
-
-str_to_ent = {
-    "author": ent.Entity_type.AUTH,
-    "conference": ent.Entity_type.CONF,
-    "journal": ent.Entity_type.JOUR,
-    "institution": ent.Entity_type.AFFI
-    }
-
-# flower_types
-flower_leaves = { 'author': [ent.Entity_type.AUTH]
-                , 'conf': [ent.Entity_type.CONF, ent.Entity_type.JOUR]
-                , 'inst': [ent.Entity_type.AFFI]
-                }
-
-
 def autocomplete(request):
     entity_type = request.GET.get('option')
     data = loadList(entity_type)
     return JsonResponse(data,safe=False)
-
-selfcite = False
-expanded_ids = dict()
-
 
 @csrf_exempt
 def main(request):
@@ -266,46 +223,6 @@ def manualcache(request):
         paper_info_mag_check_multiquery(data['PaperIds'])
     return JsonResponse({},safe=False)
 
-def view_papers(request):
-    print(request)
-    resetProgress()
-    data = json.loads(request.POST.get('data'))
-    selectedIds = data.get('selectedIds').split(',')
-    selectedNames = data.get('selectedNames').split(',')
-    entityType = data.get('entityType')
-    expanded = data.get('expanded')
-    option = data.get('option')
-    name = data.get('name')
-    if entityType == 'author':
-        entities = saved_entities[name]
-        paper_dict = saved_pids[name]
-        entities = [x for x in entities if x['id'] in selectedIds]
-        for entity in entities:
-            entity['field'] = ['_'.join([str(y) for y in x]) for x in entity['field']]
-    else:
-        entities = saved_entities[name]
-        get_pid_params = [selectedIds] if entityType != 'institution' else ([{'id':selectedIds[i],'name':selectedNames[i]} for i in range(len(selectedIds))], name)
-        paper_dict = dataFunctionDict['get_pids'][entityType](*get_pid_params)
-        entities = [x for x in entities if x['id'] in selectedIds]
-
-    simplified_paper_dict = dict()
-
-    for k, v in paper_dict.items(): # based on a dict of type entity(aID, entity_type('auth_id')):[(paperID, affiliationName, paperTitle, year, date, confName)] according to mkAff.py
-        eid = k.entity_id
-        if eid in selectedIds:
-            sorted_papers = sorted(v, key= lambda x: x['year'] if entityType != 'institution' else x['paperID'], reverse = True)
-            simplified_paper_dict[eid] = sorted_papers
-    data = {
-        'entityTuples': entities,
-        'papersDict': simplified_paper_dict,
-        'entityType': entityType,
-        'selectedInfo': selectedIds,
-        'keyword': name,
-        "navbarOption": get_navbar_option(name, option),
-    }
-
-    return render(request, 'view_papers.html', data)
-
 
 @csrf_exempt
 def submit(request):
@@ -418,32 +335,6 @@ def submit(request):
 
     request.session['flower_name']  = flower_name
     request.session['entity_names'] = entity_names
-    return render(request, "flower.html", data)
-
-
-@csrf_exempt
-def submit_from_browse(request):
-
-    data = json.loads(request.POST.get('data'))
-
-    option = data.get("option")
-    keyword = data.get('keyword')
-    authorids = data.get('AuthorIds')
-    normalizedname = data.get('NormalizedName')
-
-    # Default Dates need fixing
-    min_year = None
-    max_year = None
-
-    cache, data = get_flower_data_high_level(option, authorids, normalizedname)
-    data["navbarOption"] = get_navbar_option(keyword, option)
-
-    # Cache from flower data
-    for key, value in cache.items():
-        request.session[key] = value
-
-    request.session['flower_name']  = normalizedname
-    request.session['entity_names'] = [normalizedname]
     return render(request, "flower.html", data)
 
 @csrf_exempt

@@ -25,10 +25,8 @@ urlpatterns = [
     url(r'^manualcache', views.manualcache),
     url(r'^browse', views.browse),
     url(r'^search', views.search),
-    url(r'^submit_from_browse/', views.submit_from_browse),
     url(r'^submit/', views.submit),
     url(r'^admin/', admin.site.urls),
     url(r'^autocomplete', views.autocomplete),
-    url(r'^view_papers/', views.view_papers),
     url(r'^resubmit/', views.resubmit)
 ]
