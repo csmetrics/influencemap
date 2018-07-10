@@ -81,10 +81,10 @@ table {
   content: none;
 }
 div#publication-range .noUI-connect {
-  background: #F47E60;
+  background: #ABBD81;
 }
 div#citation-range .noUi-connect {
-  background: #ABBD81;
+  background: #F47E60;
 }
 .axis path, .grid path, .tick line {
   stroke: #ddd;
