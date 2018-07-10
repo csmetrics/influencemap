@@ -51,7 +51,7 @@ class PubChart {
         .attr("y", function(d) { return pub_y(d.value); })
         .attr("width", x.bandwidth())
         .attr("height", function(d) { return (height-pub_y(d.value)); })
-        .style("fill", "#F47E60");
+        .style("fill", "#ABBD81");
 
     this.initflag = true;
   }
@@ -67,7 +67,7 @@ class PubChart {
       if (minyear > item.attr("id") || item.attr("id") > maxyear){
         item.css("fill", "#DDD");
       } else {
-        item.css("fill", "#F47E60");
+        item.css("fill", "#ABBD81");
       }
     }
   }
@@ -126,7 +126,7 @@ class CiteChart {
       .attr("y", function(d) { return cit_y(d.value); })
       .attr("width", x.bandwidth())
       .attr("height", function(d) { return (height-cit_y(d.value)); })
-      .style("fill", "#ABBD81");
+      .style("fill", "#F47E60");
   }
 
   updateRange(minyear, maxyear){
@@ -136,7 +136,7 @@ class CiteChart {
       if (minyear > item.attr("id") || item.attr("id") > maxyear){
         item.css("fill", "#DDD");
       } else {
-        item.css("fill", "#ABBD81");
+        item.css("fill", "#F47E60");
       }
     }
   }
