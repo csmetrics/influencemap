@@ -58,7 +58,8 @@ pandas.set_option('display.max_columns', None)
 
 def gen_flower_data(score_dfs, flower_name, pub_lower=None, pub_upper=None,
                                             cit_lower=None, cit_upper=None,
-                                            coauthors=None):
+                                            coauthors=None,
+                                            include_coauthor=True):
     ''' Generates processed data for flowers given a list of score dataframes.
     '''
     flower_score = [None, None, None]
@@ -79,7 +80,13 @@ def gen_flower_data(score_dfs, flower_name, pub_lower=None, pub_upper=None,
 
         # Aggregate
         agg_score = agg_score_df(agg_score)
-        agg_score = flag_coauthor(agg_score, coauthors)
+
+        # Filter coauthors
+        if (include_coauthor == True):
+            agg_score = flag_coauthor(agg_score, coauthors)
+        else:
+            agg_score = agg_score[ ~agg_score['entity_id'].isin(coauthors) ]
+
         agg_score.ego = flower_name
 
         print()

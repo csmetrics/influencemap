@@ -1,0 +1,1 @@
+0 10 * * * /mnt/influencemap/misc/monitor/report_number.sh >> /mnt/influencemap/misc/monitor/log

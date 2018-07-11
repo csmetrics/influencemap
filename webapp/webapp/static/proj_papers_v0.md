@@ -91,3 +91,6 @@ Z Ouyang, S Pillai, F Beck, O Kunz, S Varlamov, KR Catchpole, Applied Physics Le
 * EXPTIME tableaux with global caching for description logics with transitive roles, inverse roles and role hierarchies, R Goré, LA Nguyen, International Conference on Automated Reasoning with Analytic Tableaux and …	62	2007
 * An on-the-fly tableau-based decision procedure for PDL-satisfiability, P Abate, R Goré, F Widmann, Electronic Notes in Theoretical Computer Science 231, 191-209
 
+7. **Probabilistic arithmetic. I. Numerical methods for calculating convolutions and dependency bounds**
+
+* Probabilistic arithmetic. I. Numerical methods for calculating convolutions and dependency bounds RC Williamson, T Downs International journal of approximate reasoning 4 (2), 89-158

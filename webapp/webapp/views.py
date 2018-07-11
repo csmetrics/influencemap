@@ -351,6 +351,7 @@ def resubmit(request):
     keyword = request.POST.get('keyword')
     pre_flower_data = []
     self_cite = request.POST.get('selfcite') == 'true'
+    include_coauthor = request.POST.get('coauthor') == 'true'
 
     cache        = request.session['cache']
     coauthors    = request.session['coauthors']
@@ -366,11 +367,12 @@ def resubmit(request):
 
     data1, data2, data3 = gen_flower_data(scores,
                                           flower_name,
-                                          pub_lower = pub_lower,
-                                          pub_upper = pub_upper,
-                                          cit_lower = cit_lower,
-                                          cit_upper = cit_upper,
-                                          coauthors = coauthors)
+                                          pub_lower        = pub_lower,
+                                          pub_upper        = pub_upper,
+                                          cit_lower        = cit_lower,
+                                          cit_upper        = cit_upper,
+                                          coauthors        = coauthors,
+                                          include_coauthor = include_coauthor)
 
     data = {
         "author": data1,

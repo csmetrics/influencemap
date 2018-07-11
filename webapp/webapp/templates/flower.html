@@ -15,7 +15,7 @@
   <div id="image-container" class="nav-tabs">
     <ul class="nav nav-tabs" style="float:right">
       <li><button class="btn tab-btn inverse active" href="#tab-author" data-toggle="tab"><i class="fa fa-user"></i>&nbsp;Author</button></li>
-      <li><button class="btn tab-btn inverse" href="#tab-conference" data-toggle="tab"><i class="fa fa-book"></i>&nbsp;Conference</button></li>
+      <li><button class="btn tab-btn inverse" href="#tab-conference" data-toggle="tab"><i class="fa fa-book"></i>&nbsp;Venue</button></li>
       <li><button class="btn tab-btn inverse" href="#tab-institution" data-toggle="tab"><i class="fa fa-university"></i>&nbsp;Institution</button></li>
     </ul>
     <!-- <div align="center" >
@@ -34,7 +34,7 @@
       </div>
       <div class="tab-pane" id="tab-conference">
         <div class="wrapper">
-          <h4>To Conference</h4>
+          <h4>To Venue</h4>
           <div align="center">
             <svg id="graph2" width=1800 height=800></svg>
           </div>
@@ -73,6 +73,7 @@ author_data = {{ author|safe }}
 conf_data = {{ conf|safe }}
 inst_data = {{ inst|safe }}
 var selfCiteCheckbox = document.getElementById('self-cite');
+var coauthorCheckbox = document.getElementById('coauthor');
 
 var width = document.getElementById('image-container').offsetWidth;
 drawLegend();
