@@ -394,21 +394,18 @@ def get_node_info(request):
     # request should contain the ego author ids and the node author ids separately
     print(request.POST)
     data = json.loads(request.POST.get("data_string"))
-    ego_ids = data.get("ego")
-    node_ids = data.get("node")
-    print(ego_ids, node_ids, request.POST)
-    start_ref = datetime.now()
-    reference_papers = query_reference_papers(ego_ids, node_ids)
-    start_cite = datetime.now()
-    citation_papers = query_citation_papers(ego_ids, node_ids)
-    end_cite = datetime.now()
-    # get papers from ego referencing node (red arrows)
-    # get papers from ego being cited by node (blue arrows)
-    end = datetime.now()
-    print("ref papers took "+str((start_cite-start_ref).total_seconds())+" seconds")
-    print("cite papers took "+str((end_cite-start_cite).total_seconds())+" seconds")
-    print("get node info function completed in "+str((end-start).total_seconds())+" seconds")
-    reference_papers = get_paperinfo_from_ids(reference_papers)
-    citation_papers = get_paperinfo_from_ids(citation_papers)
+    node_name = data.get("name")
+    paper_information = paper_info_mag_check_multiquery(request.session["cache"])
+   
+    reference_papers = sum([paper["References"] for paper in paper_information],[])
+    reference_papers = [paper['PaperId'] for paper in reference_papers if node_name in [author['AuthorName'] for author in paper['Authors']]]
+    reference_papers = list(set(reference_papers))
+    reference_papers = get_paperinfo_from_ids(reference_papers) if len(reference_papers)>0 else []
+
+    citation_papers = sum([paper["Citations"] for paper in paper_information],[])
+    citation_papers = [paper['PaperId'] for paper in citation_papers if node_name in [author['AuthorName'] for author in paper['Authors']]]
+    citation_papers = list(set(citation_papers))
+    citation_papers = get_paperinfo_from_ids(citation_papers) if len(citation_papers)>0 else []
+
     return JsonResponse({"reference_papers": reference_papers, "citation_papers": citation_papers}, safe=False)
     #return JsonResponse({}, safe=False)

@@ -475,8 +475,7 @@ function populateNodeInfoContent(data){
 function getData(param){
   var name = param['name'];
   var data_dict = { // input to the views.py - search()
-      "ego": [2122328552],
-      "node": [2022407533]
+      "name": name
     };
     var t0 = performance.now();
   $.ajax({
