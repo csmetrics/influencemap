@@ -3,6 +3,7 @@
 <html>
 {% include 'header.html' %}
 <body id="top">
+
 {% include 'pagehead.html' %}
 <div id="searchbar" class="wrapper bgded overlay">
   {% include 'navbar.html' with navbar=navbarOption %}
@@ -50,6 +51,15 @@
     </div>
   </div>
 </div>
+
+<!-- Node information popup -->
+<div id="node_info_modal" class="node_info_modal">
+  <div id="node_info_container" class="node_info_container">
+    <span class="close">&times;</span>
+    <div id="node_info_content">
+    </div>
+  </div>
+</div>
 </body>
 </html>
 <script src="{% static 'js/d3.v4.min.js' %}"></script>
@@ -70,4 +80,24 @@ drawFlower("#graph1", author_data, 0, width);
 drawFlower("#graph2", conf_data, 1, width);
 drawFlower("#graph3", inst_data, 2, width);
 
+
+// Get the modal
+var  node_info_modal = document.getElementById('node_info_modal');
+
+
+// Get the <span> element that closes the modal
+var node_info_close = document.getElementsByClassName("close")[0];
+
+
+// When the user clicks on <span> (x), close the modal
+node_info_close.onclick = function() {
+    node_info_modal.style.display = "none";
+}
+
+// When the user clicks anywhere outside of the modal, close it
+window.onclick = function(event) {
+    if (event.target == node_info_modal) {
+        node_info_modal.style.display = "none";
+    }
+}
 </script>

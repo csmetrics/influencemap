@@ -190,7 +190,7 @@ function drawFlower(svg_id, data, idx, w) {
         .style("stroke-width", 2)
         .on("mouseover", function() { highlight_on(idx, this); })
         .on("mouseout", function() { highlight_off(idx); })
-        .on("click", function(d) { toggle_split(idx, this); });
+        .on("click", function(d) { toggle_split(idx, this); showNodeData(idx, this);});
 
     // flower graph node text
     text_in[idx] = svg[idx].append("g").selectAll("text")
@@ -433,3 +433,93 @@ function arrow_size_calc(weight) {
     if (weight == 0) { return 0; }
     else { return 15; }
     }
+
+
+function populateNodeInfoContent(data){
+  var container_div = document.getElementById("node_info_container");
+  var content_div = document.getElementById("node_info_content");
+  container_div.removeChild(content_div);
+  var references = data["reference_papers"];
+  var citations = data["citation_papers"];
+  var refs_shown = Math.min(3, references.length);
+  var cites_shown = Math.min(3, citations.length);
+  var html_string = "<div id='node_info_content'>";
+  var title = "<h3>"+data["node_name"]+"</h3>";
+  var count = ""; //"<span style='display: block;'>xxx papers and xxyx citations</span>";
+  html_string+= title+count;
+  if (refs_shown !== 0){
+    var references_header = "<span><i>"+refs_shown+" out of "+references.length+" <span style='color: rgb(107, 172, 208)'>references</span></i></span>";
+    var references_body = "<ul>";
+    for (i = 0; i< refs_shown;i++){
+      references_body += "<li><i>"+references[i]["Ti"]+"</i>, "+references[i]["Y"]+"</li>";
+    }
+    references_body += "</ul>";
+    html_string += references_header+references_body;
+  }
+  if (cites_shown !== 0){
+    var citations_header = "<span><i>"+cites_shown+" out of "+citations.length+" <span style='color: rgb(228, 130, 104)'>citations</span></i></span>";
+    var citations_body = "<ul>";
+    for (i = 0; i< cites_shown;i++){
+      citations_body += "<li><i>"+citations[i]["Ti"]+"</i>, "+citations[i]["Y"]+"</li>";
+    }
+    citations_body += "</ul>";
+    html_string += citations_header+citations_body;
+  }
+  html_string += "</div>";
+  var html_elem = new DOMParser().parseFromString(html_string, 'text/html').body.childNodes;
+  container_div.appendChild(html_elem[0]);
+}
+// rgb(107, 172, 208); blue
+//  rgb(228, 130, 104);oranger
+
+function getData(param){
+  var name = param['name'];
+  var data_dict = { // input to the views.py - search()
+      "ego": [2122328552],
+      "node": [2022407533]
+    };
+    var t0 = performance.now();
+  $.ajax({
+    type: "POST",
+    url: "/get_node_info/",
+    data: {"data_string": JSON.stringify(data_dict)},
+    success: function (result) { // return data if success
+      var t1 = performance.now();
+      console.log("getting ajax result took " + (t1 - t0) + " milliseconds.")
+      t0 = performance.now();
+      result["node_name"] = name;
+      populateNodeInfoContent(result);
+      t1 = performance.now();
+      document.getElementById("node_info_modal").style.display = "block";
+      console.log("populating info took " + (t1 - t0) + " milliseconds.")
+      console.log(result);
+    },
+    error: function (result) {
+    }
+  });
+}
+
+
+function getNodeName(e){
+  var type = e.getAttribute('gtype');
+  var id = e.getAttribute('id');
+  var res = [];
+  $(e.parentElement.parentElement).find('text').each(function(){
+    if (this.getAttribute('gtype')==type && this.getAttribute('id')==id){
+      res.push(this);
+    }
+  });
+  for (i in res){
+    if (res[i].textContent !== ""){return res[i].textContent};
+  }
+}
+
+
+function showNodeData(idx, selected){
+    var name = getNodeName(selected);
+    var data = getData({"name": name});
+}
+
+function hideNodeData(){
+    document.getElementById('node_info_modal').style.display = "none";
+}

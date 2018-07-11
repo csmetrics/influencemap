@@ -28,5 +28,6 @@ urlpatterns = [
     url(r'^submit/', views.submit),
     url(r'^admin/', admin.site.urls),
     url(r'^autocomplete', views.autocomplete),
-    url(r'^resubmit/', views.resubmit)
+    url(r'^resubmit/', views.resubmit),
+    url(r'^get_node_info/', views.get_node_info)
 ]

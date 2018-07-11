@@ -33,6 +33,23 @@ def get_papers_from_field_of_study(field, citation):
     data = query_academic_search("get", url, query)
     return data
 
+def get_paperinfo_from_ids(paper_ids):
+    url = os.path.join(MAS_URL_PREFIX, "academic/v1.0/evaluate")
+    base_string = "Id={}"
+    or_string = or_query_builder(base_string, paper_ids)
+    expr = "{}".format(or_string)
+    query = {
+      "expr": expr,
+      "count": 10000,
+      "offset": 0,
+      "attributes": "Ti,Y,AA.AuId,AA.AuN,AA.AfId,AA.AfN"
+#      "attributes": "Ti,AA.AuId,AA.AuN,AA.AfN,AA.AfId,L,Y,D,CC,ECC,F.FN,C.CN,C.CId,J.JId,J.JN"
+      # "attributes": "prob,Id,Ti,Y,CC,AA.AuN,AA.AuId,RId"
+    }
+
+    data = query_academic_search("get", url, query)
+    return data["entities"]
+
 def get_paperinfo_from_title(paper_title):
     url = os.path.join(MAS_URL_PREFIX, "academic/v1.0/interpret")
     data = query_academic_search("get", url, {"query": paper_title})
