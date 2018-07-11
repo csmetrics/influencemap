@@ -47,6 +47,10 @@
           <b>Include self citations</b>
           <input class="self-cite" type="checkbox" style="float:left; margin:5 10 0 0" name="self-cite" id="self-cite" />
         </div>
+        <div style="padding-top:10px">
+          <b>Include coauthors</b>
+          <input class="coauthor" type="checkbox" style="float:left; margin:5 10 0 0" name="self-coauthor" id="coauthor" checked="checked" />
+        </div>
         <div align=center style="padding-top:5px;">
           <button class="btn btn-success" style="width:200px; height:30px; padding:0" id="resubmitButton">Update Flower</button>
         </div>
@@ -211,6 +215,7 @@ resubmitButton.addEventListener('click', function(){
       to_cit_year: document.getElementById('cit-upper-value').textContent,
       option: option,
       selfcite: selfCiteCheckbox.checked,
+      coauthor: coauthorCheckbox.checked,
       keyword: keyword
     },
     success: function(result){
