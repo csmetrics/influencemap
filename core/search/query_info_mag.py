@@ -14,7 +14,8 @@ from core.search.parse_academic_search import or_query_builder_list
 MAS_URL_PREFIX = "https://api.labs.cognitive.microsoft.com"
 
 basic_attr = {'Id': 'PaperId',
-              'Y' : 'Year'}
+              'Y' : 'Year',
+              'Ti': 'PaperTitle'}
 
 compound_attr = {
              'C': {

@@ -5,12 +5,13 @@ from core.search.query_paper       import paper_query
 from core.search.query_paper_mag   import paper_mag_multiquery
 from core.search.query_info        import paper_info_check_query, paper_info_mag_check_multiquery
 from core.score.agg_paper_info     import score_paper_info_list
-from core.score.agg_score          import agg_score_df
+from core.score.agg_score          import agg_score_df, agg_node_info
 from core.score.agg_utils          import get_coauthor_mapping
 from core.score.agg_utils          import flag_coauthor
 from core.score.agg_filter         import filter_year
 from core.flower.flower_bloom_data import score_df_to_graph
 from core.utils.get_stats          import get_stats
+from core.config                   import *
 
 from datetime    import datetime
 from collections import Counter
@@ -42,7 +43,7 @@ def gen_entity_score(paper_information, names, self_cite=True):
         time_cur = datetime.now()
 
         entity_score = score_paper_info_list(paper_information, leaves, self=names)
-        entity_score = entity_score[~entity_score['entity_id'].str.lower().isin(
+        entity_score = entity_score[~entity_score['entity_name'].str.lower().isin(
                                           names)]
 
         if not self_cite:
@@ -56,38 +57,44 @@ import pandas
 pandas.set_option('display.max_columns', None)
 
 
-def gen_flower_data(score_dfs, flower_name, pub_lower=None, pub_upper=None,
-                                            cit_lower=None, cit_upper=None,
-                                            coauthors=None,
-                                            include_coauthor=True):
+def gen_flower_data(score_dfs, entity_names, flower_name,
+                               pub_lower=None, pub_upper=None,
+                               cit_lower=None, cit_upper=None,
+                               coauthors=None,
+                               include_coauthor=True):
     ''' Generates processed data for flowers given a list of score dataframes.
     '''
     flower_score = [None, None, None]
+    node_info    = dict()
     for i, flower_item in enumerate(flower_leaves.items()):
         name, leaves = flower_item
 
         time_cur = datetime.now()
 
         # Filter score dfs first
-        print(pub_lower, pub_upper, cit_lower, cit_upper)
-        print(score_dfs[i])
-        print(score_dfs[i][score_dfs[i]['influence_year'] > cit_lower])
-        agg_score = filter_year(score_dfs[i], pub_lower, pub_upper)
-        print(agg_score)
-        agg_score = filter_year(agg_score, cit_lower, cit_upper,
-                                index = 'influence_year')
-        print(agg_score)
+        filter_score = filter_year(score_dfs[i], pub_lower, pub_upper)
+        filter_score = filter_year(filter_score, cit_lower, cit_upper,
+                                   index = 'influence_year')
+
+        print(filter_score)
 
         # Aggregate
-        agg_score = agg_score_df(agg_score)
+        agg_score = agg_score_df(filter_score)
 
         # Filter coauthors
         if (include_coauthor == True):
             agg_score = flag_coauthor(agg_score, coauthors)
         else:
-            agg_score = agg_score[ ~agg_score['entity_id'].isin(coauthors) ]
+            agg_score = agg_score[ ~agg_score['entity_name'].isin(coauthors) ]
 
+        # Get top data for graph
+        agg_score = agg_score[ ~agg_score['entity_name'].isin(entity_names) ].head(n=NUM_LEAVES)
         agg_score.ego = flower_name
+
+        # Get node ids
+        node_ids = agg_score['entity_name']
+
+        node_info.update(agg_node_info(filter_score, node_ids))
 
         print()
         print('Aggregated score for', leaves)
@@ -109,7 +116,7 @@ def gen_flower_data(score_dfs, flower_name, pub_lower=None, pub_upper=None,
     conf_data   = processdata("conf", flower_score[1])
     inst_data   = processdata("inst", flower_score[2])
 
-    return author_data, conf_data, inst_data
+    return author_data, conf_data, inst_data, node_info
 
 
 def get_flower_data_high_level(entitytype, authorids, normalizedname, selection=None):
@@ -160,6 +167,7 @@ def get_flower_data_high_level(entitytype, authorids, normalizedname, selection=
 
     # Generate flower data
     author_data, conf_data, inst_data = gen_flower_data(entity_scores,
+                                                        [normalizedname],
                                                         normalizedname,
                                                         coauthors = coauthors)
 

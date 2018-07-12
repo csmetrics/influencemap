@@ -39,10 +39,10 @@ def agg_score_df(influence_df, coauthors=set([]), \
             (no_nan_date['influence_date'] <= score_date_max)]
 
     # Remove year column
-    score_df = score_df[['entity_id', 'influenced', 'influencing']]
+    score_df = score_df[['entity_name', 'influenced', 'influencing']]
 
     # Aggrigatge scores up
-    score_df = score_df.groupby('entity_id').agg(np.sum).reset_index()
+    score_df = score_df.groupby('entity_name').agg(np.sum).reset_index()
 
     # calculate sum
     score_df['sum'] = score_df['influenced'] + score_df['influencing']

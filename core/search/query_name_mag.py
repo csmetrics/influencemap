@@ -194,45 +194,45 @@ def journal_name_mag_multiquery(journal_ids):
     return jour_name_res
 
 
-def name_mag_multiquery(entity_type, entity_ids):
+def name_mag_multiquery(entity_type, entity_names):
     ''' Query entity id for name depending on type.
     '''
     # Call query functions depending on type given
     # Author
     if entity_type == Entity_type.AUTH:
-        return author_name_mag_multiquery(entity_ids)
+        return author_name_mag_multiquery(entity_names)
 
     # Affiliation
     if entity_type == Entity_type.AFFI:
-        return affiliation_name_mag_multiquery(entity_ids)
+        return affiliation_name_mag_multiquery(entity_names)
 
     # Conference
     if entity_type == Entity_type.CONF:
-        return conference_name_mag_multiquery(entity_ids)
+        return conference_name_mag_multiquery(entity_names)
 
     # Journal
     if entity_type == Entity_type.JOUR:
-        return journal_name_mag_multiquery(entity_ids)
+        return journal_name_mag_multiquery(entity_names)
 
     # Otherwise
     return None
 
 
-def name_try_mag_multiquery(entity_type, entity_ids):
+def name_try_mag_multiquery(entity_type, entity_names):
     ''' Check ES first, else use the MAG API.
     '''
     to_process = list()
     name_maps  = dict()
     # Try ES
-    #for entity_id in entity_ids:
-    #    name_dict = name_query(entity_type, entity_id)
+    #for entity_name in entity_names:
+    #    name_dict = name_query(entity_type, entity_name)
     #    if name_dict:
     #        name_maps.update(name_dict)
     #    else:
-    #        to_process.append(entity_id)
-    #        print(entity_id, "Failed ES lookup on index \
+    #        to_process.append(entity_name)
+    #        print(entity_name, "Failed ES lookup on index \
     #                '{}s'".format(entity_type.text))
-    to_process = entity_ids
+    to_process = entity_names
 
     # Use API search for the remainding papers
     name_maps.update(name_mag_multiquery(entity_type, to_process))

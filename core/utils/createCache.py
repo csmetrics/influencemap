@@ -46,14 +46,14 @@ def save(typ):
         wholeRes = {}
         for dic in resNonExpand[0]:
             for key in resNonExpand[1]:
-                if dic['authorID'] == key.entity_id:
-                    wholeRes[dic['name']] = (dic, {key.entity_id:resNonExpand[1][key]})
+                if dic['authorID'] == key.entity_name:
+                    wholeRes[dic['name']] = (dic, {key.entity_name:resNonExpand[1][key]})
                     break
         
         for dic in expandRes[0]:
             for key in expandRes[1]:
-                if dic['authorID'] == key.entity_id:
-                    wholeRes[dic['name']] = (dic, {key.entity_id:expandRes[1][key]})
+                if dic['authorID'] == key.entity_name:
+                    wholeRes[dic['name']] = (dic, {key.entity_name:expandRes[1][key]})
                     break
             
         lsName = name.split(' ')

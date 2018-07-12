@@ -16,13 +16,13 @@ def paperq_to_dict(paper_query):
 def get_ent_paper_df_gen(entity):
     """
     """
-    entity_id = entity.entity_id
+    entity_name = entity.entity_name
     e_type = entity.entity_type
     query = {
         "path": "/entity/PaperIDs/papers",
         "entity": {
             "type": e_type.api_type,
-            "id": [ entity_id ],
+            "id": [ entity_name ],
             },
         "papers": {
                 "select": ["NormalizedTitle", "CitationCount", "PublishDate"]
@@ -50,14 +50,14 @@ def get_ent_paper_df_gen(entity):
 def get_ent_paper_df_conf(entity):
     """
     """
-    entity_id = entity.entity_id
+    entity_name = entity.entity_name
     e_type = entity.entity_type
     query = {
         "path": "/paper",
         "paper": {
             "type": "Paper",
             "match": {
-                "NormalizedVenue": entity_id
+                "NormalizedVenue": entity_name
                 },
             "select": [ "OriginalVenue", "NormalizedTitle", "CitationCount",
                         "PublishDate" ]
@@ -82,12 +82,12 @@ def get_ent_paper_df_conf(entity):
 def ent_paper_df(entity):
     """
     """
-    print("Generating scores for:", entity.entity_id)
+    print("Generating scores for:", entity.entity_name)
     if entity.entity_type == ent.Entity_type.CONF:
         entity_update = get_ent_paper_df_conf(entity)
     else:
         entity_update = get_ent_paper_df_gen(entity)
-    print("Finishing generating scores for:", entity.entity_id)
+    print("Finishing generating scores for:", entity.entity_name)
 
     return entity_update
 '''

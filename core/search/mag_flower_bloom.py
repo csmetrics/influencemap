@@ -58,7 +58,7 @@ def get_flower(score_df, leaves, bot_year=None, top_year=None):
     entity_score = score_entity(score_df, flower_map)
     agg_score = agg_score_df(entity_score, flower_map, score_df.ego, \
         score_year_min=bot_year, score_year_max=top_year)
-    agg_score = agg_score[agg_score['entity_id'] != ego_name]
+    agg_score = agg_score[agg_score['entity_name'] != ego_name]
     agg_score.ego = ego_name
     print(agg_score)
     return score_df_to_graph(agg_score)
