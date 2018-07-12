@@ -34,17 +34,24 @@
 	},
 
 	{
-		"display": "ANU Projects",
-		"tab_id": "anu_projects-tab",
-		"table_id": "anu_projects-table",
+		"display": "Projects",
+		"tab_id": "projects-tab",
+		"table_id": "projects-table",
 		"info":
-			"A sample list of projects invovling ANU reserchers.",
-		"list":[
-				"Plasmonic Solar Cells", "Logic Programming Book", "Tableau methods for logic"
-			],
+			"A sample list of research projects.",
 		"cache_index": "browse_paper_group",
 		"cache_type": "project"
 	},
+
+        {
+                "display": "Programming Language Researchers",
+                "tab_id": "pl-researchers-tab",
+                "table_id": "pl-researchers-table",
+                "info":
+                        "A list of programming language researchers.",
+                "cache_index": "browse_author_group",
+                "cache_type": "pl_researchers"
+        },
 
 	{
 		"display": "Publication Venues",
