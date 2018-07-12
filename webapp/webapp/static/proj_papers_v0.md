@@ -94,3 +94,33 @@ Z Ouyang, S Pillai, F Beck, O Kunz, S Varlamov, KR Catchpole, Applied Physics Le
 7. **Probabilistic arithmetic. I. Numerical methods for calculating convolutions and dependency bounds**
 
 * Probabilistic arithmetic. I. Numerical methods for calculating convolutions and dependency bounds RC Williamson, T Downs International journal of approximate reasoning 4 (2), 89-158
+
+8. **Transactional Memory (Tony Hosking)**
+
+* Open nesting in software transactional memory Y Ni, VS Menon, AR Adl-Tabatabai, AL Hosking, RL Hudson, JEB Moss, et al. ACM SIGPLAN Symposium on Principles and Practice of Parallel Programming, 68-78
+* Nested transactional memory: model and architecture sketches JEB Moss, AL Hosking Science of Computer Programming 63 (2), 186-201
+* Transactional monitors for concurrent objects A Welc, S Jagannathan, A Hosking European Conference on Object Oriented Programming; Lecture Notes in …
+* Nested transactional memory: Model and preliminary architecture sketches E Moss, A Hosking Workshop on Synchronization and Concurrency in Object Oriented Languages, 39-48
+* A transactional object calculus S Jagannathan, J Vitek, A Welc, A Hosking Science of Computer Programming 57 (2), 164-186
+
+9. **The garbage collection handbook**
+
+* The garbage collection handbook: the art of automatic memory management. Jones, Richard, Antony Hosking, and Eliot Moss Chapman and Hall/CRC, 2016.
+
+10. **Retargetable compilers**
+
+* Retargetable and reconfigurable software dynamic translation Kevin Scott (University of Virginia)Naveen Kumar (University of Pittsburgh)S. Velusamy, Bruce R. Childers, Jack W. Davidson Mar 23rd 2003 Symposium on Code Generation and Optimization pp 36-47
+* The design and application of a retargetable peephole optimizer. Davidson, J. W., & Fraser, C. W. (1980). ACM Transactions on Programming Languages and Systems (TOPLAS), 2(2), 191-202.
+* Code selection through object code optimization. Davidson, J. W., & Fraser, C. W. (1984). ACM Transactions on Programming Languages and Systems (TOPLAS), 6(4), 505-526.
+* Aggressive loop unrolling in a retargetable, optimizing compiler. Davidson, J. W., & Jinturkar, S. (1996, April)In International Conference on Compiler Construction (pp. 59-73)
+
+11. **Software security??**
+
+* Zipr: Efficient Static Rewriting for Binaries. W. Hawkins, J. D. Hiser, M. Co, A. Nguyen-Tuong, J. W. Davidson. Proceedings of 47th IEEE/IFIP International Conference on Dependable Systems and Networks (DSN 2017), Denver, Colorado, June 2017.
+* Dynamic Canary Randomization for Improved Software Security. W. Hawkins, J. D. Hiser, J. W. Davidson. Proceedings of the 11th Annual Cyber and Information Security Research Conference, Oak Ridge, TN, April 2016, pp. 9:1–9:7.
+* Security through Diversity: Leveraging Virtual Machine Technology. D. Williams, W. Hu, J. W. Davidson, J. D. Hiser, J. C. Knight, A. Nguyen-Tuong.  IEEE Security & Privacy, 7(1), January/February 2009, pp. 26–33.
+* Defense Against Stack- Based Attacks Using Speculative Stack Layout Transformation. B. D. Rodes, A. Nguyen-Tuong, J. D. Hiser, J. C. Knight, M. Co, and J. W. Davidson. Proceedings of International Conference on Run- time Verification, Istanbul, Turkey, September 2012, pp. 308–313.
+* ILR: Where did my gadgets go? J. Hiser, A. Nguyen-Tuong, M. Co, M. Hall, and J. W. Davidson. Proceedings of the 2012 IEEE Symposium on Security and Privacy, San Francsico, May 2012, pp. 571–585.
+* Security through Redundant Data Diversity, Nguyen-Tuong, D. Evans, J. C. Knight, B. Cox, and J. W. Davidson. Proceedings of the 38th Annual IEEE/IFIP International Conference on Dependable Systems and Networks, Anchorage, AK, June 2008, pp. 87–196.
+* N-Variant Systems: A Secretless Framework for Security through Diversity. B. Cox, D. Evans, A. Filipi, J. Rowanhill, W. Hu, J. Davidson, and J. Knight, A. Nguyen-Tuong, J. D. Hiser. Proceedings of the 15th USENIX Security Symposium, Vancouver, B. C., Canada, August, 2006, pp. 105–120.
+* Secure and Practical Defense Against Code-injection Attacks Using Software Dynamic Translation. W. Hu, J. Hiser, D. Williams, A. Filipi, J. W. Davidson, D. Evans, J. C. Knight, A. Nguyen-Tuong and J. Hill. Proceedings of the 2006 International Conference on Virtual Execution Environments, Ottawa, CA, June 2006, pp. 2–12.
