@@ -87,7 +87,7 @@ def combine_df(ref_df, info_df):
     return res
 
 # generate score info from combined dataframe
-def score_information(df, entity_ids, ignore_papers):
+def score_information(df, entity_names, ignore_papers):
     # If empty return empty
     if df.empty:
         return df
@@ -105,7 +105,7 @@ def score_information(df, entity_ids, ignore_papers):
     # self-cite
     sc_namer = lambda s : s + '_self_cite'
     for entity_type in Entity_type:
-        sc_df[sc_namer(entity_type.prefix)] = sc_df.apply(lambda x : is_self_cite(x, entity_type.eid, entity_ids), axis=1)
+        sc_df[sc_namer(entity_type.prefix)] = sc_df.apply(lambda x : is_self_cite(x, entity_type.eid, entity_names), axis=1)
     sc_df = sc_df.drop(columns=['citing'] + SC_COLS)
 
     # Join selfcite
@@ -114,8 +114,8 @@ def score_information(df, entity_ids, ignore_papers):
     return df.drop(columns=['paper_map'])
 
 # Generates combined information tables + deals with caching
-def gen_combined_df(conn, entity, entity_ids, paper_ids, ignore_papers):
-    # If entity_id is None (theshold papers) with no caching
+def gen_combined_df(conn, entity, entity_names, paper_ids, ignore_papers):
+    # If entity_name is None (theshold papers) with no caching
     if not entity:
         print('\n---\n{} start finding paper references for: threshold'.format(datetime.now()))
         ref_df = gen_reference_df(conn, paper_ids)
@@ -137,19 +137,19 @@ def gen_combined_df(conn, entity, entity_ids, paper_ids, ignore_papers):
         cache_path = os.path.join(CACHE_DIR, entity.cache_str())
         try:
             res_df = pd.read_pickle(cache_path)
-            print('\n---\n{} found ref cache for: {}\n---'.format(datetime.now(), entity.entity_id))
+            print('\n---\n{} found ref cache for: {}\n---'.format(datetime.now(), entity.entity_name))
         # If miss
         except FileNotFoundError:
-            print('\n---\n{} start finding paper references for: {}'.format(datetime.now(), entity.entity_id))
+            print('\n---\n{} start finding paper references for: {}'.format(datetime.now(), entity.entity_name))
             ref_df = gen_reference_df(conn, paper_ids)
-            print('{} finish finding paper references for: {}\n---'.format(datetime.now(), entity.entity_id))
+            print('{} finish finding paper references for: {}\n---'.format(datetime.now(), entity.entity_name))
 
             # Get the papers to find info for
             info_papers = list(set(ref_df['paper_citing'].tolist()).union(set(ref_df['paper_cited'].tolist())))
 
-            print('\n---\n{} start finding paper info for: {}'.format(datetime.now(), entity.entity_id))
+            print('\n---\n{} start finding paper info for: {}'.format(datetime.now(), entity.entity_name))
             info_df = gen_info_df(conn, info_papers)
-            print('{} finish finding paper info for: {}\n---'.format(datetime.now(), entity.entity_id))
+            print('{} finish finding paper info for: {}\n---'.format(datetime.now(), entity.entity_name))
 
             # Combine and deal with possible unique
             print('\n---\n{} start joining dataframes'.format(datetime.now()))
@@ -160,11 +160,11 @@ def gen_combined_df(conn, entity, entity_ids, paper_ids, ignore_papers):
             res_df.to_pickle(cache_path)
             os.chmod(cache_path, 0o777)
 
-    return score_information(res_df, entity_ids, ignore_papers)
+    return score_information(res_df, entity_names, ignore_papers)
 
 # Wraps above functions to produce a dictionary of pandas dataframes for relevent information
 def gen_search_df(conn, paper_map, unselect_paper_map):
-    entity_ids = list(map(lambda x : x.entity_id, paper_map.keys()))
+    entity_names = list(map(lambda x : x.entity_name, paper_map.keys()))
 
     res_dict = dict()
     threshold_papers = list()
@@ -181,9 +181,9 @@ def gen_search_df(conn, paper_map, unselect_paper_map):
             threshold_papers += paper_ids
             threshold_ignore += unselect_paper_map[entity]
         else:
-            res_dict[entity.name_str()] = gen_combined_df(conn, entity, entity_ids, paper_ids, ignore_papers)
+            res_dict[entity.name_str()] = gen_combined_df(conn, entity, entity_names, paper_ids, ignore_papers)
 
     # Calculate threshold values
-    res_dict[None] = gen_combined_df(conn, None, entity_ids, threshold_papers, threshold_ignore)
+    res_dict[None] = gen_combined_df(conn, None, entity_names, threshold_papers, threshold_ignore)
 
     return res_dict

@@ -8,7 +8,7 @@ def entity_to_citation_score(entity):
     """
         Turns an author ids into a list of papers associated to the ids.
     """
-    entity_id = entity.entity_id
+    entity_name = entity.entity_name
     e_type = entity.entity_type
     paper_ids = entity.get_papers()['paper_id'].tolist()
 
@@ -39,7 +39,7 @@ def entity_to_citation_score(entity):
         row['paper_id'] = cite['CellID']
         row['influenced'] = 1 #/ len(ego['AuthorIDs'])
         row['influencing'] = 0
-        row['self_cite'] = 0 if entity_id in cite['AuthorIDs'] else 1
+        row['self_cite'] = 0 if entity_name in cite['AuthorIDs'] else 1
         #row['date_ego'] = ego['PublishDate']
         row['influence_date'] = to_datetime(cite['PublishDate'])
         data_sc.append(row)
@@ -54,7 +54,7 @@ def entity_to_reference_score(entity):
     """
         Turns an author ids into a list of papers associated to the ids.
     """
-    entity_id = entity.entity_id
+    entity_name = entity.entity_name
     e_type = entity.entity_type
     paper_ids = entity.get_papers()['paper_id'].tolist()
 
@@ -85,7 +85,7 @@ def entity_to_reference_score(entity):
         row['paper_id'] = refs['CellID']
         row['influenced'] = 0
         row['influencing'] = 1 #/ len(refs['AuthorIDs'])
-        row['self_cite'] = 0 if entity_id in refs['AuthorIDs'] else 1
+        row['self_cite'] = 0 if entity_name in refs['AuthorIDs'] else 1
         row['influence_date'] = to_datetime(ego['PublishDate'])
         #row['influence_year'] = cite['PublishDate']
         data_sc.append(row)

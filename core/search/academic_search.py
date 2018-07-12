@@ -173,10 +173,10 @@ def get_search_results(keyword, entityType):
     return data
 
 
-def get_papers_from_entity_ids(entity_ids, entityType):
+def get_papers_from_entity_names(entity_names, entityType):
     url = os.path.join(MAS_URL_PREFIX, "academic/v1.0/evaluate")
     base_string = "Composite("+entity_search_details[entityType]['link_to_paper']+"={})"
-    or_string = or_query_builder(base_string, entity_ids)
+    or_string = or_query_builder(base_string, entity_names)
     expr = "{}".format(or_string)
     query = {
       "expr": expr,
@@ -199,7 +199,7 @@ def get_entities_from_search(keyword, entityType):
 
   if entityType in ['author', 'conference', 'institution', 'journal']:
       eids = [entity['eid'] for entity in data]
-      papers = get_papers_from_entity_ids(eids, entityType)
+      papers = get_papers_from_entity_names(eids, entityType)
       # print(papers['entities'][0])
       papers = parse_search_results(papers, 'paper')
       data = link_papers_to_entities(papers, data, entityType)
