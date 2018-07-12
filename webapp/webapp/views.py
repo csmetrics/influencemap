@@ -404,23 +404,4 @@ def get_node_info(request):
     data = json.loads(request.POST.get("data_string"))
     node_name = data.get("name")
 
-    paper_information = paper_info_mag_check_multiquery(request.session["cache"])
-   
-    reference_papers = sum([paper["References"] for paper in paper_information],[])
-    reference_papers = [paper['PaperId'] for paper in reference_papers if node_name in [author['AuthorName'] for author in paper['Authors']]]
-    reference_papers = list(set(reference_papers))
-    reference_papers = get_paperinfo_from_ids(reference_papers) if len(reference_papers)>0 else []
-
-    citation_papers = sum([paper["Citations"] for paper in paper_information],[])
-    citation_papers = [paper['PaperId'] for paper in citation_papers if node_name in [author['AuthorName'] for author in paper['Authors']]]
-    citation_papers = list(set(citation_papers))
-    citation_papers = get_paperinfo_from_ids(citation_papers) if len(citation_papers)>0 else []
-
-    
-    '''
-    Using cached node information here
-    #return JsonResponse(request.session['node_info'][node_name], safe=False)
-    '''
-
-    return JsonResponse({"reference_papers": reference_papers, "citation_papers": citation_papers}, safe=False)
-    #return JsonResponse({}, safe=False)
+    return JsonResponse(request.session['node_info'][node_name], safe=False)
