@@ -1,4 +1,4 @@
-import os, sys, json, pandas
+import os, sys, json, pandas, string
 from django.shortcuts import render
 from django.http import JsonResponse
 from django.views.decorators.csrf import csrf_exempt
@@ -54,13 +54,12 @@ def browse(request):
 
     for entity in browse_list:
         res = search_cache(entity["cache_index"], entity["cache_type"])
-        entity["names"] = list(set([n["_source"]["DisplayName"] for n in res]))
+        entity["names"] = list(set([n["DisplayName"] for n in res]))
         entity["entities"] = res
 
         for i in range(len(entity["entities"])):
             e = entity["entities"][i]
             document_id = e["_id"]
-            e = e["_source"]
             e["document_id"] = document_id
             if "Keywords" in e:
                 e["Keywords"] = [] if len("".join(e["Keywords"])) == 0 else e["Keywords"]
@@ -70,7 +69,6 @@ def browse(request):
                 e["NormalizedName"] = e["NormalizedNames"][0]
             e['CacheIndex'] = entity["cache_index"]
             entity["entities"][i] = e
-        print(entity["entities"])
 
     data = {
         'list': browse_list,
@@ -160,8 +158,11 @@ s = {
 def search(request):
     keyword = request.POST.get("keyword")
     entityType = request.POST.get("option")
+    exclude = set(string.punctuation)
+    keyword = ''.join(ch for ch in keyword if ch not in exclude)
+    keyword = keyword.lower()
+    keyword = " ".join(keyword.split())
     data = get_entities_from_search(keyword, entityType)
-
     for i in range(len(data)):
         # print(entity)
         entity = {'data': data[i]}
