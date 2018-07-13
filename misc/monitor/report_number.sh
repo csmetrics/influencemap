@@ -1,11 +1,11 @@
 #!/bin/bash
-ES_ADDR=http://130.56.248.105:9200
+ES_ADDR=http://130.56.248.7:9200
 DIR=/mnt/influencemap/misc/monitor
 WEBHOOK=https://www.cmlab.ml/hooks/fi1y5pxaztne5dj7demtpsihdo
 
 cd $DIR
 indices=("journals" "browse_author_group" "browse_paper_group" "conferenceinstances" \
-         "fieldofstudychildren" "authors" "conferenceseries" "fieldsofstudy" \
+         "fieldofstudychildren" "authors" "conferenceseries" "fieldsofstudy" "affiliations"\
          "paperauthoraffiliations" "papers" "paper_info" "paperreferences")
 
 # set refresh_interval to 1s
