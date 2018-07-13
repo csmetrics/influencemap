@@ -6,7 +6,7 @@ from config import conf
 from schema import *
 
 def init_es():
-    connections.create_connection(hosts = conf.get("elasticsearch.hostname"), timeout=20)
+    connections.create_connection(hosts = conf.get("elasticsearch.hostname"), timeout=60)
     print("Elasticsearch connections initialized")
 
 
@@ -17,6 +17,7 @@ def import_Authors(filepath):
     for r in reader:
         try:
             doc = Authors()
+            doc.meta.index = "Authors".lower()
             doc.meta.id = doc.AuthorId = int(r[0])
             doc.Rank = int(r[1])
             doc.NormalizedName = r[2]
@@ -39,6 +40,7 @@ def import_Affiliations(filepath):
     for r in reader:
         try:
             doc = Affiliations()
+            doc.meta.index = "Affiliations".lower()
             doc.meta.id = doc.AffiliationId = int(r[0])
             doc.Rank = int(r[1])
             doc.NormalizedName = r[2]
@@ -96,6 +98,7 @@ def import_Papers(filepath):
     for r in reader:
         try:
             doc = Papers()
+            doc.meta.index = "Papers".lower()
             doc.meta.id = doc.PaperId = int(r[0])
             doc.Rank = int(r[1])
             doc.Doi = r[2]
@@ -139,6 +142,7 @@ def import_PaperReferences(filepath):
     for r in reader:
         try:
             doc = PaperReferences()
+            doc.meta.index = "PaperReferences".lower()
             doc.PaperId = int(r[0])
             doc.PaperReferenceId = int(r[1])
             doc.meta.id = "{}_{}".format(doc.PaperId, doc.PaperReferenceId)
@@ -156,6 +160,7 @@ def import_PaperAuthorAffiliations(filepath):
     for r in reader:
         try:
             doc = PaperAuthorAffiliations()
+            doc.meta.index = "PaperAuthorAffiliations".lower()
             doc.PaperId = int(r[0])
             doc.AuthorId = int(r[1])
             doc.meta.id = "{}_{}".format(doc.PaperId, doc.AuthorId)
@@ -174,6 +179,7 @@ def import_ConferenceInstances(filepath):
     reader = csv.reader(open(filepath), delimiter="\t", quoting=csv.QUOTE_NONE)
     for r in reader:
         doc = ConferenceInstances()
+        doc.meta.index = "ConferenceInstances".lower()
         doc.meta.id = doc.ConferenceInstanceId = int(r[0])
         doc.Rank = int(r[1])
         doc.NormalizedName = r[2]
@@ -200,6 +206,7 @@ def import_ConferenceSeries(filepath):
     reader = csv.reader(open(filepath), delimiter="\t", quoting=csv.QUOTE_NONE)
     for r in reader:
         doc = ConferenceSeries()
+        doc.meta.index = "ConferenceSeries".lower()
         doc.meta.id = doc.ConferenceSeriesId = int(r[0])
         doc.Rank = int(r[1])
         doc.NormalizedName = r[2]
@@ -218,6 +225,7 @@ def import_Journals(filepath):
     for r in reader:
         try:
             doc = Journals()
+            doc.meta.index = "Journals".lower()
             doc.meta.id = doc.JournalId = int(r[0])
             doc.Rank = int(r[1])
             doc.NormalizedName = r[2]
@@ -240,6 +248,7 @@ def import_FieldsOfStudy(filepath):
     reader = csv.reader(open(filepath), delimiter="\t", quoting=csv.QUOTE_NONE)
     for r in reader:
         doc = FieldsOfStudy()
+        doc.meta.index = "FieldsOfStudy".lower()
         doc.meta.id = doc.FieldOfStudyId = int(r[0])
         doc.Rank = int(r[1])
         doc.NormalizedName = r[2]
@@ -259,6 +268,7 @@ def import_FieldOfStudyChildren(filepath):
     reader = csv.reader(open(filepath), delimiter="\t")
     for r in reader:
         doc = FieldOfStudyChildren()
+        doc.meta.index = "FieldOfStudyChildren".lower()
         doc.FieldOfStudyId = int(r[0])
         doc.ChildFieldOfStudyId = int(r[1])
         doc.meta.id = "{}_{}".format(doc.FieldOfStudyId, doc.ChildFieldOfStudyId)
