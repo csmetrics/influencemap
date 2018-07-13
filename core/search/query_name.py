@@ -138,25 +138,25 @@ def journal_name_query(journal_id):
     return jour_name_res
 
 
-def name_query(entity_type, entity_id):
+def name_query(entity_type, entity_name):
     ''' Query entity id for name depending on type.
     '''
     # Call query functions depending on type given
     # Author
     if entity_type == Entity_type.AUTH:
-        return author_name_query(entity_id)
+        return author_name_query(entity_name)
 
     # Affiliation
     if entity_type == Entity_type.AFFI:
-        return affiliation_name_query(entity_id)
+        return affiliation_name_query(entity_name)
 
     # Conference
     if entity_type == Entity_type.CONF:
-        return conference_name_query(entity_id)
+        return conference_name_query(entity_name)
 
     # Journal
     if entity_type == Entity_type.JOUR:
-        return journal_name_query(entity_id)
+        return journal_name_query(entity_name)
 
     # Otherwise
     return None

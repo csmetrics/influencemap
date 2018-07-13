@@ -443,29 +443,34 @@ function populateNodeInfoContent(data){
   var citations = data["citation_papers"];
   var refs_shown = Math.min(3, references.length);
   var cites_shown = Math.min(3, citations.length);
-  var html_string = "<div id='node_info_content'>";
+
   var title = "<h3>"+data["node_name"]+"</h3>";
-  var count = ""; //"<span style='display: block;'>xxx papers and xxyx citations</span>";
-  html_string+= title+count;
+
+  // build references string
+  var references_string = "";
   if (refs_shown !== 0){
-    var references_header = "<span><i>"+refs_shown+" out of "+references.length+" <span style='color: rgb(107, 172, 208)'>references</span></i></span>";
+    var references_header = "<span><i><span style='color: rgb(107, 172, 208)'>references</span></i></span>";
     var references_body = "<ul>";
     for (i = 0; i< refs_shown;i++){
-      references_body += "<li><i>"+references[i]["Ti"]+"</i>, "+references[i]["Y"]+"</li>";
+      references_body += "<li><i>"+references[i]["paper_title"]+"</i>, "+references[i]["year"]+"</li>";
     }
     references_body += "</ul>";
-    html_string += references_header+references_body;
+    references_string += references_header+references_body;
   }
+
+  // build citations string
+  var citations_string = "";
   if (cites_shown !== 0){
-    var citations_header = "<span><i>"+cites_shown+" out of "+citations.length+" <span style='color: rgb(228, 130, 104)'>citations</span></i></span>";
+    var citations_header = "<span><i><span style='color: rgb(228, 130, 104)'>citations</span></i></span>";
     var citations_body = "<ul>";
     for (i = 0; i< cites_shown;i++){
-      citations_body += "<li><i>"+citations[i]["Ti"]+"</i>, "+citations[i]["Y"]+"</li>";
+      citations_body += "<li><i>"+citations[i]["paper_title"]+"</i>, "+citations[i]["year"]+"</li>";
     }
     citations_body += "</ul>";
-    html_string += citations_header+citations_body;
+    citations_string += citations_header+citations_body;
   }
-  html_string += "</div>";
+
+  var html_string = "<div id='node_info_content'>"+title+references_string+citations_string+"</div>";
   var html_elem = new DOMParser().parseFromString(html_string, 'text/html').body.childNodes;
   container_div.appendChild(html_elem[0]);
 }
@@ -483,15 +488,10 @@ function getData(param){
     url: "/get_node_info/",
     data: {"data_string": JSON.stringify(data_dict)},
     success: function (result) { // return data if success
-      var t1 = performance.now();
-      console.log("getting ajax result took " + (t1 - t0) + " milliseconds.")
-      t0 = performance.now();
+      console.log(result);
       result["node_name"] = name;
       populateNodeInfoContent(result);
-      t1 = performance.now();
       document.getElementById("node_info_modal").style.display = "block";
-      console.log("populating info took " + (t1 - t0) + " milliseconds.")
-      console.log(result);
     },
     error: function (result) {
     }

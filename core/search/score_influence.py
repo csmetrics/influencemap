@@ -26,7 +26,7 @@ def score_entity_conf(score_df, entity_map):
                 paper = res_row[0]
                 row = dict()
                 row['paper_id'] = paper['CellID']
-                row['entity_id'] = paper["NormalizedVenue"]
+                row['entity_name'] = paper["NormalizedVenue"]
                 data_dict.append(row)
         else:
             entity_query = {
@@ -45,7 +45,7 @@ def score_entity_conf(score_df, entity_map):
             for paper, entity in data['Results']:
                 row = dict()
                 row['paper_id'] = paper['CellID']
-                row['entity_id'] = entity[e_type.api_name]
+                row['entity_name'] = entity[e_type.api_name]
                 data_dict.append(row)
 
     entity_df = pd.DataFrame(data_dict)
@@ -69,7 +69,7 @@ def score_entity_conf(score_df, entity_map):
         paper = res_row[0]
         row = dict()
         row['paper_id'] = paper['CellID']
-        row['entity_id'] = paper["NormalizedVenue"]
+        row['entity_name'] = paper["NormalizedVenue"]
         ego_dict.append(row)
 
     ego_df = pd.DataFrame(ego_dict)
@@ -118,7 +118,7 @@ def score_entity_gen(score_df, entity_map):
                 paper = res_row[0]
                 row = dict()
                 row['paper_id'] = paper['CellID']
-                row['entity_id'] = paper["NormalizedVenue"]
+                row['entity_name'] = paper["NormalizedVenue"]
                 data_dict.append(row)
         else:
             entity_query = {
@@ -137,7 +137,7 @@ def score_entity_gen(score_df, entity_map):
             for paper, entity in data['Results']:
                 row = dict()
                 row['paper_id'] = paper['CellID']
-                row['entity_id'] = entity[e_type.api_name]
+                row['entity_name'] = entity[e_type.api_name]
                 data_dict.append(row)
 
     entity_df = pd.DataFrame(data_dict)
@@ -163,7 +163,7 @@ def score_entity_gen(score_df, entity_map):
     for paper, entity in info_from_data['Results']:
         row = dict()
         row['paper_id'] = paper['CellID']
-        row['entity_id'] = entity[ego.api_name]
+        row['entity_name'] = entity[ego.api_name]
         ego_dict.append(row)
 
     ego_df = pd.DataFrame(ego_dict)

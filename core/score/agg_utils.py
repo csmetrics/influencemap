@@ -14,10 +14,10 @@ def get_name_mapping(score_df):
     # Create name mapping dictionary
     name_mapping = dict()
     for entity_type, entity_df in score_df.groupby('entity_type'):
-        entity_ids =  list(set(entity_df['entity_id']))
+        entity_names =  list(set(entity_df['entity_name']))
 
         # Naming dictionary for specific type
-        name_map = name_try_mag_multiquery(entity_type, entity_ids)
+        name_map = name_try_mag_multiquery(entity_type, entity_names)
         name_mapping[entity_type] = name_map
 
     return name_mapping
@@ -27,7 +27,7 @@ def apply_name_mapping(row, name_mapping):
     ''' Function to apply the name mapping given by "get_name_mapping".
     '''
     try:
-        return name_mapping[row['entity_type']][row['entity_id']]
+        return name_mapping[row['entity_type']][row['entity_name']]
     except KeyError:
         return None
 
@@ -93,7 +93,7 @@ def flag_coauthor(score_df, coauthors):
         return score_df
 
     # Set flag
-    score_df['coauthor'] = score_df.apply(lambda x: x['entity_id'] in coauthors,
+    score_df['coauthor'] = score_df.apply(lambda x: x['entity_name'] in coauthors,
                                           axis = 1)
 
     return score_df

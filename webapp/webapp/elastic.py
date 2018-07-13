@@ -34,8 +34,13 @@ def query_author_group(author_name):
 
 def search_cache(cache_index, cache_type):
     s = Search(using=client, index=cache_index).query("match", Type=cache_type)
-    response = s.execute()
-    return response.to_dict()["hits"]["hits"]
+    response = []
+    for res in s.scan():
+        res_id = res.meta.id
+        res = res.to_dict()
+        res["_id"] = res_id
+        response.append(res)
+    return response
 
 def query_paper_group(document_id):
     result = {}

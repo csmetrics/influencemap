@@ -140,25 +140,25 @@ def journal_paper_mag_query(journal_id):
     return papers
 
 
-def paper_mag_query(entity_type, entity_id):
+def paper_mag_query(entity_type, entity_name):
     ''' Query entity id for papers depending on type.
     '''
     # Call query functions depending on type given
     # Author
     if entity_type == Entity_type.AUTH:
-        return author_paper_mag_query(entity_id)
+        return author_paper_mag_query(entity_name)
 
     # Affiliation
     if entity_type == Entity_type.AFFI:
-        return affiliation_paper_mag_query(entity_id)
+        return affiliation_paper_mag_query(entity_name)
 
     # Conference
     if entity_type == Entity_type.CONF:
-        return conference_paper_mag_query(entity_id)
+        return conference_paper_mag_query(entity_name)
 
     # Journal
     if entity_type == Entity_type.JOUR:
-        return journal_paper_mag_query(entity_id)
+        return journal_paper_mag_query(entity_name)
 
     # Otherwise
     return None
@@ -308,25 +308,25 @@ def journal_paper_mag_multiquery(journal_ids):
     return papers
 
 
-def paper_mag_multiquery(entity_type, entity_ids):
+def paper_mag_multiquery(entity_type, entity_names):
     ''' Query entity id for papers depending on type.
     '''
     # Call query functions depending on type given
     # Author
     if entity_type == Entity_type.AUTH:
-        return author_paper_mag_multiquery(entity_ids)
+        return author_paper_mag_multiquery(entity_names)
 
     # Affiliation
     if entity_type == Entity_type.AFFI:
-        return affiliation_paper_mag_multiquery(entity_ids)
+        return affiliation_paper_mag_multiquery(entity_names)
 
     # Conference
     if entity_type == Entity_type.CONF:
-        return conference_paper_mag_multiquery(entity_ids)
+        return conference_paper_mag_multiquery(entity_names)
 
     # Journal
     if entity_type == Entity_type.JOUR:
-        return journal_paper_mag_multiquery(entity_ids)
+        return journal_paper_mag_multiquery(entity_names)
 
     # Otherwise
     return None

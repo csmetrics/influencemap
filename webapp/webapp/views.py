@@ -1,4 +1,4 @@
-import os, sys, json, pandas
+import os, sys, json, pandas, string
 from django.shortcuts import render
 from django.http import JsonResponse
 from django.views.decorators.csrf import csrf_exempt
@@ -54,13 +54,12 @@ def browse(request):
 
     for entity in browse_list:
         res = search_cache(entity["cache_index"], entity["cache_type"])
-        entity["names"] = list(set([n["_source"]["DisplayName"] for n in res]))
+        entity["names"] = list(set([n["DisplayName"] for n in res]))
         entity["entities"] = res
 
         for i in range(len(entity["entities"])):
             e = entity["entities"][i]
             document_id = e["_id"]
-            e = e["_source"]
             e["document_id"] = document_id
             if "Keywords" in e:
                 e["Keywords"] = [] if len("".join(e["Keywords"])) == 0 else e["Keywords"]
@@ -70,7 +69,6 @@ def browse(request):
                 e["NormalizedName"] = e["NormalizedNames"][0]
             e['CacheIndex'] = entity["cache_index"]
             entity["entities"][i] = e
-        print(entity["entities"])
 
     data = {
         'list': browse_list,
@@ -160,8 +158,11 @@ s = {
 def search(request):
     keyword = request.POST.get("keyword")
     entityType = request.POST.get("option")
+    exclude = set(string.punctuation)
+    keyword = ''.join(ch for ch in keyword if ch not in exclude)
+    keyword = keyword.lower()
+    keyword = " ".join(keyword.split())
     data = get_entities_from_search(keyword, entityType)
-
     for i in range(len(data)):
         # print(entity)
         entity = {'data': data[i]}
@@ -303,8 +304,10 @@ def submit(request):
     entity_scores = gen_entity_score(paper_information, entity_names, self_cite=False)
 
     # Make flower
-    data1, data2, data3 = gen_flower_data(entity_scores, flower_name,
-                                          coauthors = coauthors)
+    data1, data2, data3, node_info = gen_flower_data(entity_scores,
+                                                     entity_names,
+                                                     flower_name,
+                                                     coauthors = coauthors)
 
     data = {
         "author": data1,
@@ -335,6 +338,7 @@ def submit(request):
 
     request.session['flower_name']  = flower_name
     request.session['entity_names'] = entity_names
+    request.session['node_info']    = node_info
     return render(request, "flower.html", data)
 
 @csrf_exempt
@@ -365,7 +369,8 @@ def resubmit(request):
     # Generate score for each type of flower
     scores = gen_entity_score(paper_information, entity_names, self_cite=self_cite)
 
-    data1, data2, data3 = gen_flower_data(scores,
+    data1, data2, data3, node_info = gen_flower_data(scores,
+                                          entity_names,
                                           flower_name,
                                           pub_lower        = pub_lower,
                                           pub_upper        = pub_upper,
@@ -385,6 +390,9 @@ def resubmit(request):
     print(stats)
     data['stats'] = stats
 
+    # Update the node_info cache
+    request.session['node_info']    = node_info
+
     return JsonResponse(data, safe=False)
 
 
@@ -395,17 +403,5 @@ def get_node_info(request):
     print(request.POST)
     data = json.loads(request.POST.get("data_string"))
     node_name = data.get("name")
-    paper_information = paper_info_mag_check_multiquery(request.session["cache"])
-   
-    reference_papers = sum([paper["References"] for paper in paper_information],[])
-    reference_papers = [paper['PaperId'] for paper in reference_papers if node_name in [author['AuthorName'] for author in paper['Authors']]]
-    reference_papers = list(set(reference_papers))
-    reference_papers = get_paperinfo_from_ids(reference_papers) if len(reference_papers)>0 else []
 
-    citation_papers = sum([paper["Citations"] for paper in paper_information],[])
-    citation_papers = [paper['PaperId'] for paper in citation_papers if node_name in [author['AuthorName'] for author in paper['Authors']]]
-    citation_papers = list(set(citation_papers))
-    citation_papers = get_paperinfo_from_ids(citation_papers) if len(citation_papers)>0 else []
-
-    return JsonResponse({"reference_papers": reference_papers, "citation_papers": citation_papers}, safe=False)
-    #return JsonResponse({}, safe=False)
+    return JsonResponse(request.session['node_info'][node_name], safe=False)

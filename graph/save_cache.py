@@ -11,6 +11,7 @@ cache_types = {
         "anu_researchers",
         "fields_medalists",
         "turing_award_winners",
+        "pl_researchers",
     ],
     "paper_group": [
         "publication_venue",

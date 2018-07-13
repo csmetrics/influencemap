@@ -60,11 +60,11 @@ def getPreFlowerData(id_2_paper_id, unselected_id_2_paper_id, ent_type, cbfunc=l
 
     entity_map = dict()
 
-    entity_id_2_paper_id = dict()
+    entity_name_2_paper_id = dict()
     for eid, papers in id_2_paper_id.items():
         entity = Entity(eid, e[ent_type])
         entity_map[eid] = entity
-        entity_id_2_paper_id[entity] = papers
+        entity_name_2_paper_id[entity] = papers
 
     # Initiate the unselect dictionary
     entity_unselected_id_2_paper_id = dict([(entity, []) for entity in entity_map.values()])
@@ -75,7 +75,7 @@ def getPreFlowerData(id_2_paper_id, unselected_id_2_paper_id, ent_type, cbfunc=l
 
     # filter ref papers
     cbfunc(20, "filter reference papers")
-    data_df = gen_search_df(conn, entity_id_2_paper_id, entity_unselected_id_2_paper_id)
+    data_df = gen_search_df(conn, entity_name_2_paper_id, entity_unselected_id_2_paper_id)
 
     conn.close()
 

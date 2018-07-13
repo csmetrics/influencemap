@@ -49,7 +49,7 @@ def generate_scores(conn, e_map, data_df, inc_self=False):
             influence_list.append((entity_name, row['pub_year_citing']) + score_col(influence))
 
     # Turn list to dataframe
-    res = pd.DataFrame.from_records(influence_list, columns=['entity_id', 'influence_year', 'influenced', 'influencing'])
+    res = pd.DataFrame.from_records(influence_list, columns=['entity_name', 'influence_year', 'influenced', 'influencing'])
 
     print('{} finish filtering influence\n---'.format(datetime.now()))
 
@@ -81,10 +81,10 @@ def generate_score_df(influence_df, e_map, ego, coauthors=set([]), score_year_mi
         score_df = influence_df[(score_year_min <= influence_df['influence_year']) & (influence_df['influence_year'] <= score_year_max)]
 
     # Remove year column
-    score_df = score_df[['entity_id', 'influenced', 'influencing']]
+    score_df = score_df[['entity_name', 'influenced', 'influencing']]
 
     # Aggrigatge scores up
-    score_df = score_df.groupby('entity_id').agg(np.sum).reset_index()
+    score_df = score_df.groupby('entity_name').agg(np.sum).reset_index()
 
     # calculate sum
     score_df['sum'] = score_df['influenced'] + score_df['influencing']
@@ -97,10 +97,10 @@ def generate_score_df(influence_df, e_map, ego, coauthors=set([]), score_year_mi
     score_df = score_df.sort_values('tmp', ascending=False).drop('tmp', axis=1)
 
     # Flag coauthors
-    score_df['coauthor'] = score_df.apply(lambda row : row['entity_id'] in coauthors, axis=1)
+    score_df['coauthor'] = score_df.apply(lambda row : row['entity_name'] in coauthors, axis=1)
 
     # Filter coauthors
-    #score_df = score_df.loc[~score_df['entity_id'].isin(coauthors)]
+    #score_df = score_df.loc[~score_df['entity_name'].isin(coauthors)]
 
     # Add meta data
     score_df.mapping = ' to '.join([e_map.get_center_text(), e_map.get_leave_text()])
