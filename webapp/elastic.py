@@ -1,8 +1,9 @@
 from elasticsearch import Elasticsearch
 from elasticsearch_dsl import Search
 from core.search.query_info_cache import paper_info_cache_query
+from graph.config import conf
 
-client = Elasticsearch("130.56.248.105:9200")
+client = Elasticsearch(conf.get("elasticsearch.hostname"))
 
 def query_cache_paper_info(author_id):
     result = {}
