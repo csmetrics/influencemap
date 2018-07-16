@@ -9,6 +9,7 @@ author: Alexander Soen
 from core.config import *
 from core.search.mag_interface import *
 from core.search.query_info_db import papers_prop_query
+from core.search.query_info_cache import base_paper_cache_query
 from core.search.parse_academic_search import or_query_builder_list
 
 MAS_URL_PREFIX = "https://api.labs.cognitive.microsoft.com"
@@ -212,12 +213,21 @@ def paper_info_mag_multiquery(paper_ids, partial_info = list()):
     # Get paper links
     paper_links = pr_links_mag_multiquery(paper_ids_union)
 
+    # Link papers
+    link_papers = list()
+    for paper_link in paper_links.values():
+        link_papers += paper_link['References'] + paper_link['Citations']
+    link_papers = list(set(link_papers) - set(paper_props.keys()))
+
     # Get all papers to get property values
     all_papers = list() + paper_ids
-    for paper_link in paper_links.values():
-        all_papers += paper_link['References'] + paper_link['Citations']
-
-    all_papers = list(set(all_papers) - set(paper_props.keys()))
+    for link_paper in link_papers:
+        link_prop = base_paper_cache_query(link_paper)
+        if link_prop:
+            paper_props[link_paper] = link_prop
+        else:
+            all_papers.append(link_paper)
+    all_papers = list(set(all_papers))
 
     # Find all basic properties of all the papers
     paper_props.update(base_paper_mag_multiquery(all_papers))

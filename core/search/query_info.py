@@ -58,6 +58,11 @@ def paper_info_mag_check_multiquery(paper_ids):
         else:
             to_process.append(paper_id)
 
+    print("Complete cache entries found:", len(paper_info_res))
+    print("Partial cache entries found:", len(to_add_links))
+    print("No cache entries found:", len(to_process))
+    print("Total ids to query:", len(paper_ids))
+
     # Check if items do not exist in cache
     if to_process or to_add_links:
         # Get from API and add to cache

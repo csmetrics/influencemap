@@ -52,5 +52,6 @@ def base_paper_cache_query(paper_id):
     # Delete extra fields
     field_del(prop_res, 'References')
     field_del(prop_res, 'Citations')
+    field_del(prop_res, 'cache_type')
 
     return prop_res
