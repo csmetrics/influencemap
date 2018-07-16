@@ -35,13 +35,14 @@ def score_author(paper_info, self=list()):
                         else 1
 
                 # Important fields
-                row_dict['entity_id']      = ref_author['AuthorId']
-                row_dict['entity_name']    = ref_author['AuthorName']
-                row_dict['influenced']     = 0
-                row_dict['influencing']    = weight
-                row_dict['self_cite']      = self_cite
-                row_dict['ego_paper_id']   = paper_info['PaperId']
-                row_dict['other_paper_id'] = reference['PaperId']
+                row_dict['entity_id']         = ref_author['AuthorId']
+                row_dict['entity_name']       = ref_author['AuthorName']
+                row_dict['influenced']        = 0
+                row_dict['influencing']       = weight
+                row_dict['self_cite']         = self_cite
+                row_dict['ego_paper_id']      = paper_info['PaperId']
+                row_dict['other_paper_id']    = reference['PaperId']
+                row_dict['other_paper_title'] = reference['PaperTitle']
                 try:
                     row_dict['other_year'] = reference['Year']
                 except:
@@ -71,13 +72,14 @@ def score_author(paper_info, self=list()):
                          paper_info['Authors'] else 1
 
                 # Important fields
-                row_dict['entity_id']      = cite_author['AuthorId']
-                row_dict['entity_name']    = cite_author['AuthorName']
-                row_dict['influenced']     = weight
-                row_dict['influencing']    = 0
-                row_dict['self_cite']      = self_cite
-                row_dict['ego_paper_id']   = paper_info['PaperId']
-                row_dict['other_paper_id'] = citation['PaperId']
+                row_dict['entity_id']         = cite_author['AuthorId']
+                row_dict['entity_name']       = cite_author['AuthorName']
+                row_dict['influenced']        = weight
+                row_dict['influencing']       = 0
+                row_dict['self_cite']         = self_cite
+                row_dict['ego_paper_id']      = paper_info['PaperId']
+                row_dict['other_paper_id']    = citation['PaperId']
+                row_dict['other_paper_title'] = citation['PaperTitle']
                 try:
                     row_dict['other_year'] = citation['Year']
                 except:
@@ -123,12 +125,13 @@ def score_affiliation(paper_info, self=list()):
                     row_dict['entity_name'] = ref_author['AffiliationName']
                 except KeyError:
                     continue
-                row_dict['entity_id']      = ref_author['AffiliationId']
-                row_dict['influenced']     = 0
-                row_dict['influencing']    = weight
-                row_dict['self_cite']      = self_cite
-                row_dict['ego_paper_id']   = paper_info['PaperId']
-                row_dict['other_paper_id'] = reference['PaperId']
+                row_dict['entity_id']         = ref_author['AffiliationId']
+                row_dict['influenced']        = 0
+                row_dict['influencing']       = weight
+                row_dict['self_cite']         = self_cite
+                row_dict['ego_paper_id']      = paper_info['PaperId']
+                row_dict['other_paper_id']    = reference['PaperId']
+                row_dict['other_paper_title'] = reference['PaperTitle']
                 try:
                     row_dict['other_year'] = reference['Year']
                 except:
@@ -162,12 +165,13 @@ def score_affiliation(paper_info, self=list()):
                     row_dict['entity_name']   = cite_author['AffiliationName']
                 except KeyError:
                     continue
-                row_dict['entity_id']      = cite_author['AffiliationId']
-                row_dict['influenced']     = weight
-                row_dict['influencing']    = 0
-                row_dict['self_cite']      = self_cite
-                row_dict['ego_paper_id']   = paper_info['PaperId']
-                row_dict['other_paper_id'] = citation['PaperId']
+                row_dict['entity_id']         = cite_author['AffiliationId']
+                row_dict['influenced']        = weight
+                row_dict['influencing']       = 0
+                row_dict['self_cite']         = self_cite
+                row_dict['ego_paper_id']      = paper_info['PaperId']
+                row_dict['other_paper_id']    = citation['PaperId']
+                row_dict['other_paper_title'] = citation['PaperTitle']
                 try:
                     row_dict['other_year'] = citation['Year']
                 except:
@@ -210,13 +214,14 @@ def score_conference(paper_info, self=list()):
                     continue
 
             # Important fields
-            row_dict['entity_id']      = entity_id
-            row_dict['entity_name']    = entity_name
-            row_dict['influenced']     = 0
-            row_dict['influencing']    = 1
-            row_dict['self_cite']      = is_self_cite(reference, self)
-            row_dict['ego_paper_id']   = paper_info['PaperId']
-            row_dict['other_paper_id'] = reference['PaperId']
+            row_dict['entity_id']         = entity_id
+            row_dict['entity_name']       = entity_name
+            row_dict['influenced']        = 0
+            row_dict['influencing']       = 1
+            row_dict['self_cite']         = is_self_cite(reference, self)
+            row_dict['ego_paper_id']      = paper_info['PaperId']
+            row_dict['other_paper_id']    = reference['PaperId']
+            row_dict['other_paper_title'] = reference['PaperTitle']
             try:
                 row_dict['other_year'] = reference['Year']
             except:
@@ -248,13 +253,14 @@ def score_conference(paper_info, self=list()):
                     continue
 
             # Important fields
-            row_dict['entity_id']      = entity_id
-            row_dict['entity_name']    = entity_name
-            row_dict['influenced']     = 1
-            row_dict['influencing']    = 0
-            row_dict['self_cite']      = is_self_cite(citation, self)
-            row_dict['ego_paper_id']   = paper_info['PaperId']
-            row_dict['other_paper_id'] = citation['PaperId']
+            row_dict['entity_id']         = entity_id
+            row_dict['entity_name']       = entity_name
+            row_dict['influenced']        = 1
+            row_dict['influencing']       = 0
+            row_dict['self_cite']         = is_self_cite(citation, self)
+            row_dict['ego_paper_id']      = paper_info['PaperId']
+            row_dict['other_paper_id']    = citation['PaperId']
+            row_dict['other_paper_title'] = citation['PaperTitle']
             try:
                 row_dict['other_year'] = citation['Year']
             except:
@@ -294,13 +300,14 @@ def score_journal(paper_info, self=list()):
                 continue
 
             # Important fields
-            row_dict['entity_id']      = entity_id
-            row_dict['entity_name']    = entity_name
-            row_dict['influenced']     = 0
-            row_dict['influencing']    = 1
-            row_dict['self_cite']      = is_self_cite(reference, self)
-            row_dict['ego_paper_id']   = paper_info['PaperId']
-            row_dict['other_paper_id'] = reference['PaperId']
+            row_dict['entity_id']         = entity_id
+            row_dict['entity_name']       = entity_name
+            row_dict['influenced']        = 0
+            row_dict['influencing']       = 1
+            row_dict['self_cite']         = is_self_cite(reference, self)
+            row_dict['ego_paper_id']      = paper_info['PaperId']
+            row_dict['other_paper_id']    = reference['PaperId']
+            row_dict['other_paper_title'] = reference['PaperTitle']
             try:
                 row_dict['other_year'] = reference['Year']
             except:
@@ -328,13 +335,14 @@ def score_journal(paper_info, self=list()):
                 continue
 
             # Important fields
-            row_dict['entity_id']      = entity_id
-            row_dict['entity_name']    = entity_name
-            row_dict['influenced']     = 1
-            row_dict['influencing']    = 0
-            row_dict['self_cite']      = is_self_cite(citation, self)
-            row_dict['ego_paper_id']   = paper_info['PaperId']
-            row_dict['other_paper_id'] = citation['PaperId']
+            row_dict['entity_id']         = entity_id
+            row_dict['entity_name']       = entity_name
+            row_dict['influenced']        = 1
+            row_dict['influencing']       = 0
+            row_dict['self_cite']         = is_self_cite(citation, self)
+            row_dict['ego_paper_id']      = paper_info['PaperId']
+            row_dict['other_paper_id']    = citation['PaperId']
+            row_dict['other_paper_title'] = citation['PaperTitle']
             try:
                 row_dict['other_year'] = citation['Year']
             except:
@@ -386,6 +394,7 @@ def score_paper_info_list(paper_info_list, leaves, self=list()):
     
     # Iterate through different entity types for scoring dictionaries
     for paper_info in paper_info_list:
+        print(paper_info)
         for leaf in leaves:
             # Get score
             score = score_paper_info(paper_info, leaf, self)

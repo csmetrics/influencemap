@@ -20,4 +20,6 @@ def cache_paper_info(paper_infos):
     cache_datas = (paper_info_to_cache_json(pi) for pi in paper_infos)
 
     # Cache to database
-    helpers.bulk(client, cache_datas)
+    helpers.bulk(client, cache_datas, refresh=True)
+
+    print("Cache")

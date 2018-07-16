@@ -198,21 +198,29 @@ def pr_links_mag_multiquery(paper_ids):
     return results
 
 
-def paper_info_mag_multiquery(paper_ids):
+def paper_info_mag_multiquery(paper_ids, partial_info = list()):
     ''' Find paper information with MAG, "optimised"
     '''
-    # Get paper links
-    paper_links = pr_links_mag_multiquery(paper_ids)
+    paper_props = dict()
+    # Turn partial info into a map
+    for p_info in partial_info:
+        paper_props[p_info['PaperId']] = p_info
 
-    # Get all papers relevent to this query
+    # Get union of paper info ids to generate
+    paper_ids_union = list(set(paper_ids + list(paper_props.keys())))
+        
+    # Get paper links
+    paper_links = pr_links_mag_multiquery(paper_ids_union)
+
+    # Get all papers to get property values
     all_papers = list() + paper_ids
     for paper_link in paper_links.values():
         all_papers += paper_link['References'] + paper_link['Citations']
 
-    all_papers = list(set(all_papers))
+    all_papers = list(set(all_papers) - set(paper_props.keys()))
 
     # Find all basic properties of all the papers
-    paper_props = base_paper_mag_multiquery(all_papers)
+    paper_props.update(base_paper_mag_multiquery(all_papers))
 
     # Add properties to links
     paper_prop_links = dict()
@@ -236,17 +244,22 @@ def paper_info_mag_multiquery(paper_ids):
 
     # Turn into paper_info dictionaries
     paper_info_res = list()
+    partial_res    = list()
     
-    for paper_id in paper_ids:
-        try:
-            # Combine queries
-            paper_prop = paper_props[paper_id]
-            paper_link = paper_prop_links[paper_id]
-            paper_info_res.append(dict(paper_prop, **paper_link))
-        except KeyError:
-            pass
+    for paper_id, paper_prop in paper_props.items():
+        if paper_id in paper_ids_union:
+            try:
+                # Combine queries
+                paper_prop['cache_type'] = 'complete'
+                paper_link = paper_prop_links[paper_id]
+                paper_info_res.append(dict(paper_prop, **paper_link))
+            except KeyError:
+                pass
+        else:
+            paper_prop['cache_type'] = 'partial'
+            partial_res.append(paper_prop)
 
-    return paper_info_res
+    return paper_info_res, partial_res
 
 
 if __name__ == '__main__':

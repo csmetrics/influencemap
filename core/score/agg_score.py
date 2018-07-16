@@ -75,17 +75,18 @@ def agg_node_info(influence_df, node_names, coauthors=set([]), num_papers=3):
                                                 .apply(lambda x: 1 if x > 0 else 0)
 
         # Paper influence scores
-        score_groups = ['other_paper_id', 'other_year']
+        score_groups = ['other_paper_id', 'other_paper_title', 'other_year']
         paper_scores = node_influence.groupby(score_groups).agg(np.sum)
         
         # Get information
         info['reference_papers'] = list()
-        for paper_group_info, row in paper_scores.nlargest(num_papers,
+        ref_scores = paper_scores[ paper_scores['influenced'] > 0 ]
+        for paper_group_info, row in ref_scores.nlargest(num_papers,
                                         'influenced').iterrows():
-            paper_id, year = paper_group_info
+            paper_id, paper_title, year = paper_group_info
 
             paper_dict = dict()
-            paper_dict['paper_title']     = paper_id # TODO Make titles!
+            paper_dict['paper_title']     = paper_title
             paper_dict['paper_id']        = paper_id
             paper_dict['year']            = year
             paper_dict['influence_score'] = row['influenced']
@@ -94,12 +95,13 @@ def agg_node_info(influence_df, node_names, coauthors=set([]), num_papers=3):
             info['reference_papers'].append(paper_dict)
 
         info['citation_papers'] = list()
-        for paper_id, row in paper_scores.nlargest(num_papers,
+        cite_scores = paper_scores[ paper_scores['influencing'] > 0 ]
+        for paper_group_info, row in cite_scores.nlargest(num_papers,
                                 'influencing').iterrows():
-            paper_id, year = paper_group_info
+            paper_id, paper_title, year = paper_group_info
 
             paper_dict = dict()
-            paper_dict['paper_title']     = paper_id # TODO Make titles!
+            paper_dict['paper_title']     = paper_title
             paper_dict['paper_id']        = paper_id
             paper_dict['year']            = year
             paper_dict['influence_score'] = row['influencing']

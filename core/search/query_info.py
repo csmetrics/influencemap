@@ -39,6 +39,7 @@ def paper_info_mag_check_multiquery(paper_ids):
         generate paper info from basic tables and adds to cache.
     '''
     to_process     = list()
+    to_add_links   = list()
     paper_info_res = list()
     for paper_id in paper_ids:
         # Check cache
@@ -46,20 +47,25 @@ def paper_info_mag_check_multiquery(paper_ids):
 
         # If non-empty result return
         if paper_info:
-            paper_info_res.append(paper_info)
+            # If cache entry is partially complete
+            if paper_info['cache_type'] == 'partial':
+                del paper_info['cache_type']
+                to_add_links.append(paper_info)
+            else:
+                del paper_info['cache_type']
+                paper_info_res.append(paper_info)
+
         else:
             to_process.append(paper_id)
 
-    print("To call API:", len(to_process))
-
     # Check if items do not exist in cache
-    if to_process:
+    if to_process or to_add_links:
         # Get from API and add to cache
-        process_res = paper_info_mag_multiquery(to_process)
+        process_res, partial_res = paper_info_mag_multiquery(to_process,
+                                       partial_info = to_add_links)
 
         # Cache
-        cache_paper_info(process_res)
-
+        cache_paper_info(process_res + partial_res)
         paper_info_res += process_res
 
     return paper_info_res
