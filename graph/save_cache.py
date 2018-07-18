@@ -3,8 +3,9 @@ from multiprocessing import Pool
 from elasticsearch_dsl.connections import connections
 from datetime import datetime
 from graph.schema_cache import AuthorGroup, PaperGroup, AuthorInfo, PaperInfo
+from graph.config import conf
 
-hostname = "130.56.248.105:9200"
+hostname = conf.get("elasticsearch.hostname")
 
 cache_types = {
     "author_group": [
@@ -14,9 +15,9 @@ cache_types = {
         "pl_researchers",
     ],
     "paper_group": [
-        "publication_venue",
-        "univ_field",
-        "project",
+        "publication_venues",
+        "university_fields",
+        "projects",
         "universities"
     ]
 }
@@ -45,6 +46,7 @@ def saveNewAuthorGroupCache(cache):
     doc.AuthorIds = cache['AuthorIds'] if 'AuthorIds' in cache else None
     doc.CreatedDate = datetime.now()
     doc.meta.id = generate_uuid("{}-{}".format(doc.Type, doc.DisplayName))
+    doc.meta.index = "browse_author_group"
     doc.save()
     print("finished caching")
 
@@ -62,4 +64,5 @@ def saveNewPaperGroupCache(cache):
     doc.Keywords = cache["Keywords"] if "Keywords" in cache else None
     doc.CreatedDate = datetime.now()
     doc.meta.id = generate_uuid("{}-{}={}".format(doc.Year, doc.Field, doc.NormalizedName))
+    doc.meta.index = "browse_paper_group"
     doc.save()

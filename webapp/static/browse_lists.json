@@ -40,7 +40,7 @@
 		"info":
 			"A sample list of research projects.",
 		"cache_index": "browse_paper_group",
-		"cache_type": "project"
+		"cache_type": "projects"
 	},
 
         {
@@ -64,7 +64,7 @@
 				"CVPR - Computer Vision and Pattern Recognition", "NIPS - Neural Information Processing Systems", "International World Wide Web Conferences"
 			],
 		"cache_index": "browse_paper_group",
-		"cache_type": "publication_venue"
+		"cache_type": "publication_venues"
 	},
 	{
 		"display":
@@ -83,7 +83,7 @@
 			"The Australian National University, Artificial Intelligence", "California institute of technology, Artificial Intelligence"
 			],
 		"cache_index": "browse_paper_group",
-		"cache_type": "univ_field"
+		"cache_type": "university_fields"
 	},
 	{
 		"display":
