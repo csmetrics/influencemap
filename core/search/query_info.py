@@ -49,6 +49,7 @@ def paper_info_mag_check_multiquery(paper_ids):
         if paper_info:
             # If cache entry is partially complete
             if paper_info['cache_type'] == 'partial':
+                print(paper_id, paper_info['PaperTitle'], paper_info['cache_type'])
                 del paper_info['cache_type']
                 to_add_links.append(paper_info)
             else:

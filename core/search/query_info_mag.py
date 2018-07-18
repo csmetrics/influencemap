@@ -219,12 +219,16 @@ def paper_info_mag_multiquery(paper_ids, partial_info = list()):
         link_papers += paper_link['References'] + paper_link['Citations']
     link_papers = list(set(link_papers) - set(paper_props.keys()))
 
+    # In cache list to ensure no overrides
+    in_cache = list()
+
     # Get all papers to get property values
     all_papers = list() + paper_ids
     for link_paper in link_papers:
         link_prop = base_paper_cache_query(link_paper)
         if link_prop:
             paper_props[link_paper] = link_prop
+            in_cache.append(link_paper)
         else:
             all_papers.append(link_paper)
     all_papers = list(set(all_papers))
@@ -266,8 +270,10 @@ def paper_info_mag_multiquery(paper_ids, partial_info = list()):
             except KeyError:
                 pass
         else:
-            paper_prop['cache_type'] = 'partial'
-            partial_res.append(paper_prop)
+            # If not already in cache
+            if not paper_id in in_cache:
+                paper_prop['cache_type'] = 'partial'
+                partial_res.append(paper_prop)
 
     return paper_info_res, partial_res
 
