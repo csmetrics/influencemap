@@ -394,7 +394,6 @@ def score_paper_info_list(paper_info_list, leaves, self=list()):
     
     # Iterate through different entity types for scoring dictionaries
     for paper_info in paper_info_list:
-        print(paper_info)
         for leaf in leaves:
             # Get score
             score = score_paper_info(paper_info, leaf, self)

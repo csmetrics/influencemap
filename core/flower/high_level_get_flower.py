@@ -53,9 +53,6 @@ def gen_entity_score(paper_information, names, self_cite=True):
 
     return entity_scores
 
-import pandas
-pandas.set_option('display.max_columns', None)
-
 
 def gen_flower_data(score_dfs, entity_names, flower_name,
                                pub_lower=None, pub_upper=None,
@@ -75,8 +72,6 @@ def gen_flower_data(score_dfs, entity_names, flower_name,
         filter_score = filter_year(score_dfs[i], pub_lower, pub_upper)
         filter_score = filter_year(filter_score, cit_lower, cit_upper,
                                    index = 'influence_year')
-
-        print(filter_score)
 
         # Aggregate
         agg_score = agg_score_df(filter_score)
@@ -159,7 +154,6 @@ def get_flower_data_high_level(entitytype, authorids, normalizedname, selection=
     year_counter = sorted(list(Counter(years).items()), key=itemgetter(0))
     year_chart = [["Year", "Num of Papers"]]
     year_chart.extend([[k,v] for k,v in year_counter])
-    print(year_chart)
 
     # Generate score for each type of flower
     entity_scores = gen_entity_score(paper_information, [normalizedname],

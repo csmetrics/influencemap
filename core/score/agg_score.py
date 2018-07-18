@@ -34,8 +34,6 @@ def agg_score_df(influence_df, coauthors=set([]), \
     score_df = score_df.assign(tmp = sort_func(score_df['influencing'], score_df['influenced']))
     score_df = score_df.sort_values('tmp', ascending=False)
 
-    print(score_df)
-    print(score_df.head(n=25))
     score_df = score_df.drop('tmp', axis=1)
 
     # Default value

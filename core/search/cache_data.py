@@ -21,5 +21,3 @@ def cache_paper_info(paper_infos):
 
     # Cache to database
     helpers.bulk(client, cache_datas, refresh=True)
-
-    print("Cache")

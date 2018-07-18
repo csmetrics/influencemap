@@ -387,7 +387,6 @@ def resubmit(request):
     }
 
     stats = get_stats(paper_information, pub_lower, pub_upper)
-    print(stats)
     data['stats'] = stats
 
     # Update the node_info cache
