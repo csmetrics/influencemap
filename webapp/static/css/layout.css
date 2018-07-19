@@ -330,15 +330,30 @@ table a, #comments a{background-color:inherit;}
 /* @media screen and (min-width:978px){ */
 	/* .hoc{max-width:978px;} */
 /* } */
-
-@media screen and (min-width:1440px){
-	.hoc{max-width:1440px;}
+@media screen and (min-width:1200px){
+	.hoc{max-width:1200px;}
+	.statpane-right {
+		width: auto;
+		vertical-align: top;
+		border-top:1px #ddd solid;
+	}
+	#image-container{width:750px}
 }
+@media screen and (min-width:1360px){
+	.hoc{max-width:1360px;}
+	.statpane-right {
+		width: auto;
+		vertical-align: top;
+		border-top:1px #ddd solid;
+	}
+	#image-container{width:950px}
+}
+
 
 /* Mobile Devices
 --------------------------------------------------------------------------------------------------------------- */
-@media screen and (max-width:1024px){
-	.hoc{max-width:100%;}
+@media screen and (max-width:1200px){
+	.hoc{max-width:1024px;}
 
 	#topbar{}
 
@@ -355,45 +370,14 @@ table a, #comments a{background-color:inherit;}
 	#comments input[type="reset"]{margin-top:10px;}
 	.pagination li{display:inline-block; margin:0 5px 5px 0;}
 
+	#statpane {width:100%;}
+	.statpane-left {width: 500px; display:inline-block; vertical-align: top}
+	.statpane-right {
+		width: 518px;
+		display:inline-block;
+		vertical-align: top;
+		border-left:1px #ddd solid;
+	}
+	#image-container{width:1024px}
 	#footer{}
-}
-
-
-@media screen and (max-width:750px){
-	.imgl, .imgr{display:inline-block; float:none; margin:0 0 10px 0;}
-	.fl_left, .fl_right{display:block; float:none;}
-	.one_half, .one_third, .two_third, .one_quarter, .two_quarter, .three_quarter{display:block; float:none; width:auto; margin:0 0 30px 0; padding:0;}
-
-	#topbar{padding-top:15px; text-align:center;}
-	#topbar ul{margin:0 0 15px 0; line-height:normal;}
-
-	#header{text-align:center;}
-	#header #logo{margin:0 0 30px 0;}
-
-	#mainav form{margin-top:0;}
-
-	#pageintro article .heading{margin-bottom:30px; font-size:38px;}
-	#pageintro article p:first-of-type{margin-bottom:20px; font-size:18px;}
-
-	#services .table, #services .table-row, #services .table-cell{display:block; width:100%;}
-	#services .table-cell{padding:5%;}
-}
-
-
-@media screen and (max-width:450px){
-	#topbar ul li{margin-bottom:2px; padding-right:0; border-right:none;}
-}
-
-
-/* Other
---------------------------------------------------------------------------------------------------------------- */
-@media screen and (max-width:650px){
-	.scrollable{display:block; width:100%; margin:0 0 30px 0; padding:0 0 15px 0; overflow:auto; overflow-x:scroll;}
-	.scrollable table{margin:0; padding:0; white-space:nowrap;}
-
-	.inline li{display:block; margin-bottom:10px;}
-	.pushright li{margin-right:0;}
-
-	.font-x2{font-size:1.4rem;}
-	.font-x3{font-size:1.6rem;}
 }

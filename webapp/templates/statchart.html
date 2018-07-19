@@ -1,19 +1,21 @@
 {% load staticfiles%}
-<div style="min-width: 430px; border: 1px #ddd solid;">
-  <div class="wrapper">
-    <b>Select YearRange</b>
-    <div style="float:right;padding:0 3">
-      <i class="fa fa-circle" style="color:#ABBD81"></i> Publication
-      <i class="fa fa-circle" style="color:#F47E60"></i> Citation
-    </div>
-    <div id="div_charts" style="width:400px;height:210px;">
-      <div id="pub_chart" style="height:90px;"></div>
-      <div id="publication-range" class="yearslider"></div>
-      <div id="citation-range" class="yearslider"></div>
-      <div id="cite_chart" style="height:110px;"></div>
+<div style="min-width: 400px; border: 1px #ddd solid;">
+  <div class="statpane-left">
+    <div class="wrapper">
+      <b>Select YearRange</b>
+      <div style="float:right;padding:0 3">
+        <i class="fa fa-circle" style="color:#ABBD81"></i> Publication
+        <i class="fa fa-circle" style="color:#F47E60"></i> Citation
+      </div>
+      <div id="div_charts" style="width:370px;height:210px;">
+        <div id="pub_chart" style="height:90px;"></div>
+        <div id="publication-range" class="yearslider"></div>
+        <div id="citation-range" class="yearslider"></div>
+        <div id="cite_chart" style="height:110px;"></div>
+      </div>
     </div>
   </div>
-  <div style="border-top:1px #ddd solid;">
+  <div class="statpane-right">
     <div class="wrapper">
       <b> Statictics: Total</b> <span class="stat">{{ yearSlider.pubrange.2 }}</span> years of publication
       <span class="stat">{{ yearSlider.pubrange.0 }}~{{ yearSlider.pubrange.1 }}</span><br>
@@ -26,9 +28,7 @@
         average <span id="avg_cites" class="stat">{{ stats.avg_cites }}</span> per paper<br>
       </div>
     </div>
-  </div>
-  <div style="border-top:1px #ddd solid;">
-    <div class="wrapper" >
+    <div class="wrapper" style="border-top:1px #ddd solid;">
       <b>Selected Range (for flower)</b>
       <div style="padding-left:10px">
         <b>Publications:
@@ -72,7 +72,7 @@ var chartoption = {
   max: Math.max(pub_range[1], cite_range[1]),
   xticks: Math.round(pub_range[2]/5), yticks: 3,
   width:380, height:h,
-  top: 40, right: 0, bottom: 40, left: 40};
+  top: 40, right: 25, bottom: 40, left: 40};
 
 var pubSlider = document.getElementById('publication-range');
 var citSlider = document.getElementById('citation-range');
