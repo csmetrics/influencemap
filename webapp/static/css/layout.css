@@ -337,6 +337,7 @@ table a, #comments a{background-color:inherit;}
 		vertical-align: top;
 		border-top:1px #ddd solid;
 	}
+	#flower-searchbar {margin-left:30%;}
 	#image-container{width:750px}
 }
 @media screen and (min-width:1360px){
@@ -346,6 +347,7 @@ table a, #comments a{background-color:inherit;}
 		vertical-align: top;
 		border-top:1px #ddd solid;
 	}
+	#flower-searchbar {margin-left:30%;}
 	#image-container{width:950px}
 }
 
@@ -359,9 +361,9 @@ table a, #comments a{background-color:inherit;}
 
 	#header{padding:30px 0;}
 	#header #logo{margin:0;}
+	#headbar{height:160px}
 
 	#mainav{}
-	#mainav ul{display:none;}
 	#mainav form{display:block; margin-top:8px;}
 
 	#breadcrumb{}
@@ -370,6 +372,7 @@ table a, #comments a{background-color:inherit;}
 	#comments input[type="reset"]{margin-top:10px;}
 	.pagination li{display:inline-block; margin:0 5px 5px 0;}
 
+	#flower-searchbar {margin-left:15; display:block;}
 	#statpane {width:100%;}
 	.statpane-left {width: 500px; display:inline-block; vertical-align: top}
 	.statpane-right {

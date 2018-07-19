@@ -4,10 +4,7 @@
 {% include 'header.html' %}
 <body id="top">
 
-{% include 'pagehead.html' %}
-<div id="searchbar" class="wrapper bgded overlay">
-  {% include 'navbar.html' with navbar=navbarOption %}
-</div>
+{% include 'flower_pagehead.html' with navbar=navbarOption %}
 <div class="hoc" style="padding-top:0">
   <div style="display:inline-block; vertical-align:top" id="statpane">
     {% include 'statchart.html' with stats=stats yearSlider=yearSlider %}

@@ -1,0 +1,38 @@
+{% load staticfiles %}
+
+<div id="headbar" class="wrapper row1 bgded overlay">
+  <header id="header" class="hoc clear" style="color:white;height: 80px">
+    <div id="logo" style="float:left">
+      <h1><b><a href="/">Influence Map</a></b></h1>
+      <p>Mapping intellectual influence using citation data</p>
+    </div>
+    <nav id="mainav" style="color:white;float:right;">
+      <ul class="clear">
+        <li class="active"><a href="index.html">Home</a></li>
+        <li><a href="#">Menu</a></li>
+        <li><a href="#">Contact</a></li>
+      </ul>
+    </nav>
+    <div id="flower-searchbar">
+      <div class="row search-bar" style="padding:23px 0; width: 600px;">
+        <div class="col-xs-3">
+          <select id="entity-type-option" class="form-control select" name="type" style="width:150px; height:40px">
+            {% for opt in navbar.optionlist %}
+              <option class="entity-option" value="{{opt.id}}" {% if opt.id == navbar.selectedOption.id %} selected {% endif %}>{{ opt.name }}</option>
+            {% endfor %}
+          </select>
+        </div>
+        <div class="col-xs-9">
+          <div class="input-group input-group-sm" style="width: 450px; height: 40px;">
+            <input id="name-search-bar" type="text" name="keyword" class="form-control" {% if navbar.selectedKeyword %} value="{{ navbar.selectedKeyword }}" {% endif %}>
+            <span class="input-group-btn">
+              <button id="search-btn" type="submit" name="search" value="search" class="btn btn-primary btn-flat" style="width:40px; font-size:20px"><i class="fa fa-search"></i></button>
+            </span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </header>
+</div>
+<script src="{% static 'js/auto-complete.min.js' %}"></script>
+<script src="{% static 'js/navbar.js' %}"></script>
