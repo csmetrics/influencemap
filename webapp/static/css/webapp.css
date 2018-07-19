@@ -62,10 +62,7 @@ table {
   font-size: 16px;
   background-color: rgba(0,0,0,0.5);
 }
-#statpane {
-  border: 1px #ddd solid;
-  border-top: none;
-}
+
 .flower-loading{
   background: url('../images/flower_updating.gif') no-repeat center center;
 }
@@ -75,8 +72,8 @@ table {
 
 .yearslider {
   height: 15px;
-  width: 380px;
-  margin: 12 40 6 60;
+  width: 340px;
+  margin: 12 20 6 40;
 }
 .noUi-horizontal .noUi-handle {
   width: auto;
@@ -308,7 +305,6 @@ tr:hover td{
     width: 100%; /* Full width */
     height: 100%; /* Full height */
     overflow: auto; /* Enable scroll if needed */
-    background-color: rgba(0,0,0,0.2); /* Black background with opacity */
 }
 
 /* Node info Content/Box */

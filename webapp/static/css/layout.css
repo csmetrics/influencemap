@@ -331,14 +331,14 @@ table a, #comments a{background-color:inherit;}
 	/* .hoc{max-width:978px;} */
 /* } */
 
-@media screen and (min-width:1200px){
-	.hoc{max-width:1024px;}
+@media screen and (min-width:1440px){
+	.hoc{max-width:1440px;}
 }
 
 /* Mobile Devices
 --------------------------------------------------------------------------------------------------------------- */
 @media screen and (max-width:1024px){
-	.hoc{max-width:90%;}
+	.hoc{max-width:100%;}
 
 	#topbar{}
 

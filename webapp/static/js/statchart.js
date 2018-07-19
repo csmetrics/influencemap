@@ -8,7 +8,7 @@ class PubChart {
   }
 
   initChart(data, opt) {
-    var height = opt.height-opt.top;
+    var height = opt.height-opt.top+10;
     var width = opt.width-opt.left-opt.right;
     this.g = this.chartsvg.append("g")
         .attr("transform", "translate(" + opt.left + "," + opt.top + ")");
@@ -81,7 +81,7 @@ class CiteChart {
   }
 
   drawChart(data, opt) {
-    var height = opt.height-opt.bottom;
+    var height = opt.height-opt.bottom+10;
     var width = opt.width-opt.left-opt.right;
     this.chartsvg.selectAll("g").remove();
     this.g = this.chartsvg.append("g")
