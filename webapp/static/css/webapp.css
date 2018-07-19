@@ -66,6 +66,12 @@ table {
   border: 1px #ddd solid;
   border-top: none;
 }
+.flower-loading{
+  background: url('../images/flower_updating.gif') no-repeat center center;
+}
+#resubmitButton {
+  background-color: #001F3F;
+}
 
 .yearslider {
   height: 15px;

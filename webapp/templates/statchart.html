@@ -52,7 +52,7 @@
           <input class="coauthor" type="checkbox" style="float:left; margin:5 10 0 0" name="self-coauthor" id="coauthor" checked="checked" />
         </div>
         <div align=center style="padding-top:5px;">
-          <button class="btn btn-success" style="width:200px; height:30px; padding:0" id="resubmitButton">Update Flower</button>
+          <button class="btn" style="width:160px; height:30px; padding:0" id="resubmitButton">Update Flower</button>
         </div>
       </div>
     </div>
@@ -205,6 +205,7 @@ function updateStats(stats){
 }
 
 resubmitButton.addEventListener('click', function(){
+  resubmitButton.className = "btn flower-loading";
   $.ajax({
     type: "POST",
     url: "/resubmit/",
@@ -233,6 +234,7 @@ resubmitButton.addEventListener('click', function(){
 
       // do not update stat for resubmit
       // updateStats(result.stats);
+      resubmitButton.className = "btn";
     }
   });
 });
