@@ -449,7 +449,7 @@ function populateNodeInfoContent(data){
   // build references string
   var references_string = "";
   if (refs_shown !== 0){
-    var references_header = "<span><i><span style='color: rgb(107, 172, 208)'>references</span></i></span>";
+    var references_header = "<span><i><span style='color: rgb(228,130,104)'>cited by</span></i></span>";
     var references_body = "<ul>";
     for (i = 0; i< refs_shown;i++){
       references_body += "<li><i>"+references[i]["paper_title"]+"</i>, "+references[i]["year"]+"</li>";
@@ -461,7 +461,7 @@ function populateNodeInfoContent(data){
   // build citations string
   var citations_string = "";
   if (cites_shown !== 0){
-    var citations_header = "<span><i><span style='color: rgb(228, 130, 104)'>citations</span></i></span>";
+    var citations_header = "<span><i><span style='color: rgb(107, 172, 208)'>referenced</span></i></span>";
     var citations_body = "<ul>";
     for (i = 0; i< cites_shown;i++){
       citations_body += "<li><i>"+citations[i]["paper_title"]+"</i>, "+citations[i]["year"]+"</li>";
