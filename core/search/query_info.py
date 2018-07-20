@@ -71,7 +71,8 @@ def paper_info_mag_check_multiquery(paper_ids):
                                        partial_info = to_add_links)
 
         # Cache
-        cache_paper_info(process_res + partial_res)
+        cache_paper_info(process_res)
+        cache_paper_info(partial_res, chunk_size=100)
         paper_info_res += process_res
 
     return paper_info_res
