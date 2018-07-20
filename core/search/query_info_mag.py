@@ -14,7 +14,8 @@ from core.search.query_info_db import papers_prop_query
 from core.search.query_info_cache import base_paper_cache_query
 from core.search.parse_academic_search import or_query_builder
 
-MAS_URL_PREFIX = "https://api.labs.cognitive.microsoft.com"
+MAS_URL_PREFIX  = "https://api.labs.cognitive.microsoft.com"
+API_CHUNK_SIZE = 1000
 
 basic_attr = {'Id': 'PaperId',
               'Y' : 'Year',
@@ -233,8 +234,11 @@ def paper_info_mag_multiquery(paper_ids, partial_info = list()):
             all_papers.append(link_paper)
     all_papers = list(set(all_papers))
 
+    print("Number of paper props to get:", len(all_papers))
     # Find all basic properties of all the papers
-    paper_props.update(base_paper_mag_multiquery(all_papers))
+    for chunk in [all_papers[i:i+API_CHUNK_SIZE] for i in
+                  range(0, len(all_papers), API_CHUNK_SIZE)]:
+        paper_props.update(base_paper_mag_multiquery(chunk))
 
     # Add properties to links
     paper_prop_links = dict()
