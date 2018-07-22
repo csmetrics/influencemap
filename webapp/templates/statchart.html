@@ -70,9 +70,10 @@ var h = ($("#div_charts").height()-50)/2;
 var chartoption = {
   min: Math.min(pub_range[0], cite_range[0]),
   max: Math.max(pub_range[1], cite_range[1]),
-  xticks: Math.round(pub_range[2]/5), yticks: 3,
+  xticks: Math.round(Math.max(pub_range[2], cite_range[2])/5), yticks: 3,
   width:380, height:h,
   top: 40, right: 25, bottom: 40, left: 40};
+console.log("xticks", chartoption.xticks, pub_range[2])
 
 var pubSlider = document.getElementById('publication-range');
 var citSlider = document.getElementById('citation-range');
