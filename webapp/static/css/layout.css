@@ -355,11 +355,11 @@ table a, #comments a{background-color:inherit;}
 /* Mobile Devices
 --------------------------------------------------------------------------------------------------------------- */
 @media screen and (max-width:1200px){
-	.hoc{max-width:1024px;}
+	.hoc{max-width:900px;}
 
 	#topbar{}
 
-	#header{padding:30px 0;}
+	#header{padding:20px 0;}
 	#header #logo{margin:0;}
 	#headbar{height:160px}
 
@@ -374,13 +374,13 @@ table a, #comments a{background-color:inherit;}
 
 	#flower-searchbar {margin-left:15; display:block;}
 	#statpane {width:100%;}
-	.statpane-left {width: 500px; display:inline-block; vertical-align: top}
+	.statpane-left {width: 450px; display:inline-block; vertical-align: top}
 	.statpane-right {
-		width: 518px;
+		width: 440px;
 		display:inline-block;
 		vertical-align: top;
 		border-left:1px #ddd solid;
 	}
-	#image-container{width:1024px}
+	#image-container{width:900px}
 	#footer{}
 }
