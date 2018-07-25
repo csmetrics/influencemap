@@ -105,8 +105,8 @@ window.onclick = function(event) {
 /**
 *  RECOMMENDED CONFIGURATION VARIABLES: EDIT AND UNCOMMENT THE SECTION BELOW TO INSERT DYNAMIC VALUES FROM YOUR PLATFORM OR CMS.
 *  LEARN WHY DEFINING THESE VARIABLES IS IMPORTANT: https://disqus.com/admin/universalcode/#configuration-variables*/
-var page_url = '{{ request.build_absolute_uri|urlencode }}';
-var page_identifier = keyword;
+var page_url = '{{ request.build_absolute_uri }}';
+var page_identifier = '{{ request.get_full_path }}';
 var disqus_config = function () {
   this.page.url = page_url;  // Replace PAGE_URL with your page's canonical URL variable
   this.page.identifier = page_identifier; // Replace PAGE_IDENTIFIER with your page's unique identifier variable
@@ -118,5 +118,4 @@ var disqus_config = function () {
   (d.head || d.body).appendChild(s);
 })();
 </script>
-<script id="dsq-count-scr" src="//influencemap-ml.disqus.com/count.js" async></script>
 <noscript>Please enable JavaScript to view the <a href="https://disqus.com/?ref_noscript">comments powered by Disqus.</a></noscript>
