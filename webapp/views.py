@@ -228,11 +228,13 @@ def manualcache(request):
 @csrf_exempt
 def submit(request):
 
+    curated_flag = False
     if request.method == "GET":
         # from url e.g.
         # /submit/?type=author_id&id=2146610949&name=stephen_m_blackburn
         # /submit/?type=browse_author_group&name=lexing_xie
         # data should be pre-processed and cached
+        curated_flag = True
         data, option, keyword, ranges = get_url_query(request.GET)
     else:
         data = json.loads(request.POST.get('data'))
@@ -240,6 +242,7 @@ def submit(request):
          # entities: {"normalisedName": <string>, "eid": <int>, "entity_type": <author | conference | institution | journal | paper>
         option = data.get("option")   # last searched entity type (confusing for multiple entities)
         keyword = data.get('keyword') # last searched term (doesn't really work for multiple searches)
+        ranges = None
 
     time_cur = datetime.now()
 
@@ -319,6 +322,7 @@ def submit(request):
         "author": data1,
         "conf": data2,
         "inst": data3,
+        "curated": curated_flag,
         "yearSlider": {
             "title": "Publications range",
             "pubrange": [min_pub_year, max_pub_year, (max_pub_year-min_pub_year+1)],

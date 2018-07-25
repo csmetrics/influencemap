@@ -52,17 +52,19 @@
         <button class="btn" style="width:160px; height:30px; padding:0" id="resubmitButton">Update Flower</button>
       </div>
     </div>
-    <div class="wrapper" style="border-top:1px #ddd solid;">
-      <div class="row">
-        <div class="col-sm-8" style="padding-right:0">
-          <input style="width:100%" type="text" value="{{ request.build_absolute_uri }}" id="configuration">
-        </div>
-        <div class="col-sm-4">
-          <button style="width:100%" onclick="copyConfig()">Copy Config</button>
-        </div>
+  </div>
+  {% if curated %}
+  <div class="wrapper" style="border-top:1px #ddd solid;">
+    <div class="row">
+      <div class="col-sm-8" style="padding-right:0">
+        <input style="width:100%" type="text" value="{{ request.build_absolute_uri }}" id="configuration">
+      </div>
+      <div class="col-sm-4">
+        <button style="width:100%" onclick="copyConfig()">Copy Config</button>
       </div>
     </div>
   </div>
+  {% endif %}
 </div>
 
 <script src="{% static 'js/d3.v4.min.js' %}"></script>
@@ -84,7 +86,6 @@ var chartoption = {
   xticks: Math.round(Math.max(pub_range[2], cite_range[2])/5), yticks: 3,
   width:380, height:h,
   top: 40, right: 25, bottom: 40, left: 40};
-console.log("xticks", chartoption.xticks, pub_range[2])
 
 var copyText = document.getElementById("configuration");
 var pubSlider = document.getElementById('publication-range');
@@ -144,9 +145,11 @@ function updateNumbers() {
   p_max = parseInt(handles[1].innerText)
   c_min = parseInt(handles[2].innerText)
   c_max = parseInt(handles[3].innerText)
-  copyText.value = "{{ request.build_absolute_uri }}"
-    + "&amp;pmin=" + p_min + "&amp;pmax=" + p_max
-    + "&amp;cmin=" + c_min + "&amp;cmax=" + c_max;
+  if (copyText != null) {
+    copyText.value = "{{ request.build_absolute_uri }}"
+      + "&amp;pmin=" + p_min + "&amp;pmax=" + p_max
+      + "&amp;cmin=" + c_min + "&amp;cmax=" + c_max;
+  }
   updatePubNumbers(yearcounter, p_min, p_max);
   updateCiteNumbers(citationcounter, p_min, p_max, c_min, c_max);
 }
@@ -219,7 +222,7 @@ function copyConfig() {
   copyText.select();
   /* Copy the text inside the text field */
   document.execCommand("copy");
-  alert("Copied current configuration: " + copyText.value);
+  alert("Copied current configuration");
 }
 
 resubmitButton.addEventListener('click', function(){

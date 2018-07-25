@@ -7,7 +7,7 @@
 {% include 'flower_pagehead.html' with navbar=navbarOption %}
 <div class="hoc" style="padding-top:0">
   <div style="display:inline-block; vertical-align:top" id="statpane">
-    {% include 'statchart.html' with stats=stats yearSlider=yearSlider %}
+    {% include 'statchart.html' with stats=stats curated=curated yearSlider=yearSlider %}
   </div>
   <div style="display:inline-block; vertical-align:top">
     <div id="image-container" style="height:760px;">
@@ -48,7 +48,9 @@
         </div>
       </div>
     </div>
+    {% if curated %}
     <div id="disqus_thread"></div>
+    {% endif %}
   </div>
 </div>
 
@@ -101,7 +103,10 @@ window.onclick = function(event) {
         node_info_modal.style.display = "none";
     }
 }
+</script>
 
+{% if curated %}
+<script>
 /**
 *  RECOMMENDED CONFIGURATION VARIABLES: EDIT AND UNCOMMENT THE SECTION BELOW TO INSERT DYNAMIC VALUES FROM YOUR PLATFORM OR CMS.
 *  LEARN WHY DEFINING THESE VARIABLES IS IMPORTANT: https://disqus.com/admin/universalcode/#configuration-variables*/
@@ -119,3 +124,4 @@ var disqus_config = function () {
 })();
 </script>
 <noscript>Please enable JavaScript to view the <a href="https://disqus.com/?ref_noscript">comments powered by Disqus.</a></noscript>
+{% endif %}
