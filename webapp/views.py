@@ -316,7 +316,7 @@ def submit(request):
         "yearSlider": {
             "title": "Publications range",
             "pubrange": [min_pub_year, max_pub_year, (max_pub_year-min_pub_year+1)],
-            "citerange": [min_cite_year, max_cite_year],
+            "citerange": [min_cite_year, max_cite_year, (max_cite_year-min_cite_year+1)],
             "pubChart": pub_chart,
             "citeChart": cite_chart
         },
