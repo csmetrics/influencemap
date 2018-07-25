@@ -300,11 +300,21 @@ def submit(request):
     entity_scores = gen_entity_score(paper_information, entity_names, self_cite=False)
 
     # Make flower
-    data1, data2, data3, node_info = gen_flower_data(entity_scores,
+    if ranges != None:
+        print(ranges)
+        data1, data2, data3, node_info = gen_flower_data(entity_scores,
+                                              entity_names,
+                                              flower_name,
+                                              pub_lower        = int(ranges[0]),
+                                              pub_upper        = int(ranges[1]),
+                                              cit_lower        = int(ranges[2]),
+                                              cit_upper        = int(ranges[3]),
+                                              coauthors        = coauthors)
+    else:
+        data1, data2, data3, node_info = gen_flower_data(entity_scores,
                                                      entity_names,
                                                      flower_name,
                                                      coauthors = coauthors)
-
     data = {
         "author": data1,
         "conf": data2,

@@ -124,7 +124,6 @@ var labels = [
   document.getElementById('cit-lower-value'),
   document.getElementById('cit-upper-value'),
 ];
-resubmitButton.click();
 
 pubSlider.noUiSlider.on('update', function ( values, handle, unencoded, isTap, positions ) {
   handles[handle].innerText = parseInt(values[handle]);
