@@ -233,17 +233,13 @@ def submit(request):
         # /submit/?type=author_id&id=2146610949&name=stephen_m_blackburn
         # /submit/?type=browse_author_group&name=lexing_xie
         # data should be pre-processed and cached
-        data, option, keyword = get_url_query(request.GET)
+        data, option, keyword, ranges = get_url_query(request.GET)
     else:
         data = json.loads(request.POST.get('data'))
          # normalisedName: <string>   # the normalised name from entity with highest paper count of selected entities
          # entities: {"normalisedName": <string>, "eid": <int>, "entity_type": <author | conference | institution | journal | paper>
         option = data.get("option")   # last searched entity type (confusing for multiple entities)
         keyword = data.get('keyword') # last searched term (doesn't really work for multiple searches)
-
-    # Default Dates
-    min_year = None
-    max_year = None
 
     time_cur = datetime.now()
 
@@ -318,7 +314,8 @@ def submit(request):
             "pubrange": [min_pub_year, max_pub_year, (max_pub_year-min_pub_year+1)],
             "citerange": [min_cite_year, max_cite_year, (max_cite_year-min_cite_year+1)],
             "pubChart": pub_chart,
-            "citeChart": cite_chart
+            "citeChart": cite_chart,
+            "selected": ranges if ranges else [min_pub_year, max_pub_year, min_cite_year, max_cite_year]
         },
         "navbarOption": get_navbar_option(keyword, option)
     }

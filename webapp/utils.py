@@ -58,6 +58,9 @@ def get_url_query(query):
         "browse_paper_group"
     ]
     data = {}
+    ranges = None
+    if "pmin" in query:
+        ranges = [query.get("pmin"), query.get("pmax"), query.get("cmin"), query.get("cmax")]
     cachetype = query.get("type")
     document_id = query.get("id")
     print(document_id)
@@ -67,16 +70,16 @@ def get_url_query(query):
         data["papers"] = query_cache_paper_info(aid)
         data["names"] = [aname]
         data["flower_name"] = aname
-        return data, "author", aname
+        return data, "author", aname, ranges
     elif cachetype == query_type[1]:
         gname = query.get('name').replace("_", " ")
         data["papers"] = query_author_group(gname)
         data["names"] = [gname]
         data["flower_name"] = gname
-        return data, "author", gname
+        return data, "author", gname, ranges
     elif cachetype == query_type[2]:
         pname = query.get("name")
         data["papers"] = query_paper_group(document_id)
         data["names"] = [pname]
         data["flower_name"] = pname
-        return data, "author", pname 
+        return data, "author", pname, ranges

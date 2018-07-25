@@ -108,8 +108,8 @@ window.onclick = function(event) {
 var page_url = '{{ request.build_absolute_uri }}';
 var page_identifier = '{{ request.get_full_path }}';
 var disqus_config = function () {
-  this.page.url = page_url;  // Replace PAGE_URL with your page's canonical URL variable
-  this.page.identifier = page_identifier; // Replace PAGE_IDENTIFIER with your page's unique identifier variable
+  this.page.url = page_url.split("&amp;pmin")[0];  // Replace PAGE_URL with your page's canonical URL variable
+  this.page.identifier = page_identifier.split("&amp;pmin")[0]; // Replace PAGE_IDENTIFIER with your page's unique identifier variable
 };
 (function() { // DON'T EDIT BELOW THIS LINE
   var d = document, s = d.createElement('script');
