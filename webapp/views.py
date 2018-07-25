@@ -315,7 +315,7 @@ def submit(request):
             "citerange": [min_cite_year, max_cite_year, (max_cite_year-min_cite_year+1)],
             "pubChart": pub_chart,
             "citeChart": cite_chart,
-            "selected": ranges if ranges else [min_pub_year, max_pub_year, min_cite_year, max_cite_year]
+            "selected": ranges if ranges != None else [min_pub_year, max_pub_year, min_cite_year, max_cite_year]
         },
         "navbarOption": get_navbar_option(keyword, option)
     }
