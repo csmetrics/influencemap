@@ -235,14 +235,14 @@ def submit(request):
         # /submit/?type=browse_author_group&name=lexing_xie
         # data should be pre-processed and cached
         curated_flag = True
-        data, option, keyword, ranges = get_url_query(request.GET)
+        data, option, keyword, config = get_url_query(request.GET)
     else:
         data = json.loads(request.POST.get('data'))
          # normalisedName: <string>   # the normalised name from entity with highest paper count of selected entities
          # entities: {"normalisedName": <string>, "eid": <int>, "entity_type": <author | conference | institution | journal | paper>
         option = data.get("option")   # last searched entity type (confusing for multiple entities)
         keyword = data.get('keyword') # last searched term (doesn't really work for multiple searches)
-        ranges = None
+        config = None
 
     time_cur = datetime.now()
 
@@ -300,24 +300,31 @@ def submit(request):
 #    normal_names = list(map(lambda x: x.lower(), entity_names))
 
     # Generate score for each type of flower
-    entity_scores = gen_entity_score(paper_information, entity_names, self_cite=False)
-
     # Make flower
-    if ranges != None:
-        print(ranges)
+    if config != None:
+        print(config)
+        entity_scores = gen_entity_score(paper_information, entity_names, self_cite=config[4])
         data1, data2, data3, node_info = gen_flower_data(entity_scores,
                                               entity_names,
                                               flower_name,
-                                              pub_lower        = int(ranges[0]),
-                                              pub_upper        = int(ranges[1]),
-                                              cit_lower        = int(ranges[2]),
-                                              cit_upper        = int(ranges[3]),
-                                              coauthors        = coauthors)
+                                              pub_lower        = config[0],
+                                              pub_upper        = config[1],
+                                              cit_lower        = config[2],
+                                              cit_upper        = config[3],
+                                              coauthors        = coauthors,
+                                              include_coauthor = config[5])
     else:
+        entity_scores = gen_entity_score(paper_information, entity_names, self_cite=False)
         data1, data2, data3, node_info = gen_flower_data(entity_scores,
                                                      entity_names,
                                                      flower_name,
                                                      coauthors = coauthors)
+    if config == None:
+        config = [min_pub_year, max_pub_year, min_cite_year, max_cite_year, "false", "true"]
+    else:
+        config[4] = str(config[4]).lower()
+        config[5] = str(config[5]).lower()
+
     data = {
         "author": data1,
         "conf": data2,
@@ -329,7 +336,7 @@ def submit(request):
             "citerange": [min_cite_year, max_cite_year, (max_cite_year-min_cite_year+1)],
             "pubChart": pub_chart,
             "citeChart": cite_chart,
-            "selected": ranges if ranges != None else [min_pub_year, max_pub_year, min_cite_year, max_cite_year]
+            "selected": config
         },
         "navbarOption": get_navbar_option(keyword, option)
     }

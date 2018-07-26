@@ -42,11 +42,11 @@
       </div>
       <div style="padding-top:10px">
         <b>Include self citations</b>
-        <input class="self-cite" type="checkbox" style="float:left; margin:5 10 0 0" name="self-cite" id="self-cite" />
+        <input class="self-cite" type="checkbox" onclick="updateConfigUrl()" style="float:left; margin:5 10 0 0" name="self-cite" id="self-cite" {% if yearSlider.selected.4 == 'true' %} checked="checked" {% endif %}/>
       </div>
       <div>
         <b>Include coauthors</b>
-        <input class="coauthor" type="checkbox" style="float:left; margin:5 10 0 0" name="self-coauthor" id="coauthor" checked="checked" />
+        <input class="coauthor" type="checkbox" onclick="updateConfigUrl()" style="float:left; margin:5 10 0 0" name="self-coauthor" id="coauthor" {% if yearSlider.selected.5 == 'true' %} checked="checked" {% endif %}/>
       </div>
       <div align=center style="padding-top:5px;">
         <button class="btn" style="width:160px; height:30px; padding:0" id="resubmitButton">Update Flower</button>
@@ -75,7 +75,7 @@ var citationcounter = {{ yearSlider.citeChart | safe }};
 var processedcites = [];
 var pub_range = {{ yearSlider.pubrange | safe }};
 var cite_range = {{ yearSlider.citerange | safe }};
-var selected_range = {{ yearSlider.selected | safe }};
+var selected_config = {{ yearSlider.selected | safe }};
 
 var pubchart = new PubChart("#pub_chart");
 var citechart = new CiteChart("#cite_chart");
@@ -93,7 +93,7 @@ var citSlider = document.getElementById('citation-range');
 noUiSlider.create(pubSlider, {
   connect: true,
   behaviour: 'tap',
-  start: [ selected_range[0], selected_range[1] ],
+  start: [ selected_config[0], selected_config[1] ],
   step: 1,
   animate: false,
   range: {
@@ -104,7 +104,7 @@ noUiSlider.create(pubSlider, {
 noUiSlider.create(citSlider, {
   connect: true,
   behaviour: 'tap',
-  start: [ selected_range[2], selected_range[3] ],
+  start: [ selected_config[2], selected_config[3] ],
   step: 1,
   animate: false,
   range: {
@@ -140,16 +140,22 @@ citSlider.noUiSlider.on('update', function ( values, handle, unencoded, isTap, p
   citechart.updateRange(parseInt(values[0]), parseInt(values[1]));
 });
 
+function updateConfigUrl() {
+  if (copyText != null) {
+    copyText.value = "{{ request.build_absolute_uri }}"
+      + "&amp;pmin=" + handles[0].innerText + "&amp;pmax=" + handles[1].innerText
+      + "&amp;cmin=" + handles[2].innerText + "&amp;cmax=" + handles[3].innerText
+      + "&amp;selfcite=" + $("#self-cite").is(":checked")
+      + "&amp;coauthor=" + $("#coauthor").is(":checked");
+  }
+}
+
 function updateNumbers() {
   p_min = parseInt(handles[0].innerText)
   p_max = parseInt(handles[1].innerText)
   c_min = parseInt(handles[2].innerText)
   c_max = parseInt(handles[3].innerText)
-  if (copyText != null) {
-    copyText.value = "{{ request.build_absolute_uri }}"
-      + "&amp;pmin=" + p_min + "&amp;pmax=" + p_max
-      + "&amp;cmin=" + c_min + "&amp;cmax=" + c_max;
-  }
+  updateConfigUrl();
   updatePubNumbers(yearcounter, p_min, p_max);
   updateCiteNumbers(citationcounter, p_min, p_max, c_min, c_max);
 }
