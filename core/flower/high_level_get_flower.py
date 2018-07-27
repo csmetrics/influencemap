@@ -19,10 +19,9 @@ from operator    import itemgetter
 
 import core.utils.entity_type as ent
 
-flower_leaves = { 'author': [ent.Entity_type.AUTH]
-                , 'conf': [ent.Entity_type.CONF, ent.Entity_type.JOUR]
-                , 'inst': [ent.Entity_type.AFFI]
-    }
+flower_leaves = [ ('author', [ent.Entity_type.AUTH])
+                , ('conf'  , [ent.Entity_type.CONF, ent.Entity_type.JOUR])
+                , ('inst'  , [ent.Entity_type.AFFI]) ]
 
 str_to_ent = {
         "author": ent.Entity_type.AUTH,
@@ -36,7 +35,7 @@ def gen_entity_score(paper_information, names, self_cite=True):
     ''' Generates the non-aggregated entity scores
     '''
     entity_scores = [None, None, None]
-    for i, flower_item in enumerate(flower_leaves.items()):
+    for i, flower_item in enumerate(flower_leaves):
         name, leaves = flower_item
 
         # Timer
@@ -63,7 +62,7 @@ def gen_flower_data(score_dfs, entity_names, flower_name,
     '''
     flower_score = [None, None, None]
     node_info    = dict()
-    for i, flower_item in enumerate(flower_leaves.items()):
+    for i, flower_item in enumerate(flower_leaves):
         name, leaves = flower_item
 
         time_cur = datetime.now()
