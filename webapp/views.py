@@ -6,7 +6,7 @@ from datetime import datetime
 from collections import Counter
 from operator import itemgetter
 from webapp.graph import processdata
-from webapp.elastic import search_cache, query_reference_papers, query_citation_papers
+from webapp.elastic import search_cache, query_reference_papers, query_citation_papers, query_conference_series, query_journal, query_affiliation
 from webapp.utils import *
 
 import core.utils.entity_type as ent
@@ -141,15 +141,15 @@ s = {
     'author': ('<h5>{name}</h5><p>{affiliation}, Papers: {paperCount}, Citations: {citations}</p></div>'),
          # '<div style="float: left; width: 50%; padding: 0;"><p>Papers: {paperCount}</p></div>'
          # '<div style="float: right; width: 50%; text-align: right; padding: 0;"<p>Citations: {citations}</p></div>'),
-    'conference': ('<h5>{name}</h5>'
-        '<div style="float: left; width: 50%; padding: 0;"><p>Papers: {paperCount}</p></div>'
-        '<div style="float: right; width: 50%; text-align: right; padding: 0;"<p>Citations: {citations}</p></div>'),
-    'institution': ('<h5>{name}</h5>'
-        '<div style="float: left; width: 50%; padding: 0;"><p>Papers: {paperCount}</p></div>'
-        '<div style="float: right; width: 50%; text-align: right; padding: 0;"<p>Citations: {citations}</p></div>'),
-    'journal': ('<h5>{name}</h5>'
-        '<div style="float: left; width: 50%; padding: 0;"><p>Papers: {paperCount}</p></div>'
-        '<div style="float: right; width: 50%; text-align: right; padding: 0;"<p>Citations: {citations}</p></div>'),
+    'conference': ('<h5>{DisplayName}</h5>'
+        '<div style="float: left; width: 50%; padding: 0;"><p>Papers: {PaperCount}</p></div>'
+        '<div style="float: right; width: 50%; text-align: right; padding: 0;"<p>Citations: {CitationCount}</p></div>'),
+    'institution': ('<h5>{DisplayName}</h5>'
+        '<div style="float: left; width: 50%; padding: 0;"><p>Papers: {PaperCount}</p></div>'
+        '<div style="float: right; width: 50%; text-align: right; padding: 0;"<p>Citations: {CitationCount}</p></div>'),
+    'journal': ('<h5>{DisplayName}</h5>'
+        '<div style="float: left; width: 50%; padding: 0;"><p>Papers: {PaperCount}</p></div>'
+        '<div style="float: right; width: 50%; text-align: right; padding: 0;"<p>Citations: {CitationCount}</p></div>'),
     'paper': ('<h5>{title}</h5>'
         '<div><p>Citations: {citations}, Field: {fieldOfStudy}</p><p>Authors: {authorName}</p></div>')
 }
@@ -162,15 +162,20 @@ def search(request):
     keyword = ''.join(ch for ch in keyword if ch not in exclude)
     keyword = keyword.lower()
     keyword = " ".join(keyword.split())
-    data = get_entities_from_search(keyword, entityType)
+    id_helper_dict = {"conference": "ConferenceSeriesId", "journal": "JournalId", "institution": "AffiliationId", "paper": "eid", "author": "eid"}
+    if entityType == "conference":
+        data = query_conference_series(keyword)
+    elif entityType == "journal":
+        data = query_journal(keyword)
+    elif entityType == "institution":
+        data = query_affiliation(keyword)
+    else: 
+        data = get_entities_from_search(keyword, entityType)
     for i in range(len(data)):
-        # print(entity)
         entity = {'data': data[i]}
         entity['display-info'] = s[entityType].format(**entity['data'])
-        entity['table-id'] = "{}_{}".format(entity['data']['entity-type'], entity['data']['eid'])
+        entity['table-id'] = "{}_{}".format(entityType, entity['data'][id_helper_dict[entityType]])
         data[i] = entity
-        # print(entity)
-    print(data[0])
     return JsonResponse({'entities': data}, safe=False)
 
 
