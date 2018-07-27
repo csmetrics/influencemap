@@ -23,11 +23,11 @@
           </select>
         </div>
         <div class="col-xs-9">
-          <div class="input-group input-group-sm" style="width: 450px; height: 40px;">
-            <input id="name-search-bar" type="text" name="keyword" class="form-control" {% if navbar.selectedKeyword %} value="{{ navbar.selectedKeyword }}" {% endif %}>
-            <span class="input-group-btn">
-              <button id="search-btn" type="submit" name="search" value="search" class="btn btn-primary btn-flat" style="width:40px; font-size:20px"><i class="fa fa-search"></i></button>
-            </span>
+          <div class="input-group" style="width: 450px; height: 40px;">
+            <input id="name-search-bar" type="text" name="keyword" style="height:100%" class="form-control" {% if navbar.selectedKeyword %} value="{{ navbar.selectedKeyword }}" {% endif %}>
+            <button id="search-btn" type="submit" name="search" value="search" class="input-group-btn btn btn-primary" style="padding:0 10; font-size:20px">
+              <i class="fa fa-search"></i>
+            </button>
           </div>
         </div>
       </div>
