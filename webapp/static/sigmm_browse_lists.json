@@ -1,0 +1,51 @@
+[
+	{
+		"display":"ACM Multimedia",
+		"tab_id":"tab1",
+		"table_id":"table1",
+		"cache_index": "browse_paper_group",
+		"cache_type": "acm_mm"
+	},
+	{
+		"display": "ACM Workshop on Information Hiding and Multimedia Security",
+		"tab_id": "tab2",
+		"table_id": "table2",
+		"cache_index": "browse_paper_group",
+		"cache_type": "ihmmsec"
+	},
+	{
+		"display": "ACM International Conference on Multimedia Security",
+		"tab_id":	"tab3",
+		"table_id": "table3",
+		"cache_index": "browse_paper_group",
+		"cache_type": "acm_icmr"
+	},
+	{
+		"display": "ACM Multimedia Systems",
+		"tab_id": "tab4",
+		"table_id": "table4",
+		"cache_index": "browse_paper_group",
+		"cache_type": "mm_sys"
+	},
+        {
+                "display": "SIGMM Tecnical Achievment Award",
+                "tab_id": "tab5",
+                "table_id": "table5",
+                "cache_index": "browse_author_group",
+                "cache_type": "sigmm_award_taa"
+        },
+        {       
+                "display": "SIGMM Rising Star Award",
+                "tab_id": "tab6",
+                "table_id": "table6",
+                "cache_index": "browse_author_group",
+                "cache_type": "sigmm_risingstaraward"
+        },
+        {       
+                "display": "SIGMM Outstanding PhD Thesis in Multimedia Computing",
+                "tab_id": "tab7",
+                "table_id": "table7",
+                "cache_index": "browse_author_group",
+                "cache_type": "sigmm_thesisaward"
+        }
+]

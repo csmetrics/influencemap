@@ -13,6 +13,9 @@ cache_types = {
         "fields_medalists",
         "turing_award_winners",
         "pl_researchers",
+        "sigmm_award_taa",
+        "sigmm_thesisaward",
+        "sigmm_risingstaraward"
     ],
     "paper_group": [
         "publication_venues",

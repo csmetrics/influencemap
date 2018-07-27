@@ -48,7 +48,12 @@ def main(request):
 @csrf_exempt
 def browse(request):
 
-    browse_list_filename = os.path.join(BASE_DIR, 'webapp/static/browse_lists.json')
+    which = request.GET.get("which")
+    if which and which=="sigmm":
+        browse_file = "webapp/static/sigmm_browse_lists.json"
+    else:
+        browse_file = "webapp/static/browse_lists.json"
+    browse_list_filename = os.path.join(BASE_DIR, browse_file)
     with open(browse_list_filename, 'r') as fp:
         browse_list = json.load(fp)
 
