@@ -1,31 +1,17 @@
 [
 	{
-		"display":"ACM Multimedia",
+		"display":"Conferences",
 		"tab_id":"tab1",
 		"table_id":"table1",
 		"cache_index": "browse_paper_group",
-		"cache_type": "acm_mm"
+		"cache_type": "sigmm_conferences"
 	},
 	{
-		"display": "ACM Workshop on Information Hiding and Multimedia Security",
+		"display": "Journals",
 		"tab_id": "tab2",
 		"table_id": "table2",
 		"cache_index": "browse_paper_group",
-		"cache_type": "ihmmsec"
-	},
-	{
-		"display": "ACM International Conference on Multimedia Security",
-		"tab_id":	"tab3",
-		"table_id": "table3",
-		"cache_index": "browse_paper_group",
-		"cache_type": "acm_icmr"
-	},
-	{
-		"display": "ACM Multimedia Systems",
-		"tab_id": "tab4",
-		"table_id": "table4",
-		"cache_index": "browse_paper_group",
-		"cache_type": "mm_sys"
+		"cache_type": "sigmm_journals"
 	},
         {
                 "display": "SIGMM Tecnical Achievment Award",
