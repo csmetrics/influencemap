@@ -6,13 +6,16 @@ date:   25.06.18
 author: Alexander Soen
 '''
 
+import copy
+
 from core.config import *
 from core.search.mag_interface import *
 from core.search.query_info_db import papers_prop_query
 from core.search.query_info_cache import base_paper_cache_query
-from core.search.parse_academic_search import or_query_builder_list
+from core.search.parse_academic_search import or_query_builder
 
-MAS_URL_PREFIX = "https://api.labs.cognitive.microsoft.com"
+MAS_URL_PREFIX  = "https://api.labs.cognitive.microsoft.com"
+API_CHUNK_SIZE = 1000
 
 basic_attr = {'Id': 'PaperId',
               'Y' : 'Year',
@@ -56,71 +59,70 @@ def base_paper_mag_multiquery(paper_ids):
     ''' Returns all basic fields of a paper with API.
     '''
     url = os.path.join(MAS_URL_PREFIX, "academic/v1.0/evaluate")
-    queries = (lambda x: {
-        'expr': expr,
+    query = lambda x: {
+        'expr': or_query_builder('Id={}', paper_ids),
         'count': 10000,
         'offset': x,
         'attributes': compound_snames
-        } for expr in or_query_builder_list('Id={}', paper_ids))
+        }
 
     # Query result
     results = dict()
 
-    for query in queries:
-        # Checking offsets
-        finished = False
-        count    = 0
+    # Checking offsets
+    finished = False
+    count    = 0
 
-        while not finished:
-            data = query_academic_search('get', url, query(count))
+    while not finished:
+        data = query_academic_search('post', url, query(count))
 
-            # Check if no more data
-            if len(data['entities']) > 0:
-                count += len(data['entities'])
-            else:
-                finished = True
+        # Check if no more data
+        if len(data['entities']) > 0:
+            count += len(data['entities'])
+        else:
+            finished = True
 
-            for res in data['entities']:
-                res_row = dict()
+        for res in data['entities']:
+            res_row = dict()
 
-                # Get basic attributes
-                for a, n in basic_attr.items():
-                    if a in res:
-                        res_row[n] = res[a]
+            # Get basic attributes
+            for a, n in basic_attr.items():
+                if a in res:
+                    res_row[n] = res[a]
 
-                # Get compound attributes
-                for t, ca in compound_attr.items():
-                    # Check if result exists for type
-                    if t not in res:
-                        continue
+            # Get compound attributes
+            for t, ca in compound_attr.items():
+                # Check if result exists for type
+                if t not in res:
+                    continue
 
-                    # If field type, need to process list
-                    if t in list_attr_names.keys():
-                        attr_res = list()
+                # If field type, need to process list
+                if t in list_attr_names.keys():
+                    attr_res = list()
 
-                        # Go through each value in list
-                        for a_dict in res[t]:
-                            suba_dict = dict()
-                            # Get values for single entry
-                            for a, n in ca.items():
-                                if a in a_dict:
-                                    suba_dict[n] = a_dict[a]
-
-                            attr_res.append(suba_dict)
-
-                        # Add field
-                        res_row[list_attr_names[t]] = attr_res
-
-                    # Other singular types
-                    else:
+                    # Go through each value in list
+                    for a_dict in res[t]:
+                        suba_dict = dict()
+                        # Get values for single entry
                         for a, n in ca.items():
-                            try:
-                                res_row[n] = res[t][a]
-                            except KeyError:
-                                pass
+                            if a in a_dict:
+                                suba_dict[n] = a_dict[a]
 
-                # Add paper
-                results[res['Id']] = res_row
+                        attr_res.append(suba_dict)
+
+                    # Add field
+                    res_row[list_attr_names[t]] = attr_res
+
+                # Other singular types
+                else:
+                    for a, n in ca.items():
+                        try:
+                            res_row[n] = res[t][a]
+                        except KeyError:
+                            pass
+
+            # Add paper
+            results[res['Id']] = res_row
 
     # Return results
     return results
@@ -138,31 +140,30 @@ def pr_links_mag_multiquery(paper_ids):
 
     # Calculate references
     url = os.path.join(MAS_URL_PREFIX, "academic/v1.0/evaluate")
-    queries = (lambda x: {
-        'expr': expr,
+    query = lambda x: {
+        'expr': or_query_builder('Id={}', paper_ids),
         'count': 10000,
         'offset': x,
         'attributes': 'RId'
-        } for expr in or_query_builder_list('Id={}', paper_ids))
+        }
 
-    for query in queries:
-        # Checking offsets
-        finished = False
-        count    = 0
+    # Checking offsets
+    finished = False
+    count    = 0
 
-        while not finished:
-            data = query_academic_search('get', url, query(count))
+    while not finished:
+        data = query_academic_search('post', url, query(count))
 
-            # Check if no more data
-            if len(data['entities']) > 0:
-                count += len(data['entities'])
-            else:
-                finished = True
+        # Check if no more data
+        if len(data['entities']) > 0:
+            count += len(data['entities'])
+        else:
+            finished = True
 
-            # Add references
-            for res in data['entities']:
-                if 'RId' in res:
-                    results[res['Id']]['References'] += res['RId']
+        # Add references
+        for res in data['entities']:
+            if 'RId' in res:
+                results[res['Id']]['References'] += res['RId']
 
     for paper_id in paper_ids:
         # Checking offsets
@@ -177,7 +178,7 @@ def pr_links_mag_multiquery(paper_ids):
             'attributes': 'Id,RId'
             }
 
-            data = query_academic_search('get', url, query(count))
+            data = query_academic_search('post', url, query(count))
 
             # Check if no more data
             if len(data['entities']) > 0:
@@ -233,8 +234,11 @@ def paper_info_mag_multiquery(paper_ids, partial_info = list()):
             all_papers.append(link_paper)
     all_papers = list(set(all_papers))
 
+    print("Number of paper props to get:", len(all_papers))
     # Find all basic properties of all the papers
-    paper_props.update(base_paper_mag_multiquery(all_papers))
+    for chunk in [all_papers[i:i+API_CHUNK_SIZE] for i in
+                  range(0, len(all_papers), API_CHUNK_SIZE)]:
+        paper_props.update(base_paper_mag_multiquery(chunk))
 
     # Add properties to links
     paper_prop_links = dict()
@@ -265,7 +269,7 @@ def paper_info_mag_multiquery(paper_ids, partial_info = list()):
             try:
                 # Combine queries
                 paper_prop['cache_type'] = 'complete'
-                paper_link = paper_prop_links[paper_id]
+                paper_link = copy.deepcopy(paper_prop_links[paper_id])
                 paper_info_res.append(dict(paper_prop, **paper_link))
             except KeyError:
                 pass
@@ -276,15 +280,3 @@ def paper_info_mag_multiquery(paper_ids, partial_info = list()):
                 partial_res.append(paper_prop)
 
     return paper_info_res, partial_res
-
-
-if __name__ == '__main__':
-    # TEST
-    from query_paper_mag import author_paper_mag_query
-#    print(paa_prop_multiquery([2279671314]))
-    #print(pr_links_mag_multiquery([2279671314]))
-    #base_paper_mag_multiquery_test([2010977797, 2279671314, 2059658980])
-    papers = author_paper_mag_query(2100918400)
-    paper_info = paper_info_mag_multiquery(papers)
-    print(paper_info)
-    #print(paa_prop_mag_multiquery([2010977797]))

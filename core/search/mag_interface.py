@@ -30,7 +30,7 @@ def query_academic_search(type, url, query):
         if type == "get":
             response = requests.get(url, params=urllib.parse.urlencode(query), headers=header)
         elif type == "post":
-            response = requests.post(url, json=query, headers=header)
+            response = requests.post(url, data=query, headers=header)
             #print(response.status_code)
         if response.status_code == 401:
             print(keys[i])

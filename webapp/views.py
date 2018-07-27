@@ -238,14 +238,15 @@ def manualcache(request):
 @csrf_exempt
 def submit(request):
 
+    curated_flag = False
     if request.method == "GET":
         # from url e.g.
         # /submit/?type=author_id&id=2146610949&name=stephen_m_blackburn
         # /submit/?type=browse_author_group&name=lexing_xie
         # data should be pre-processed and cached
-        data, option, keyword = get_url_query(request.GET)
+        curated_flag = True
+        data, option, keyword, config = get_url_query(request.GET)
         selected_papers = data.get('papers')
-
     else:
         data = json.loads(request.POST.get('data'))
          # normalisedName: <string>   # the normalised name from entity with highest paper count of selected entities
@@ -260,6 +261,7 @@ def submit(request):
         if entity_ids['journal'] != []: paper_ids += get_papers_from_journal_ids(entity_ids['journal'])
 
         selected_papers =  paper_ids
+        config = None
 
 
     # Default Dates
@@ -320,24 +322,43 @@ def submit(request):
 #    normal_names = list(map(lambda x: x.lower(), entity_names))
 
     # Generate score for each type of flower
-    entity_scores = gen_entity_score(paper_information, entity_names, self_cite=False)
-
     # Make flower
-    data1, data2, data3, node_info = gen_flower_data(entity_scores,
+    if config != None:
+        print(config)
+        entity_scores = gen_entity_score(paper_information, entity_names, self_cite=config[4])
+        data1, data2, data3, node_info = gen_flower_data(entity_scores,
+                                              entity_names,
+                                              flower_name,
+                                              pub_lower        = config[0],
+                                              pub_upper        = config[1],
+                                              cit_lower        = config[2],
+                                              cit_upper        = config[3],
+                                              coauthors        = coauthors,
+                                              include_coauthor = config[5])
+    else:
+        entity_scores = gen_entity_score(paper_information, entity_names, self_cite=False)
+        data1, data2, data3, node_info = gen_flower_data(entity_scores,
                                                      entity_names,
                                                      flower_name,
                                                      coauthors = coauthors)
+    if config == None:
+        config = [min_pub_year, max_pub_year, min_cite_year, max_cite_year, "false", "true"]
+    else:
+        config[4] = str(config[4]).lower()
+        config[5] = str(config[5]).lower()
 
     data = {
         "author": data1,
         "conf": data2,
         "inst": data3,
+        "curated": curated_flag,
         "yearSlider": {
             "title": "Publications range",
             "pubrange": [min_pub_year, max_pub_year, (max_pub_year-min_pub_year+1)],
-            "citerange": [min_cite_year, max_cite_year],
+            "citerange": [min_cite_year, max_cite_year, (max_cite_year-min_cite_year+1)],
             "pubChart": pub_chart,
-            "citeChart": cite_chart
+            "citeChart": cite_chart,
+            "selected": config
         },
         "navbarOption": get_navbar_option(keyword, option)
     }

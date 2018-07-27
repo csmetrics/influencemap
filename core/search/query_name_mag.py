@@ -9,7 +9,7 @@ from core.config import *
 from core.search.mag_interface import *
 from core.search.query_name import name_query
 from core.utils.entity_type import Entity_type
-from core.search.parse_academic_search import or_query_builder_list
+from core.search.parse_academic_search import or_query_builder
 
 MAS_URL_PREFIX = "https://api.labs.cognitive.microsoft.com"
 
@@ -18,33 +18,32 @@ def author_name_mag_multiquery(author_ids):
     '''
     # Query
     url = os.path.join(MAS_URL_PREFIX, "academic/v1.0/evaluate")
-    queries = (lambda x: {
-        'expr': expr,
+    query = lambda x: {
+        'expr': or_query_builder('Id={}', author_ids),
         'count': 10000,
         'offset': x,
         'attributes': 'AuN'
-        } for expr in or_query_builder_list('Id={}', author_ids))
+        }
 
     # Query result
     auth_name_res = dict()
 
-    for query in queries:
-        # Checking offsets
-        finished = False
-        count    = 0
+    # Checking offsets
+    finished = False
+    count    = 0
 
-        while not finished:
-            data = query_academic_search('get', url, query(count))
+    while not finished:
+        data = query_academic_search('post', url, query(count))
 
-            # Check if no more data
-            if len(data['entities']) > 0:
-                count += len(data['entities'])
-            else:
-                finished = True
+        # Check if no more data
+        if len(data['entities']) > 0:
+            count += len(data['entities'])
+        else:
+            finished = True
 
-            for res in data['entities']:
-                # Set name
-                auth_name_res[res['Id']] = res['AuN']
+        for res in data['entities']:
+            # Set name
+            auth_name_res[res['Id']] = res['AuN']
 
     return auth_name_res
 
@@ -54,33 +53,32 @@ def affiliation_name_mag_multiquery(affiliation_ids):
     '''
     # Query
     url = os.path.join(MAS_URL_PREFIX, "academic/v1.0/evaluate")
-    queries = (lambda x: {
-        'expr': expr,
+    query = lambda x: {
+        'expr': or_query_builder('Id={}', affiliation_ids),
         'count': 10000,
         'offset': x,
         'attributes': 'AfN'
-        } for expr in or_query_builder_list('Id={}', affiliation_ids))
+        }
 
     # Query result
     affi_name_res = dict()
 
-    for query in queries:
-        # Checking offsets
-        finished = False
-        count    = 0
+    # Checking offsets
+    finished = False
+    count    = 0
 
-        while not finished:
-            data = query_academic_search('get', url, query(count))
+    while not finished:
+        data = query_academic_search('post', url, query(count))
 
-            # Check if no more data
-            if len(data['entities']) > 0:
-                count += len(data['entities'])
-            else:
-                finished = True
+        # Check if no more data
+        if len(data['entities']) > 0:
+            count += len(data['entities'])
+        else:
+            finished = True
 
-            for res in data['entities']:
-                # Set name
-                affi_name_res[res['Id']] = res['AfN']
+        for res in data['entities']:
+            # Set name
+            affi_name_res[res['Id']] = res['AfN']
 
     return affi_name_res
 
@@ -90,67 +88,65 @@ def conference_name_mag_multiquery(conference_ids):
     '''
     # Query
     url = os.path.join(MAS_URL_PREFIX, "academic/v1.0/evaluate")
-    queries = (lambda x: {
-        'expr': expr,
+    query = lambda x: {
+        'expr': or_query_builder('Id={}', conference_ids),
         'count': 10000,
         'offset': x,
         'attributes': 'PCS.CN'
-        } for expr in or_query_builder_list('Id={}', conference_ids))
+        }
 
     # Query result
     conf_name_res = dict()
 
-    for query in queries:
-        # Checking offsets
-        finished = False
-        count    = 0
+    # Checking offsets
+    finished = False
+    count    = 0
 
-        while not finished:
-            data = query_academic_search('get', url, query(count))
+    while not finished:
+        data = query_academic_search('post', url, query(count))
 
-            # Check if no more data
-            if len(data['entities']) > 0:
-                count += len(data['entities'])
-            else:
-                finished = True
+        # Check if no more data
+        if len(data['entities']) > 0:
+            count += len(data['entities'])
+        else:
+            finished = True
 
-            for res in data['entities']:
-                # Set name
-                try:
-                    conf_name_res[res['Id']] = res['PCS']['CN']
-                except KeyError:
-                    pass
+        for res in data['entities']:
+            # Set name
+            try:
+                conf_name_res[res['Id']] = res['PCS']['CN']
+            except KeyError:
+                pass
 
     # Try Series now
     # Query
     url = os.path.join(MAS_URL_PREFIX, "academic/v1.0/evaluate")
-    queries = (lambda x: {
-        'expr': expr,
+    query = lambda x: {
+        'expr': or_query_builder('Id={}', conference_ids),
         'count': 10000,
         'offset': x,
         'attributes': 'CN'
-        } for expr in or_query_builder_list('Id={}', conference_ids))
+        }
 
-    for query in queries:
-        # Checking offsets
-        finished = False
-        count    = 0
+    # Checking offsets
+    finished = False
+    count    = 0
 
-        while not finished:
-            data = query_academic_search('get', url, query(count))
+    while not finished:
+        data = query_academic_search('post', url, query(count))
 
-            # Check if no more data
-            if len(data['entities']) > 0:
-                count += len(data['entities'])
-            else:
-                finished = True
+        # Check if no more data
+        if len(data['entities']) > 0:
+            count += len(data['entities'])
+        else:
+            finished = True
 
-            for res in data['entities']:
-                # Set name
-                try:
-                    conf_name_res[res['Id']] = res['CN']
-                except KeyError:
-                    pass
+        for res in data['entities']:
+            # Set name
+            try:
+                conf_name_res[res['Id']] = res['CN']
+            except KeyError:
+                pass
 
     return conf_name_res
 
@@ -160,36 +156,35 @@ def journal_name_mag_multiquery(journal_ids):
     '''
     # Query
     url = os.path.join(MAS_URL_PREFIX, "academic/v1.0/evaluate")
-    queries = (lambda x: {
-        'expr': expr,
+    query = lambda x: {
+        'expr': or_query_builder('Id={}', journal_ids),
         'count': 10000,
         'offset': x,
         'attributes': 'DJN'
-        } for expr in or_query_builder_list('Id={}', journal_ids))
+        }
 
     # Query result
     jour_name_res = dict()
 
-    for query in queries:
-        # Checking offsets
-        finished = False
-        count    = 0
+    # Checking offsets
+    finished = False
+    count    = 0
 
-        while not finished:
-            data = query_academic_search('get', url, query(count))
+    while not finished:
+        data = query_academic_search('post', url, query(count))
 
-            # Check if no more data
-            if len(data['entities']) > 0:
-                count += len(data['entities'])
-            else:
-                finished = True
+        # Check if no more data
+        if len(data['entities']) > 0:
+            count += len(data['entities'])
+        else:
+            finished = True
 
-            for res in data['entities']:
-                # Set name
-                try:
-                    jour_name_res[res['Id']] = res['DJN']
-                except KeyError:
-                    pass
+        for res in data['entities']:
+            # Set name
+            try:
+                jour_name_res[res['Id']] = res['DJN']
+            except KeyError:
+                pass
 
     return jour_name_res
 

@@ -8,7 +8,7 @@ author: Alexander Soen
 from core.config import *
 from core.search.mag_interface import *
 from core.utils.entity_type import Entity_type
-from core.search.parse_academic_search import or_query_builder_list
+from core.search.parse_academic_search import or_query_builder
 
 MAS_URL_PREFIX = "https://api.labs.cognitive.microsoft.com"
 
@@ -24,7 +24,7 @@ def author_paper_mag_query(author_id):
         'attributes': 'Id'
         }
 
-    data = query_academic_search('get', url, query)
+    data = query_academic_search('post', url, query)
 
     # Query result
     papers = list()
@@ -48,7 +48,7 @@ def affiliation_paper_mag_query(affiliation_id):
         'attributes': 'Id'
         }
 
-    data = query_academic_search('get', url, query)
+    data = query_academic_search('post', url, query)
 
     # Query result
     papers = list()
@@ -72,7 +72,7 @@ def conference_instance_to_series_mag(conference_id):
         'attributes': 'PCS.CId'
         }
 
-    data = query_academic_search('get', url, query)
+    data = query_academic_search('post', url, query)
 
     # Query result
     conf_id = int()
@@ -104,7 +104,7 @@ def conference_paper_mag_query(conference_id):
         'attributes': 'Id'
         }
 
-    data = query_academic_search('get', url, query)
+    data = query_academic_search('post', url, query)
 
     # Query result
     papers = list()
@@ -128,7 +128,7 @@ def journal_paper_mag_query(journal_id):
         'attributes': 'Id'
         }
 
-    data = query_academic_search('get', url, query)
+    data = query_academic_search('post', url, query)
 
     # Query result
     papers = list()
@@ -169,33 +169,32 @@ def author_paper_mag_multiquery(author_ids):
     '''
     # Query
     url = os.path.join(MAS_URL_PREFIX, "academic/v1.0/evaluate")
-    queries = (lambda x: {
-        'expr': expr,
+    queries = lambda x: {
+        'expr': or_query_builder('Composite(AA.AuId={})', author_ids),
         'count': 10000,
         'offset': x,
         'attributes': 'Id'
-        } for expr in or_query_builder_list('Composite(AA.AuId={})', author_ids))
+        }
 
     # Query result
     papers = list()
 
-    for query in queries:
-        # Checking offsets
-        finished = False
-        count    = 0
+    # Checking offsets
+    finished = False
+    count    = 0
 
-        while not finished:
-            data = query_academic_search('get', url, query(count))
+    while not finished:
+        data = query_academic_search('post', url, query(count))
 
-            # Check if no more data
-            if len(data['entities']) > 0:
-                count += len(data['entities'])
-            else:
-                finished = True
+        # Check if no more data
+        if len(data['entities']) > 0:
+            count += len(data['entities'])
+        else:
+            finished = True
 
-            for res in data['entities']:
-                # Set name
-                papers.append(res['Id'])
+        for res in data['entities']:
+            # Set name
+            papers.append(res['Id'])
 
     return papers
 
@@ -205,33 +204,32 @@ def affiliation_paper_mag_multiquery(affiliation_ids):
     '''
     # Query
     url = os.path.join(MAS_URL_PREFIX, "academic/v1.0/evaluate")
-    queries = (lambda x: {
-        'expr': expr,
+    query = lambda x: {
+        'expr': or_query_builder('Composite(AA.AfId={})', affiliation_ids),
         'count': 10000,
         'offset': x,
         'attributes': 'Id'
-        } for expr in or_query_builder_list('Composite(AA.AfId={})', affiliation_ids))
+        }
 
     # Query result
     papers = list()
 
-    for query in queries:
-        # Checking offsets
-        finished = False
-        count    = 0
+    # Checking offsets
+    finished = False
+    count    = 0
 
-        while not finished:
-            data = query_academic_search('get', url, query(count))
+    while not finished:
+        data = query_academic_search('post', url, query(count))
 
-            # Check if no more data
-            if len(data['entities']) > 0:
-                count += len(data['entities'])
-            else:
-                finished = True
+        # Check if no more data
+        if len(data['entities']) > 0:
+            count += len(data['entities'])
+        else:
+            finished = True
 
-            for res in data['entities']:
-                # Set name
-                papers.append(res['Id'])
+        for res in data['entities']:
+            # Set name
+            papers.append(res['Id'])
 
     return papers
 
@@ -241,33 +239,32 @@ def conference_paper_mag_multiquery(conference_ids):
     '''
     # Query
     url = os.path.join(MAS_URL_PREFIX, "academic/v1.0/evaluate")
-    queries = (lambda x: {
-        'expr': expr,
+    query = lambda x: {
+        'expr': or_query_builder('Composite(C.CId={})', conference_ids),
         'count': 10000,
         'offset': x,
         'attributes': 'Id'
-        } for expr in or_query_builder_list('Composite(C.CId={})', conference_ids))
+        }
 
     # Query result
     papers = list()
 
-    for query in queries:
-        # Checking offsets
-        finished = False
-        count    = 0
+    # Checking offsets
+    finished = False
+    count    = 0
 
-        while not finished:
-            data = query_academic_search('get', url, query(count))
+    while not finished:
+        data = query_academic_search('post', url, query(count))
 
-            # Check if no more data
-            if len(data['entities']) > 0:
-                count += len(data['entities'])
-            else:
-                finished = True
+        # Check if no more data
+        if len(data['entities']) > 0:
+            count += len(data['entities'])
+        else:
+            finished = True
 
-            for res in data['entities']:
-                # Set name
-                papers.append(res['Id'])
+        for res in data['entities']:
+            # Set name
+            papers.append(res['Id'])
 
     return papers
 
@@ -277,33 +274,32 @@ def journal_paper_mag_multiquery(journal_ids):
     '''
     # Query
     url = os.path.join(MAS_URL_PREFIX, "academic/v1.0/evaluate")
-    queries = (lambda x: {
-        'expr': expr,
+    query = lambda x: {
+        'expr': or_query_builder('Composite(J.JId={})', journal_ids),
         'count': 10000,
         'offset': x,
         'attributes': 'Id'
-        } for expr in or_query_builder_list('Composite(J.JId={})', journal_ids))
+        }
 
     # Query result
     papers = list()
 
-    for query in queries:
-        # Checking offsets
-        finished = False
-        count    = 0
+    # Checking offsets
+    finished = False
+    count    = 0
 
-        while not finished:
-            data = query_academic_search('get', url, query(count))
+    while not finished:
+        data = query_academic_search('post', url, query(count))
 
-            # Check if no more data
-            if len(data['entities']) > 0:
-                count += len(data['entities'])
-            else:
-                finished = True
+        # Check if no more data
+        if len(data['entities']) > 0:
+            count += len(data['entities'])
+        else:
+            finished = True
 
-        for res in data['entities']:
-            # Set name
-            papers.append(res['Id'])
+    for res in data['entities']:
+        # Set name
+        papers.append(res['Id'])
 
     return papers
 

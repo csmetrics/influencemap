@@ -26,7 +26,7 @@ def entity_from_name(name, e_type):
       "count": 100,
       "attributes": search_details['attributes']
     }
-    data = query_academic_search("get", url, query)
+    data = query_academic_search('post', url, query)
 
     name_tag = search_details['attributes'].split(',')[1]
     entity_list = list()
