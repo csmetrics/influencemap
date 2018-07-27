@@ -239,12 +239,23 @@ def submit(request):
         # /submit/?type=browse_author_group&name=lexing_xie
         # data should be pre-processed and cached
         data, option, keyword = get_url_query(request.GET)
+        selected_papers = data.get('papers')
+
     else:
         data = json.loads(request.POST.get('data'))
          # normalisedName: <string>   # the normalised name from entity with highest paper count of selected entities
          # entities: {"normalisedName": <string>, "eid": <int>, "entity_type": <author | conference | institution | journal | paper>
         option = data.get("option")   # last searched entity type (confusing for multiple entities)
         keyword = data.get('keyword') # last searched term (doesn't really work for multiple searches)
+        entity_ids = data.get('entities')
+        paper_ids = entity_ids['paper']
+        if entity_ids['author'] != []: paper_ids += get_papers_from_author_ids(entity_ids['author'])
+        if entity_ids['conference'] != []: paper_ids += get_papers_from_conference_ids(entity_ids['conference'])
+        if entity_ids['institution'] != []: paper_ids += get_papers_from_affiliation_ids(entity_ids['institution'])
+        if entity_ids['journal'] != []: paper_ids += get_papers_from_journal_ids(entity_ids['journal'])
+
+        selected_papers =  paper_ids
+
 
     # Default Dates
     min_year = None
@@ -252,8 +263,6 @@ def submit(request):
 
     time_cur = datetime.now()
 
-    # Get the selected paper
-    selected_papers = data.get('papers')
     entity_names    = data.get('names')
     flower_name     = data.get('flower_name')
 
