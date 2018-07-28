@@ -70,11 +70,7 @@ def score_df_to_graph(score_df):
     print('\n---\n{} start graph generation'.format(datetime.now()))
 
     # Ego Graph
-    ego=score_df.ego
-    egoG = nx.DiGraph(ego=ego, max_influenced=score_df['influenced'].max(), max_influencing=score_df['influencing'].max())
-
-    # Get top data for graph
-    score_df = score_df[score_df['entity_name'] != ego].head(n=NUM_LEAVES)
+    egoG = nx.DiGraph(ego='ego', max_influenced=score_df['influenced'].max(), max_influencing=score_df['influencing'].max())
 
     # Normalise values
     score_df['normed_sum'] = normalise_singular_linear(score_df['sum'])
@@ -84,7 +80,7 @@ def score_df_to_graph(score_df):
     score_df['normed_influencing'] = norm_influencing
 
     # Add ego
-    egoG.add_node(ego, weight=None)
+    egoG.add_node('ego', name=score_df.ego, weight=None)
 
     # Iterate over dataframe
     for _, row in score_df.iterrows():
@@ -92,8 +88,8 @@ def score_df_to_graph(score_df):
         egoG.add_node(row['entity_name'], nratiow=row['normed_ratio'], ratiow=row['ratio'], sumw=row['normed_sum'], coauthor=row['coauthor'])
 
         # Add influence weights
-        egoG.add_edge(row['entity_name'], ego, weight=row['influencing'], nweight=row['normed_influencing'], direction='out')
-        egoG.add_edge(ego, row['entity_name'], weight=row['influenced'], nweight=row['normed_influenced'], direction='in')
+        egoG.add_edge(row['entity_name'], 'ego', weight=row['influencing'], nweight=row['normed_influencing'], direction='out')
+        egoG.add_edge('ego', row['entity_name'], weight=row['influenced'], nweight=row['normed_influenced'], direction='in')
 
     print('{} finish graph generation\n---'.format(datetime.now()))
 

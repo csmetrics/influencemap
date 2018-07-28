@@ -42,7 +42,9 @@ def gen_entity_score(paper_information, names, self_cite=True):
         time_cur = datetime.now()
 
         entity_score = score_paper_info_list(paper_information, leaves, self=names)
-        entity_score = entity_score[~entity_score['entity_name'].str.lower().isin(
+
+        if (name != 'conf'):
+            entity_score = entity_score[~entity_score['entity_name'].str.lower().isin(
                                           names)]
 
         if not self_cite:
@@ -75,19 +77,25 @@ def gen_flower_data(score_dfs, entity_names, flower_name,
         # Aggregate
         agg_score = agg_score_df(filter_score)
 
+        print(filter_score)
+        print(agg_score)
+
         # Filter coauthors
-        if (include_coauthor == True):
+        if (include_coauthor):
             agg_score = flag_coauthor(agg_score, coauthors)
         else:
             agg_score = agg_score[ ~agg_score['entity_name'].isin(coauthors) ]
 
         # Get top data for graph
-        agg_score = agg_score[ ~agg_score['entity_name'].isin(entity_names) ].head(n=NUM_LEAVES)
+        if (name != 'conf'):
+            agg_score = agg_score[ ~agg_score['entity_name'].isin(entity_names) ].head(n=NUM_LEAVES)
+
+        # Get top data for graph
+        agg_score = agg_score.head(n=NUM_LEAVES)
         agg_score.ego = flower_name
 
         # Get node ids
         node_ids = agg_score['entity_name']
-
         node_info.update(agg_node_info(filter_score, node_ids))
 
         print()
