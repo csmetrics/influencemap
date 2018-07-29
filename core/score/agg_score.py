@@ -59,10 +59,10 @@ def agg_node_info(influence_df, node_names, coauthors=set([]), num_papers=3):
 
         info = dict()
         info['node_name'] = node_name
-        info['node_ids']  = list(set(node_influence['entity_id']))
+        #info['node_ids']  = list(set(node_influence['entity_id']))
 
         # Remove node ids
-        remove_cols = ['entity_id', 'entity_name', 'ego_paper_id',
+        remove_cols = ['entity_name', 'ego_paper_id',  #'entity_id', 
                        'influence_year', 'publication_year']
         node_influence = node_influence.drop(remove_cols, 1)
 
@@ -73,7 +73,7 @@ def agg_node_info(influence_df, node_names, coauthors=set([]), num_papers=3):
                                                 .apply(lambda x: 1 if x > 0 else 0)
 
         # Paper influence scores
-        score_groups = ['other_paper_id', 'other_paper_title', 'other_year']
+        score_groups = ['link_paper_id', 'link_paper_title', 'link_year']
         paper_scores = node_influence.groupby(score_groups).agg(np.sum)
         
         # Get information

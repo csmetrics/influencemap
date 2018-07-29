@@ -4,7 +4,7 @@ from core.utils.get_entity         import entity_from_name
 from core.search.query_paper       import paper_query
 from core.search.query_paper_mag   import paper_mag_multiquery
 from core.search.query_info        import paper_info_check_query, paper_info_mag_check_multiquery
-from core.score.agg_paper_info     import score_paper_info_list
+from core.score.agg_paper_info     import score_paper_info_list, score_leaves
 from core.score.agg_score          import agg_score_df, agg_node_info
 from core.score.agg_utils          import get_coauthor_mapping
 from core.score.agg_utils          import flag_coauthor
@@ -35,13 +35,14 @@ def gen_entity_score(paper_information, names, self_cite=True):
     ''' Generates the non-aggregated entity scores
     '''
     entity_scores = [None, None, None]
+    score_df = score_paper_info_list(paper_information, self=names)
     for i, flower_item in enumerate(flower_leaves):
         name, leaves = flower_item
 
         # Timer
         time_cur = datetime.now()
 
-        entity_score = score_paper_info_list(paper_information, leaves, self=names)
+        entity_score = score_leaves(score_df, leaves)
 
         if (name != 'conf'):
             entity_score = entity_score[~entity_score['entity_name'].str.lower().isin(

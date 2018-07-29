@@ -29,7 +29,6 @@ from core.flower.high_level_get_flower import gen_entity_score
 from core.search.query_paper    import paper_query
 from core.search.query_info     import paper_info_check_query, paper_info_mag_check_multiquery
 from core.search.query_info_mag import base_paper_mag_multiquery
-from core.score.agg_paper_info  import score_paper_info_list
 from core.score.agg_utils       import get_coauthor_mapping
 from core.score.agg_utils       import flag_coauthor
 from core.utils.get_stats       import get_stats

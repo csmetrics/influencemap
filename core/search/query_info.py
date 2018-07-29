@@ -79,23 +79,3 @@ def paper_info_mag_check_multiquery(paper_ids):
         paper_info_res += process_res
 
     return paper_info_res
-
-
-if __name__ == '__main__':
-    # TESTING
-    from core.search.query_db_pd import author_name_db_query
-    from core.search.query_utility import paper_info_to_cache_json
-    from core.score.agg_paper_info import score_paper_info_list
-    from core.utils.entity_type import Entity_type
-
-    author_df = author_name_db_query('antony l hosking')
-
-    a_papers = list(author_df['PaperId'])
-
-    paper_info_list = list()
-    for paper in a_papers:
-        paper_info = paper_info_check_query(paper)
-        if paper_info:
-            paper_info_list.append(paper_info)
-
-    print(score_paper_info_list(paper_info_list, [Entity_type.JOUR]))
