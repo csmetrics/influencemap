@@ -2,7 +2,7 @@
 Aggregates paper information dictionaries into scoring tables/statistics to
 display pass to the front-end (Draw flower or display statistics).
 
-date:   26.06.18
+date:   29.06.18
 author: Alexander Soen
 '''
 
@@ -19,6 +19,8 @@ def score_paper_info(paper_info, self=list()):
     '''
     # Score results
     score_list = list()
+    influenced_paa = 1 / len(paper_info['Authors']) \
+            if 'Authors' in paper_info else 1
 
     # Iterate through references
     for reference in paper_info['References']:
@@ -120,7 +122,7 @@ def score_paper_info(paper_info, self=list()):
             inst_res['influenced_count']  = 1
             inst_res['influencing_count'] = 0
             
-            inst_res['influenced_paa']  = 1 / len(author_list)
+            inst_res['influenced_paa']  = influenced_paa
             inst_res['influencing_paa'] = 0
 
             # Year information
@@ -158,13 +160,11 @@ def get_influence_index(entity_type, influence_dir='influenced'):
 
     # Conference
     if entity_type == Entity_type.CONF:
-        #return influence_dir + '_count'
-        return influence_dir + '_paa' #Should be equiv to count once agg
+        return influence_dir + '_count'
 
     # Journal
     if entity_type == Entity_type.JOUR:
-        #return influence_dir + '_count'
-        return influence_dir + '_paa'
+        return influence_dir + '_count'
 
     return None
 
@@ -210,10 +210,16 @@ def score_leaves(score_df, leaves):
     '''
     # Set entity names and influence to specified
     res_list = list()
+    col_id   = ['entity_name', 'ego_paper_id', 'link_paper_id']
     for leaf in leaves:
         leaf_df = score_df.copy()
         leaf_df['entity_name'] = leaf_df[get_name_index(leaf)]
         leaf_df['entity_type'] = leaf
+
+        # Remove duplicates for specific types
+        if leaf not in [ Entity_type.AUTH, Entity_type.AFFI ]:
+            leaf_df.drop_duplicates(subset=col_id, inplace=True)
+
         leaf_df['influenced']  = leaf_df[get_influence_index(leaf)]
         leaf_df['influencing'] = leaf_df[get_influence_index(leaf,
             influence_dir='influencing')]
