@@ -1,4 +1,5 @@
 import os, sys, json, pandas, string
+import multiprocess
 from django.shortcuts import render
 from django.http import JsonResponse
 from django.views.decorators.csrf import csrf_exempt
@@ -21,9 +22,9 @@ from core.search.search import search_name
 from graph.save_cache import *
 from core.utils.load_tsv import tsv_to_dict
 
-from core.flower.high_level_get_flower import get_flower_data_high_level
 from core.flower.high_level_get_flower import gen_flower_data
-from core.flower.high_level_get_flower import gen_entity_score
+from core.flower.high_level_get_flower import default_config
+from core.score.agg_paper_info         import score_paper_info_list
 
 # Imports for submit
 from core.search.query_paper    import paper_query
@@ -34,6 +35,12 @@ from core.score.agg_utils       import flag_coauthor
 from core.utils.get_stats       import get_stats
 
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+
+flower_leaves = [ ('author', [ent.Entity_type.AUTH])
+                , ('conf'  , [ent.Entity_type.CONF, ent.Entity_type.JOUR])
+                , ('inst'  , [ent.Entity_type.AFFI]) ]
+
+NUM_THREADS = 8
 
 def autocomplete(request):
     entity_type = request.GET.get('option')
@@ -298,26 +305,44 @@ def submit(request):
     entity_names = list(set(entity_names))
 #    normal_names = list(map(lambda x: x.lower(), entity_names))
 
-    # Generate score for each type of flower
-    # Make flower
-    if config != None:
-        print(config)
-        entity_scores = gen_entity_score(paper_information, entity_names, self_cite=config[4])
-        data1, data2, data3, node_info = gen_flower_data(entity_scores,
-                                              entity_names,
-                                              flower_name,
-                                              pub_lower        = config[0],
-                                              pub_upper        = config[1],
-                                              cit_lower        = config[2],
-                                              cit_upper        = config[3],
-                                              coauthors        = coauthors,
-                                              include_coauthor = config[5])
-    else:
-        entity_scores = gen_entity_score(paper_information, entity_names, self_cite=False)
-        data1, data2, data3, node_info = gen_flower_data(entity_scores,
-                                                     entity_names,
-                                                     flower_name,
-                                                     coauthors = coauthors)
+    # TEST TOTAL TIME FOR SCORING
+    time_cur = datetime.now()
+
+    # Generate scores from paper information
+    time_score = datetime.now()
+    score_df = score_paper_info_list(paper_information, self=entity_names)
+    print('TOTAL SCORE_DF TIME: ', datetime.now() - time_score)
+
+    # Set up configuration of influence flowers
+    flower_config = default_config
+    if config:
+        flower_config['self_cite'] = config[4]
+        flower_config['icoauthor'] = config[5]
+        flower_config['pub_lower'] = config[0]
+        flower_config['pub_upper'] = config[1]
+        flower_config['cit_lower'] = config[2]
+        flower_config['cit_upper'] = config[3]
+
+    # Concurrently calculate the aggregations
+    p = multiprocess.Pool(NUM_THREADS)
+
+    # Work function
+    make_flower = lambda x: gen_flower_data(score_df, x, entity_names,
+            flower_name, coauthors, config=flower_config)
+
+    # Concurrent map
+    flower_res = p.map(make_flower, flower_leaves)
+    sorted(flower_res, key=lambda x: x[0])
+
+    # Reduce
+    node_info   = dict()
+    flower_info = list()
+    for _, f_info, n_info in flower_res:
+        flower_info.append(f_info)
+        node_info.update(n_info)
+
+    print('TOTAL FLOWER TIME: ', datetime.now() - time_cur)
+
     if config == None:
         config = [min_pub_year, max_pub_year, min_cite_year, max_cite_year, "false", "true"]
     else:
@@ -325,9 +350,9 @@ def submit(request):
         config[5] = str(config[5]).lower()
 
     data = {
-        "author": data1,
-        "conf": data2,
-        "inst": data3,
+        "author": flower_info[0],
+        "conf"  : flower_info[1],
+        "inst"  : flower_info[2],
         "curated": curated_flag,
         "yearSlider": {
             "title": "Publications range",
@@ -361,45 +386,48 @@ def submit(request):
 @csrf_exempt
 def resubmit(request):
     print(request)
-    # Get year filter data
-    pub_lower = int(request.POST.get('from_pub_year'))
-    pub_upper = int(request.POST.get('to_pub_year'))
-    cit_lower = int(request.POST.get('from_cit_year'))
-    cit_upper = int(request.POST.get('to_cit_year'))
-
-
     option = request.POST.get('option')
     keyword = request.POST.get('keyword')
     pre_flower_data = []
-    self_cite = request.POST.get('selfcite') == 'true'
-    include_coauthor = request.POST.get('coauthor') == 'true'
-
     cache        = request.session['cache']
     coauthors    = request.session['coauthors']
     flower_name  = request.session['flower_name']
     entity_names = request.session['entity_names']
     #scores = [pd.read_json(c, orient = 'index') for c in cache]
 
+    flower_config = default_config
+    flower_config['self_cite'] = request.POST.get('selfcite') == 'true'
+    flower_config['icoauthor'] = request.POST.get('coauthor') == 'true'
+    flower_config['pub_lower'] = int(request.POST.get('from_pub_year'))
+    flower_config['pub_upper'] = int(request.POST.get('to_pub_year'))
+    flower_config['cit_lower'] = int(request.POST.get('from_cit_year'))
+    flower_config['cit_upper'] = int(request.POST.get('to_cit_year'))
+
     # Recompute flowers
     paper_information = paper_info_mag_check_multiquery(cache) # API
 
     # Generate score for each type of flower
-    scores = gen_entity_score(paper_information, entity_names, self_cite=self_cite)
+    p = multiprocess.Pool(NUM_THREADS)
 
-    data1, data2, data3, node_info = gen_flower_data(scores,
-                                          entity_names,
-                                          flower_name,
-                                          pub_lower        = pub_lower,
-                                          pub_upper        = pub_upper,
-                                          cit_lower        = cit_lower,
-                                          cit_upper        = cit_upper,
-                                          coauthors        = coauthors,
-                                          include_coauthor = include_coauthor)
+    # Work function
+    make_flower = lambda x: gen_flower_data(score_df, x, entity_names,
+            flower_name, coauthors, config=flower_config)
+
+    # Concurrent map
+    flower_res = list(p.map(make_flower, flower_leaves))
+    sorted(flower_res, key=lambda x: x[0])
+
+    # Reduce
+    node_info   = dict()
+    flower_info = list()
+    for _, f_info, n_info in flower_res:
+        flower_info.append(f_info)
+        node_info.update(n_info)
 
     data = {
-        "author": data1,
-        "conf": data2,
-        "inst": data3,
+        "author": flower_info[0],
+        "conf"  : flower_info[1],
+        "inst"  : flower_info[2],
         "navbarOption": get_navbar_option(keyword, option)
     }
 
@@ -407,7 +435,7 @@ def resubmit(request):
     data['stats'] = stats
 
     # Update the node_info cache
-    request.session['node_info']    = node_info
+    request.session['node_info'] = node_info
 
     return JsonResponse(data, safe=False)
 

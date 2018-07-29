@@ -30,165 +30,66 @@ str_to_ent = {
         "institution": ent.Entity_type.AFFI
     }
 
+default_config = {
+        'self_cite': True,
+        'icoauthor': True,
+        'pub_lower': None,
+        'pub_upper': None,
+        'cit_lower': None,
+        'cit_upper': None,
+        }
 
-def gen_entity_score(paper_information, names, self_cite=True):
-    ''' Generates the non-aggregated entity scores
+
+def gen_flower_data(score_df, flower_prop, entity_names, flower_name,
+                    coauthors, config=default_config):
     '''
-    entity_scores = [None, None, None]
-    score_df = score_paper_info_list(paper_information, self=names)
-    for i, flower_item in enumerate(flower_leaves):
-        name, leaves = flower_item
-
-        # Timer
-        time_cur = datetime.now()
-
-        entity_score = score_leaves(score_df, leaves)
-
-        if (name != 'conf'):
-            entity_score = entity_score[~entity_score['entity_name'].str.lower().isin(
-                                          names)]
-
-        if not self_cite:
-            entity_score = entity_score[~entity_score['self_cite']]
-
-        entity_scores[i] = entity_score
-
-    return entity_scores
-
-
-def gen_flower_data(score_dfs, entity_names, flower_name,
-                               pub_lower=None, pub_upper=None,
-                               cit_lower=None, cit_upper=None,
-                               coauthors=None,
-                               include_coauthor=True):
-    ''' Generates processed data for flowers given a list of score dataframes.
     '''
-    flower_score = [None, None, None]
-    node_info    = dict()
-    for i, flower_item in enumerate(flower_leaves):
-        name, leaves = flower_item
+    # Flower properties
+    flower_type, leaves = flower_prop
 
-        time_cur = datetime.now()
+    entity_score = score_leaves(score_df, leaves)
 
-        # Filter score dfs first
-        filter_score = filter_year(score_dfs[i], pub_lower, pub_upper)
-        filter_score = filter_year(filter_score, cit_lower, cit_upper,
-                                   index = 'influence_year')
+    # Ego name removal
+    if (flower_type != 'conf'):
+        entity_score = entity_score[~entity_score['entity_name'].str.lower()\
+                .isin(entity_names)]
 
-        # Aggregate
-        agg_score = agg_score_df(filter_score)
+    # Self citation filter
+    if not config['self_cite']:
+        entity_score = entity_score[~entity_score['self_cite']]
 
-        print(filter_score)
-        print(agg_score)
+    # Filter publication year for ego's paper
+    filter_score = filter_year(entity_score, config['pub_lower'],
+                                             config['pub_upper'])
 
-        # Filter coauthors
-        if (include_coauthor):
-            agg_score = flag_coauthor(agg_score, coauthors)
-        else:
-            agg_score = agg_score[ ~agg_score['entity_name'].isin(coauthors) ]
+    # Filter Citaiton year for reference links
+    filter_score = filter_year(filter_score, config['cit_lower'],
+                                             config['cit_upper'],
+                                             index = 'influence_year')
 
-        # Get top data for graph
-        if (name != 'conf'):
-            agg_score = agg_score[ ~agg_score['entity_name'].isin(entity_names) ].head(n=NUM_LEAVES)
+    # Aggregate
+    agg_score = agg_score_df(filter_score)
 
-        # Get top data for graph
-        agg_score = agg_score.head(n=NUM_LEAVES)
-        agg_score.ego = flower_name
-
-        # Get node ids
-        node_ids = agg_score['entity_name']
-        node_info.update(agg_node_info(filter_score, node_ids))
-
-        print()
-        print('Aggregated score for', leaves)
-        print('Time taken: ', datetime.now() - time_cur)
-        print()
-
-        time_cur = datetime.now()
-
-        score = score_df_to_graph(agg_score)
-
-        print()
-        print('Score to graph for', leaves)
-        print('Time taken: ', datetime.now() - time_cur)
-        print()
-
-        flower_score[i] = score
-
-    author_data = processdata("author", flower_score[0])
-    conf_data   = processdata("conf", flower_score[1])
-    inst_data   = processdata("inst", flower_score[2])
-
-    return author_data, conf_data, inst_data, node_info
-
-
-def get_flower_data_high_level(entitytype, authorids, normalizedname, selection=None):
-
-    time_cur = datetime.now()
-
-    # Get the selected paper
-    selected_papers = list()
-    if selection:
-        # If selection is not None, they follow selection
-        for eid in authorids:
-            selected_papers += list(map(lambda x : x['eid'], selection[eid]))
+    # Filter coauthors
+    if config['icoauthor']:
+        agg_score = flag_coauthor(agg_score, coauthors)
     else:
-        selected_papers = paper_mag_multiquery(str_to_ent[entitytype], authorids)
+        agg_score = agg_score[ ~agg_score['entity_name']\
+                                .isin(coauthors) ]
 
-    print()
-    print('Number of Papers Found: ', len(selected_papers))
-    print('Time taken: ', datetime.now() - time_cur)
-    print()
+    # Get top scores for graph
+    if (flower_type != 'conf'):
+        agg_score = agg_score[ ~agg_score['entity_name'].isin(entity_names) ]
+    agg_score = agg_score.head(n=NUM_LEAVES)
+    agg_score.ego = flower_name
 
-    time_cur = datetime.now()
+    # Generate node information
+    node_info = agg_node_info(filter_score, agg_score['entity_name'])
 
-    # Turn selected paper into information dictionary list
-    paper_information = paper_info_mag_check_multiquery(selected_papers) # API
+    # Graph score
+    graph_score = score_df_to_graph(agg_score)
 
-    # Get coauthors
-    coauthors = get_coauthor_mapping(paper_information)
+    # D3 format
+    data = processdata(flower_type, graph_score)
 
-    print()
-    print('Number of Paper Information Found: ', len(paper_information))
-    print('Time taken: ', datetime.now() - time_cur)
-    print()
-    if not paper_information:
-        return None
-
-    # Get min and maximum year
-    years = [info['Year'] for info in paper_information if 'Year' in info]
-    min_year = min(years)
-    max_year = max(years)
-    year_counter = sorted(list(Counter(years).items()), key=itemgetter(0))
-    year_chart = [["Year", "Num of Papers"]]
-    year_chart.extend([[k,v] for k,v in year_counter])
-
-    # Generate score for each type of flower
-    entity_scores = gen_entity_score(paper_information, [normalizedname],
-                                     self_cite=False)
-
-    # Generate flower data
-    author_data, conf_data, inst_data = gen_flower_data(entity_scores,
-                                                        [normalizedname],
-                                                        normalizedname,
-                                                        coauthors = coauthors)
-
-    # Set cache
-    cache = {'cache': selected_papers, 'coauthors': coauthors}
-
-    # Set statistics
-    stats = get_stats(paper_information)
-
-    data = {
-        "author": author_data,
-        "conf":   conf_data,
-        "inst":   inst_data,
-        "yearSlider": {
-            "title": "Publications range",
-            "range": [min_year, max_year],
-            "counter": year_chart
-        },
-        "stats": stats
-    }
-
-    return cache, data
+    return flower_type, data, node_info
