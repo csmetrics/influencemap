@@ -2,7 +2,7 @@
 Aggregates paper information dictionaries into scoring tables/statistics to
 display pass to the front-end (Draw flower or display statistics).
 
-date:   26.06.18
+date:   29.06.18
 author: Alexander Soen
 '''
 
@@ -12,398 +12,218 @@ from core.score.agg_utils   import get_name_mapping
 from core.score.agg_utils   import apply_name_mapping
 from core.score.agg_utils   import is_self_cite
 
-def score_author(paper_info, self=list()):
-    ''' Turns a paper information dictionary into a list of scoring
-        dictionaries for authors.
+
+def score_paper_info(paper_info, self=list()):
+    ''' Generates a dictionary with score values and relevant information to be
+        aggregated.
     '''
     # Score results
     score_list = list()
+    influenced_paa = 1 / len(paper_info['Authors']) \
+            if 'Authors' in paper_info else 1
 
-    # Check if references are empty
-    if 'References' in paper_info:
-        # Iterate through the references
-        for reference in paper_info['References']:
-            # Determine if self cite
-            self_cite = is_self_cite(reference, self)
+    # Iterate through references
+    for reference in paper_info['References']:
+        # Check if it is a self citation
+        self_cite = is_self_cite(reference, self)
 
-            # Go through each of the authors
-            for ref_author in reference['Authors']:
-                row_dict = dict()
+        # Get venue value
+        conf_name = reference['ConferenceName'] \
+                if 'ConferenceName' in reference else None
+        jour_name = reference['JournalName'] \
+                if 'JournalName' in reference else None
 
-                # Influence weight
-                weight = 1 / len(reference['Authors']) if reference['Authors'] \
-                        else 1
+        # Get author combinations
+        author_list = list()
+        for paa in reference['Authors']:
+            auth_name = paa['AuthorName'] \
+                    if 'AuthorName' in paa else None
+            affi_name = paa['AffiliationName'] \
+                    if 'AffiliationName' in paa else None
+            author_list.append((auth_name, affi_name))
 
-                # Important fields
-                row_dict['entity_id']         = ref_author['AuthorId']
-                row_dict['entity_name']       = ref_author['AuthorName']
-                row_dict['influenced']        = 0
-                row_dict['influencing']       = weight
-                row_dict['self_cite']         = self_cite
-                row_dict['ego_paper_id']      = paper_info['PaperId']
-                row_dict['other_paper_id']    = reference['PaperId']
-                row_dict['other_paper_title'] = reference['PaperTitle']
-                try:
-                    row_dict['other_year'] = reference['Year']
-                except:
-                    row_dict['other_year'] = None
-                try:
-                    row_dict['publication_year'] = paper_info['Year']
-                    row_dict['influence_year']   = paper_info['Year']
-                except KeyError:
-                    row_dict['publication_year'] = None
-                    row_dict['influence_year']   = None
+        if not author_list:
+            author_list = [(None, None)]
 
-                score_list.append(row_dict)
+        for auth_name, affi_name in author_list:
+            inst_res = dict()
 
-    # Check if citations are empty
-    if 'Citations' in paper_info:
-        # Iterate through the citations
-        for citation in paper_info['Citations']:
-            # Determine if self cite
-            self_cite = is_self_cite(citation, self)
+            # Entity Names
+            inst_res['AuthorName']      = auth_name
+            inst_res['AffiliationName'] = affi_name
+            inst_res['ConferenceName']  = conf_name
+            inst_res['JournalName']     = jour_name
 
-            # Go through each of the authors
-            for cite_author in citation['Authors']:
-                row_dict = dict()
+            # Additional Properties
+            inst_res['self_cite'] = self_cite
 
-                # Influence weight
-                weight = 1 / len(paper_info['Authors']) if \
-                         paper_info['Authors'] else 1
+            # Scoring
+            inst_res['influenced_count']  = 0
+            inst_res['influencing_count'] = 1
+            
+            inst_res['influenced_paa']  = 0
+            inst_res['influencing_paa'] = 1 / len(author_list)
 
-                # Important fields
-                row_dict['entity_id']         = cite_author['AuthorId']
-                row_dict['entity_name']       = cite_author['AuthorName']
-                row_dict['influenced']        = weight
-                row_dict['influencing']       = 0
-                row_dict['self_cite']         = self_cite
-                row_dict['ego_paper_id']      = paper_info['PaperId']
-                row_dict['other_paper_id']    = citation['PaperId']
-                row_dict['other_paper_title'] = citation['PaperTitle']
-                try:
-                    row_dict['other_year'] = citation['Year']
-                except:
-                    row_dict['other_year'] = None
-                try:
-                    row_dict['publication_year'] = paper_info['Year']
-                except KeyError:
-                    row_dict['publication_year'] = None
-                try:
-                    row_dict['influence_year'] = citation['Year']
-                except KeyError:
-                    row_dict['influence_year'] = None
+            # Year information
+            try:
+                inst_res['publication_year'] = paper_info['Year']
+                inst_res['influence_year']   = paper_info['Year']
+            except KeyError:
+                inst_res['publication_year'] = None
+                inst_res['influence_year']   = None
+            try:
+                inst_res['link_year'] = reference['Year']
+            except:
+                inst_res['link_year'] = None
 
-                score_list.append(row_dict)
+            # Paper information
+            inst_res['ego_paper_id']     = paper_info['PaperId']
+            inst_res['link_paper_id']    = reference['PaperId']
+            inst_res['link_paper_title'] = reference['PaperTitle']
+
+            score_list.append(inst_res)
+
+    # Iterate through citations
+    for citation in paper_info['Citations']:
+        # Check if it is a self citation
+        self_cite = is_self_cite(citation, self)
+
+        # Get venue value
+        conf_name = citation['ConferenceName'] \
+                if 'ConferenceName' in citation else None
+        jour_name = citation['JournalName'] \
+                if 'JournalName' in citation else None
+
+        # Get author combinations
+        author_list = list()
+        for paa in citation['Authors']:
+            auth_name = paa['AuthorName'] \
+                    if 'AuthorName' in paa else None
+            affi_name = paa['AffiliationName'] \
+                    if 'AffiliationName' in paa else None
+            author_list.append((auth_name, affi_name))
+
+        if not author_list:
+            author_list = [(None, None)]
+
+        for auth_name, affi_name in author_list:
+            inst_res = dict()
+
+            # Entity Names
+            inst_res['AuthorName']      = auth_name
+            inst_res['AffiliationName'] = affi_name
+            inst_res['ConferenceName']  = conf_name
+            inst_res['JournalName']     = jour_name
+
+            # Additional Properties
+            inst_res['self_cite'] = self_cite
+
+            # Scoring
+            inst_res['influenced_count']  = 1
+            inst_res['influencing_count'] = 0
+            
+            inst_res['influenced_paa']  = influenced_paa
+            inst_res['influencing_paa'] = 0
+
+            # Year information
+            try:
+                inst_res['publication_year'] = paper_info['Year']
+            except KeyError:
+                inst_res['publication_year'] = None
+            try:
+                inst_res['influence_year'] = citation['Year']
+                inst_res['link_year']     = citation['Year']
+            except KeyError:
+                inst_res['influence_year'] = None
+                inst_res['link_year'] = None
+
+            # Paper information
+            inst_res['ego_paper_id']     = paper_info['PaperId']
+            inst_res['link_paper_id']    = citation['PaperId']
+            inst_res['link_paper_title'] = citation['PaperTitle']
+
+            score_list.append(inst_res)
 
     return score_list
 
 
-def score_affiliation(paper_info, self=list()):
-    ''' Turns a paper information dictionary into a list of scoring
-        dictionary for affiliations.
+def get_influence_index(entity_type, influence_dir='influenced'):
+    ''' Function to get the score index from the scoring dictionaries.
     '''
-    # Score results
-    score_list = list()
-
-    # Check if references are empty
-    if 'References' in paper_info:
-        # Iterate through the references
-        for reference in paper_info['References']:
-            # Determine if self cite
-            self_cite = is_self_cite(reference, self)
-
-            # Go through each of the authors
-            for ref_author in reference['Authors']:
-                row_dict = dict()
-
-                # Influence weight
-                weight = 1 / len(reference['Authors']) if reference['Authors'] \
-                         else 1
-
-                # Important fields
-                try:
-                    row_dict['entity_name'] = ref_author['AffiliationName']
-                except KeyError:
-                    continue
-                row_dict['entity_id']         = ref_author['AffiliationId']
-                row_dict['influenced']        = 0
-                row_dict['influencing']       = weight
-                row_dict['self_cite']         = self_cite
-                row_dict['ego_paper_id']      = paper_info['PaperId']
-                row_dict['other_paper_id']    = reference['PaperId']
-                row_dict['other_paper_title'] = reference['PaperTitle']
-                try:
-                    row_dict['other_year'] = reference['Year']
-                except:
-                    row_dict['other_year'] = None
-                try:
-                    row_dict['publication_year'] = paper_info['Year']
-                    row_dict['influence_year']   = paper_info['Year']
-                except KeyError:
-                    row_dict['publication_year'] = None
-                    row_dict['influence_year']   = None
-
-                score_list.append(row_dict)
-
-    # Check if citations are empty
-    if 'Citations' in paper_info:
-        # Iterate through the citations
-        for citation in paper_info['Citations']:
-            # Determine if self cite
-            self_cite = is_self_cite(citation, self)
-
-            # Go through each of the authors
-            for cite_author in citation['Authors']:
-                row_dict = dict()
-
-                # Influence weight
-                weight = 1 / len(paper_info['Authors']) if \
-                         paper_info['Authors'] else 1
-
-                # Important fields
-                try:
-                    row_dict['entity_name']   = cite_author['AffiliationName']
-                except KeyError:
-                    continue
-                row_dict['entity_id']         = cite_author['AffiliationId']
-                row_dict['influenced']        = weight
-                row_dict['influencing']       = 0
-                row_dict['self_cite']         = self_cite
-                row_dict['ego_paper_id']      = paper_info['PaperId']
-                row_dict['other_paper_id']    = citation['PaperId']
-                row_dict['other_paper_title'] = citation['PaperTitle']
-                try:
-                    row_dict['other_year'] = citation['Year']
-                except:
-                    row_dict['other_year'] = None
-                try:
-                    row_dict['publication_year'] = paper_info['Year']
-                except KeyError:
-                    row_dict['publication_year'] = None
-                try:
-                    row_dict['influence_year'] = citation['Year']
-                except KeyError:
-                    row_dict['influence_year'] = None
-
-                score_list.append(row_dict)
-
-    return score_list
-
-
-def score_conference(paper_info, self=list()):
-    ''' Turns a paper information dictionary into a list of scoring
-        dictionary for conferences.
-    '''
-    # Score results
-    score_list = list()
-
-    # Check if references are empty
-    if 'References' in paper_info:
-        # Iterate through the references
-        for reference in paper_info['References']:
-            row_dict = dict()
-
-            # Make entity id
-            try:
-                entity_name = reference['ConferenceInstanceId']
-            except KeyError:
-                try:
-                    entity_id   = reference['ConferenceSeriesId']
-                    entity_name = reference['ConferenceName']
-                except KeyError:
-                    continue
-
-            # Important fields
-            row_dict['entity_id']         = entity_id
-            row_dict['entity_name']       = entity_name
-            row_dict['influenced']        = 0
-            row_dict['influencing']       = 1
-            row_dict['self_cite']         = is_self_cite(reference, self)
-            row_dict['ego_paper_id']      = paper_info['PaperId']
-            row_dict['other_paper_id']    = reference['PaperId']
-            row_dict['other_paper_title'] = reference['PaperTitle']
-            try:
-                row_dict['other_year'] = reference['Year']
-            except:
-                row_dict['other_year'] = None
-            try:
-                row_dict['publication_year'] = paper_info['Year']
-                row_dict['influence_year']   = paper_info['Year']
-            except KeyError:
-                row_dict['publication_year'] = None
-                row_dict['influence_year']   = None
-
-            score_list.append(row_dict)
-
-    # Check if citations are empty
-    if 'Citations' in paper_info:
-        # Iterate through the citations
-        for citation in paper_info['Citations']:
-            row_dict = dict()
-
-            # Make entity id
-            try:
-                entity_id   = citation['ConferenceSeriesId']
-                entity_name = citation['ConferenceInstanceId']
-            except KeyError:
-                try:
-                    entity_id   = citation['ConferenceSeriesId']
-                    entity_name = citation['ConferenceName']
-                except KeyError:
-                    continue
-
-            # Important fields
-            row_dict['entity_id']         = entity_id
-            row_dict['entity_name']       = entity_name
-            row_dict['influenced']        = 1
-            row_dict['influencing']       = 0
-            row_dict['self_cite']         = is_self_cite(citation, self)
-            row_dict['ego_paper_id']      = paper_info['PaperId']
-            row_dict['other_paper_id']    = citation['PaperId']
-            row_dict['other_paper_title'] = citation['PaperTitle']
-            try:
-                row_dict['other_year'] = citation['Year']
-            except:
-                row_dict['other_year'] = None
-            try:
-                row_dict['publication_year'] = paper_info['Year']
-            except KeyError:
-                row_dict['publication_year'] = None
-            try:
-                row_dict['influence_year'] = citation['Year']
-            except KeyError:
-                row_dict['influence_year'] = None
-
-            score_list.append(row_dict)
-
-    return score_list
-
-
-def score_journal(paper_info, self=list()):
-    ''' Turns a paper information dictionary into a list of scoring
-        dictionary for journals.
-    '''
-    # Score results
-    score_list = list()
-
-    # Check if references are empty
-    if 'References' in paper_info:
-        # Iterate through the references
-        for reference in paper_info['References']:
-            row_dict = dict()
-
-            # Make entity id
-            try:
-                entity_id   = reference['JournalId']
-                entity_name = reference['JournalName']
-            except KeyError:
-                continue
-
-            # Important fields
-            row_dict['entity_id']         = entity_id
-            row_dict['entity_name']       = entity_name
-            row_dict['influenced']        = 0
-            row_dict['influencing']       = 1
-            row_dict['self_cite']         = is_self_cite(reference, self)
-            row_dict['ego_paper_id']      = paper_info['PaperId']
-            row_dict['other_paper_id']    = reference['PaperId']
-            row_dict['other_paper_title'] = reference['PaperTitle']
-            try:
-                row_dict['other_year'] = reference['Year']
-            except:
-                row_dict['other_year'] = None
-            try:
-                row_dict['publication_year'] = paper_info['Year']
-                row_dict['influence_year']   = paper_info['Year']
-            except KeyError:
-                row_dict['publication_year'] = None
-                row_dict['influence_year']   = None
-
-            score_list.append(row_dict)
-
-    # Check if citations are empty
-    if 'Citations' in paper_info:
-        # Iterate through the citations
-        for citation in paper_info['Citations']:
-            row_dict = dict()
-
-            # Make entity id
-            try:
-                entity_id   = citation['JournalId']
-                entity_name = citation['JournalName']
-            except KeyError:
-                continue
-
-            # Important fields
-            row_dict['entity_id']         = entity_id
-            row_dict['entity_name']       = entity_name
-            row_dict['influenced']        = 1
-            row_dict['influencing']       = 0
-            row_dict['self_cite']         = is_self_cite(citation, self)
-            row_dict['ego_paper_id']      = paper_info['PaperId']
-            row_dict['other_paper_id']    = citation['PaperId']
-            row_dict['other_paper_title'] = citation['PaperTitle']
-            try:
-                row_dict['other_year'] = citation['Year']
-            except:
-                row_dict['other_year'] = None
-            try:
-                row_dict['publication_year'] = paper_info['Year']
-            except KeyError:
-                row_dict['publication_year'] = None
-            try:
-                row_dict['influence_year'] = citation['Year']
-            except KeyError:
-                row_dict['influence_year'] = None
-
-            score_list.append(row_dict)
-
-    return score_list
-
-
-def score_paper_info(paper_info, entity_type, self=list()):
-    ''' Score paper information depending on specific target type.
-    '''
-    # Call query functions depending on type given
     # Author
     if entity_type == Entity_type.AUTH:
-        return score_author(paper_info, self = self)
+        return influence_dir + '_paa'
 
     # Affiliation
     if entity_type == Entity_type.AFFI:
-        return score_affiliation(paper_info, self = self)
+        return influence_dir + '_paa'
 
     # Conference
     if entity_type == Entity_type.CONF:
-        return score_conference(paper_info, self = self)
+        return influence_dir + '_count'
 
     # Journal
     if entity_type == Entity_type.JOUR:
-        return score_journal(paper_info, self = self)
+        return influence_dir + '_count'
 
-    # Otherwise
     return None
 
 
-def score_paper_info_list(paper_info_list, leaves, self=list()):
-    ''' Provides a scoring pandas dataframe given a list of paper information
-        and leaf configuration of flower to represent the scoring.
+def get_name_index(entity_type):
+    ''' Function to get the name index from the scoring dictionaries.
+    '''
+    # Author
+    if entity_type == Entity_type.AUTH:
+        return 'AuthorName'
+
+    # Affiliation
+    if entity_type == Entity_type.AFFI:
+        return 'AffiliationName'
+
+    # Conference
+    if entity_type == Entity_type.CONF:
+        return 'ConferenceName'
+
+    # Journal
+    if entity_type == Entity_type.JOUR:
+        return 'JournalName'
+
+    return None
+
+
+def score_paper_info_list(paper_info_list, self=list()):
+    '''
     '''
     # Query results
     score_list = list()
-    
-    # Iterate through different entity types for scoring dictionaries
-    for paper_info in paper_info_list:
-        for leaf in leaves:
-            # Get score
-            score = score_paper_info(paper_info, leaf, self)
 
-            # Check if valid score
-            if score:
-                score_list += score
+    # Turn paper information into score dictionary
+    for paper_info in paper_info_list:
+        score_list += score_paper_info(paper_info, self)
 
     # Score dataframe
-    score_df = pd.DataFrame(score_list)
+    return pd.DataFrame(score_list)
 
-    # Return scoring
-    return score_df
+    
+def score_leaves(score_df, leaves):
+    '''
+    '''
+    # Set entity names and influence to specified
+    res_list = list()
+    col_id   = ['entity_name', 'ego_paper_id', 'link_paper_id']
+    for leaf in leaves:
+        leaf_df = score_df.copy()
+        leaf_df['entity_name'] = leaf_df[get_name_index(leaf)]
+        leaf_df['entity_type'] = leaf
+
+        # Remove duplicates for specific types
+        if leaf not in [ Entity_type.AUTH, Entity_type.AFFI ]:
+            leaf_df.drop_duplicates(subset=col_id, inplace=True)
+
+        leaf_df['influenced']  = leaf_df[get_influence_index(leaf)]
+        leaf_df['influencing'] = leaf_df[get_influence_index(leaf,
+            influence_dir='influencing')]
+
+        res_list.append(leaf_df)
+
+    return pd.concat(res_list)

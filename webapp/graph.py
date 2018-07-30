@@ -10,7 +10,7 @@ def processdata(gtype, egoG):
 
     # Get basic node information from ego graph
     outer_nodes = list(egoG)
-    outer_nodes.remove(center_node)
+    outer_nodes.remove('ego')
     outer_nodes.sort(key=lambda n : egoG.nodes[n]['ratiow'])
 
     links = egoG.edges(data=True)
@@ -30,9 +30,11 @@ def processdata(gtype, egoG):
             "coauthor": str(egoG.nodes[key]['coauthor'])
         } for i, key in zip(range(1, len(outer_nodes)+1), outer_nodes)}
 
+    nodekeys = ['ego'] + [v["name"] for v in sorted(nodedata.values(), key=itemgetter("id"))]
+
     # Center node data
-    nodedata[center_node] = {
-        "name": center_node,
+    nodedata['ego'] = {
+        "name": egoG.nodes['ego']['name'],
         "weight": 1,
         "id": 0,
         "gtype": gtype,
@@ -41,8 +43,6 @@ def processdata(gtype, egoG):
         "ypos": y_pos[0],
         "coauthor": str(False)
     }
-
-    nodekeys = [v["name"] for v in sorted(nodedata.values(), key=itemgetter("id"))]
 
     linkin = [{
             "source": nodekeys.index(s),
