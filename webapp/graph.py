@@ -11,9 +11,27 @@ def processdata(gtype, egoG):
     # Get basic node information from ego graph
     outer_nodes = list(egoG)
     outer_nodes.remove('ego')
-    outer_nodes.sort(key=lambda n : egoG.nodes[n]['ratiow'])
 
-    links = egoG.edges(data=True)
+    # Sort by name, influence dif, then ratio
+    outer_nodes.sort()
+    outer_nodes.sort(key=lambda n: egoG.nodes[n]['dif'])
+    outer_nodes.sort(key=lambda n: egoG.nodes[n]['ratiow'])
+
+    links = list(egoG.edges(data=True))
+
+    # Sort by name, influence dif, then ratio
+    links.sort(key=lambda l: (l[0], l[1]))
+    links.sort(key=lambda l: l[2]['dif'])
+    links.sort(key=lambda l: l[2]['ratiow'])
+    links_in  = [l for l in links if l[2]['direction'] == 'in']
+    links_out = [l for l in links if l[2]['direction'] == 'out']
+
+    # Make sure in/out bars are in order
+    links = list()
+    for l_in, l_out in zip(links_in, links_out):
+        links.append(l_out)
+        links.append(l_in)
+
     anglelist = np.linspace(np.pi, 0., num=len(outer_nodes))
     x_pos = [0]; x_pos.extend(list(radius * np.cos(anglelist)))
     y_pos = [0]; y_pos.extend(list(radius * np.sin(anglelist)))
@@ -44,7 +62,7 @@ def processdata(gtype, egoG):
         "coauthor": str(False)
     }
 
-    linkin = [{
+    edge_in = [{
             "source": nodekeys.index(s),
             "target": nodekeys.index(t),
             "padding": nodedata[t]["size"],
@@ -52,9 +70,9 @@ def processdata(gtype, egoG):
             "gtype": gtype,
             "type": v["direction"],
             "weight": v["nweight"]
-        } for s, t, v in links if v["direction"] == "in"]
+        } for s, t, v in links_in]
 
-    linkout = [{
+    edge_out = [{
             "source": nodekeys.index(s),
             "target": nodekeys.index(t),
             "padding": nodedata[t]["size"],
@@ -62,11 +80,11 @@ def processdata(gtype, egoG):
             "gtype": gtype,
             "type": v["direction"],
             "weight": v["nweight"]
-        } for s, t, v in links if v["direction"] != "in"]
+        } for s, t, v in links_out]
 
     linkdata = list()
 
-    for i, (lin, lout) in enumerate(zip(linkin, linkout)):
+    for lin, lout in zip(edge_in, edge_out):
         linkdata.append(lin)
         linkdata.append(lout)
 
@@ -78,5 +96,4 @@ def processdata(gtype, egoG):
             "sum": nodedata[t]["weight"] if v["direction"] == "in" else nodedata[s]["weight"],
             "weight": v["weight"]
         } for s, t, v in links]
-    chartdata = sorted(chartdata, key=itemgetter("sum"))
     return { "nodes": list(nodedata.values()), "links": linkdata, "bars": chartdata }

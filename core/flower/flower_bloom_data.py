@@ -78,6 +78,7 @@ def score_df_to_graph(score_df):
     norm_influenced, norm_influencing = normalise_double_log(score_df['influenced'], score_df['influencing'])
     score_df['normed_influenced'] = norm_influenced
     score_df['normed_influencing'] = norm_influencing
+    score_df['dif'] = score_df['influencing'] - score_df['influenced']
 
     # Add ego
     egoG.add_node('ego', name=score_df.ego, weight=None)
@@ -85,11 +86,17 @@ def score_df_to_graph(score_df):
     # Iterate over dataframe
     for _, row in score_df.iterrows():
         # Add ratio weight
-        egoG.add_node(row['entity_name'], nratiow=row['normed_ratio'], ratiow=row['ratio'], sumw=row['normed_sum'], coauthor=row['coauthor'])
+        egoG.add_node(row['entity_name'], nratiow=row['normed_ratio'],
+                ratiow=row['ratio'], sumw=row['normed_sum'],
+                coauthor=row['coauthor'], dif=row['dif'])
 
         # Add influence weights
-        egoG.add_edge(row['entity_name'], 'ego', weight=row['influencing'], nweight=row['normed_influencing'], direction='out')
-        egoG.add_edge('ego', row['entity_name'], weight=row['influenced'], nweight=row['normed_influenced'], direction='in')
+        egoG.add_edge(row['entity_name'], 'ego', weight=row['influencing'],
+                nweight=row['normed_influencing'], direction='out',
+                ratiow=row['ratio'], dif=row['dif'])
+        egoG.add_edge('ego', row['entity_name'], weight=row['influenced'],
+                nweight=row['normed_influenced'], direction='in',
+                ratiow=row['ratio'], dif=row['dif'])
 
     print('{} finish graph generation\n---'.format(datetime.now()))
 
