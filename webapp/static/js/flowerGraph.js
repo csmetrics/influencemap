@@ -188,6 +188,7 @@ function drawFlower(svg_id, data, idx, w) {
         .style("stroke", function (d, i) { if ((d.coauthor == 'True') && (d.id != 0)) return "green";
                                           else return ""; })
         .style("stroke-width", 2)
+        .style("cursor", "pointer")
         .on("mouseover", function() { highlight_on(idx, this); })
         .on("mouseout", function() { highlight_off(idx); })
         .on("click", function(d) { toggle_split(idx, this); showNodeData(idx, this);});
