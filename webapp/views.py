@@ -3,6 +3,7 @@ import multiprocess
 from django.shortcuts import render
 from django.http import JsonResponse
 from django.views.decorators.csrf import csrf_exempt
+from django.conf import settings
 from datetime import datetime
 from collections import Counter
 from operator import itemgetter
@@ -34,7 +35,7 @@ from core.score.agg_utils       import get_coauthor_mapping
 from core.score.agg_utils       import flag_coauthor
 from core.utils.get_stats       import get_stats
 
-BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+BASE_DIR = settings.BASE_DIR
 
 flower_leaves = [ ('author', [ent.Entity_type.AUTH])
                 , ('conf'  , [ent.Entity_type.CONF, ent.Entity_type.JOUR])
@@ -180,7 +181,7 @@ def search(request):
         data = query_journal(keyword)
     elif entityType == "institution":
         data = query_affiliation(keyword)
-    else: 
+    else:
         data = get_entities_from_search(keyword, entityType)
     for i in range(len(data)):
         entity = {'data': data[i]}
@@ -345,15 +346,17 @@ def submit(request):
         flower_config['cit_lower'] = config[2]
         flower_config['cit_upper'] = config[3]
 
-    # Concurrently calculate the aggregations
-    p = multiprocess.Pool(NUM_THREADS)
-
     # Work function
     make_flower = lambda x: gen_flower_data(score_df, x, entity_names,
             flower_name, coauthors, config=flower_config)
 
+    # Concurrently calculate the aggregations
     # Concurrent map
-    flower_res = p.map(make_flower, flower_leaves)
+    if settings.MULTIPROCESS:
+        p = multiprocess.Pool(NUM_THREADS)
+        flower_res = p.map(make_flower, flower_leaves)
+    else: # temporary fix
+        flower_res = [make_flower(v) for v in flower_leaves]
     sorted(flower_res, key=lambda x: x[0])
 
     # Reduce
@@ -428,16 +431,17 @@ def resubmit(request):
     # Recompute flowers
     paper_information = paper_info_mag_check_multiquery(cache) # API
 
-    # Generate score for each type of flower
-    p = multiprocess.Pool(NUM_THREADS)
-
     # Work function
     make_flower = lambda x: gen_flower_data(score_df, x, entity_names,
             flower_name, coauthors, config=flower_config)
 
+    # Concurrently calculate the aggregations
     # Concurrent map
-    flower_res = list(p.map(make_flower, flower_leaves))
-    sorted(flower_res, key=lambda x: x[0])
+    if settings.MULTIPROCESS:
+        p = multiprocess.Pool(NUM_THREADS)
+        flower_res = p.map(make_flower, flower_leaves)
+    else: # temporary fix
+        flower_res = [make_flower(v) for v in flower_leaves]
 
     # Reduce
     node_info   = dict()
