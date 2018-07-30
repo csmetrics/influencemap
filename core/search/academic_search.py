@@ -189,6 +189,56 @@ def get_papers_from_entity_names(entity_names, entityType):
     data = query_academic_search("get", url, query)
     return data
 
+
+
+def get_papers_from_entity_ids(entity_ids, entity_type):
+    entity_type_helper_dict = {'author': 'AA.AuId', 'affiliation': 'AA.AfId', 'journal': 'J.JId', 'conference': 'C.CId'}
+    url = os.path.join(MAS_URL_PREFIX, "academic/v1.0/evaluate")
+    base_string = "Composite("+entity_type_helper_dict[entity_type]+"={})"
+    or_string = or_query_builder(base_string, entity_ids)
+    expr = "{}".format(or_string)
+    query = lambda expression, count, offset: {
+      "expr": expression,
+      "count": count,
+      "offset": offset,
+      "attributes": "Id"
+    }
+
+    data = []
+    offset = 0
+    count = 1000
+    continue_querying = True
+    while continue_querying:
+        print(query(expr, count,offset))
+        new_data =  query_academic_search("get", url, query(expr, count, offset))['entities']
+        data += new_data
+        if len(new_data) < 1000:
+            continue_querying = False
+        else:
+            offset += count
+    data = [paper['Id'] for paper in data]
+    print(data)
+    print(len(data))
+    return data
+
+def get_papers_from_author_ids(entity_ids):
+    return get_papers_from_entity_ids(entity_ids, 'author')
+
+def get_papers_from_affiliation_ids(entity_ids):
+    return get_papers_from_entity_ids(entity_ids, 'affiliation')
+
+def get_papers_from_journal_ids(entity_ids):
+    return get_papers_from_entity_ids(entity_ids, 'journal')
+
+def get_papers_from_conference_ids(entity_ids):
+    return get_papers_from_entity_ids(entity_ids, 'conference')
+
+
+
+
+
+
+
 def get_entities_from_search(keyword, entityType):
   data = get_morepaperinfo_from_title(keyword) if entityType == "paper"  else get_search_results(keyword, entityType)
   print('\n\n\n\n\n\n\n\n')

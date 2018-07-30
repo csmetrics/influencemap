@@ -3,11 +3,12 @@ import multiprocess
 from django.shortcuts import render
 from django.http import JsonResponse
 from django.views.decorators.csrf import csrf_exempt
+from django.conf import settings
 from datetime import datetime
 from collections import Counter
 from operator import itemgetter
 from webapp.graph import processdata
-from webapp.elastic import search_cache, query_reference_papers, query_citation_papers
+from webapp.elastic import search_cache, query_reference_papers, query_citation_papers, query_conference_series, query_journal, query_affiliation
 from webapp.utils import *
 
 import core.utils.entity_type as ent
@@ -34,7 +35,7 @@ from core.score.agg_utils       import get_coauthor_mapping
 from core.score.agg_utils       import flag_coauthor
 from core.utils.get_stats       import get_stats
 
-BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+BASE_DIR = settings.BASE_DIR
 
 flower_leaves = [ ('author', [ent.Entity_type.AUTH])
                 , ('conf'  , [ent.Entity_type.CONF, ent.Entity_type.JOUR])
@@ -54,7 +55,12 @@ def main(request):
 @csrf_exempt
 def browse(request):
 
-    browse_list_filename = os.path.join(BASE_DIR, 'webapp/static/browse_lists.json')
+    which = request.GET.get("which")
+    if which and which=="sigmm":
+        browse_file = "webapp/static/sigmm_browse_lists.json"
+    else:
+        browse_file = "webapp/static/browse_lists.json"
+    browse_list_filename = os.path.join(BASE_DIR, browse_file)
     with open(browse_list_filename, 'r') as fp:
         browse_list = json.load(fp)
 
@@ -147,15 +153,15 @@ s = {
     'author': ('<h5>{name}</h5><p>{affiliation}, Papers: {paperCount}, Citations: {citations}</p></div>'),
          # '<div style="float: left; width: 50%; padding: 0;"><p>Papers: {paperCount}</p></div>'
          # '<div style="float: right; width: 50%; text-align: right; padding: 0;"<p>Citations: {citations}</p></div>'),
-    'conference': ('<h5>{name}</h5>'
-        '<div style="float: left; width: 50%; padding: 0;"><p>Papers: {paperCount}</p></div>'
-        '<div style="float: right; width: 50%; text-align: right; padding: 0;"<p>Citations: {citations}</p></div>'),
-    'institution': ('<h5>{name}</h5>'
-        '<div style="float: left; width: 50%; padding: 0;"><p>Papers: {paperCount}</p></div>'
-        '<div style="float: right; width: 50%; text-align: right; padding: 0;"<p>Citations: {citations}</p></div>'),
-    'journal': ('<h5>{name}</h5>'
-        '<div style="float: left; width: 50%; padding: 0;"><p>Papers: {paperCount}</p></div>'
-        '<div style="float: right; width: 50%; text-align: right; padding: 0;"<p>Citations: {citations}</p></div>'),
+    'conference': ('<h5>{DisplayName}</h5>'
+        '<div style="float: left; width: 50%; padding: 0;"><p>Papers: {PaperCount}</p></div>'
+        '<div style="float: right; width: 50%; text-align: right; padding: 0;"<p>Citations: {CitationCount}</p></div>'),
+    'institution': ('<h5>{DisplayName}</h5>'
+        '<div style="float: left; width: 50%; padding: 0;"><p>Papers: {PaperCount}</p></div>'
+        '<div style="float: right; width: 50%; text-align: right; padding: 0;"<p>Citations: {CitationCount}</p></div>'),
+    'journal': ('<h5>{DisplayName}</h5>'
+        '<div style="float: left; width: 50%; padding: 0;"><p>Papers: {PaperCount}</p></div>'
+        '<div style="float: right; width: 50%; text-align: right; padding: 0;"<p>Citations: {CitationCount}</p></div>'),
     'paper': ('<h5>{title}</h5>'
         '<div><p>Citations: {citations}, Field: {fieldOfStudy}</p><p>Authors: {authorName}</p></div>')
 }
@@ -168,15 +174,20 @@ def search(request):
     keyword = ''.join(ch for ch in keyword if ch not in exclude)
     keyword = keyword.lower()
     keyword = " ".join(keyword.split())
-    data = get_entities_from_search(keyword, entityType)
+    id_helper_dict = {"conference": "ConferenceSeriesId", "journal": "JournalId", "institution": "AffiliationId", "paper": "eid", "author": "eid"}
+    if entityType == "conference":
+        data = query_conference_series(keyword)
+    elif entityType == "journal":
+        data = query_journal(keyword)
+    elif entityType == "institution":
+        data = query_affiliation(keyword)
+    else:
+        data = get_entities_from_search(keyword, entityType)
     for i in range(len(data)):
-        # print(entity)
         entity = {'data': data[i]}
         entity['display-info'] = s[entityType].format(**entity['data'])
-        entity['table-id'] = "{}_{}".format(entity['data']['entity-type'], entity['data']['eid'])
+        entity['table-id'] = "{}_{}".format(entityType, entity['data'][id_helper_dict[entityType]])
         data[i] = entity
-        # print(entity)
-    print(data[0])
     return JsonResponse({'entities': data}, safe=False)
 
 
@@ -242,18 +253,30 @@ def submit(request):
         # data should be pre-processed and cached
         curated_flag = True
         data, option, keyword, config = get_url_query(request.GET)
+        selected_papers = data.get('papers')
     else:
         data = json.loads(request.POST.get('data'))
          # normalisedName: <string>   # the normalised name from entity with highest paper count of selected entities
          # entities: {"normalisedName": <string>, "eid": <int>, "entity_type": <author | conference | institution | journal | paper>
         option = data.get("option")   # last searched entity type (confusing for multiple entities)
         keyword = data.get('keyword') # last searched term (doesn't really work for multiple searches)
+        entity_ids = data.get('entities')
+        paper_ids = entity_ids['paper']
+        if entity_ids['author'] != []: paper_ids += get_papers_from_author_ids(entity_ids['author'])
+        if entity_ids['conference'] != []: paper_ids += get_papers_from_conference_ids(entity_ids['conference'])
+        if entity_ids['institution'] != []: paper_ids += get_papers_from_affiliation_ids(entity_ids['institution'])
+        if entity_ids['journal'] != []: paper_ids += get_papers_from_journal_ids(entity_ids['journal'])
+
+        selected_papers =  paper_ids
         config = None
+
+
+    # Default Dates
+    min_year = None
+    max_year = None
 
     time_cur = datetime.now()
 
-    # Get the selected paper
-    selected_papers = data.get('papers')
     entity_names    = data.get('names')
     flower_name     = data.get('flower_name')
 
@@ -323,15 +346,17 @@ def submit(request):
         flower_config['cit_lower'] = config[2]
         flower_config['cit_upper'] = config[3]
 
-    # Concurrently calculate the aggregations
-    p = multiprocess.Pool(NUM_THREADS)
-
     # Work function
     make_flower = lambda x: gen_flower_data(score_df, x, entity_names,
             flower_name, coauthors, config=flower_config)
 
+    # Concurrently calculate the aggregations
     # Concurrent map
-    flower_res = p.map(make_flower, flower_leaves)
+    if settings.MULTIPROCESS:
+        p = multiprocess.Pool(NUM_THREADS)
+        flower_res = p.map(make_flower, flower_leaves)
+    else: # temporary fix
+        flower_res = [make_flower(v) for v in flower_leaves]
     sorted(flower_res, key=lambda x: x[0])
 
     # Reduce
@@ -406,16 +431,17 @@ def resubmit(request):
     # Recompute flowers
     paper_information = paper_info_mag_check_multiquery(cache) # API
 
-    # Generate score for each type of flower
-    p = multiprocess.Pool(NUM_THREADS)
-
     # Work function
     make_flower = lambda x: gen_flower_data(score_df, x, entity_names,
             flower_name, coauthors, config=flower_config)
 
+    # Concurrently calculate the aggregations
     # Concurrent map
-    flower_res = list(p.map(make_flower, flower_leaves))
-    sorted(flower_res, key=lambda x: x[0])
+    if settings.MULTIPROCESS:
+        p = multiprocess.Pool(NUM_THREADS)
+        flower_res = p.map(make_flower, flower_leaves)
+    else: # temporary fix
+        flower_res = [make_flower(v) for v in flower_leaves]
 
     # Reduce
     node_info   = dict()

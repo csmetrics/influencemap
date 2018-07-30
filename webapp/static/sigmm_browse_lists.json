@@ -1,0 +1,37 @@
+[
+	{
+		"display":"Conferences",
+		"tab_id":"tab1",
+		"table_id":"table1",
+		"cache_index": "browse_paper_group",
+		"cache_type": "sigmm_conferences"
+	},
+	{
+		"display": "Journals",
+		"tab_id": "tab2",
+		"table_id": "table2",
+		"cache_index": "browse_paper_group",
+		"cache_type": "sigmm_journals"
+	},
+        {
+                "display": "SIGMM Tecnical Achievment Award",
+                "tab_id": "tab5",
+                "table_id": "table5",
+                "cache_index": "browse_author_group",
+                "cache_type": "sigmm_award_taa"
+        },
+        {       
+                "display": "SIGMM Rising Star Award",
+                "tab_id": "tab6",
+                "table_id": "table6",
+                "cache_index": "browse_author_group",
+                "cache_type": "sigmm_risingstaraward"
+        },
+        {       
+                "display": "SIGMM Outstanding PhD Thesis in Multimedia Computing",
+                "tab_id": "tab7",
+                "table_id": "table7",
+                "cache_index": "browse_author_group",
+                "cache_type": "sigmm_thesisaward"
+        }
+]

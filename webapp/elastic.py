@@ -55,6 +55,36 @@ def query_paper_group(document_id):
     paper_ids = data[0]["_source"]["PaperIds"]
     return paper_ids
 
+
+def query_names_with_matches(index, fields_list, search_phrase, max_return=15):
+    result = []
+    matches = [{"match": {field: search_phrase}} for field in fields_list]
+    q = {
+        "query":{
+          "bool":{
+            "should": matches
+          }
+        }}
+    s = Search(using=client, index=index).params(preserve_order=True)
+    s.update_from_dict(q)
+
+    count = 0
+    for res in s.scan():
+        if count >= max_return:
+            break
+        result.append(res.to_dict())
+        count += 1
+    return result
+
+def query_conference_series(search_phrase):
+    return query_names_with_matches("conferenceseries", ["DisplayName","NormalizedName"] , search_phrase)
+
+def query_journal(search_phrase):
+    return query_names_with_matches("journals", ["DisplayName", "NormalizedName"], search_phrase)
+
+def query_affiliation(search_phrase):
+    return query_names_with_matches("affiliations", ["DisplayName", "NormalizedName"], search_phrase)
+
 def query_reference_papers(ego_author_ids, node_author_ids):
     result = []
     cache_index = "paper_info"
