@@ -430,6 +430,7 @@ def resubmit(request):
 
     # Recompute flowers
     paper_information = paper_info_mag_check_multiquery(cache) # API
+    score_df = score_paper_info_list(paper_information, self=entity_names)
 
     # Work function
     make_flower = lambda x: gen_flower_data(score_df, x, entity_names,
@@ -457,7 +458,7 @@ def resubmit(request):
         "navbarOption": get_navbar_option(keyword, option)
     }
 
-    stats = get_stats(paper_information, pub_lower, pub_upper)
+    stats = get_stats(paper_information, flower_config['pub_lower'], flower_config['pub_upper'])
     data['stats'] = stats
 
     # Update the node_info cache
