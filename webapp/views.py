@@ -252,8 +252,14 @@ def submit(request):
         # /submit/?type=browse_author_group&name=lexing_xie
         # data should be pre-processed and cached
         curated_flag = True
-        data, option, keyword, config = get_url_query(request.GET)
-        selected_papers = data.get('papers')
+        data, option, config = get_url_query(request.GET)
+        paper_ids = data['EntityIds']['PaperIds'] if "PaperIds" in data["EntityIds"] else []
+        if "AuthorIds" in data['EntityIds']: paper_ids += get_papers_from_author_ids(data['EntityIds']['AuthorIds'])
+        if "ConferenceIds" in data['EntityIds']: paper_ids += get_papers_from_conference_ids(data['EntityIds']['ConferenceIds'])
+        if "AffiliationIds" in data['EntityIds']: paper_ids += get_papers_from_affiliation_ids(data['EntityIds']['AffiliationIds'])
+        if "JournalIds" in data['EntityIds']: paper_ids += get_papers_from_journal_ids(data['EntityIds']['JournalIds'])
+        selected_papers = paper_ids
+        keyword = ""
     else:
         data = json.loads(request.POST.get('data'))
          # normalisedName: <string>   # the normalised name from entity with highest paper count of selected entities
@@ -276,9 +282,8 @@ def submit(request):
     max_year = None
 
     time_cur = datetime.now()
-
-    entity_names    = data.get('names')
-    flower_name     = data.get('flower_name')
+    entity_names    = [data.get('DisplayName')]
+    flower_name     = data.get('DisplayName')
 
     print()
     print('Number of Papers Found: ', len(selected_papers))
