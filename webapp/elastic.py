@@ -32,6 +32,16 @@ def query_author_group(author_name):
     author_ids = data[0]["_source"]["AuthorIds"]
     return query_cache_paper_info(author_ids)
 
+def query_browse_group(document_id):
+    result = {}
+    cache_index = "browse_cache"
+    q = {"query": {"match": {"_id": document_id}}}
+    s = Search(using=client, index=cache_index)
+    s.update_from_dict(q)
+    response = s.execute()
+    data = response.to_dict()["hits"]["hits"]
+    document = data[0]["_source"]
+    return document
 
 def search_cache(cache_index, cache_type):
     s = Search(using=client, index=cache_index).query("match", Type=cache_type)

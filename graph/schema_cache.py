@@ -2,6 +2,31 @@ from elasticsearch import Elasticsearch
 from elasticsearch_dsl import DocType, Date, Integer, \
         Float, Long, Text, Keyword, analyzer, Object
 
+
+class BrowseCache(DocType):
+    Type = Keyword(required=True)
+    DisplayName = Text(required=True)
+    EntityIds = Object(
+        required=True,
+        properties = {
+            "AuthorIds": Long(multi=True),
+            "ConferenceIds": Long(multi=True),
+            "JournalIds": Long(multi=True),
+            "AffiliationIds": Long(multi=True),
+            "PaperIds": Long(multi=True)
+        }
+    )
+    Citation = Text(analyzer="standard")
+    Year = Integer()
+    Field = Text(analyzer="standard")
+    Affiliations = Text(analyzer="standard", multi=True)
+    Url = Keyword()
+    PhotoUrl = Keyword()
+    class Meta:
+        index = "browse_cache"
+
+
+
 # e.g. anu_researchers, fields_medalists, turing_award_winners
 class AuthorGroup(DocType):
     # meta.id = hash(Type-NormalizedName)

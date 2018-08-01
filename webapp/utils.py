@@ -1,5 +1,5 @@
 import os
-from webapp.elastic import query_cache_paper_info, query_author_group, query_paper_group
+from webapp.elastic import query_browse_group, query_cache_paper_info, query_author_group, query_paper_group
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 
 # option list for radios
@@ -66,7 +66,7 @@ def get_url_query(query):
             query.get("selfcite") == "true",
             query.get("coauthor") == "true"
         ]
-    cachetype = query.get("type")
+    cachetype = "something that wont match elifs" #query.get("type")
     document_id = query.get("id")
     print(document_id)
     if cachetype == query_type[0]:
@@ -88,3 +88,7 @@ def get_url_query(query):
         data["names"] = [pname]
         data["flower_name"] = pname
         return data, "author", pname, config
+    else:
+        document = query_browse_group(document_id)
+        return document, "author", config
+
