@@ -95,4 +95,3 @@ class BagOfVenues(PaperEmbeddingModel):
         '''
         '''
         return self.emb_matrix.getrow(obj_idx).toarray()[0]
-
