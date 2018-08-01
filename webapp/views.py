@@ -260,6 +260,9 @@ def submit(request):
         if "JournalIds" in data['EntityIds']: paper_ids += get_papers_from_journal_ids(data['EntityIds']['JournalIds'])
         selected_papers = paper_ids
         keyword = ""
+        entity_names    = [data.get('DisplayName')]
+        flower_name     = data.get('DisplayName')
+
     else:
         data = json.loads(request.POST.get('data'))
          # normalisedName: <string>   # the normalised name from entity with highest paper count of selected entities
@@ -275,15 +278,14 @@ def submit(request):
 
         selected_papers =  paper_ids
         config = None
-
+        entity_names    = data.get('names')
+        flower_name     = data.get('flower_name')
 
     # Default Dates
     min_year = None
     max_year = None
 
     time_cur = datetime.now()
-    entity_names    = [data.get('DisplayName')]
-    flower_name     = data.get('DisplayName')
 
     print()
     print('Number of Papers Found: ', len(selected_papers))
