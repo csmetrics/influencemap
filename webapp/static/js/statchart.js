@@ -51,6 +51,7 @@ class PubChart {
         .attr("y", function(d) { return pub_y(d.value); })
         .attr("width", x.bandwidth())
         .attr("height", function(d) { return (height-pub_y(d.value)); })
+        .on("click", function(d) { showPapers("bar-pub", d.year) })
         .style("fill", "#ABBD81");
 
     this.initflag = true;
@@ -126,6 +127,7 @@ class CiteChart {
       .attr("y", function(d) { return cit_y(d.value); })
       .attr("width", x.bandwidth())
       .attr("height", function(d) { return (height-cit_y(d.value)); })
+      .on("click", function(d) { showPapers("bar-cite", d.year) })
       .style("fill", "#F47E60");
   }
 
