@@ -266,5 +266,16 @@ resubmitButton.addEventListener('click', function(){
   });
 });
 
+function showPapers(type, year) {
+  // event handler for pub/cite bar graphs
+  if (type == "bar-pub") {
+    alert("pub year: " + year)
+  } else if (type == "bar-cite") {
+    from_pub = document.getElementById('pub-lower-value').textContent
+    to_pub = document.getElementById('pub-upper-value').textContent
+    alert("cite year: " + year + " pub range [" + from_pub + ", " + to_pub + "]")
+  }
+}
+
 
 </script>
