@@ -34,24 +34,19 @@ class PaperEmbeddingModel(EmbeddingModel):
         ''' Calculates the embedded vector for authors through the aggregation
             of the paper vectors associated to the author.
         '''
-        res = dict()
-        for author in authors:
-            res[author] = list()
+        # Get the author indices
+        auth_indices = find_author_indices(authors, self.paper_information,
+                self.obj2idx)
 
-        # Find associated vecs for each author
-        for paper_info in self.paper_information:
-            for auth_prop in paper_info['Authors']:
-                paper_author = auth_prop['AuthorName']
-                if paper_author in authors:
-                    paper_title = paper_info['PaperTitle']
-                    paper_vec = self.title_to_vec(paper_title)
-                    # Check for invalid embedding
-                    if paper_vec is not None:
-                        res[paper_author].append(paper_vec)
+        # Turn indices into embedding vectors
+        to_emb_vecs = lambda x_list: [self.obj_index_to_emb(x) for x in x_list \
+                if self.obj_index_to_emb is not None]
+        res = [(a, to_emb_vecs(idx)) for a, idx in auth_indices.items()]
 
         # Create final vectors
         agg_res = dict()
-        for author, vecs in res.items():
+        for author, vecs in res:
+            print(vecs)
             if not vecs:
                 agg_res[author] = None
             elif scoring == 'avg':

@@ -32,3 +32,25 @@ def gen_cmp_matrix(vec_list, calc=cosine_sim):
             cmp_matrix[i, j] = calc(vec_list[i], vec_list[j])
 
     return cmp_matrix
+
+
+def find_author_indices(authors, paper_information, title2idx):
+    '''
+    '''
+    res = dict()
+    for author in authors:
+        res[author] = list()
+
+    # Find associated vecs for each author
+    for paper_info in paper_information:
+        for auth_prop in paper_info['Authors']:
+            paper_author = auth_prop['AuthorName']
+            # If the paper is in the author list we are looking at, add idx
+            if paper_author in authors:
+                paper_title = paper_info['PaperTitle']
+                # Check if an index exists
+                if paper_title in title2idx:
+                    paper_idx   = title2idx[paper_title]
+                    res[paper_author].append(paper_idx)
+
+    return res
