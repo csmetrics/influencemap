@@ -1,5 +1,7 @@
 import os
+from core.search.academic_search import *
 from webapp.elastic import query_browse_group, query_cache_paper_info, query_author_group, query_paper_group
+import matplotlib.pylab as plt
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 
 # option list for radios
@@ -52,12 +54,6 @@ def get_navbar_option(keyword = "", option = ""):
     }
 
 def get_url_query(query):
-    query_type = [
-        "author_id",
-        "browse_author_group",
-        "browse_paper_group"
-    ]
-    data = {}
     config = None
     if "pmin" in query:
         config = [
@@ -66,29 +62,18 @@ def get_url_query(query):
             query.get("selfcite") == "true",
             query.get("coauthor") == "true"
         ]
-    cachetype = "something that wont match elifs" #query.get("type")
     document_id = query.get("id")
-    print(document_id)
-    if cachetype == query_type[0]:
-        aid = query.get("id")
-        aname = query.get("name").replace("_", " ")
-        data["papers"] = query_cache_paper_info(aid)
-        data["names"] = [aname]
-        data["flower_name"] = aname
-        return data, "author", aname, config
-    elif cachetype == query_type[1]:
-        gname = query.get('name').replace("_", " ")
-        data["papers"] = query_author_group(gname)
-        data["names"] = [gname]
-        data["flower_name"] = gname
-        return data, "author", gname, config
-    elif cachetype == query_type[2]:
-        pname = query.get("name")
-        data["papers"] = query_paper_group(document_id)
-        data["names"] = [pname]
-        data["flower_name"] = pname
-        return data, "author", pname, config
-    else:
-        document = query_browse_group(document_id)
-        return document, "author", config
+    document = query_browse_group(document_id)
+    return document, "author", config
+
+
+def get_all_paper_ids(entityIds):
+    paper_ids = [] + entityIds['PaperIds'] if "PaperIds" in entityIds else []
+    if "AuthorIds" in entityIds and entityIds["AuthorIds"] != []: paper_ids += get_papers_from_author_ids(entityIds['AuthorIds'])
+    if "ConferenceIds" in entityIds and entityIds["ConferenceIds"] != []: paper_ids += get_papers_from_conference_ids(entityIds['ConferenceIds'])
+    if "AffiliationIds" in entityIds and entityIds["AffiliationIds"] != []: paper_ids += get_papers_from_affiliation_ids(entityIds['AffiliationIds'])
+    if "JournalIds" in entityIds and entityIds["JournalIds"] != []: paper_ids += get_papers_from_journal_ids(entityIds['JournalIds'])
+    return paper_ids
+
+
 

@@ -231,14 +231,16 @@ def search(request):
 
 @csrf_exempt
 def manualcache(request):
-    data = (json.loads(request.POST.get('ent_data')))
-    cache_type = request.POST.get('cache_type')
-    if cache_type == "authorGroup":
-        saveNewAuthorGroupCache(data)
-        paper_info_mag_check_multiquery(data['Papers'])
-    elif cache_type == "paperGroup":
-        saveNewPaperGroupCache(data)
-        paper_info_mag_check_multiquery(data['PaperIds'])
+    cache_dictionary = (json.loads(request.POST.get('cache')))
+    paper_action = request.POST.get('paperAction')
+    saveNewBrowseCache(cache_dictionary)
+
+    if paper_action == "batch":
+        paper_ids = get_all_paper_ids(cache_dictionary["EntityIds"])
+        addToBatch(paper_ids)
+    if paper_action == "cache":
+        paper_ids = get_all_paper_ids(cache_dictionary["EntityIds"])
+        paper_info_mag_check_multiquery(paper_ids)
     return JsonResponse({},safe=False)
 
 
@@ -253,12 +255,7 @@ def submit(request):
         # data should be pre-processed and cached
         curated_flag = True
         data, option, config = get_url_query(request.GET)
-        paper_ids = data['EntityIds']['PaperIds'] if "PaperIds" in data["EntityIds"] else []
-        if "AuthorIds" in data['EntityIds']: paper_ids += get_papers_from_author_ids(data['EntityIds']['AuthorIds'])
-        if "ConferenceIds" in data['EntityIds']: paper_ids += get_papers_from_conference_ids(data['EntityIds']['ConferenceIds'])
-        if "AffiliationIds" in data['EntityIds']: paper_ids += get_papers_from_affiliation_ids(data['EntityIds']['AffiliationIds'])
-        if "JournalIds" in data['EntityIds']: paper_ids += get_papers_from_journal_ids(data['EntityIds']['JournalIds'])
-        selected_papers = paper_ids
+        selected_papers = get_all_paper_ids(data["EntityIds"])
         keyword = ""
         entity_names    = [data.get('DisplayName')]
         flower_name     = data.get('DisplayName')
@@ -270,13 +267,7 @@ def submit(request):
         option = data.get("option")   # last searched entity type (confusing for multiple entities)
         keyword = data.get('keyword') # last searched term (doesn't really work for multiple searches)
         entity_ids = data.get('entities')
-        paper_ids = entity_ids['paper']
-        if entity_ids['author'] != []: paper_ids += get_papers_from_author_ids(entity_ids['author'])
-        if entity_ids['conference'] != []: paper_ids += get_papers_from_conference_ids(entity_ids['conference'])
-        if entity_ids['institution'] != []: paper_ids += get_papers_from_affiliation_ids(entity_ids['institution'])
-        if entity_ids['journal'] != []: paper_ids += get_papers_from_journal_ids(entity_ids['journal'])
-
-        selected_papers =  paper_ids
+        selected_papers = get_all_paper_ids(entity_ids)
         config = None
         entity_names    = data.get('names')
         flower_name     = data.get('flower_name')

@@ -26,9 +26,11 @@ cache_types = {
     "browse_cache": [
         "anu_researchers",
         "turing_award_winners",
+        "sigmm_conferences",
+        "sigmm_journals",
         "sigmm_award_taa",
         "sigmm_thesisaward",
-        "sigmm_risingstaraward"
+        "sigmm_risingstaraward",
         "publication_venues",
         "pl_researchers",
         "projects"
@@ -83,6 +85,7 @@ def saveNewPaperGroupCache(cache):
 
 def saveNewBrowseCache(cache):
     print("starting cache")
+
     init_es()
 
     # validation
@@ -114,3 +117,67 @@ def saveNewBrowseCache(cache):
     doc.meta.index = "browse_cache"
 
     doc.save()
+
+
+
+
+
+import json
+from core.search.query_info import paper_info_mag_check_multiquery
+
+batchPath = "/home/u5798145/papers_to_cache"
+
+
+def addToBatch(new_papers):
+    with open(batchPath, 'r') as fh:
+        papers = json.loads(fh.read())
+    papers += new_papers
+    papers = list(set(papers))
+    with open(batchPath, 'w') as fh:
+        json.dump(papers,fh)
+
+def getBatch():
+    with open(batchPath, 'r') as fh:
+        papers = json.loads(fh.read())
+    return papers
+
+def emptyBatch():
+    with open(batchPath, 'w') as fh:
+        json.dump([],fh)
+
+def cacheBatch():
+    batchsize = 150
+    while sizeBatch() > 0:
+        batch = getBatch()
+        batchindex = min([batchsize, len(batch)])
+        minibatch = batch[0:batchindex]
+        rebatch = batch[batchindex:len(batch)]
+        print("caching {} papers".format(len(minibatch)))
+        paper_info_mag_check_multiquery(minibatch)
+        print("{} papers remaining in batch".format(len(rebatch)))
+        emptyBatch()
+        addToBatch(rebatch)
+
+def sizeBatch():
+    with open(batchPath, 'r') as fh:
+        papers = json.loads(fh.read())
+    return len(papers)
+
+def main():
+    if len(sys.argv) > 2:
+        if sys.argv[1] == "batch":
+            if sys.argv[2] == "get":
+                for line in getBatch():
+                    print(line)
+            elif sys.argv[2] == "empty":
+                emptyBatch()
+            elif sys.argv[2] == "cache":
+                cacheBatch()
+            elif sys.argv[2] == "add" and len(sys.argv) > 3:
+                addToBatch(sys.argv[3].split(','))
+            elif sys.argv[2] == "size":
+                print(sizeBatch())
+
+
+if __name__ == '__main__':
+    main()
