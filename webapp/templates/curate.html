@@ -55,6 +55,35 @@
       </table>
       <button id="previous" class="btn medium">Previous</button>
       <button id="next" class="btn medium">Next</button>
+
+    <div style="padding: 15px">
+      <button id="manualIdsBtn" class="btn small">Show manual ID table</button>
+      <table id="entityIdsTable" hidden>
+        <tbody>
+          <tr>
+            <td width="30%">Paper Ids</td>
+            <td width="70%" contenteditable="true" id="PaperIds"></td>
+          </tr>
+          <tr>
+            <td width="30%">Author Ids</td>
+            <td width="70%" contenteditable="true" id="AuthorIds"></td>
+          </tr>
+          <tr>
+            <td width="30%">Affiliation Ids</td>
+            <td width="70%" contenteditable="true" id="AffiliationIds"></td>
+          </tr>
+          <tr>
+            <td width="30%">Conference Ids</td>
+            <td width="70%" contenteditable="true" id="ConferenceIds"></td>
+          </tr>
+          <tr>
+            <td width="30%">Journal Ids</td>
+            <td width="70%" contenteditable="true" id="JournalIds"></td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
     </div>
   </div>
     {% include 'search_tables.html' %}
@@ -66,7 +95,8 @@
 
 var prevBtn = document.getElementById('previous');
 var nextBtn = document.getElementById('next');
-
+var manualIdsBtn = document.getElementById('manualIdsBtn');
+var entityIdsTable = document.getElementById('entityIdsTable');
 var current;
 var current_data;
 
@@ -87,10 +117,24 @@ nextBtn.addEventListener('click', function(){
   set_current(current+1)
 });
 
+manualIdsBtn.addEventListener('click', function(){
+  if (entityIdsTable.hidden){
+    entityIdsTable.hidden = false;
+    manualIdsBtn.textContent = "Hide manual ID table";
+  } else {
+    entityIdsTable.hidden = true;
+    manualIdsBtn.textContent = "Show manual ID table";
+  }
+});
+
 
 ////  --------  Function definitions  --------  ////
 
 // ----  Submit information to be cached  ---- //
+
+function isNumeric(n) {
+  return !isNaN(parseInt(n)) && isFinite(n);
+}
 
 function getCacheInfo(){
   var cache = {};
@@ -98,10 +142,24 @@ function getCacheInfo(){
     var key = cacheKeys[i];
     var value = $('#'+key)[0].textContent;
     if (value !== ""){
-      if (key in cacheListKeys){
+      if (cacheListKeys.includes(key)){
         cache[key] = splitStrip(value);
       } else {
         cache[key] = value.trim();
+      }
+    }
+  }
+  cache["EntityIds"] = {};
+  var entityIds = ["PaperIds","AuthorIds","AffiliationIds","ConferenceIds","JournalIds"];
+  for (i in entityIds){
+    var entityIdsKey = entityIds[i]
+    cache["EntityIds"][entityIdsKey] = [];
+    var ids = splitStrip(document.getElementById(entityIdsKey).textContent);
+    for (j in ids){
+      var id = ids[j];
+      if (isNumeric(id)){
+        console.log(cache);console.log(entityIdsKey);console.log(entityIds);console.log(parseInt(id));
+        cache["EntityIds"][entityIdsKey].push(id);
       }
     }
   }
@@ -119,7 +177,9 @@ function resetTable(){
 function saveCache(data){
   var cache = getCacheInfo();
   var paperAction = document.getElementById('paperAction').value;
-  cache["EntityIds"] = data["entities"];
+  for (key in data["entities"]){
+    cache["EntityIds"][key] = Array.from(new Set(cache["EntityIds"][key].concat(data["entities"][key])))
+  }
   $.ajax({
     type: "POST",
     url: "/manualcache",
@@ -143,6 +203,18 @@ function splitStrip(str){
   }
   return split;
 }
+
+function addId(entityType){
+  var edit = document.getElementById('manual_'+entityType+'_ids_edit');
+  var display = document.getElementById('manual_'+entityType+'_ids_display');
+  console.log(edit);console.log(display);
+  if (edit.textContent !== ""){
+    display.textContent += ", "+edit.textContent.trim();
+    edit.textContent = "";
+  }
+}
+
+
 </script>
 
 
