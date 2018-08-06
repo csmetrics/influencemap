@@ -5,5 +5,6 @@ var browseTableConfig = {
     "paging": true,
     "info": false,
     "lengthChange": false,
+    "sorting": [[2, 'desc'],[0, 'asc']],
   }
 }
