@@ -1,6 +1,6 @@
 import os
 from core.search.academic_search import *
-from webapp.elastic import query_browse_group, query_cache_paper_info, query_author_group, query_paper_group
+from webapp.elastic import query_browse_group, query_cache_paper_info, query_author_group, query_paper_group, get_names_from_conference_ids, get_names_from_journal_ids, get_names_from_affiliation_ids
 import matplotlib.pylab as plt
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 
@@ -76,4 +76,11 @@ def get_all_paper_ids(entityIds):
     return paper_ids
 
 
+def get_all_normalised_names(entityIds):
+    normalised_names = []
+    if "AuthorIds" in entityIds and entityIds["AuthorIds"] != []: normalised_names += get_names_from_author_ids(entityIds['AuthorIds'])
+    if "ConferenceIds" in entityIds and entityIds["ConferenceIds"] != []: normalised_names += get_names_from_conference_ids(entityIds['ConferenceIds'])
+    if "AffiliationIds" in entityIds and entityIds["AffiliationIds"] != []: normalised_names += get_names_from_affiliation_ids(entityIds['AffiliationIds'])
+    if "JournalIds" in entityIds and entityIds["JournalIds"] != []: normalised_names += get_names_from_journal_ids(entityIds['JournalIds'])
 
+    return normalised_names
