@@ -298,7 +298,7 @@ def submit(request):
 
     # Get min and maximum year
     years = [info['Year'] for info in paper_information if 'Year' in info]
-    min_pub_year, max_pub_year = min(years), max(years)
+    min_pub_year, max_pub_year = min(years, default=0), max(years, default=0)
 
     # caculate pub/cite chart data
     cont_pub_years = range(min_pub_year, max_pub_year+1)
@@ -311,8 +311,8 @@ def submit(request):
     cite_years.add(min_pub_year)
     cite_years.add(max_pub_year)
 
-    min_cite_year, max_cite_year = min(cite_years), max(cite_years)
-    cont_cite_years = range(min(cite_years), max(cite_years)+1)
+    min_cite_year, max_cite_year = min(cite_years, default=0), max(cite_years, default=0)
+    cont_cite_years = range(min(cite_years, default=0), max(cite_years,default=0)+1)
     pub_chart = [{"year":k,"value":Counter(years)[k] if k in Counter(years) else 0} for k in cont_cite_years]
     citecounter = {k:[] for k in cont_cite_years}
     for info in paper_information:

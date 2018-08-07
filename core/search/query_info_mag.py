@@ -136,7 +136,7 @@ def pr_links_mag_multiquery(paper_ids):
 
     # Initalise results
     for paper_id in paper_ids:
-        results[paper_id] = {'References': list(), 'Citations': list()}
+        results[int(paper_id)] = {'References': list(), 'Citations': list()}
 
     # Calculate references
     url = os.path.join(MAS_URL_PREFIX, "academic/v1.0/evaluate")
