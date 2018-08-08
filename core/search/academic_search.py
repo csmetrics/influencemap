@@ -234,11 +234,6 @@ def get_papers_from_conference_ids(entity_ids):
     return get_papers_from_entity_ids(entity_ids, 'conference')
 
 
-
-
-
-
-
 def get_entities_from_search(keyword, entityType):
   data = get_morepaperinfo_from_title(keyword) if entityType == "paper"  else get_search_results(keyword, entityType)
   print('\n\n\n\n\n\n\n\n')
@@ -258,6 +253,21 @@ def get_entities_from_search(keyword, entityType):
   for entity in data:
       entity['entity-type'] = entityType
   return data
+
+def get_names_from_author_ids(author_ids):
+    url = os.path.join(MAS_URL_PREFIX, "academic/v1.0/evaluate")
+    base_string = "Id={}"
+    or_string = or_query_builder(base_string, author_ids)
+    expr = "{}".format(or_string)
+    query = {
+      "expr": expr,
+      "count": 1000,
+      "offset": 0,
+      "attributes": "AuN"
+    }
+    data = query_academic_search("get", url, query)
+    data = list(set([res["AuN"] for res in data["entities"]]))
+    return data
 
 def printDict(d):
     print("dict():")

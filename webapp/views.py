@@ -8,7 +8,7 @@ from datetime import datetime
 from collections import Counter
 from operator import itemgetter
 from webapp.graph import processdata
-from webapp.elastic import search_cache, query_reference_papers, query_citation_papers, query_conference_series, query_journal, query_affiliation
+from webapp.elastic import search_cache, query_conference_series, query_journal, query_affiliation
 from webapp.utils import *
 
 import core.utils.entity_type as ent
@@ -256,8 +256,8 @@ def submit(request):
         curated_flag = True
         data, option, config = get_url_query(request.GET)
         selected_papers = get_all_paper_ids(data["EntityIds"])
+        entity_names = get_all_normalised_names(data["EntityIds"])
         keyword = ""
-        entity_names    = [data.get('DisplayName')]
         flower_name     = data.get('DisplayName')
 
     else:
@@ -268,8 +268,8 @@ def submit(request):
         keyword = data.get('keyword') # last searched term (doesn't really work for multiple searches)
         entity_ids = data.get('entities')
         selected_papers = get_all_paper_ids(entity_ids)
+        entity_names = get_all_normalised_names(entity_ids)
         config = None
-        entity_names    = data.get('names')
         flower_name     = data.get('flower_name')
 
     # Default Dates
