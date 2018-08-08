@@ -53,13 +53,10 @@ def agg_node_info(influence_df, node_names, coauthors=set([]), num_papers=3):
     # Node information results
     node_info = dict()
 
-    for node_name, node_influence in filtered_influence.groupby('entity_name'):
-        # Remove duplicates TODO for affiliations
-        #print(node_influence.columns.values)
-
+    for entity_info, node_influence in filtered_influence.groupby(['entity_name', 'entity_type']):
         info = dict()
+        node_name, node_type = entity_info
         info['node_name'] = node_name
-        #info['node_ids']  = list(set(node_influence['entity_id']))
 
         # Remove node ids
         remove_cols = ['entity_name', 'ego_paper_id',  #'entity_id', 
@@ -74,38 +71,42 @@ def agg_node_info(influence_df, node_names, coauthors=set([]), num_papers=3):
 
         # Paper influence scores
         score_groups = ['link_paper_id', 'link_paper_title', 'link_year']
-        paper_scores = node_influence.groupby(score_groups).agg(np.sum)
-        
-        # Get information
-        info['reference_papers'] = list()
-        ref_scores = paper_scores[ paper_scores['influenced'] > 0 ]
-        for paper_group_info, row in ref_scores.nlargest(num_papers,
-                                        'influenced').iterrows():
-            paper_id, paper_title, year = paper_group_info
 
-            paper_dict = dict()
-            paper_dict['paper_title']     = paper_title
-            paper_dict['paper_id']        = paper_id
-            paper_dict['year']            = year
-            paper_dict['influence_score'] = row['influenced']
-            paper_dict['count']           = row['influenced_count']
+        # Iterate through each of the papers
+        node_paper_info = list()
+        for score_group, score_info in node_influence.groupby(score_groups):
+            info_dict = dict()
 
-            info['reference_papers'].append(paper_dict)
+            # Score group information
+            link_id, link_title, link_year = score_group
+            #info_dict['link_id']    = link_id
+            info_dict['link_title'] = link_title
+            info_dict['link_year']  = link_year.item()
+            
+            # Scores
+            info_dict['influenced']  = score_info['influenced'].sum().item()
+            info_dict['influencing'] = score_info['influencing'].sum().item()
 
-        info['citation_papers'] = list()
-        cite_scores = paper_scores[ paper_scores['influencing'] > 0 ]
-        for paper_group_info, row in cite_scores.nlargest(num_papers,
-                                'influencing').iterrows():
-            paper_id, paper_title, year = paper_group_info
+            #info_dict['count'] = score_info['influenced_count'].sum().item()
 
-            paper_dict = dict()
-            paper_dict['paper_title']     = paper_title
-            paper_dict['paper_id']        = paper_id
-            paper_dict['year']            = year
-            paper_dict['influence_score'] = row['influencing']
-            paper_dict['count']           = row['influencing_count']
+            # Link paper information
+            info_dict['link_auth'] = list(set(score_info['AuthorName']))
+            info_dict['link_affi'] = list(set(score_info['AffiliationName']))
+            info_dict['link_conf'] = list(set(score_info['ConferenceName']))
+            info_dict['link_jour'] = list(set(score_info['JournalName']))
 
-            info['citation_papers'].append(paper_dict)
+            # Ego paper
+            info_dict['ego_title'] = list(set(score_info['ego_paper_title']))
+
+            # Node type
+            info_dict['type'] = node_type.ident
+
+            node_paper_info.append(info_dict)
+
+        info['reference_papers'] = sorted(node_paper_info,
+                key=lambda x: -x['influenced'])[:num_papers]
+        info['citation_papers'] = sorted(node_paper_info,
+                key=lambda x: -x['influencing'])[:num_papers]
 
         node_info[node_name] = info
 

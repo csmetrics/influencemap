@@ -78,6 +78,7 @@ def score_paper_info(paper_info, self=list()):
 
             # Paper information
             inst_res['ego_paper_id']     = paper_info['PaperId']
+            inst_res['ego_paper_title']  = paper_info['PaperTitle']
             inst_res['link_paper_id']    = reference['PaperId']
             inst_res['link_paper_title'] = reference['PaperTitle']
 
@@ -139,6 +140,7 @@ def score_paper_info(paper_info, self=list()):
 
             # Paper information
             inst_res['ego_paper_id']     = paper_info['PaperId']
+            inst_res['ego_paper_title']  = paper_info['PaperTitle']
             inst_res['link_paper_id']    = citation['PaperId']
             inst_res['link_paper_title'] = citation['PaperTitle']
 
@@ -223,6 +225,9 @@ def score_leaves(score_df, leaves):
         leaf_df['influenced']  = leaf_df[get_influence_index(leaf)]
         leaf_df['influencing'] = leaf_df[get_influence_index(leaf,
             influence_dir='influencing')]
+
+        leaf_df = leaf_df.drop(['influenced_paa', 'influenced_count',
+            'influencing_paa', 'influenced_paa'], 1)
 
         res_list.append(leaf_df)
 

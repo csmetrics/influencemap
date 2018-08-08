@@ -436,6 +436,66 @@ function arrow_size_calc(weight) {
     }
 
 
+function genNodeInfoTitleStr(info_dict) {
+    // Make node paper title string
+    var title_str = "<i>" + info_dict["link_title"] + "</i>";
+    title_str += ": " + info_dict["link_year"];
+
+    return title_str;
+}
+
+
+function genNodeInfoPaperStr(info_dict) {
+    // Make node paper information string
+    var info_str = "";
+
+    // Author display
+    if (info_dict['type'] != 'AUTH') {
+        info_str += "Authors: " + info_dict["link_auth"].join(', ');
+        info_str += "<br>";
+    }
+    
+    // Venue display
+    if (info_dict['type'] != 'CONF' && info_dict['type'] != 'JOUR') {
+        // Join journal and conferences
+        var venues = info_dict["link_conf"].concat(info_dict["link_jour"]);
+        venues = venues.filter(n => n);
+
+        if (venues.length > 0) {
+            info_str += "Venues: " + venues.join(', ');
+        } else {
+            info_str += "Venues: Not Specified";
+        }
+        info_str += "<br>";
+    }
+
+    return info_str;
+}
+
+function genNodeInfoListElement(info_dict) {
+    // Make the list elements
+    var title_str = genNodeInfoTitleStr(info_dict);
+    var paper_str = genNodeInfoPaperStr(info_dict);
+
+    var info_str = "<li>";
+
+    info_str += title_str;
+
+    // Add button for collapsed information
+    var id = info_dict["link_title"].replace(/\s+/g, '-') + "-info";
+    info_str += "<button type=\"button\" data-toggle=\"collapse\" ";
+    info_str += "data-target=\"#" + id + "\">More Information</button>";
+
+    info_str += "<div id=\"" + id + "\" class=\"collapse\">";
+    info_str += paper_str;
+    info_str += "</div>";
+
+    info_str += "</li>";
+
+    return info_str;
+}
+
+
 function populateNodeInfoContent(data){
   var container_div = document.getElementById("node_info_container");
   var content_div = document.getElementById("node_info_content");
@@ -453,7 +513,8 @@ function populateNodeInfoContent(data){
     var references_header = "<span><i><span style='color: rgb(228,130,104)'>cited by</span></i></span>";
     var references_body = "<ul>";
     for (i = 0; i< refs_shown;i++){
-      references_body += "<li><i>"+references[i]["paper_title"]+"</i>, "+references[i]["year"]+"</li>";
+      //references_body += "<li><i>"+references[i]["link_title"]+"</i>, "+references[i]["link_year"]+"</li>";
+      references_body += genNodeInfoListElement(references[i]);
     }
     references_body += "</ul>";
     references_string += references_header+references_body;
@@ -465,7 +526,7 @@ function populateNodeInfoContent(data){
     var citations_header = "<span><i><span style='color: rgb(107, 172, 208)'>referenced</span></i></span>";
     var citations_body = "<ul>";
     for (i = 0; i< cites_shown;i++){
-      citations_body += "<li><i>"+citations[i]["paper_title"]+"</i>, "+citations[i]["year"]+"</li>";
+      citations_body += genNodeInfoListElement(citations[i]);
     }
     citations_body += "</ul>";
     citations_string += citations_header+citations_body;
