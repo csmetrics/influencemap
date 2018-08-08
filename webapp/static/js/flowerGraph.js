@@ -483,8 +483,11 @@ function genNodeInfoListElement(info_dict) {
 
     // Add button for collapsed information
     var id = info_dict["link_title"].replace(/\s+/g, '-') + "-info";
-    info_str += "<button type=\"button\" data-toggle=\"collapse\" ";
-    info_str += "data-target=\"#" + id + "\">More Information</button>";
+    info_str += "<button type=\"button\" ";
+    //info_str += "class=\"btn\" "; // ADD BUTTON CLASS HERE
+    info_str += "data-toggle=\"collapse\" ";
+    info_str += "data-target=\"#" + id + "\" ";
+    info_str += ">More Information</button>";
 
     info_str += "<div id=\"" + id + "\" class=\"collapse\">";
     info_str += paper_str;
