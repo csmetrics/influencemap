@@ -5,6 +5,7 @@ import pickle
 import torch
 import torch.nn            as nn
 import torch.nn.functional as F
+import numpy               as np
 
 from torch.utils.data import Dataset
 
@@ -23,6 +24,9 @@ class Preprocess():
         self.pairs  = None
         self.index  = None
 
+        self.unigram = None
+        self.unigram_dict = dict()
+
 
     def string_to_pairs(self, string):
         '''
@@ -31,6 +35,13 @@ class Preprocess():
         pairs = list()
         for i in range(len(words)):
             idx_i = self.index.setdefault(words[i], len(self.index))
+
+            # Update unigram
+            if idx_i in self.unigram_dict:
+                self.unigram_dict[idx_i] += 1
+            else:
+                self.unigram_dict[idx_i] = 1
+
             for j in range(0, i):
                 idx_j = self.index.setdefault(words[j], len(self.index))
                 pairs.append((idx_i, idx_j))
@@ -55,11 +66,31 @@ class Preprocess():
         return pairs
 
 
+    def gen_unigram(self):
+        '''
+        '''
+        unigram = np.zeros(len(self.unigram_dict), dtype=int)
+        for key, val in self.unigram_dict.items():
+            unigram[key] = val
+
+#        unigram = unigram / unigram.sum()
+        self.unigram = unigram
+        return unigram
+
+
     def export_pairs(self, file_path):
         '''
         '''
         with open(file_path, 'wb') as f:
             pickle.dump(self.pairs, f)
+
+
+    def export_unigram(self, file_path):
+        '''
+        '''
+        with open(file_path, 'wb') as f:
+            pickle.dump(self.unigram, f)
+
 
 
 class ContextCorpus(Dataset):
@@ -69,6 +100,28 @@ class ContextCorpus(Dataset):
         '''
         '''
         self.data = pickle.load(open(data_path, 'rb'))
+
+
+    def __len__(self):
+        return len(self.data)
+
+
+    def __getitem__(self, idx):
+        return self.data[idx]
+
+
+class UnigramCorpus(Dataset):
+    ''' Temp solution
+    '''
+
+    def __init__(self, unigram):
+        z = unigram.sum()
+        data = np.zeros(z * 20, dtype=int)
+        for i, value in enumerate(unigram):
+            for j in range(20):
+                data[i + j * z] = value
+
+        self.data = data
 
 
     def __len__(self):

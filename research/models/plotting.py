@@ -5,10 +5,10 @@ Functions to format the standard plots
 import seaborn as sns
 
 
-def cmp_plot(cmp_matrix, labels, plt):
+def cmp_plot(cmp_matrix, labels, plt, cmap=sns.cm.rocket):
     ''' Plots a comparison matrix as a heatmap in seaborn.
     '''
-    ax = sns.heatmap(cmp_matrix, annot=True)
+    ax = sns.heatmap(cmp_matrix, annot=True, cmap=cmap)
     ax.set_xticklabels(labels)
     ax.set_yticklabels(labels)
 
