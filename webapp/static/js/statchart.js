@@ -52,7 +52,8 @@ class PubChart {
         .attr("width", x.bandwidth())
         .attr("height", function(d) { return (height-pub_y(d.value)); })
         .on("click", function(d) { showPapers("bar-pub", d.year) })
-        .style("fill", "#ABBD81");
+        .style("fill", "#ABBD81")
+        .style("cursor", "pointer");
 
     this.initflag = true;
   }
@@ -128,7 +129,8 @@ class CiteChart {
       .attr("width", x.bandwidth())
       .attr("height", function(d) { return (height-cit_y(d.value)); })
       .on("click", function(d) { showPapers("bar-cite", d.year) })
-      .style("fill", "#F47E60");
+      .style("fill", "#F47E60")
+      .style("cursor", "pointer");
   }
 
   updateRange(minyear, maxyear){
