@@ -317,3 +317,11 @@ tr:hover td{
     width: 80%; /* Could be more or less, depending on screen size
    /* float: right;*/
 }
+
+.link {
+  cursor: pointer;
+} 
+
+.link:hover {
+    text-decoration: underline;
+}
