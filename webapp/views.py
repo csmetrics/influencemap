@@ -466,6 +466,37 @@ def resubmit(request):
 
 
 @csrf_exempt
+def get_publication_papers(request):
+    start = datetime.now()
+    # request should contain the ego author ids and the node author ids separately
+    print(request.POST)
+    pub_year = int(request.POST.get("pub_year"))
+    paper_ids = request.session['cache']
+    papers = paper_info_mag_check_multiquery(paper_ids)
+    papers = [paper for paper in papers if paper["Year"] == pub_year]
+    for paper in papers: print(paper)
+    print((datetime.now()-start).total_seconds())
+    return JsonResponse({"papers": papers, "names": request.session["entity_names"]+ list(request.session["node_info"].keys())}, safe=False)
+
+@csrf_exempt
+def get_citation_papers(request):
+    start = datetime.now()
+    # request should contain the ego author ids and the node author ids separately
+    print(request.POST)
+    cite_year = int(request.POST.get("cite_year"))
+    pub_year_min = int(request.POST.get("pub_year_min"))
+    pub_year_max = int(request.POST.get("pub_year_max"))
+    paper_ids = request.session['cache']
+    papers = paper_info_mag_check_multiquery(paper_ids)
+    cite_papers = [[citation for citation in paper["Citations"] if citation["Year"] == cite_year] for paper in papers if (paper["Year"] >= pub_year_min and paper["Year"] <= pub_year_max)]
+    citations = sum(cite_papers,[])
+    for citation in citations: print(citation)
+    print((datetime.now()-start).total_seconds())
+    print(request.session["node_info"].keys())
+    return JsonResponse({"papers": citations, "names": request.session["entity_names"] + list(request.session["node_info"].keys())}, safe=False)
+
+
+@csrf_exempt
 def get_node_info(request):
     start = datetime.now()
     # request should contain the ego author ids and the node author ids separately

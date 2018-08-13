@@ -269,13 +269,50 @@ resubmitButton.addEventListener('click', function(){
 function showPapers(type, year) {
   // event handler for pub/cite bar graphs
   if (type == "bar-pub") {
-    alert("pub year: " + year)
+//    alert("pub year: " + year)
+  $.ajax({
+    type: "POST",
+    url: "/get_publication_papers/",
+    data: {pub_year: year},
+    success: function(result){
+      console.log(result);
+      populatePapersContent(result.papers, year +" publications", result.names);
+      document.getElementById("node_info_modal").style.display = "block";
+    }
+  });
+
   } else if (type == "bar-cite") {
     from_pub = document.getElementById('pub-lower-value').textContent
     to_pub = document.getElementById('pub-upper-value').textContent
-    alert("cite year: " + year + " pub range [" + from_pub + ", " + to_pub + "]")
+  $.ajax({
+    type: "POST",
+    url: "/get_citation_papers/",
+    data: {cite_year: year, pub_year_min: from_pub, pub_year_max: to_pub},
+    success: function(result){
+      console.log(result);
+      populatePapersContent(result.papers, year+" citations [for publications between "+from_pub+"-"+to_pub+"]", result.names);
+      document.getElementById("node_info_modal").style.display = "block";
+    }
+  });
   }
 }
 
+
+
+function populatePapersContent(papers, title, entity_names){
+  var container_div = document.getElementById("node_info_container");
+  var content_div = document.getElementById("node_info_content");
+  container_div.removeChild(content_div);
+
+  var title = "<h3>"+title+"</h3>";
+  var li_elements = "";
+  for (i in papers){
+    li_elements += "<li>"+formatCitation(papers[i], entity_names)+"</li>";
+  }
+  var ul_string = "<ul>"+li_elements+"</ul>";
+  var html_string = "<div id='node_info_content'>"+title+ul_string+"</div>";
+  var html_elem = new DOMParser().parseFromString(html_string, 'text/html').body.childNodes;
+  container_div.appendChild(html_elem[0]);
+}
 
 </script>
