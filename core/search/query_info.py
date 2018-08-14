@@ -38,26 +38,11 @@ def paper_info_mag_check_multiquery(paper_ids):
     ''' Query which checks cache for existence first. Otherwise tries to
         generate paper info from basic tables and adds to cache.
     '''
-    to_process     = list()
-    to_add_links   = list()
-    paper_info_res = list()
-    for paper_id in paper_ids:
-        # Check cache
-        paper_info = paper_info_cache_query(paper_id)
-
-        # If non-empty result return
-        if paper_info:
-            # If cache entry is partially complete
-            if paper_info['cache_type'] == 'partial':
-                print(paper_id, paper_info['PaperTitle'], paper_info['cache_type'])
-                del paper_info['cache_type']
-                to_add_links.append(paper_info)
-            else:
-                del paper_info['cache_type']
-                paper_info_res.append(paper_info)
-
-        else:
-            to_process.append(paper_id)
+    # Find entries in ES
+    es_res = paper_info_cache_query(paper_ids)
+    to_add_links   = es_res['partial']
+    to_process     = list(es_res['missing'])
+    paper_info_res = es_res['complete']
 
     print("Complete cache entries found:", len(paper_info_res))
     print("Partial cache entries found:", len(to_add_links))
@@ -79,3 +64,42 @@ def paper_info_mag_check_multiquery(paper_ids):
         paper_info_res += process_res
 
     return paper_info_res
+
+
+def get_paper_info_dict(paper_info):
+    ''' Generates a paper information dictionary of a paper information.
+        dictionary.
+
+        { 'title'          : str,
+          'author'         : list str,
+          'affiliation'    : list str,
+          'venue'          : list str,
+          'reference_count': int,
+          'citation_count' : int,
+        }
+    '''
+    paper_dict = dict()
+    paper_dict['title'] = paper_info['PaperTitle']
+
+    paper_dict['author']      = list()
+    paper_dict['affiliation'] = list()
+    for auth_dict in paper_info['Authors']:
+        if 'AuthorName' in auth_dict:
+            paper_dict['author'].append(auth_dict['AuthorName'])
+
+        if 'AffiliationName' in auth_dict:
+            paper_dict['affiliation'].append(auth_dict['AffiliationName'])
+
+    paper_dict['conference'] = None
+    paper_dict['journal']    = None
+    if 'ConferenceName' in paper_info:
+        paper_dict['conference'] = paper_info['ConferenceName']
+    if 'JournalName' in paper_info:
+        paper_dict['journal'] = paper_info['JournalName']
+
+    if 'Year' in paper_info:
+        paper_dict['year'] = paper_info['Year']
+    #paper_dict['reference_count'] = len(paper_info['References'])
+    #paper_dict['citation_count']  = len(paper_info['Citations'])
+
+    return paper_dict
