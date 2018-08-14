@@ -400,7 +400,7 @@ def submit(request):
 
     for p in paper_information:
         len(p['Citations'])
-
+    request.session['year_ranges'] = {'pub_lower': min_pub_year, 'pub_upper': max_pub_year, 'cit_lower': min_cite_year, 'cit_upper': max_cite_year}
     request.session['flower_name']  = flower_name
     request.session['entity_names'] = entity_names
     request.session['node_info']    = node_info
@@ -425,6 +425,8 @@ def resubmit(request):
     flower_config['pub_upper'] = int(request.POST.get('to_pub_year'))
     flower_config['cit_lower'] = int(request.POST.get('from_cit_year'))
     flower_config['cit_upper'] = int(request.POST.get('to_cit_year'))
+
+    request.session['year_ranges'] = {'pub_lower': flower_config['pub_lower'], 'pub_upper': flower_config['pub_upper'], 'cit_lower': flower_config['cit_lower'], 'cit_upper': flower_config['cit_upper']}
 
     # Recompute flowers
     paper_information = paper_info_mag_check_multiquery(cache) # API
@@ -530,13 +532,21 @@ def get_node_info_all(request):
     return {"node_info": node_info, "papers": papers_to_send}
 
 
-def get_node_info_single(request, entity):
+def get_node_info_single(request, entity, year_ranges):
+    pub_lower = year_ranges["pub_lower"]
+    pub_upper = year_ranges["pub_upper"]
+    cit_lower = year_ranges["cit_lower"]
+    cit_upper = year_ranges["cit_upper"]
+
     papers = paper_info_mag_check_multiquery(request.session["cache"])
     papers_to_send = dict()
     node_info = {"References": {}, "Citations":{}}
     for paper in papers:
+        if paper["Year"] < pub_lower or paper["Year"] > pub_upper: continue
+
         for relationship_type in ["References", "Citations"]:
             for rel_paper in paper[relationship_type]:
+                if (relationship_type == "Citations")  and  (rel_paper["Year"] < cit_lower or rel_paper["Year"] > cit_upper): continue
                 authors      = [author["AuthorName"] for author in rel_paper["Authors"]]
                 affiliations = [author["AffiliationName"] for author in rel_paper["Authors"] if "AffiliationName" in author]
                 conferences = [rel_paper["ConferenceName"]] if ("ConferenceName" in rel_paper) else []
@@ -554,15 +564,18 @@ def get_node_info_single(request, entity):
 
 @csrf_exempt
 def get_node_info(request):
-    start = datetime.now()
     # request should contain the ego author ids and the node author ids separately
     print(request.POST)
     data = json.loads(request.POST.get("data_string"))
-    entities = request.session["entity_names"]
     node_name = data.get("name")
-    node_info = get_node_info_single(request, node_name) #request.session['node_information_store']
+
+    entities = request.session["entity_names"]
+    year_ranges = request.session["year_ranges"]
+
+    node_info = get_node_info_single(request, node_name, year_ranges) #request.session['node_information_store']
     info = node_info["node_info"]
     papers = node_info["papers"]
+
     info["entity_names"] = list(request.session["node_info"].keys()) +entities
     info["References"] = sorted([{"to": papers[k], "from": sorted([papers[paper_id] for paper_id in v], key=lambda x: x["Year"])} for k,v in info["References"].items()],key=lambda x: x["to"]["Year"])
     info["Citations"] = sorted([{"from": papers[k], "to": sorted([papers[paper_id] for paper_id in v], key=lambda x: x["Year"])} for k,v in info["Citations"].items()], key=lambda x: x["from"]["Year"])
