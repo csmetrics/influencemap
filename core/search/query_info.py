@@ -79,3 +79,42 @@ def paper_info_mag_check_multiquery(paper_ids):
         paper_info_res += process_res
 
     return paper_info_res
+
+
+def get_paper_info_dict(paper_info):
+    ''' Generates a paper information dictionary of a paper information.
+        dictionary.
+
+        { 'title'          : str,
+          'author'         : list str,
+          'affiliation'    : list str,
+          'venue'          : list str,
+          'reference_count': int,
+          'citation_count' : int,
+        }
+    '''
+    paper_dict = dict()
+    paper_dict['title'] = paper_info['PaperTitle']
+
+    paper_dict['author']      = list()
+    paper_dict['affiliation'] = list()
+    for auth_dict in paper_info['Authors']:
+        if 'AuthorName' in auth_dict:
+            paper_dict['author'].append(auth_dict['AuthorName'])
+
+        if 'AffiliationName' in auth_dict:
+            paper_dict['affiliation'].append(auth_dict['AffiliationName'])
+
+    paper_dict['conference'] = None
+    paper_dict['journal']    = None
+    if 'ConferenceName' in paper_info:
+        paper_dict['conference'] = paper_info['ConferenceName']
+    if 'JournalName' in paper_info:
+        paper_dict['journal'] = paper_info['JournalName']
+
+    if 'Year' in paper_info:
+        paper_dict['year'] = paper_info['Year']
+    #paper_dict['reference_count'] = len(paper_info['References'])
+    #paper_dict['citation_count']  = len(paper_info['Citations'])
+
+    return paper_dict
