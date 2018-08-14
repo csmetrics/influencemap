@@ -6,13 +6,7 @@ author: Alexander Soen
 '''
 import pandas as pd
 import numpy as np
-import copy
-
-from datetime   import datetime
-from functools  import reduce
-from core.search.query_info_cache import paper_info_cache_query
-from core.search.query_info       import get_paper_info_dict
-
+from datetime import datetime
 
 def agg_score_df(influence_df, coauthors=set([]), \
     ratio_func=np.vectorize(lambda x, y : y - x), sort_func=np.maximum):
@@ -65,7 +59,7 @@ def agg_node_info(influence_df, node_names, coauthors=set([]), num_papers=3):
         info['node_name'] = node_name
 
         # Remove node ids
-        remove_cols = ['entity_name', #'ego_paper_id',  #'entity_id', 
+        remove_cols = ['entity_name', 'ego_paper_id',  #'entity_id', 
                        'influence_year', 'publication_year']
         node_influence = node_influence.drop(remove_cols, 1)
 
@@ -75,98 +69,44 @@ def agg_node_info(influence_df, node_names, coauthors=set([]), num_papers=3):
         node_influence['influencing_count'] = node_influence['influencing']\
                                                 .apply(lambda x: 1 if x > 0 else 0)
 
+        # Paper influence scores
+        score_groups = ['link_paper_id', 'link_paper_title', 'link_year']
+
         # Iterate through each of the papers
         node_paper_info = list()
-        for link_id, score_info in node_influence.groupby('link_paper_id'):
+        for score_group, score_info in node_influence.groupby(score_groups):
             info_dict = dict()
 
             # Score group information
-            info_dict['link_id'] = link_id
-            info_dict['ego_ids'] = set(score_info['ego_paper_id'])
+            link_id, link_title, link_year = score_group
+            #info_dict['link_id']    = link_id
+            info_dict['link_title'] = link_title
+            info_dict['link_year']  = link_year.item()
             
             # Scores
             info_dict['influenced']  = score_info['influenced'].sum().item()
             info_dict['influencing'] = score_info['influencing'].sum().item()
 
-            info_dict['c_influenced']  = score_info['influenced_count'].sum().item()
-            info_dict['c_influencing'] = score_info['influencing_count'].sum().item()
+            #info_dict['count'] = score_info['influenced_count'].sum().item()
+
+            # Link paper information
+            info_dict['link_auth'] = list(set(score_info['AuthorName']))
+            info_dict['link_affi'] = list(set(score_info['AffiliationName']))
+            info_dict['link_conf'] = list(set(score_info['ConferenceName']))
+            info_dict['link_jour'] = list(set(score_info['JournalName']))
+
+            # Ego paper
+            info_dict['ego_title'] = list(set(score_info['ego_paper_title']))
 
             # Node type
             info_dict['type'] = node_type.ident
 
             node_paper_info.append(info_dict)
 
-        reference_ids = sorted(node_paper_info,
+        info['reference_papers'] = sorted(node_paper_info,
                 key=lambda x: -x['influenced'])[:num_papers]
-        citation_ids = sorted(node_paper_info,
+        info['citation_papers'] = sorted(node_paper_info,
                 key=lambda x: -x['influencing'])[:num_papers]
-
-        # Generate the information for associated papers
-        rel_paper_info = set()
-        info_dicts = reference_ids + citation_ids
-
-        rel_paper_info.update(map(lambda x: x['link_id'], info_dicts))
-        ego_papers = map(lambda x: x['ego_ids'], info_dicts)
-        rel_paper_info.update(reduce(lambda x, y: x.union(y), ego_papers))
-
-        # find the map from ids to paper information
-        info_papers = list()
-        for rel_paper in rel_paper_info:
-            info_papers.append(paper_info_cache_query(rel_paper))
-
-        info_map = dict()
-        for info_paper in info_papers:
-            info_map[info_paper['PaperId']] = info_paper
-
-        # Create info dictionaries for the nodes
-        reference_info = list()
-        for info_dict in reference_ids:
-            # Link paper information
-            link_paper_info = info_map[info_dict['link_id']]
-            link_info_dict  = get_paper_info_dict(link_paper_info)
-
-            # Ego paper information
-            ego_info_dict_list = list()
-            for ego_paper_id in info_dict['ego_ids']:
-                ego_paper_info = info_map[ego_paper_id]
-                ego_info_dict_list.append(get_paper_info_dict(ego_paper_info))
-
-            # Delete the id fields
-            new_info = copy.copy(info_dict)
-            del new_info['link_id']
-            del new_info['ego_ids']
-
-            # Assign new fields for the link and egos
-            new_info['link_paper'] = link_info_dict
-            new_info['ego_papers'] = ego_info_dict_list
-
-            reference_info.append(new_info)
-
-        citation_info = list()
-        for info_dict in citation_ids:
-            # Link paper information
-            link_paper_info = info_map[info_dict['link_id']]
-            link_info_dict  = get_paper_info_dict(link_paper_info)
-
-            # Ego paper information
-            ego_info_dict_list = list()
-            for ego_paper_id in info_dict['ego_ids']:
-                ego_paper_info = info_map[ego_paper_id]
-                ego_info_dict_list.append(get_paper_info_dict(ego_paper_info))
-
-            # Delete the id fields
-            new_info = copy.copy(info_dict)
-            del new_info['link_id']
-            del new_info['ego_ids']
-
-            # Assign new fields for the link and egos
-            new_info['link_paper'] = link_info_dict
-            new_info['ego_papers'] = ego_info_dict_list
-
-            citation_info.append(new_info)
-
-        info['reference_papers'] = reference_info
-        info['citation_papers']  = citation_info
 
         node_info[node_name] = info
 
