@@ -475,7 +475,6 @@ def get_publication_papers(request):
     paper_ids = request.session['cache']
     papers = paper_info_mag_check_multiquery(paper_ids)
     papers = [paper for paper in papers if (paper["Year"] >= pub_year_min and paper["Year"] <= pub_year_max)]
-    for paper in papers: print(paper)
     print((datetime.now()-start).total_seconds())
     return JsonResponse({"papers": papers, "names": request.session["entity_names"]+ list(request.session["node_info"].keys())}, safe=False)
 
@@ -492,10 +491,43 @@ def get_citation_papers(request):
     papers = paper_info_mag_check_multiquery(paper_ids)
     cite_papers = [[citation for citation in paper["Citations"] if (citation["Year"] >= cite_year_min and citation["Year"] <= cite_year_max)] for paper in papers if (paper["Year"] >= pub_year_min and paper["Year"] <= pub_year_max)]
     citations = sum(cite_papers,[])
-    for citation in citations: print(citation)
     print((datetime.now()-start).total_seconds())
-    return JsonResponse({"papers": citations, "names": request.session["entity_names"] + list(request.session["node_info"].keys())}, safe=False)
+    return JsonResponse({"papers": citations, "names": request.session["entity_names"] + list(request.session["node_info"].keys()),"node_info": request.session["node_information_store"]}, safe=False)
 
+
+def get_node_info_all(request):
+    papers = paper_info_mag_check_multiquery(request.session["cache"])
+    entities = list(request.session["node_info"].keys())
+    papers_to_send = dict()
+    node_info = {entity: {"References": {}, "Citations":{}} for entity in entities}
+    for paper in papers:
+        for reference in paper["References"]:
+            relevant_authors      = [i for i in [author["AuthorName"] for author in reference["Authors"]] if i in entities]
+            relevant_affiliations = [i for i in [author["AffiliationName"] for author in reference["Authors"] if "AffiliationName" in author] if i in entities]
+            relevant_conferences = [reference["ConferenceName"]] if ("ConferenceName" in reference and reference["ConferenceName"] in entities) else []
+            relevant_journals = [reference["JournalName"]] if ("JournalName" in reference and reference["JournalName"] in entities) else []
+            relevant_entities = list(set(relevant_authors + relevant_affiliations + relevant_conferences + relevant_journals))
+            for entity in relevant_entities:
+                papers_to_send[paper["PaperId"]] = {k:v for k,v in paper.items() if k in ["PaperTitle", "Authors","PaperId","Year"]}
+                papers_to_send[reference["PaperId"]] = {k:v for k,v in reference.items() if k in ["PaperTitle", "Authors","PaperId","Year"]}
+                if reference["PaperId"] in node_info[entity]["References"]:
+                    node_info[entity]["References"][reference["PaperId"]].append(paper["PaperId"])
+                else:
+                    node_info[entity]["References"][reference["PaperId"]] = [paper["PaperId"]]
+        for citation in paper["Citations"]:
+            relevant_authors      = [i for i in [author["AuthorName"] for author in citation["Authors"]] if i in entities]
+            relevant_affiliations = [i for i in [author["AffiliationName"] for author in citation["Authors"] if "AffiliationName" in author] if i in entities]
+            relevant_conferences = [citation["ConferenceName"]] if ("ConferenceName" in citation and citation["ConferenceName"] in entities) else []
+            relevant_journals = [citation["JournalName"]] if ("JournalName" in citation and citation["JournalName"] in entities) else []
+            relevant_entities = set(list(relevant_authors + relevant_affiliations + relevant_conferences + relevant_journals))
+            for entity in relevant_entities:
+                papers_to_send[paper["PaperId"]] = {k:v for k,v in paper.items() if k in ["PaperTitle", "Authors","PaperId","Year"]}
+                papers_to_send[citation["PaperId"]] = {k:v for k,v in citation.items() if k in ["PaperTitle", "Authors","PaperId","Year"]}
+                if citation["PaperId"] in node_info[entity]["Citations"]:
+                    node_info[entity]["Citations"][citation["PaperId"]].append(paper["PaperId"])
+                else:
+                    node_info[entity]["Citations"][citation["PaperId"]] = [paper["PaperId"]]
+    return {"node_info": node_info, "papers": papers_to_send}
 
 @csrf_exempt
 def get_node_info(request):
@@ -503,6 +535,12 @@ def get_node_info(request):
     # request should contain the ego author ids and the node author ids separately
     print(request.POST)
     data = json.loads(request.POST.get("data_string"))
+    entities = request.session["entity_names"]
     node_name = data.get("name")
-
-    return JsonResponse(request.session['node_info'][node_name], safe=False)
+    node_info = get_node_info_all(request) #request.session['node_information_store']
+    info = node_info["node_info"][node_name]
+    papers = node_info["papers"]
+    info["entity_names"] = list(node_info["node_info"].keys()) +entities
+    info["References"] = sorted([{"to": papers[k], "from": sorted([papers[paper_id] for paper_id in v], key=lambda x: x["Year"])} for k,v in info["References"].items()],key=lambda x: x["to"]["Year"])
+    info["Citations"] = sorted([{"from": papers[k], "to": sorted([papers[paper_id] for paper_id in v], key=lambda x: x["Year"])} for k,v in info["Citations"].items()], key=lambda x: x["from"]["Year"])
+    return JsonResponse(info, safe=False)

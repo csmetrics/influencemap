@@ -498,7 +498,7 @@ function genNodeInfoListElement(info_dict) {
     return info_str;
 }
 
-
+/*
 function populateNodeInfoContent(data){
   var container_div = document.getElementById("node_info_container");
   var content_div = document.getElementById("node_info_content");
@@ -539,6 +539,63 @@ function populateNodeInfoContent(data){
   var html_elem = new DOMParser().parseFromString(html_string, 'text/html').body.childNodes;
   container_div.appendChild(html_elem[0]);
 }
+*/
+
+
+function populateNodeInfoContent(data){
+  var container_div = document.getElementById("node_info_container");
+  var content_div = document.getElementById("node_info_content");
+  container_div.removeChild(content_div);
+  var references = data["References"];
+  var citations = data["Citations"];
+  var refs_shown = Math.min(3, references.length);
+  var cites_shown = Math.min(3, citations.length);
+  var entities = data.entity_names;
+  var title = "<h3>"+data["node_name"]+"</h3>";
+
+  // build references string
+  var references_table = "";
+  if (refs_shown !== 0){
+    var references_header = "<span><i><span style='color: rgb(107,172,208)'>References</span></i></span>";
+
+    references_table += references_header + "<table>";
+
+    for (var i=0; i<references.length;i++){
+      var left = formatCitation(references[i]["to"],data.entity_names);
+      for (var j = 0; j< references[i]["from"].length;j++){
+        var right = (formatCitation(references[i]["from"][j],entities));
+        if (j == 0) references_table += "<tr><td width='49%'rowspan='"+references[i]["from"].length+"'>"+left+"</td><td width='2%' style='color: rgb(107,172,208); font-size: 30px'>⟵</td><td width='49%'>"+right+"</td></tr>";
+        else references_table += "<tr><td width='2%'style='color: rgb(107,172,208); font-size: 30px'>⟵</td><td width='49%'>"+right+"</td></tr>";
+      }
+    }   
+    references_table += "</table>";
+
+  }
+
+  // build citations string
+  var citations_table = "";
+  if (cites_shown !== 0){
+    var citations_header = "<span><i><span style='color: rgb(228,130,104)'>Citations</span></i></span>";
+    citations_table += citations_header + "<table>";
+
+    for (var i=0; i<citations.length;i++){
+      var left = formatCitation(citations[i]["from"],data.entity_names);
+      for (var j = 0; j< citations[i]["to"].length;j++){
+        var right = (formatCitation(citations[i]["to"][j],entities));
+        if (j == 0) citations_table += "<tr><td width='49%' rowspan='"+citations[i]["to"].length+"'>"+left+"</td><td width='2%' style='color: rgb(228,130,104); font-size: 30px'>⟶ </td><td width='49%'>"+right+"</td></tr>";
+        else citations_table += "<tr><td width='2%' style='color: rgb(228,130,104); font-size: 30px'>⟶ </td><td width='49%'>"+right+"</td></tr>";
+      }
+    }
+    citations_table += "</table>";
+
+  }
+
+  var html_string = "<div id='node_info_content'>"+title+references_table+citations_table+"</div>";
+  var html_elem = new DOMParser().parseFromString(html_string, 'text/html').body.childNodes;
+  container_div.appendChild(html_elem[0]);
+}
+
+
 // rgb(107, 172, 208); blue
 //  rgb(228, 130, 104);oranger
 
@@ -554,6 +611,7 @@ function getData(param){
     data: {"data_string": JSON.stringify(data_dict)},
     success: function (result) { // return data if success
       console.log(result);
+//      console.log(result.node_info);
       result["node_name"] = name;
       populateNodeInfoContent(result);
       document.getElementById("node_info_modal").style.display = "block";
