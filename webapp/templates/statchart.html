@@ -37,8 +37,8 @@
         <b>Citations:
           <span class="label-as-badge" id="cit-lower-value"></span>~
           <span class="label-as-badge" id="cit-upper-value"></span> </b><br>
-        <span id="selected_num_papers" class="stat">???</span> papers,
-        <span id="selected_num_cites" class="stat">???</span> citations
+        <span id="selected_publication_link" class="link"><span id="selected_num_papers" class="stat">???</span> papers</span>,
+        <span id="selected_citation_link" class="link"><span id="selected_num_cites" class="stat">???</span> citations</span>
       </div>
       <div style="padding-top:10px">
         <b>Include self citations</b>
@@ -70,6 +70,11 @@
 <script src="{% static 'js/d3.v4.min.js' %}"></script>
 <script src="{% static 'js/statchart.js' %}"></script>
 <script type="text/javascript">
+var selectedpublink = document.getElementById("selected_publication_link");
+var selectedcitelink = document.getElementById("selected_citation_link");
+selectedpublink.onclick = function(){showPapers("all-pub")};
+selectedcitelink.onclick = function(){showPapers("all-cite")};
+
 var yearcounter = {{ yearSlider.pubChart | safe }};
 var citationcounter = {{ yearSlider.citeChart | safe }};
 var processedcites = [];
@@ -266,16 +271,75 @@ resubmitButton.addEventListener('click', function(){
   });
 });
 
-function showPapers(type, year) {
+function showPapers(type, year=NaN) {
+    from_pub = document.getElementById('pub-lower-value').textContent;
+    to_pub = document.getElementById('pub-upper-value').textContent;
+    from_cite = document.getElementById('cit-lower-value').textContent;
+    to_cite = document.getElementById('cit-upper-value').textContent;
+
   // event handler for pub/cite bar graphs
   if (type == "bar-pub") {
-    alert("pub year: " + year)
+    $.ajax({
+      type: "POST",
+      url: "/get_publication_papers/",
+      data: {pub_year_min: year, pub_year_max: year},
+      success: function(result){
+        populatePapersContent(result.papers, year +" publications", result.names);
+        document.getElementById("node_info_modal").style.display = "block";
+      }
+    });
+
   } else if (type == "bar-cite") {
-    from_pub = document.getElementById('pub-lower-value').textContent
-    to_pub = document.getElementById('pub-upper-value').textContent
-    alert("cite year: " + year + " pub range [" + from_pub + ", " + to_pub + "]")
+    $.ajax({
+      type: "POST",
+      url: "/get_citation_papers/",
+      data: {cite_year_min: year, cite_year_max: year, pub_year_min: from_pub, pub_year_max: to_pub},
+      success: function(result){
+        console.log(result);
+        populatePapersContent(result.papers, year+" citations [for publications between "+from_pub+"-"+to_pub+"]", result.names);
+        document.getElementById("node_info_modal").style.display = "block";
+      }
+    });
+
+  } else if (type == "all-pub"){
+    $.ajax({
+      type: "POST",
+      url: "/get_publication_papers/",
+      data: {pub_year_min: from_pub, pub_year_max: to_pub},
+      success: function(result){
+        populatePapersContent(result.papers, from_pub+"-"+to_pub+" publications", result.names);
+        document.getElementById("node_info_modal").style.display = "block";
+      }
+    });
+  } else if (type == "all-cite"){
+    $.ajax({
+      type: "POST",
+      url: "/get_citation_papers/",
+      data: {cite_year_min: from_cite, cite_year_max: to_cite, pub_year_min: from_pub, pub_year_max: to_pub},
+      success: function(result){
+        populatePapersContent(result.papers,  from_cite+"-"+to_cite+" citations [for publications between "+from_pub+"-"+to_pub+"]", result.names);
+        document.getElementById("node_info_modal").style.display = "block";
+      }
+    });
   }
 }
 
+
+
+function populatePapersContent(papers, title, entity_names){
+  var container_div = document.getElementById("node_info_container");
+  var content_div = document.getElementById("node_info_content");
+  container_div.removeChild(content_div);
+
+  var title = "<h3>"+title+"</h3>";
+  var li_elements = "";
+  for (i in papers){
+    li_elements += "<li>"+formatCitation(papers[i], entity_names)+"</li>";
+  }
+  var ul_string = "<ul>"+li_elements+"</ul>";
+  var html_string = "<div id='node_info_content'>"+title+ul_string+"</div>";
+  var html_elem = new DOMParser().parseFromString(html_string, 'text/html').body.childNodes;
+  container_div.appendChild(html_elem[0]);
+}
 
 </script>
