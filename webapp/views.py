@@ -529,6 +529,29 @@ def get_node_info_all(request):
                     node_info[entity]["Citations"][citation["PaperId"]] = [paper["PaperId"]]
     return {"node_info": node_info, "papers": papers_to_send}
 
+
+def get_node_info_single(request, entity):
+    papers = paper_info_mag_check_multiquery(request.session["cache"])
+    papers_to_send = dict()
+    node_info = {"References": {}, "Citations":{}}
+    for paper in papers:
+        for relationship_type in ["References", "Citations"]:
+            for rel_paper in paper[relationship_type]:
+                authors      = [author["AuthorName"] for author in rel_paper["Authors"]]
+                affiliations = [author["AffiliationName"] for author in rel_paper["Authors"] if "AffiliationName" in author]
+                conferences = [rel_paper["ConferenceName"]] if ("ConferenceName" in rel_paper) else []
+                journals = [rel_paper["JournalName"]] if ("JournalName" in rel_paper) else []
+                relevant = entity in list(set(authors + affiliations + conferences + journals))
+                if relevant:
+                    papers_to_send[paper["PaperId"]] = {k:v for k,v in paper.items() if k in ["PaperTitle", "Authors","PaperId","Year"]}
+                    papers_to_send[rel_paper["PaperId"]] = {k:v for k,v in rel_paper.items() if k in ["PaperTitle", "Authors","PaperId","Year"]}
+                    if rel_paper["PaperId"] in node_info[relationship_type]:
+                        node_info[relationship_type][rel_paper["PaperId"]].append(paper["PaperId"])
+                    else:
+                        node_info[relationship_type][rel_paper["PaperId"]] = [paper["PaperId"]]
+    return {"node_info": node_info, "papers": papers_to_send}
+
+
 @csrf_exempt
 def get_node_info(request):
     start = datetime.now()
@@ -537,10 +560,10 @@ def get_node_info(request):
     data = json.loads(request.POST.get("data_string"))
     entities = request.session["entity_names"]
     node_name = data.get("name")
-    node_info = get_node_info_all(request) #request.session['node_information_store']
-    info = node_info["node_info"][node_name]
+    node_info = get_node_info_single(request, node_name) #request.session['node_information_store']
+    info = node_info["node_info"]
     papers = node_info["papers"]
-    info["entity_names"] = list(node_info["node_info"].keys()) +entities
+    info["entity_names"] = list(request.session["node_info"].keys()) +entities
     info["References"] = sorted([{"to": papers[k], "from": sorted([papers[paper_id] for paper_id in v], key=lambda x: x["Year"])} for k,v in info["References"].items()],key=lambda x: x["to"]["Year"])
     info["Citations"] = sorted([{"from": papers[k], "to": sorted([papers[paper_id] for paper_id in v], key=lambda x: x["Year"])} for k,v in info["Citations"].items()], key=lambda x: x["from"]["Year"])
     return JsonResponse(info, safe=False)
