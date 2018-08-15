@@ -325,3 +325,39 @@ tr:hover td{
 .link:hover {
     text-decoration: underline;
 }
+
+
+
+
+/* Tooltip container */
+.hoverinfo {
+    position: relative;
+    display: inline-block;
+    border-bottom: 1px dotted black; /* If you want dots under the hoverable text */
+}
+
+/* Tooltip text */
+.hoverinfo .hoverinfotext {
+    visibility: hidden;
+    background-color: rgba(23, 23, 23, 0.5) ;
+    color: #fff;
+    text-align: center;
+    padding: 5px 0;
+    border-radius: 6px;
+ 
+    /* Position the tooltip text - see examples below! */
+    position: absolute;
+    z-index: 1;
+
+    /* position at bottom of text*/
+    width: 180px;
+    top: 100%;
+    left: 50%; 
+    margin-left: -90px; /* Use half of the width (120/2 = 60), to center the tooltip */
+
+}
+
+/* Show the tooltip text when you mouse over the tooltip container */
+.hoverinfo:hover .hoverinfotext {
+    visibility: visible;
+}

@@ -553,8 +553,8 @@ def get_node_info_single(request, entity, year_ranges):
                 journals = [rel_paper["JournalName"]] if ("JournalName" in rel_paper) else []
                 relevant = entity in list(set(authors + affiliations + conferences + journals))
                 if relevant:
-                    papers_to_send[paper["PaperId"]] = {k:v for k,v in paper.items() if k in ["PaperTitle", "Authors","PaperId","Year"]}
-                    papers_to_send[rel_paper["PaperId"]] = {k:v for k,v in rel_paper.items() if k in ["PaperTitle", "Authors","PaperId","Year"]}
+                    papers_to_send[paper["PaperId"]] = {k:v for k,v in paper.items() if k in ["PaperTitle", "Authors","PaperId","Year", "ConferenceName", "ConferenceSeriesId", "JournalName", "JournalId"]}
+                    papers_to_send[rel_paper["PaperId"]] = {k:v for k,v in rel_paper.items() if k in ["PaperTitle", "Authors","PaperId","Year", "ConferenceName", "ConferenceSeriesId", "JournalName", "JournalId"]}
                     if rel_paper["PaperId"] in node_info[relationship_type]:
                         node_info[relationship_type][rel_paper["PaperId"]].append(paper["PaperId"])
                     else:
@@ -575,6 +575,15 @@ def get_node_info(request):
     node_info = get_node_info_single(request, node_name, year_ranges) #request.session['node_information_store']
     info = node_info["node_info"]
     papers = node_info["papers"]
+    conf_journ_ids = {"ConferenceSeriesIds": [], "JournalIds": []}
+    for paper in papers.values():
+        if "ConferenceSeriesId" in paper: conf_journ_ids["ConferenceSeriesIds"].append(paper["ConferenceSeriesId"])
+        if "JournalId" in paper: conf_journ_ids["JournalIds"].append(paper["JournalId"])
+    conf_journ_display_names = get_conf_journ_display_names(conf_journ_ids)
+    for paper in papers.values():
+        if "ConferenceSeriesId" in paper: paper["ConferenceName"] = conf_journ_display_names["Conference"][paper["ConferenceSeriesId"]]
+        if "JournalId" in paper: paper["JournalName"] = conf_journ_display_names["Journal"][paper["JournalId"]]
+
 
     info["entity_names"] = list(request.session["node_info"].keys()) +entities
     info["References"] = sorted([{"to": papers[k], "from": sorted([papers[paper_id] for paper_id in v], key=lambda x: x["Year"])} for k,v in info["References"].items()],key=lambda x: x["to"]["Year"])

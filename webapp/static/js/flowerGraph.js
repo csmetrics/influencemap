@@ -593,6 +593,9 @@ function populateNodeInfoContent(data){
   var html_string = "<div id='node_info_content'>"+title+references_table+citations_table+"</div>";
   var html_elem = new DOMParser().parseFromString(html_string, 'text/html').body.childNodes;
   container_div.appendChild(html_elem[0]);
+  $(function () {
+    $('[data-toggle="tooltip"]').tooltip()
+  })
 }
 
 
