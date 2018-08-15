@@ -68,7 +68,7 @@ def get_url_query(query):
 
 
 def get_all_paper_ids(entityIds):
-    paper_ids = [] + entityIds['PaperIds'] if "PaperIds" in entityIds else []
+    paper_ids = entityIds['PaperIds'] if "PaperIds" in entityIds else []
     if "AuthorIds" in entityIds and entityIds["AuthorIds"] != []: paper_ids += get_papers_from_author_ids(entityIds['AuthorIds'])
     if "ConferenceIds" in entityIds and entityIds["ConferenceIds"] != []: paper_ids += get_papers_from_conference_ids(entityIds['ConferenceIds'])
     if "AffiliationIds" in entityIds and entityIds["AffiliationIds"] != []: paper_ids += get_papers_from_affiliation_ids(entityIds['AffiliationIds'])

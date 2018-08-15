@@ -47,7 +47,9 @@ def gen_flower_data(score_df, flower_prop, entity_names, flower_name,
     # Flower properties
     flower_type, leaves = flower_prop
 
+    print(datetime.now(), 'score_leaves')
     entity_score = score_leaves(score_df, leaves)
+    print(datetime.now(), 'score_leaves')
 
     # Ego name removal
     if (flower_type != 'conf'):
@@ -70,26 +72,41 @@ def gen_flower_data(score_df, flower_prop, entity_names, flower_name,
     # Aggregate
     agg_score = agg_score_df(filter_score)
 
-    # Filter coauthors
-    if config['icoauthor']:
-        agg_score = flag_coauthor(agg_score, coauthors)
-    else:
-        agg_score = agg_score[ ~agg_score['entity_name']\
-                                .isin(coauthors) ]
+    # Get the top scores with filter considerations
+    # Iteratively generates a top number of entries until filters get the right amount
+    i = 0
+    top_score = list()
+    max_search = False
+    while len(top_score) < NUM_LEAVES and not max_search :
+        top_score = agg_score.head(n=(4 + i) * NUM_LEAVES)
 
-    # Get top scores for graph
-    if (flower_type != 'conf'):
-        agg_score = agg_score[ ~agg_score['entity_name'].isin(entity_names) ]
-    agg_score = agg_score.head(n=NUM_LEAVES)
-    agg_score.ego = flower_name
+        if len(agg_score) == len(top_score):
+            max_search = True
 
-    # Generate node information
-    node_info = agg_node_info(filter_score, agg_score['entity_name'])
+        # Get top scores for graph
+        if (flower_type != 'conf'):
+            top_score = top_score[ ~top_score['entity_name'].isin(entity_names) ]
+
+        # Filter coauthors
+        if config['icoauthor']:
+            top_score = flag_coauthor(top_score, coauthors)
+        else:
+            top_score = agg_score[ ~top_score['entity_name']\
+                                    .isin(coauthors) ]
+
+        top_score = top_score.head(n=NUM_LEAVES)
+        top_score.ego = flower_name
+        # Increase the search space
+        i += 1
+
 
     # Graph score
-    graph_score = score_df_to_graph(agg_score)
+    graph_score = score_df_to_graph(top_score)
+
+    # Generate node information
+    #node_info = agg_node_info(filter_score, agg_score['entity_name'])
 
     # D3 format
     data = processdata(flower_type, graph_score)
 
-    return flower_type, data, node_info
+    return flower_type, data, top_score['entity_name'].tolist()

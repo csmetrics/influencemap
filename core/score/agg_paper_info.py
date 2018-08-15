@@ -71,16 +71,16 @@ def score_paper_info(paper_info, self=list()):
             except KeyError:
                 inst_res['publication_year'] = None
                 inst_res['influence_year']   = None
-            try:
-                inst_res['link_year'] = reference['Year']
-            except:
-                inst_res['link_year'] = None
+            #try:
+            #    inst_res['link_year'] = reference['Year']
+            #except:
+            #    inst_res['link_year'] = None
 
             # Paper information
             inst_res['ego_paper_id']     = paper_info['PaperId']
-            inst_res['ego_paper_title']  = paper_info['PaperTitle']
+            #inst_res['ego_paper_title']  = paper_info['PaperTitle']
             inst_res['link_paper_id']    = reference['PaperId']
-            inst_res['link_paper_title'] = reference['PaperTitle']
+            #inst_res['link_paper_title'] = reference['PaperTitle']
 
             score_list.append(inst_res)
 
@@ -133,16 +133,16 @@ def score_paper_info(paper_info, self=list()):
                 inst_res['publication_year'] = None
             try:
                 inst_res['influence_year'] = citation['Year']
-                inst_res['link_year']     = citation['Year']
+            #    inst_res['link_year']     = citation['Year']
             except KeyError:
                 inst_res['influence_year'] = None
-                inst_res['link_year'] = None
+            #    inst_res['link_year'] = None
 
             # Paper information
             inst_res['ego_paper_id']     = paper_info['PaperId']
-            inst_res['ego_paper_title']  = paper_info['PaperTitle']
+            #inst_res['ego_paper_title']  = paper_info['PaperTitle']
             inst_res['link_paper_id']    = citation['PaperId']
-            inst_res['link_paper_title'] = citation['PaperTitle']
+            #inst_res['link_paper_title'] = citation['PaperTitle']
 
             score_list.append(inst_res)
 
@@ -210,6 +210,11 @@ def score_paper_info_list(paper_info_list, self=list()):
 def score_leaves(score_df, leaves):
     '''
     '''
+    # Final column values
+    score_cols = ['entity_name', 'entity_type', 'influence_year',
+            'publication_year', 'self_cite', 'influenced', 'influencing',
+            'ego_paper_id', 'link_paper_id']
+
     # Set entity names and influence to specified
     res_list = list()
     col_id   = ['entity_name', 'ego_paper_id', 'link_paper_id']
@@ -222,12 +227,18 @@ def score_leaves(score_df, leaves):
         if leaf not in [ Entity_type.AUTH, Entity_type.AFFI ]:
             leaf_df.drop_duplicates(subset=col_id, inplace=True)
 
-        leaf_df['influenced']  = leaf_df[get_influence_index(leaf)]
-        leaf_df['influencing'] = leaf_df[get_influence_index(leaf,
-            influence_dir='influencing')]
+        #leaf_df['influenced']  = leaf_df[get_influence_index(leaf)]
+        #leaf_df['influencing'] = leaf_df[get_influence_index(leaf,
+        #    influence_dir='influencing')]
 
-        leaf_df = leaf_df.drop(['influenced_paa', 'influenced_count',
-            'influencing_paa', 'influenced_paa'], 1)
+        #leaf_df = leaf_df.drop(['influenced_paa', 'influenced_count',
+        #    'influencing_paa', 'influencing_count'], 1)
+
+        leaf_df.rename(columns={get_influence_index(leaf): 'influenced',
+            get_influence_index(leaf, influence_dir='influencing'):
+            'influencing'}, inplace=True)
+
+        leaf_df = leaf_df[score_cols]
 
         res_list.append(leaf_df)
 

@@ -54,7 +54,12 @@ def base_paper_cache_query(paper_id):
     ''' Gets basic paper information required for reference links from cache.
     '''
     # Get properties
-    prop_res = paper_info_cache_query(paper_id)
+    es_res = paper_info_cache_query([paper_id])
+    es_prop = es_res['complete'] + es_res['partial']
+    if len(es_prop) > 0:
+        prop_res = es_prop[0]
+    else:
+        prop_res = None
 
     # Check for empty results
     if not prop_res:

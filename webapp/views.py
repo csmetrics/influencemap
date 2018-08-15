@@ -246,6 +246,7 @@ def manualcache(request):
 
 @csrf_exempt
 def submit(request):
+    print('Flower request: ', datetime.now())
 
     curated_flag = False
     if request.method == "GET":
@@ -296,6 +297,8 @@ def submit(request):
     print('Time taken: ', datetime.now() - time_cur)
     print()
 
+    print('Graph ops: ', datetime.now())
+
     # Get min and maximum year
     years = [info['Year'] for info in paper_information if 'Year' in info]
     min_pub_year, max_pub_year = min(years, default=0), max(years, default=0)
@@ -326,6 +329,8 @@ def submit(request):
     entity_names = list(set(entity_names))
 #    normal_names = list(map(lambda x: x.lower(), entity_names))
 
+    print('Graph ops: ', datetime.now())
+
     # TEST TOTAL TIME FOR SCORING
     time_cur = datetime.now()
 
@@ -344,6 +349,8 @@ def submit(request):
         flower_config['cit_lower'] = config[2]
         flower_config['cit_upper'] = config[3]
 
+    print(config)
+
     # Work function
     make_flower = lambda x: gen_flower_data(score_df, x, entity_names,
             flower_name, coauthors, config=flower_config)
@@ -358,11 +365,13 @@ def submit(request):
     sorted(flower_res, key=lambda x: x[0])
 
     # Reduce
-    node_info   = dict()
+    #node_info   = dict()
+    node_info   = list()
     flower_info = list()
     for _, f_info, n_info in flower_res:
+        node_info += n_info
         flower_info.append(f_info)
-        node_info.update(n_info)
+        #node_info.update(n_info)
 
     print('TOTAL FLOWER TIME: ', datetime.now() - time_cur)
 
@@ -445,11 +454,13 @@ def resubmit(request):
         flower_res = [make_flower(v) for v in flower_leaves]
 
     # Reduce
-    node_info   = dict()
+    #node_info   = dict()
+    node_info   = list()
     flower_info = list()
     for _, f_info, n_info in flower_res:
         flower_info.append(f_info)
-        node_info.update(n_info)
+        #node_info.update(n_info)
+        node_info += n_info
 
     data = {
         "author": flower_info[0],
@@ -576,7 +587,8 @@ def get_node_info(request):
     info = node_info["node_info"]
     papers = node_info["papers"]
 
-    info["entity_names"] = list(request.session["node_info"].keys()) +entities
+    #info["entity_names"] = list(request.session["node_info"].keys()) +entities
+    info["entity_names"] = list(request.session["node_info"]) +entities
     info["References"] = sorted([{"to": papers[k], "from": sorted([papers[paper_id] for paper_id in v], key=lambda x: x["Year"])} for k,v in info["References"].items()],key=lambda x: x["to"]["Year"])
     info["Citations"] = sorted([{"from": papers[k], "to": sorted([papers[paper_id] for paper_id in v], key=lambda x: x["Year"])} for k,v in info["Citations"].items()], key=lambda x: x["from"]["Year"])
     return JsonResponse(info, safe=False)
