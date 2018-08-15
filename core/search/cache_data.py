@@ -22,5 +22,5 @@ def cache_paper_info(paper_infos, chunk_size=20):
 
     # Cache to database
     for chunk in paper_info_chunks:
-        cache_datas  = (paper_info_to_cache_json(pi) for pi in chunk)
-        helpers.bulk(client, cache_datas, refresh=True)
+        cache_datas = (paper_info_to_cache_json(pi) for pi in chunk)
+        helpers.bulk(client, cache_datas, refresh=True, stats_only=True)
