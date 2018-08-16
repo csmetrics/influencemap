@@ -200,12 +200,35 @@ text {
 
 /*    ------ Stylesheet for browse.html ------    */
 .info-box {
-  height: 60px;
+  min-height: 60px;
+  max-height: auto;
   border: 1px solid gray;
+  width: 250px;
+  float: left;
+  margin: 5px 0px 5px 20px;
 }
 .info-box-icon {
-  width: 60px;
-  height: 60px;
+  width: 58px;
+  height: 58px;
+  padding: 5px;
+}
+.info-box-content {
+  margin-left: 65px;
+  height: 58px;
+  padding: 8px;
+}
+.info-box-text {
+  /* white-space: normal; */
+}
+.info-box-more {
+  z-index: 900;
+  position: fixed;
+  padding: 3px 10px;
+  margin: -1px;
+  width: 250px;
+  border: 1px solid gray;
+  border-top: 1px solid #ddd;
+  background-color: white;
 }
 
 /*    ---     Modal     ---     */

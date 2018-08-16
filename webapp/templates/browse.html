@@ -27,30 +27,29 @@
               <p>{{category.info}}</p>
               <div class="row">
                 {% for entity in category.entities %}
-                <div class="col-lg-3">
+                <!-- <div class="col-lg-3"> -->
                   <div class="info-box">
                     <span class="info-box-icon bg-gray"><a href="/submit/?id={{ entity.document_id }}">
                       <i class="fa fa-user"></i>
                     </a></span>
                     <div class="info-box-content">
-                      <span class="info-box-text"AuthorIds='{{entity.AuthorIds | safe }}' normalizedname="{{ entity.NormalizedName | safe }}">
-                        <b>{{entity.DisplayName}}</b>
-                        <small>
-                          {% for aff in entity.Affiliations %}
-                            <li>{{ aff }}</li>
-                          {% endfor %}
-                          {{entity.Year}}
-                          {{entity.Citation}}
-                          {% for keyword in entity.Keywords %}
-                            <li>{{ keyword }}</li>
-                          {% endfor %}
-                        </small>
+                      <span class="info-box-text" AuthorIds='{{entity.AuthorIds | safe }}' normalizedname="{{ entity.NormalizedName | safe }}">
+                        <b>{{entity.DisplayName}}</b><br/>{{entity.Year}}
                       </span>
                     </div>
-                    <!-- /.info-box-content -->
+                    <div class="info-box-more col-lg-3 hidden">
+                      {% for aff in entity.Affiliations %}
+                        <li>{{ aff }}</li>
+                      {% endfor %}
+                      <br />
+                      {{entity.Citation}}
+                      <br />
+                      {% for keyword in entity.Keywords %}
+                        <li>{{ keyword }}</li>
+                      {% endfor %}
+                    </div>
                   </div>
-                  <!-- /.info-box -->
-                </div>
+                <!-- </div> -->
                 {% endfor %}
               </div>
             </div>
@@ -62,43 +61,14 @@
     </section>
   </div>
 </body>
-<script src="{% static 'js/browseTableConfig.js' %}"></script>
 <script type="text/javascript">
-
-    /*  ---    Control tab selection    ---   */
-    function openTab(evt, tabId) {
-      // Declare all variables
-      var i, tabcontent, tablinks;
-
-      // Get all elements with class="tabcontent" and hide them
-      tabcontent = document.getElementsByClassName("tabcontent");
-      for (i = 0; i < tabcontent.length; i++) {
-          tabcontent[i].style.display = "none";
-      }
-
-      // Get all elements with class="tablinks" and remove the class "active"
-      tablinks = document.getElementsByClassName("tablinks");
-      for (i = 0; i < tablinks.length; i++) {
-          tablinks[i].className = tablinks[i].className.replace(" active", "");
-      }
-
-      // Show the current tab, and add an "active" class to the link that opened the tab
-      document.getElementById(tabId).style.display = "block";
-      evt.currentTarget.className += " active";
-    }
-
-    /*  ---    Convert tables to JQuery DataTables    ---   */
-    $(document).ready(function(){
-      $('table').each(function(a,b){
-        var table = $('#' + this.id).DataTable(browseTableConfig['tableSettings']);
-        //var table = $('#' + this.id).DataTable();
-
-        // add on click listeners for all table rows to show modal
-//        $('#' + this.id + ' tbody').on('click', 'tr', function(){
-//          modal.style.display = "block";
-//        })
-      });
-    });
+$(".info-box")
+  .mouseover(function() {
+    $(this).find(".info-box-more").removeClass("hidden");
+  })
+  .mouseout(function() {
+    $(this).find(".info-box-more").addClass("hidden");
+  })
 </script>
 
 </html>
