@@ -1,56 +1,54 @@
 {% load staticfiles%}
-<div style="min-width: 400px; border: 1px #ddd solid;">
-  <div class="statpane-left">
-    <div class="wrapper">
-      <b>Select YearRange</b>
-      <div style="float:right;padding:0 3">
-        <i class="fa fa-circle" style="color:#ABBD81"></i> Publication
-        <i class="fa fa-circle" style="color:#F47E60"></i> Citation
-      </div>
-      <div id="div_charts" style="width:370px;height:210px;">
-        <div id="pub_chart" style="height:90px;"></div>
-        <div id="publication-range" class="yearslider"></div>
-        <div id="citation-range" class="yearslider"></div>
-        <div id="cite_chart" style="height:110px;"></div>
-      </div>
+<div class="statpane-left">
+  <div class="wrapper">
+    <b>Select YearRange</b>
+    <div style="float:right;padding:0 3">
+      <i class="fa fa-circle" style="color:#ABBD81"></i> Publication
+      <i class="fa fa-circle" style="color:#F47E60"></i> Citation
+    </div>
+    <div id="div_charts" style="width:370px;height:210px;">
+      <div id="pub_chart" style="height:90px;"></div>
+      <div id="publication-range" class="yearslider"></div>
+      <div id="citation-range" class="yearslider"></div>
+      <div id="cite_chart" style="height:110px;"></div>
     </div>
   </div>
-  <div class="statpane-right">
-    <div class="wrapper">
-      <b> Statictics: Total</b> <span class="stat">{{ yearSlider.pubrange.2 }}</span> years of publication
-      <span class="stat">{{ yearSlider.pubrange.0 }}~{{ yearSlider.pubrange.1 }}</span><br>
-      <div style="padding-left:10px">
-        <span id="num_papers" class="stat">{{ stats.num_papers }}</span> papers total,
-        average <span id="avg_papers" class="stat">{{ stats.avg_papers }}</span> per year<br>
-        <span id="num_refs" class="stat">{{ stats.num_refs }}</span> references total,
-        average <span id="avg_refs" class="stat">{{ stats.avg_refs }}</span> per paper<br>
-        <span id="num_cites" class="stat">{{ stats.num_cites }}</span> citations total,
-        average <span id="avg_cites" class="stat">{{ stats.avg_cites }}</span> per paper<br>
-      </div>
+</div>
+<div class="statpane-right">
+  <div class="wrapper">
+    <b> Statictics: Total</b> <span class="stat">{{ yearSlider.pubrange.2 }}</span> years of publication
+    <span class="stat">{{ yearSlider.pubrange.0 }}~{{ yearSlider.pubrange.1 }}</span><br>
+    <div style="padding-left:10px">
+      <span id="num_papers" class="stat">{{ stats.num_papers }}</span> papers total,
+      average <span id="avg_papers" class="stat">{{ stats.avg_papers }}</span> per year<br>
+      <span id="num_refs" class="stat">{{ stats.num_refs }}</span> references total,
+      average <span id="avg_refs" class="stat">{{ stats.avg_refs }}</span> per paper<br>
+      <span id="num_cites" class="stat">{{ stats.num_cites }}</span> citations total,
+      average <span id="avg_cites" class="stat">{{ stats.avg_cites }}</span> per paper<br>
     </div>
-    <div class="wrapper" style="border-top:1px #ddd solid;">
-      <b>Selected Range (for flower)</b>
-      <div style="padding-left:10px">
-        <b>Publications:
-          <span class="label-as-badge" id="pub-lower-value"></span>~
-          <span class="label-as-badge" id="pub-upper-value"></span> </b>
-        <b>Citations:
-          <span class="label-as-badge" id="cit-lower-value"></span>~
-          <span class="label-as-badge" id="cit-upper-value"></span> </b><br>
-        <span id="selected_publication_link" class="link"><span id="selected_num_papers" class="stat">???</span> papers</span>,
-        <span id="selected_citation_link" class="link"><span id="selected_num_cites" class="stat">???</span> citations</span>
-      </div>
-      <div style="padding-top:10px">
-        <b>Include self citations</b>
-        <input class="self-cite" type="checkbox" onclick="updateConfigUrl()" style="float:left; margin:5 10 0 0" name="self-cite" id="self-cite" {% if yearSlider.selected.4 == 'true' %} checked="checked" {% endif %}/>
-      </div>
-      <div>
-        <b>Include coauthors</b>
-        <input class="coauthor" type="checkbox" onclick="updateConfigUrl()" style="float:left; margin:5 10 0 0" name="self-coauthor" id="coauthor" {% if yearSlider.selected.5 == 'true' %} checked="checked" {% endif %}/>
-      </div>
-      <div align=center style="padding-top:5px;">
-        <button class="btn" style="width:160px; height:30px; padding:0" id="resubmitButton">Update Flower</button>
-      </div>
+  </div>
+  <div class="wrapper" style="border-top:1px #ddd solid;">
+    <b>Selected Range (for flower)</b>
+    <div style="padding-left:10px">
+      <b>Publications:
+        <span class="label-as-badge" id="pub-lower-value"></span>~
+        <span class="label-as-badge" id="pub-upper-value"></span> </b>
+      <b>Citations:
+        <span class="label-as-badge" id="cit-lower-value"></span>~
+        <span class="label-as-badge" id="cit-upper-value"></span> </b><br>
+      <span id="selected_publication_link" class="link"><span id="selected_num_papers" class="stat">???</span> papers</span>,
+      <span id="selected_citation_link" class="link"><span id="selected_num_cites" class="stat">???</span> citations</span>
+    </div>
+    <div style="padding-top:10px">
+      <b>Include self citations</b>
+      <input class="self-cite" type="checkbox" onclick="updateConfigUrl()" style="float:left; margin:5 10 0 0" name="self-cite" id="self-cite" {% if yearSlider.selected.4 == 'true' %} checked="checked" {% endif %}/>
+    </div>
+    <div>
+      <b>Include coauthors</b>
+      <input class="coauthor" type="checkbox" onclick="updateConfigUrl()" style="float:left; margin:5 10 0 0" name="self-coauthor" id="coauthor" {% if yearSlider.selected.5 == 'true' %} checked="checked" {% endif %}/>
+    </div>
+    <div align=center style="padding-top:5px;">
+      <button class="btn btn-primary" id="resubmitButton">Update Flower</button>
     </div>
   </div>
   {% if curated %}
@@ -266,7 +264,7 @@ resubmitButton.addEventListener('click', function(){
 
       // do not update stat for resubmit
       // updateStats(result.stats);
-      resubmitButton.className = "btn";
+      resubmitButton.className = "btn btn-primary";
     }
   });
 });

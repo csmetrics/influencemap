@@ -2,127 +2,81 @@
 
 <html>
 {% include 'header.html' %}
-
-<body id="top">
-    {% include 'pagehead.html' %}
-    <div id="searchbar" class="wrapper bgded overlay">
-        {% include 'navbar.html' with navbar=navbarOption %}
-    </div>
-    <div class="wrapper row2" style="padding-top:0">
-        <div class="hoc clear">
+<body class="hold-transition skin-blue sidebar-mini">
+<div class="wrapper">
+  {% include 'pagehead.html' %}
+  {% include 'side-navbar.html' %}
+  <div class="content-wrapper bgded">
+    <!-- Main content -->
+    <section class="content">
+      <div class="row">
+        <div class="tab">
+          <button class="tablinks" onclick="openTab(event, 'Categories')">Categories</button> {% for category in list %}
+          <button class="tablinks" onclick="openTab(event, '{{category.tab_id}}')">{{ category.display }}</button> {% endfor %}
         </div>
-    </div>
-    <div class="wrapper row2" style="padding-top:0">
-        <div class="hoc row2">
-            <div class="row">
-                <div class="tab">
-                    <button class="tablinks" onclick="openTab(event, 'Categories')">Categories</button> {% for category in list %}
-                    <button class="tablinks" onclick="openTab(event, '{{category.tab_id}}')">{{ category.display }}</button> {% endfor %}
-                </div>
-
-                <div id="Categories" class="tabcontent" style="display: block">
-                    <p></p>
-                    {% for category in list %}
-                    <h4>{{category.display}}</h4>
-                    <p>{{category.info}}</p>
-                        {% for entity in category.list %}
-                                <a href=>{{entity}}</a>,
-                        {% endfor %}
-                    <p></p>
-                    {% endfor %}
-                </div>
-
-                {% for category in list %}
-                <div id="{{category.tab_id}}" class="tabcontent" style="display: none">
-<!--                     <h3>{{category.display}}</h3>
-                    <p>{{category.info}}</p> -->
-                    <table id="{{category.table_id}}">
-                       <thead>
-                           <th>Name</th>
-                           <th>Affiliation</th>
-                           <th>Year</th>
-                           <th>Citation</th>
-                           <th>Keywords</th>
-                           <th></th>
-                       </thead>
-                       <tbody>
-                          {% for entity in category.entities %}
-                            <tr AuthorIds='{{entity.AuthorIds | safe }}' normalizedname="{{ entity.NormalizedName | safe }}">
-                                <td>
-                                    {{entity.DisplayName}}
-                                </td>
-                                <td>
-                                  <ul>
-                                    {% for aff in entity.Affiliations %}
-                                      <li>{{ aff }}</li>
-                                    {% endfor %}
-                                  </ul>
-                                </td>
-                                <td>
-                                    {{entity.Year}}
-                                </td>
-                                <td>
-                                    {{entity.Citation}}
-                                </td>
-                                <td>
-                                  <ul>
-                                    {% for keyword in entity.Keywords %}
-                                      <li>{{ keyword }}</li>
-                                    {% endfor %}
-                                  </ul>
-                                </td>
-                                <td>
-                                    <a href="/submit/?id={{ entity.document_id }}">more info</a>
-                                </td>
-                            </tr>
-                          {% endfor %}
-                        </tbody>
-                    </table>
-                </div>
+        <div id="Categories" class="tabcontent" style="display: block">
+            <p></p>
+            {% for category in list %}
+            <h4>{{category.display}}</h4>
+            <p>{{category.info}}</p>
+                {% for entity in category.list %}
+                        <a href=>{{entity}}</a>,
                 {% endfor %}
-            </div>
+            <p></p>
+            {% endfor %}
         </div>
-        <!-- Trigger/Open The Modal -->
-
-    </div>
-    <!-- The Modal -->
-    <div id="myModal" class="modal">
-
-        <!-- Modal content -->
-        <div class="modal-content right">
-            <span class="close">&times;</span>
-            <div class="hoc cntr" style="border-bottom: 1px solid grey; width: 80%; padding: 10px">
-                <button class="btn">Take me to the flower!</button>
-            </div>
-            <div class='center'>
-                <p>Alternatively, <a href="#" id="closer-look-btn">take a closer look</a> at the papers that are included in this curated flower and add or deselect papers yourself.</p>
-            </div>
+        {% for category in list %}
+        <div id="{{category.tab_id}}" class="tabcontent" style="display: none">
+            <table id="{{category.table_id}}">
+               <thead>
+                   <th>Name</th>
+                   <th>Affiliation</th>
+                   <th>Year</th>
+                   <th>Citation</th>
+                   <th>Keywords</th>
+                   <th></th>
+               </thead>
+               <tbody>
+                  {% for entity in category.entities %}
+                    <tr AuthorIds='{{entity.AuthorIds | safe }}' normalizedname="{{ entity.NormalizedName | safe }}">
+                        <td>
+                            {{entity.DisplayName}}
+                        </td>
+                        <td>
+                          <ul>
+                            {% for aff in entity.Affiliations %}
+                              <li>{{ aff }}</li>
+                            {% endfor %}
+                          </ul>
+                        </td>
+                        <td>
+                            {{entity.Year}}
+                        </td>
+                        <td>
+                            {{entity.Citation}}
+                        </td>
+                        <td>
+                          <ul>
+                            {% for keyword in entity.Keywords %}
+                              <li>{{ keyword }}</li>
+                            {% endfor %}
+                          </ul>
+                        </td>
+                        <td>
+                            <a href="/submit/?id={{ entity.document_id }}">more info</a>
+                        </td>
+                    </tr>
+                  {% endfor %}
+                </tbody>
+            </table>
         </div>
-
-    </div>
+        {% endfor %}
+      </div>
+    </section>
+  </div>
 </body>
 <script src="{% static 'js/browseTableConfig.js' %}"></script>
 <script type="text/javascript">
-
-    /*  ---    Modal    ---   */
-    // Get the modal
-    var modal = document.getElementById('myModal');
-
-    // Get the <span> element that closes the modal
-    var span = document.getElementsByClassName("close")[0];
-
-    // When the user clicks on <span> (x), close the modal
-    span.onclick = function() {
-        modal.style.display = "none";
-    }
-
-    // When the user clicks anywhere outside of the modal, close it
-    window.onclick = function(event) {
-        if (event.target == modal) {
-            modal.style.display = "none";
-        }
-    }
-
 
     /*  ---    Control tab selection    ---   */
     function openTab(evt, tabId) {

@@ -1,0 +1,73 @@
+{% load staticfiles %}
+
+<!--
+Template Name: Corklow
+Author: <a href="http://www.os-templates.com/">OS Templates</a>
+Author URI: http://www.os-templates.com/
+Licence: Free to use under our free template licence terms
+Licence URI: http://www.os-templates.com/template-terms
+-->
+<html>
+{% include 'header.html' %}
+<body id="top">
+{% include 'pagehead.html' %}
+<div id="pageintro-wrapper" class="wrapper bgded overlay">
+  <div id="pageintro" class="hoc clear">
+    <article>
+			<p>About Project Influence Map</p>
+			<p>
+        This project sets up to map the incoming and outgoing intellectual influence of academic entities -- people, projects, publications venues, and institutions. We do so by creating visualisations from the citation data curated in Microsoft Academic Graph.
+        <!-- In academia, a prevalent question of interest is which academics are influential? Further, what makes an academic influential? With Influence Map, we are working towards a deeper understanding of academic influence by visualising it at a localised level, i.e. considering who a person or a group has been influenced by, and who they have had influence on. We create these visualisations using citation data from the Microsoft Academic Graph. -->
+      </p>
+      <p>
+      Follow the links below to browse pre-curated visualisations from a selection of award winners and well-known entities, or grow your own flowers for any entity.
+      </p>
+      <footer><a href="https://github.com/csmetrics/influencemap">more info</a></footer>
+    </article>
+  </div>
+</div>
+<div class="wrapper row2" style="padding-top:0">
+  <div id="services" class="hoc clear">
+    <div class="table">
+      <div class="table-row">
+        <div class="table-cell">
+          <article><a href="/browse"><i class="fa fa-trophy"></i></a>
+            <h6 class="heading">Flower Gallery</h6>
+						<p>Browse influence maps of Nobel Laureates, Turing Award winners, Fields Medalists, Journals and Conferences, and more...</p>
+						<footer><a href="/browse">Browse</a></footer>
+          </article>
+        </div>
+        <div class="table-cell">
+          <article><a href="/create"><i class="fa fa-users"></i></a>
+            <h6 class="heading">Create new flowers</h6>
+						<p>Curate your own influence maps by querying papers, people, groups and institutions...</p>
+						<footer><a href="/create">Create</a></footer>
+          </article>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+<div class="wrapper" style="background-color:#eee">
+  <article class="hoc clear center" style="padding: 20px" align="left">
+    <h3 class="heading">Methodology</h3>
+    <p>Our main visual metaphor is the "influence flower", quantifying the bi-directional citations between the entity in question and the top entities it interacts with.
+    We further allow filtering influence by time-frame. By default the person-centric citations filters out self-citations. </p>
+    <!--
+		<p>Quantifying influence is difficult for many reasons and it is unlikely that there is a silver bullet solution. Our aim is to use an intuitive yet considered system to quantify localised influence, which we do by summing the number of citations from one person to another, weighted according to the number of authors of the cited paper.</p>
+    <p>We allow the user to chose whether or not to include self citations in the calculation, where a self-citation occurs if a paper shares any authors with the paper it cites.</p>
+    -->
+    <footer><a class="btn medium" href="https://github.com/csmetrics/influencemap">More Information &raquo;</a></footer>
+  </article>
+</div>
+<div class="wrapper row3">
+  <footer id="footer" class="hoc clear">
+    <div id="copyright">
+      <p>Copyright &copy; 2018 - All Rights Reserved - <a href="http://http://cm.cecs.anu.edu.au/">ANU Computational Media Lab.</a></p>
+      <p class="font-xs">Template by <a target="_blank" href="http://www.os-templates.com/" title="Free Website Templates">OS Templates</a></p>
+    </div>
+  </footer>
+</div>
+
+</body>
+</html>

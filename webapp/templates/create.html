@@ -2,9 +2,11 @@
 
 <html>
 {% include 'header.html' %}
-<body id="top">
-{% include 'pagehead.html' %}
-{% include 'search_tables.html' %}
+<body class="hold-transition skin-blue sidebar-mini">
+<div class="wrapper">
+  {% include 'pagehead-searchbar.html' with navbar=navbarOption %}
+  {% include 'search_tables.html' %}
+</div>
 </body>
 </html>
 <script>
