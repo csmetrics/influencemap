@@ -12,9 +12,9 @@
       <div class="row">
         <div class="col-xs-12">
           {% for category in list %}
-          <div class="box box-default box-solid">
+          <div class="box box-solid">
             <div class="box-header with-border" id={{category.tab_id}}>
-              <h3 class="box-title">{{ category.display }}</h3>
+              <h3 class="box-title"><b>{{ category.display }}</b></h3>
 
               <div class="box-tools pull-right">
                 <button type="button" class="btn btn-box-tool" data-widget="collapse"><i class="fa fa-minus"></i>
@@ -28,21 +28,28 @@
               <div class="row">
                 {% for entity in category.entities %}
                 <div class="col-lg-3">
-                  <div class="pull-left">
-                    <img src="none" class="img-circle" alt="User Image">
+                  <div class="info-box">
+                    <span class="info-box-icon bg-gray"><a href="/submit/?id={{ entity.document_id }}">
+                      <i class="fa fa-user"></i>
+                    </a></span>
+                    <div class="info-box-content">
+                      <span class="info-box-text"AuthorIds='{{entity.AuthorIds | safe }}' normalizedname="{{ entity.NormalizedName | safe }}">
+                        <b>{{entity.DisplayName}}</b>
+                        <small>
+                          {% for aff in entity.Affiliations %}
+                            <li>{{ aff }}</li>
+                          {% endfor %}
+                          {{entity.Year}}
+                          {{entity.Citation}}
+                          {% for keyword in entity.Keywords %}
+                            <li>{{ keyword }}</li>
+                          {% endfor %}
+                        </small>
+                      </span>
+                    </div>
+                    <!-- /.info-box-content -->
                   </div>
-                  <div AuthorIds='{{entity.AuthorIds | safe }}' normalizedname="{{ entity.NormalizedName | safe }}">
-                    {{entity.DisplayName}}
-                    {% for aff in entity.Affiliations %}
-                      <li>{{ aff }}</li>
-                    {% endfor %}
-                    {{entity.Year}}
-                    {{entity.Citation}}
-                    {% for keyword in entity.Keywords %}
-                      <li>{{ keyword }}</li>
-                    {% endfor %}
-                    <a href="/submit/?id={{ entity.document_id }}">more info</a>
-                  </div>
+                  <!-- /.info-box -->
                 </div>
                 {% endfor %}
               </div>
