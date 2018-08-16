@@ -6,71 +6,51 @@
 <div class="wrapper">
   {% include 'pagehead.html' %}
   {% include 'side-navbar.html' %}
-  <div class="content-wrapper bgded">
+  <div class="content-wrapper">
     <!-- Main content -->
     <section class="content">
       <div class="row">
-        <div class="tab">
-          <button class="tablinks" onclick="openTab(event, 'Categories')">Categories</button> {% for category in list %}
-          <button class="tablinks" onclick="openTab(event, '{{category.tab_id}}')">{{ category.display }}</button> {% endfor %}
-        </div>
-        <div id="Categories" class="tabcontent" style="display: block">
-            <p></p>
-            {% for category in list %}
-            <h4>{{category.display}}</h4>
-            <p>{{category.info}}</p>
-                {% for entity in category.list %}
-                        <a href=>{{entity}}</a>,
+        <div class="col-xs-12">
+          {% for category in list %}
+          <div class="box box-default box-solid">
+            <div class="box-header with-border" id={{category.tab_id}}>
+              <h3 class="box-title">{{ category.display }}</h3>
+
+              <div class="box-tools pull-right">
+                <button type="button" class="btn btn-box-tool" data-widget="collapse"><i class="fa fa-minus"></i>
+                </button>
+              </div>
+              <!-- /.box-tools -->
+            </div>
+            <!-- /.box-header -->
+            <div class="box-body">
+              <p>{{category.info}}</p>
+              <div class="row">
+                {% for entity in category.entities %}
+                <div class="col-lg-3">
+                  <div class="pull-left">
+                    <img src="none" class="img-circle" alt="User Image">
+                  </div>
+                  <div AuthorIds='{{entity.AuthorIds | safe }}' normalizedname="{{ entity.NormalizedName | safe }}">
+                    {{entity.DisplayName}}
+                    {% for aff in entity.Affiliations %}
+                      <li>{{ aff }}</li>
+                    {% endfor %}
+                    {{entity.Year}}
+                    {{entity.Citation}}
+                    {% for keyword in entity.Keywords %}
+                      <li>{{ keyword }}</li>
+                    {% endfor %}
+                    <a href="/submit/?id={{ entity.document_id }}">more info</a>
+                  </div>
+                </div>
                 {% endfor %}
-            <p></p>
-            {% endfor %}
-        </div>
-        {% for category in list %}
-        <div id="{{category.tab_id}}" class="tabcontent" style="display: none">
-            <table id="{{category.table_id}}">
-               <thead>
-                   <th>Name</th>
-                   <th>Affiliation</th>
-                   <th>Year</th>
-                   <th>Citation</th>
-                   <th>Keywords</th>
-                   <th></th>
-               </thead>
-               <tbody>
-                  {% for entity in category.entities %}
-                    <tr AuthorIds='{{entity.AuthorIds | safe }}' normalizedname="{{ entity.NormalizedName | safe }}">
-                        <td>
-                            {{entity.DisplayName}}
-                        </td>
-                        <td>
-                          <ul>
-                            {% for aff in entity.Affiliations %}
-                              <li>{{ aff }}</li>
-                            {% endfor %}
-                          </ul>
-                        </td>
-                        <td>
-                            {{entity.Year}}
-                        </td>
-                        <td>
-                            {{entity.Citation}}
-                        </td>
-                        <td>
-                          <ul>
-                            {% for keyword in entity.Keywords %}
-                              <li>{{ keyword }}</li>
-                            {% endfor %}
-                          </ul>
-                        </td>
-                        <td>
-                            <a href="/submit/?id={{ entity.document_id }}">more info</a>
-                        </td>
-                    </tr>
-                  {% endfor %}
-                </tbody>
-            </table>
-        </div>
+              </div>
+            </div>
+            <!-- /.box-body -->
+          </div>
         {% endfor %}
+        </div>
       </div>
     </section>
   </div>
