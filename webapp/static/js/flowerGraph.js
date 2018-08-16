@@ -45,16 +45,14 @@ function drawFlower(svg_id, data, idx, w) {
     var links = data["links"];
     var bars = data["bars"];
 
-    h_margin = 225;
-    v_margin = 250;
+    v_margin = 160;
     yheight = 100;
-    flower_margin = 0;
 
     svg[idx] = d3.select(svg_id),
     width = w, magf = Math.min(250, width/5),
-    height = 650,
+    height = 600,
     numnodes[idx] = nodes.length,
-    center = [width/2, height/2 - flower_margin];
+    center = [width*0.45, height*0.6];
     flower_split[idx] = false;
 
     // bar location
@@ -93,7 +91,7 @@ function drawFlower(svg_id, data, idx, w) {
         .selectAll("text")
           .text(function(d) { if (d.length > 20) return d.slice(0, 20)+"..."; else return d.slice(0, 20); })
           .style("text-anchor", "end")
-          .style("fill", function(d) { 
+          .style("fill", function(d) {
             for (var i in nodes) {
                 if (nodes[i]['name'] == d) {
                     if (nodes[i]['coauthor'] == 'True') {
@@ -454,7 +452,7 @@ function genNodeInfoPaperStr(info_dict) {
         info_str += "Authors: " + info_dict["link_auth"].join(', ');
         info_str += "<br>";
     }
-    
+
     // Venue display
     if (info_dict['type'] != 'CONF' && info_dict['type'] != 'JOUR') {
         // Join journal and conferences
@@ -567,7 +565,7 @@ function populateNodeInfoContent(data){
         if (j == 0) references_table += "<tr><td width='49%'rowspan='"+references[i]["from"].length+"'>"+left+"</td><td width='2%' style='color: rgb(107,172,208); font-size: 30px'>⟵</td><td width='49%'>"+right+"</td></tr>";
         else references_table += "<tr><td width='2%'style='color: rgb(107,172,208); font-size: 30px'>⟵</td><td width='49%'>"+right+"</td></tr>";
       }
-    }   
+    }
     references_table += "</table>";
 
   }

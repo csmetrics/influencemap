@@ -2,73 +2,59 @@
 
 <html>
 {% include 'header.html' %}
-<body class="hold-transition skin-blue sidebar-mini">
+<body class="hold-transition skin-black sidebar-mini">
 <div class="wrapper">
   {% include 'pagehead.html' %}
   {% include 'side-navbar.html' %}
-  <div class="content-wrapper">
+
+  {% for category in list %}
+  <div class="content-wrapper-browse">
+    <section class="content-header">
+      <h1>
+        {{ category.display }}<br>
+        <small>{{category.info}}</small>
+      </h1>
+      <!-- <ol class="breadcrumb">
+        <li><a href="#"><i class="fa fa-dashboard"></i> Home</a></li>
+        <li class="active">Dashboard</li>
+      </ol> -->
+    </section>
     <!-- Main content -->
     <section class="content">
       <div class="row">
         <div class="col-xs-12">
-          {% for category in list %}
-          <div class="box box-solid">
-            <div class="box-header with-border" id={{category.tab_id}}>
-              <h3 class="box-title"><b>{{ category.display }}</b></h3>
-
-              <div class="box-tools pull-right">
-                <button type="button" class="btn btn-box-tool" data-widget="collapse"><i class="fa fa-minus"></i>
-                </button>
+          <div class="row">
+            {% for entity in category.entities %}
+            <!-- <div class="col-lg-3"> -->
+              <div class="info-box">
+                <span class="info-box-icon bg-gray"><a href="/submit/?id={{ entity.document_id }}">
+                  <i class="fa fa-user"></i>
+                </a></span>
+                <div class="info-box-content">
+                  <span class="info-box-text text-truncate" AuthorIds='{{entity.AuthorIds | safe }}' normalizedname="{{ entity.NormalizedName | safe }}">
+                    <b>{{entity.DisplayName}}</b><br/>{{entity.Year}}
+                  </span>
+                </div>
+                <div class="info-box-more hidden">
+                  {% for aff in entity.Affiliations %}
+                    <li>{{ aff }}</li>
+                  {% endfor %}
+                  <br />
+                  {{entity.Citation}}
+                  <br />
+                  {% for keyword in entity.Keywords %}
+                    <li>{{ keyword }}</li>
+                  {% endfor %}
+                </div>
               </div>
-              <!-- /.box-tools -->
-            </div>
-            <!-- /.box-header -->
-            <div class="box-body">
-              <p>{{category.info}}</p>
-              <div class="row">
-                {% for entity in category.entities %}
-                <!-- <div class="col-lg-3"> -->
-                  <div class="info-box">
-                    <span class="info-box-icon bg-gray"><a href="/submit/?id={{ entity.document_id }}">
-                      <i class="fa fa-user"></i>
-                    </a></span>
-                    <div class="info-box-content">
-                      <span class="info-box-text" AuthorIds='{{entity.AuthorIds | safe }}' normalizedname="{{ entity.NormalizedName | safe }}">
-                        <b>{{entity.DisplayName}}</b><br/>{{entity.Year}}
-                      </span>
-                    </div>
-                    <div class="info-box-more col-lg-3 hidden">
-                      {% for aff in entity.Affiliations %}
-                        <li>{{ aff }}</li>
-                      {% endfor %}
-                      <br />
-                      {{entity.Citation}}
-                      <br />
-                      {% for keyword in entity.Keywords %}
-                        <li>{{ keyword }}</li>
-                      {% endfor %}
-                    </div>
-                  </div>
-                <!-- </div> -->
-                {% endfor %}
-              </div>
-            </div>
-            <!-- /.box-body -->
+            {% endfor %}
           </div>
-        {% endfor %}
         </div>
       </div>
     </section>
   </div>
+  {% endfor %}
 </body>
 <script type="text/javascript">
-$(".info-box")
-  .mouseover(function() {
-    $(this).find(".info-box-more").removeClass("hidden");
-  })
-  .mouseout(function() {
-    $(this).find(".info-box-more").addClass("hidden");
-  })
 </script>
-
 </html>
