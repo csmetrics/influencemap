@@ -232,14 +232,20 @@ text {
   -webkit-box-orient: vertical;
 }
 .info-box-more {
+  position: absolute;
   z-index: 900;
-  position: fixed;
   padding: 3px 10px;
   margin: -1px;
-  width: 250px;
+  width: 260px;
   border: 1px solid gray;
   border-top: 1px solid #ddd;
   background-color: white;
+}
+.align-buttons {
+  position: fixed;
+  z-index: 1000;
+  margin-top: 10px;
+  right: 10px;
 }
 
 /*    ---     Modal     ---     */

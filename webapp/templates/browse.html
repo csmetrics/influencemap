@@ -7,6 +7,15 @@
   {% include 'pagehead.html' %}
   {% include 'side-navbar.html' %}
 
+  <div class="align-buttons">
+    <table><tr><td>
+      <div class="btn-group">
+        <button id="btn-align-list" type="button" class="btn btn-default"><i class="fa fa-list-ul"></i></button>
+        <button id="btn-align-small" type="button" class="btn btn-default"><i class="fa fa-th"></i></button>
+        <button id="btn-align-big" type="button" class="btn btn-default"><i class="fa fa-th-large"></i></button>
+      </div>
+    </td></tr></table>
+  </div>
   {% for category in list %}
   <div class="content-wrapper-browse">
     <section class="content-header">
@@ -25,7 +34,15 @@
         <div class="col-xs-12">
           <div class="row">
             {% for entity in category.entities %}
-            <!-- <div class="col-lg-3"> -->
+              <div class="info-list col-xs-12 hidden">
+                <li>
+                  <a href="/submit/?id={{ entity.document_id }}"><b>{{entity.DisplayName}}</b></a>
+                  {{entity.Year}}
+                  {% for aff in entity.Affiliations %}
+                    {{ aff }}
+                  {% endfor %}
+                </li>
+              </div>
               <div class="info-box">
                 <span class="info-box-icon bg-gray"><a href="/submit/?id={{ entity.document_id }}">
                   <i class="fa fa-user"></i>
@@ -39,12 +56,10 @@
                   {% for aff in entity.Affiliations %}
                     <li>{{ aff }}</li>
                   {% endfor %}
-                  <br />
-                  {{entity.Citation}}
-                  <br />
                   {% for keyword in entity.Keywords %}
                     <li>{{ keyword }}</li>
-                  {% endfor %}
+                  {% endfor %} <br/>
+                  <small>{{entity.Citation}}</small>
                 </div>
               </div>
             {% endfor %}
@@ -56,5 +71,33 @@
   {% endfor %}
 </body>
 <script type="text/javascript">
+var aligntype = "small";
+$(".info-box")
+  .mouseover(function() {
+    if (aligntype == "small") $(this).find(".info-box-more").removeClass("hidden");
+  })
+  .mouseout(function() {
+    if (aligntype == "small") $(this).find(".info-box-more").addClass("hidden");
+  })
+
+$("#btn-align-list").click(function() {
+  aligntype = "list";
+  $(".info-box").addClass("hidden");
+  $(".info-list").removeClass("hidden");
+})
+$("#btn-align-small").click(function() {
+  aligntype = "small";
+  $(".info-list").addClass("hidden");
+  $(".info-box").removeClass("hidden");
+  $(".info-box-more").addClass("hidden");
+  $(".info-box-more").css({"position":"absolute", "height":"auto"});
+})
+$("#btn-align-big").click(function() {
+  aligntype = "big";
+  $(".info-list").addClass("hidden");
+  $(".info-box").removeClass("hidden");
+  $(".info-box-more").removeClass("hidden");
+  $(".info-box-more").css({"position":"relative", "height":"210px"});
+})
 </script>
 </html>
