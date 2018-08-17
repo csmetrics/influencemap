@@ -13,13 +13,6 @@
 .content {
   min-height: 0;
 }
-.bgded {
-  background: url('../images/background.jpg') no-repeat center;
-}
-.overlay::after{
-  color:inherit;
-  background-color:rgba(0,61,109,0.5);
-}
 .box-home {
   min-height:25%;
   padding: 20px;
