@@ -2,7 +2,7 @@
 
 <html>
 {% include 'header.html' %}
-<body class="hold-transition skin-black sidebar-mini">
+<body class="hold-transition skin-blue sidebar-mini">
 <div class="wrapper">
   {% include 'pagehead.html' %}
   {% include 'side-navbar.html' %}
@@ -43,25 +43,30 @@
                   {% endfor %}
                 </li>
               </div>
-              <div class="info-box">
-                <span class="info-box-icon bg-gray"><a href="/submit/?id={{ entity.document_id }}">
-                  <i class="fa fa-user"></i>
-                </a></span>
-                <div class="info-box-content">
-                  <span class="info-box-text text-truncate" AuthorIds='{{entity.AuthorIds | safe }}' normalizedname="{{ entity.NormalizedName | safe }}">
-                    <b>{{entity.DisplayName}}</b><br/>{{entity.Year}}
+              <a href="/submit/?id={{ entity.document_id }}">
+                <div class="info-box">
+                  <span class="info-box-icon bg-gray">
+                    {% if entity.icon_type == "projects" %}<i class="fa fa-rocket"></i>
+                    {% elif entity.icon_type == "conferences" or entity.icon_type == "journals" or entity.icon_type == "venues" %}<i class="fa fa-university"></i>
+                    {% else %}<i class="fa fa-user"></i>
+                    {% endif %}
                   </span>
+                  <div class="info-box-content">
+                    <span class="info-box-text text-truncate" AuthorIds='{{entity.AuthorIds | safe }}' normalizedname="{{ entity.NormalizedName | safe }}">
+                      <b>{{entity.DisplayName}}</b><br/>{{entity.Year}}
+                    </span>
+                  </div>
+                  <div class="info-box-more hidden">
+                    {% for aff in entity.Affiliations %}
+                      <li>{{ aff }}</li>
+                    {% endfor %}
+                    {% for keyword in entity.Keywords %}
+                      <li>{{ keyword }}</li>
+                    {% endfor %} <br/>
+                    <small>{{entity.Citation}}</small>
+                  </div>
                 </div>
-                <div class="info-box-more hidden">
-                  {% for aff in entity.Affiliations %}
-                    <li>{{ aff }}</li>
-                  {% endfor %}
-                  {% for keyword in entity.Keywords %}
-                    <li>{{ keyword }}</li>
-                  {% endfor %} <br/>
-                  <small>{{entity.Citation}}</small>
-                </div>
-              </div>
+              </a>
             {% endfor %}
           </div>
         </div>

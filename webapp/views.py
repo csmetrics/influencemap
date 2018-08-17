@@ -73,6 +73,7 @@ def browse(request):
             e = entity["entities"][i]
             document_id = e["_id"]
             e["document_id"] = document_id
+            e["icon_type"] = e["Type"].split("_")[-1]
             if "Keywords" in e:
                 e["Keywords"] = [] if len("".join(e["Keywords"])) == 0 else e["Keywords"]
             if "AuthorIds" in e:
