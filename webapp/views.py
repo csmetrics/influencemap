@@ -28,12 +28,13 @@ from core.flower.high_level_get_flower import default_config
 from core.score.agg_paper_info         import score_paper_info_list
 
 # Imports for submit
-from core.search.query_paper    import paper_query
-from core.search.query_info     import paper_info_check_query, paper_info_mag_check_multiquery
-from core.search.query_info_mag import base_paper_mag_multiquery
-from core.score.agg_utils       import get_coauthor_mapping
-from core.score.agg_utils       import flag_coauthor
-from core.utils.get_stats       import get_stats
+from core.search.query_paper      import paper_query
+from core.search.query_info       import paper_info_check_query, paper_info_mag_check_multiquery
+from core.search.query_info_mag   import base_paper_mag_multiquery
+from core.search.query_info_cache import base_paper_cache_query
+from core.score.agg_utils         import get_coauthor_mapping
+from core.score.agg_utils         import flag_coauthor
+from core.utils.get_stats         import get_stats
 
 BASE_DIR = settings.BASE_DIR
 
@@ -109,7 +110,6 @@ def create(request):
         "navbarOption": get_navbar_option(keyword, option),
         "search": search
     })
-
 
 
 @csrf_exempt
@@ -247,6 +247,7 @@ def manualcache(request):
 @csrf_exempt
 def submit(request):
     print('Flower request: ', datetime.now())
+    total_request_cur = datetime.now()
 
     curated_flag = False
     if request.method == "GET":
@@ -365,15 +366,16 @@ def submit(request):
     sorted(flower_res, key=lambda x: x[0])
 
     # Reduce
-    #node_info   = dict()
-    node_info   = list()
+    node_info   = dict()
+    #node_info   = list()
     flower_info = list()
     for _, f_info, n_info in flower_res:
-        node_info += n_info
+        #node_info += n_info
         flower_info.append(f_info)
-        #node_info.update(n_info)
+        node_info.update(n_info)
 
     print('TOTAL FLOWER TIME: ', datetime.now() - time_cur)
+    print('TOTAL REQUEST TIME: ', datetime.now() - total_request_cur)
 
     if config == None:
         config = [min_pub_year, max_pub_year, min_cite_year, max_cite_year, "false", "true"]
@@ -413,6 +415,7 @@ def submit(request):
     request.session['flower_name']  = flower_name
     request.session['entity_names'] = entity_names
     request.session['node_info']    = node_info
+
     return render(request, "flower.html", data)
 
 @csrf_exempt
@@ -454,13 +457,13 @@ def resubmit(request):
         flower_res = [make_flower(v) for v in flower_leaves]
 
     # Reduce
-    #node_info   = dict()
-    node_info   = list()
+    node_info   = dict()
+    #node_info   = list()
     flower_info = list()
     for _, f_info, n_info in flower_res:
         flower_info.append(f_info)
-        #node_info.update(n_info)
-        node_info += n_info
+        node_info.update(n_info)
+        #node_info += n_info
 
     data = {
         "author": flower_info[0],
@@ -543,33 +546,35 @@ def get_node_info_all(request):
     return {"node_info": node_info, "papers": papers_to_send}
 
 
-def get_node_info_single(request, entity, year_ranges):
-    pub_lower = year_ranges["pub_lower"]
-    pub_upper = year_ranges["pub_upper"]
-    cit_lower = year_ranges["cit_lower"]
-    cit_upper = year_ranges["cit_upper"]
+def get_node_info_single(info_dict):
+    '''
+    '''
+    papers = info_dict['reference_link'] + info_dict['citation_link']
+    for paper_list in info_dict['reference_ego'] + info_dict['citation_ego']:
+        papers += paper_list
 
-    papers = paper_info_mag_check_multiquery(request.session["cache"])
-    papers_to_send = dict()
-    node_info = {"References": {}, "Citations":{}}
+    papers = list(set(papers))
+
+    papers = base_paper_cache_query(papers)
+    print("!!!")
+    print(papers)
+
+    info_fields = ["PaperTitle", "Authors","PaperId","Year"]
+    papers_dict = dict()
     for paper in papers:
-        if paper["Year"] < pub_lower or paper["Year"] > pub_upper: continue
+        print(paper)
+        paper_info = {k:v for k,v in paper.items() if k in info_fields}
+        papers_dict[paper['PaperId']] = paper
 
-        for relationship_type in ["References", "Citations"]:
-            for rel_paper in paper[relationship_type]:
-                if (relationship_type == "Citations")  and  (rel_paper["Year"] < cit_lower or rel_paper["Year"] > cit_upper): continue
-                authors      = [author["AuthorName"] for author in rel_paper["Authors"]]
-                affiliations = [author["AffiliationName"] for author in rel_paper["Authors"] if "AffiliationName" in author]
-                conferences = [rel_paper["ConferenceName"]] if ("ConferenceName" in rel_paper) else []
-                journals = [rel_paper["JournalName"]] if ("JournalName" in rel_paper) else []
-                relevant = entity in list(set(authors + affiliations + conferences + journals))
-                if relevant:
-                    papers_to_send[paper["PaperId"]] = {k:v for k,v in paper.items() if k in ["PaperTitle", "Authors","PaperId","Year"]}
-                    papers_to_send[rel_paper["PaperId"]] = {k:v for k,v in rel_paper.items() if k in ["PaperTitle", "Authors","PaperId","Year"]}
-                    if rel_paper["PaperId"] in node_info[relationship_type]:
-                        node_info[relationship_type][rel_paper["PaperId"]].append(paper["PaperId"])
-                    else:
-                        node_info[relationship_type][rel_paper["PaperId"]] = [paper["PaperId"]]
+    node_info = {"References": {}, "Citations":{}}
+    for link_id, ego_ids in zip(info_dict['reference_link'], info_dict['reference_ego']):
+        node_info['References'][link_id] = ego_ids
+
+    for link_id, ego_ids in zip(info_dict['citation_link'], info_dict['citation_ego']):
+        node_info['Citations'][link_id] = ego_ids
+
+    papers_to_send = papers_dict
+
     return {"node_info": node_info, "papers": papers_to_send}
 
 
@@ -583,7 +588,9 @@ def get_node_info(request):
     entities = request.session["entity_names"]
     year_ranges = request.session["year_ranges"]
 
-    node_info = get_node_info_single(request, node_name, year_ranges) #request.session['node_information_store']
+    #node_info = get_node_info_single(request, node_name, year_ranges) #request.session['node_information_store']
+    node_info = get_node_info_single(request.session["node_info"][node_name])
+
     info = node_info["node_info"]
     papers = node_info["papers"]
 

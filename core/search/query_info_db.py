@@ -154,7 +154,7 @@ def link_paper_info_query(paper_id, cache = True):
             # If cache true
             if cache:
                 # Check cache for entries
-                link_paper_prop = base_paper_cache_query(link_paper)
+                link_paper_prop = base_paper_cache_query([link_paper])[0]
             else:
                 # Set default to None
                 link_paper_prop = None

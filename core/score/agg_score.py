@@ -44,69 +44,45 @@ def agg_score_df(influence_df, coauthors=set([]), \
     return score_df
 
 
-def agg_node_info(influence_df, node_names, coauthors=set([]), num_papers=3):
+def select_node_info(influence_df, node_names, num_papers=3):
     '''
     '''
+    influence_cols = ['influenced', 'influencing', 'link_paper_id', 'ego_paper_id']
+    node_cols = ['entity_name', 'entity_type']
+
     # Filter out non-node data
-    filtered_influence = influence_df[ influence_df['entity_name'].isin(node_names) ]
+    filtered_influence = influence_df[ \
+            influence_df['entity_name'].isin(node_names) ]
+    filtered_influence = filtered_influence[ influence_cols + node_cols ]
 
     # Node information results
     node_info = dict()
 
-    for entity_info, node_influence in filtered_influence.groupby(['entity_name', 'entity_type']):
+    for entity_info, node_influence in filtered_influence.groupby(node_cols):
         info = dict()
         node_name, node_type = entity_info
         info['node_name'] = node_name
 
-        # Remove node ids
-        remove_cols = ['entity_name', 'ego_paper_id',  #'entity_id', 
-                       'influence_year', 'publication_year']
-        node_influence = node_influence.drop(remove_cols, 1)
+        # Get the aggregate influence and influencing
+        paper_scores = node_influence.groupby('link_paper_id', \
+                as_index=False).agg(\
+                {'influenced': np.sum,
+                 'influencing': np.sum,
+                 'ego_paper_id': lambda x: tuple(x)})
 
-        # Add column for counting
-        node_influence['influenced_count']  = node_influence['influenced']\
-                                                .apply(lambda x: 1 if x > 0 else 0)
-        node_influence['influencing_count'] = node_influence['influencing']\
-                                                .apply(lambda x: 1 if x > 0 else 0)
+        top_influenced  = paper_scores.sort_values('influenced', \
+                ascending=False).head(n=num_papers)
+        top_influencing = paper_scores.sort_values('influencing', \
+                ascending=False).head(n=num_papers)
 
-        # Paper influence scores
-        score_groups = ['link_paper_id', 'link_paper_title', 'link_year']
+        info['reference_link'] = top_influenced['link_paper_id'].tolist()
+        info['citation_link']  = top_influencing['link_paper_id'].tolist()
 
-        # Iterate through each of the papers
-        node_paper_info = list()
-        for score_group, score_info in node_influence.groupby(score_groups):
-            info_dict = dict()
+        to_sets = lambda x: list(map(lambda y: list(set(y)), x))
+        info['reference_ego'] = to_sets(top_influenced['ego_paper_id'].tolist())
+        info['citation_ego']  = to_sets(top_influencing['ego_paper_id'].tolist())
 
-            # Score group information
-            link_id, link_title, link_year = score_group
-            #info_dict['link_id']    = link_id
-            info_dict['link_title'] = link_title
-            info_dict['link_year']  = link_year.item()
-            
-            # Scores
-            info_dict['influenced']  = score_info['influenced'].sum().item()
-            info_dict['influencing'] = score_info['influencing'].sum().item()
-
-            #info_dict['count'] = score_info['influenced_count'].sum().item()
-
-            # Link paper information
-            info_dict['link_auth'] = list(set(score_info['AuthorName']))
-            info_dict['link_affi'] = list(set(score_info['AffiliationName']))
-            info_dict['link_conf'] = list(set(score_info['ConferenceName']))
-            info_dict['link_jour'] = list(set(score_info['JournalName']))
-
-            # Ego paper
-            info_dict['ego_title'] = list(set(score_info['ego_paper_title']))
-
-            # Node type
-            info_dict['type'] = node_type.ident
-
-            node_paper_info.append(info_dict)
-
-        info['reference_papers'] = sorted(node_paper_info,
-                key=lambda x: -x['influenced'])[:num_papers]
-        info['citation_papers'] = sorted(node_paper_info,
-                key=lambda x: -x['influencing'])[:num_papers]
+        print(info)
 
         node_info[node_name] = info
 
