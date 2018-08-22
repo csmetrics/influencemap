@@ -478,6 +478,20 @@ def resubmit(request):
     return JsonResponse(data, safe=False)
 
 
+def conf_journ_to_display_names(papers):
+    conf_journ_ids = {"ConferenceSeriesIds": [], "JournalIds": []}
+    for paper in papers.values():
+        if "ConferenceSeriesId" in paper: conf_journ_ids["ConferenceSeriesIds"].append(paper["ConferenceSeriesId"])
+        if "JournalId" in paper: conf_journ_ids["JournalIds"].append(paper["JournalId"])
+    conf_journ_display_names = get_conf_journ_display_names(conf_journ_ids)
+    for paper in papers.values():
+        try:
+            if "ConferenceSeriesId" in paper: paper["ConferenceName"] = conf_journ_display_names["Conference"][paper["ConferenceSeriesId"]]
+            if "JournalId" in paper: paper["JournalName"] = conf_journ_display_names["Journal"][paper["JournalId"]]
+        except:
+            print("Unable to match display name for journal/conference")
+    return papers
+
 @csrf_exempt
 def get_publication_papers(request):
     start = datetime.now()
@@ -488,8 +502,9 @@ def get_publication_papers(request):
     paper_ids = request.session['cache']
     papers = paper_info_mag_check_multiquery(paper_ids)
     papers = [paper for paper in papers if (paper["Year"] >= pub_year_min and paper["Year"] <= pub_year_max)]
+    papers = conf_journ_to_display_names({paper["PaperId"]: paper for paper in papers})
     print((datetime.now()-start).total_seconds())
-    return JsonResponse({"papers": papers, "names": request.session["entity_names"]+ list(request.session["node_info"].keys())}, safe=False)
+    return JsonResponse({"papers": papers, "names": request.session["entity_names"]+ request.session["node_info"]}, safe=False)
 
 @csrf_exempt
 def get_citation_papers(request):
@@ -504,8 +519,10 @@ def get_citation_papers(request):
     papers = paper_info_mag_check_multiquery(paper_ids)
     cite_papers = [[citation for citation in paper["Citations"] if (citation["Year"] >= cite_year_min and citation["Year"] <= cite_year_max)] for paper in papers if (paper["Year"] >= pub_year_min and paper["Year"] <= pub_year_max)]
     citations = sum(cite_papers,[])
+    citations = conf_journ_to_display_names({paper["PaperId"]: paper for paper in citations})
+
     print((datetime.now()-start).total_seconds())
-    return JsonResponse({"papers": citations, "names": request.session["entity_names"] + list(request.session["node_info"].keys()),"node_info": request.session["node_information_store"]}, safe=False)
+    return JsonResponse({"papers": citations, "names": request.session["entity_names"] + request.session["node_info"],"node_info": request.session["node_information_store"]}, safe=False)
 
 
 def get_node_info_all(request):
@@ -600,4 +617,5 @@ def get_node_info(request):
     info["entity_names"] = list(request.session["node_info"]) +entities
     info["References"] = sorted([{"to": papers[k], "from": sorted([papers[paper_id] for paper_id in v], key=lambda x: x["Year"])} for k,v in info["References"].items()],key=lambda x: x["to"]["Year"])
     info["Citations"] = sorted([{"from": papers[k], "to": sorted([papers[paper_id] for paper_id in v], key=lambda x: x["Year"])} for k,v in info["Citations"].items()], key=lambda x: x["from"]["Year"])
+    print(request.session["node_info"])
     return JsonResponse(info, safe=False)
