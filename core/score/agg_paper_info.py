@@ -77,9 +77,9 @@ def score_paper_info(paper_info, self=list()):
             #    inst_res['link_year'] = None
 
             # Paper information
-            inst_res['ego_paper_id']     = paper_info['PaperId']
+            inst_res['ego_paper_id']     = int(paper_info['PaperId'])
             #inst_res['ego_paper_title']  = paper_info['PaperTitle']
-            inst_res['link_paper_id']    = reference['PaperId']
+            inst_res['link_paper_id']    = int(reference['PaperId'])
             #inst_res['link_paper_title'] = reference['PaperTitle']
 
             score_list.append(inst_res)

@@ -418,6 +418,7 @@ def submit(request):
 
     return render(request, "flower.html", data)
 
+
 @csrf_exempt
 def resubmit(request):
     print(request)
@@ -549,30 +550,41 @@ def get_node_info_all(request):
 def get_node_info_single(info_dict):
     '''
     '''
-    papers = info_dict['reference_link'] + info_dict['citation_link']
-    for paper_list in info_dict['reference_ego'] + info_dict['citation_ego']:
+    # Get ego papers
+    papers = list()
+    papers += [int(k) for k in info_dict['reference'].keys()]
+    papers += [int(k) for k in info_dict['citation'].keys()]
+
+    # Get link papers
+    link_paper_list = list()
+    link_paper_list += list(info_dict['reference'].values())
+    link_paper_list += list(info_dict['citation'].values())
+
+    # Combine the two
+    for paper_list in link_paper_list:
         papers += paper_list
 
+    # Remove duplicates
     papers = list(set(papers))
 
     papers = base_paper_cache_query(papers)
-    print("!!!")
-    print(papers)
 
-    info_fields = ["PaperTitle", "Authors","PaperId","Year"]
+    info_fields = ["PaperTitle", "Authors","PaperId", "Year"]
     papers_dict = dict()
     for paper in papers:
-        print(paper)
         paper_info = {k:v for k,v in paper.items() if k in info_fields}
-        papers_dict[paper['PaperId']] = paper
+        papers_dict[paper['PaperId']] = paper_info
 
-    node_info = {"References": {}, "Citations":{}}
-    for link_id, ego_ids in zip(info_dict['reference_link'], info_dict['reference_ego']):
-        node_info['References'][link_id] = ego_ids
+    ref_info = dict()
+    for k, v in info_dict['reference'].items():
+        ref_info[int(k)] = v
 
-    for link_id, ego_ids in zip(info_dict['citation_link'], info_dict['citation_ego']):
-        node_info['Citations'][link_id] = ego_ids
+    cit_info = dict()
+    for k, v in info_dict['citation'].items():
+        cit_info[int(k)] = v
 
+    node_info = {"References": ref_info,
+                 "Citations" : cit_info}
     papers_to_send = papers_dict
 
     return {"node_info": node_info, "papers": papers_to_send}
