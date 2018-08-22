@@ -1,11 +1,11 @@
 {% load staticfiles %}
-<div id="searchbar" class="wrapper bgded overlay">
-  {% include 'navbar.html' with navbar=navbarOption %}
-</div>
-<div class="wrapper row2" style="padding-top:0">
-  <div class="hoc clear">
+<!-- Content Wrapper. Contains page content -->
+<div class="content-wrapper content-wrapper-home">
+  <!-- Main content -->
+  <section class="content" style="padding-top:0">
+    <!-- Small boxes (Stat box) -->
     <div class="row">
-      <div id="lefttable" class="col-md-9">
+      <div id="lefttable" class="col-xs-9">
         <div id="tables-container" style="padding-right:25px;">
           <div id="searchtable-container">
             <div id="loading" style="display: none;"></div>
@@ -13,14 +13,14 @@
           </div>
         </div>
       </div>
-      <div id="rightslider" class="col-md-3">
+      <div id="rightslider" class="col-xs-3">
         <div id="selectiontable-container" style="width: 100%; height: 100%">
           <table id="selectiontable" class="row-border hover order-column" cellspacing="0" width="100%"></table>
           <input id="continue-btn" class="btn medium" type="submit" value="Go" float="bottom" style="width:100%; margin-top:10px" />
         </div>
       </div>
     </div>
-  </div>
+  </section>
 </div>
 <script src="{% static 'js/searchTableConfig.js' %}"></script>
 <script src="{% static 'js/selectionTableConfig.js' %}"></script>

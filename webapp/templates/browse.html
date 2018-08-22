@@ -2,162 +2,107 @@
 
 <html>
 {% include 'header.html' %}
+<body class="hold-transition skin-blue sidebar-mini">
+<div class="wrapper">
+  {% include 'pagehead.html' %}
+  {% include 'side-navbar.html' %}
 
-<body id="top">
-    {% include 'pagehead.html' %}
-    <div id="searchbar" class="wrapper bgded overlay">
-        {% include 'navbar.html' with navbar=navbarOption %}
-    </div>
-    <div class="wrapper row2" style="padding-top:0">
-        <div class="hoc clear">
-        </div>
-    </div>
-    <div class="wrapper row2" style="padding-top:0">
-        <div class="hoc row2">
-            <div class="row">
-                <div class="tab">
-                    <button class="tablinks" onclick="openTab(event, 'Categories')">Categories</button> {% for category in list %}
-                    <button class="tablinks" onclick="openTab(event, '{{category.tab_id}}')">{{ category.display }}</button> {% endfor %}
-                </div>
-
-                <div id="Categories" class="tabcontent" style="display: block">
-                    <p></p>
-                    {% for category in list %}
-                    <h4>{{category.display}}</h4>
-                    <p>{{category.info}}</p>
-                        {% for entity in category.list %}
-                                <a href=>{{entity}}</a>,
-                        {% endfor %}
-                    <p></p>
+  <div class="align-buttons">
+    <table><tr><td>
+      <div class="btn-group">
+        <button id="btn-align-list" type="button" class="btn btn-default"><i class="fa fa-list-ul"></i></button>
+        <button id="btn-align-small" type="button" class="btn btn-default"><i class="fa fa-th"></i></button>
+        <button id="btn-align-big" type="button" class="btn btn-default"><i class="fa fa-th-large"></i></button>
+      </div>
+    </td></tr></table>
+  </div>
+  {% for category in list %}
+  <div class="content-wrapper-browse">
+    <section class="content-header">
+      <h1>
+        {{ category.display }}<br>
+        <small>{{category.info}}</small>
+      </h1>
+      <!-- <ol class="breadcrumb">
+        <li><a href="#"><i class="fa fa-dashboard"></i> Home</a></li>
+        <li class="active">Dashboard</li>
+      </ol> -->
+    </section>
+    <!-- Main content -->
+    <section class="content">
+      <div class="row">
+        <div class="col-xs-12">
+          <div class="row">
+            {% for entity in category.entities %}
+              <div class="info-list col-xs-12 hidden">
+                <li>
+                  <a href="/submit/?id={{ entity.document_id }}"><b>{{entity.DisplayName}}</b></a>
+                  {{entity.Year}}
+                  {% for aff in entity.Affiliations %}
+                    {{ aff }}
+                  {% endfor %}
+                </li>
+              </div>
+              <a href="/submit/?id={{ entity.document_id }}">
+                <div class="info-box">
+                  <span class="info-box-icon bg-gray">
+                    {% if entity.icon_type == "projects" %}<i class="fa fa-rocket"></i>
+                    {% elif entity.icon_type == "conferences" or entity.icon_type == "journals" or entity.icon_type == "venues" %}<i class="fa fa-university"></i>
+                    {% else %}<i class="fa fa-user"></i>
+                    {% endif %}
+                  </span>
+                  <div class="info-box-content">
+                    <span class="info-box-text text-truncate" AuthorIds='{{entity.AuthorIds | safe }}' normalizedname="{{ entity.NormalizedName | safe }}">
+                      <b>{{entity.DisplayName}}</b><br/>{{entity.Year}}
+                    </span>
+                  </div>
+                  <div class="info-box-more hidden">
+                    {% for aff in entity.Affiliations %}
+                      <li>{{ aff }}</li>
                     {% endfor %}
+                    {% for keyword in entity.Keywords %}
+                      <li>{{ keyword }}</li>
+                    {% endfor %} <br/>
+                    <small>{{entity.Citation}}</small>
+                  </div>
                 </div>
-
-                {% for category in list %}
-                <div id="{{category.tab_id}}" class="tabcontent" style="display: none">
-<!--                     <h3>{{category.display}}</h3>
-                    <p>{{category.info}}</p> -->
-                    <table id="{{category.table_id}}">
-                       <thead>
-                           <th>Name</th>
-                           <th>Affiliation</th>
-                           <th>Year</th>
-                           <th>Citation</th>
-                           <th>Keywords</th>
-                           <th></th>
-                       </thead>
-                       <tbody>
-                          {% for entity in category.entities %}
-                            <tr AuthorIds='{{entity.AuthorIds | safe }}' normalizedname="{{ entity.NormalizedName | safe }}">
-                                <td>
-                                    {{entity.DisplayName}}
-                                </td>
-                                <td>
-                                  <ul>
-                                    {% for aff in entity.Affiliations %}
-                                      <li>{{ aff }}</li>
-                                    {% endfor %}
-                                  </ul>
-                                </td>
-                                <td>
-                                    {{entity.Year}}
-                                </td>
-                                <td>
-                                    {{entity.Citation}}
-                                </td>
-                                <td>
-                                  <ul>
-                                    {% for keyword in entity.Keywords %}
-                                      <li>{{ keyword }}</li>
-                                    {% endfor %}
-                                  </ul>
-                                </td>
-                                <td>
-                                    <a href="/submit/?id={{ entity.document_id }}">more info</a>
-                                </td>
-                            </tr>
-                          {% endfor %}
-                        </tbody>
-                    </table>
-                </div>
-                {% endfor %}
-            </div>
+              </a>
+            {% endfor %}
+          </div>
         </div>
-        <!-- Trigger/Open The Modal -->
-
-    </div>
-    <!-- The Modal -->
-    <div id="myModal" class="modal">
-
-        <!-- Modal content -->
-        <div class="modal-content right">
-            <span class="close">&times;</span>
-            <div class="hoc cntr" style="border-bottom: 1px solid grey; width: 80%; padding: 10px">
-                <button class="btn">Take me to the flower!</button>
-            </div>
-            <div class='center'>
-                <p>Alternatively, <a href="#" id="closer-look-btn">take a closer look</a> at the papers that are included in this curated flower and add or deselect papers yourself.</p>
-            </div>
-        </div>
-
-    </div>
+      </div>
+    </section>
+  </div>
+  {% endfor %}
 </body>
-<script src="{% static 'js/browseTableConfig.js' %}"></script>
 <script type="text/javascript">
+var aligntype = "small";
+$(".info-box")
+  .mouseover(function() {
+    if (aligntype == "small") $(this).find(".info-box-more").removeClass("hidden");
+  })
+  .mouseout(function() {
+    if (aligntype == "small") $(this).find(".info-box-more").addClass("hidden");
+  })
 
-    /*  ---    Modal    ---   */
-    // Get the modal
-    var modal = document.getElementById('myModal');
-
-    // Get the <span> element that closes the modal
-    var span = document.getElementsByClassName("close")[0];
-
-    // When the user clicks on <span> (x), close the modal
-    span.onclick = function() {
-        modal.style.display = "none";
-    }
-
-    // When the user clicks anywhere outside of the modal, close it
-    window.onclick = function(event) {
-        if (event.target == modal) {
-            modal.style.display = "none";
-        }
-    }
-
-
-    /*  ---    Control tab selection    ---   */
-    function openTab(evt, tabId) {
-      // Declare all variables
-      var i, tabcontent, tablinks;
-
-      // Get all elements with class="tabcontent" and hide them
-      tabcontent = document.getElementsByClassName("tabcontent");
-      for (i = 0; i < tabcontent.length; i++) {
-          tabcontent[i].style.display = "none";
-      }
-
-      // Get all elements with class="tablinks" and remove the class "active"
-      tablinks = document.getElementsByClassName("tablinks");
-      for (i = 0; i < tablinks.length; i++) {
-          tablinks[i].className = tablinks[i].className.replace(" active", "");
-      }
-
-      // Show the current tab, and add an "active" class to the link that opened the tab
-      document.getElementById(tabId).style.display = "block";
-      evt.currentTarget.className += " active";
-    }
-
-    /*  ---    Convert tables to JQuery DataTables    ---   */
-    $(document).ready(function(){
-      $('table').each(function(a,b){
-        var table = $('#' + this.id).DataTable(browseTableConfig['tableSettings']);
-        //var table = $('#' + this.id).DataTable();
-
-        // add on click listeners for all table rows to show modal
-//        $('#' + this.id + ' tbody').on('click', 'tr', function(){
-//          modal.style.display = "block";
-//        })
-      });
-    });
+$("#btn-align-list").click(function() {
+  aligntype = "list";
+  $(".info-box").addClass("hidden");
+  $(".info-list").removeClass("hidden");
+})
+$("#btn-align-small").click(function() {
+  aligntype = "small";
+  $(".info-list").addClass("hidden");
+  $(".info-box").removeClass("hidden");
+  $(".info-box-more").addClass("hidden");
+  $(".info-box-more").css({"position":"absolute", "height":"auto"});
+})
+$("#btn-align-big").click(function() {
+  aligntype = "big";
+  $(".info-list").addClass("hidden");
+  $(".info-box").removeClass("hidden");
+  $(".info-box-more").removeClass("hidden");
+  $(".info-box-more").css({"position":"relative", "height":"210px"});
+})
 </script>
-
 </html>
