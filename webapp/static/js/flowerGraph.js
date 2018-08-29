@@ -554,7 +554,7 @@ function populateNodeInfoContent(data){
   var style_str = "";
   var link_table = "<table>";
 
-  var test = "";
+  var table_str = "";
   for (var i=0; i<links.length; i++) {
       var references = links[i]["reference"];
       var citations  = links[i]["citation"];
@@ -563,11 +563,11 @@ function populateNodeInfoContent(data){
 
       var ego_info = paper_map[links[i]["ego_paper"]];
       var ego_str = formatCitation(ego_info, data.entity_names);
-      var ego_test = "<td width='32%'>" + ego_str + "</td>";
+      var ego_html = "<td width='32%'>" + ego_str + "</td>";
       var ego_empty = "<td width='32%'></td>";
 
       for (var j=0; j<link_length; j++) {
-          test += "<tr>";
+          table_str += "<tr>";
           if (j < citations.length) {
               var cit_info = paper_map[citations[j]];
               var cit_str = formatCitation(cit_info, data.entity_names);
@@ -589,15 +589,17 @@ function populateNodeInfoContent(data){
           }
 
           if (j == 0) {
-              test += cit_html + cit_arrow + ego_test  + ref_arrow + ref_html;
+              table_str += cit_html + cit_arrow + ego_html  + ref_arrow + ref_html;
           } else {
-              test += cit_html + cit_arrow + ego_empty + ref_arrow + ref_html;
+              table_str += cit_html + cit_arrow + ego_empty + ref_arrow + ref_html;
           }
-          test += "</tr>";
+          table_str += "</tr>";
       }
+      table_str += "<tr style='border-bottom: 1px solid black'><td style='height: 1px' colspan='5'></td></tr>";
   }
-  link_table += "<tr> <th>Has influenced</th> <th font-size: 30px>⟶</th> <th>Ego</th> <th font-size: 30px>⟶</th> <th>Has influenced</th> </tr>";
-  link_table += test;
+  link_table += "<tr> <th>Has influenced</th> <th style='font-size: 30px'>⟶</th>";
+  link_table += "<th>Ego</th> <th style='font-size: 30px'>⟶</th> <th>Has influenced</th> </tr>";
+  link_table += table_str;
   link_table += "</table>";
 
   var html_string = "<div id='node_info_content'>"+title+link_table+"</div>";
