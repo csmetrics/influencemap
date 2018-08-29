@@ -31,10 +31,22 @@ function formatCitation(paper, authorsToHighlight=[]){
   for (i in names){
     var a = names[i];
     if (authorsToHighlight.indexOf(a["AuthorName"]) >= 0){a["FormattedName"] = "<b>"+a["FormattedName"]+"</b>"};
+    if ("AffiliationName" in a) {
+      a["FormattedName"] = "<span"+
+                            " data-toggle='tooltip'"+
+                            " data-delay='{\"hide\": 500, \"show\": 700}'"+
+                            " data-html='true'"+
+                            " data-placement='bottom'"+
+                            " title='<a href=\"https://academic.microsoft.com/#/detail/"+a["AffiliationId"]+"\" style=\"color: #fff;\">"   +a["AffiliationName"]+   "</a>'"+
+                           ">"+
+                             a["FormattedName"]+
+                           "</span>";
+    }
     out_str.push("<a href=\"https://academic.microsoft.com/#/detail/"+a["AuthorId"]+"\">"+a["FormattedName"]+"</a>");
   }
 
-  return out_str.join(', ') + ". <i><a href=\"https://academic.microsoft.com/#/detail/"+paper["PaperId"]+"\">"+toTitleCase(paper["PaperTitle"]) + "</a></i>, " + paper["Year"];
+  var venue = ("JournalName" in paper) ? (", <a href='https://academic.microsoft.com/#/detail/"+paper["JournalId"]+"'>"+paper["JournalName"]+"</a>") : (("ConferenceName" in paper) ? (",  <a href='https://academic.microsoft.com/#/detail/"+paper["ConferenceSeriesId"]+"'>"+paper["ConferenceName"]+"</a>") : (""));
+
+
+  return out_str.join(', ') + ". <i><a href=\"https://academic.microsoft.com/#/detail/"+paper["PaperId"]+"\">"+toTitleCase(paper["PaperTitle"]) + "</a></i>, " + paper["Year"] + venue;
 }
-
-

@@ -74,6 +74,7 @@ def browse(request):
             e = entity["entities"][i]
             document_id = e["_id"]
             e["document_id"] = document_id
+            e["icon_type"] = e["Type"].split("_")[-1]
             if "Keywords" in e:
                 e["Keywords"] = [] if len("".join(e["Keywords"])) == 0 else e["Keywords"]
             if "AuthorIds" in e:
@@ -564,11 +565,24 @@ def get_node_info_single(info_list):
 
     papers = base_paper_cache_query(papers)
 
-    info_fields = ["PaperTitle", "Authors","PaperId", "Year"]
+    info_fields = ["PaperTitle", "Authors","PaperId","Year", "ConferenceName", "ConferenceSeriesId", "JournalName", "JournalId"]
     papers_dict = dict()
+    conf_journ_ids = {"ConferenceSeriesIds": [], "JournalIds": []}
     for paper in papers:
         paper_info = {k:v for k,v in paper.items() if k in info_fields}
+        if "ConferenceSeriesId" in paper_info:
+            conf_journ_ids["ConferenceSeriesIds"].append(paper_info["ConferenceSeriesId"])
+        if "JournalId" in paper_info:
+            conf_journ_ids["JournalIds"].append(paper_info["JournalId"])
+
         papers_dict[paper['PaperId']] = paper_info
+
+    conf_journ_display_names = get_conf_journ_display_names(conf_journ_ids)
+    for paper in papers_dict.values():
+        if "ConferenceSeriesId" in paper:
+            paper["ConferenceName"] = conf_journ_display_names["Conference"][paper["ConferenceSeriesId"]]
+        if "JournalId" in paper:
+            paper["JournalName"] = conf_journ_display_names["Journal"][paper["JournalId"]]
 
     return {"node_links": info_list, "paper_info": papers_dict}
 
@@ -583,7 +597,6 @@ def get_node_info(request):
     entities = request.session["entity_names"]
     year_ranges = request.session["year_ranges"]
 
-    #node_info = get_node_info_single(request, node_name, year_ranges) #request.session['node_information_store']
     node_info = get_node_info_single(request.session["node_info"][node_name])
 
     node_info["entity_names"] = entities

@@ -2,15 +2,18 @@
 
 <html>
 {% include 'header.html' %}
-<body id="top">
-
-{% include 'flower_pagehead.html' with navbar=navbarOption %}
-<div class="hoc" style="padding-top:0">
-  <div style="display:inline-block; vertical-align:top" id="statpane">
-    {% include 'statchart.html' with stats=stats curated=curated yearSlider=yearSlider %}
-  </div>
-  <div style="display:inline-block; vertical-align:top">
-    <div id="image-container" style="height:760px;">
+<body class="hold-transition skin-blue-light sidebar-mini">
+<div class="wrapper">
+  {% include 'pagehead-searchbar.html' with navbar=navbarOption %}
+  <aside class="main-sidebar main-sidebar-wide">
+    <section class="sidebar">
+      <div id="statpane">
+        {% include 'statchart.html' with stats=stats curated=curated yearSlider=yearSlider %}
+      </div>
+    </section>
+  </aside>
+  <div class="content-wrapper content-wrapper-narrow">
+    <div id="flower-container" style="height:760px;">
       <ul class="nav nav-tabs" style="float:right">
         <li><button class="btn tab-btn inverse active" href="#tab-author" data-toggle="tab"><i class="fa fa-user"></i>&nbsp;Author</button></li>
         <li><button class="btn tab-btn inverse" href="#tab-conference" data-toggle="tab"><i class="fa fa-book"></i>&nbsp;Venue</button></li>
@@ -22,28 +25,22 @@
       </div> -->
       <!-- Tab content -->
       <div class="tab-content">
-        <div role="tabpanel" class="tab-pane active" id="tab-author">
-          <div class="wrapper">
-            <h4>To Author</h4>
-            <div align="center">
-              <svg id="graph1" width=1800 height=800></svg>
-            </div>
+        <div role="tabpanel" class="tab-pane tab-flower active" id="tab-author">
+          <h4>To Author</h4>
+          <div align="center">
+            <svg id="graph1" width=1800 height=800></svg>
           </div>
         </div>
-        <div role="tabpanel" class="tab-pane" id="tab-conference">
-          <div class="wrapper">
-            <h4>To Venue</h4>
-            <div align="center">
-              <svg id="graph2" width=1800 height=800></svg>
-            </div>
+        <div role="tabpanel" class="tab-pane tab-flower" id="tab-conference">
+          <h4>To Venue</h4>
+          <div align="center">
+            <svg id="graph2" width=1800 height=800></svg>
           </div>
         </div>
-        <div role="tabpanel" class="tab-pane" id="tab-institution">
-          <div class="wrapper">
-            <h4>To Institution</h4>
-            <div align="center">
-              <svg id="graph3" width=1800 height=800></svg>
-            </div>
+        <div role="tabpanel" class="tab-pane tab-flower" id="tab-institution">
+          <h4>To Institution</h4>
+          <div align="center">
+            <svg id="graph3" width=1800 height=800></svg>
           </div>
         </div>
       </div>
@@ -77,7 +74,7 @@ inst_data = {{ inst|safe }}
 var selfCiteCheckbox = document.getElementById('self-cite');
 var coauthorCheckbox = document.getElementById('coauthor');
 
-var width = document.getElementById('image-container').offsetWidth;
+var width = document.getElementById('flower-container').offsetWidth;
 drawLegend();
 drawFlower("#graph1", author_data, 0, width);
 drawFlower("#graph2", conf_data, 1, width);

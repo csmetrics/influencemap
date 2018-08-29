@@ -96,7 +96,10 @@ def query_affiliation(search_phrase):
     return query_names_with_matches("affiliations", ["DisplayName", "NormalizedName"], search_phrase)
 
 
-def get_names_from_entity(entity_ids, index, id_field, name_field):
+def get_names_from_entity(entity_ids, index, id_field, name_field, with_id=False):
+    if with_id:
+        name_field = [name_field, id_field]
+
     result = []
     q = {
       "_source": name_field,
@@ -109,6 +112,8 @@ def get_names_from_entity(entity_ids, index, id_field, name_field):
     s.update_from_dict(q)
     response = s.execute()
     data = response.to_dict()["hits"]["hits"]
+    if with_id:
+        return {res["_source"][id_field]: res["_source"][name_field[0]] for res in data}
     paper_ids = [res["_source"][name_field] for res in data]
     return paper_ids
 
@@ -122,7 +127,11 @@ def get_names_from_affiliation_ids(entity_ids):
 def get_names_from_journal_ids(entity_ids):
     return get_names_from_entity(entity_ids, "journals", "JournalId", "NormalizedName")
 
+def get_display_names_from_conference_ids(entity_ids):
+    return get_names_from_entity(entity_ids, "conferenceseries", "ConferenceSeriesId", "DisplayName", with_id=True)
 
+def get_display_names_from_journal_ids(entity_ids):
+    return get_names_from_entity(entity_ids, "journals", "JournalId", "DisplayName", with_id=True)
 
 
 
