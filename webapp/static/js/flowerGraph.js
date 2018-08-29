@@ -546,51 +546,61 @@ function populateNodeInfoContent(data){
   var container_div = document.getElementById("node_info_container");
   var content_div = document.getElementById("node_info_content");
   container_div.removeChild(content_div);
-  var references = data["References"];
-  var citations = data["Citations"];
-  var refs_shown = Math.min(3, references.length);
-  var cites_shown = Math.min(3, citations.length);
+  var links = data["node_links"];
+  var paper_map = data["paper_info"];
   var entities = data.entity_names;
   var title = "<h3>"+data["node_name"]+"</h3>";
 
-  // build references string
-  var references_table = "";
-  if (refs_shown !== 0){
-    var references_header = "<span><i><span style='color: rgb(107,172,208)'>References</span></i></span>";
+  var style_str = "";
+  var link_table = "<table>";
 
-    references_table += references_header + "<table>";
+  var test = "";
+  for (var i=0; i<links.length; i++) {
+      var references = links[i]["reference"];
+      var citations  = links[i]["citation"];
 
-    for (var i=0; i<references.length;i++){
-      var left = formatCitation(references[i]["to"],data.entity_names);
-      for (var j = 0; j< references[i]["from"].length;j++){
-        var right = (formatCitation(references[i]["from"][j],entities));
-        if (j == 0) references_table += "<tr><td width='49%'rowspan='"+references[i]["from"].length+"'>"+left+"</td><td width='2%' style='color: rgb(107,172,208); font-size: 30px'>⟵</td><td width='49%'>"+right+"</td></tr>";
-        else references_table += "<tr><td width='2%'style='color: rgb(107,172,208); font-size: 30px'>⟵</td><td width='49%'>"+right+"</td></tr>";
+      var link_length = Math.max(references.length, citations.length);
+
+      var ego_info = paper_map[links[i]["ego_paper"]];
+      var ego_str = formatCitation(ego_info, data.entity_names);
+      var ego_test = "<td width='32%'>" + ego_str + "</td>";
+      var ego_empty = "<td width='32%'></td>";
+
+      for (var j=0; j<link_length; j++) {
+          test += "<tr>";
+          if (j < citations.length) {
+              var cit_info = paper_map[citations[j]];
+              var cit_str = formatCitation(cit_info, data.entity_names);
+              var cit_html = "<td width='32%'>" + cit_str + "</td>";
+              var cit_arrow = "<td width='2%' style='color: rgb(107,172,208); font-size: 30px'>⟶</td>";
+          } else {
+              var cit_html = "<td width='32%'></td>";
+              var cit_arrow = "<td width='2%'></td>";
+          }
+
+          if (j < references.length) {
+              var ref_info = paper_map[references[j]];
+              var ref_str = formatCitation(ref_info, data.entity_names);
+              var ref_html = "<td width='32%'>" + ref_str + "</td>";
+              var ref_arrow = "<td width='2%' style='color: rgb(228,130,104); font-size: 30px'>⟶ </td>";
+          } else {
+              var ref_html = "<td width='32%'></td>";
+              var ref_arrow = "<td width='2%'></td>";
+          }
+
+          if (j == 0) {
+              test += cit_html + cit_arrow + ego_test  + ref_arrow + ref_html;
+          } else {
+              test += cit_html + cit_arrow + ego_empty + ref_arrow + ref_html;
+          }
+          test += "</tr>";
       }
-    }   
-    references_table += "</table>";
-
   }
+  link_table += "<tr> <th>Has influenced</th> <th font-size: 30px>⟶</th> <th>Ego</th> <th font-size: 30px>⟶</th> <th>Has influenced</th> </tr>";
+  link_table += test;
+  link_table += "</table>";
 
-  // build citations string
-  var citations_table = "";
-  if (cites_shown !== 0){
-    var citations_header = "<span><i><span style='color: rgb(228,130,104)'>Citations</span></i></span>";
-    citations_table += citations_header + "<table>";
-
-    for (var i=0; i<citations.length;i++){
-      var left = formatCitation(citations[i]["from"],data.entity_names);
-      for (var j = 0; j< citations[i]["to"].length;j++){
-        var right = (formatCitation(citations[i]["to"][j],entities));
-        if (j == 0) citations_table += "<tr><td width='49%' rowspan='"+citations[i]["to"].length+"'>"+left+"</td><td width='2%' style='color: rgb(228,130,104); font-size: 30px'>⟶ </td><td width='49%'>"+right+"</td></tr>";
-        else citations_table += "<tr><td width='2%' style='color: rgb(228,130,104); font-size: 30px'>⟶ </td><td width='49%'>"+right+"</td></tr>";
-      }
-    }
-    citations_table += "</table>";
-
-  }
-
-  var html_string = "<div id='node_info_content'>"+title+references_table+citations_table+"</div>";
+  var html_string = "<div id='node_info_content'>"+title+link_table+"</div>";
   var html_elem = new DOMParser().parseFromString(html_string, 'text/html').body.childNodes;
   container_div.appendChild(html_elem[0]);
 }

@@ -547,22 +547,17 @@ def get_node_info_all(request):
     return {"node_info": node_info, "papers": papers_to_send}
 
 
-def get_node_info_single(info_dict):
+def get_node_info_single(info_list):
     '''
     '''
+    print(info_list)
     # Get ego papers
     papers = list()
-    papers += [int(k) for k in info_dict['reference'].keys()]
-    papers += [int(k) for k in info_dict['citation'].keys()]
 
-    # Get link papers
-    link_paper_list = list()
-    link_paper_list += list(info_dict['reference'].values())
-    link_paper_list += list(info_dict['citation'].values())
-
-    # Combine the two
-    for paper_list in link_paper_list:
-        papers += paper_list
+    for info in info_list:
+        papers.append(info['ego_paper'])
+        papers += info['reference']
+        papers += info['citation']
 
     # Remove duplicates
     papers = list(set(papers))
@@ -575,19 +570,7 @@ def get_node_info_single(info_dict):
         paper_info = {k:v for k,v in paper.items() if k in info_fields}
         papers_dict[paper['PaperId']] = paper_info
 
-    ref_info = dict()
-    for k, v in info_dict['reference'].items():
-        ref_info[int(k)] = v
-
-    cit_info = dict()
-    for k, v in info_dict['citation'].items():
-        cit_info[int(k)] = v
-
-    node_info = {"References": ref_info,
-                 "Citations" : cit_info}
-    papers_to_send = papers_dict
-
-    return {"node_info": node_info, "papers": papers_to_send}
+    return {"node_links": info_list, "paper_info": papers_dict}
 
 
 @csrf_exempt
@@ -603,11 +586,5 @@ def get_node_info(request):
     #node_info = get_node_info_single(request, node_name, year_ranges) #request.session['node_information_store']
     node_info = get_node_info_single(request.session["node_info"][node_name])
 
-    info = node_info["node_info"]
-    papers = node_info["papers"]
-
-    #info["entity_names"] = list(request.session["node_info"].keys()) +entities
-    info["entity_names"] = list(request.session["node_info"]) +entities
-    info["References"] = sorted([{"to": papers[k], "from": sorted([papers[paper_id] for paper_id in v], key=lambda x: x["Year"])} for k,v in info["References"].items()],key=lambda x: x["to"]["Year"])
-    info["Citations"] = sorted([{"from": papers[k], "to": sorted([papers[paper_id] for paper_id in v], key=lambda x: x["Year"])} for k,v in info["Citations"].items()], key=lambda x: x["from"]["Year"])
-    return JsonResponse(info, safe=False)
+    node_info["entity_names"] = entities
+    return JsonResponse(node_info, safe=False)
