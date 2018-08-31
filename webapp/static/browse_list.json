@@ -1,0 +1,119 @@
+[
+{"display":   "People",  
+  "type": "outer",
+  "subgroups": [
+    {"display": "Turing Award Winners",
+     "type":    "inner",
+     "info":    "some more text to explain what a turing award winner is",
+     "tag":     "turing_award_winners"
+    },
+    {"display": "ANU Researchers",
+     "type":    "inner",
+      "info": "some more text to explain what a turing award winner is",
+      "tag": "anu_researchers"
+    },
+    {"display": "Fields Medalists",
+     "type":    "inner",
+      "info": "some more text to explain what a turing award winner is",
+      "tag": "#"
+    },
+    {"display": "Nobel Prize Winners",
+     "type":    "inner",
+      "info": "some more text to explain what a turing award winner is",
+      "tag": "#"
+    }
+  ]
+},
+
+{"display": "Organisations",
+  "type": "outer",
+  "subgroups":
+[{"display":   "SIG Multimedia", 
+  "type": "outer",
+  "subgroups": [
+    {"display": "Awards",
+     "type":    "inner",
+     "info":    "some more text to explain what a taa winner is",
+     "tag":     "sigmm_award_taa"
+    },
+    {"display": "SIG multimedia Conferences",
+     "type":    "inner",
+      "info": "some more text to explain what a turing award winner is",
+      "tag": "sigmm_conferences"
+    }
+  ]
+},
+{"display":   "SIG PLAN",
+  "type": "outer",
+  "subgroups": [
+    {"display": "Awards",
+     "type":    "inner",
+     "info":    "some more text to explain what a taa winner is",
+     "tag":     "sigmm_risingstaraward"
+    },
+    {"display": "SIG PLAN Conferences",
+     "type":    "inner",
+      "info": "some more text to explain what a turing award winner is",
+      "tag": "sigmm_conferences"
+    }
+  ]
+}]
+},
+
+{"display":   "Projects", 
+  "type":    "outer",
+  "subgroups": [
+    {"display": "Projects in Computer Science",
+     "type":    "inner",
+     "info":    "some more text to explain...",
+     "tag":     "projects"
+    },
+    {"display": "Projects in Engineering",
+     "type":    "inner",
+      "info": "some more text to explain something else...",
+      "tag": "projects"
+    }
+  ]
+},
+{"display": "Venues",
+  "type": "outer",
+  "subgroups": [
+    {"display": "Computer Science",
+      "type": "outer",
+      "subgroups": [
+        {"display": "Programming Languages",
+          "type": "inner",
+          "tag": "conferences"
+        },
+        {"display": "Multimedia",
+          "type": "inner",
+          "tag": "sigmm_conferences"
+        }
+      ]
+    },
+    {"display": "Physics",
+      "type": "outer",
+      "subgroups": [
+        {"display": "Astrophysics",
+          "type": "inner",
+          "tag": "conferences"
+        }
+      ]
+    },
+    {"display": "Economics",
+      "type": "outer",
+      "subgroups": [
+        {"display": "Political Economics",
+          "type": "inner",
+          "tag": "conferences"
+        },
+        {"display": "Econometrics",
+          "type": "inner",
+          "tag": "conferences"
+        }
+      ]
+    }
+  ]
+}
+]
+

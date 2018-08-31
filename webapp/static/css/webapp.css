@@ -213,6 +213,15 @@ text {
   width: 58px;
   height: 58px;
   padding: 5px;
+  background-repeat: no-repeat; 
+  background-position: center; 
+  background-size: cover;
+}
+.info-box-img {
+  width: 58px;
+  height: 58px;
+  padding: 2px;
+  display: inline;
 }
 .info-box-content {
   margin-left: 65px;

@@ -133,6 +133,13 @@ def get_display_names_from_conference_ids(entity_ids):
 def get_display_names_from_journal_ids(entity_ids):
     return get_names_from_entity(entity_ids, "journals", "JournalId", "DisplayName", with_id=True)
 
-
-
-
+def get_all_browse_cache():
+    cache_index = "browse_cache"
+    q = {"size": 10000,
+        "query": {"match_all": {}}}
+    s = Search(using=client, index=cache_index)
+    s.update_from_dict(q)
+    response = s.execute()
+    data = response.to_dict()["hits"]["hits"]
+    result = [{**e["_source"],"document_id": e["_id"]} for e in data]
+    return result

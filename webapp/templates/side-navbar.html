@@ -13,62 +13,47 @@
     </form>
     <!-- /.search form -->
     <!-- sidebar menu: : style can be found in sidebar.less -->
+
     <ul class="sidebar-menu" data-widget="tree">
-      <!-- <li class="header">MAIN NAVIGATION</li> -->
-      <li class="active treeview">
-        <a href="#">
-          <i class="fa fa-user"></i>
-          <span>People</span>
-          <span class="pull-right-container">
-            <i class="fa fa-angle-left pull-right"></i>
-          </span>
-        </a>
-        <ul class="treeview-menu">
-          <li class="active"><a href="index.html"><i class="fa fa-circle-o"></i> Turing Award winners</a></li>
-          <li><a href="index2.html"><i class="fa fa-circle-o"></i> Some other winners</a></li>
-          <li><a href="index2.html"><i class="fa fa-circle-o"></i> Some other researchers</a></li>
-        </ul>
-      </li>
+      {% for group in browse_groups %}
       <li class="treeview">
-        <a href="#">
-          <i class="fa fa-map-signs"></i>
-          <span>Venues</span>
+        <a class="nav-item" data-displayname="{{group.display}}" data-level="g" href="#">
+          <!--<i class="fa fa-user"></i>-->
+          <span>{{ group.display }}</span>
           <span class="pull-right-container">
             <i class="fa fa-angle-left pull-right"></i>
           </span>
         </a>
         <ul class="treeview-menu">
-          <li><a href="pages/layout/top-nav.html"><i class="fa fa-circle-o"></i> PLDI</a></li>
-          <li><a href="pages/layout/boxed.html"><i class="fa fa-circle-o"></i> ICML</a></li>
-          <li><a href="pages/layout/fixed.html"><i class="fa fa-circle-o"></i> Another venue</a></li>
+          {% for subgroup in group.subgroups %}
+          <li class="treeview">
+              {% if subgroup.type == "inner" %}
+              <a href="#" class="nav-item" data-displayname="{{subgroup.display}}" data-level="sg" data-g="{{group.display}}">
+                <i class="fa fa-user"></i>
+                {{ subgroup.display }}
+              </a>
+            {% endif %}
+            {% if subgroup.type == "outer" %}
+            <a href="#" class="nav-item" data-displayname="{{subgroup.display}}" data-level="sg" data-g="{{group.display}}">
+              <i class="fa fa-circle-o"></i>
+              {{ subgroup.display }}
+              <span class="pull-right-container">
+                <i class="fa fa-angle-left pull-right"></i>
+              </span>
+            </a>
+            <ul class="treeview-menu">
+              {% for subsubgroup in subgroup.subgroups %}
+                <li><a href="#" class="nav-item" data-displayname="{{subsubgroup.display}}" data-level="ssg" data-g="{{group.display}}" data-sg="{{subgroup.display}}"><i class="fa fa-user"></i>{{ subsubgroup.display }}</a></li>
+              {% endfor %}
+            </ul>
+           {% endif %}
+            </li>
+          {% endfor %}
         </ul>
       </li>
-      <li class="treeview">
-        <a href="#">
-          <i class="fa fa-bank"></i> <span>Organizations</span>
-          <span class="pull-right-container">
-            <i class="fa fa-angle-left pull-right"></i>
-          </span>
-        </a>
-        <ul class="treeview-menu">
-          <li><a href="pages/forms/general.html"><i class="fa fa-circle-o"></i> SIGMM</a></li>
-          <li><a href="pages/forms/advanced.html"><i class="fa fa-circle-o"></i> Organization 1</a></li>
-          <li><a href="pages/forms/editors.html"><i class="fa fa-circle-o"></i> Organization 2</a></li>
-        </ul>
-      </li>
-      <li class="treeview">
-        <a href="#">
-          <i class="fa fa-bookmark"></i> <span>What else</span>
-          <span class="pull-right-container">
-            <i class="fa fa-angle-left pull-right"></i>
-          </span>
-        </a>
-        <ul class="treeview-menu">
-          <li><a href="pages/tables/simple.html"><i class="fa fa-circle-o"></i> Else 1</a></li>
-          <li><a href="pages/tables/data.html"><i class="fa fa-circle-o"></i> Else 2</a></li>
-        </ul>
-      </li>
-    </ul>
+      {% endfor %}
+
+
   </section>
   <!-- /.sidebar -->
 </aside>

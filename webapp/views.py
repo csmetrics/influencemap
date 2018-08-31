@@ -8,7 +8,7 @@ from datetime import datetime
 from collections import Counter
 from operator import itemgetter
 from webapp.graph import processdata
-from webapp.elastic import search_cache, query_conference_series, query_journal, query_affiliation
+from webapp.elastic import *
 from webapp.utils import *
 
 import core.utils.entity_type as ent
@@ -52,43 +52,30 @@ def autocomplete(request):
 def main(request):
     return render(request, "main.html")
 
+
+
 @csrf_exempt
 def browse(request):
 
-    which = request.GET.get("which")
-    if which and which=="sigmm":
-        browse_file = "webapp/static/sigmm_browse_lists.json"
-    else:
-        browse_file = "webapp/static/browse_lists.json"
-    browse_list_filename = os.path.join(BASE_DIR, browse_file)
-    with open(browse_list_filename, 'r') as fp:
-        browse_list = json.load(fp)
+    with open("webapp/static/browse_list.json", "r") as fh:
+        browse_list = json.load(fh)
+    for b in browse_list:
+        print(b)
+    browse_cache = get_all_browse_cache()
+    for group in browse_list:
+        for subgroup in group["subgroups"]:
+            if subgroup["type"] == "inner":
+                #subgroup["document_ids"] = [cache["document_id"] for cache in browse_cache if cache["Type"] == subgroup["tag"]]
+                subgroup["docs"] = [cache for cache in browse_cache if cache["Type"] == subgroup["tag"]]
+            else:
+                for subsubgroup in subgroup["subgroups"]:
+                    if subsubgroup["type"] == "inner":
+                        #subsubgroup["document_ids"] = [cache["document_id"] for cache in browse_cache if cache["Type"] == subsubgroup["tag"]]
+                        subsubgroup["docs"] = [cache for cache in browse_cache if cache["Type"] == subsubgroup["tag"]]
+    browse_cache = {cache["document_id"]: cache for cache in browse_cache}
+    printNested(browse_list)
 
-    for entity in browse_list:
-        res = search_cache(entity["cache_index"], entity["cache_type"])
-        entity["names"] = list(set([n["DisplayName"] for n in res]))
-        entity["entities"] = res
-
-        for i in range(len(entity["entities"])):
-            e = entity["entities"][i]
-            document_id = e["_id"]
-            e["document_id"] = document_id
-            e["icon_type"] = e["Type"].split("_")[-1]
-            if "Keywords" in e:
-                e["Keywords"] = [] if len("".join(e["Keywords"])) == 0 else e["Keywords"]
-            if "AuthorIds" in e:
-                e["AuthorIds"] = json.dumps(e["AuthorIds"])
-            if "NormalizedNames" in e:
-                e["NormalizedName"] = e["NormalizedNames"][0]
-            e['CacheIndex'] = entity["cache_index"]
-            entity["entities"][i] = e
-
-    data = {
-        'list': browse_list,
-        "navbarOption": get_navbar_option()
-    }
-    return render(request, "browse.html", data)
-
+    return render(request, "browse.html", {"browse_groups": browse_list, "cache_data": browse_cache})
 
 @csrf_exempt
 def create(request):

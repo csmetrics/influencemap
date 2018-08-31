@@ -16,24 +16,40 @@
       </div>
     </td></tr></table>
   </div>
-  {% for category in list %}
-  <div class="content-wrapper-browse">
+
+  <div style="min-height: 100%" class="content-wrapper-browse">
+
+    <!-- Groups-->
+  {% for group in browse_groups %}
+  <div style="display: none;" class="content_section" data-displayname="{{group.display}}" data-level="g">
     <section class="content-header">
-      <h1>
+      <h2>
+        {{ group.display }}<br>
+        <small>{{group.info}}</small>
+      </h2>
+    </section>
+
+
+   <!-- Sub groups-->
+  {% for category in group.subgroups %} 
+   <div class="content_section" data-displayname="{{category.display}}" data-level="sg" data-g="{{group.display}}">
+
+   {% if not category.subgroups %} 
+
+    <section class="content-header">
+      <h4>
         {{ category.display }}<br>
         <small>{{category.info}}</small>
-      </h1>
-      <!-- <ol class="breadcrumb">
-        <li><a href="#"><i class="fa fa-dashboard"></i> Home</a></li>
-        <li class="active">Dashboard</li>
-      </ol> -->
+      </h4>
     </section>
-    <!-- Main content -->
+
+
+ 
     <section class="content">
       <div class="row">
         <div class="col-xs-12">
           <div class="row">
-            {% for entity in category.entities %}
+            {% for entity in category.docs %}
               <div class="info-list col-xs-12 hidden">
                 <li>
                   <a href="/submit/?id={{ entity.document_id }}"><b>{{entity.DisplayName}}</b></a>
@@ -45,14 +61,18 @@
               </div>
               <a href="/submit/?id={{ entity.document_id }}">
                 <div class="info-box">
-                  <span class="info-box-icon bg-gray">
-                    {% if entity.icon_type == "projects" %}<i class="fa fa-rocket"></i>
-                    {% elif entity.icon_type == "conferences" or entity.icon_type == "journals" or entity.icon_type == "venues" %}<i class="fa fa-university"></i>
-                    {% else %}<i class="fa fa-user"></i>
+                    {% if entity.PhotoUrl %}
+                      <span class="info-box-icon" style="background-image: url('{{entity.PhotoUrl}}');"></span>
+                    {% else %}
+                      <span class="info-box-icon bg-gray">
+                      {% if entity.icon_type == "projects" %}<i class="fa fa-rocket"></i>
+                      {% elif entity.icon_type == "conferences" or entity.icon_type == "journals" or entity.icon_type == "venues" %}<i class="fa fa-university"></i>
+                      {% else %}<i class="fa fa-user"></i>
+                      {% endif %}
+                      </span>
                     {% endif %}
-                  </span>
                   <div class="info-box-content">
-                    <span class="info-box-text text-truncate" AuthorIds='{{entity.AuthorIds | safe }}' normalizedname="{{ entity.NormalizedName | safe }}">
+                    <span class="info-box-text text-truncate">
                       <b>{{entity.DisplayName}}</b><br/>{{entity.Year}}
                     </span>
                   </div>
@@ -72,9 +92,95 @@
         </div>
       </div>
     </section>
+
+    {% else %}
+
+    <section class="content-header">
+      <h4>
+        {{ category.display }}<br>
+        <small>{{category.info}}</small>
+      </h4>
+    </section>
+
+
+    <!-- Subsubgroups  -->
+    {% for subsubgroup in category.subgroups %}
+    <div class="content_section" data-displayname="{{subsubgroup.display}}" data-level="ssg" data-g="{{group.display}}" data-sg="{{category.display}}">
+    <section class="content-header">
+      <h5>
+        {{ subsubgroup.display }}<br>
+        <small>{{subsubgroup.info}}</small>
+      </h5>
+    </section>
+    <section class="content">
+      <div class="row">
+        <div class="col-xs-12">
+          <div class="row">
+            {% for entity in subsubgroup.docs %}
+              <div class="info-list col-xs-12 hidden">
+                <li>
+                  <a href="/submit/?id={{ entity.document_id }}"><b>{{entity.DisplayName}}</b></a>
+                  {{entity.Year}}
+                  {% for aff in entity.Affiliations %}
+                    {{ aff }}
+                  {% endfor %}
+                </li>
+              </div>
+              <a href="/submit/?id={{ entity.document_id }}">
+                <div class="info-box">
+                    {% if entity.PhotoUrlFALSE %}
+                      <span class="info-box-icon" style="background-image: '{{entity.PhotoUrl}}';"></span>
+                    {% else %}
+                      <span class="info-box-icon bg-gray">
+                      {% if entity.icon_type == "projects" %}<i class="fa fa-rocket"></i>
+                      {% elif entity.icon_type == "conferences" or entity.icon_type == "journals" or entity.icon_type == "venues" %}<i class="fa fa-university"></i>
+                      {% else %}<i class="fa fa-user"></i>
+                      {% endif %}
+                      </span>
+                    {% endif %}
+                  <div class="info-box-content">
+                    <span class="info-box-text text-truncate">
+                      <b>{{entity.DisplayName}}</b><br/>{{entity.Year}}
+                    </span>
+                  </div>
+                  <div class="info-box-more hidden">
+                    {% for aff in entity.Affiliations %}
+                      <li>{{ aff }}</li>
+                    {% endfor %}
+                    {% for keyword in entity.Keywords %}
+                      <li>{{ keyword }}</li>
+                    {% endfor %} <br/>
+                    <small>{{entity.Citation}}</small>
+                  </div>
+                </div>
+              </a>
+            {% endfor %}
+          </div>
+        </div>
+      </div>
+    </section>
+    </div>
+     {% endfor %}
+
+    
+    {% endif %}
+
   </div>
+
+
   {% endfor %}
+
+
+
+  </div>
+
+  {% endfor %}
+
+</div>
 </body>
+
+
+
 <script type="text/javascript">
 var aligntype = "small";
 $(".info-box")
@@ -104,5 +210,72 @@ $("#btn-align-big").click(function() {
   $(".info-box-more").removeClass("hidden");
   $(".info-box-more").css({"position":"relative", "height":"210px"});
 })
+
+function clear_content(){
+  $(".content_section").each(function(){this.style.display="none"})
+}
+
+function display_group(name){
+   // display group
+   $(".content_section[data-displayname='"+name+"'][data-level='g']").each(function(){this.style.display = "block"});
+
+   // display all subgroups and subsubgroups
+   $(".content_section[data-g='"+name+"']").each(function(){this.style.display = "block"});
+}
+
+function display_subgroup(name,groupname){
+   // display group
+   $(".content_section[data-displayname='"+groupname+"'][data-level='g']").each(function(){this.style.display = "block"});
+
+   // display subgroup
+   $(".content_section[data-g='"+groupname+"'][data-level='sg'][data-displayname='"+name+"']").each(function(){this.style.display = "block"});
+
+   // display all subsubgroups
+   $(".content_section[data-g='"+groupname+"'][data-sg='"+name+"']").each(function(){this.style.display = "block"});
+}
+
+
+
+function display_subsubgroup(name,groupname,subgroupname){
+   // display group
+   $(".content_section[data-displayname='"+groupname+"'][data-level='g']").each(function(){this.style.display = "block"});
+
+   // display subgroup
+   $(".content_section[data-g='"+groupname+"'][data-level='sg'][data-displayname='"+subgroupname+"']").each(function(){this.style.display = "block"});
+
+   // display all subsubgroups
+   $(".content_section[data-g='"+groupname+"'][data-sg='"+subgroupname+"'][data-displayname='"+name+"']").each(function(){this.style.display = "block"});
+}
+
+
+
+$(".nav-item").on('click', function(){
+  clear_content();
+  var level = this.dataset.level;
+  var name = this.dataset.displayname;
+
+  // display relevent blocks
+  if (level=="g"){
+    display_group(name);
+
+  } else if (level=="sg"){
+   var groupname = this.dataset.g;
+   display_subgroup(name,groupname);
+
+  } else if (level=="ssg"){
+   var groupname = this.dataset.g;
+   var subgroupname = this.dataset.sg;
+   display_subsubgroup(name,groupname,subgroupname);
+  }
+
+})
+
+
+$(document).ready(function(){
+  defaultgroup = $(".nav-item")[0];
+  console.log(defaultgroup);
+  defaultgroup.parentElement.classList.add("active");
+  display_group(defaultgroup.dataset.displayname);
+});
 </script>
 </html>
