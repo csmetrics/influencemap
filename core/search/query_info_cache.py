@@ -50,24 +50,23 @@ def paper_info_cache_query(paper_ids):
             'missing': set(paper_ids) - seen}
 
 
-def base_paper_cache_query(paper_id):
+def base_paper_cache_query(paper_ids):
     ''' Gets basic paper information required for reference links from cache.
     '''
     # Get properties
-    es_res = paper_info_cache_query([paper_id])
+    es_res = paper_info_cache_query(paper_ids)
     es_prop = es_res['complete'] + es_res['partial']
-    if len(es_prop) > 0:
-        prop_res = es_prop[0]
-    else:
-        prop_res = None
 
-    # Check for empty results
-    if not prop_res:
+    # If empty results
+    if len(es_prop) < 0:
         return None
 
     # Delete extra fields
-    field_del(prop_res, 'References')
-    field_del(prop_res, 'Citations')
-    field_del(prop_res, 'cache_type')
+    prop_res = list()
+    for info in es_prop:
+        field_del(info, 'References')
+        field_del(info, 'Citations')
+        field_del(info, 'cache_type')
+        prop_res.append(info)
 
     return prop_res

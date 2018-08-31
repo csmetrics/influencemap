@@ -28,12 +28,13 @@ from core.flower.high_level_get_flower import default_config
 from core.score.agg_paper_info         import score_paper_info_list
 
 # Imports for submit
-from core.search.query_paper    import paper_query
-from core.search.query_info     import paper_info_check_query, paper_info_mag_check_multiquery
-from core.search.query_info_mag import base_paper_mag_multiquery
-from core.score.agg_utils       import get_coauthor_mapping
-from core.score.agg_utils       import flag_coauthor
-from core.utils.get_stats       import get_stats
+from core.search.query_paper      import paper_query
+from core.search.query_info       import paper_info_check_query, paper_info_mag_check_multiquery
+from core.search.query_info_mag   import base_paper_mag_multiquery
+from core.search.query_info_cache import base_paper_cache_query
+from core.score.agg_utils         import get_coauthor_mapping
+from core.score.agg_utils         import flag_coauthor
+from core.utils.get_stats         import get_stats
 
 BASE_DIR = settings.BASE_DIR
 
@@ -97,7 +98,6 @@ def create(request):
         "navbarOption": get_navbar_option(keyword, option),
         "search": search
     })
-
 
 
 @csrf_exempt
@@ -235,6 +235,7 @@ def manualcache(request):
 @csrf_exempt
 def submit(request):
     print('Flower request: ', datetime.now())
+    total_request_cur = datetime.now()
 
     curated_flag = False
     if request.method == "GET":
@@ -353,15 +354,16 @@ def submit(request):
     sorted(flower_res, key=lambda x: x[0])
 
     # Reduce
-    #node_info   = dict()
-    node_info   = list()
+    node_info   = dict()
+    #node_info   = list()
     flower_info = list()
     for _, f_info, n_info in flower_res:
-        node_info += n_info
+        #node_info += n_info
         flower_info.append(f_info)
-        #node_info.update(n_info)
+        node_info.update(n_info)
 
     print('TOTAL FLOWER TIME: ', datetime.now() - time_cur)
+    print('TOTAL REQUEST TIME: ', datetime.now() - total_request_cur)
 
     if config == None:
         config = [min_pub_year, max_pub_year, min_cite_year, max_cite_year, "false", "true"]
@@ -401,7 +403,9 @@ def submit(request):
     request.session['flower_name']  = flower_name
     request.session['entity_names'] = entity_names
     request.session['node_info']    = node_info
+
     return render(request, "flower.html", data)
+
 
 @csrf_exempt
 def resubmit(request):
@@ -442,13 +446,13 @@ def resubmit(request):
         flower_res = [make_flower(v) for v in flower_leaves]
 
     # Reduce
-    #node_info   = dict()
-    node_info   = list()
+    node_info   = dict()
+    #node_info   = list()
     flower_info = list()
     for _, f_info, n_info in flower_res:
         flower_info.append(f_info)
-        #node_info.update(n_info)
-        node_info += n_info
+        node_info.update(n_info)
+        #node_info += n_info
 
     data = {
         "author": flower_info[0],
@@ -548,34 +552,43 @@ def get_node_info_all(request):
     return {"node_info": node_info, "papers": papers_to_send}
 
 
-def get_node_info_single(request, entity, year_ranges):
-    pub_lower = year_ranges["pub_lower"]
-    pub_upper = year_ranges["pub_upper"]
-    cit_lower = year_ranges["cit_lower"]
-    cit_upper = year_ranges["cit_upper"]
+def get_node_info_single(info_list):
+    '''
+    '''
+    print(info_list)
+    # Get ego papers
+    papers = list()
 
-    papers = paper_info_mag_check_multiquery(request.session["cache"])
-    papers_to_send = dict()
-    node_info = {"References": {}, "Citations":{}}
+    for info in info_list:
+        papers.append(info['ego_paper'])
+        papers += info['reference']
+        papers += info['citation']
+
+    # Remove duplicates
+    papers = list(set(papers))
+
+    papers = base_paper_cache_query(papers)
+
+    info_fields = ["PaperTitle", "Authors","PaperId","Year", "ConferenceName", "ConferenceSeriesId", "JournalName", "JournalId"]
+    papers_dict = dict()
+    conf_journ_ids = {"ConferenceSeriesIds": [], "JournalIds": []}
     for paper in papers:
-        if paper["Year"] < pub_lower or paper["Year"] > pub_upper: continue
+        paper_info = {k:v for k,v in paper.items() if k in info_fields}
+        if "ConferenceSeriesId" in paper_info:
+            conf_journ_ids["ConferenceSeriesIds"].append(paper_info["ConferenceSeriesId"])
+        if "JournalId" in paper_info:
+            conf_journ_ids["JournalIds"].append(paper_info["JournalId"])
 
-        for relationship_type in ["References", "Citations"]:
-            for rel_paper in paper[relationship_type]:
-                if (relationship_type == "Citations")  and  (rel_paper["Year"] < cit_lower or rel_paper["Year"] > cit_upper): continue
-                authors      = [author["AuthorName"] for author in rel_paper["Authors"]]
-                affiliations = [author["AffiliationName"] for author in rel_paper["Authors"] if "AffiliationName" in author]
-                conferences = [rel_paper["ConferenceName"]] if ("ConferenceName" in rel_paper) else []
-                journals = [rel_paper["JournalName"]] if ("JournalName" in rel_paper) else []
-                relevant = entity in list(set(authors + affiliations + conferences + journals))
-                if relevant:
-                    papers_to_send[paper["PaperId"]] = {k:v for k,v in paper.items() if k in ["PaperTitle", "Authors","PaperId","Year", "ConferenceName", "ConferenceSeriesId", "JournalName", "JournalId"]}
-                    papers_to_send[rel_paper["PaperId"]] = {k:v for k,v in rel_paper.items() if k in ["PaperTitle", "Authors","PaperId","Year", "ConferenceName", "ConferenceSeriesId", "JournalName", "JournalId"]}
-                    if rel_paper["PaperId"] in node_info[relationship_type]:
-                        node_info[relationship_type][rel_paper["PaperId"]].append(paper["PaperId"])
-                    else:
-                        node_info[relationship_type][rel_paper["PaperId"]] = [paper["PaperId"]]
-    return {"node_info": node_info, "papers": papers_to_send}
+        papers_dict[paper['PaperId']] = paper_info
+
+    conf_journ_display_names = get_conf_journ_display_names(conf_journ_ids)
+    for paper in papers_dict.values():
+        if "ConferenceSeriesId" in paper:
+            paper["ConferenceName"] = conf_journ_display_names["Conference"][paper["ConferenceSeriesId"]]
+        if "JournalId" in paper:
+            paper["JournalName"] = conf_journ_display_names["Journal"][paper["JournalId"]]
+
+    return {"node_links": info_list, "paper_info": papers_dict}
 
 
 @csrf_exempt
@@ -588,22 +601,7 @@ def get_node_info(request):
     entities = request.session["entity_names"]
     year_ranges = request.session["year_ranges"]
 
-    node_info = get_node_info_single(request, node_name, year_ranges) #request.session['node_information_store']
-    info = node_info["node_info"]
-    papers = node_info["papers"]
-    conf_journ_ids = {"ConferenceSeriesIds": [], "JournalIds": []}
-    for paper in papers.values():
-        if "ConferenceSeriesId" in paper: conf_journ_ids["ConferenceSeriesIds"].append(paper["ConferenceSeriesId"])
-        if "JournalId" in paper: conf_journ_ids["JournalIds"].append(paper["JournalId"])
-    conf_journ_display_names = get_conf_journ_display_names(conf_journ_ids)
-    for paper in papers.values():
-        if "ConferenceSeriesId" in paper: paper["ConferenceName"] = conf_journ_display_names["Conference"][paper["ConferenceSeriesId"]]
-        if "JournalId" in paper: paper["JournalName"] = conf_journ_display_names["Journal"][paper["JournalId"]]
+    node_info = get_node_info_single(request.session["node_info"][node_name])
 
-
-    #info["entity_names"] = list(request.session["node_info"].keys()) +entities
-    info["entity_names"] = list(request.session["node_info"]) +entities
-    info["References"] = sorted([{"to": papers[k], "from": sorted([papers[paper_id] for paper_id in v], key=lambda x: x["Year"])} for k,v in info["References"].items()],key=lambda x: x["to"]["Year"])
-    info["Citations"] = sorted([{"from": papers[k], "to": sorted([papers[paper_id] for paper_id in v], key=lambda x: x["Year"])} for k,v in info["Citations"].items()], key=lambda x: x["from"]["Year"])
-    print(request.session["node_info"])
-    return JsonResponse(info, safe=False)
+    node_info["entity_names"] = entities
+    return JsonResponse(node_info, safe=False)

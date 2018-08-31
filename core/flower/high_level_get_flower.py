@@ -5,7 +5,8 @@ from core.search.query_paper       import paper_query
 from core.search.query_paper_mag   import paper_mag_multiquery
 from core.search.query_info        import paper_info_check_query, paper_info_mag_check_multiquery
 from core.score.agg_paper_info     import score_paper_info_list, score_leaves
-from core.score.agg_score          import agg_score_df, agg_node_info
+from core.score.agg_score          import agg_score_df#, select_node_info
+from core.flower.node_info         import select_node_info
 from core.score.agg_utils          import get_coauthor_mapping
 from core.score.agg_utils          import flag_coauthor
 from core.score.agg_filter         import filter_year
@@ -99,14 +100,15 @@ def gen_flower_data(score_df, flower_prop, entity_names, flower_name,
         # Increase the search space
         i += 1
 
+    # Get papers to show info for each node
+    print(datetime.now(), 'node_info')
+    node_info = select_node_info(filter_score, top_score['entity_name'].tolist())
+    print(datetime.now(), 'node_info')
 
     # Graph score
     graph_score = score_df_to_graph(top_score)
 
-    # Generate node information
-    #node_info = agg_node_info(filter_score, agg_score['entity_name'])
-
     # D3 format
     data = processdata(flower_type, graph_score)
 
-    return flower_type, data, top_score['entity_name'].tolist()
+    return flower_type, data, node_info

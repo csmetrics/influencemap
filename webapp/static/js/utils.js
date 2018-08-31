@@ -21,24 +21,16 @@ function toTitleCase(str) {
 
 function formatCitation(paper, authorsToHighlight=[]){
   var authors = paper["Authors"];
+  var names = [];
   for (i in authors){
-    authors[i]["FormattedName"] =  normaliseNameForCitation(authors[i]["AuthorName"]);
+    var formatted_name = normaliseNameForCitation(authors[i]["AuthorName"]);
+    names.push({"AuthorName": authors[i]["AuthorName"], "FormattedName": formatted_name, "AuthorId": authors[i]["AuthorId"]});
   }
-  authors.sort(function(a,b){return a["FormattedName"] > b["FormattedName"]});
-  for (i in authors){
-    var a = authors[i];
+  names.sort(function(a,b){return a["FormattedName"] > b["FormattedName"]});
+  out_str = [];
+  for (i in names){
+    var a = names[i];
     if (authorsToHighlight.indexOf(a["AuthorName"]) >= 0){a["FormattedName"] = "<b>"+a["FormattedName"]+"</b>"};
-/*    if ("AffiliationName" in a) {
-      a["FormattedName"] = "<div class='hoverinfo'>"+
-                              a["FormattedName"]+
-                              "<a href='https://academic.microsoft.com/#/detail/"+a["AffiliationId"]+"'>"+
-                                  "<span class='hoverinfotext'>"+
-                                      a["AffiliationName"]+
-                                  "</span>"+
-                              "</a>"+
-                           "</div>";
-    }
-*/
     if ("AffiliationName" in a) {
       a["FormattedName"] = "<span"+
                             " data-toggle='tooltip'"+
@@ -50,11 +42,11 @@ function formatCitation(paper, authorsToHighlight=[]){
                              a["FormattedName"]+
                            "</span>";
     }
-
-    authors[i] = "<a href=\"https://academic.microsoft.com/#/detail/"+a["AuthorId"]+"\">"+a["FormattedName"]+"</a>";
-    console.log(authors[i]);
+    out_str.push("<a href=\"https://academic.microsoft.com/#/detail/"+a["AuthorId"]+"\">"+a["FormattedName"]+"</a>");
   }
+
   var venue = ("JournalName" in paper) ? (", <a href='https://academic.microsoft.com/#/detail/"+paper["JournalId"]+"'>"+paper["JournalName"]+"</a>") : (("ConferenceName" in paper) ? (",  <a href='https://academic.microsoft.com/#/detail/"+paper["ConferenceSeriesId"]+"'>"+paper["ConferenceName"]+"</a>") : (""));
 
-  return authors.join(', ') + ". <i><a href=\"https://academic.microsoft.com/#/detail/"+paper["PaperId"]+"\">"+toTitleCase(paper["PaperTitle"]) + "</a></i>, " + paper["Year"] + venue;
+
+  return out_str.join(', ') + ". <i><a href=\"https://academic.microsoft.com/#/detail/"+paper["PaperId"]+"\">"+toTitleCase(paper["PaperTitle"]) + "</a></i>, " + paper["Year"] + venue;
 }
