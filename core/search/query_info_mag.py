@@ -226,7 +226,10 @@ def paper_info_mag_multiquery(paper_ids, partial_info = list()):
     # Get all papers to get property values
     all_papers = list() + paper_ids
     for link_paper in link_papers:
-        link_prop = base_paper_cache_query([link_paper])[0]
+        try:
+            link_prop = base_paper_cache_query([link_paper])[0]
+        except:
+            link_prop = None
         if link_prop:
             paper_props[link_paper] = link_prop
             in_cache.append(link_paper)
