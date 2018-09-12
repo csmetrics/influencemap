@@ -33,7 +33,7 @@ cache_types = {
         "sigmm_risingstaraward",
         "publication_venues",
         "pl_researchers",
-        "projects"
+        "projects","test"
     ]
 }
 
@@ -95,7 +95,7 @@ def saveNewBrowseCache(cache):
     assert cache["Type"] in cache_types["browse_cache"]
 
     doc = BrowseCache()
-    
+
     # required fields
     doc.Type = cache["Type"]
     doc.DisplayName = cache["DisplayName"]
@@ -111,11 +111,14 @@ def saveNewBrowseCache(cache):
     if "Url" in cache:                                    doc.Url = cache["Url"] 
     if "PhotoUrl" in cache:                               doc.PhotoUrl = cache["PhotoUrl"] 
 
+    for key,value in cache.items():
+        if key not in ["Type","DisplayName","EntityIds","Citation","Year","Field","Affiliations","Url","PhotoUrl"]: doc[key] = value
+
     # meta data
     doc.CreatedDate = datetime.now()
     doc.meta.id = generate_uuid("{}-{}".format(doc.DisplayName, doc.Type))
     doc.meta.index = "browse_cache"
-
+    print(doc.to_dict())
     doc.save()
 
 

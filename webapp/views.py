@@ -54,7 +54,6 @@ def main(request):
     return render(request, "main.html")
 
 
-
 @csrf_exempt
 def browse(request):
 
@@ -103,7 +102,7 @@ def create(request):
 @csrf_exempt
 def curate(request):
     print(request)
-
+    types = get_cache_types()
     try:
         data = json.loads(request.POST.get('data'))
         keyword = data.get('keyword', '')
@@ -115,12 +114,18 @@ def curate(request):
         search = False
 
     print(search)
+    print(types)
     # render page with data
     return render(request, "curate.html", {
         "navbarOption": get_navbar_option(keyword, option),
-        "search": search
+        "search": search,
+        "types": types
     })
 
+@csrf_exempt
+def check_record(request):
+    exists, names = check_browse_record_exists(request.POST.get("type"), request.POST.get("name"))
+    return JsonResponse({"exists": exists, "names": names})
 
 @csrf_exempt
 def curate_load_file(request):

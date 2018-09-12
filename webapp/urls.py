@@ -22,6 +22,7 @@ urlpatterns = [
     url(r'^create', views.create),
     url(r'^curate_load_file', views.curate_load_file),
     url(r'^curate', views.curate),
+    url(r'^check_record', views.check_record),
     url(r'^get_publication_papers', views.get_publication_papers),
     url(r'^get_citation_papers', views.get_citation_papers),
     url(r'^manualcache', views.manualcache),
