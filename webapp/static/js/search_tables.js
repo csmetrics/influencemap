@@ -54,7 +54,11 @@ searchBar.addEventListener('keypress', function (e) {
 function search(){
   console.log("searching")
   $("#loading").show();
-  latestSearchOption = $(".entity-option:selected").val();
+  latestSearchOption = [];
+  $(".entity-type-btn.selected-entity").each(function(){
+    latestSearchOption.push(this.dataset.entitytype)
+  });
+  
   latestSearchTerm = searchBar.value;
   searchtable = makeSearchTable(latestSearchOption);
 
@@ -63,7 +67,7 @@ function search(){
     url: "/search",
     data: { // input to the views.py - search()
       keyword: latestSearchTerm,
-      option: latestSearchOption,
+      option: latestSearchOption[0],
     },
     success: function (result) { // return data if success
       updateTable(result["entities"], searchtable);
@@ -74,6 +78,7 @@ function search(){
     },
     error: function (result) {
       console.log("searchButton error");
+      $("#loading").hide();
     }
   });
 }
@@ -236,4 +241,17 @@ function hideElement(elem){
 
 function showElement(elem){
   elem.css({'display': 'block'});
+}
+
+function clear_search(){
+  $("#searchtable").empty();
+}
+
+function clear_selection(){
+  $("#selectiontable").empty();
+}
+
+function clear_search_tables(){
+  clear_search();
+  clear_selection();
 }

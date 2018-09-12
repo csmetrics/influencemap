@@ -2,10 +2,10 @@ var selectionTableConfig = {
   tableSettings: {
     "destroy" : true,
     "bAutoWidth" : true,
-    "sScrollY" : "560",
+//    "sScrollY" : "560",
     "bSort" : true,
     "columns": [
-    { title: "Selected", data: "display-info", className: "dt-body-left"},
+    { data: "display-info", className: "dt-body-left"},
     // { data: "entity-type" },
     { data: "table-id" },
     // { data: "name" },
@@ -25,5 +25,10 @@ var selectionTableConfig = {
     "searching": false,
     "paging": false,
     "info": false,
+    "language": {
+      "emptyTable": " "
+    },
+      "scrollY": "75vh",
+      "scrollCollapse": false
   }
 }

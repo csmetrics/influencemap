@@ -4,14 +4,19 @@
 {% include 'header.html' %}
 <body class="hold-transition skin-blue-light sidebar-mini">
 <div class="wrapper">
-  {% include 'pagehead-searchbar.html' with navbar=navbarOption %}
+{% include 'pagehead.html' with navbar=navbarOption %}
   {% include 'search_tables.html' %}
 </div>
 </body>
 </html>
 <script>
+
 function goToFlower(data){
-   data['option'] = latestSearchOption;
+  var latestSearchOption = [];
+  $(".entity-type-btn.selected-entity").each(function(){
+    latestSearchOption.push(this.dataset.entitytype)
+  });
+   data['option'] = latestSearchOption[0];
    data['keyword'] = latestSearchTerm;
    postData('/submit/', data, "{% csrf_token %}");
 }
