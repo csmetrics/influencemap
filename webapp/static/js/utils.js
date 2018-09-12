@@ -42,11 +42,11 @@ function formatCitation(paper, authorsToHighlight=[]){
                              a["FormattedName"]+
                            "</span>";
     }
-    out_str.push("<a href=\"https://academic.microsoft.com/#/detail/"+a["AuthorId"]+"\">"+a["FormattedName"]+"</a>");
+    out_str.push("<a class='node_info_a' href=\"https://academic.microsoft.com/#/detail/"+a["AuthorId"]+"\">"+a["FormattedName"]+"</a>");
   }
 
-  var venue = ("JournalName" in paper) ? (", <a href='https://academic.microsoft.com/#/detail/"+paper["JournalId"]+"'>"+paper["JournalName"]+"</a>") : (("ConferenceName" in paper) ? (",  <a href='https://academic.microsoft.com/#/detail/"+paper["ConferenceSeriesId"]+"'>"+paper["ConferenceName"]+"</a>") : (""));
+  var venue = ("JournalName" in paper) ? (", <a class='node_info_a' href='https://academic.microsoft.com/#/detail/"+paper["JournalId"]+"'>"+paper["JournalName"]+"</a>") : (("ConferenceName" in paper) ? (",  <a class='node_info_a' href='https://academic.microsoft.com/#/detail/"+paper["ConferenceSeriesId"]+"'>"+paper["ConferenceName"]+"</a>") : (""));
 
 
-  return out_str.join(', ') + ". <i><a href=\"https://academic.microsoft.com/#/detail/"+paper["PaperId"]+"\">"+toTitleCase(paper["PaperTitle"]) + "</a></i>, " + paper["Year"] + venue;
+  return out_str.join(', ') + ". <i><a class='node_info_a' href=\"https://academic.microsoft.com/#/detail/"+paper["PaperId"]+"\">"+toTitleCase(paper["PaperTitle"]) + "</a></i>, " + paper["Year"] + venue;
 }
