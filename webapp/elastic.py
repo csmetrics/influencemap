@@ -143,3 +143,45 @@ def get_all_browse_cache():
     data = response.to_dict()["hits"]["hits"]
     result = [{**e["_source"],"document_id": e["_id"]} for e in data]
     return result
+
+def get_cache_types():
+    q = {
+      "_source": ["Type"],
+      "size": 10000,
+      "query": {
+        "match_all": {}
+      }
+    }
+    s = Search(using = client, index="browse_cache")
+    s.update_from_dict(q)
+    response = s.execute()
+    data = response.to_dict()["hits"]["hits"]
+    result = sorted(list(set(hit["_source"]["Type"]  for hit in data)))
+    return result
+
+def check_browse_record_exists(cachetype, displayname):
+    cache_index = "browse_cache"
+    q = {
+      "query" : {
+        "constant_score" : { 
+          "filter" : {
+            "bool" : {
+              "must" : [
+                { "term" : {"Type" : cachetype}},
+                { "match" : {"DisplayName" : displayname}}
+              ]
+            }
+          }
+        }
+      }
+    }
+    s = Search(using=client, index=cache_index)
+    s.update_from_dict(q)
+    response = s.execute()
+    print(response)
+    print(response["hits"])
+    print(response["hits"]["hits"])
+    names = [hit["_source"]["DisplayName"] for hit in response["hits"]["hits"]]
+    return (response["hits"]["total"] > 0, names)
+
+

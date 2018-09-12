@@ -1,7 +1,16 @@
+var emptytablemsg = "<div style='text-align: left'>"+
+  "<h3>Create your own flowers</h3>"+
+  "<ol><li>Select the type(s) of entity you want to search for</li>"+
+  "<li>Enter the name or keyword you would like to search for</li>"+
+  "<li>Use the information to identify entities that you want to include in your flower</li>"+
+  "<li>Repeat until you have selected all entities you want included in your flower</li>"+
+  "<li>(Optional) Name your flower</li>"+
+  "<li>Press <b>Go</b> to create your flower, but be patient, computation time depends on the selected entities</li></ol></div>";
+
 var searchTableConfig = {
     tableSettings: {
       "columns": [
-      { title: "Search results", data: "display-info", className: "dt-body-left display-info"},
+      { data: "display-info", className: "dt-body-left display-info"},
       { data: "table-id" },
       { data: "data" },
       { 
@@ -26,18 +35,20 @@ var searchTableConfig = {
       //   "selector": 'td:last-child input[type="checkbox"]'
       // },
       "language": {
-        "emptyTable": "no search result"
+        "emptyTable": emptytablemsg
       },
       "fixedColumns": true,
       "paging": false, // true,
       "searching": false,
-      "sScrollY": 560,
+//      "sScrollY": 560,
       // "pagingType": "simple_numbers",
       "ordering": false,//true,
     //  "order": [[0, "desc" ]],
-      "info": true,
+      "info": false,
       "autoWidth": false,
       "destroy": true,
+      "scrollY": "85vh",
+      "scrollCollapse": false
     },
 };
 
