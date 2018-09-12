@@ -32,7 +32,7 @@ str_to_ent = {
     }
 
 default_config = {
-        'self_cite': True,
+        'self_cite': False,
         'icoauthor': True,
         'pub_lower': None,
         'pub_upper': None,
