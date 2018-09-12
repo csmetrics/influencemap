@@ -61,13 +61,14 @@ function search(){
   
   latestSearchTerm = searchBar.value;
   searchtable = makeSearchTable(latestSearchOption);
-
   $.ajax({
     type: "POST",
     url: "/search",
-    data: { // input to the views.py - search()
-      keyword: latestSearchTerm,
-      option: latestSearchOption[0],
+    data: { "data": 
+      JSON.stringify({ 
+        keyword: latestSearchTerm,
+        option: latestSearchOption,
+      })
     },
     success: function (result) { // return data if success
       updateTable(result["entities"], searchtable);

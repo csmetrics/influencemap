@@ -143,43 +143,51 @@ def curate_load_file(request):
 
 
 s = {
-    'author': ('<h5>{name}</h5><p>{affiliation}, Papers: {paperCount}, Citations: {citations}</p></div>'),
+    'author': ('<i class="fa fa-user" style="float: left; font-size: 40px;"></i><h5>{name}</h5><p>{affiliation}, Papers: {paperCount}, Citations: {citations}</p></div>'),
          # '<div style="float: left; width: 50%; padding: 0;"><p>Papers: {paperCount}</p></div>'
          # '<div style="float: right; width: 50%; text-align: right; padding: 0;"<p>Citations: {citations}</p></div>'),
-    'conference': ('<h5>{DisplayName}</h5>'
+    'conference': ('<i class="fa fa-building" style="float: left; font-size: 40px;"></i><h5>{DisplayName}</h5>'
         '<div style="float: left; width: 50%; padding: 0;"><p>Papers: {PaperCount}</p></div>'
         '<div style="float: right; width: 50%; text-align: right; padding: 0;"<p>Citations: {CitationCount}</p></div>'),
-    'institution': ('<h5>{DisplayName}</h5>'
+    'institution': ('<i class="fa fa-university" style="float: left; font-size: 40px;"></i><h5>{DisplayName}</h5>'
         '<div style="float: left; width: 50%; padding: 0;"><p>Papers: {PaperCount}</p></div>'
         '<div style="float: right; width: 50%; text-align: right; padding: 0;"<p>Citations: {CitationCount}</p></div>'),
-    'journal': ('<h5>{DisplayName}</h5>'
+    'journal': ('<i class="fa fa-book" style="float: left; font-size: 40px;"></i><h5>{DisplayName}</h5>'
         '<div style="float: left; width: 50%; padding: 0;"><p>Papers: {PaperCount}</p></div>'
         '<div style="float: right; width: 50%; text-align: right; padding: 0;"<p>Citations: {CitationCount}</p></div>'),
-    'paper': ('<h5>{title}</h5>'
+    'paper': ('<i class="fa fa-file" style="float: left; font-size: 40px;"></i><h5>{title}</h5>'
         '<div><p>Citations: {citations}, Field: {fieldOfStudy}</p><p>Authors: {authorName}</p></div>')
 }
 
 @csrf_exempt
 def search(request):
-    keyword = request.POST.get("keyword")
-    entityType = request.POST.get("option")
+    request_data = json.loads(request.POST.get("data"))
+    keyword = request_data.get("keyword")
+    entityType = request_data.get("option")
+    print(entityType, request_data)
     exclude = set(string.punctuation)
     keyword = ''.join(ch for ch in keyword if ch not in exclude)
     keyword = keyword.lower()
     keyword = " ".join(keyword.split())
     id_helper_dict = {"conference": "ConferenceSeriesId", "journal": "JournalId", "institution": "AffiliationId", "paper": "eid", "author": "eid"}
-    if entityType == "conference":
-        data = query_conference_series(keyword)
-    elif entityType == "journal":
-        data = query_journal(keyword)
-    elif entityType == "institution":
-        data = query_affiliation(keyword)
-    else:
-        data = get_entities_from_search(keyword, entityType)
+    data = []
+    if "conference" in entityType:
+        data += [(val, "conference") for val in query_conference_series(keyword)]
+    if "journal" in entityType:
+        data += [(val, "journal") for val in query_journal(keyword)]
+    if "institution" in entityType:
+        data += [(val, "institution") for val in query_affiliation(keyword)]
+    if "paper" in entityType:
+        data += [(val, "paper") for val in get_entities_from_search(keyword, "paper")]
+    if "author" in entityType:
+        try:
+            data += [(val, "author") for val in get_entities_from_search(keyword, "author")]
+        except Exception as e:
+            print(e)
     for i in range(len(data)):
-        entity = {'data': data[i]}
-        entity['display-info'] = s[entityType].format(**entity['data'])
-        entity['table-id'] = "{}_{}".format(entityType, entity['data'][id_helper_dict[entityType]])
+        entity = {'data': data[i][0]}
+        entity['display-info'] = s[data[i][1]].format(**entity['data'])
+        entity['table-id'] = "{}_{}".format(data[i][1], entity['data'][id_helper_dict[data[i][1]]])
         data[i] = entity
     return JsonResponse({'entities': data}, safe=False)
 
