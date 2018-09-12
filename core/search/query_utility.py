@@ -35,3 +35,11 @@ def field_del(val_dict, field):
         pass
 
     return val_dict
+
+
+def chunker(elements, batch_size):
+    ''' Standard chunker.
+    '''
+    size = len(elements)
+    for i in range(0, size, batch_size):
+        yield elements[i: min(size, i+batch_size)]

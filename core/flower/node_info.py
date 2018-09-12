@@ -20,11 +20,11 @@ def select_node_info(influence_df, node_names):
     # Node information results
     node_info = dict()
     for entity_info, node_influence in filtered_influence.groupby(node_cols):
-        info = dict()
-        entity_name, _ = entity_info
+        entity_name, entity_type = entity_info
 
         # List of dictionaries per node entity for timeline
-        node_info[entity_name] = list()       
+        #node_info[entity_name] = list()       
+        ego_paper_list = list()
 
         ego_group = node_influence.groupby(['ego_paper_id', 'publication_year'])
         for ego_paper_attr, ego_df in ego_group:
@@ -44,8 +44,11 @@ def select_node_info(influence_df, node_names):
             ego_paper_res['reference'] = ref_links
             ego_paper_res['citation']  = cit_links
 
-            node_info[entity_name].append(ego_paper_res)
+            ego_paper_list.append(ego_paper_res)
+            #node_info[entity_name].append(ego_paper_res)
 
-        node_info[entity_name].sort(key=lambda x: -x['year'])
+        ego_paper_list.sort(key=lambda x: -x['year'])
+        #node_info[entity_name].sort(key=lambda x: -x['year'])
+        node_info[entity_name] = { 'paper_list': ego_paper_list, 'type': entity_type.ident }
 
     return node_info

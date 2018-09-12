@@ -134,8 +134,20 @@ img.fit-wrapper {
 }
 
 table th {
+/*
   background-color: #001F3F;
+  */
+  background-color: #001F3F80;
 }
+
+table td {
+  padding: 5px;
+}
+
+table th {
+  padding: 5px;
+}
+
 .innertable {
   box-shadow: inset 0px 2px 1px 0px #bbb;
 }
@@ -304,7 +316,10 @@ td{
   cursor: pointer;
 }
 tr:hover td{
+/*
   background: #ddd;
+  */
+  background: none;
 }
 
 /* The node info modal (background) */
@@ -330,6 +345,10 @@ tr:hover td{
    /* float: right;*/
 }
 
+.node_info_a {
+    color: black;
+}
+
 .link {
   cursor: pointer;
 }
@@ -337,8 +356,6 @@ tr:hover td{
 .link:hover {
     text-decoration: underline;
 }
-
-
 
 
 /* Tooltip container */
