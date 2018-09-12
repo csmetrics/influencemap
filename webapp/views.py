@@ -26,6 +26,7 @@ from core.utils.load_tsv import tsv_to_dict
 from core.flower.high_level_get_flower import gen_flower_data
 from core.flower.high_level_get_flower import default_config
 from core.score.agg_paper_info         import score_paper_info_list
+from core.search.query_name            import normalized_to_display
 
 # Imports for submit
 from core.search.query_paper      import paper_query
@@ -566,27 +567,44 @@ def get_node_info(request):
     entities = request.session["entity_names"]
     #year_ranges = request.session["year_ranges"]
 
-    node_dicts = request.session["node_info"][node_name]
-    selected_node_dicts = node_dicts[0: min(NUM_NODE_INFO, len(node_dicts))]
+    node_info_dict = request.session["node_info"][node_name]
+    paper_dicts = node_info_dict['paper_list']
+    node_type = node_info_dict['type']
 
+    selected_node_dicts = paper_dicts[0: min(NUM_NODE_INFO, len(paper_dicts))]
+
+    # Information for the node info table
     node_info = get_node_info_single(selected_node_dicts)
     node_info["entity_names"] = entities
-    node_info["max_page"] = math.ceil(len(node_dicts) / NUM_NODE_INFO)
+    node_info["max_page"] = math.ceil(len(paper_dicts) / NUM_NODE_INFO)
+
+    # Find node display name
+    if node_type == 'CONF':
+        display_name = normalized_to_display(node_name, 'conferenceseries')
+        if display_name:
+            node_info['node_name'] = display_name + ' (' + node_name + ')'
+    elif node_type == 'JOUR':
+        display_name = normalized_to_display(node_name, 'journals')
+        if display_name:
+            node_info['node_name'] = display_name + ' (' + node_name + ')'
+    if not 'node_name' in node_info:
+        node_info['node_name'] = node_name.title()
 
     return JsonResponse(node_info, safe=False)
 
 
 @csrf_exempt
 def get_next_node_info_page(request):
-    '''
+    ''' Creates new table content
     '''
     entities = request.session["entity_names"]
     data = json.loads(request.POST.get("data_string"))
     node_name = data.get("name")
     page = int(data.get("page")) - 1
 
-    node_dicts = request.session["node_info"][node_name]
-    selected_node_dicts = node_dicts[page*NUM_NODE_INFO: min((1+page)*NUM_NODE_INFO, len(node_dicts))]
+    node_info_dict = request.session["node_info"][node_name]
+    paper_dicts = node_info_dict['paper_list']
+    selected_node_dicts = paper_dicts[page*NUM_NODE_INFO: min((1+page)*NUM_NODE_INFO, len(paper_dicts))]
 
     node_info = get_node_info_single(selected_node_dicts)
     node_info["entity_names"] = entities

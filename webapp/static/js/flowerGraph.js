@@ -509,10 +509,11 @@ var odd_ego  = '#e0e0e099';
 var page_counter = 0;
 var max_page_num = 0;
 var node_info_name = '';
+var display_name   = '';
 
 
 function formatNodeInfoHeader(data) {
-  var title = "<h3 style='display: inline;margin-right: 10px;'>"+data["node_name"]+"</h3>";
+  var title = "<h3 style='display: inline;margin-right: 10px;'>"+display_name+"</h3>";
   page_counter = 1;
   max_page_num = data["max_page"];
 
@@ -592,7 +593,7 @@ function formatNodeInfoTable(data) {
       table_str += "<tr style='border-bottom: 0px solid white'><td style='height: 1px' colspan='5'></td></tr>";
   }
   link_table += "<tr> <th>Has influenced</th> <th style='font-size: 30px'>⟶</th>";
-  link_table += "<th>" + node_info_name + "</th> <th style='font-size: 30px'>⟶</th> <th>Has influenced</th> </tr>";
+  link_table += "<th>" + display_name + "</th> <th style='font-size: 30px'>⟶</th> <th>Has influenced</th> </tr>";
   link_table += table_str;
   link_table += "</table>";
 
@@ -641,9 +642,8 @@ function getData(param){
     url: "/get_node_info/",
     data: {"data_string": JSON.stringify(data_dict)},
     success: function (result) { // return data if success
-      console.log(result);
-//      console.log(result.node_info);
-      result["node_name"] = node_info_name;
+
+      display_name = result['node_name'];
       populateNodeInfoContent(result);
       document.getElementById("node_info_modal").style.display = "block";
     },

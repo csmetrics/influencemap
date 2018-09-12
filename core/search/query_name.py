@@ -160,3 +160,24 @@ def name_query(entity_type, entity_name):
 
     # Otherwise
     return None
+
+
+def normalized_to_display(entity_name, index):
+    '''
+    '''
+    # Elastic search client
+    client = Elasticsearch(conf.get("elasticsearch.hostname"))
+
+    # Query for paa
+    query_s = Search(index=index, using=client)
+    query_s = query_s.query('match', NormalizedName=entity_name)
+    query_s = query_s.source(['DisplayName'])
+
+    print()
+    print(index)
+    for query in query_s.scan():
+        # Return display name
+        print(query, index)
+        return query['DisplayName']
+        
+    return None
