@@ -4,22 +4,18 @@
   "subgroups": [
     {"display": "Turing Award Winners",
      "type":    "inner",
-     "info":    "some more text to explain what a turing award winner is",
      "tag":     "turing_award_winners"
     },
     {"display": "ANU Researchers",
      "type":    "inner",
-      "info": "some more text to explain what a turing award winner is",
       "tag": "anu_researchers"
     },
     {"display": "Fields Medalists",
      "type":    "inner",
-      "info": "some more text to explain what a turing award winner is",
       "tag": "#"
     },
     {"display": "Nobel Prize Winners",
      "type":    "inner",
-      "info": "some more text to explain what a turing award winner is",
       "tag": "#"
     }
   ]
@@ -31,47 +27,48 @@
 [{"display":   "SIG Multimedia", 
   "type": "outer",
   "subgroups": [
-    {"display": "Awards",
+    {"display": "Multimedia Conferences",
      "type":    "inner",
-     "info":    "some more text to explain what a taa winner is",
+      "tag": "sigmm_conferences"
+    },
+    {"display": "Multimedia Journals",
+     "type":    "inner",
+      "tag": "sigmm_journals"
+    },
+    {"display": "Technical Achievement Award",
+     "type":    "inner",
+     "info":    "The SIGMM Award for Outstanding Technical Contributions to Multimedia Computing, Communications and Applications is presented annually to a researcher who has made significant and lasting contributions to multimedia computing, communication and applications. The recpient is awarded an honorarium and is invited to present a keynote talk at the ACM International Conference on Multimedia.",
      "tag":     "sigmm_award_taa"
     },
-    {"display": "SIG multimedia Conferences",
+    {"display": "Rising Star Award",
      "type":    "inner",
-      "info": "some more text to explain what a turing award winner is",
-      "tag": "sigmm_conferences"
+     "info":    "The SIGMM Rising Star Award is awarded annually, recognizing a young researcher - individual either no older than 35 or within 7 years of PhD - who has made outstanding research contributions to the field of multimedia computing, communications and applications during this early part of his or her career. The recipient is awarded an honorarium and an invitation to present a keynote talk at a the ACM International Conference on Multimedisa.",
+     "tag":     "sigmm_risingstaraward"
+    },
+    {"display": "Outstanding Phd Thesis Award",
+     "type":    "inner",
+     "info":    "The SIGMM Award for Outstanding PhD Thesis in Multimedia Computing, Communications and Applications is awarded annually to a researcher whose PhD thesis has made contributions and has the potential of very high impact in multimedia computing, communication and applications.The award will recognize members of the SIGMM community and their research contributions in their PhD theses as well as the potential of impact of their PhD theses in multimedia area. The recpient is awarded an honorarium and an invitation to receive the award at the ACM International Conference on Multimedia.",
+     "tag":     "sigmm_thesisaward"
     }
   ]
 },
 {"display":   "SIG PLAN",
   "type": "outer",
   "subgroups": [
-    {"display": "Awards",
-     "type":    "inner",
-     "info":    "some more text to explain what a taa winner is",
-     "tag":     "sigmm_risingstaraward"
-    },
     {"display": "SIG PLAN Conferences",
      "type":    "inner",
-      "info": "some more text to explain what a turing award winner is",
       "tag": "sigmm_conferences"
     }
   ]
 }]
 },
-
 {"display":   "Projects", 
   "type":    "outer",
   "subgroups": [
-    {"display": "Projects in Computer Science",
-     "type":    "inner",
-     "info":    "some more text to explain...",
-     "tag":     "projects"
-    },
-    {"display": "Projects in Engineering",
-     "type":    "inner",
-      "info": "some more text to explain something else...",
-      "tag": "projects"
+    {"display": "ANU Projects",
+     "type": "inner",
+     "info": "A series of projects (collections of papers on a given topic) either or authored or co-authored by researchers at the Australian National University.",
+     "tag": "projects"
     }
   ]
 },
@@ -83,33 +80,11 @@
       "subgroups": [
         {"display": "Programming Languages",
           "type": "inner",
-          "tag": "conferences"
+          "tag": "publication_venues"
         },
         {"display": "Multimedia",
           "type": "inner",
           "tag": "sigmm_conferences"
-        }
-      ]
-    },
-    {"display": "Physics",
-      "type": "outer",
-      "subgroups": [
-        {"display": "Astrophysics",
-          "type": "inner",
-          "tag": "conferences"
-        }
-      ]
-    },
-    {"display": "Economics",
-      "type": "outer",
-      "subgroups": [
-        {"display": "Political Economics",
-          "type": "inner",
-          "tag": "conferences"
-        },
-        {"display": "Econometrics",
-          "type": "inner",
-          "tag": "conferences"
         }
       ]
     }
