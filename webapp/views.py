@@ -68,12 +68,12 @@ def browse(request):
         for subgroup in group["subgroups"]:
             if subgroup["type"] == "inner":
                 #subgroup["document_ids"] = [cache["document_id"] for cache in browse_cache if cache["Type"] == subgroup["tag"]]
-                subgroup["docs"] = [cache for cache in browse_cache if cache["Type"] == subgroup["tag"]]
+                subgroup["docs"] = sorted([cache for cache in browse_cache if cache["Type"] == subgroup["tag"]], key=lambda x: (x["Year"], x["DisplayName"]) if ("Year" in x) else (0, x["DisplayName"]))
             else:
                 for subsubgroup in subgroup["subgroups"]:
                     if subsubgroup["type"] == "inner":
                         #subsubgroup["document_ids"] = [cache["document_id"] for cache in browse_cache if cache["Type"] == subsubgroup["tag"]]
-                        subsubgroup["docs"] = [cache for cache in browse_cache if cache["Type"] == subsubgroup["tag"]]
+                        subsubgroup["docs"] = sorted([cache for cache in browse_cache if cache["Type"] == subsubgroup["tag"]], key=lambda x: (x["Year"], x["DisplayName"]) if ("Year" in x) else (0, x["DisplayName"]))
     browse_cache = {cache["document_id"]: cache for cache in browse_cache}
     printNested(browse_list)
 
