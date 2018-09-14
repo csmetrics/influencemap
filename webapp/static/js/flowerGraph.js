@@ -19,8 +19,7 @@ var width, height, center, magf;
 var link = [], flower_split = [], bar = [],
     numnodes = [], svg = [], simulation = [],
     bar_axis_x = [], bar_axis_y = [],
-    node_in = [], node_out = [],
-    text_in = [], text_out = [];
+    node_out = [], text_out = [];
 
 function drawLegend() {
   var colorScale = d3.scaleSequential(colors).domain([0, 500]);
@@ -159,22 +158,6 @@ function drawFlower(svg_id, data, idx, w) {
         .on("mouseout", function() { highlight_off(idx); });
 
     // flower graph nodes
-    node_in[idx] = svg[idx].append("g").selectAll("circle")
-        .data(nodes)
-      .enter().append("circle")
-        .attr("id", function(d) { return d.id; })
-        .attr("class", "hl-circle")
-        .attr("gtype", function(d) { return d.gtype; })
-        .attr("r", function(d) { return 5+10*d.size; })
-        .style("fill", function (d, i) {if (d.id == 0) return "#ccc"; else return colors(d.weight);})
-        .style("stroke", function (d, i) { if ((d.coauthor == 'True') && (d.id != 0)) return "green";
-                                          else return ""; })
-        .style("stroke-width", 2)
-        .on("mouseover", function() { highlight_on(idx, this); })
-        .on("mouseout", function() { highlight_off(idx); })
-        .on("click", function(d) { toggle_split(idx, this); });
-
-    // flower graph nodes
     node_out[idx] = svg[idx].append("g").selectAll("circle")
         .data(nodes)
       .enter().append("circle")
@@ -189,20 +172,7 @@ function drawFlower(svg_id, data, idx, w) {
         .style("cursor", "pointer")
         .on("mouseover", function() { highlight_on(idx, this); })
         .on("mouseout", function() { highlight_off(idx); })
-        .on("click", function(d) { toggle_split(idx, this); showNodeData(idx, this);});
-
-    // flower graph node text
-    text_in[idx] = svg[idx].append("g").selectAll("text")
-        .data(nodes)
-      .enter().append("text")
-        .attr("id", function(d) { return d.id; })
-        .attr("class", "hl-text")
-        .attr("gtype", function(d) { return d.gtype; })
-        .attr("x", 8)
-        .attr("y", ".31em")
-        .text(function(d) { return d.name; })
-        .style("fill", function(d) { if (d.coauthor == 'False') return "black"; else return "gray"; });
-//        .style("font-style", function(d) { if (d.coauthor == 'False') return "normal"; else return "italic"; });
+        .on("click", function(d) { showNodeData(idx, this);});
 
     // flower graph node text
     text_out[idx] = svg[idx].append("g").selectAll("text")
@@ -213,7 +183,7 @@ function drawFlower(svg_id, data, idx, w) {
         .attr("gtype", function(d) { return d.gtype; })
         .attr("x", 8)
         .attr("y", ".31em")
-        .text(function(d) { d.name; })
+        .text(function(d) { return d.name; })
         .style("fill", function(d) { if (d.coauthor == 'False') return "black"; else return "gray"; });
 //        .style("font-style", function(d) { if (d.coauthor == 'False') return "normal"; else return "italic"; });
 
@@ -300,15 +270,10 @@ function highlight_off(idx) {
 
 function ticked(idx) {
   link[idx].attr("d", linkArc);
-  node_in[idx].attr("cx", transform_x);
-  node_in[idx].attr("cy", transform_y);
   node_out[idx].attr("cx", transform_x);
   node_out[idx].attr("cy", transform_y);
-  text_in[idx].attr("x", transform_text_x);
-  text_in[idx].attr("y", transform_text_y);
   text_out[idx].attr("x", transform_text_x);
   text_out[idx].attr("y", transform_text_y);
-  text_in[idx].attr("text-anchor", locate_text);
   text_out[idx].attr("text-anchor", locate_text);
 }
 
@@ -359,27 +324,11 @@ function locate_text(d) {
 function split_flower(idx, shift) {
 
   // Move text wrt shift
-  text_in[idx].transition()
-    .each(function() {
-        d3.select(this).transition()
-            .duration(2000)
-            .attr("transform", "translate(" + eval(-shift) + ", 0)");
-    });
-
-  // Move text wrt shift
   text_out[idx].transition()
     .each(function() {
         d3.select(this).transition()
             .duration(2000)
             .attr("transform", "translate(" + shift + ", 0)");
-    });
-
-  // Move nodes wrt shift
-  node_in[idx].transition()
-    .each(function() {
-        d3.select(this).transition()
-            .duration(2000)
-            .attr("transform", "translate(" + eval(-shift) + ", 0)");
     });
 
   // Move nodes wrt shift
