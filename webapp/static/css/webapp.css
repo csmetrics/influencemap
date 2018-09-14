@@ -169,8 +169,6 @@ table th {
 
 .link {
   fill: none;
-  stroke: #666;
-  stroke-width: 1.5px;
 }
 
 circle {
@@ -225,8 +223,8 @@ text {
   width: 58px;
   height: 58px;
   padding: 5px;
-  background-repeat: no-repeat; 
-  background-position: center; 
+  background-repeat: no-repeat;
+  background-position: center;
   background-size: cover;
 }
 .info-box-img {
@@ -348,15 +346,6 @@ tr:hover td{
 .node_info_a {
     color: black;
 }
-
-.link {
-  cursor: pointer;
-}
-
-.link:hover {
-    text-decoration: underline;
-}
-
 
 /* Tooltip container */
 .hoverinfo {

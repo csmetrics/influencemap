@@ -96,4 +96,5 @@ def processdata(gtype, egoG):
             "sum": nodedata[t]["weight"] if v["direction"] == "in" else nodedata[s]["weight"],
             "weight": v["weight"]
         } for s, t, v in links]
-    return { "nodes": list(nodedata.values()), "links": linkdata, "bars": chartdata }
+
+    return { "nodes": sorted(list(nodedata.values()), key=itemgetter("id")), "links": linkdata, "bars": chartdata }

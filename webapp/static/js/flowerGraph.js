@@ -17,7 +17,7 @@ var selcolor = [colors(0.2), colors(0.8)],
 
 var width, height, center, magf;
 var link = [], flower_split = [], bar = [],
-    numnodes = [], svg = [], simulation = [],
+    numnodes = [], svg = [],
     bar_axis_x = [], bar_axis_y = [],
     node_out = [], text_out = [];
 
@@ -143,11 +143,48 @@ function drawFlower(svg_id, data, idx, w) {
         .attr("d", "M0,-5L10,0L0,5")
         .style("fill", function (d) { if (d.type == "in") return selcolor[0]; else return selcolor[1]; });
 
+    link_g = svg[idx].append("g");
+    node_g = svg[idx].append("g");
+    text_g = svg[idx].append("g");
+
+    // flower graph nodes
+    node_out[idx] = node_g.selectAll("circle")
+        .data(nodes)
+      .enter().append("circle")
+        .attr("id", function(d) { return d.id; })
+        .attr("class", "hl-circle")
+        .attr("cx", function(d) { return transform_x(d.xpos); })
+        .attr("cy", function(d) { return transform_y(d.ypos); })
+        .attr("gtype", function(d) { return d.gtype; })
+        .attr("r", function(d) { return 5+10*d.size; })
+        .style("fill", function (d, i) {if (d.id == 0) return "#ccc"; else return colors(d.weight);})
+        .style("stroke", function (d, i) { if ((d.coauthor == 'True') && (d.id != 0)) return "green"; else return ""; })
+        .style("stroke-width", 2)
+        .style("cursor", "pointer")
+        .on("mouseover", function() { highlight_on(idx, this); })
+        .on("mouseout", function() { highlight_off(idx); })
+        .on("click", function(d) { showNodeData(idx, this);});
+
+    // flower graph node text
+    text_out[idx] = text_g.selectAll("text")
+        .data(nodes)
+      .enter().append("text")
+        .attr("id", function(d) { return d.id; })
+        .attr("class", "hl-text")
+        .attr("gtype", function(d) { return d.gtype; })
+        .attr("x", function(d) { return transform_text_x(d); })
+        .attr("y", function(d) { return transform_text_y(d); })
+        .attr("text-anchor", locate_text)
+        .text(function(d) { return d.name; })
+        .style("fill", function(d) { if (d.coauthor == 'False') return "black"; else return "gray"; });
+//        .style("font-style", function(d) { if (d.coauthor == 'False') return "normal"; else return "italic"; });
+
     // flower graph edges
-    link[idx] = svg[idx].append("g").selectAll("path")
+    link[idx] = link_g.selectAll("path")
         .data(links)
       .enter().append("path")
         .attr("id", function(d) { return d.id; })
+        .attr("d", function(d) { return linkArc(idx, d); })
         .attr("gtype", function(d) { return d.gtype; })
         .attr("class", function(d) { return "link " + d.type; })
         .attr('marker-end', function(d) { return "url(#" + d.gtype+"_"+d.type+"_"+d.id + ")"; })
@@ -157,43 +194,7 @@ function drawFlower(svg_id, data, idx, w) {
         .on("mouseover", function() { highlight_on(idx, this); })
         .on("mouseout", function() { highlight_off(idx); });
 
-    // flower graph nodes
-    node_out[idx] = svg[idx].append("g").selectAll("circle")
-        .data(nodes)
-      .enter().append("circle")
-        .attr("id", function(d) { return d.id; })
-        .attr("class", "hl-circle")
-        .attr("gtype", function(d) { return d.gtype; })
-        .attr("r", function(d) { return 5+10*d.size; })
-        .style("fill", function (d, i) {if (d.id == 0) return "#ccc"; else return colors(d.weight);})
-        .style("stroke", function (d, i) { if ((d.coauthor == 'True') && (d.id != 0)) return "green";
-                                          else return ""; })
-        .style("stroke-width", 2)
-        .style("cursor", "pointer")
-        .on("mouseover", function() { highlight_on(idx, this); })
-        .on("mouseout", function() { highlight_off(idx); })
-        .on("click", function(d) { showNodeData(idx, this);});
 
-    // flower graph node text
-    text_out[idx] = svg[idx].append("g").selectAll("text")
-        .data(nodes)
-      .enter().append("text")
-        .attr("id", function(d) { return d.id; })
-        .attr("class", "hl-text")
-        .attr("gtype", function(d) { return d.gtype; })
-        .attr("x", 8)
-        .attr("y", ".31em")
-        .text(function(d) { return d.name; })
-        .style("fill", function(d) { if (d.coauthor == 'False') return "black"; else return "gray"; });
-//        .style("font-style", function(d) { if (d.coauthor == 'False') return "normal"; else return "italic"; });
-
-    // flower graph chart layout
-    simulation[idx] = d3.forceSimulation(nodes)
-        .force("charge", d3.forceManyBody().strength(-80))
-        .force("link", d3.forceLink(links).id(function (d) {return d.id;}).distance(300).strength(1).iterations(0))
-        .force("x", d3.forceX())
-        .force("y", d3.forceY())
-        .on("tick", function() { ticked(idx); });
 }
 
 function highlight_on(idx, selected) {
@@ -268,51 +269,40 @@ function highlight_off(idx) {
   });
 }
 
-function ticked(idx) {
-  link[idx].attr("d", linkArc);
-  node_out[idx].attr("cx", transform_x);
-  node_out[idx].attr("cy", transform_y);
-  text_out[idx].attr("x", transform_text_x);
-  text_out[idx].attr("y", transform_text_y);
-  text_out[idx].attr("text-anchor", locate_text);
-}
-
-function linkArc(d) {
-  var dx = d.target.x - d.source.x,
-      dy = d.target.y - d.source.y,
+function linkArc(idx, d) {
+  var source = node_out[idx]._groups[0][d.source],
+      target = node_out[idx]._groups[0][d.target];
+  var dx = parseInt(target.getAttribute("cx")) - parseInt(source.getAttribute("cx")),
+      dy = parseInt(target.getAttribute("cy")) - parseInt(source.getAttribute("cy")),
       dr = Math.sqrt(dx * dx + dy * dy);
-  return "M" + d.source.x + "," + d.source.y + "A" + dr + "," + dr + " 0 0,1 " + d.target.x + "," + d.target.y;
+  return "M" + source.getAttribute("cx") + "," + source.getAttribute("cy")
+        + "A" + dr + "," + dr + " 0 0,1 "
+        + target.getAttribute("cx") + "," + target.getAttribute("cy");
 }
 
-function transform_x(d) {
-  d.fx = center[0]+magf*d.xpos;
-  return d.x
+function transform_x(xpos) {
+  return center[0]+magf*xpos;
 }
 
-function transform_y(d) {
-  d.fy = center[1]+magf*d.ypos;
-  return d.y
+function transform_y(ypos) {
+  return center[1]-magf*ypos;
 }
 
 function transform_text_x(d) {
   shift = 0;
   circ_dif = 5;
-  d.fx = center[0]+magf*d.xpos;
-
   if (d.xpos < -.3) shift -= 5 + 10 * d.size + circ_dif;
   if (d.xpos > .3) shift += 5 + 10 * d.size + circ_dif;
-  return d.x + shift
+  return transform_x(d.xpos) + shift
 }
 
 function transform_text_y(d) {
   shift = 0;
-  d.fy = center[1]-magf*d.ypos;
-
   if (d.id > 0 && -.5 < d.xpos && d.xpos < .5) shift -= 5;
   if (d.id > 0 && -.4 < d.xpos && d.xpos < .4) shift -= 6;
   if (d.id > 0 && -.3 < d.xpos && d.xpos < .3) shift -= 11;
   if (d.id > 0 && -.1 < d.xpos && d.xpos < .1) shift -= 15;
-  return d.y + shift
+  return transform_y(d.ypos) + shift
 }
 
 function locate_text(d) {
