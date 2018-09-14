@@ -577,8 +577,8 @@ def get_node_info(request):
     data = json.loads(request.POST.get("data_string"))
     node_name = data.get("name")
 
-    entities = request.session["entity_names"]
-    #year_ranges = request.session["year_ranges"]
+    entities    = request.session["entity_names"]
+    flower_name = request.session["flower_name"]
 
     node_info_dict = request.session["node_info"][node_name]
     paper_dicts = node_info_dict['paper_list']
@@ -589,7 +589,8 @@ def get_node_info(request):
     # Information for the node info table
     node_info = get_node_info_single(selected_node_dicts)
     node_info["entity_names"] = entities
-    node_info["max_page"] = math.ceil(len(paper_dicts) / NUM_NODE_INFO)
+    node_info["max_page"]     = math.ceil(len(paper_dicts) / NUM_NODE_INFO)
+    node_info["flower_name"]  = flower_name
 
     # Find node display name
     if node_type == 'CONF':
