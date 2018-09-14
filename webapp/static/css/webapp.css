@@ -349,6 +349,16 @@ tr:hover td{
     color: black;
 }
 
+.node_info_header {
+    margin-bottom: 10px;
+}
+
+.node_info_lower {
+    margin-bottom: -10px;
+    display: flex;
+    justify-content: right;
+}
+
 .link {
   cursor: pointer;
 }

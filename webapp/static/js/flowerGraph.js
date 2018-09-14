@@ -510,17 +510,25 @@ var page_counter = 0;
 var max_page_num = 0;
 var node_info_name = '';
 var display_name   = '';
+var flower_name    = '';
 
 
 function formatNodeInfoHeader(data) {
   var title = "<h3 style='display: inline;margin-right: 10px;'>"+display_name+"</h3>";
+
+  return "<div id='node_info_header' class='node_info_header'>"+title+"</div>";
+}
+
+
+function formatNodeInfoLower(data) {
   page_counter = 1;
   max_page_num = data["max_page"];
 
   var next_button = "<button onclick='nextPage()'>Next</button>";
   var prev_button = "<button onclick='prevPage()'>Prev</button>";
   var page_indicate = "<p id='page_indicate' style='display: inline; margin: 5px;'>" + page_counter + "/" + max_page_num + "</p>";
-  return "<div id='node_info_header'>"+title+prev_button+page_indicate+next_button+"</div>";
+
+  return "<div id='node_info_lower' class='node_info_lower'>"+prev_button+page_indicate+next_button+"</div>";
 }
 
 
@@ -568,8 +576,8 @@ function formatNodeInfoTable(data) {
               var cit_arrow = function (x) { return "<td width='2%' style='color: rgb(107,172,208); font-size: 30px; background-color:" + x + "'>⟶</td>"; };
           } else {
               //var cit_html = function (x) { return "<td width='32%' style='background-color:" + x + "'></td>"; };
-              var cit_html = function (x) { return "<td width='32%'></td>"; };
-              var cit_arrow = function (x) { return "<td width='2%'></td>"; };
+              var cit_html = function (x) { return "<td width='32%' style='cursor: default;'></td>"; };
+              var cit_arrow = function (x) { return "<td width='2%' style='cursor: default;'></td>"; };
           }
 
           if (j < references.length) {
@@ -579,8 +587,8 @@ function formatNodeInfoTable(data) {
               var ref_arrow = function (x) { return "<td width='2%' style='color: rgb(228,130,104); font-size: 30px; background-color:" + x + "'>⟶</td>"; };
           } else {
               //var ref_html = function (x) { return "<td width='32%' style='background-color:" + x + "'></td>"; };
-              var ref_html = function (x) { return "<td width='32%'></td>"; };
-              var ref_arrow = function (x) { return "<td width='2%'></td>"; };
+              var ref_html = function (x) { return "<td width='32%' style='cursor: default;'></td>"; };
+              var ref_arrow = function (x) { return "<td width='2%' style='cursor: default;'></td>"; };
           }
 
           if (j == 0) {
@@ -590,10 +598,10 @@ function formatNodeInfoTable(data) {
           }
           table_str += "</tr>";
       }
-      table_str += "<tr style='border-bottom: 0px solid white'><td style='height: 1px' colspan='5'></td></tr>";
+      table_str += "<tr style='border-bottom: 0px solid white;'><td style='height: 1px; cursor: default;' colspan='5'></td></tr>";
   }
-  link_table += "<tr> <th>Has influenced</th> <th style='font-size: 30px'>⟶</th>";
-  link_table += "<th>" + display_name + "</th> <th style='font-size: 30px'>⟶</th> <th>Has influenced</th> </tr>";
+  link_table += "<tr> <th>" + display_name + " has influenced</th> <th style='font-size: 30px'>⟶</th>";
+  link_table += "<th>" + flower_name + "</th> <th style='font-size: 30px'>⟶</th> <th>" + display_name + " has been influenced</th> </tr>";
   link_table += table_str;
   link_table += "</table>";
 
@@ -605,12 +613,16 @@ function populateNodeInfoContent(data){
   var container_div = document.getElementById("node_info_container");
   var content_div = document.getElementById("node_info_content");
   var header_div = document.getElementById("node_info_header");
+  var lower_div = document.getElementById("node_info_lower");
 
   if (content_div) {
       container_div.removeChild(content_div);
   }
   if (header_div) {
       container_div.removeChild(header_div);
+  }
+  if (lower_div) {
+      container_div.removeChild(lower_div);
   }
 
   // Make header
@@ -625,6 +637,11 @@ function populateNodeInfoContent(data){
   $(function () {
     $('[data-toggle="tooltip"]').tooltip()
   })
+
+  // Make lower
+  var lower_string = formatNodeInfoLower(data);
+  var html_elem = new DOMParser().parseFromString(lower_string, 'text/html').body.childNodes;
+  container_div.appendChild(html_elem[0]);
 }
 
 
@@ -643,7 +660,9 @@ function getData(param){
     data: {"data_string": JSON.stringify(data_dict)},
     success: function (result) { // return data if success
 
+      console.log(result);
       display_name = result['node_name'];
+      flower_name  = result['flower_name'];
       populateNodeInfoContent(result);
       document.getElementById("node_info_modal").style.display = "block";
     },
@@ -688,17 +707,12 @@ function nextPage() {
         url: "/get_next_node_info_page/",
         data: {"data_string": JSON.stringify(data_dict)},
         success: function (result) { // return data if success
-          var container_div = document.getElementById("node_info_container");
           var content_div = document.getElementById("node_info_content");
-
-          if (content_div) {
-              container_div.removeChild(content_div);
-          }
 
           // Make content
           var html_string = formatNodeInfoTable(result);
           var html_elem = new DOMParser().parseFromString(html_string, 'text/html').body.childNodes;
-          container_div.appendChild(html_elem[0]);
+          content_div.replaceWith(html_elem[0]);
 
           document.getElementById("node_info_modal").style.display = "block";
 
@@ -723,17 +737,12 @@ function prevPage() {
         url: "/get_next_node_info_page/",
         data: {"data_string": JSON.stringify(data_dict)},
         success: function (result) { // return data if success
-          var container_div = document.getElementById("node_info_container");
           var content_div = document.getElementById("node_info_content");
-
-          if (content_div) {
-              container_div.removeChild(content_div);
-          }
 
           // Make content
           var html_string = formatNodeInfoTable(result);
           var html_elem = new DOMParser().parseFromString(html_string, 'text/html').body.childNodes;
-          container_div.appendChild(html_elem[0]);
+          content_div.replaceWith(html_elem[0]);
 
           document.getElementById("node_info_modal").style.display = "block";
 
