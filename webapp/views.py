@@ -7,7 +7,6 @@ from django.conf import settings
 from datetime import datetime
 from collections import Counter
 from operator import itemgetter
-from webapp.graph import processdata
 from webapp.elastic import *
 from webapp.utils import *
 
@@ -440,6 +439,7 @@ def resubmit(request):
     flower_config['pub_upper'] = int(request.POST.get('to_pub_year'))
     flower_config['cit_lower'] = int(request.POST.get('from_cit_year'))
     flower_config['cit_upper'] = int(request.POST.get('to_cit_year'))
+    flower_config['num_leaves'] = int(request.POST.get('numpetals'))
 
     request.session['year_ranges'] = {'pub_lower': flower_config['pub_lower'], 'pub_upper': flower_config['pub_upper'], 'cit_lower': flower_config['cit_lower'], 'cit_upper': flower_config['cit_upper']}
 
