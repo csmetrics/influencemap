@@ -117,8 +117,8 @@ function drawFlower(svg_id, data, idx, w) {
       .enter().append("marker")
         .attr("id", function(d) { return d.gtype+"_"+d.type+"_"+d.id; })
         .attr("viewBox", "0 -5 10 10")
-        .attr("refX", function (d) { return 10+10*d.padding; })
-        .attr("refY", 0)
+        .attr("refX", function (d) { return 12+5*d.padding; })
+        .attr("refY", function (d) { return -d.padding; })
         .attr("markerWidth", function (d) { return arrow_size_calc(d.weight); })
         .attr("markerHeight", function (d) { return arrow_size_calc(d.weight); })
         .attr("markerUnits", "userSpaceOnUse")
@@ -153,10 +153,10 @@ function drawFlower(svg_id, data, idx, w) {
       .enter().append("circle")
         .attr("id", function(d) { return d.id; })
         .attr("class", "hl-circle")
-        .attr("xpos", function(d) { return transform_x(d.xpos); })
-        .attr("ypos", function(d) { return transform_y(d.ypos); })
-        .attr("cx", function(d) { if (d.id > 0) return transform_x(nodes[13].xpos); else return transform_x(d.xpos); })
-        .attr("cy", function(d) { if (d.id > 0) return transform_y(nodes[13].ypos); else return transform_y(d.ypos); })
+        .attr("xpos", function(d) { return transform_x(d); })
+        .attr("ypos", function(d) { return transform_y(d); })
+        .attr("cx", function(d) { if (d.id > 0) return transform_x(nodes[13]); else return transform_x(d); })
+        .attr("cy", function(d) { if (d.id > 0) return transform_y(nodes[13]); else return transform_y(d); })
         .attr("gtype", function(d) { return d.gtype; })
         .attr("r", function(d) { return 5+10*d.size; })
         .style("fill", function (d, i) {if (d.id == 0) return "#ccc"; else return colors(d.weight);})
@@ -168,8 +168,8 @@ function drawFlower(svg_id, data, idx, w) {
         .on("click", function(d) { showNodeData(idx, this);})
       .transition()
         .duration(2000)
-        .attr("cx", function(d) { return transform_x(d.xpos); })
-        .attr("cy", function(d) { return transform_y(d.ypos); })
+        .attr("cx", function(d) { return transform_x(d); })
+        .attr("cy", function(d) { return transform_y(d); })
 
     // flower graph node text
     text_out[idx] = text_g.selectAll("text")
@@ -293,16 +293,16 @@ function linkArc(idx, d, bloom) {
   }
   var dx = tx-sx,
       dy = ty-sy,
-      dr = Math.sqrt(dx * dx + dy * dy);
+      dr = Math.sqrt(dx * dx + dy * dy)*2;
   return "M" + sx + "," + sy + "A" + dr + "," + dr + " 0 0,1 " + tx + "," + ty;
 }
 
-function transform_x(xpos) {
-  return center[0]+magf*xpos;
+function transform_x(d) {
+  return center[0]+magf*d.xpos;
 }
 
-function transform_y(ypos) {
-  return center[1]-magf*ypos;
+function transform_y(d) {
+  return center[1]-magf*d.ypos;
 }
 
 function transform_text_x(d) {
@@ -310,7 +310,7 @@ function transform_text_x(d) {
   circ_dif = 5;
   if (d.xpos < -.3) shift -= 5 + 10 * d.size + circ_dif;
   if (d.xpos > .3) shift += 5 + 10 * d.size + circ_dif;
-  return transform_x(d.xpos) + shift
+  return transform_x(d) + shift
 }
 
 function transform_text_y(d) {
@@ -319,7 +319,7 @@ function transform_text_y(d) {
   if (d.id > 0 && -.4 < d.xpos && d.xpos < .4) shift -= 6;
   if (d.id > 0 && -.3 < d.xpos && d.xpos < .3) shift -= 11;
   if (d.id > 0 && -.1 < d.xpos && d.xpos < .1) shift -= 15;
-  return transform_y(d.ypos) + shift
+  return transform_y(d) + shift
 }
 
 function locate_text(d) {
