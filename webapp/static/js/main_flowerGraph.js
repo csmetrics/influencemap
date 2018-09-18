@@ -30,7 +30,7 @@ function drawFlower(svg_id, data, idx, w) {
     width = w, magf = Math.min(250, width/5),
     height = Math.max(580, w*0.6),
     numnodes[idx] = nodes.length,
-    center = [width*0.45, Math.max(250, height*0.55)];
+    center = [width*0.45, Math.max(250, height*0.53)];
     flower_split[idx] = false;
 
     // flower graph edge arrow
