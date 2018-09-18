@@ -5,8 +5,9 @@ Flower functions for node information.
 import numpy as np
 from datetime import datetime
 
+
 def select_node_info(influence_df, node_names):
-    '''
+    ''' Determine node information through single pass through dataframe.
     '''
     influence_cols = ['influenced', 'influencing', 'link_paper_id', 'ego_paper_id', 'publication_year']
     node_cols = ['entity_name', 'entity_type']
@@ -19,36 +20,29 @@ def select_node_info(influence_df, node_names):
 
     # Node information results
     node_info = dict()
-    for entity_info, node_influence in filtered_influence.groupby(node_cols):
-        entity_name, entity_type = entity_info
+    for iterrow in filtered_influence.iterrows():
+        _, row = iterrow
+        entity_name    = row['entity_name']
+        entity_type    = row['entity_type']
+        ego_paper_id   = row['ego_paper_id']
+        ego_paper_year = row['publication_year']
+        link_paper_id  = row['link_paper_id']
+        
+        # Set default dictionaries
+        info = node_info.setdefault(entity_name, { 'paper_list': dict(), 'type': entity_type.ident })
+        paper_info = info['paper_list'].setdefault(ego_paper_id, { 'year': int(ego_paper_year), 'ego_paper': int(ego_paper_id), 'reference': list(), 'citation': list() })
 
-        # List of dictionaries per node entity for timeline
-        #node_info[entity_name] = list()       
-        ego_paper_list = list()
+        # Determine if reference or citation
+        if row['is_ref']:
+            paper_info['reference'].append(link_paper_id)
+        if row['is_cit']:
+            paper_info['citation'].append(link_paper_id)
 
-        ego_group = node_influence.groupby(['ego_paper_id', 'publication_year'])
-        for ego_paper_attr, ego_df in ego_group:
-            # Ego attributes
-            ego_paper_id, ego_paper_year = ego_paper_attr
-            ego_paper_res = {'year': int(ego_paper_year)}
+    # Turn paper dictionaries to lists and sort by year
+    for name, info in node_info.items():
+        paper_list = list(info['paper_list'].values())
+        paper_list.sort(key=lambda x: -x['year'])
 
-            # Get reference papers
-            ref_df    = ego_df[ ego_df['is_ref'] ]
-            ref_links = list(set(ref_df['link_paper_id'].astype('int').tolist()))
-
-            # Get citation papers
-            cit_df    = ego_df[ ego_df['is_cit'] ]
-            cit_links = list(set(cit_df['link_paper_id'].astype('int').tolist()))
-
-            ego_paper_res['ego_paper'] = int(ego_paper_id)
-            ego_paper_res['reference'] = ref_links
-            ego_paper_res['citation']  = cit_links
-
-            ego_paper_list.append(ego_paper_res)
-            #node_info[entity_name].append(ego_paper_res)
-
-        ego_paper_list.sort(key=lambda x: -x['year'])
-        #node_info[entity_name].sort(key=lambda x: -x['year'])
-        node_info[entity_name] = { 'paper_list': ego_paper_list, 'type': entity_type.ident }
+        info['paper_list'] = paper_list
 
     return node_info
