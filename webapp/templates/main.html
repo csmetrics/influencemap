@@ -19,12 +19,49 @@ Licence URI: http://www.os-templates.com/template-terms
       <!-- Small boxes (Stat box) -->
       <div class="row">
         <div class="col-lg-7 col-xs-7">
-          <svg id="graph1" width=900 height=450></svg>
+          <div id="preview-carousel" class="carousel slide" data-ride="carousel">
+            <ol class="carousel-indicators">
+              <li data-target="#preview-carousel" data-slide-to="0" class="active"></li>
+              <li data-target="#preview-carousel" data-slide-to="1"></li>
+              <li data-target="#preview-carousel" data-slide-to="2"></li>
+            </ol>
+            <div class="carousel-inner" style="padding-left:40">
+              <div class="carousel-item active">
+                <svg id="graph1" width=1000 height=500></svg>
+                <div class="carousel-caption d-none d-md-block">
+                  <h5>Influence Flower of Sir Tim Berners-Lee - to Authors</h5>
+                  <p>description description description description description description description description some other description about the flower</p>
+                </div>
+              </div>
+              <div class="carousel-item">
+                <!-- <svg id="graph2" width=900 height=450></svg> -->
+              </div>
+              <div class="carousel-item">
+                <!-- <svg id="graph3" width=900 height=450></svg> -->
+              </div>
+            </div>
+            <a class="carousel-control-prev" href="#preview-carousel" role="button" data-slide="prev">
+              <span class="carousel-control-prev-icon" aria-hidden="true"></span>
+              <span class="sr-only">Previous</span>
+            </a>
+            <a class="carousel-control-next" href="#preview-carousel" role="button" data-slide="next">
+              <span class="carousel-control-next-icon" aria-hidden="true"></span>
+              <span class="sr-only">Next</span>
+            </a>
+          </div>
         </div>
         <div class="col-lg-5 col-xs-5">
           <!-- small box -->
-          <div class="box box-solid box-home bg-white">
-            <p>About Project Influence Map</p>
+          <div class="previews">
+            <div class="preview-item">other preview</div>
+            <div class="preview-item">other preview</div>
+            <div class="preview-item">other preview</div>
+            <div class="preview-item">other preview</div>
+            <div class="preview-item">other preview</div>
+
+          </div>
+          <div class="project-intro">
+            <h3>About Project Influence Map</h3>
       			<p>
               This project sets up to map the incoming and outgoing intellectual influence of academic entities -- people, projects, publications venues, and institutions. We do so by creating visualisations from the citation data curated in Microsoft Academic Graph.
               <!-- In academia, a prevalent question of interest is which academics are influential? Further, what makes an academic influential? With Influence Map, we are working towards a deeper understanding of academic influence by visualising it at a localised level, i.e. considering who a person or a group has been influenced by, and who they have had influence on. We create these visualisations using citation data from the Microsoft Academic Graph. -->
@@ -71,7 +108,13 @@ Licence URI: http://www.os-templates.com/template-terms
 <script src="{% static 'js/main_data.js' %}"></script>
 <script src="{% static 'js/main_flowerGraph.js' %}"></script>
 <script>
-drawFlower("#graph1", author_data, 0, 1000);
-// drawFlower("#graph2", conf_data, 1, 800);
-// drawFlower("#graph3", inst_data, 2, 800);
+var width = document.getElementById('preview-carousel').offsetWidth;
+drawFlower("#graph1", author_data, 0, width);
+drawFlower("#graph2", conf_data, 1, width);
+drawFlower("#graph3", inst_data, 2, width);
+
+$('#preview-carousel').bind('slide.bs.carousel', function (e) {
+    console.log('slide event!', e);
+});
+
 </script>

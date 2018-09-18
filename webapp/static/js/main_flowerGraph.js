@@ -31,7 +31,7 @@ function drawFlower(svg_id, data, idx, w) {
 
     svg[idx] = d3.select(svg_id),
     width = w, magf = Math.min(250, width/5),
-    height = 600,
+    height = 500,
     numnodes[idx] = nodes.length,
     center = [width*0.45, height*0.6];
     flower_split[idx] = false;

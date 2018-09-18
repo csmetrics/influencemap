@@ -13,10 +13,27 @@
 .content {
   min-height: 0;
 }
-.box-home {
-  min-height:25%;
-  padding: 20px;
-  font-size: 20px;
+
+.carousel-indicators li {
+  border: 1px solid #000;
+}
+.carousel-indicators .active {
+  background-color: #ddd;
+}
+.carousel-caption {
+  margin-top: 20px;
+  color:#000;
+}
+.preview-item {
+  display: inline-block;
+  border-radius: 15px;
+  border: 8px solid #ddd;
+  width: 120px;
+  height: 120px;
+}
+.project-intro {
+  padding: 20px 20px 20px 0;
+  font-size: 15px;
 }
 
 .search-bar {
