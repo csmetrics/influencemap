@@ -56,12 +56,15 @@ def get_navbar_option(keyword = "", option = ""):
 def get_url_query(query):
     config = None
     if "pmin" in query:
-        config = [
-            int(query.get("pmin")), int(query.get("pmax")),
-            int(query.get("cmin")), int(query.get("cmax")),
-            query.get("selfcite") == "true",
-            query.get("coauthor") == "true"
-        ]
+        config = {
+            "pub_lower": int(query.get("pmin")),
+            "pub_upper": int(query.get("pmax")),
+            "cit_lower": int(query.get("cmin")),
+            "cit_upper": int(query.get("cmax")),
+            "self_cite": query.get("selfcite") == "true",
+            "icoauthor": query.get("coauthor") == "true",
+            "num_leaves": int(query.get("node"))
+        }
     document_id = query.get("id")
     document = query_browse_group(document_id)
     return document, "author", config
@@ -91,6 +94,3 @@ def get_conf_journ_display_names(entityIds):
     if "JournalIds" in entityIds and entityIds["JournalIds"] != []: display_names["Journal"] = get_display_names_from_journal_ids(entityIds['JournalIds'])
 
     return display_names
-
-
-

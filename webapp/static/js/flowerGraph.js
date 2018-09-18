@@ -17,7 +17,11 @@ var selcolor = [colors(0.2), colors(0.8)],
 
 var width, height, center, magf;
 var link = [], flower_split = [], bar = [],
+<<<<<<< HEAD
     numnodes = [], svg = [],
+=======
+    numnodes = [], cnode = [], svg = [],
+>>>>>>> incubator
     bar_axis_x = [], bar_axis_y = [],
     node_out = [], text_out = [];
 
@@ -44,8 +48,8 @@ function drawFlower(svg_id, data, idx, w) {
     var links = data["links"];
     var bars = data["bars"];
 
-    v_margin = 160;
-    yheight = 100;
+    v_margin = 150-(Math.max(5, nodes.length-15)*3);
+    yheight = 120-Math.max(20, nodes.length-15);
 
     svg[idx] = d3.select(svg_id),
     width = w, magf = Math.min(250, width/5),
@@ -117,8 +121,8 @@ function drawFlower(svg_id, data, idx, w) {
       .enter().append("marker")
         .attr("id", function(d) { return d.gtype+"_"+d.type+"_"+d.id; })
         .attr("viewBox", "0 -5 10 10")
-        .attr("refX", function (d) { return 10+10*d.padding; })
-        .attr("refY", 0)
+        .attr("refX", function (d) { return 10+200*d.padding/Math.max(15, numnodes[idx]); })
+        .attr("refY", function (d) { return -d.padding; })
         .attr("markerWidth", function (d) { return arrow_size_calc(d.weight); })
         .attr("markerHeight", function (d) { return arrow_size_calc(d.weight); })
         .attr("markerUnits", "userSpaceOnUse")
@@ -133,7 +137,7 @@ function drawFlower(svg_id, data, idx, w) {
       .enter().append("marker")
         .attr("id", function(d) { return d.gtype+"_"+d.type+"_"+d.id+"_selected"; })
         .attr("viewBox", "0 -5 10 10")
-        .attr("refX", function (d) { return 10+10*d.padding; })
+        .attr("refX", function (d) { return 10+200*d.padding/Math.max(15, numnodes[idx]); })
         .attr("refY", 0)
         .attr("markerWidth", function (d) { return arrow_size_calc(d.weight); })
         .attr("markerHeight", function (d) { return arrow_size_calc(d.weight); })
@@ -153,12 +157,12 @@ function drawFlower(svg_id, data, idx, w) {
       .enter().append("circle")
         .attr("id", function(d) { return d.id; })
         .attr("class", "hl-circle")
-        .attr("xpos", function(d) { return transform_x(d.xpos); })
-        .attr("ypos", function(d) { return transform_y(d.ypos); })
-        .attr("cx", function(d) { if (d.id > 0) return transform_x(nodes[13].xpos); else return transform_x(d.xpos); })
-        .attr("cy", function(d) { if (d.id > 0) return transform_y(nodes[13].ypos); else return transform_y(d.ypos); })
+        .attr("xpos", function(d) { return transform_x(d); })
+        .attr("ypos", function(d) { return transform_y(d); })
+        .attr("cx", function(d) { if (d.id > 0) return transform_x(nodes[0]); else return transform_x(d); })
+        .attr("cy", function(d) { if (d.id > 0) return transform_y(nodes[0])-magf; else return transform_y(d); })
         .attr("gtype", function(d) { return d.gtype; })
-        .attr("r", function(d) { return 5+10*d.size; })
+        .attr("r", function(d) { return 8+200*d.size/Math.max(15, numnodes[idx]); })
         .style("fill", function (d, i) {if (d.id == 0) return "#ccc"; else return colors(d.weight);})
         .style("stroke", function (d, i) { if ((d.coauthor == 'True') && (d.id != 0)) return "green"; else return ""; })
         .style("stroke-width", 2)
@@ -168,8 +172,8 @@ function drawFlower(svg_id, data, idx, w) {
         .on("click", function(d) { showNodeData(idx, this);})
       .transition()
         .duration(2000)
-        .attr("cx", function(d) { return transform_x(d.xpos); })
-        .attr("cy", function(d) { return transform_y(d.ypos); })
+        .attr("cx", function(d) { return transform_x(d); })
+        .attr("cy", function(d) { return transform_y(d); })
 
     // flower graph node text
     text_out[idx] = text_g.selectAll("text")
@@ -178,8 +182,8 @@ function drawFlower(svg_id, data, idx, w) {
         .attr("id", function(d) { return d.id; })
         .attr("class", "hl-text")
         .attr("gtype", function(d) { return d.gtype; })
-        .attr("x", function(d) { if (d.id > 0) return transform_text_x(nodes[13]); else return transform_text_x(d); })
-        .attr("y", function(d) { if (d.id > 0) return transform_text_y(nodes[13]); else return transform_text_y(d); })
+        .attr("x", function(d) { if (d.id > 0) return transform_text_x(nodes[0]); else return transform_text_x(d); })
+        .attr("y", function(d) { if (d.id > 0) return transform_text_y(nodes[0])-magf; else return transform_text_y(d); })
         .attr("text-anchor", locate_text)
         .text(function(d) { return d.name; })
         .style("fill", function(d) { if (d.coauthor == 'False') return "black"; else return "gray"; })
@@ -293,6 +297,7 @@ function linkArc(idx, d, bloom) {
   }
   var dx = tx-sx,
       dy = ty-sy,
+<<<<<<< HEAD
       dr = Math.sqrt(dx * dx + dy * dy);
   return "M" + sx + "," + sy + "A" + dr + "," + dr + " 0 0,1 " + tx + "," + ty;
 }
@@ -303,14 +308,32 @@ function transform_x(xpos) {
 
 function transform_y(ypos) {
   return center[1]-magf*ypos;
+=======
+      dr = Math.sqrt(dx * dx + dy * dy)*2;
+  return "M" + sx + "," + sy + "A" + dr + "," + dr + " 0 0,1 " + tx + "," + ty;
+}
+
+function transform_x(d) {
+  return center[0]+magf*d.xpos;
+}
+
+function transform_y(d) {
+  return center[1]-magf*d.ypos;
+>>>>>>> incubator
 }
 
 function transform_text_x(d) {
   shift = 0;
   circ_dif = 5;
+<<<<<<< HEAD
   if (d.xpos < -.3) shift -= 5 + 10 * d.size + circ_dif;
   if (d.xpos > .3) shift += 5 + 10 * d.size + circ_dif;
   return transform_x(d.xpos) + shift
+=======
+  if (d.xpos < -.3) shift -= 8+200*d.size/15 + circ_dif;
+  if (d.xpos > .3) shift += 8+200*d.size/15 + circ_dif;
+  return transform_x(d) + shift
+>>>>>>> incubator
 }
 
 function transform_text_y(d) {
@@ -319,7 +342,11 @@ function transform_text_y(d) {
   if (d.id > 0 && -.4 < d.xpos && d.xpos < .4) shift -= 6;
   if (d.id > 0 && -.3 < d.xpos && d.xpos < .3) shift -= 11;
   if (d.id > 0 && -.1 < d.xpos && d.xpos < .1) shift -= 15;
+<<<<<<< HEAD
   return transform_y(d.ypos) + shift
+=======
+  return transform_y(d) + shift
+>>>>>>> incubator
 }
 
 function locate_text(d) {
