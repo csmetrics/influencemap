@@ -18,7 +18,10 @@ Licence URI: http://www.os-templates.com/template-terms
     <section class="content">
       <!-- Small boxes (Stat box) -->
       <div class="row">
-        <div class="col-lg-12 col-xs-12">
+        <div class="col-lg-7 col-xs-7">
+          <svg id="graph1" width=900 height=450></svg>
+        </div>
+        <div class="col-lg-5 col-xs-5">
           <!-- small box -->
           <div class="box box-solid box-home bg-white">
             <p>About Project Influence Map</p>
@@ -35,7 +38,7 @@ Licence URI: http://www.os-templates.com/template-terms
       </div>
       <!-- Small boxes (Stat box) -->
       <div class="row">
-        <div class="col-lg-12 col-xs-12">
+        <div class="col-lg-6 col-xs-6">
           <!-- small box -->
           <div class="box box-solid box-home bg-white">
             <p>Flower Gallery</p>
@@ -43,9 +46,7 @@ Licence URI: http://www.os-templates.com/template-terms
             <footer><a href="/browse">Browse</a></footer>
           </div>
         </div>
-      </div>
-      <div class="row">
-        <div class="col-lg-12 col-xs-12">
+        <div class="col-lg-6 col-xs-6">
           <!-- small box -->
           <div class="box box-solid box-home bg-white">
             <p>Create new flowers</p>
@@ -64,3 +65,13 @@ Licence URI: http://www.os-templates.com/template-terms
 </div>
 </body>
 </html>
+<script src="{% static 'js/d3.v4.min.js' %}"></script>
+<script src="{% static 'js/d3-selection-multi.v1.min.js' %}"></script>
+<script src="{% static 'js/d3-scale-chromatic.v1.min.js' %}"></script>
+<script src="{% static 'js/mainpage.js' %}"></script>
+<script src="{% static 'js/main_flowerGraph.js' %}"></script>
+<script>
+drawFlower("#graph1", author_data, 0, 1000);
+// drawFlower("#graph2", conf_data, 1, 800);
+// drawFlower("#graph3", inst_data, 2, 800);
+</script>
