@@ -85,10 +85,11 @@ function drawFlower(svg_id, data, idx, w) {
     // bar chart x axis
     bar_axis_x[idx] = svg[idx].append("g")
         .attr("transform", "translate(0," + (height+yheight-v_margin) + ")")
-        .attr("class", "hl-text")
         .call(d3.axisBottom(x))
         .selectAll("text")
           .text(function(d) { if (d.length > 20) return d.slice(0, 20)+"..."; else return d.slice(0, 20); })
+          .attr("id", function(d, i) { return i+1; })
+          .attr("class", "hl-text node-text")
           .style("text-anchor", "end")
           .style("fill", function(d) {
             for (var i in nodes) {
@@ -103,8 +104,8 @@ function drawFlower(svg_id, data, idx, w) {
             };
             return "black"; } )
           .attr("dx", "-.8em")
-          .attr("dy", "-.5em")
-          .attr("transform", "rotate(-90)");;
+          .attr("dy", function() {return - x.bandwidth()/15; } )//"-3px")
+          .attr("transform", "rotate(-90)");
 
     // bar chart y axis
     bar_axis_y[idx] = svg[idx].append("g")
@@ -165,7 +166,7 @@ function drawFlower(svg_id, data, idx, w) {
         .style("cursor", "pointer")
         .on("mouseover", function() { highlight_on(idx, this); })
         .on("mouseout", function() { highlight_off(idx); })
-        .on("click", function(d) { showNodeData(idx, this);})
+        .on("click", function(d) { if (d.id != 0) { showNodeData(idx, this);} })
       .transition()
         .duration(2000)
         .attr("cx", function(d) { return transform_x(d); })
@@ -176,7 +177,7 @@ function drawFlower(svg_id, data, idx, w) {
         .data(nodes)
       .enter().append("text")
         .attr("id", function(d) { return d.id; })
-        .attr("class", "hl-text")
+        .attr("class", function(d) { if (d.id == 0) return 'hl-text node-ego-text'; else return 'hl-text node-text'; })
         .attr("gtype", function(d) { return d.gtype; })
         .attr("x", function(d) { if (d.id > 0) return transform_text_x(nodes[0]); else return transform_text_x(d); })
         .attr("y", function(d) { if (d.id > 0) return transform_text_y(nodes[0])-magf; else return transform_text_y(d); })
@@ -222,8 +223,8 @@ function highlight_on(idx, selected) {
 
   // highlight text
   svg[idx].selectAll("text").each(function() {
-    if (d3.select(this).attr("class") == "hl-text") {
-        d3.select(this).style("opacity", function (d) { if(id != d.id && d.id != 0 && group == d.gtype) return 0.4; else return 1; });
+    if (d3.select(this).classed("hl-text")) {
+        d3.select(this).style("opacity", function () { if(id != this.id) return 0.4; else return 1; });
     }
   });
 
@@ -267,7 +268,7 @@ function highlight_off(idx) {
 
   // un-highlight text
   svg[idx].selectAll("text").each(function() {
-    if (d3.select(this).attr("class") == "hl-text") {
+    if (d3.select(this).classed("hl-text")) {
         d3.select(this).style("opacity", 1);
     }
   });
