@@ -347,6 +347,12 @@ function transform_text_y(d) {
   if (d.id > 0 && -.4 < d.xpos && d.xpos < .4) shift -= 6;
   if (d.id > 0 && -.3 < d.xpos && d.xpos < .3) shift -= 11;
   if (d.id > 0 && -.1 < d.xpos && d.xpos < .1) shift -= 15;
+
+  // Title
+  if (d.id == 0) {
+      shift += 50;
+  }
+
   return d.y + shift
 }
 
