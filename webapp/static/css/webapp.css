@@ -365,6 +365,20 @@ tr:hover td{
     color: black;
 }
 
+/* Flower text */
+.node-text {
+    font-size: 20px;
+    font-family: Times;
+}
+
+
+.node-ego-text {
+    font-size: 20px;
+    font-family: Courier New;
+    text-decoration: underline;
+}
+
+
 /* Tooltip container */
 .hoverinfo {
     position: relative;
