@@ -28,7 +28,7 @@
   <div class="right-col col-sm-3">
     <table id="selectiontable" class="row-border"></table>
     <input class="inputbar" type="text" placeholder="Name your flower..."/>
-    <input id="continue-btn" class="btn medium" type="submit" value="Go" float="bottom" style="width:100%; margin-top:10px" />
+    <input id="continue-btn" class="btn btn-warning" type="submit" value="Go" float="bottom" style="width:100%; margin-top:10px" />
   </div>
 </div>
 
@@ -42,7 +42,7 @@
 
 .right-col {
   height: 100%;
-  border-left: 1px solid #999;
+  border-left: 1px solid #d2d6de;
 }
 
 .left-col {
@@ -53,8 +53,9 @@
 div.searchbar {
   background-color: #fff;
   border-radius: 10px;
-  color: #999;
-  border: 1px solid #999;
+  /* color: #999; */
+  height: 36px;
+  border: 1px solid #d2d6de;
 }
 
 .searchbar input {
@@ -67,8 +68,8 @@ div.searchbar {
 /* Form submit button */
 .searchbar button {
     background: #fff;
-    color: #999;
-}  
+    /* color: #999; */
+}
 
 #search-btn {
   background: transparent;
@@ -77,21 +78,22 @@ div.searchbar {
 .search-div {
   padding: 10px;
   background-color: #fff;
-  border-bottom: 1px solid #9E9E9E;
+  border-bottom: 1px solid #d2d6de;
 }
 
 .grey-theme-inverse, .entity-type-btn {
   border-radius: 10px;
   background-color: #fff;
-  border: 1px solid #9E9E9E;
-  color: #9E9E9E;
+  height: 36px;
+  border: 1px solid #d2d6de;
+  /* color: #999; */
 }
 
 .grey-theme, .selected-entity {
   border-radius: 10px;
-  background-color: #9E9E9E;
+  background-color: #d2d6de;
   border: 1px solid #9E9E9E;
-  color: #fff;
+  /* color: #fff; */
 }
 
 .btn:focus, .btn.focus {
@@ -113,13 +115,15 @@ table.dataTable.no-footer {
 .inputbar {
   padding: 5px 10px;
   border-radius: 10px;
-  border: 1px solid #9E9E9E;
-  color: #9E9E9E;
+  border: 1px solid #d2d6de;
+  /* color: #9E9E9E; */
   width: 100%;
 }
 
 #continue-btn {
-  background-color: #FFE39B;
+  /* background-color: #FFE39B; */
+  width: 240px;
+  font-weight: bold;
 }
 
 </style>
@@ -128,7 +132,7 @@ table.dataTable.no-footer {
 var entitytypebtns = $(".entity-type-btn");
 entitytypebtns.on("click",function(){
   this.classList.toggle("selected-entity");
-}); 
+});
 </script>
 
 <script src="{% static 'js/searchTableConfig.js' %}"></script>

@@ -22,6 +22,7 @@
 .search-bar {
   padding: 2px 15%;
 }
+
 .btn.dropdown-toggle {
   width: 200px;
 }
@@ -258,6 +259,7 @@ text {
   padding: 3px 10px;
   margin: -1px;
   width: 260px;
+  overflow-y: scroll;
   border: 1px solid gray;
   border-top: 1px solid #ddd;
   background-color: white;

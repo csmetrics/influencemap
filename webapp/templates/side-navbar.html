@@ -30,7 +30,7 @@
               {% if subgroup.type == "inner" %}
               <a href="#" class="nav-item" data-displayname="{{subgroup.display}}" data-level="sg" data-g="{{group.display}}">
                 <i class="fa fa-user"></i>
-                {{ subgroup.display }}
+                <span>{{ subgroup.display }}</span>
               </a>
             {% endif %}
             {% if subgroup.type == "outer" %}
