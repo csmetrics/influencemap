@@ -54,15 +54,15 @@ def processdata(gtype, egoG, num_leaves):
 
     # Sort by name, influence dif, then ratio
     outer_nodes.sort()
-    outer_nodes.sort(key=lambda n: egoG.nodes[n]['dif'])
-    outer_nodes.sort(key=lambda n: egoG.nodes[n]['ratiow'])
+    outer_nodes.sort(key=lambda n: -egoG.nodes[n]['dif'])
+    outer_nodes.sort(key=lambda n: -egoG.nodes[n]['ratiow'])
 
     links = list(egoG.edges(data=True))
 
     # Sort by name, influence dif, then ratio
     links.sort(key=lambda l: (l[0], l[1]))
-    links.sort(key=lambda l: l[2]['dif'])
-    links.sort(key=lambda l: l[2]['ratiow'])
+    links.sort(key=lambda l: -l[2]['dif'])
+    links.sort(key=lambda l: -l[2]['ratiow'])
     links_in  = [l for l in links if l[2]['direction'] == 'in']
     links_out = [l for l in links if l[2]['direction'] == 'out']
 
