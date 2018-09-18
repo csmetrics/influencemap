@@ -7,7 +7,6 @@
 .content-wrapper-browse {
   min-height: 0;
   margin-left: 230px;
-  background-color: #ecf0f5;
   z-index: 800;
 }
 .content {
@@ -75,12 +74,18 @@ table {
 }
 
 .flower-loading{
-  background: url('../images/flower_updating.gif') repeat center center;
+  background: url('../images/button_loading.gif') no-repeat center center;
+  background-size: 160px 20px;
+  background-color: #357ca5;
 }
 #resubmitButton {
   width: 240px;
-  border: 2px solid #001F3F;
   font-weight: bold;
+  text-shadow:
+   -1px -1px 0 #357ca5,
+    1px -1px 0 #357ca5,
+    -1px 1px 0 #357ca5,
+     1px 1px 0 #357ca5;
 }
 
 .yearslider {
@@ -111,14 +116,16 @@ div#citation-range .noUi-connect {
 .tab-btn:hover, .tab-btn.inverse{
   padding: 8px 20px;
   border-radius: 0 0 5px 5px;
-  color:#001F3F; background-color:transparent; border-color:#ddd;
-  border-bottom: 5px #001F3F solid;
+  color:#000; background-color:transparent;
+  border: 1px solid #d2d6de;
+  border-bottom: 5px #3c8dbc solid;
 }
 .tab-btn, .tab-btn.active, .tab-btn.inverse:hover{
   padding: 8px 20px;
   border-radius: 0 0 5px 5px;
-  color:#FFFFFF; background-color:#3c8dbc; border-color:#3c8dbc;
-  border-bottom: 5px #001F3F solid;
+  color:#000; background-color:#ecf0f5;
+  border: 1px solid #d2d6de;
+  border-bottom: 5px #3c8dbc solid;
 }
 
 img.fit-wrapper {

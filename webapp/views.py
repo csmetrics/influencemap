@@ -252,6 +252,7 @@ def submit(request):
     total_request_cur = datetime.now()
 
     curated_flag = False
+    num_leaves = 25 # default
     if request.method == "GET":
         # from url e.g.
         # /submit/?type=author_id&id=2146610949&name=stephen_m_blackburn
@@ -345,12 +346,7 @@ def submit(request):
     # Set up configuration of influence flowers
     flower_config = default_config
     if config:
-        flower_config['self_cite'] = config[4]
-        flower_config['icoauthor'] = config[5]
-        flower_config['pub_lower'] = config[0]
-        flower_config['pub_upper'] = config[1]
-        flower_config['cit_lower'] = config[2]
-        flower_config['cit_upper'] = config[3]
+        flower_config = config
 
     print(config)
 
@@ -380,10 +376,18 @@ def submit(request):
     print('TOTAL REQUEST TIME: ', datetime.now() - total_request_cur)
 
     if config == None:
-        config = [min_pub_year, max_pub_year, min_cite_year, max_cite_year, "false", "true"]
+        config = {
+            "pub_lower": min_pub_year,
+            "pub_upper": max_pub_year,
+            "cit_lower": min_cite_year,
+            "cit_upper": max_cite_year,
+            "self_cite": "false",
+            "icoauthor": "true",
+            "num_leaves": num_leaves
+        }
     else:
-        config[4] = str(config[4]).lower()
-        config[5] = str(config[5]).lower()
+        config["self_cite"] = str(config["self_cite"]).lower()
+        config["icoauthor"] = str(config["icoauthor"]).lower()
 
     data = {
         "author": flower_info[0],

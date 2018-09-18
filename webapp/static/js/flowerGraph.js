@@ -44,8 +44,8 @@ function drawFlower(svg_id, data, idx, w) {
     var links = data["links"];
     var bars = data["bars"];
 
-    v_margin = 160;
-    yheight = 100;
+    v_margin = 150-(Math.max(5, nodes.length-15)*3);
+    yheight = 120-Math.max(20, nodes.length-15);
 
     svg[idx] = d3.select(svg_id),
     width = w, magf = Math.min(250, width/5),
