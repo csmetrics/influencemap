@@ -89,14 +89,6 @@ function drawFlower(svg_id, data, idx, w) {
         .selectAll("text")
           .text(function(d) { if (d.length > 20) return d.slice(0, 20)+"..."; else return d.slice(0, 20); })
           .attr("id", function(d, i) { return i+1; })
-          .attr("gtype", function() { switch (idx) {
-              case 0:
-                  return "author";
-              case 1:
-                  return "conf";
-              case 2:
-                  return "inst";
-          } })
           .attr("class", "hl-text node-text")
           .style("text-anchor", "end")
           .style("fill", function(d) {
