@@ -350,6 +350,16 @@ tr:hover td{
    /* float: right;*/
 }
 
+.node_info_header {
+    margin-bottom: 10px;
+    }
+
+.node_info_lower {
+    margin-bottom: -10px;
+    display: flex;
+    justify-content: right;
+    }
+
 .node_info_a {
     color: black;
 }
