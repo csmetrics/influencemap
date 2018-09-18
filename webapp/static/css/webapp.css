@@ -14,6 +14,33 @@
   min-height: 0;
 }
 
+.top-panel {
+  background-color: #fff;
+  margin: -15px -15px 0 -15px;
+  padding-bottom: 20px;
+}
+.preview {
+  margin-left: 36%;
+  background-color: #fff;
+}
+.carousel-intro {
+  position: absolute;
+  width: 650;
+  top: 65;
+  left: 3%;
+  background: rgb(100, 100, 100, 0.8);
+  padding: 15;
+  border-radius: 10px;
+}
+.carousel-indicators {
+  position: absolute;
+  top: 20px;
+  left: 90%;
+  z-index: 15;
+  padding-left: 0;
+  text-align: center;
+  list-style: none;
+}
 .carousel-indicators li {
   border: 1px solid #000;
 }
@@ -34,6 +61,9 @@
 .project-intro {
   padding: 20px 20px 20px 0;
   font-size: 15px;
+}
+.main-menu {
+  padding: 20px;
 }
 
 .search-bar {

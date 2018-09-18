@@ -13,44 +13,34 @@ Licence URI: http://www.os-templates.com/template-terms
 <div class="wrapper">
   {% include 'pagehead.html' %}
   <!-- Content Wrapper. Contains page content -->
-  <div class="content-wrapper content-wrapper-home">
+  <div class="content-wrapper content-wrapper-home" style="background-color:#ddd">
     <!-- Main content -->
     <section class="content">
       <!-- Small boxes (Stat box) -->
-      <div class="row">
-        <div class="col-lg-7 col-xs-7">
+      <div class="top-panel">
+        <div class="preview">
           <div id="preview-carousel" class="carousel slide" data-ride="carousel">
+            <!-- Indicators -->
             <ol class="carousel-indicators">
               <li data-target="#preview-carousel" data-slide-to="0" class="active"></li>
               <li data-target="#preview-carousel" data-slide-to="1"></li>
               <li data-target="#preview-carousel" data-slide-to="2"></li>
             </ol>
-            <div class="carousel-inner" style="padding-left:40">
-              <div class="carousel-item active">
-                <svg id="graph1" width=1000 height=500></svg>
-                <div class="carousel-caption d-none d-md-block">
-                  <h5>Influence Flower of Sir Tim Berners-Lee - to Authors</h5>
-                  <p>description description description description description description description description some other description about the flower</p>
-                </div>
+            <!-- Wrapper for slides -->
+            <div class="carousel-inner">
+              <div class="item active">
+                <svg id="chart1" width=1800 height=410></svg>
               </div>
-              <div class="carousel-item">
-                <!-- <svg id="graph2" width=900 height=450></svg> -->
+              <div class="item">
+                <svg id="chart2" width=1800 height=410></svg>
               </div>
-              <div class="carousel-item">
-                <!-- <svg id="graph3" width=900 height=450></svg> -->
+              <div class="item">
+                <svg id="chart3" width=1800 height=410></svg>
               </div>
             </div>
-            <a class="carousel-control-prev" href="#preview-carousel" role="button" data-slide="prev">
-              <span class="carousel-control-prev-icon" aria-hidden="true"></span>
-              <span class="sr-only">Previous</span>
-            </a>
-            <a class="carousel-control-next" href="#preview-carousel" role="button" data-slide="next">
-              <span class="carousel-control-next-icon" aria-hidden="true"></span>
-              <span class="sr-only">Next</span>
-            </a>
           </div>
         </div>
-        <div class="col-lg-5 col-xs-5">
+        <div class="carousel-intro">
           <!-- small box -->
           <div class="previews">
             <div class="preview-item">other preview</div>
@@ -58,10 +48,9 @@ Licence URI: http://www.os-templates.com/template-terms
             <div class="preview-item">other preview</div>
             <div class="preview-item">other preview</div>
             <div class="preview-item">other preview</div>
-
           </div>
           <div class="project-intro">
-            <h3>About Project Influence Map</h3>
+            <h3><b>About Project Influence Map</b></h3>
       			<p>
               This project sets up to map the incoming and outgoing intellectual influence of academic entities -- people, projects, publications venues, and institutions. We do so by creating visualisations from the citation data curated in Microsoft Academic Graph.
               <!-- In academia, a prevalent question of interest is which academics are influential? Further, what makes an academic influential? With Influence Map, we are working towards a deeper understanding of academic influence by visualising it at a localised level, i.e. considering who a person or a group has been influenced by, and who they have had influence on. We create these visualisations using citation data from the Microsoft Academic Graph. -->
@@ -74,21 +63,23 @@ Licence URI: http://www.os-templates.com/template-terms
         </div>
       </div>
       <!-- Small boxes (Stat box) -->
-      <div class="row">
-        <div class="col-lg-6 col-xs-6">
-          <!-- small box -->
-          <div class="box box-solid box-home bg-white">
-            <p>Flower Gallery</p>
-            <p>Browse influence maps of Nobel Laureates, Turing Award winners, Fields Medalists, Journals and Conferences, and more...</p>
-            <footer><a href="/browse">Browse</a></footer>
+      <div class="main-menu">
+        <div class="row">
+          <div class="col-lg-6 col-xs-6">
+            <!-- small box -->
+            <div class="box box-solid bg-white">
+              <p>Flower Gallery</p>
+              <p>Browse influence maps of Nobel Laureates, Turing Award winners, Fields Medalists, Journals and Conferences, and more...</p>
+              <footer><a href="/browse">Browse</a></footer>
+            </div>
           </div>
-        </div>
-        <div class="col-lg-6 col-xs-6">
-          <!-- small box -->
-          <div class="box box-solid box-home bg-white">
-            <p>Create new flowers</p>
-            <p>Curate your own influence maps by querying papers, people, groups and institutions...</p>
-            <footer><a href="/create">Create</a></footer>
+          <div class="col-lg-6 col-xs-6">
+            <!-- small box -->
+            <div class="box box-solid bg-white">
+              <p>Create new flowers</p>
+              <p>Curate your own influence maps by querying papers, people, groups and institutions...</p>
+              <footer><a href="/create">Create</a></footer>
+            </div>
           </div>
         </div>
       </div>
@@ -109,12 +100,7 @@ Licence URI: http://www.os-templates.com/template-terms
 <script src="{% static 'js/main_flowerGraph.js' %}"></script>
 <script>
 var width = document.getElementById('preview-carousel').offsetWidth;
-drawFlower("#graph1", author_data, 0, width);
-drawFlower("#graph2", conf_data, 1, width);
-drawFlower("#graph3", inst_data, 2, width);
-
-$('#preview-carousel').bind('slide.bs.carousel', function (e) {
-    console.log('slide event!', e);
-});
-
+drawFlower("#chart1", author_data, 0, width);
+drawFlower("#chart2", conf_data, 1, width);
+drawFlower("#chart3", inst_data, 2, width);
 </script>
