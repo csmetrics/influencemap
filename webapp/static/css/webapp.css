@@ -2,7 +2,8 @@
 .main-footer-home {
   margin-left:0;
 }
-.main-sidebar-wide { width: 400px; }
+.main-sidebar-wide { width: 400px; background-color: #fff; }
+.main-sidebar-dark { background-color: #222d32; }
 .content-wrapper-narrow { margin-left: 400px; }
 .content-wrapper-browse {
   min-height: 0;

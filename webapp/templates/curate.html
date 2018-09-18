@@ -1,7 +1,7 @@
 {% load staticfiles %}
 <html>
 {% include 'header.html' %}
-<body id="top" class="hold-transition skin-blue-light sidebar-mini">
+<body id="top" class="hold-transition skin-custom sidebar-mini">
   <div class="wrapper">
     {% include 'pagehead.html' %}
     <div class="container-fluid" style="margin-top: 15px; margin-bottom: 15px;">
@@ -55,7 +55,7 @@
         <p>When the search is completed the results will be displayed in a table immediately below with information such as related affiliations and publication count to help determine whether the result is relevent to your record. It is important to note that there may be more than one relevent result for the same entity and there could actually be dozens. When searching for authors, you can click on the row of a result to reveal the titles of papers linked to that entity.</p>
 
         <p>You can select a result by clicking the checkbox on the right of a result. The result will then appear on the right hand side in the Selection table. To unselect a row from the selection table, simply click on the row in the Selection table or uncheck the row in the main search results table.</p>
-      </div>  
+      </div>
 
       <button id="required_table_div" class="collapsible grey-theme">Required information <span id="existingrecordwarning" style="display: none; float: right"><i color="red" class="fa fa-warning"></i> a record(s) for this type already exists under the name(s) <span id="existingnames"></span></span></button>
       <div class="collapsible-content">
@@ -183,9 +183,9 @@ margin: 3px;
 
 /* Style the collapsible content. Note: hidden by default */
 .collapsible-content { */
-  padding: 0 18px; 
-  display: none; 
-  overflow: hidden; 
+  padding: 0 18px;
+  display: none;
+  overflow: hidden;
 }
 
 #add_row_btn {
@@ -215,7 +215,7 @@ margin: 3px;
   border-radius: 3px;
   background-color: #fff;
   border: 1px solid #9E9E9E;
-  color: #9E9E9E; 
+  color: #9E9E9E;
 }
 .grey-theme {
   border-radius: 3px;
@@ -265,7 +265,7 @@ var typevalue = document.getElementById("Type");
 ////  --------  Set listeners  --------  ////
 
 $(document).ready(function(){
-  
+
 
   // Page setup / reset
 
@@ -286,7 +286,7 @@ $(document).ready(function(){
     var field_type = this.dataset.fieldtype;
     add_additional_info_row(field_type);
   })
-  
+
   $(".type-btn").on("click",function(){
     var cache_type = this.textContent;
     $('#Type').text(cache_type);
@@ -329,7 +329,7 @@ $(document).ready(function(){
 
   // Submit for caching
 
-  setContinueFunction(saveCache);  
+  setContinueFunction(saveCache);
 
 
 });
@@ -364,7 +364,7 @@ function clear_record(){
     var id = elem_ids_to_clear[i];
     document.getElementById(id).textContent = "";
   }
-  
+
   // remove additional table rows
   $('.additional-info-row').remove();
   clear_search_tables();
@@ -407,14 +407,14 @@ function parse_tsv(contents){
   var gross_lines = contents.split('\n');
 
   //no data or not properly formatted
-  if (gross_lines.length <=  1){ 
+  if (gross_lines.length <=  1){
     return
   } else {
     var header = gross_lines[0].split("\t");
     gross_lines = gross_lines.slice(1,gross_lines.length);
   }
   console.log(header);
-  // split lines and keep only ones same length as header 
+  // split lines and keep only ones same length as header
   var lines = [];
   for (var i in gross_lines){
     var line = gross_lines[i].split('\t');
@@ -423,7 +423,7 @@ function parse_tsv(contents){
   delete gross_lines;
 
   // no data of the correct length
-  if (lines.length === 0){  
+  if (lines.length === 0){
     return
   }
 
@@ -589,5 +589,3 @@ function isNumeric(n) {
 }
 
 </script>
-
-

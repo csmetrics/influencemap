@@ -60,11 +60,11 @@
   background-color: #fff;
 }
 
-.skin-custom .wrapper,
+/* .skin-custom .wrapper,
 .skin-custom .main-sidebar,
 .skin-custom .left-side {
   background-color: #fff;
-}
+} */
 .skin-custom .main-sidebar {
   border-right: 1px solid #d2d6de;
 }
