@@ -2,7 +2,7 @@
 
 <html>
 {% include 'header.html' %}
-<body class="hold-transition skin-blue sidebar-mini">
+<body class="hold-transition skin-custom sidebar-mini">
 <div class="wrapper">
   {% include 'pagehead.html' %}
   {% include 'side-navbar.html' %}
@@ -17,7 +17,7 @@
     </td></tr></table>
   </div>
 
-  <div style="min-height: 100%" class="content-wrapper-browse">
+  <div style="min-height: 100%" class="content-wrapper content-wrapper-browse">
 
     <!-- Groups-->
   {% for group in browse_groups %}
@@ -31,10 +31,10 @@
 
 
    <!-- Sub groups-->
-  {% for category in group.subgroups %} 
+  {% for category in group.subgroups %}
    <div class="content_section" data-displayname="{{category.display}}" data-level="sg" data-g="{{group.display}}">
 
-   {% if not category.subgroups %} 
+   {% if not category.subgroups %}
 
     <section class="content-header">
       <h4>
@@ -44,7 +44,7 @@
     </section>
 
 
- 
+
     <section class="content">
       <div class="row">
         <div class="col-xs-12">
@@ -162,7 +162,7 @@
     </div>
      {% endfor %}
 
-    
+
     {% endif %}
 
   </div>
