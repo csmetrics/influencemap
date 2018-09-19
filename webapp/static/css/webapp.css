@@ -26,7 +26,7 @@
 }
 .carousel-intro {
   position: absolute;
-  width: 685px;
+  width: 40%;
   top: 75;
   margin-left: 5%;
 }
@@ -52,30 +52,37 @@
 }
 .project-intro {
   background: rgb(80, 80, 80, 0.7);
-  padding: 25px;
+  padding: 4%;
   border-radius: 10px 10px 0 0;
   font-size: 15px;
 }
 .project-intro h3 {
   margin-top: 5px;
   margin-bottom: 25px;
-  color: #ddd;
+  color: #fff;
 }
 .other-previews {
   background: rgb(80, 80, 80, 0.9);
-  padding: 25px;
+  padding: 2%;
+  text-align: center;
   border-radius: 0 0 10px 10px;
 }
 .preview-item {
-  margin-right: 3px;
+  margin: 0 1%;
   display: inline-block;
   border-radius: 15px;
   border: 8px solid #ddd;
-  width: 120px;
-  height: 120px;
+  width: 17%;
+  padding-top: 15%;
   background-color: #ddd;
+  position: relative;
 }
 .preview-item img {
+  position: absolute;
+  top: 0;
+  left: 0;
+  bottom: 0;
+  right: 0;
   width: 100%;
   height: 100%;
   border-radius: 10px;
