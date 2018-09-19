@@ -18,6 +18,10 @@ Each of the edges of the graph signifies the flow of influence to and from the e
 
 The hue of the outer nodes signify the ratio of influence in and out. A blue node indicates that the associated entity has influence the ego more than the ego has influenced itself. Likewise, a red node indicates the ego has influenced the node's entity more than it has influenced the ego.
 
+<p align="center">
+  <img src="https://github.com/csmetrics/influencemap/blob/master/assets/img/gradiant_key.svg"/>
+</p>
+
 We define two entities to be coauthors if the entities have contributed to the same paper. Coauthor of the ego are signified by nodes with green borders and greyed out names.
 
 ## methodology
