@@ -13,7 +13,7 @@ Licence URI: http://www.os-templates.com/template-terms
 <div class="wrapper">
   {% include 'pagehead.html' %}
   <!-- Content Wrapper. Contains page content -->
-  <div class="content-wrapper content-wrapper-home" style="background-color:#ddd">
+  <div class="content-wrapper content-wrapper-home" style="background-color:#ecf0f5">
     <!-- Main content -->
     <section class="content">
       <!-- Small boxes (Stat box) -->
@@ -45,14 +45,13 @@ Licence URI: http://www.os-templates.com/template-terms
             <h3><b>About Project Influence Map</b></h3>
       			<p>
               This project sets up to map the incoming and outgoing intellectual influence of academic entities -- people, projects, publications venues, and institutions. We do so by creating visualisations from the citation data curated in Microsoft Academic Graph.
-              <!-- In academia, a prevalent question of interest is which academics are influential? Further, what makes an academic influential? With Influence Map, we are working towards a deeper understanding of academic influence by visualising it at a localised level, i.e. considering who a person or a group has been influenced by, and who they have had influence on. We create these visualisations using citation data from the Microsoft Academic Graph. -->
             </p>
             <p>
-            Follow the links below to browse pre-curated visualisations from a selection of award winners and well-known entities, or grow your own flowers for any entity.
+              To quantify academic influence, we define influence as a function of paper citations. The scoring of influence is done with respect to entities (author, institute, journal, or conference) and how entities cite other entities. To visualise influence we use influence flowers. An influence flower aims to show a dense representation of the influence in which an entity (the center node, denoted as the ego) has with several other entities.
             </p>
             <footer><a href="https://github.com/csmetrics/influencemap">more info</a></footer>
           </div>
-          <div class="previews">
+          <div class="other-previews">
             <div class="preview-item">
               <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/4/4e/Sir_Tim_Berners-Lee_%28cropped%29.jpg/192px-Sir_Tim_Berners-Lee_%28cropped%29.jpg">
             </div>
@@ -74,34 +73,24 @@ Licence URI: http://www.os-templates.com/template-terms
       <!-- Small boxes (Stat box) -->
       <div class="main-menu">
         <div class="row">
-          <div class="col-lg-6 col-xs-6">
-            Some image description about influence, arrow color etc..
+          <div class="col-lg-5 col-xs-5" style="padding: 100px 30px 0px 50px;">
+            <div class="inner">
+              <h3>Flower Gallery <i class="fa fa-trophy"></i></h3>
+              <p>Browse influence maps of Nobel Laureates, Turing Award winners, Fields Medalists, Journals and Conferences, and more...</p>
+            </div>
+            <a href="/browse" class="small-box-footer">
+              Browse <i class="fa fa-arrow-circle-right"></i>
+            </a>
+            <div class="inner">
+              <h3>Create new flowers <i class="fa fa-plus-circle"></i></h3>
+              <p>Curate your own influence maps by querying papers, people, groups and institutions...</p>
+            </div>
+            <a href="/create" class="small-box-footer">
+              Create <i class="fa fa-arrow-circle-right"></i>
+            </a>
           </div>
-          <div class="col-lg-6 col-xs-6">
-            <div class="small-box bg-gray">
-              <div class="inner">
-                <h3>Flower Gallery</h3>
-                <p>Browse influence maps of Nobel Laureates, Turing Award winners, Fields Medalists, Journals and Conferences, and more...</p>
-              </div>
-              <div class="icon">
-                <i class="fa fa-shopping-cart"></i>
-              </div>
-              <a href="/browse" class="small-box-footer">
-                Browse <i class="fa fa-arrow-circle-right"></i>
-              </a>
-            </div>
-            <div class="small-box bg-gray">
-              <div class="inner">
-                <h3>Create new flowers</h3>
-                <p>Curate your own influence maps by querying papers, people, groups and institutions...</p>
-              </div>
-              <div class="icon">
-                <i class="fa fa-plus-circle"></i>
-              </div>
-              <a href="/create" class="small-box-footer">
-                Create <i class="fa fa-arrow-circle-right"></i>
-              </a>
-            </div>
+          <div class="col-lg-7 col-xs-7">
+            Some image description about influence, arrow color etc..
           </div>
         </div>
       </div>
