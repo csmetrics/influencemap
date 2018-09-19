@@ -18,7 +18,7 @@
 .top-panel {
   background-color: #fff;
   margin: -15px -15px 0 -15px;
-  padding-bottom: 15px;
+  padding: 15px 0;
 }
 .preview {
   margin-left: 36%;
@@ -27,7 +27,7 @@
 .carousel-intro {
   position: absolute;
   width: 685px;
-  top: 65;
+  top: 75;
   margin-left: 5%;
 }
 .carousel-indicators {
@@ -85,10 +85,13 @@
 .main-menu {
   padding: 20px;
 }
-.small-box .inner { padding: 20px 15px 15px 15px; }
-.small-box h3 { font-size: 25px; }
-.small-box:hover { color: #3c8dbc; }
-.small-box .icon { font-size: 90px; padding-top: 20px;}
+.data-box {
+  display: inline-block;
+  width: 22%;
+  text-align: center;
+  padding: 10px 0;
+  color: #666;
+}
 
 .search-bar {
   padding: 2px 15%;

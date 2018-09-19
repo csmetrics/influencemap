@@ -73,7 +73,7 @@ Licence URI: http://www.os-templates.com/template-terms
       <div class="main-menu">
         <div class="row" style="padding: 40px 6% 0 6%;">
 
-          <div class="col-lg-4 col-xs-4" style="padding: 10px 15px;">
+          <div class="col-lg-4 col-xs-4" style="padding: 10px 20px; text-align:justify">
             <h4><b>Flow of influence</b></h4>
             <div align="center" style="padding: 15px 0;">
               <img width="90%" src="{% static 'images/influence_flow.svg' %}">
@@ -81,27 +81,50 @@ Licence URI: http://www.os-templates.com/template-terms
             Each of the edges of the graph signifies the flow of influence to and from the ego node, the strenth of this relation is reflected in the thickness of the edge. The red edges denotes the influence the ego has towards the outer entities (an outer entity citing a paper by the ego). The blue edges denotes the influence the outer entities have towards the ego (the ego cites a paper by one of the outer entities).
           </div>
 
-          <div class="col-lg-4 col-xs-4" style="padding: 10px 15px;">
-            <h4><b>Something else</b></h4>
-            <div align="center" style="padding: 15px 0;">
+          <div class="col-lg-4 col-xs-4" style="padding: 10px 20px; text-align:justify">
+            <h4><b>Dataset</b></h4>
+            We use the <a href="https://www.microsoft.com/en-us/research/project/microsoft-academic-graph/">Microsoft Academic Graph (MAG)</a> dataset for our visualization.
+            MAG is a heterogeneous graph containing scientific publication records, citation relationships, as well as authors, institutions, journals and conferences.
+            We download the entire knowledge graph ver 2018-06-29. (will be regularly updated)
+            <div class="row" style="padding: 15px 0;" align="center">
+              <div class="box box-solid data-box">
+                <i class="fa fa-newspaper-o" style="font-size:40px"></i><br>
+                176M<br>
+                Publications
+              </div>
+              <div class="box box-solid data-box">
+                <i class="fa fa-user" style="font-size:40px"></i><br>
+                212M<br>
+                Authors
+              </div>
+              <div class="box box-solid data-box">
+                <i class="fa fa-institution" style="font-size:40px"></i><br>
+                25K<br>
+                Institutions
+              </div>
+              <div class="box box-solid data-box">
+                <i class="fa fa-map-signs" style="font-size:40px"></i><br>
+                52K<br>
+                Venues
+              </div>
             </div>
           </div>
 
-          <div class="col-lg-4 col-xs-4" style="padding: 10px 15px;">
+          <div class="col-lg-4 col-xs-4" style="padding: 10px 20px;">
             <div class="inner">
-              <a href="/browse" class="small-box-footer">
+              <a href="/browse">
                 <h4><b>Flower Gallery <i class="fa fa-trophy"></i></b></h4>
               </a>
               Browse influence flowers of Turing Award winners, Fields Medalists, Journals and Conferences, and more...
             </div>
             <div class="inner" style="padding-top:5px">
-              <a href="/create" class="small-box-footer">
+              <a href="/create">
                 <h4><b>Create new flowers <i class="fa fa-plus-circle"></i></b></h4>
               </a>
               Curate your own influence flowers by querying papers, people, groups and institutions...
             </div>
             <div class="inner" style="padding-top:5px">
-              <a href="https://github.com/csmetrics/influencemap" class="small-box-footer">
+              <a href="https://github.com/csmetrics/influencemap">
                 <h4><b>Project repo <i class="fa fa-github"></i></b></h4>
               </a>
               Visit repository for more information about the Influence Map project.
