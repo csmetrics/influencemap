@@ -21,13 +21,14 @@
   padding: 15px 0;
 }
 .preview {
-  margin-left: 36%;
+  margin-left: 40%;
   background-color: #fff;
 }
 .carousel-intro {
   position: absolute;
+  z-index: 30;
   width: 40%;
-  top: 75;
+  top: 62;
   margin-left: 5%;
 }
 .carousel-indicators {
@@ -72,10 +73,13 @@
   display: inline-block;
   border-radius: 15px;
   border: 8px solid #ddd;
-  width: 17%;
-  padding-top: 15%;
+  width: 15%;
+  padding-top: 13%;
   background-color: #ddd;
   position: relative;
+}
+.preview-item:hover {
+  opacity: 0.5;
 }
 .preview-item img {
   position: absolute;
