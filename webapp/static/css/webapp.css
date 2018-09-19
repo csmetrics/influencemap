@@ -21,7 +21,8 @@
   padding: 15px 0;
 }
 .preview {
-  margin-left: 40%;
+  /* margin-left: 40%; */
+  margin-left: 10%;
   background-color: #fff;
 }
 .carousel-intro {
@@ -63,18 +64,18 @@
   color: #fff;
 }
 .other-previews {
-  background: rgb(80, 80, 80, 0.9);
-  padding: 2%;
+  /* background: rgb(80, 80, 80, 0.9); */
+  /* padding: 2%; */
   text-align: center;
-  border-radius: 0 0 10px 10px;
+  /* border-radius: 0 0 10px 10px; */
 }
 .preview-item {
   margin: 0 1%;
   display: inline-block;
   border-radius: 15px;
   border: 8px solid #ddd;
-  width: 15%;
-  padding-top: 13%;
+  width: 10%;
+  padding-top: 8%;
   background-color: #ddd;
   position: relative;
 }
