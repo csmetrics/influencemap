@@ -564,7 +564,7 @@ function formatNodeInfoTable(data) {
       table_str += "<tr style='border-bottom: 0px solid white;'><td style='height: 1px; cursor: default;' colspan='5'></td></tr>";
   }
   link_table += "<tr> <th>" + display_name + " has influenced</th> <th style='font-size: 30px'>⟶</th>";
-  link_table += "<th>" + flower_name + "</th> <th style='font-size: 30px'>⟶</th> <th>" + display_name + " has been influenced</th> </tr>";
+  link_table += "<th>" + flower_name + "</th> <th style='font-size: 30px'>⟶</th> <th> influencing " + display_name + "</th> </tr>";
   link_table += table_str;
   link_table += "</table>";
 
