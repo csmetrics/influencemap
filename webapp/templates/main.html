@@ -49,7 +49,6 @@ Licence URI: http://www.os-templates.com/template-terms
             <p>
               To quantify academic influence, we define influence as a function of paper citations. The scoring of influence is done with respect to entities (author, institute, journal, or conference) and how entities cite other entities. To visualise influence we use influence flowers. An influence flower aims to show a dense representation of the influence in which an entity (the center node, denoted as the ego) has with several other entities.
             </p>
-            <footer><a href="https://github.com/csmetrics/influencemap">more info</a></footer>
           </div>
           <div class="other-previews">
             <div class="preview-item">
@@ -72,26 +71,49 @@ Licence URI: http://www.os-templates.com/template-terms
       </div>
       <!-- Small boxes (Stat box) -->
       <div class="main-menu">
-        <div class="row">
-          <div class="col-lg-5 col-xs-5" style="padding: 90px 30px 0px 30px;">
-            <div class="inner">
-              <h3>Flower Gallery <i class="fa fa-trophy"></i></h3>
-              <p>Browse influence maps of Nobel Laureates, Turing Award winners, Fields Medalists, Journals and Conferences, and more...</p>
-            </div>
-            <a href="/browse" class="small-box-footer">
-              Browse <i class="fa fa-arrow-circle-right"></i>
-            </a>
-            <div class="inner">
-              <h3>Create new flowers <i class="fa fa-plus-circle"></i></h3>
-              <p>Curate your own influence maps by querying papers, people, groups and institutions...</p>
-            </div>
-            <a href="/create" class="small-box-footer">
-              Create <i class="fa fa-arrow-circle-right"></i>
-            </a>
-          </div>
-          <div class="col-lg-7 col-xs-7" style="padding: 70px 30px 0px 30px;">
-            Some image description about influence, arrow color etc..
+        <div class="row" style="padding: 40px 6% 0 6%;">
 
+          <div class="col-lg-4 col-xs-4" style="padding: 10px 15px;">
+            <!-- The node in the center of the flower denotes the ego entity, the entitiy in which we are looking at influence with respect to.
+            <div align="center" style="padding-bottom: 15px;">
+            {% include 'gradiant_key.svg' %}
+            </div> -->
+            <h4><b>Flow of influence</b></h4>
+            <div align="center" style="padding: 15px 0;">
+              <img width="90%" src="{% static 'images/influence_flow.svg' %}">
+            </div>
+            Each of the edges of the graph signifies the flow of influence to and from the ego node, the strenth of this relation is reflected in the thickness of the edge. The red edges denotes the influence the ego has towards the outer entities (an outer entity citing a paper by the ego). The blue edges denotes the influence the outer entities have towards the ego (the ego cites a paper by one of the outer entities).
+          </div>
+
+          <div class="col-lg-4 col-xs-4" style="padding: 10px 15px;">
+            <!-- The node in the center of the flower denotes the ego entity, the entitiy in which we are looking at influence with respect to.
+            <div align="center" style="padding-bottom: 15px;">
+            {% include 'gradiant_key.svg' %}
+            </div> -->
+            <h4><b>Something else</b></h4>
+            <div align="center" style="padding: 15px 0;">
+            </div>
+          </div>
+
+          <div class="col-lg-4 col-xs-4" style="padding: 10px 15px;">
+            <div class="inner">
+              <a href="/browse" class="small-box-footer">
+                <h4><b>Flower Gallery <i class="fa fa-trophy"></i></b></h4>
+              </a>
+              Browse influence flowers of Turing Award winners, Fields Medalists, Journals and Conferences, and more...
+            </div>
+            <div class="inner" style="padding-top:5px">
+              <a href="/create" class="small-box-footer">
+                <h4><b>Create new flowers <i class="fa fa-plus-circle"></i></b></h4>
+              </a>
+              Curate your own influence flowers by querying papers, people, groups and institutions...
+            </div>
+            <div class="inner" style="padding-top:5px">
+              <a href="https://github.com/csmetrics/influencemap" class="small-box-footer">
+                <h4><b>Project repo <i class="fa fa-github"></i></b></h4>
+              </a>
+              Visit repository for more information about the Influence Map project.
+            </div>
           </div>
         </div>
       </div>

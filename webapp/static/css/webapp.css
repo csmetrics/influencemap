@@ -31,13 +31,14 @@
   margin-left: 5%;
 }
 .carousel-indicators {
+  width: 50px;
+  height: 20px;
   position: absolute;
   top: 20px;
-  left: 90%;
+  left: 85%;
+  margin-left: 0;
   z-index: 15;
   padding-left: 0;
-  text-align: center;
-  list-style: none;
 }
 .carousel-indicators li {
   border: 1px solid #000;
