@@ -4,13 +4,17 @@ Influence in the academic communities has been an area of interest for researche
 
 We aim to provide a visualization tool which allows users to easily search and visualize the flow of academic influence. Our visualization maps influence in the form of an influence flower.
 
-![alt text](https://github.com/csmetrics/influencemap/blob/master/assets/img/example_flower_1.png)
+<p align="center">
+  <img src="https://github.com/csmetrics/influencemap/blob/master/assets/img/example_flower_1.png"/>
+</p>
 
 The node in the center of the flower denotes the ego entity, the entitiy in which we are looking at influence with respect to. The leaf nodes are the most influential (look below for definition of our influence) entities with respect to the ego.
 
 Each of the edges of the graph signifies the flow of influence to and from the ego node, the strenth of this relation is reflected in the thickness of the edge. The red edges denotes the influence the ego has towards the outer entities (an outer entity citing a paper by the ego). The blue edges denotes the influence the outer entities have towards the ego (the ego cites a paper by one of the outer entities).
 
-![Alt text](https://github.com/csmetrics/influencemap/blob/master/assets/img/influence_flow.svg)
+<p align="center">
+  <img src="https://github.com/csmetrics/influencemap/blob/master/assets/img/influence_flow.svg"/>
+</p>
 
 The hue of the outer nodes signify the ratio of influence in and out. A blue node indicates that the associated entity has influence the ego more than the ego has influenced itself. Likewise, a red node indicates the ego has influenced the node's entity more than it has influenced the ego.
 
