@@ -30,7 +30,7 @@ function drawFlower(svg_id, data, idx, w) {
     width = w, magf = Math.min(250, width/5),
     height = Math.max(580, w*0.6),
     numnodes[idx] = nodes.length,
-    center = [width*0.45, Math.min(350, Math.max(250, height*0.55))];
+    center = [width*0.45, Math.min(355, Math.max(250, height*0.55))];
     flower_split[idx] = false;
 
     // flower graph edge arrow
@@ -92,7 +92,7 @@ function drawFlower(svg_id, data, idx, w) {
         .data(nodes)
       .enter().append("text")
         .attr("id", function(d) { return d.id; })
-        .attr("class", "hl-text")
+        .attr("class", function(d) { if (d.id == 0) return 'hl-text node-ego-text'; else return 'hl-text node-text'; })
         .attr("gtype", function(d) { return d.gtype; })
         .attr("x", function(d) { return transform_text_x(d); })
         .attr("y", function(d) { return transform_text_y(d); })
