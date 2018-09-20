@@ -61,7 +61,7 @@ We aggregate the pairwise influence of entities associated with the papers of th
 2. Venue (conferences or journals) outer nodes
 3. Author Affiliation outer nodes
 
-#### removing self-citations
+#### Removing self-citations
 
 We define a self-citation between papers and a cited paper as a relation
 dependent on the ego. A paper citation is a self-citation if both papers
@@ -74,17 +74,14 @@ the referencing paper authors) we found the 'cut down' to be too extreme. This
 would greatly effect the produced flower, leaving one with little to no
 information.
 
-#### page-rank style weighting of papers
+#### Other candidate definitions of influence 
 
-[TODO] generate sample graphics using different weighting schemes
+We have described influence as the sum of citations from one person (or venue or affiliation) to another, weighted by the number of authors in the citing paper. Similar methods were considered early on in the project which included combinations of different weighting schemes. We looked at the eight combinations of three mutually exclusive weightings:
 
-### one database containing all useful tables
+1. Weighting by the number of authors on the citing paper;
+2. Weighting by the number of authors on the cited paper; and
+3. Weighting by the number of papers referenced by the citing paper.
 
-[TBD]
+Due to the lack of a ground truth value of influence to compare these definitions to, we evaluated the eight combinations of these weightings empirically by discussing with researchers which of the definitions produced flowers that most accurately reflected their opinions of who they have influenced and been influenced by.
 
-### how data is cached
-
-[TBD]
-
-### visualising the influence
-To visualise the influence that one entity has on others, the influence scores are calculated as described above for the entity and each other entity that cites it. The scores of the most influential entities are normalised and used as weights for the graph's edges to show their relative influence. Similarly, visualising how one is influenced involves finding the scores for each entity that has influenced (been cited by) them and plotting the normalised scores as weights on a weighted graph.
+Other definitions of influence which have not yet been explored with this data include existing measures for node centrality in graphs. By using citation data from MAG to define a directed graph where nodes represent authors, venues or affiliations, and edges are derived from citations between nodes, we could explore using metrics such as closeness, betweenness and eigenvector centrality. These metrics are more appropriate for defining the influence of an entity relative to the whole network.
