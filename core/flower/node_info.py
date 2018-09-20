@@ -30,17 +30,20 @@ def select_node_info(influence_df, node_names):
         
         # Set default dictionaries
         info = node_info.setdefault(entity_name, { 'paper_list': dict(), 'type': entity_type.ident })
-        paper_info = info['paper_list'].setdefault(ego_paper_id, { 'year': int(ego_paper_year), 'ego_paper': int(ego_paper_id), 'reference': list(), 'citation': list() })
+        paper_info = info['paper_list'].setdefault(ego_paper_id, { 'year': int(ego_paper_year), 'ego_paper': int(ego_paper_id), 'reference': set(), 'citation': set() })
 
         # Determine if reference or citation
         if row['is_ref']:
-            paper_info['reference'].append(link_paper_id)
+            paper_info['reference'].add(link_paper_id)
         if row['is_cit']:
-            paper_info['citation'].append(link_paper_id)
+            paper_info['citation'].add(link_paper_id)
 
     # Turn paper dictionaries to lists and sort by year
     for name, info in node_info.items():
         paper_list = list(info['paper_list'].values())
+        for paper in paper_list:
+            paper['reference'] = list(paper['reference'])
+            paper['citation']  = list(paper['citation'])
         paper_list.sort(key=lambda x: -x['year'])
 
         info['paper_list'] = paper_list
