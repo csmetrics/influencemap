@@ -13,6 +13,7 @@
 }
 .content {
   padding-top: 0;
+  font-size: 20px;
 }
 .main-header .logo img {
   width: 25px;
@@ -51,7 +52,6 @@
 .project-intro p {
   text-align: left;
   padding: 20 20 0 20%;
-  font-size: 20px;
   color: #000;
 }
 .main-menu {
@@ -80,7 +80,7 @@
 
 .preview {
   margin-left: 38%;
-  background-color: #ddd;
+  background-color: #eee;
   height: 750px;
 }
 .carousel-indicators {
@@ -94,38 +94,25 @@
   padding-left: 0;
 }
 .carousel-indicators li {
-  border: 2px solid #fff;
+  border: 1px solid #357ca5;
   width: 60px;
   height: 60px;
   margin: 10px 10px;
+  border-radius: 15px;
+  position: relative;
+  background-color: #357ca5;
 }
 .carousel-indicators .active {
-  background-color: #ddd;
+  background-color: #357ca5;
   width: 80px;
   height: 80px;
-}
-.carousel-caption {
-  margin-top: 20px;
-  color:#000;
+  border-radius: 15px;
 }
 .other-previews {
   width: 12%;
   text-align: center;
 }
-.preview-item {
-  margin: 0 1%;
-  border-radius: 15px;
-  border: 8px solid #ddd;
-  width: 100;
-  height: 100;
-  /* padding-top: 8%; */
-  background-color: #ddd;
-  position: relative;
-}
-.preview-item:hover {
-  opacity: 0.5;
-}
-.preview-item img {
+.carousel-indicators img {
   position: absolute;
   top: 0;
   left: 0;
@@ -133,16 +120,28 @@
   right: 0;
   width: 100%;
   height: 100%;
-  border-radius: 10px;
+  border-radius: 15px;
   object-fit: cover;
 }
 
+.project-info {
+  padding: 10px 0 30px 0; 
+  text-align: center;
+}
+.project-info .project-detail {
+  padding: 5px 10%;
+}
+.dataset {
+  padding: 15px 10%;
+  margin: 15 -20;
+  background-color: #20B2AA;
+}
 .data-box {
   display: inline-block;
   width: 22%;
   text-align: center;
-  padding: 10px 0;
-  color: #666;
+  padding: 10px;
+  color: #eee;
 }
 
 .search-bar {

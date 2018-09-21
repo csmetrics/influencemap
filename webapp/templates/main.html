@@ -58,25 +58,25 @@ Licence URI: http://www.os-templates.com/template-terms
           <div id="preview-carousel" class="carousel slide" data-ride="carousel">
             <!-- Indicators -->
             <ol class="carousel-indicators">
-              <li data-target="#preview-carousel" data-slide-to="0" class="preview-item active">
+              <li data-target="#preview-carousel" data-slide-to="0" class="active">
                 <img title="Sir Tim Berners-Lee" src="https://upload.wikimedia.org/wikipedia/commons/thumb/4/4e/Sir_Tim_Berners-Lee_%28cropped%29.jpg/192px-Sir_Tim_Berners-Lee_%28cropped%29.jpg">
               </li>
-              <li data-target="#preview-carousel" data-slide-to="1" class="preview-item">
+              <li data-target="#preview-carousel" data-slide-to="1">
                 <img title="John L Hennessy" src="https://amturing.acm.org/images/lg_aw/1426931.jpg">
               </li>
-              <li data-target="#preview-carousel" data-slide-to="2" class="preview-item">
+              <li data-target="#preview-carousel" data-slide-to="2">
                 <img title="ACM Multimedia" src="https://pbs.twimg.com/profile_images/832295325469536257/Ooqjbgzc_400x400.jpg">
               </li>
-              <li data-target="#preview-carousel" data-slide-to="3" class="preview-item">
+              <li data-target="#preview-carousel" data-slide-to="3">
                 <img title="PLDI" src="https://pbs.twimg.com/profile_images/1008437223539269632/VNsST0-8_400x400.jpg">
               </li>
-              <li data-target="#preview-carousel" data-slide-to="4" class="preview-item">
+              <li data-target="#preview-carousel" data-slide-to="4">
                 <img title="ANU" src="https://i0.wp.com/nswcocabs.com/wp-content/uploads/2018/07/anu-logo.jpg?ssl=1">
               </li>
-              <li data-target="#preview-carousel" data-slide-to="5" class="preview-item">
+              <li data-target="#preview-carousel" data-slide-to="5">
                 <img title="John L Hennessy" src="https://amturing.acm.org/images/lg_aw/1426931.jpg">
               </li>
-              <li data-target="#preview-carousel" data-slide-to="6" class="preview-item">
+              <li data-target="#preview-carousel" data-slide-to="6">
                 <img title="John L Hennessy" src="https://amturing.acm.org/images/lg_aw/1426931.jpg">
               </li>
             </ol>
@@ -96,6 +96,47 @@ Licence URI: http://www.os-templates.com/template-terms
             </div>
           </div>
 
+        </div>
+      </div>
+
+      <div class="project-info">
+        <h3><b>Dataset</b></h3>
+        <div class="row dataset">
+          <div class="data-box">
+            <i class="fa fa-newspaper-o" style="font-size:40px"></i><br>
+            176M<br>
+            Publications
+          </div>
+          <div class="data-box">
+            <i class="fa fa-user" style="font-size:40px"></i><br>
+            212M<br>
+            Authors
+          </div>
+          <div class="data-box">
+            <i class="fa fa-institution" style="font-size:40px"></i><br>
+            25K<br>
+            Institutions
+          </div>
+          <div class="data-box">
+            <i class="fa fa-map-signs" style="font-size:40px"></i><br>
+            52K<br>
+            Venues
+          </div>
+        </div>
+        <div class="project-detail">
+          We use the <a href="https://www.microsoft.com/en-us/research/project/microsoft-academic-graph/">Microsoft Academic Graph (MAG)</a> dataset for our visualization.
+          <br>MAG is a heterogeneous graph containing scientific publication records, citation relationships, as well as authors, institutions, journals and conferences.
+          We download the entire knowledge graph ver 2018-06-29. (will be regularly updated)
+        </div>
+      </div>
+
+      <div class="project-info flow-influence">
+        <h3><b>Flow of influence</b></h3>
+        <div align="center" style="padding: 15px 0;">
+          <img width="50%" src="{% static 'images/influence_flow.svg' %}">
+        </div>
+        <div class="project-detail">
+          Each of the edges of the graph signifies the flow of influence to and from the ego node, the strenth of this relation is reflected in the thickness of the edge. The red edges denotes the influence the ego has towards the outer entities (an outer entity citing a paper by the ego). The blue edges denotes the influence the outer entities have towards the ego (the ego cites a paper by one of the outer entities).
         </div>
       </div>
     </section>
