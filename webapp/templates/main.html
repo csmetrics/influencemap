@@ -11,93 +11,91 @@ Licence URI: http://www.os-templates.com/template-terms
 {% include 'header.html' %}
 <body class="hold-transition skin-custom sidebar-mini">
 <div class="wrapper">
-  {% include 'pagehead.html' %}
+  <header class="main-header">
+    <a href="/" class="logo">
+      <span class="logo-mini"><i class="fa fa-asterisk"></i></span>
+      <span class="logo-lg">
+        <img src="{% static 'images/nxicon1.png'%}">
+        <b>Influence Map</b></span>
+    </a>
+    <nav class="navbar navbar-static-top">
+      <div class="pull-right">
+        <a href="/browse" class="btn btn-flat bg-white">Gallery</a>
+        <a href="/create" class="btn btn-flat bg-white">Create</a>
+        <a href="https://github.com/csmetrics/influencemap" class="btn btn-flat bg-white">About</a>
+      </div>
+    </nav>
+  </header>
   <!-- Content Wrapper. Contains page content -->
-  <div class="content-wrapper content-wrapper-home" style="background-color:#ecf0f5">
+  <div class="content-wrapper content-wrapper-home">
     <!-- Main content -->
     <section class="content">
       <!-- Small boxes (Stat box) -->
       <div class="top-panel">
+        <div class="project-intro">
+          <h3><b>About Influence Map</b></h3>
+          <p>
+            This project sets up to map the incoming and outgoing intellectual influence of academic entities
+             -- people, projects, publications venues, and institutions.
+            <!-- We do so by creating visualisations from the citation data curated in Microsoft Academic Graph. -->
+          </p>
+          <p>
+            <!-- To quantify academic influence, we define influence as a function of paper citations.
+            The scoring of influence is done with respect to entities (author, institute, journal, or conference) and how entities cite other entities.
+            To visualise influence we use influence flowers. -->
+            An influence flower aims to show a dense representation of the influence in which an entity (the center node, denoted as the ego) has with several other entities.
+          </p>
+          <div class="main-menu">
+            <a href="/browse" class="btn btn-main btn-main-white">
+              <h4><b>Flower Gallery</b></h4>
+            </a>
+            <a href="/create" class="btn btn-main btn-main-primary">
+              <h4><b>Create new flowers</b></h4>
+            </a>
+          </div>
+        </div>
         <div class="preview">
           <div id="preview-carousel" class="carousel slide" data-ride="carousel">
             <!-- Indicators -->
             <ol class="carousel-indicators">
-              <li data-target="#preview-carousel" data-slide-to="0" class="active"></li>
-              <li data-target="#preview-carousel" data-slide-to="1"></li>
-              <li data-target="#preview-carousel" data-slide-to="2"></li>
+              <li data-target="#preview-carousel" data-slide-to="0" class="preview-item active">
+                <img title="Sir Tim Berners-Lee" src="https://upload.wikimedia.org/wikipedia/commons/thumb/4/4e/Sir_Tim_Berners-Lee_%28cropped%29.jpg/192px-Sir_Tim_Berners-Lee_%28cropped%29.jpg">
+              </li>
+              <li data-target="#preview-carousel" data-slide-to="1" class="preview-item">
+                <img title="John L Hennessy" src="https://amturing.acm.org/images/lg_aw/1426931.jpg">
+              </li>
+              <li data-target="#preview-carousel" data-slide-to="2" class="preview-item">
+                <img title="ACM Multimedia" src="https://pbs.twimg.com/profile_images/832295325469536257/Ooqjbgzc_400x400.jpg">
+              </li>
+              <li data-target="#preview-carousel" data-slide-to="3" class="preview-item">
+                <img title="PLDI" src="https://pbs.twimg.com/profile_images/1008437223539269632/VNsST0-8_400x400.jpg">
+              </li>
+              <li data-target="#preview-carousel" data-slide-to="4" class="preview-item">
+                <img title="ANU" src="https://i0.wp.com/nswcocabs.com/wp-content/uploads/2018/07/anu-logo.jpg?ssl=1">
+              </li>
+              <li data-target="#preview-carousel" data-slide-to="5" class="preview-item">
+                <img title="John L Hennessy" src="https://amturing.acm.org/images/lg_aw/1426931.jpg">
+              </li>
+              <li data-target="#preview-carousel" data-slide-to="6" class="preview-item">
+                <img title="John L Hennessy" src="https://amturing.acm.org/images/lg_aw/1426931.jpg">
+              </li>
             </ol>
             <!-- Wrapper for slides -->
             <div class="carousel-inner">
               <div class="item active">
-                <svg id="chart1" width=2400 height=410></svg>
+                <svg id="chart1" width=1600 height=240></svg>
+                <svg id="chart2" width=1600 height=240></svg>
+                <svg id="chart3" width=1600 height=240></svg>
               </div>
-              <div class="item">
-                <svg id="chart2" width=2400 height=410></svg>
-              </div>
-              <div class="item">
-                <svg id="chart3" width=2400 height=410></svg>
-              </div>
+              <div class="item"></div>
+              <div class="item"></div>
+              <div class="item"></div>
+              <div class="item"></div>
+              <div class="item"></div>
+              <div class="item"></div>
             </div>
           </div>
-        </div>
-      </div>
-      <!-- Small boxes (Stat box) -->
-      <div class="main-menu">
-        <div class="row" style="padding: 20px 6% 0 6%;">
 
-          <div class="col-lg-8 col-xs-8" style="padding: 10px 20px; text-align:justify">
-            <div class="other-previews">
-              <div class="preview-item">
-                <img title="Sir Tim Berners-Lee" src="https://upload.wikimedia.org/wikipedia/commons/thumb/4/4e/Sir_Tim_Berners-Lee_%28cropped%29.jpg/192px-Sir_Tim_Berners-Lee_%28cropped%29.jpg">
-              </div>
-              <div class="preview-item">
-                <img title="John L Hennessy" src="https://amturing.acm.org/images/lg_aw/1426931.jpg">
-              </div>
-              <div class="preview-item">
-                <img title="ACM Multimedia" src="https://pbs.twimg.com/profile_images/832295325469536257/Ooqjbgzc_400x400.jpg">
-              </div>
-              <div class="preview-item">
-                <img title="PLDI" src="https://pbs.twimg.com/profile_images/1008437223539269632/VNsST0-8_400x400.jpg">
-              </div>
-              <div class="preview-item">
-                <img title="ANU" src="https://i0.wp.com/nswcocabs.com/wp-content/uploads/2018/07/anu-logo.jpg?ssl=1">
-              </div>
-            </div>
-
-            <h4><b>About Project Influence Map</b></h4>
-            <p>
-              This project sets up to map the incoming and outgoing intellectual influence of academic entities
-               -- people, projects, publications venues, and institutions.
-              <!-- We do so by creating visualisations from the citation data curated in Microsoft Academic Graph. -->
-            </p>
-            <p>
-              To quantify academic influence, we define influence as a function of paper citations.
-              The scoring of influence is done with respect to entities (author, institute, journal, or conference) and how entities cite other entities.
-              To visualise influence we use influence flowers.
-              An influence flower aims to show a dense representation of the influence in which an entity (the center node, denoted as the ego) has with several other entities.
-            </p>
-          </div>
-
-          <div class="col-lg-4 col-xs-4" style="padding: 10px 20px; text-align:justify">
-            <div class="inner">
-              <a href="/browse">
-                <h4><b>Flower Gallery <i class="fa fa-trophy"></i></b></h4>
-              </a>
-              Browse influence flowers of Turing Award winners, Fields Medalists, Journals and Conferences, and more...
-            </div>
-            <div class="inner" style="padding-top:5px">
-              <a href="/create">
-                <h4><b>Create new flowers <i class="fa fa-plus-circle"></i></b></h4>
-              </a>
-              Curate your own influence flowers by querying papers, people, groups and institutions...
-            </div>
-            <div class="inner" style="padding-top:5px">
-              <a href="https://github.com/csmetrics/influencemap">
-                <h4><b>Project repo <i class="fa fa-github"></i></b></h4>
-              </a>
-              Visit repository for more information about the Influence Map project.
-            </div>
-          </div>
         </div>
       </div>
     </section>

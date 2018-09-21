@@ -3,7 +3,9 @@
  * ----------
  */
 .skin-custom .main-header .navbar {
-  background-color: #ecf0f5;
+  background-color: #ffffff;
+  margin-left: 38%;
+  border-bottom: 1px solid #d2d6de;
 }
 .skin-custom .main-header .navbar .nav > li > a {
   color: #ffffff;
@@ -46,6 +48,9 @@
   background-color: #ecf0f5;
   color: #357ca5;
   border-bottom: 0 solid transparent;
+  text-align: left;
+  padding-left: 40px;
+  width: 38%;
 }
 .skin-custom .main-header .logo:hover {
   background-color: #ecf0f5;

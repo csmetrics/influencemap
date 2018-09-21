@@ -1,7 +1,7 @@
 .content-wrapper-home { background-color: #ecf0f5; }
 .content-wrapper-home,
 .main-footer-home {
-  margin-left:0;
+  margin-left: 0;
 }
 .main-sidebar-wide { width: 400px; background-color: #fff; }
 .main-sidebar-dark { background-color: #222d32; }
@@ -12,7 +12,19 @@
   z-index: 800;
 }
 .content {
-  min-height: 0;
+  padding-top: 0;
+}
+.main-header .logo img {
+  width: 25px;
+  height: 25px;
+  margin-right: 10px;
+}
+.navbar .btn {
+  color: #999;
+  height: 50px;
+  padding: 12px 15px;
+  font-size: 16px;
+  margin-right: 10px;
 }
 
 .top-panel {
@@ -20,23 +32,61 @@
   margin: -15px -15px 0 -15px;
   padding: 15px 0;
 }
-.preview {
-  /* margin-left: 40%; */
-  margin-left: 10%;
-  background-color: #fff;
-}
-.carousel-intro {
+.project-intro {
+  width: 38%;
+  height: 720px;
+  background-color: #ecf0f5;
   position: absolute;
   z-index: 30;
-  width: 40%;
-  top: 62;
-  margin-left: 5%;
+  padding: 100 3% 80 3%;
+}
+.project-intro h3 {
+  text-align: left;
+  padding-left: 15%;
+  margin-top: 5px;
+  margin-bottom: 25px;
+  font-size: 35px;
+  color: #000;
+}
+.project-intro p {
+  text-align: left;
+  padding: 20 20 0 15%;
+  font-size: 20px;
+  color: #000;
+}
+.main-menu {
+  margin: 50 -500 0 15%;
+}
+.btn-main {
+  display: inline-block;
+  padding: 30px;
+  width: 260px;
+  margin-right: 50px;
+  border-radius: 50px;
+  border: 1px solid #357ca5;
+  background-color: white;
+  color: black;
+}
+.btn-main-primary {
+  background-color: #3c8dbc;
+}
+.btn-main.btn-main-white:hover{
+  background-color: #ddd;
+}
+.btn-main.btn-main-primary:hover {
+  color: black;
+  background-color: #357ca5;
+}
+
+.preview {
+  margin-left: 38%;
+  background-color: #fff;
 }
 .carousel-indicators {
-  width: 50px;
-  height: 20px;
+  width: 70px;
+  height: 500px;
   position: absolute;
-  top: 20px;
+  top: 80px;
   left: 85%;
   margin-left: 0;
   z-index: 15;
@@ -44,38 +94,30 @@
 }
 .carousel-indicators li {
   border: 1px solid #000;
+  width: 60px;
+  height: 60px;
+  margin: 10px 10px;
 }
 .carousel-indicators .active {
   background-color: #ddd;
+  width: 80px;
+  height: 80px;
 }
 .carousel-caption {
   margin-top: 20px;
   color:#000;
 }
-.project-intro {
-  background: rgb(80, 80, 80, 0.7);
-  padding: 4%;
-  border-radius: 10px 10px 0 0;
-  font-size: 15px;
-}
-.project-intro h3 {
-  margin-top: 5px;
-  margin-bottom: 25px;
-  color: #fff;
-}
 .other-previews {
-  /* background: rgb(80, 80, 80, 0.9); */
-  /* padding: 2%; */
+  width: 12%;
   text-align: center;
-  /* border-radius: 0 0 10px 10px; */
 }
 .preview-item {
   margin: 0 1%;
-  display: inline-block;
   border-radius: 15px;
   border: 8px solid #ddd;
-  width: 10%;
-  padding-top: 8%;
+  width: 100;
+  height: 100;
+  /* padding-top: 8%; */
   background-color: #ddd;
   position: relative;
 }
@@ -94,9 +136,6 @@
   object-fit: cover;
 }
 
-.main-menu {
-  padding: 20px;
-}
 .data-box {
   display: inline-block;
   width: 22%;
@@ -455,7 +494,7 @@ tr:hover td{
 
 /* Flower text */
 .node-text {
-    /* font-size: 20px; */
+    font-size: 12px;
     /* font-family: Times; */
 }
 .node-ego-text {
