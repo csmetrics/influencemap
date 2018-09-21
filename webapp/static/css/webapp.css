@@ -1,4 +1,4 @@
-.content-wrapper-home { background-color: #ecf0f5; }
+.content-wrapper-home { background-color: #fff; }
 .content-wrapper-home,
 .main-footer-home {
   margin-left: 0;
@@ -20,7 +20,7 @@
   margin-right: 10px;
 }
 .navbar .btn {
-  color: #999;
+  color: #666;
   height: 50px;
   padding: 12px 15px;
   font-size: 16px;
@@ -35,14 +35,14 @@
 .project-intro {
   width: 38%;
   height: 720px;
-  background-color: #ecf0f5;
+  background-color: #fff;
   position: absolute;
   z-index: 30;
   padding: 100 3% 80 3%;
 }
 .project-intro h3 {
   text-align: left;
-  padding-left: 15%;
+  padding-left: 20%;
   margin-top: 5px;
   margin-bottom: 25px;
   font-size: 35px;
@@ -50,7 +50,7 @@
 }
 .project-intro p {
   text-align: left;
-  padding: 20 20 0 15%;
+  padding: 20 20 0 20%;
   font-size: 20px;
   color: #000;
 }
@@ -80,20 +80,21 @@
 
 .preview {
   margin-left: 38%;
-  background-color: #fff;
+  background-color: #ddd;
+  height: 750px;
 }
 .carousel-indicators {
   width: 70px;
   height: 500px;
   position: absolute;
   top: 80px;
-  left: 85%;
+  left: 80%;
   margin-left: 0;
   z-index: 15;
   padding-left: 0;
 }
 .carousel-indicators li {
-  border: 1px solid #000;
+  border: 2px solid #fff;
   width: 60px;
   height: 60px;
   margin: 10px 10px;

@@ -3,9 +3,9 @@
  * ----------
  */
 .skin-custom .main-header .navbar {
-  background-color: #ffffff;
+  background-color: #ddd;
   margin-left: 38%;
-  border-bottom: 1px solid #d2d6de;
+  border-bottom: 1px solid #fff;
 }
 .skin-custom .main-header .navbar .nav > li > a {
   color: #ffffff;
@@ -31,7 +31,7 @@
   color: #fff;
 }
 .skin-custom .main-header .navbar .sidebar-toggle:hover {
-  background-color: #ecf0f5;
+  background-color: #fff;
 }
 @media (max-width: 767px) {
   .skin-custom .main-header .navbar .dropdown-menu li.divider {
@@ -41,11 +41,11 @@
     color: #fff;
   }
   .skin-custom .main-header .navbar .dropdown-menu li a:hover {
-    background: #ecf0f5;
+    background: #fff;
   }
 }
 .skin-custom .main-header .logo {
-  background-color: #ecf0f5;
+  background-color: #fff;
   color: #357ca5;
   border-bottom: 0 solid transparent;
   text-align: left;
@@ -53,10 +53,10 @@
   width: 38%;
 }
 .skin-custom .main-header .logo:hover {
-  background-color: #ecf0f5;
+  background-color: #fff;
 }
 .skin-custom .main-header li.user-header {
-  background-color: #ecf0f5;
+  background-color: #fff;
 }
 .skin-custom .content-header {
   background: transparent;
