@@ -1,24 +1,14 @@
 {% load staticfiles %}
-<header class="main-header">
-  <!-- Logo -->
-  <a href="/" class="logo">
-    <!-- mini logo for sidebar mini 50x50 pixels -->
-    <span class="logo-mini"><i class="fa fa-asterisk"></i></span>
-    <!-- logo for regular state and mobile devices -->
-    <span class="logo-lg"><b>Influence Map</b></span>
-    <!-- <p>Mapping intellectual influence using citation data</p> -->
-  </a>
-  <!-- Header Navbar: style can be found in header.less -->
-  <nav class="navbar navbar-static-top">
-    <!-- Sidebar toggle button-->
-    <!-- <a href="#" class="sidebar-toggle" data-toggle="push-menu" role="button"> -->
-      <!-- <span class="sr-only">Toggle navigation</span> -->
-    <!-- </a> -->
-
-    <!-- <div class="navbar-custom-menu"> -->
-      <!-- <ul class="nav navbar-nav"> -->
-
-      <!-- </ul> -->
-    <!-- </div> -->
-  </nav>
-</header>
+<a href="/" class="logo">
+  <span class="logo-mini"><i class="fa fa-asterisk"></i></span>
+  <span class="logo-lg">
+    <img src="{% static 'images/nxicon1.png'%}">
+    <b>Influence Map</b></span>
+</a>
+<nav class="navbar navbar-static-top">
+  <div class="pull-right" style="margin-right: 20px">
+    <a href="/browse" class="btn btn-flat bg-white">Gallery</a>
+    <a href="/create" class="btn btn-flat bg-white">Create</a>
+    <a href="https://github.com/csmetrics/influencemap" class="btn btn-flat bg-white">About</a>
+  </div>
+</nav>
