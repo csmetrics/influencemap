@@ -25,7 +25,7 @@ def paper_info_cache_query(paper_ids):
 
     # Query for paper info
     paper_info_s = Search(index = 'paper_info', using = client)
-    paper_info_s = paper_info_s.filter('terms', PaperId = paper_ids)
+    paper_info_s = paper_info_s.filter('terms', _id = paper_ids)
 
     # Convert query into dictionary format
     for paper_info in paper_info_s.scan():
