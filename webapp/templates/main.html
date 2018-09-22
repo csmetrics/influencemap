@@ -12,19 +12,7 @@ Licence URI: http://www.os-templates.com/template-terms
 <body class="hold-transition skin-custom sidebar-mini">
 <div class="wrapper">
   <header class="main-header">
-    <a href="/" class="logo">
-      <span class="logo-mini"><i class="fa fa-asterisk"></i></span>
-      <span class="logo-lg">
-        <img src="{% static 'images/nxicon1.png'%}">
-        <b>Influence Map</b></span>
-    </a>
-    <nav class="navbar navbar-static-top">
-      <div class="pull-right">
-        <a href="/browse" class="btn btn-flat bg-white">Gallery</a>
-        <a href="/create" class="btn btn-flat bg-white">Create</a>
-        <a href="https://github.com/csmetrics/influencemap" class="btn btn-flat bg-white">About</a>
-      </div>
-    </nav>
+    {% include 'pagehead.html' %}
   </header>
   <!-- Content Wrapper. Contains page content -->
   <div class="content-wrapper content-wrapper-home">
@@ -36,7 +24,7 @@ Licence URI: http://www.os-templates.com/template-terms
           <h3><b>About Influence Map</b></h3>
           <p>
             This project sets up to map the incoming and outgoing intellectual influence of academic entities
-             -- people, projects, publications venues, and institutions.
+            <br>-- people, projects, publications venues, and institutions.
             <!-- We do so by creating visualisations from the citation data curated in Microsoft Academic Graph. -->
           </p>
           <p>
@@ -47,13 +35,14 @@ Licence URI: http://www.os-templates.com/template-terms
           </p>
           <div class="main-menu">
             <a href="/browse" class="btn btn-main btn-main-primary">
-              <h4><b>Flower Gallery</b></h4>
+              Flower Gallery
             </a>
             <a href="/create" class="btn btn-main btn-main-white">
-              <h4><b>Create new flowers</b></h4>
+              Create new flowers
             </a>
           </div>
         </div>
+
         <div class="preview">
           <div id="preview-carousel" class="carousel slide" data-ride="carousel">
             <!-- Indicators -->
@@ -76,9 +65,6 @@ Licence URI: http://www.os-templates.com/template-terms
               <li data-target="#preview-carousel" data-slide-to="5">
                 <img title="John L Hennessy" src="https://amturing.acm.org/images/lg_aw/1426931.jpg">
               </li>
-              <li data-target="#preview-carousel" data-slide-to="6">
-                <img title="John L Hennessy" src="https://amturing.acm.org/images/lg_aw/1426931.jpg">
-              </li>
             </ol>
             <!-- Wrapper for slides -->
             <div class="carousel-inner">
@@ -92,11 +78,14 @@ Licence URI: http://www.os-templates.com/template-terms
               <div class="item"></div>
               <div class="item"></div>
               <div class="item"></div>
-              <div class="item"></div>
             </div>
           </div>
 
         </div>
+      </div>
+
+      <div class="subtitle">
+        "An influence flower aims to show a dense representation of the intellectual influence"
       </div>
 
       <div class="project-info">
@@ -130,22 +119,47 @@ Licence URI: http://www.os-templates.com/template-terms
         </div>
       </div>
 
+
       <div class="project-info flow-influence">
         <h3><b>Flow of influence</b></h3>
         <div align="center" style="padding: 15px 0;">
-          <img width="50%" src="{% static 'images/influence_flow.svg' %}">
+          <img width="55%" src="{% static 'images/influence_flow.svg' %}">
         </div>
         <div class="project-detail">
-          Each of the edges of the graph signifies the flow of influence to and from the ego node, the strenth of this relation is reflected in the thickness of the edge. The red edges denotes the influence the ego has towards the outer entities (an outer entity citing a paper by the ego). The blue edges denotes the influence the outer entities have towards the ego (the ego cites a paper by one of the outer entities).
+          Each of the edges of the graph signifies the flow of influence to and from the ego node,
+          <br>the strenth of this relation is reflected in the thickness of the edge.
+          <br>The red edges denotes the influence the ego has towards the outer entities (an outer entity citing a paper by the ego). The blue edges denotes the influence the outer entities have towards the ego (the ego cites a paper by one of the outer entities).
+          <br>The hue of the outer nodes signify the ratio of influence in and out. A blue node indicates that the associated entity has influence the ego more than the ego has influenced itself. Likewise, a red node indicates the ego has influenced the node's entity more than it has influenced the ego.
+        </div>
+      </div>
+
+      <div class="project-info" style="padding-bottom:0">
+        <div class="row detail">
+          <div class="detail-box detail-box-large">
+            <a href="http://http://cm.cecs.anu.edu.au/"><h4><b>ANU Computational Media Lab.</b></h4></a>
+            Building 145, North Rd<br>
+            College of Engineering and Computer Science<br>
+            The Australian National University<br>
+            Canberra, ACT 2601, Australia<br>
+          </div>
+          <div class="detail-box">
+            <h4><b>Abut Project</b></h4>
+            Repository<br>
+            Report Issue<br>
+            Contact<br>
+          </div>
+          <div class="detail-box">
+            <h4><b>Our team</b></h4>
+            Alexander Soen<br>
+            Benjamin Readshaw<br>
+            Minjeong Shin<br>
+            Lexing Xie<br>
+            Stephen Blackburn<br>
+          </div>
         </div>
       </div>
     </section>
   </div>
-  <!-- /.content-wrapper -->
-  <footer class="main-footer main-footer-home">
-    Copyright &copy; 2018 - All Rights Reserved - <a href="http://http://cm.cecs.anu.edu.au/">ANU Computational Media Lab.</a>
-    Template by <a href="https://adminlte.io">Almsaeed Studio</a>.</span>
-  </footer>
 </div>
 </body>
 </html>

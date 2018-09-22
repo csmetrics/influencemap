@@ -5,7 +5,15 @@
 .skin-custom .main-header .navbar {
   background-color: #eee;
   margin-left: 38%;
-  border-bottom: 1px solid #fff;
+  /* border-bottom: 1px solid #fff; */
+}
+.skin-custom .main-header .navbar-home,
+.skin-custom .header-browse .navbar{
+  margin-left: 270px;
+}
+.skin-custom .header-flower .navbar{
+  margin-left: 439px;
+  background-color: #eee;
 }
 .skin-custom .main-header .navbar .nav > li > a {
   color: #ffffff;
@@ -44,17 +52,25 @@
     background: #fff;
   }
 }
+
 .skin-custom .main-header .logo {
   background-color: #fff;
-  color: #357ca5;
+  color: #456990;
   border-bottom: 0 solid transparent;
   text-align: left;
   padding-left: 40px;
   width: 38%;
 }
-.skin-custom .main-header .logo:hover {
-  background-color: #fff;
+.skin-custom .header-browse .logo {
+  width: 270px;
 }
+.skin-custom .header-flower .logo {
+  width: 440px;
+  background-color: #eee;
+}
+/* .skin-custom .main-header .logo:hover {
+  background-color: #fff;
+} */
 .skin-custom .main-header li.user-header {
   background-color: #fff;
 }
@@ -71,7 +87,7 @@
   background-color: #fff;
 } */
 .skin-custom .main-sidebar {
-  border-right: 1px solid #d2d6de;
+  border-right: 1px solid #eee;
 }
 .skin-custom .user-panel > .info,
 .skin-custom .user-panel > .info > a {
@@ -79,7 +95,7 @@
 }
 .skin-custom .sidebar-menu > li.header {
   color: #4b646f;
-  background: #1a2226;
+  background: #fff;
 }
 .skin-custom .sidebar-menu > li > a {
   border-left: 3px solid transparent;
@@ -91,7 +107,7 @@
   background: #1e282c;
 }
 .skin-custom .sidebar-menu > li.active > a {
-  border-left-color: #3c8dbc;
+  /* border-left-color: #456990; */
 }
 .skin-custom .sidebar-menu > li > .treeview-menu {
   margin: 0 1px;
@@ -112,13 +128,13 @@
 }
 .skin-custom .sidebar-form {
   border-radius: 3px;
-  border: 1px solid #374850;
+  border: 1px solid #456990;
   margin: 10px 10px;
 }
 .skin-custom .sidebar-form input[type="text"],
 .skin-custom .sidebar-form .btn {
   box-shadow: none;
-  background-color: #374850;
+  /* background-color: #456990; */
   border: 1px solid transparent;
   height: 35px;
 }

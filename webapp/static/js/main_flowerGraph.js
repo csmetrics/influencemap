@@ -79,7 +79,7 @@ function drawFlower(svg_id, data, idx, w) {
         .attr("cy", function(d) { return transform_y(d); })
         .attr("gtype", function(d) { return d.gtype; })
         .attr("r", function(d) { return 6+100*d.size/Math.max(15, numnodes[idx]); })
-        .style("fill", function (d, i) {if (d.id == 0) return "#ccc"; else return colors(d.weight);})
+        .style("fill", function (d, i) {if (d.id == 0) return "#fff"; else return colors(d.weight);})
         .style("stroke", function (d, i) { if ((d.coauthor == 'True') && (d.id != 0)) return "green"; else return ""; })
         .style("stroke-width", 2)
 
@@ -102,7 +102,7 @@ function drawFlower(svg_id, data, idx, w) {
             return d.name
           }
         })
-        .style("fill", function(d) { if (d.coauthor == 'False') return "black"; else return "gray"; })
+        .style("fill", function(d) { if (d.coauthor == 'False') return "black"; else return "#666"; })
 
     // flower graph edges
     link[idx] = link_g.selectAll("path")
@@ -114,7 +114,7 @@ function drawFlower(svg_id, data, idx, w) {
         .attr("class", function(d) { return "link " + d.type; })
         .attr('marker-end', function(d) { return "url(#" + d.gtype+"_"+d.type+"_"+d.id + ")"; })
         .attr("type", function(d) {d.type})
-        .style("stroke-width", function (d) { return arrow_width_calc(d.weight); })
+        .style("stroke-width", function (d) { return arrow_width_calc(d.weight)/1.5; })
         .style("stroke", function (d) { if (d.type == "in") return norcolor[0]; else return norcolor[1]; })
 
 }
@@ -155,9 +155,9 @@ function transform_text_x(d) {
 function transform_text_y(d) {
   shift = 0;
   if (d.id > 0 && -.5 < d.xpos && d.xpos < .5) shift -= 5;
-  if (d.id > 0 && -.4 < d.xpos && d.xpos < .4) shift -= 6;
-  if (d.id > 0 && -.3 < d.xpos && d.xpos < .3) shift -= 11;
-  if (d.id > 0 && -.1 < d.xpos && d.xpos < .1) shift -= 15;
+  if (d.id > 0 && -.4 < d.xpos && d.xpos < .4) shift -= 5;
+  if (d.id > 0 && -.3 < d.xpos && d.xpos < .3) shift -= 4;
+  if (d.id > 0 && -.1 < d.xpos && d.xpos < .1) shift -= 12;
 
   // Title
   if (d.id == 0) {

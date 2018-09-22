@@ -160,7 +160,7 @@ function drawFlower(svg_id, data, idx, w) {
         .attr("cy", function(d) { if (d.id > 0) return transform_y(nodes[0])-magf; else return transform_y(d); })
         .attr("gtype", function(d) { return d.gtype; })
         .attr("r", function(d) { return 8+200*d.size/Math.max(15, numnodes[idx]); })
-        .style("fill", function (d, i) {if (d.id == 0) return "#ccc"; else return colors(d.weight);})
+        .style("fill", function (d, i) {if (d.id == 0) return "#fff"; else return colors(d.weight);})
         .style("stroke", function (d, i) { if ((d.coauthor == 'True') && (d.id != 0)) return "green"; else return ""; })
         .style("stroke-width", 2)
         .style("cursor", "pointer")
