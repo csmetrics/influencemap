@@ -11,14 +11,14 @@
           <button class="btn-sm entity-type-btn"  data-entitytype="journal"><i class="fa fa-book"></i>  Journals</button>
           <button class="btn-sm entity-type-btn"  data-entitytype="paper"><i class="fa fa-file"></i>  Papers</button>
       </div>
-        <div class="input-group searchbar">
-          <input autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false" id="name-search-bar" type="text" class="form-control" value="" placeholder="Search">
-          <span class="input-group-btn">
-            <button id="search-btn" type="button" class="btn btn-flat">
-              <i class="fa fa-search"></i>
-            </button>
-          </span>
-        </div>
+      <div class="input-group searchbar">
+        <input autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false" id="name-search-bar" type="text" class="form-control" value="" placeholder="Search">
+        <span class="input-group-btn">
+          <button id="search-btn" type="button" class="btn btn-flat">
+            <i class="fa fa-search"></i>
+          </button>
+        </span>
+      </div>
     </div>
     <div id="searchtable-container" style="padding: 0px 30px">
       <div id="loading" style="display: none"></div>
@@ -38,6 +38,21 @@
   height: 100%;
   width: 100%;
   background-color: #fff;
+}
+
+#searchtable td,
+#selectiontable td {
+  font-size: 16px;
+}
+#searchtable td i,
+#selectiontable td i {
+  font-size: 20px;
+  float: left;
+  padding: 10px;
+}
+#searchtable td p,
+#selectiontable td p {
+  padding: 2px 10px;
 }
 
 .right-col {
