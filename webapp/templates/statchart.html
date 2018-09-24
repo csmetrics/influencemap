@@ -6,7 +6,7 @@
       <i class="fa fa-circle" style="color:#ABBD81"></i> Publication
       <i class="fa fa-circle" style="color:#F47E60"></i> Citation
     </div>
-    <div id="div_charts" style="width:370px;height:210px;">
+    <div id="div_charts" style="width:375px;height:230px;overflow:hidden">
       <div id="pub_chart" style="height:90px;"></div>
       <div id="publication-range" class="yearslider"></div>
       <div id="citation-range" class="yearslider"></div>
@@ -27,15 +27,17 @@
       average <span id="avg_cites" class="stat">{{ stats.avg_cites }}</span> per paper<br>
     </div>
   </div>
-  <div class="wrapper" style="border-top:1px #ddd solid;">
+</div>
+<div class="statpane-control" style="border-top:1px #eee solid;">
+  <div class="wrapper">
     <b>Selected Range (for flower)</b>
-    <div style="padding-left:10px">
-      <b>Publications:
+    <div style="padding:10px 0 0 10px">
+      Publications:
         <span class="label-as-badge" id="pub-lower-value"></span>~
-        <span class="label-as-badge" id="pub-upper-value"></span> </b>
-      <b>Citations:
+        <span class="label-as-badge" id="pub-upper-value"></span>
+      Citations:
         <span class="label-as-badge" id="cit-lower-value"></span>~
-        <span class="label-as-badge" id="cit-upper-value"></span> </b><br>
+        <span class="label-as-badge" id="cit-upper-value"></span> <br>
       <span id="selected_publication_link" class="link"><span id="selected_num_papers" class="stat">???</span> papers</span>,
       <span id="selected_citation_link" class="link"><span id="selected_num_cites" class="stat">???</span> citations</span>
     </div>
@@ -52,11 +54,11 @@
       <input class="coauthor" type="checkbox" onclick="updateConfigUrl()" style="float:left; margin:5 10 0 0" name="self-coauthor" id="coauthor" {% if yearSlider.selected.icoauthor == 'true' %} checked="checked" {% endif %}/>
     </div>
     <div align=center style="padding-top:5px;">
-      <button class="btn btn-primary" id="resubmitButton">Update Flower</button>
+      <button class="btn " id="resubmitButton">Update Flower</button>
     </div>
   </div>
   {% if curated %}
-  <div class="wrapper" style="border-top:1px #ddd solid;">
+  <div class="wrapper" style="border-top:1px #eee solid;">
     <div class="row">
       <div class="col-sm-8" style="padding-right:0">
         <input style="width:100%" type="text" value="{{ request.build_absolute_uri }}" id="configuration">

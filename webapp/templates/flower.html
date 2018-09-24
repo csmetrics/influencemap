@@ -4,7 +4,9 @@
 {% include 'header.html' %}
 <body class="hold-transition skin-custom sidebar-mini">
 <div class="wrapper">
-  {% include 'pagehead.html' with navbar=navbarOption %}
+  <header class="main-header header-flower">
+    {% include 'pagehead.html' %}
+  </header>
   <aside class="main-sidebar main-sidebar-wide" style="background-color: #fff;">
     <section class="sidebar">
       <div id="statpane">
@@ -15,14 +17,10 @@
   <div class="content-wrapper content-wrapper-narrow">
     <div id="flower-container" style="height:860px;">
       <ul class="nav nav-tabs" style="float:right">
-        <li><button class="btn tab-btn inverse active" href="#tab-author" data-toggle="tab"><i class="fa fa-user"></i>&nbsp;Author</button></li>
-        <li><button class="btn tab-btn inverse" href="#tab-conference" data-toggle="tab"><i class="fa fa-book"></i>&nbsp;Venue</button></li>
-        <li><button class="btn tab-btn inverse" href="#tab-institution" data-toggle="tab"><i class="fa fa-university"></i>&nbsp;Institution</button></li>
+        <li class="active"><a class="btn tab-btn" href="#tab-author" data-toggle="tab"><i class="fa fa-user"></i>&nbsp;Author</a></li>
+        <li><a class="btn tab-btn" href="#tab-conference" data-toggle="tab"><i class="fa fa-book"></i>&nbsp;Venue</a></li>
+        <li><a class="btn tab-btn" href="#tab-institution" data-toggle="tab"><i class="fa fa-university"></i>&nbsp;Institution</a></li>
       </ul>
-      <!-- <div align="center" >
-        legend-testtest (fix later)
-        <div id="flower-legend"></div>
-      </div> -->
       <!-- Tab content -->
       <div class="tab-content">
         <div role="tabpanel" class="tab-pane tab-flower active" id="tab-author">

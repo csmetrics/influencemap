@@ -11,150 +11,176 @@ Licence URI: http://www.os-templates.com/template-terms
 {% include 'header.html' %}
 <body class="hold-transition skin-custom sidebar-mini">
 <div class="wrapper">
-  {% include 'pagehead.html' %}
+  <header class="main-header">
+    {% include 'pagehead.html' %}
+  </header>
   <!-- Content Wrapper. Contains page content -->
-  <div class="content-wrapper content-wrapper-home" style="background-color:#ecf0f5">
+  <div class="content-wrapper content-wrapper-home">
     <!-- Main content -->
     <section class="content">
       <!-- Small boxes (Stat box) -->
       <div class="top-panel">
+        <div class="project-intro">
+          <h3><b>About Influence Map</b></h3>
+          <p>
+            This project sets up to map the incoming and outgoing intellectual influence of academic entities
+            <br>-- people, projects, publications venues, and institutions.
+            <!-- We do so by creating visualisations from the citation data curated in Microsoft Academic Graph. -->
+          </p>
+          <p>
+            <!-- To quantify academic influence, we define influence as a function of paper citations.
+            The scoring of influence is done with respect to entities (author, institute, journal, or conference) and how entities cite other entities.
+            To visualise influence we use influence flowers. -->
+            An influence flower aims to show a dense representation of the influence in which an entity (the center node, denoted as the ego) has with several other entities.
+          </p>
+          <div class="main-menu">
+            <a href="/browse" class="btn btn-main btn-main-primary">
+              Flower Gallery
+            </a>
+            <a href="/create" class="btn btn-main btn-main-white">
+              Create new flowers
+            </a>
+          </div>
+        </div>
+
         <div class="preview">
           <div id="preview-carousel" class="carousel slide" data-ride="carousel">
             <!-- Indicators -->
             <ol class="carousel-indicators">
-              <li data-target="#preview-carousel" data-slide-to="0" class="active"></li>
-              <li data-target="#preview-carousel" data-slide-to="1"></li>
-              <li data-target="#preview-carousel" data-slide-to="2"></li>
+              <li data-target="#preview-carousel" data-slide-to="0" class="active">
+                <img title="Sir Tim Berners-Lee" src="https://upload.wikimedia.org/wikipedia/commons/thumb/4/4e/Sir_Tim_Berners-Lee_%28cropped%29.jpg/192px-Sir_Tim_Berners-Lee_%28cropped%29.jpg">
+              </li>
+              <li data-target="#preview-carousel" data-slide-to="1">
+                <img title="John L Hennessy" src="https://amturing.acm.org/images/lg_aw/1426931.jpg">
+              </li>
+              <li data-target="#preview-carousel" data-slide-to="2">
+                <img title="ACM Multimedia" src="https://pbs.twimg.com/profile_images/832295325469536257/Ooqjbgzc_400x400.jpg">
+              </li>
+              <li data-target="#preview-carousel" data-slide-to="3">
+                <img title="PLDI" src="https://pbs.twimg.com/profile_images/1008437223539269632/VNsST0-8_400x400.jpg">
+              </li>
+              <li data-target="#preview-carousel" data-slide-to="4">
+                <img title="ANU" src="https://i0.wp.com/nswcocabs.com/wp-content/uploads/2018/07/anu-logo.jpg?ssl=1">
+              </li>
+              <li data-target="#preview-carousel" data-slide-to="5">
+                <img title="John L Hennessy" src="https://amturing.acm.org/images/lg_aw/1426931.jpg">
+              </li>
             </ol>
             <!-- Wrapper for slides -->
             <div class="carousel-inner">
               <div class="item active">
-                <svg id="chart1" width=1800 height=410></svg>
+                <svg id="chart_1_1" width=1600 height=240></svg>
+                <svg id="chart_1_2" width=1600 height=240></svg>
+                <svg id="chart_1_3" width=1600 height=240></svg>
               </div>
               <div class="item">
-                <svg id="chart2" width=1800 height=410></svg>
+                <svg id="chart_2_1" width=1600 height=240></svg>
+                <svg id="chart_2_2" width=1600 height=240></svg>
+                <svg id="chart_2_3" width=1600 height=240></svg>
               </div>
-              <div class="item">
-                <svg id="chart3" width=1800 height=410></svg>
-              </div>
+              <div class="item"></div>
+              <div class="item"></div>
+              <div class="item"></div>
+              <div class="item"></div>
             </div>
           </div>
-        </div>
-        <div class="carousel-intro">
-          <div class="project-intro">
-            <h3><b>About Project Influence Map</b></h3>
-      			<p>
-              This project sets up to map the incoming and outgoing intellectual influence of academic entities
-               -- people, projects, publications venues, and institutions.
-              <!-- We do so by creating visualisations from the citation data curated in Microsoft Academic Graph. -->
-            </p>
-            <p>
-              To quantify academic influence, we define influence as a function of paper citations.
-              The scoring of influence is done with respect to entities (author, institute, journal, or conference) and how entities cite other entities.
-              To visualise influence we use influence flowers.
-              An influence flower aims to show a dense representation of the influence in which an entity (the center node, denoted as the ego) has with several other entities.
-            </p>
-          </div>
-          <div class="other-previews">
-            <div class="preview-item">
-              <img title="Sir Tim Berners-Lee" src="https://upload.wikimedia.org/wikipedia/commons/thumb/4/4e/Sir_Tim_Berners-Lee_%28cropped%29.jpg/192px-Sir_Tim_Berners-Lee_%28cropped%29.jpg">
-            </div>
-            <div class="preview-item">
-              <img title="John L Hennessy" src="https://amturing.acm.org/images/lg_aw/1426931.jpg">
-            </div>
-            <div class="preview-item">
-              <img title="ACM Multimedia" src="https://pbs.twimg.com/profile_images/832295325469536257/Ooqjbgzc_400x400.jpg">
-            </div>
-            <div class="preview-item">
-              <img title="PLDI" src="https://pbs.twimg.com/profile_images/1008437223539269632/VNsST0-8_400x400.jpg">
-            </div>
-            <div class="preview-item">
-              <img title="ANU" src="https://i0.wp.com/nswcocabs.com/wp-content/uploads/2018/07/anu-logo.jpg?ssl=1">
-            </div>
-          </div>
+
         </div>
       </div>
-      <!-- Small boxes (Stat box) -->
-      <div class="main-menu">
-        <div class="row" style="padding: 20px 6% 0 6%;">
 
-          <div class="col-lg-4 col-xs-4" style="padding: 10px 20px; text-align:justify">
-            <h4><b>Flow of influence</b></h4>
-            <div align="center" style="padding: 15px 0;">
-              <img width="90%" src="{% static 'images/influence_flow.svg' %}">
-            </div>
-            Each of the edges of the graph signifies the flow of influence to and from the ego node, the strenth of this relation is reflected in the thickness of the edge. The red edges denotes the influence the ego has towards the outer entities (an outer entity citing a paper by the ego). The blue edges denotes the influence the outer entities have towards the ego (the ego cites a paper by one of the outer entities).
+      <div class="subtitle">
+        "An influence flower aims to show a dense representation of the intellectual influence"
+      </div>
+
+      <div class="project-info">
+        <h3><b>Dataset</b></h3>
+        <div class="row dataset">
+          <div class="data-box">
+            <i class="fa fa-newspaper-o" style="font-size:40px"></i><br>
+            176M<br>
+            Publications
           </div>
-
-          <div class="col-lg-4 col-xs-4" style="padding: 10px 20px; text-align:justify">
-            <h4><b>Dataset</b></h4>
-            We use the <a href="https://www.microsoft.com/en-us/research/project/microsoft-academic-graph/">Microsoft Academic Graph (MAG)</a> dataset for our visualization.
-            MAG is a heterogeneous graph containing scientific publication records, citation relationships, as well as authors, institutions, journals and conferences.
-            We download the entire knowledge graph ver 2018-06-29. (will be regularly updated)
-            <div class="row" style="padding: 15px 0;" align="center">
-              <div class="box box-solid data-box">
-                <i class="fa fa-newspaper-o" style="font-size:40px"></i><br>
-                176M<br>
-                Publications
-              </div>
-              <div class="box box-solid data-box">
-                <i class="fa fa-user" style="font-size:40px"></i><br>
-                212M<br>
-                Authors
-              </div>
-              <div class="box box-solid data-box">
-                <i class="fa fa-institution" style="font-size:40px"></i><br>
-                25K<br>
-                Institutions
-              </div>
-              <div class="box box-solid data-box">
-                <i class="fa fa-map-signs" style="font-size:40px"></i><br>
-                52K<br>
-                Venues
-              </div>
-            </div>
+          <div class="data-box">
+            <i class="fa fa-user" style="font-size:40px"></i><br>
+            212M<br>
+            Authors
           </div>
+          <div class="data-box">
+            <i class="fa fa-institution" style="font-size:40px"></i><br>
+            25K<br>
+            Institutions
+          </div>
+          <div class="data-box">
+            <i class="fa fa-map-signs" style="font-size:40px"></i><br>
+            52K<br>
+            Venues
+          </div>
+        </div>
+        <div class="project-detail">
+          We use the <a href="https://www.microsoft.com/en-us/research/project/microsoft-academic-graph/">Microsoft Academic Graph (MAG)</a> dataset for our visualization.
+          <br>MAG is a heterogeneous graph containing scientific publication records, citation relationships, as well as authors, institutions, journals and conferences.
+          We download the entire knowledge graph ver 2018-06-29. (will be regularly updated)
+        </div>
+      </div>
 
-          <div class="col-lg-4 col-xs-4" style="padding: 10px 20px; text-align:justify">
-            <div class="inner">
-              <a href="/browse">
-                <h4><b>Flower Gallery <i class="fa fa-trophy"></i></b></h4>
-              </a>
-              Browse influence flowers of Turing Award winners, Fields Medalists, Journals and Conferences, and more...
-            </div>
-            <div class="inner" style="padding-top:5px">
-              <a href="/create">
-                <h4><b>Create new flowers <i class="fa fa-plus-circle"></i></b></h4>
-              </a>
-              Curate your own influence flowers by querying papers, people, groups and institutions...
-            </div>
-            <div class="inner" style="padding-top:5px">
-              <a href="https://github.com/csmetrics/influencemap">
-                <h4><b>Project repo <i class="fa fa-github"></i></b></h4>
-              </a>
-              Visit repository for more information about the Influence Map project.
-            </div>
+
+      <div class="project-info flow-influence">
+        <h3><b>Flow of influence</b></h3>
+        <div align="center" style="padding: 15px 0;">
+          <img width="55%" src="{% static 'images/influence_flow.svg' %}">
+        </div>
+        <div class="project-detail">
+          Each of the edges of the graph signifies the flow of influence to and from the ego node,
+          <br>the strenth of this relation is reflected in the thickness of the edge.
+          <br>The red edges denotes the influence the ego has towards the outer entities (an outer entity citing a paper by the ego). The blue edges denotes the influence the outer entities have towards the ego (the ego cites a paper by one of the outer entities).
+          <br>The hue of the outer nodes signify the ratio of influence in and out. A blue node indicates that the associated entity has influence the ego more than the ego has influenced itself. Likewise, a red node indicates the ego has influenced the node's entity more than it has influenced the ego.
+        </div>
+      </div>
+
+      <div class="project-info" style="padding-bottom:0">
+        <div class="row detail">
+          <div class="detail-box detail-box-large">
+            <a href="http://http://cm.cecs.anu.edu.au/"><h4><b>ANU Computational Media Lab.</b></h4></a>
+            Building 145, North Rd<br>
+            College of Engineering and Computer Science<br>
+            The Australian National University<br>
+            Canberra, ACT 2601, Australia<br>
+          </div>
+          <div class="detail-box">
+            <h4><b>Abut Project</b></h4>
+            Repository<br>
+            Report Issue<br>
+            Contact<br>
+          </div>
+          <div class="detail-box">
+            <h4><b>Our team</b></h4>
+            Alexander Soen<br>
+            Benjamin Readshaw<br>
+            Minjeong Shin<br>
+            Lexing Xie<br>
+            Stephen Blackburn<br>
           </div>
         </div>
       </div>
     </section>
   </div>
-  <!-- /.content-wrapper -->
-  <footer class="main-footer main-footer-home">
-    Copyright &copy; 2018 - All Rights Reserved - <a href="http://http://cm.cecs.anu.edu.au/">ANU Computational Media Lab.</a>
-    Template by <a href="https://adminlte.io">Almsaeed Studio</a>.</span>
-  </footer>
 </div>
 </body>
 </html>
 <script src="{% static 'js/d3.v4.min.js' %}"></script>
 <script src="{% static 'js/d3-selection-multi.v1.min.js' %}"></script>
 <script src="{% static 'js/d3-scale-chromatic.v1.min.js' %}"></script>
-<script src="{% static 'js/main_data.js' %}"></script>
 <script src="{% static 'js/main_flowerGraph.js' %}"></script>
+<script src="{% static 'js/maindata/main_data_0.js' %}"></script>
 <script>
 var width = document.getElementById('preview-carousel').offsetWidth;
-drawFlower("#chart1", author_data, 0, width);
-drawFlower("#chart2", conf_data, 1, width);
-drawFlower("#chart3", inst_data, 2, width);
+drawFlower("#chart_1_1", author_data, 0, width);
+drawFlower("#chart_1_2", conf_data, 1, width);
+drawFlower("#chart_1_3", inst_data, 2, width);
+</script>
+<script src="{% static 'js/maindata/main_data_1.js' %}"></script>
+<script>
+drawFlower("#chart_2_1", author_data, 0, width);
+drawFlower("#chart_2_2", conf_data, 1, width);
+drawFlower("#chart_2_3", inst_data, 2, width);
 </script>

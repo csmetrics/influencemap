@@ -144,20 +144,11 @@ def curate_load_file(request):
 
 
 s = {
-    'author': ('<i class="fa fa-user" style="float: left; font-size: 40px;"></i><h5>{name}</h5><p>{affiliation}, Papers: {paperCount}, Citations: {citations}</p></div>'),
-         # '<div style="float: left; width: 50%; padding: 0;"><p>Papers: {paperCount}</p></div>'
-         # '<div style="float: right; width: 50%; text-align: right; padding: 0;"<p>Citations: {citations}</p></div>'),
-    'conference': ('<i class="fa fa-building" style="float: left; font-size: 40px;"></i><h5>{DisplayName}</h5>'
-        '<div style="float: left; width: 50%; padding: 0;"><p>Papers: {PaperCount}</p></div>'
-        '<div style="float: right; width: 50%; text-align: right; padding: 0;"<p>Citations: {CitationCount}</p></div>'),
-    'institution': ('<i class="fa fa-university" style="float: left; font-size: 40px;"></i><h5>{DisplayName}</h5>'
-        '<div style="float: left; width: 50%; padding: 0;"><p>Papers: {PaperCount}</p></div>'
-        '<div style="float: right; width: 50%; text-align: right; padding: 0;"<p>Citations: {CitationCount}</p></div>'),
-    'journal': ('<i class="fa fa-book" style="float: left; font-size: 40px;"></i><h5>{DisplayName}</h5>'
-        '<div style="float: left; width: 50%; padding: 0;"><p>Papers: {PaperCount}</p></div>'
-        '<div style="float: right; width: 50%; text-align: right; padding: 0;"<p>Citations: {CitationCount}</p></div>'),
-    'paper': ('<i class="fa fa-file" style="float: left; font-size: 40px;"></i><h5>{title}</h5>'
-        '<div><p>Citations: {citations}, Field: {fieldOfStudy}</p><p>Authors: {authorName}</p></div>')
+    'author': ('<i class="fa fa-user""></i><h4>{name}</h4><p>{affiliation}, Papers: {paperCount}, Citations: {citations}</p>'),
+    'conference': ('<i class="fa fa-building"></i><h4>{DisplayName}</h4><p>Papers: {PaperCount}, Citations: {CitationCount}</p>'),
+    'institution': ('<i class="fa fa-university"></i><h4>{DisplayName}</h4><p>Papers: {PaperCount}, Citations: {CitationCount}</p>'),
+    'journal': ('<i class="fa fa-book"></i><h4>{DisplayName}</h4><p>Papers: {PaperCount}, Citations: {CitationCount}</p>'),
+    'paper': ('<i class="fa fa-file"></i><h4>{title}</h4><p>Citations: {citations}, Field: {fieldOfStudy}</p><p>Authors: {authorName}</p>')
 }
 
 @csrf_exempt
