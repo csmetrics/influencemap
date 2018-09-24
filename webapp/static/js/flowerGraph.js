@@ -487,8 +487,8 @@ function formatNodeInfoLower(data) {
   page_counter = 1;
   max_page_num = data["max_page"];
 
-  var next_button = "<button onclick='nextPage()'>Next</button>";
-  var prev_button = "<button onclick='prevPage()'>Prev</button>";
+  var next_button = "<button id='next_node_page' onclick='nextPage()'>Next</button>";
+  var prev_button = "<button id='prev_node_page' onclick='prevPage()'>Prev</button>";
   var page_indicate = "<p id='page_indicate' style='display: inline; margin: 5px;'>" + page_counter + "/" + max_page_num + "</p>";
 
   return "<div id='node_info_lower' class='node_info_lower'>"+prev_button+page_indicate+next_button+"</div>";
@@ -614,7 +614,8 @@ function populateNodeInfoContent(data){
 function getData(param){
   node_info_name  = param['name'];
   var data_dict = { // input to the views.py - search()
-      "name": node_info_name
+      "name": node_info_name,
+      "session": session
     };
     var t0 = performance.now();
   $.ajax({
@@ -627,6 +628,8 @@ function getData(param){
       display_name = result['node_name'];
       flower_name  = result['flower_name'];
       populateNodeInfoContent(result);
+      document.getElementById("prev_node_page").disabled=true;
+      if (result['max_page']===1){document.getElementById("next_node_page").disabled=true}
       document.getElementById("node_info_modal").style.display = "block";
     },
     error: function (result) {
@@ -663,7 +666,8 @@ function nextPage() {
     if (page_counter != max_page_num) {
       var data_dict = { // input to the views.py - search()
           "name": node_info_name,
-          "page": page_counter + 1
+          "page": page_counter + 1,
+          "session": session
         };
       $.ajax({
         type: "POST",
@@ -682,6 +686,8 @@ function nextPage() {
           // Set the page number
           page_counter = Math.min(page_counter + 1, max_page_num);
           document.getElementById("page_indicate").innerHTML = page_counter + "/" + max_page_num;
+          if (page_counter === max_page_num){document.getElementById("next_node_page").disabled=true}
+          document.getElementById("prev_node_page").disabled=false;
         },
         error: function (result) {
         }
@@ -693,7 +699,8 @@ function prevPage() {
     if (page_counter != 1) {
       var data_dict = { // input to the views.py - search()
           "name": node_info_name,
-          "page": page_counter - 1
+          "page": page_counter - 1,
+          "session": session
         };
       $.ajax({
         type: "POST",
@@ -712,6 +719,8 @@ function prevPage() {
           // Set the page number
           page_counter = Math.max(page_counter - 1, 1);
           document.getElementById("page_indicate").innerHTML = page_counter + "/" + max_page_num;
+          if (page_counter === 1){document.getElementById("prev_node_page").disabled=true}
+          document.getElementById("next_node_page").disabled=false;
         },
         error: function (result) {
         }

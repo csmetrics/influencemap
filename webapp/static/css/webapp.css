@@ -113,13 +113,17 @@ a {
   left: 80%;
   margin-left: 0;
   z-index: 15;
-  padding-left: 0;
+  font-size: 12px;
+  font-weight: bold;
+  text-align: center;
 }
 .carousel-indicators li {
   border: 3px solid #fff;
   width: 60px;
   height: 60px;
   margin: 10px;
+  padding: 18px 0;
+  text-indent: 0;
   border-radius: 50%;
   position: relative;
   background-color: #fff;
@@ -129,6 +133,8 @@ a {
   background-color: #EEB868;
   width: 80px;
   height: 80px;
+  font-size: 16px;
+  padding: 25px 0;
   border-radius: 50%;
 }
 .other-previews {
@@ -214,6 +220,8 @@ a {
   border-bottom-left-radius: 6px;
 }
 
+#statpane { font-size: 15px; }
+#statpane b { font-size: 16px; }
 #disqus_thread, #lefttable,
 #statpane .wrapper, .tab-flower {
   padding: 15px 25px;
@@ -239,6 +247,7 @@ a {
   position: absolute;
   width: 100%;
   height: 70%;
+  z-index: 300;
   background: url('../images/loading.gif') no-repeat center center;
 }
 
@@ -247,7 +256,17 @@ table, th, td, table.dataTable thead th, table.dataTable thead td {
 }
 table {
   font-size: 14px;
+
 }
+.emb-table {
+  text-align: left;
+  font-size: 18px;
+  padding-left: 20px;
+}
+.emb-table li {
+  padding-top: 5px;
+}
+
 #selectiontable tr {
   color: black;
   background: none;
@@ -304,7 +323,8 @@ div#citation-range .noUi-connect {
 
 #flower-container { margin-top:0; }
 
-.tab-btn:hover, .tab-btn.inverse{
+
+.nav-tabs>li>a.tab-btn{
   padding: 8px 0;
   border-radius: 0 0 5px 5px;
   color:#000; background-color:transparent;
@@ -313,16 +333,15 @@ div#citation-range .noUi-connect {
   text-align: center;
   width: 140px;
   font-size: 16px;
+  margin: 0;
 }
-.tab-btn, .tab-btn.active, .tab-btn.inverse:hover{
-  padding: 8px 0;
-  border-radius: 0 0 5px 5px;
+.nav-tabs>li.active>a,
+.nav-tabs>li.active>a:focus,
+.nav-tabs>li.active>a:hover,
+.nav-tabs>li.active>a.tab-btn,
+.nav-tabs>li>a.tab-btn:hover{
   color:#000; background-color:#eee;
-  border: 1px solid #ddd;
   border-bottom: 5px #49BEAA solid;
-  text-align: center;
-  width: 140px;
-  font-size: 16px;
 }
 
 img.fit-wrapper {
@@ -390,10 +409,10 @@ text {
 }
 
 .label-as-badge {
-    border-radius: 4px;
-    padding: 2px;
-    background-color: rgb(245, 245, 245);
-    border: 1px solid #e5e5e5;
+  border-radius: 4px;
+  padding: 2px 4px;
+  background-color: rgb(245, 245, 245);
+  border: 1px solid #e5e5e5;
 }
 
 .custom-text-box {

@@ -184,7 +184,7 @@ def gen_flower_data(score_df, flower_prop, entity_names, flower_name,
     i = 0
     top_score = list()
     max_search = False
-    num_leaves = default_config["num_leaves"]
+    num_leaves = config["num_leaves"]
     while len(top_score) < num_leaves and not max_search :
         top_score = agg_score.head(n=(4 + i) * num_leaves)
 
