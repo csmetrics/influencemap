@@ -113,13 +113,17 @@ a {
   left: 80%;
   margin-left: 0;
   z-index: 15;
-  padding-left: 0;
+  font-size: 12px;
+  font-weight: bold;
+  text-align: center;
 }
 .carousel-indicators li {
   border: 3px solid #fff;
   width: 60px;
   height: 60px;
   margin: 10px;
+  padding: 18px 0;
+  text-indent: 0;
   border-radius: 50%;
   position: relative;
   background-color: #fff;
@@ -129,6 +133,8 @@ a {
   background-color: #EEB868;
   width: 80px;
   height: 80px;
+  font-size: 16px;
+  padding: 25px 0;
   border-radius: 50%;
 }
 .other-previews {
