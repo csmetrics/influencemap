@@ -402,16 +402,20 @@ def submit(request):
     stats = get_stats(paper_information)
     data['stats'] = stats
 
+    session = dict()
+
     # Cache from flower data
     for key, value in cache.items():
-        request.session[key] = value
+        session[key] = value
 
     for p in paper_information:
         len(p['Citations'])
-    request.session['year_ranges'] = {'pub_lower': min_pub_year, 'pub_upper': max_pub_year, 'cit_lower': min_cite_year, 'cit_upper': max_cite_year}
-    request.session['flower_name']  = flower_name
-    request.session['entity_names'] = entity_names
-    request.session['node_info']    = node_info
+    session['year_ranges'] = {'pub_lower': min_pub_year, 'pub_upper': max_pub_year, 'cit_lower': min_cite_year, 'cit_upper': max_cite_year}
+    session['flower_name']  = flower_name
+    session['entity_names'] = entity_names
+    session['node_info']    = node_info
+
+    data["session"] = session
 
     return render(request, "flower.html", data)
 
@@ -421,11 +425,14 @@ def resubmit(request):
     print(request)
     option = request.POST.get('option')
     keyword = request.POST.get('keyword')
+
+    session = json.loads(request.POST.get("session"))
+
     pre_flower_data = []
-    cache        = request.session['cache']
-    coauthors    = request.session['coauthors']
-    flower_name  = request.session['flower_name']
-    entity_names = request.session['entity_names']
+    cache        = session['cache']
+    coauthors    = session['coauthors']
+    flower_name  = session['flower_name']
+    entity_names = session['entity_names']
 
     flower_config = default_config
     flower_config['self_cite'] = request.POST.get('selfcite') == 'true'
@@ -436,7 +443,7 @@ def resubmit(request):
     flower_config['cit_upper'] = int(request.POST.get('to_cit_year'))
     flower_config['num_leaves'] = int(request.POST.get('numpetals'))
 
-    request.session['year_ranges'] = {'pub_lower': flower_config['pub_lower'], 'pub_upper': flower_config['pub_upper'], 'cit_lower': flower_config['cit_lower'], 'cit_upper': flower_config['cit_upper']}
+    session['year_ranges'] = {'pub_lower': flower_config['pub_lower'], 'pub_upper': flower_config['pub_upper'], 'cit_lower': flower_config['cit_lower'], 'cit_upper': flower_config['cit_upper']}
 
     # Recompute flowers
     paper_information = paper_info_mag_check_multiquery(cache) # API
@@ -474,8 +481,8 @@ def resubmit(request):
     data['stats'] = stats
 
     # Update the node_info cache
-    request.session['node_info'] = node_info
-
+    session['node_info'] = node_info
+    data["session"] = session
     return JsonResponse(data, safe=False)
 
 
@@ -498,32 +505,39 @@ def get_publication_papers(request):
     start = datetime.now()
     # request should contain the ego author ids and the node author ids separately
     print(request.POST)
+    request_data = json.loads(request.POST.get("data_string"))
+    session = request_data.get("session")
+
     pub_year_min = int(request.POST.get("pub_year_min"))
     pub_year_max = int(request.POST.get("pub_year_max"))
-    paper_ids = request.session['cache']
+    paper_ids = session['cache']
     papers = paper_info_mag_check_multiquery(paper_ids)
     papers = [paper for paper in papers if (paper["Year"] >= pub_year_min and paper["Year"] <= pub_year_max)]
     papers = conf_journ_to_display_names({paper["PaperId"]: paper for paper in papers})
     print((datetime.now()-start).total_seconds())
-    return JsonResponse({"papers": papers, "names": request.session["entity_names"]+ request.session["node_info"]}, safe=False)
+    return JsonResponse({"papers": papers, "names": session["entity_names"]+ session["node_info"]}, safe=False)
 
 @csrf_exempt
 def get_citation_papers(request):
     start = datetime.now()
     # request should contain the ego author ids and the node author ids separately
     print(request.POST)
+
+    request_data = json.loads(request.POST.get("data_string"))
+    session = request_data.get("session")
+
     cite_year_min = int(request.POST.get("cite_year_min"))
     cite_year_max = int(request.POST.get("cite_year_max"))
     pub_year_min = int(request.POST.get("pub_year_min"))
     pub_year_max = int(request.POST.get("pub_year_max"))
-    paper_ids = request.session['cache']
+    paper_ids = session['cache']
     papers = paper_info_mag_check_multiquery(paper_ids)
     cite_papers = [[citation for citation in paper["Citations"] if (citation["Year"] >= cite_year_min and citation["Year"] <= cite_year_max)] for paper in papers if (paper["Year"] >= pub_year_min and paper["Year"] <= pub_year_max)]
     citations = sum(cite_papers,[])
     citations = conf_journ_to_display_names({paper["PaperId"]: paper for paper in citations})
 
     print((datetime.now()-start).total_seconds())
-    return JsonResponse({"papers": citations, "names": request.session["entity_names"] + request.session["node_info"],"node_info": request.session["node_information_store"]}, safe=False)
+    return JsonResponse({"papers": citations, "names": session["entity_names"] + session["node_info"],"node_info": session["node_information_store"]}, safe=False)
 
 
 def get_node_info_single(request, entity, year_ranges):
@@ -531,8 +545,9 @@ def get_node_info_single(request, entity, year_ranges):
     pub_upper = year_ranges["pub_upper"]
     cit_lower = year_ranges["cit_lower"]
     cit_upper = year_ranges["cit_upper"]
-
-    papers = paper_info_mag_check_multiquery(request.session["cache"])
+    request_data = json.loads(request.POST.get("data_string"))
+    session = request_data.get("session")
+    papers = paper_info_mag_check_multiquery(session["cache"])
     papers_to_send = dict()
     links = dict()
 
@@ -583,9 +598,10 @@ def get_node_info_single(request, entity, year_ranges):
 def get_node_info(request):
     request_data = json.loads(request.POST.get("data_string"))
     node_name = request_data.get("name")
-    entities = request.session["entity_names"]
-    year_ranges = request.session["year_ranges"]
-    flower_name = request.session["flower_name"]
+    session = request_data.get("session")
+    entities = session["entity_names"]
+    year_ranges = session["year_ranges"]
+    flower_name = session["flower_name"]
 
     data = get_node_info_single(request, node_name, year_ranges)
     data["node_name"] = node_name
@@ -596,11 +612,12 @@ def get_node_info(request):
 
 @csrf_exempt
 def get_next_node_info_page(request):
-    entities = request.session["entity_names"]
     data = json.loads(request.POST.get("data_string"))
-    node_name = data.get("name")    
-    year_ranges = request.session["year_ranges"]
-    flower_name = request.session["flower_name"]
+    node_name = data.get("name")
+    session = data.get("session")    
+    entities = session["entity_names"]
+    year_ranges = session["year_ranges"]
+    flower_name = session["flower_name"]
     page = int(data.get("page")) 
 
     node_info = get_node_info_single(request, node_name, year_ranges)

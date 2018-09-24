@@ -614,7 +614,8 @@ function populateNodeInfoContent(data){
 function getData(param){
   node_info_name  = param['name'];
   var data_dict = { // input to the views.py - search()
-      "name": node_info_name
+      "name": node_info_name,
+      "session": session
     };
     var t0 = performance.now();
   $.ajax({
@@ -665,7 +666,8 @@ function nextPage() {
     if (page_counter != max_page_num) {
       var data_dict = { // input to the views.py - search()
           "name": node_info_name,
-          "page": page_counter + 1
+          "page": page_counter + 1,
+          "session": session
         };
       $.ajax({
         type: "POST",
@@ -697,7 +699,8 @@ function prevPage() {
     if (page_counter != 1) {
       var data_dict = { // input to the views.py - search()
           "name": node_info_name,
-          "page": page_counter - 1
+          "page": page_counter - 1,
+          "session": session
         };
       $.ajax({
         type: "POST",

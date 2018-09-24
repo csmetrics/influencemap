@@ -49,6 +49,10 @@
      "type":    "inner",
      "info":    "The SIGMM Award for Outstanding PhD Thesis in Multimedia Computing, Communications and Applications is awarded annually to a researcher whose PhD thesis has made contributions and has the potential of very high impact in multimedia computing, communication and applications.The award will recognize members of the SIGMM community and their research contributions in their PhD theses as well as the potential of impact of their PhD theses in multimedia area. The recpient is awarded an honorarium and an invitation to receive the award at the ACM International Conference on Multimedia.",
      "tag":     "sigmm_thesisaward"
+    },
+    {"display": "ACM MM Top Papers",
+     "type":    "inner",
+      "tag": "sigmm_toppapers"
     }
   ]
 },
