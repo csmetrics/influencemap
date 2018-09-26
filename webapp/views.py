@@ -24,7 +24,7 @@ from core.utils.load_tsv import tsv_to_dict
 
 from core.flower.high_level_get_flower import gen_flower_data
 from core.flower.high_level_get_flower import default_config
-from core.score.agg_paper_info         import score_paper_info_list
+from core.score.agg_paper_info         import score_paper_info_list, score_paper_info_list_parallel
 from core.search.query_name            import normalized_to_display
 
 # Imports for submit
@@ -242,6 +242,8 @@ def submit(request):
     print('Flower request: ', datetime.now())
     total_request_cur = datetime.now()
 
+    time_cur = datetime.now()
+
     curated_flag = False
     num_leaves = 25 # default
     if request.method == "GET":
@@ -254,7 +256,7 @@ def submit(request):
         selected_papers = get_all_paper_ids(data["EntityIds"])
         entity_names = get_all_normalised_names(data["EntityIds"])
         keyword = ""
-        flower_name     = data.get('DisplayName')
+        flower_name = data.get('DisplayName')
 
     else:
         data = json.loads(request.POST.get('data'))
@@ -266,13 +268,13 @@ def submit(request):
         selected_papers = get_all_paper_ids(entity_ids)
         entity_names = get_all_normalised_names(entity_ids)
         config = None
-        flower_name     = data.get('flower_name')
+        flower_name = data.get('flower_name')
+        if not flower_name:
+            flower_name = '-'.join(entity_names)
 
     # Default Dates
     min_year = None
     max_year = None
-
-    time_cur = datetime.now()
 
     print()
     print('Number of Papers Found: ', len(selected_papers))
@@ -331,6 +333,7 @@ def submit(request):
 
     # Generate scores from paper information
     time_score = datetime.now()
+    #score_df = score_paper_info_list_parallel(paper_information, self=entity_names, num_proc=4)
     score_df = score_paper_info_list(paper_information, self=entity_names)
     print('TOTAL SCORE_DF TIME: ', datetime.now() - time_score)
 
@@ -355,13 +358,14 @@ def submit(request):
     sorted(flower_res, key=lambda x: x[0])
 
     # Reduce
-    node_info   = dict()
+    #node_info   = dict()
     #node_info   = list()
     flower_info = list()
-    for _, f_info, n_info in flower_res:
+    #for _, f_info, n_info in flower_res:
+    for _, f_info in flower_res:
         #node_info += n_info
         flower_info.append(f_info)
-        node_info.update(n_info)
+        #node_info.update(n_info)
 
     print('TOTAL FLOWER TIME: ', datetime.now() - time_cur)
     print('TOTAL REQUEST TIME: ', datetime.now() - total_request_cur)
@@ -413,7 +417,7 @@ def submit(request):
     session['year_ranges'] = {'pub_lower': min_pub_year, 'pub_upper': max_pub_year, 'cit_lower': min_cite_year, 'cit_upper': max_cite_year}
     session['flower_name']  = flower_name
     session['entity_names'] = entity_names
-    session['node_info']    = node_info
+    #session['node_info']    = node_info
 
     data["session"] = session
 
@@ -462,12 +466,13 @@ def resubmit(request):
         flower_res = [make_flower(v) for v in flower_leaves]
 
     # Reduce
-    node_info   = dict()
+    #node_info   = dict()
     #node_info   = list()
     flower_info = list()
-    for _, f_info, n_info in flower_res:
+    #for _, f_info, n_info in flower_res:
+    for _, f_info in flower_res:
         flower_info.append(f_info)
-        node_info.update(n_info)
+        #node_info.update(n_info)
         #node_info += n_info
 
     data = {
@@ -481,7 +486,7 @@ def resubmit(request):
     data['stats'] = stats
 
     # Update the node_info cache
-    session['node_info'] = node_info
+    #session['node_info'] = node_info
     data["session"] = session
     return JsonResponse(data, safe=False)
 

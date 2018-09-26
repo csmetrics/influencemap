@@ -1,6 +1,13 @@
 import os
 from core.search.academic_search import *
 from webapp.elastic import *
+from core.search.query_paper import conference_paper_query
+from core.search.query_paper import journal_paper_query
+from core.search.query_name import conference_name_query
+from core.search.query_name import journal_name_query
+from core.search.query_name import author_name_query
+from core.search.query_name import affiliation_name_query
+
 import matplotlib.pylab as plt
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 
@@ -73,18 +80,20 @@ def get_url_query(query):
 def get_all_paper_ids(entityIds):
     paper_ids = entityIds['PaperIds'] if "PaperIds" in entityIds else []
     if "AuthorIds" in entityIds and entityIds["AuthorIds"] != []: paper_ids += get_papers_from_author_ids(entityIds['AuthorIds'])
-    if "ConferenceIds" in entityIds and entityIds["ConferenceIds"] != []: paper_ids += get_papers_from_conference_ids(entityIds['ConferenceIds'])
+    #if "ConferenceIds" in entityIds and entityIds["ConferenceIds"] != []: paper_ids += get_papers_from_conference_ids(entityIds['ConferenceIds'])
+    if "ConferenceIds" in entityIds and entityIds["ConferenceIds"] != []: paper_ids += conference_paper_query(entityIds['ConferenceIds'])
     if "AffiliationIds" in entityIds and entityIds["AffiliationIds"] != []: paper_ids += get_papers_from_affiliation_ids(entityIds['AffiliationIds'])
-    if "JournalIds" in entityIds and entityIds["JournalIds"] != []: paper_ids += get_papers_from_journal_ids(entityIds['JournalIds'])
+    #if "JournalIds" in entityIds and entityIds["JournalIds"] != []: paper_ids += get_papers_from_journal_ids(entityIds['JournalIds'])
+    if "JournalIds" in entityIds and entityIds["JournalIds"] != []: paper_ids += journal_paper_query(entityIds['JournalIds'])
     return paper_ids
 
 
 def get_all_normalised_names(entityIds):
     normalised_names = []
-    if "AuthorIds" in entityIds and entityIds["AuthorIds"] != []: normalised_names += get_names_from_author_ids(entityIds['AuthorIds'])
-    if "ConferenceIds" in entityIds and entityIds["ConferenceIds"] != []: normalised_names += get_names_from_conference_ids(entityIds['ConferenceIds'])
-    if "AffiliationIds" in entityIds and entityIds["AffiliationIds"] != []: normalised_names += get_names_from_affiliation_ids(entityIds['AffiliationIds'])
-    if "JournalIds" in entityIds and entityIds["JournalIds"] != []: normalised_names += get_names_from_journal_ids(entityIds['JournalIds'])
+    if "AuthorIds" in entityIds and entityIds["AuthorIds"] != []: normalised_names += author_name_query(entityIds['AuthorIds'])
+    if "ConferenceIds" in entityIds and entityIds["ConferenceIds"] != []: normalised_names += conference_name_query(entityIds['ConferenceIds'])
+    if "AffiliationIds" in entityIds and entityIds["AffiliationIds"] != []: normalised_names += affiliation_name_query(entityIds['AffiliationIds'])
+    if "JournalIds" in entityIds and entityIds["JournalIds"] != []: normalised_names += journal_name_query(entityIds['JournalIds'])
 
     return normalised_names
 

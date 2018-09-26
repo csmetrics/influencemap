@@ -12,6 +12,9 @@ from core.score.agg_utils   import get_name_mapping
 from core.score.agg_utils   import apply_name_mapping
 from core.score.agg_utils   import is_self_cite
 
+import os
+from multiprocessing import Pool
+
 
 def score_paper_info(paper_info, self=list()):
     ''' Generates a dictionary with score values and relevant information to be
@@ -71,16 +74,10 @@ def score_paper_info(paper_info, self=list()):
             except KeyError:
                 inst_res['publication_year'] = None
                 inst_res['influence_year']   = None
-            #try:
-            #    inst_res['link_year'] = reference['Year']
-            #except:
-            #    inst_res['link_year'] = None
 
             # Paper information
             inst_res['ego_paper_id']     = int(paper_info['PaperId'])
-            #inst_res['ego_paper_title']  = paper_info['PaperTitle']
             inst_res['link_paper_id']    = int(reference['PaperId'])
-            #inst_res['link_paper_title'] = reference['PaperTitle']
 
             score_list.append(inst_res)
 
@@ -133,16 +130,12 @@ def score_paper_info(paper_info, self=list()):
                 inst_res['publication_year'] = None
             try:
                 inst_res['influence_year'] = citation['Year']
-            #    inst_res['link_year']     = citation['Year']
             except KeyError:
                 inst_res['influence_year'] = None
-            #    inst_res['link_year'] = None
 
             # Paper information
             inst_res['ego_paper_id']     = paper_info['PaperId']
-            #inst_res['ego_paper_title']  = paper_info['PaperTitle']
             inst_res['link_paper_id']    = citation['PaperId']
-            #inst_res['link_paper_title'] = citation['PaperTitle']
 
             score_list.append(inst_res)
 
@@ -206,6 +199,21 @@ def score_paper_info_list(paper_info_list, self=list()):
     # Score dataframe
     return pd.DataFrame(score_list)
 
+
+def score_paper_info_list_parallel(paper_info_list, self=list(), num_proc=1):
+    '''
+    '''
+    if num_proc == 1:
+        return score_paper_info_list(paper_info_list, self=self)
+    else:
+        with Pool() as pool:
+        #with Pool(processes=num_proc) as pool:
+            score_lists = pool.map(score_paper_info, paper_info_list) #, chunksize=len(paper_info_list) // num_proc)
+            res = list()
+            for score_list in score_lists:
+                res += score_list
+            return pd.DataFrame(res)
+
     
 def score_leaves(score_df, leaves):
     '''
@@ -226,13 +234,6 @@ def score_leaves(score_df, leaves):
         # Remove duplicates for specific types
         if leaf not in [ Entity_type.AUTH, Entity_type.AFFI ]:
             leaf_df.drop_duplicates(subset=col_id, inplace=True)
-
-        #leaf_df['influenced']  = leaf_df[get_influence_index(leaf)]
-        #leaf_df['influencing'] = leaf_df[get_influence_index(leaf,
-        #    influence_dir='influencing')]
-
-        #leaf_df = leaf_df.drop(['influenced_paa', 'influenced_count',
-        #    'influencing_paa', 'influencing_count'], 1)
 
         leaf_df.rename(columns={get_influence_index(leaf): 'influenced',
             get_influence_index(leaf, influence_dir='influencing'):

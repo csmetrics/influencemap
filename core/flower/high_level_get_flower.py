@@ -208,9 +208,9 @@ def gen_flower_data(score_df, flower_prop, entity_names, flower_name,
         i += 1
 
     # Get papers to show info for each node
-    print(datetime.now(), 'node_info')
-    node_info = select_node_info(filter_score, top_score['entity_name'].tolist())
-    print(datetime.now(), 'node_info')
+    #print(datetime.now(), 'node_info')
+    #node_info = select_node_info(filter_score, top_score['entity_name'].tolist())
+    #print(datetime.now(), 'node_info')
 
     # Graph score
     graph_score = score_df_to_graph(top_score)
@@ -218,4 +218,4 @@ def gen_flower_data(score_df, flower_prop, entity_names, flower_name,
     # D3 format
     data = processdata(flower_type, graph_score, num_leaves)
 
-    return flower_type, data, node_info
+    return flower_type, data #, node_info
