@@ -3,7 +3,7 @@
  * ----------
  */
 .skin-custom .main-header .navbar {
-  background-color: #f9f9f9;
+  background-color: #fff;
   margin-left: 38%;
   /* border-bottom: 1px solid #fff; */
 }
@@ -54,7 +54,7 @@
 }
 
 .skin-custom .main-header .logo {
-  background-color: #fff;
+  background-color: #f9f9f9;
   color: #456990;
   border-bottom: 0 solid transparent;
   text-align: left;

@@ -45,7 +45,7 @@ a {
 .project-intro {
   width: 38%;
   height: 720px;
-  background-color: #fff;
+  background-color: #f9f9f9;
   position: absolute;
   z-index: 30;
   padding: 100 3% 80 3%;
@@ -102,7 +102,7 @@ a {
 }
 .preview {
   margin-left: 38%;
-  background-color: #f9f9f9;
+  background-color: #fff;
   height: 750px;
 }
 .carousel-indicators {
