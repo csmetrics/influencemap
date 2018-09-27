@@ -3,7 +3,7 @@
  * ----------
  */
 .skin-custom .main-header .navbar {
-  background-color: #eee;
+  background-color: #f9f9f9;
   margin-left: 38%;
   /* border-bottom: 1px solid #fff; */
 }
@@ -13,7 +13,7 @@
 }
 .skin-custom .header-flower .navbar{
   margin-left: 439px;
-  background-color: #eee;
+  background-color: #f9f9f9;
 }
 .skin-custom .main-header .navbar .nav > li > a {
   color: #ffffff;
@@ -66,7 +66,7 @@
 }
 .skin-custom .header-flower .logo {
   width: 440px;
-  background-color: #eee;
+  background-color: #f9f9f9;
 }
 /* .skin-custom .main-header .logo:hover {
   background-color: #fff;
