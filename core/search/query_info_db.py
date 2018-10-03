@@ -15,7 +15,8 @@ from datetime import datetime
 
 from graph.config import conf
 from core.search.query_info_cache import base_paper_cache_query
-
+from core.search.query_name import *
+ 
 from elasticsearch import Elasticsearch
 from elasticsearch_dsl import Search, Q
 
@@ -28,7 +29,7 @@ def papers_prop_query(paper_ids):
     client = Elasticsearch(conf.get("elasticsearch.hostname"))
 
     # Targets
-    papers_targets = ['ConferenceInstanceId', 'JournalId', 'Year']
+    papers_targets = ['PaperTitle', 'ConferenceSeriesId', 'JournalId', 'Year']
 
     # Query for papers
     papers_s = Search(index = 'papers', using = client)
@@ -38,6 +39,8 @@ def papers_prop_query(paper_ids):
 
     # Convert papers into dictionary format
     results = dict()
+    conf_ids = set()
+    jour_ids = set()
     for paper in papers_s.scan():
         # Get properties for papers
         paper_res = paper.to_dict()
@@ -46,9 +49,37 @@ def papers_prop_query(paper_ids):
         # Rename Conference
         if 'ConferenceInstanceId' in paper_res:
             paper_res['ConferenceId'] = paper_res.pop('ConferenceInstanceId')
+            conf_ids.add(paper_res['ConferenceId'])
+            #conf_name = conference_name_query([paper_res['ConferenceId']])
+            #if not conf_name:
+            #    paper_res['ConferenceName'] = None
+            #else:
+            #    paper_res['ConferenceName'] = conf_name[0]
+
+        # Journal
+        if 'JournalId' in paper_res:
+            jour_ids.add(paper_res['JournalId'])
+            jour_name = journal_name_query([paper_res['JournalId']])
+            #if not jour_name:
+            #    paper_res['JournalName'] = None
+            #else:
+            #    paper_res['JournalName'] = jour_name[0]
 
         paper_res['PaperId'] = p_id
         results[p_id] = paper_res
+
+    conf_names = conference_name_dict_query(list(conf_ids))
+    jour_names = journal_name_dict_query(list(jour_ids))
+
+    res = dict()
+    for p_id, paper_info in results.items():
+        if 'ConferenceId' in paper_info:
+            paper_info['ConferenceName'] = conf_names[paper_info['ConferenceId']]
+
+        if 'JournalId' in paper_info:
+            paper_info['JournalName'] = jour_names[paper_info['JournalId']]
+
+        res[p_id] = paper_info
 
     return results
 
@@ -71,6 +102,8 @@ def paa_prop_query(paper_ids):
 
     # Convert paa into dictionary format
     results = dict()
+    auth_ids = set()
+    affi_ids = set()
     for paa in paa_s.scan():
         paa_res = paa.to_dict()
 
@@ -78,14 +111,49 @@ def paa_prop_query(paper_ids):
         paper_id = paa_res['PaperId']
         del paa_res['PaperId']
 
+        # Author
+        if 'AuthorId' in paa_res:
+            auth_ids.add(paa_res['AuthorId'])
+            #auth_name = author_name_query([paa_res['AuthorId']])
+            #if not auth_name:
+            #    paa_res['AuthorName'] = None
+            #else:
+            #    paa_res['AuthorName'] = auth_name[0]
+
+        # Affiliation
+        if 'AffiliationId' in paa_res:
+            affi_ids.add(paa_res['AffiliationId'])
+            #affi_name = affiliation_name_query([paa_res['AffiliationId']])
+            #if not affi_name:
+            #    paa_res['AffiliationName'] = None
+            #else:
+            #    paa_res['AffiliationName'] = affi_name[0]
+
         # Aggregate results
         if paper_id in results:
             results[paper_id].append(paa_res)
         else:
             results[paper_id] = [paa_res]
 
+    auth_names = author_name_dict_query(list(auth_ids))
+    affi_names = affiliation_name_dict_query(list(affi_ids))
+
+    res = dict()
+    for p_id, paa_info_list in results.items():
+        paa_res = list()
+        for paa_info in paa_info_list:
+            if 'AuthorId' in paa_info:
+                paa_info['AuthorName'] = auth_names[paa_info['AuthorId']]
+
+            if 'AffiliationId' in paa_info:
+                paa_info['AffiliationName'] = affi_names[paa_info['AffiliationId']]
+
+            paa_res.append(paa_info)
+
+        res[p_id] = paa_res
+
     # Return as dictionary
-    return results
+    return res
     
 
 def pr_links_query(paper_ids):
@@ -212,7 +280,7 @@ def paper_info_db_query(paper_id):
     return paper_info
 
 
-def paper_info_multiquery(paper_ids, partial_info=list()):
+def paper_info_multiquery(paper_ids, partial_info=list(), force=False):
     '''
     '''
     # Create partial information dictionary
@@ -236,11 +304,16 @@ def paper_info_multiquery(paper_ids, partial_info=list()):
 
     print("Need to find,", len(find_partial))
 
-    # Get partial information for papers from cache
-    for p_info in base_paper_cache_query(list(find_partial)):
-        p_id = p_info['PaperId']
-        find_partial.remove(p_id)
-        paper_partial[p_id] = p_info
+    # Get list of papers which are in cache
+    from_cached = list()
+
+    if not force:
+        # Get partial information for papers from cache
+        for p_info in base_paper_cache_query(list(find_partial)):
+            p_id = p_info['PaperId']
+            find_partial.remove(p_id)
+            paper_partial[p_id] = p_info
+            from_cached.append(p_id)
 
     # Get partial information from db
     for p_info in base_paper_db_query(list(find_partial)):
@@ -286,6 +359,9 @@ def paper_info_multiquery(paper_ids, partial_info=list()):
             total_res.append(dict(p_partial, **p_links))
         # Otherwise just add as partial cache entry
         else:
+            if p_id in from_cached:
+                continue
+
             p_partial['cache_type'] = 'partial'
             partial_res.append(p_partial)
 

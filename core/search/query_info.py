@@ -104,10 +104,12 @@ def paper_info_db_check_multiquery(paper_ids, force=False):
     # Check if items do not exist in cache
     if to_process or to_add_links:
         total_res, partial_res = paper_info_multiquery(to_process,
-                                       partial_info=to_add_links)
+                                       partial_info=to_add_links,
+                                       force=force)
 
         complete_res = [t for t in total_res if t['cache_type'] == 'complete']
-        print("Complete cached:", len(total_res))
+        print("Total entries found:", len(total_res))
+        print("Complete cached:", len(complete_res))
         print("Partial cached:", len(partial_res))
 
         # Cache

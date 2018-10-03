@@ -34,6 +34,29 @@ def author_name_query(author_ids):
     return names
 
 
+def author_name_dict_query(author_ids):
+    ''' Find author name from id.
+    '''
+    # Elastic search client
+    client = Elasticsearch(conf.get("elasticsearch.hostname"))
+
+    # Target
+    authors_target = 'NormalizedName'
+
+    # Query for paa
+    authors_s = Search(index = 'authors', using = client)
+    authors_s = authors_s.query('terms', AuthorId=author_ids)
+    authors_s = authors_s.source([authors_target])
+    authors_s = authors_s.params(request_timeout=30)
+
+    names = dict()
+    for authors in authors_s.scan():
+        # Add names to result
+        names[int(authors.meta.id)] = authors[authors_target]
+        
+    return names
+
+
 def affiliation_name_query(affiliation_ids):
     ''' Find affiliation name from id.
     '''
@@ -53,6 +76,29 @@ def affiliation_name_query(affiliation_ids):
     for affi in affi_s.scan():
         # Add names to result
         names.append(affi[affi_target])
+        
+    return names
+
+
+def affiliation_name_dict_query(affiliation_ids):
+    ''' Find affiliation name from id.
+    '''
+    # Elastic search client
+    client = Elasticsearch(conf.get("elasticsearch.hostname"))
+
+    # Target
+    affi_target = 'NormalizedName'
+
+    # Query for paa
+    affi_s = Search(index = 'affiliations', using = client)
+    affi_s = affi_s.query('terms', AffiliationId=affiliation_ids)
+    affi_s = affi_s.source([affi_target])
+    affi_s = affi_s.params(request_timeout=30)
+
+    names = dict()
+    for affi in affi_s.scan():
+        # Add names to result
+        names[int(affi.meta.id)] = affi[affi_target]
         
     return names
 
@@ -80,6 +126,29 @@ def conference_name_query(conference_ids):
     return names
 
 
+def conference_name_dict_query(conference_ids):
+    ''' Find conference name from id.
+    '''
+    # Elastic search client
+    client = Elasticsearch(conf.get("elasticsearch.hostname"))
+
+    # Target
+    conf_target = 'NormalizedName'
+
+    # Query for paa
+    conf_s = Search(index = 'conferenceseries', using = client)
+    conf_s = conf_s.query('terms', ConferenceSeriesId=conference_ids)
+    conf_s = conf_s.source([conf_target])
+    conf_s = conf_s.params(request_timeout=30)
+
+    names = dict()
+    for conference in conf_s.scan():
+        # Add names to result
+        names[int(conference.meta.id)] = conference[conf_target]
+
+    return names
+
+
 def journal_name_query(journal_ids):
     ''' Find journal name from id.
     '''
@@ -99,6 +168,29 @@ def journal_name_query(journal_ids):
     for jour in jour_s.scan():
         # Add names to result
         names.append(jour[jour_target])
+
+    return names
+
+
+def journal_name_dict_query(journal_ids):
+    ''' Find journal name from id.
+    '''
+    # Elastic search client
+    client = Elasticsearch(conf.get("elasticsearch.hostname"))
+
+    # Target
+    jour_target = 'NormalizedName'
+
+    # Query for paa
+    jour_s = Search(index = 'journals', using = client)
+    jour_s = jour_s.query('terms', JournalId=journal_ids)
+    jour_s = jour_s.source([jour_target])
+    jour_s = jour_s.params(request_timeout=30)
+
+    names = dict()
+    for jour in jour_s.scan():
+        # Add names to result
+        names[int(jour.meta.id)] = jour[jour_target]
 
     return names
 
