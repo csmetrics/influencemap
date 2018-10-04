@@ -30,8 +30,8 @@ from core.search.query_name            import normalized_to_display
 # Imports for submit
 from core.search.query_paper      import paper_query
 from core.search.query_info       import paper_info_check_query
-#from core.search.query_info       import paper_info_db_check_multiquery
-from core.search.query_info       import paper_info_mag_multiquery
+#from core.search.query_info       import paper_info_mag_check_multiquery
+from core.search.query_info       import paper_info_db_check_multiquery
 from core.search.query_info_cache import base_paper_cache_query
 from core.score.agg_utils         import get_coauthor_mapping
 from core.score.agg_utils         import flag_coauthor
@@ -234,7 +234,7 @@ def manualcache(request):
         addToBatch(paper_ids)
     if paper_action == "cache":
         paper_ids = get_all_paper_ids(cache_dictionary["EntityIds"])
-        paper_info_mag_multiquery(paper_ids)
+        paper_info_db_check_multiquery(paper_ids)
     return JsonResponse({},safe=False)
 
 
@@ -285,7 +285,7 @@ def submit(request):
     time_cur = datetime.now()
 
     # Turn selected paper into information dictionary list
-    paper_information = paper_info_mag_multiquery(selected_papers) # API
+    paper_information = paper_info_db_check_multiquery(selected_papers) # API
 
     # Get coauthors
     coauthors = get_coauthor_mapping(paper_information)
@@ -451,7 +451,7 @@ def resubmit(request):
     session['year_ranges'] = {'pub_lower': flower_config['pub_lower'], 'pub_upper': flower_config['pub_upper'], 'cit_lower': flower_config['cit_lower'], 'cit_upper': flower_config['cit_upper']}
 
     # Recompute flowers
-    paper_information = paper_info_mag_multiquery(cache) # API
+    paper_information = paper_info_db_check_multiquery(cache) # API
     score_df = score_paper_info_list(paper_information, self=entity_names)
 
     # Work function
@@ -517,7 +517,7 @@ def get_publication_papers(request):
     pub_year_min = int(request.POST.get("pub_year_min"))
     pub_year_max = int(request.POST.get("pub_year_max"))
     paper_ids = session['cache']
-    papers = paper_info_mag_multiquery(paper_ids)
+    papers = paper_info_db_check_multiquery(paper_ids)
     papers = [paper for paper in papers if (paper["Year"] >= pub_year_min and paper["Year"] <= pub_year_max)]
     papers = conf_journ_to_display_names({paper["PaperId"]: paper for paper in papers})
     print((datetime.now()-start).total_seconds())
@@ -537,7 +537,7 @@ def get_citation_papers(request):
     pub_year_min = int(request.POST.get("pub_year_min"))
     pub_year_max = int(request.POST.get("pub_year_max"))
     paper_ids = session['cache']
-    papers = paper_info_mag_multiquery(paper_ids)
+    papers = paper_info_db_check_multiquery(paper_ids)
     cite_papers = [[citation for citation in paper["Citations"] if (citation["Year"] >= cite_year_min and citation["Year"] <= cite_year_max)] for paper in papers if (paper["Year"] >= pub_year_min and paper["Year"] <= pub_year_max)]
     citations = sum(cite_papers,[])
     citations = conf_journ_to_display_names({paper["PaperId"]: paper for paper in citations})
@@ -553,7 +553,7 @@ def get_node_info_single(request, entity, year_ranges):
     cit_upper = year_ranges["cit_upper"]
     request_data = json.loads(request.POST.get("data_string"))
     session = request_data.get("session")
-    papers = paper_info_mag_multiquery(session["cache"])
+    papers = paper_info_db_check_multiquery(session["cache"])
     papers_to_send = dict()
     links = dict()
 
