@@ -322,20 +322,12 @@ def paper_info_multiquery(paper_ids, partial_info=list(), force=False):
         find_partial.remove(p_id)
         paper_partial[p_id] = p_info
 
-    # Handle infos which cannot be found here TODO
-    print(find_partial)
-    print('Missing from db', len(find_partial))
-    for p_id in find_partial:
-        paper_partial[p_id] = {'PaperId': p_id, 'Year': 2018, 'Authors': []}
-    
+    print("Missing paper:", find_partial)
+
     # Generate results
     total_res   = list()
     partial_res = list()
     for p_id, p_partial in paper_partial.items():
-
-        # TEMP FOR INCOMPLETE
-        if p_id in find_partial:
-            continue
 
         p_partial = copy.deepcopy(p_partial)
 
@@ -347,18 +339,17 @@ def paper_info_multiquery(paper_ids, partial_info=list(), force=False):
             p_links = {'References': [], 'Citations': []}
 
             for r_id in paper_links[p_id]['References']:
-                p_links['References'].append(paper_partial[r_id])
-                if r_id in find_partial:
-                    p_partial['cache_type'] = 'taint'
+                if r_id in paper_partial:
+                    p_links['References'].append(paper_partial[r_id])
 
             for c_id in paper_links[p_id]['Citations']:
-                p_links['Citations'].append(paper_partial[c_id])
-                if c_id in find_partial:
-                    p_partial['cache_type'] = 'taint'
+                if c_id in paper_partial:
+                    p_links['Citations'].append(paper_partial[c_id])
 
             total_res.append(dict(p_partial, **p_links))
         # Otherwise just add as partial cache entry
         else:
+            # Avoid recaching
             if p_id in from_cached:
                 continue
 
