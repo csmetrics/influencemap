@@ -96,6 +96,7 @@ def paper_info_db_check_multiquery(paper_ids, force=False):
         to_process     = list(es_res['missing'])
         paper_info_res = es_res['complete']
 
+    #print(paper_info_res[0])
     print("Complete cache entries found:", len(paper_info_res))
     print("Partial cache entries found:", len(to_add_links))
     print("No cache entries found:", len(to_process))

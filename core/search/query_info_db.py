@@ -47,9 +47,8 @@ def papers_prop_query(paper_ids):
         p_id = int(paper.meta.id)
 
         # Rename Conference
-        if 'ConferenceInstanceId' in paper_res:
-            paper_res['ConferenceId'] = paper_res.pop('ConferenceInstanceId')
-            conf_ids.add(paper_res['ConferenceId'])
+        if 'ConferenceSeriesId' in paper_res:
+            conf_ids.add(paper_res['ConferenceSeriesId'])
             #conf_name = conference_name_query([paper_res['ConferenceId']])
             #if not conf_name:
             #    paper_res['ConferenceName'] = None
@@ -59,7 +58,7 @@ def papers_prop_query(paper_ids):
         # Journal
         if 'JournalId' in paper_res:
             jour_ids.add(paper_res['JournalId'])
-            jour_name = journal_name_query([paper_res['JournalId']])
+            #jour_name = journal_name_query([paper_res['JournalId']])
             #if not jour_name:
             #    paper_res['JournalName'] = None
             #else:
@@ -73,15 +72,15 @@ def papers_prop_query(paper_ids):
 
     res = dict()
     for p_id, paper_info in results.items():
-        if 'ConferenceId' in paper_info:
-            paper_info['ConferenceName'] = conf_names[paper_info['ConferenceId']]
+        if 'ConferenceSeriesId' in paper_info:
+            paper_info['ConferenceName'] = conf_names[paper_info['ConferenceSeriesId']]
 
         if 'JournalId' in paper_info:
             paper_info['JournalName'] = jour_names[paper_info['JournalId']]
 
         res[p_id] = paper_info
 
-    return results
+    return res
 
 
 def paa_prop_query(paper_ids):
@@ -204,7 +203,6 @@ def base_paper_db_query(paper_ids):
     # Get basic paper properties
     papers_props = papers_prop_query(paper_ids)
     print('Get basic props', datetime.now() - t_cur)
-
 
     t_cur = datetime.now()
     # Get author information

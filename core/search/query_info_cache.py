@@ -73,6 +73,7 @@ def paper_info_cache_query(paper_ids, batch_size=DEFAULT_BATCH):
     # Query for paper info
     paper_info_s = Search(index = 'paper_info', using = client)
     paper_info_s = paper_info_s.filter('terms', _id = paper_ids)
+    #paper_info_s = paper_info_s.source(exclude=['*.FieldOfStudy'])
     paper_info_s = paper_info_s.params(size=DEFAULT_BATCH)
 
     # Convert query into dictionary format

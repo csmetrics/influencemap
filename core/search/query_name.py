@@ -121,7 +121,7 @@ def conference_name_query(conference_ids):
     names = list()
     for conference in conf_s.scan():
         # Add names to result
-        names.append(conference[conf_target])
+        names.append(conference[conf_target].lower())
 
     return names
 
@@ -144,7 +144,7 @@ def conference_name_dict_query(conference_ids):
     names = dict()
     for conference in conf_s.scan():
         # Add names to result
-        names[int(conference.meta.id)] = conference[conf_target]
+        names[int(conference.meta.id)] = conference[conf_target].lower()
 
     return names
 
