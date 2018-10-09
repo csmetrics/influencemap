@@ -116,6 +116,11 @@ a {
   font-size: 12px;
   font-weight: bold;
   text-align: center;
+  text-shadow:
+   -1px -1px 0 #fff,
+    1px -1px 0 #fff,
+    -1px 1px 0 #fff,
+     1px 1px 0 #fff;
 }
 .carousel-indicators li {
   border: 3px solid #fff;
@@ -136,6 +141,16 @@ a {
   font-size: 16px;
   padding: 25px 0;
   border-radius: 50%;
+}
+.carousel-indicators .venue {
+  background: url('../images/venue.svg') no-repeat center center;
+  background-size: 70%;
+  background-color: #EEB868;
+}
+.carousel-indicators .paper {
+  background: url('../images/award.svg') no-repeat center center;
+  background-size: 70%;
+  background-color: #EEB868;
 }
 .other-previews {
   width: 12%;
