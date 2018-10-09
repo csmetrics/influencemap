@@ -33,7 +33,7 @@ def papers_prop_query(paper_ids):
 
     # Query for papers
     papers_s = Search(index = 'papers', using = client)
-    papers_s = papers_s.query('terms', _id=paper_ids)
+    papers_s = papers_s.query('terms', PaperId=paper_ids)
     papers_s = papers_s.source(papers_targets)
     papers_s = papers_s.params(request_timeout=TIMEOUT)
 
