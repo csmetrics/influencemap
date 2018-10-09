@@ -69,13 +69,31 @@ def query_paper_group(document_id):
 def query_names_with_matches(index, fields_list, search_phrase, max_return=15):
     result = []
     matches = [{"match": {field: search_phrase}} for field in fields_list]
+
+    # the script field nested within functions defines the formula used to order the retrieved documents
+    # log citation count is included to ensure that large entities with slightly different names are not missed
+    # the addition of 10 is to account for relevant entities with 0, 1 or otherwise few citations 
+    # The _score is taken to a higher power to increase its significance
+
     q = {
-        "size": max_return,
-        "query":{
-          "bool":{
-            "should": matches
-          }
-        }}
+      "size": max_return,
+      "from": 0,
+      "query":{
+          "function_score": {
+            "query": {      
+              "bool":{
+                "should": matches
+              }
+            },
+            "functions": [
+              {"script_score": {
+                "script": "Math.pow(_score, 3) * (Math.log((doc['CitationCount'].value + 10)))"
+              }}
+            ]
+          } 
+        }
+      }
+
     s = Search(using=client, index=index).params(preserve_order=True)
     s.update_from_dict(q)
 
