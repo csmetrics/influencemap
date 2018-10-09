@@ -241,6 +241,9 @@ def submit(request):
     min_year = None
     max_year = None
 
+    # Solving type issues
+    selected_papers = [int(p) for p in selected_papers]
+
     print()
     print('Number of Papers Found: ', len(selected_papers))
     print('Time taken: ', datetime.now() - time_cur)
