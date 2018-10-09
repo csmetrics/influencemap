@@ -45,7 +45,7 @@ a {
 .project-intro {
   width: 38%;
   height: 720px;
-  background-color: #fff;
+  background-color: #f9f9f9;
   position: absolute;
   z-index: 30;
   padding: 100 3% 80 3%;
@@ -98,11 +98,11 @@ a {
 }
 
 .main-footer-home {
-  background-color: #eee;
+  background-color: #f9f9f9;
 }
 .preview {
   margin-left: 38%;
-  background-color: #eee;
+  background-color: #fff;
   height: 750px;
 }
 .carousel-indicators {
@@ -116,6 +116,11 @@ a {
   font-size: 12px;
   font-weight: bold;
   text-align: center;
+  text-shadow:
+   -1px -1px 0 #fff,
+    1px -1px 0 #fff,
+    -1px 1px 0 #fff,
+     1px 1px 0 #fff;
 }
 .carousel-indicators li {
   border: 3px solid #fff;
@@ -127,15 +132,25 @@ a {
   border-radius: 50%;
   position: relative;
   background-color: #fff;
+  border: 3px solid #EEB868;
 }
 .carousel-indicators .active {
-  border: 3px solid #EEB868;
   background-color: #EEB868;
   width: 80px;
   height: 80px;
   font-size: 16px;
   padding: 25px 0;
   border-radius: 50%;
+}
+.carousel-indicators .venue {
+  background: url('../images/venue.svg') no-repeat center center;
+  background-size: 70%;
+  background-color: #EEB868;
+}
+.carousel-indicators .paper {
+  background: url('../images/award.svg') no-repeat center center;
+  background-size: 70%;
+  background-color: #EEB868;
 }
 .other-previews {
   width: 12%;
@@ -175,10 +190,10 @@ a {
 }
 .data-box {
   display: inline-block;
-  width: 22%;
+  width: 18%;
   text-align: center;
   padding: 10px;
-  color: #eee;
+  color: #f9f9f9;
 }
 .data-box i {
   padding-bottom: 5px;
@@ -187,7 +202,7 @@ a {
 .detail {
   padding: 15px 10% 150px 10%;
   margin: 15 -20 0 -20;
-  background-color: #eee;
+  background-color: #f9f9f9;
 }
 
 .detail-box {
@@ -323,13 +338,16 @@ div#citation-range .noUi-connect {
 
 #flower-container { margin-top:0; }
 
-
+.nav-tabs {
+  border-bottom: none;
+}
 .nav-tabs>li>a.tab-btn{
   padding: 8px 0;
   border-radius: 0 0 5px 5px;
   color:#000; background-color:transparent;
-  border: 1px solid #ddd;
+  border-left: 1px solid #ddd;
   border-bottom: 5px #49BEAA solid;
+  border-top: none;
   text-align: center;
   width: 140px;
   font-size: 16px;
@@ -340,7 +358,7 @@ div#citation-range .noUi-connect {
 .nav-tabs>li.active>a:hover,
 .nav-tabs>li.active>a.tab-btn,
 .nav-tabs>li>a.tab-btn:hover{
-  color:#000; background-color:#eee;
+  color:#000; background-color:#f9f9f9;
   border-bottom: 5px #49BEAA solid;
 }
 
