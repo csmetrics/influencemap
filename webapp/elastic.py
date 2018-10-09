@@ -3,7 +3,7 @@ from elasticsearch_dsl import Search
 from core.search.query_info_cache import paper_info_cache_query
 from graph.config import conf
 
-client = Elasticsearch(conf.get("elasticsearch.hostname"))
+client = Elasticsearch(conf.get("elasticsearch.hostname"), timeout=30)
 
 def query_cache_paper_info(author_id):
     result = {}
@@ -70,6 +70,7 @@ def query_names_with_matches(index, fields_list, search_phrase, max_return=15):
     result = []
     matches = [{"match": {field: search_phrase}} for field in fields_list]
     q = {
+        "size": max_return,
         "query":{
           "bool":{
             "should": matches
@@ -95,6 +96,11 @@ def query_journal(search_phrase):
 def query_affiliation(search_phrase):
     return query_names_with_matches("affiliations", ["DisplayName", "NormalizedName"], search_phrase)
 
+def query_paper(search_phrase):
+    return query_names_with_matches("papers", ["PaperTitle", "OriginalTitle", "BookTitle"], search_phrase)
+
+def query_author(search_phrase):
+    return query_names_with_matches("authors", ["DisplayName", "NormalisedName"], search_phrase)
 
 def get_names_from_entity(entity_ids, index, id_field, name_field, with_id=False):
     if with_id:

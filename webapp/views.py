@@ -144,11 +144,11 @@ def curate_load_file(request):
 
 
 s = {
-    'author': ('<i class="fa fa-user""></i><h4>{name}</h4><p>{affiliation}, Papers: {paperCount}, Citations: {citations}</p>'),
+    'author': ('<i class="fa fa-user""></i><h4>{DisplayName}</h4><p>Papers: {PaperCount}, Citations: {CitationCount}</p>'),
     'conference': ('<i class="fa fa-building"></i><h4>{DisplayName}</h4><p>Papers: {PaperCount}, Citations: {CitationCount}</p>'),
     'institution': ('<i class="fa fa-university"></i><h4>{DisplayName}</h4><p>Papers: {PaperCount}, Citations: {CitationCount}</p>'),
     'journal': ('<i class="fa fa-book"></i><h4>{DisplayName}</h4><p>Papers: {PaperCount}, Citations: {CitationCount}</p>'),
-    'paper': ('<i class="fa fa-file"></i><h4>{title}</h4><p>Citations: {citations}, Field: {fieldOfStudy}</p><p>Authors: {authorName}</p>')
+    'paper': ('<i class="fa fa-file"></i><h4>{OriginalTitle}</h4><p>Citations: {CitationCount}, Field:</p><p>Authors:</p>')
 }
 
 @csrf_exempt
@@ -161,7 +161,7 @@ def search(request):
     keyword = ''.join(ch for ch in keyword if ch not in exclude)
     keyword = keyword.lower()
     keyword = " ".join(keyword.split())
-    id_helper_dict = {"conference": "ConferenceSeriesId", "journal": "JournalId", "institution": "AffiliationId", "paper": "eid", "author": "eid"}
+    id_helper_dict = {"conference": "ConferenceSeriesId", "journal": "JournalId", "institution": "AffiliationId", "paper": "PaperId", "author": "AuthorId"}
     data = []
     if "conference" in entityType:
         data += [(val, "conference") for val in query_conference_series(keyword)]
@@ -170,12 +170,14 @@ def search(request):
     if "institution" in entityType:
         data += [(val, "institution") for val in query_affiliation(keyword)]
     if "paper" in entityType:
-        data += [(val, "paper") for val in get_entities_from_search(keyword, "paper")]
+#        data += [(val, "paper") for val in get_entities_from_search(keyword, "paper")]
+        data += [(val, "paper") for val in query_paper(keyword)]
     if "author" in entityType:
-        try:
-            data += [(val, "author") for val in get_entities_from_search(keyword, "author")]
-        except Exception as e:
-            print(e)
+        data += [(val, "author") for val in query_author(keyword)]
+#        try:
+#            data += [(val, "author") for val in get_entities_from_search(keyword, "author")]
+#        except Exception as e:
+#            print(e)
     for i in range(len(data)):
         entity = {'data': data[i][0]}
         entity['display-info'] = s[data[i][1]].format(**entity['data'])
@@ -183,44 +185,6 @@ def search(request):
         data[i] = entity
     return JsonResponse({'entities': data}, safe=False)
 
-
-'''
-s = {
-    'author': ('<h5>{DisplayName}</h5><p>Papers: {PaperCount}, Citations: {CitationCount}</p></div>'),
-         # '<div style="float: left; width: 50%; padding: 0;"><p>Papers: {paperCount}</p></div>'
-         # '<div style="float: right; width: 50%; text-align: right; padding: 0;"<p>Citations: {citations}</p></div>'),
-    'conference': ('<h5>{DisplayName}</h5>'
-        '<div style="float: left; width: 50%; padding: 0;"><p>Papers: {PaperCount}</p></div>'
-        '<div style="float: right; width: 50%; text-align: right; padding: 0;"<p>Citations: {CitationCount}</p></div>'),
-    'institution': ('<h5>{DisplayName}</h5>'
-        '<div style="float: left; width: 50%; padding: 0;"><p>Papers: {PaperCount}</p></div>'
-        '<div style="float: right; width: 50%; text-align: right; padding: 0;"<p>Citations: {CitationCount}</p></div>'),
-    'journal': ('<h5>{DisplayName}</h5>'
-        '<div style="float: left; width: 50%; padding: 0;"><p>Papers: {PaperCount}</p></div>'
-        '<div style="float: right; width: 50%; text-align: right; padding: 0;"<p>Citations: {CitationCount}</p></div>'),
-    'paper': ('<h5>{PaperTitle}</h5>'
-        '<div><p>Citations: {CitationCount}</p></div>')
-}
-
-idkeys = {'paper': 'PaperId', 'author': 'AuthorId', 'institution': 'AffiliationId', 'journal': 'JournalId', 'conference': 'ConferenceSeriesId'}
-
-@csrf_exempt
-def search(request):
-    global idkeys
-    keyword = request.POST.get("keyword")
-    entity_type = request.POST.get("option")
-    data = search_name(keyword, entity_type)
-    idkey = idkeys[entity_type]
-    for i in range(len(data)):
-        # print(entity)
-        entity = {'data': data[i]}
-        entity['display-info'] = s[entity_type].format(**entity['data'])
-        entity['table-id'] = "{}_{}".format(entity_type, entity['data'][idkey])
-        data[i] = entity
-        # print(entity)
-    print(data[0])
-    return JsonResponse({'entities': data}, safe=False)
-'''
 
 @csrf_exempt
 def manualcache(request):
