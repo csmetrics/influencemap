@@ -255,7 +255,8 @@ resubmitButton.addEventListener('click', function(){
       selfcite: selfCiteCheckbox.checked,
       coauthor: coauthorCheckbox.checked,
       keyword: keyword,
-      numpetals: document.getElementById('num-petals').value
+      numpetals: document.getElementById('num-petals').value,
+      session: JSON.stringify(session)
     },
     success: function(result){
       $("#graph1").empty();
@@ -269,7 +270,7 @@ resubmitButton.addEventListener('click', function(){
       drawFlower("#graph1", author_data, 0, width);
       drawFlower("#graph2", conf_data, 1, width);
       drawFlower("#graph3", inst_data, 2, width);
-
+      session = result["session"];
       // do not update stat for resubmit
       // updateStats(result.stats);
       resubmitButton.className = "btn btn-primary";
