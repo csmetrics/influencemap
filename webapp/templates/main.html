@@ -137,14 +137,25 @@ Licence URI: http://www.os-templates.com/template-terms
 
       <div class="project-info flow-influence">
         <h3><b>Flow of influence</b></h3>
+        <div class="project-detail">
+          We define influence as a function of paper citations.
+          <!-- <br>Each citation which the ego is apart of contributes to the overall influence map of an ego. -->
+        </div>
         <div align="center" style="padding: 15px 0;">
-          <img width="55%" src="{% static 'images/influence_flow.svg' %}">
+          <img width="48%" src="{% static 'images/influence_flow.svg' %}">
         </div>
         <div class="project-detail">
           Each of the edges of the graph signifies the flow of influence to and from the ego node,
           <br>the strenth of this relation is reflected in the thickness of the edge.
           <br>The red edges denotes the influence the ego has towards the outer entities (an outer entity citing a paper by the ego). The blue edges denotes the influence the outer entities have towards the ego (the ego cites a paper by one of the outer entities).
           <br>The hue of the outer nodes signify the ratio of influence in and out. A blue node indicates that the associated entity has influence the ego more than the ego has influenced itself. Likewise, a red node indicates the ego has influenced the node's entity more than it has influenced the ego.
+        </div>
+        <div align="center" style="padding: 15px 0;">
+          <img width="27%" src="{% static 'images/influence_weight.svg' %}">
+        </div>
+        <div class="project-detail">
+          To prevent papers with a large number of entities contributing from creating an overwhelming amount of influence,
+          <br>we normalize the influence contribution by the number of authors in the cited paper.
         </div>
       </div>
 
@@ -154,14 +165,14 @@ Licence URI: http://www.os-templates.com/template-terms
             <a href="http://http://cm.cecs.anu.edu.au/"><h4><b>ANU Computational Media Lab.</b></h4></a>
             Building 145, North Rd<br>
             College of Engineering and Computer Science<br>
-            The Australian National University<br>
+            <a href="http://www.anu.edu.au/">The Australian National University</a><br>
             Canberra, ACT 2601, Australia<br>
           </div>
           <div class="detail-box">
             <h4><b>Abut Project</b></h4>
-            Repository<br>
-            Report Issue<br>
-            Contact<br>
+            <a href="https://github.com/csmetrics/influencemap">Repository</a><br>
+            <a href="https://github.com/csmetrics/influencemap/issues">Report Issue</a><br>
+            <a href="mailto:csmetrics.org@gmail.com">Contact</a><br>
           </div>
           <div class="detail-box">
             <h4><b>Our team</b></h4>
