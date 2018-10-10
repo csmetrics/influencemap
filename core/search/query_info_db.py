@@ -142,10 +142,16 @@ def paa_prop_query(paper_ids):
         paa_res = list()
         for paa_info in paa_info_list:
             if 'AuthorId' in paa_info:
-                paa_info['AuthorName'] = auth_names[paa_info['AuthorId']]
+                if paa_info['AuthorId'] in auth_names:
+                    paa_info['AuthorName'] = auth_names[paa_info['AuthorId']]
+                else:
+                    continue
 
             if 'AffiliationId' in paa_info:
-                paa_info['AffiliationName'] = affi_names[paa_info['AffiliationId']]
+                if paa_info['AffiliationId'] in affi_names:
+                    paa_info['AffiliationName'] = affi_names[paa_info['AffiliationId']]
+                else:
+                    continue
 
             paa_res.append(paa_info)
 
