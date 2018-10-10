@@ -200,23 +200,17 @@ a {
 }
 
 .detail {
-  padding: 15px 10% 150px 10%;
+  padding: 100px 10% 150px 10%;
   margin: 15 -20 0 -20;
-  background-color: #f9f9f9;
+  background-color: #222d32;
+  text-align: left;
 }
 
 .detail-box {
-  color: #666;
+  color: #aaa;
   vertical-align: top;
   display: inline-block;
-  width: 18%;
-  padding: 10px;
   text-align: left;
-}
-.detail-box-large {
-  width: 40%;
-  padding-right: 80px;
-  text-align: right;
 }
 
 .search-bar {
