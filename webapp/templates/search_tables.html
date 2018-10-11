@@ -21,6 +21,9 @@
       </div>
     </div>
     <div id="searchtable-container" style="padding: 0px 30px">
+    <div style="float: right; padding: 15px;">
+      <i id="instruction-activate" class="far fa-question-circle" style="font-size: 20px;"></i>
+    </div>
       <div id="loading" style="display: none"></div>
       <table id="searchtable" class="row-border hover order-column" cellspacing="0" width="100%"></table>
     </div>
@@ -30,6 +33,25 @@
     <input class="inputbar" type="text" placeholder="Name your flower..."/>
     <input id="continue-btn" class="btn btn-warning" type="submit" value="Go" float="bottom" style="width:100%; margin-top:10px" />
   </div>
+</div>
+
+<!-- The Modal -->
+<div id="instructionModal" class="modal">
+
+  <!-- Modal content -->
+  <div class="modal-content">
+    <span class="close-modal">&times;</span>
+
+  <h3><b>Create your own flowers</b></h3>
+  <ol><li>Select the type(s) of entity you want to restrict your search to<br/><br/><img src='/static/images/entity_type_instruction_mm.png'/><br/><br/><br/><br/></li>
+  <li>Use the search bar to find the entity you are searching for<br/><br/><img src='/static/images/searchbar_instruction_mm.png'/><br/><br/><br/><br/></li>
+  <li>Select the checkboxes on the right hand side of a row in the results to add that entity to your flower.<br/><br/><img width='100%' src='/static/images/search_results_instruction_mm.png'/><br/><br/><br/><br/></li>
+  <li>Repeat until you have selected all entities you want included in your flower.<br/><br/><br/><br/></li>
+  <li>(Optional) Name your flower.<br/><br/><img src='/static/images/flower_name_instruction_mm.png'/><br/><br/><br/><br/></li>
+  <li>Press <b>Go</b> to create your flower, but be patient, computation time depends on the selected entities.</li></ol>
+
+  </div>
+
 </div>
 
 
@@ -150,6 +172,45 @@ table.dataTable.no-footer {
   font-weight: bold;
 }
 
+/* The Modal (background) */
+.modal {
+    display: none; /* Hidden by default */
+    position: fixed; /* Stay in place */
+    z-index: 1; /* Sit on top */
+    left: 0;
+    top: 0;
+    width: 100%; /* Full width */
+    height: 100%; /* Full height */
+    overflow: auto; /* Enable scroll if needed */
+    background-color: rgb(0,0,0); /* Fallback color */
+    background-color: rgba(0,0,0,0.4); /* Black w/ opacity */
+}
+
+/* Modal Content/Box */
+.modal-content {
+    background-color: #fefefe;
+    margin: 15% auto; /* 15% from the top and centered */
+    padding: 20px;
+    border: 1px solid #888;
+    width: 80%; /* Could be more or less, depending on screen size */
+}
+
+/* The Close Button */
+.close-modal {
+    color: #aaa;
+    float: right;
+    font-size: 28px;
+    font-weight: bold;
+}
+
+.close-modal:hover,
+.close-modal:focus {
+    color: black;
+    text-decoration: none;
+    cursor: pointer;
+}
+
+
 </style>
 
 <script>
@@ -162,3 +223,14 @@ entitytypebtns.on("click",function(){
 <script src="{% static 'js/searchTableConfig.js' %}"></script>
 <script src="{% static 'js/selectionTableConfig.js' %}"></script>
 <script src="{% static 'js/search_tables.js' %}"></script>
+<script src="{% static 'js/modal.js' %}"></script>
+
+<script>
+
+var btn = document.getElementById("instruction-activate");
+var modal = document.getElementById("instructionModal");
+
+make_modal(modal,btn);
+
+
+</script>
