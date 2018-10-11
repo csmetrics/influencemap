@@ -199,7 +199,6 @@ function handleSelectionTableRowClick(element){
 function getSelectedData(){
    var papers = [];
    var names  = [];
-   var most_papers = {"paperCount": -1, 'name': ''};
    var entities = {"paper": [], "author": [], "conference": [], "journal": [], "institution": []};
 
    // For each of the selected
@@ -210,11 +209,6 @@ function getSelectedData(){
      var row_data = selectiontable.row(a).data()['data'];
      // If not a paper
      if (row_data['entity-type'] != 'paper') {
-       // Determine flower name
-       if (row_data['paperCount'] > most_papers['paperCount']) {
-         most_papers = {"name": row_data['normalisedName'], "paperCount": row_data['paperCount']}
-       };
-
        // Add names and papers
        names.push(row_data['normalisedName']);
        if ('papers' in row_data) {for (var i = 0; i < row_data['papers'].length; i++) {
@@ -232,8 +226,8 @@ function getSelectedData(){
      entities[keyChange[key]] = entities[key];
      delete entities[key];
    }
-
-   return {'papers': papers, 'flower_name': most_papers['name'], 'names': names, 'entities': entities}
+   var flower_name = document.getElementById("flowername").value;
+   return {'papers': papers, 'flower_name': flower_name, 'names': names, 'entities': entities}
 }
 
 function hideElement(elem){
