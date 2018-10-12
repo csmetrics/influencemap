@@ -115,7 +115,11 @@ def query_affiliation(search_phrase):
     return query_names_with_matches("affiliations", ["DisplayName", "NormalizedName"], search_phrase)
 
 def query_paper(search_phrase):
-    return query_names_with_matches("papers", ["PaperTitle", "OriginalTitle", "BookTitle"], search_phrase)
+    papers = query_names_with_matches("papers", ["PaperTitle", "OriginalTitle", "BookTitle"], search_phrase)
+    for paper in papers:
+        author_ids = get_authors_from_paper(paper["PaperId"])
+        paper["Authors"] = get_display_names_from_author_ids(author_ids)
+    return papers
 
 def query_author(search_phrase):
     authors = query_names_with_matches("authors", ["DisplayName", "NormalisedName"], search_phrase)
@@ -124,6 +128,25 @@ def query_author(search_phrase):
             author["Affiliation"] = get_names_from_affiliation_ids([author["LastKnownAffiliationId"]])[0]
             print(author["Affiliation"])
     return authors
+
+
+def get_authors_from_paper(paper_id):
+    result = []
+    q = {
+      "_source": "AuthorId",
+      "size": 3,
+      "sort": [{"AuthorSequenceNumber":"desc"}],
+      "query": {
+        "term": {"PaperId": paper_id}
+      }
+    }
+    s = Search(using=client, index="paperauthoraffiliations")
+    s.update_from_dict(q)
+    response = s.execute()
+    data = response.to_dict()["hits"]["hits"]
+    author_ids = [res["_source"]["AuthorId"] for res in data]
+    return author_ids
+
 
 def get_names_from_entity(entity_ids, index, id_field, name_field, with_id=False):
     if with_id:
@@ -161,6 +184,9 @@ def get_display_names_from_conference_ids(entity_ids):
 
 def get_display_names_from_journal_ids(entity_ids):
     return get_names_from_entity(entity_ids, "journals", "JournalId", "DisplayName", with_id=True)
+
+def get_display_names_from_author_ids(entity_ids):
+    return get_names_from_entity(entity_ids, "authors", "AuthorId", "DisplayName", with_id=False)
 
 def get_all_browse_cache():
     cache_index = "browse_cache"
