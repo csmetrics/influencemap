@@ -26,13 +26,13 @@
 .skin-custom .main-header .navbar .nav .open > a:focus,
 .skin-custom .main-header .navbar .nav > .active > a {
   background: rgba(0, 0, 0, 0.1);
-  color: #f6f6f6;
+  color: #f9f9f9;
 }
 .skin-custom .main-header .navbar .sidebar-toggle {
   color: #ffffff;
 }
 .skin-custom .main-header .navbar .sidebar-toggle:hover {
-  color: #f6f6f6;
+  color: #f9f9f9;
   background: rgba(0, 0, 0, 0.1);
 }
 .skin-custom .main-header .navbar .sidebar-toggle {

@@ -183,6 +183,8 @@ a {
 .project-info .project-detail {
   padding: 10px 15%;
 }
+.project-info .logo img { float:right; width: 40px; margin-top: 20px;}
+
 .dataset {
   padding: 15px 10%;
   margin: 15 -20;
@@ -200,18 +202,22 @@ a {
 }
 
 .detail {
-  padding: 100px 10% 150px 10%;
+  padding: 50px 10% 100px 10%;
   margin: 15 -20 0 -20;
   background-color: #222d32;
   text-align: left;
 }
 
 .detail-box {
-  color: #aaa;
+  color: #ddd;
   vertical-align: top;
   display: inline-block;
   text-align: left;
+  padding-bottom: 10px;
+  font-size: 16px;
 }
+.detail-box a, .detail-box h4 { color: white; }
+.detail-box a:hover {color: #49BEAA; }
 
 .search-bar {
   padding: 2px 15%;
@@ -495,31 +501,6 @@ text {
   z-index: 1000;
   margin-top: 10px;
   right: 10px;
-}
-
-/*    ---     Modal     ---     */
-
-/* The Modal (background) */
-.modal {
-    display: none; /* Hidden by default */
-    position: fixed; /* Stay in place */
-    z-index: 1; /* Sit on top */
-    left: 0;
-    top: 0;
-    width: 100%; /* Full width */
-    height: 100%; /* Full height */
-    overflow: auto; /* Enable scroll if needed */
-    background-color: rgb(0,0,0); /* Fallback color */
-    background-color: rgba(0,0,0,0.4); /* Black w/ opacity */
-}
-
-/* Modal Content/Box */
-.modal-content {
-    background-color: #fefefe;
-    margin: 15% auto; /* 15% from the top and centered */
-    padding: 20px;
-    border: 1px solid #888;
-    width: 80%; /* Could be more or less, depending on screen size */
 }
 
 /* The Close Button */
