@@ -200,9 +200,11 @@ function getSelectedData(){
    var papers = [];
    var names  = [];
    var entities = {"paper": [], "author": [], "conference": [], "journal": [], "institution": []};
+   var empty_query = true;
 
    // For each of the selected
    selectiontable.rows().nodes().each(function(a) {
+     empty_query = false;
      var datatable_row = selectiontable.row(a).data();
      var type_and_id = datatable_row['table-id'].split('_');
      entities[type_and_id[0]].push(type_and_id[1]);
@@ -227,7 +229,7 @@ function getSelectedData(){
      delete entities[key];
    }
    var flower_name = document.getElementById("flowername").value;
-   return {'papers': papers, 'flower_name': flower_name, 'names': names, 'entities': entities}
+   return {'papers': papers, 'flower_name': flower_name, 'names': names, 'entities': entities, 'empty_query': empty_query}
 }
 
 function hideElement(elem){

@@ -35,6 +35,13 @@ var flowerLoadingModal = document.getElementById("loading-flower-modal");
 
 
 function goToFlower(data){
+  if (data['empty_query']){
+    function fade_alert(){$("#empty_selection_alert").fadeToggle()};
+    fade_alert()
+    setTimeout(fade_alert, 4000);
+    return
+  };
+
   var latestSearchOption = [];
   $(".entity-type-btn.selected-entity").each(function(){
     latestSearchOption.push(this.dataset.entitytype)
