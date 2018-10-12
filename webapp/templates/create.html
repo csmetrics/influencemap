@@ -9,15 +9,38 @@
   </header>
   {% include 'search_tables.html' %}
 </div>
+
+<!-- Modal to display while flower is loading -->
+<div id="loading-flower-modal" class="modal">
+  <!-- Modal content -->
+  <div class="modal-content">
+    <div class="loading" style="float: left; width: 50px; height: 50px; background-size: 50px 50px;"></div>
+    <span class="close">&times;</span>
+    <p style="display: block; margin: 25 auto 5 auto; text-align: center; width: 70%">While your flower is growing, understand what different parts of the flower are representing</p>
+
+    {% include 'legend/hennessy_flower_no_bars.html' %}<br/>
+    <p style="display: block; margin: 25 auto 5 auto; text-align: center; width: 70%">Flowers are made up of a centre node (John Hennessy in the flower above), many outer nodes (the red/blue circles with corresonding names) and up to two arrows between the centre node and each of the outer nodes. The graphics below explain how the information is presented</p>
+    {% include 'legend/influence_direction_legend.html' %}<br/>
+    {% include 'legend/node_colour_legend.html' %}<br/>
+    {% include 'legend/node_size_legend.html' %}<br/>
+    {% include 'legend/coauthor_legend.html' %}
+  </div>
+</div>
+
 </body>
 </html>
 <script>
+
+var flowerLoadingModal = document.getElementById("loading-flower-modal");
+
 
 function goToFlower(data){
   var latestSearchOption = [];
   $(".entity-type-btn.selected-entity").each(function(){
     latestSearchOption.push(this.dataset.entitytype)
   });
+   modal_display_function = make_modal(flowerLoadingModal);
+   setTimeout(modal_display_function, 2000);
    data['option'] = latestSearchOption[0];
    data['keyword'] = latestSearchTerm;
    postData('/submit/', data, "{% csrf_token %}");

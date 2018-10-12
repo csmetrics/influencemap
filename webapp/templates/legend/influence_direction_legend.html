@@ -1,0 +1,38 @@
+<!-- Influence flow legend -->
+<svg style="display: block; margin:0 auto;" width="450" height="200">
+    <defs>
+        <marker id="redarrow" viewBox="0 -5 10 10" refX="10" refY="0" markerWidth="15" markerHeight="15" markerUnits="userSpaceOnUse" orient="auto">
+            <path d="M0,-5L10,0L0,5" style="fill: rgb(228, 130, 104); stroke: rgb(228, 130, 104); opacity: 1;" marker-end="url(#redarrow)"></path>
+        </marker>
+        <marker id="bluearrow" viewBox="0 -5 10 10" refX="10" refY="0" markerWidth="15" markerHeight="15" markerUnits="userSpaceOnUse" orient="auto">
+            <path d="M0,-5L10,0L0,5" style="fill: rgb(107, 172, 208); stroke: rgb(107, 172, 208); opacity: 1;" marker-end="url(#bluearrow)"></path>
+        </marker>
+    </defs>
+    <g>
+
+
+        <circle class="hl-circle" cx="60" cy="50" r="15" style="fill: rgb(255, 255, 255); stroke-width: 2; cursor: pointer;"></circle>
+
+        <path marker-end="url(#redarrow)" d="M75,50L150,50M155,50" style="stroke-width: 3; stroke: rgb(228, 130, 104);"></path>
+        <path marker-end="url(#redarrow)" d="M165,50L240,50M245,50" style="stroke-width: 6; stroke: rgb(228, 130, 104);"></path>
+        <path marker-end="url(#redarrow)" d="M255,50L330,50M337,50" style="stroke-width: 9; stroke: rgb(228, 130, 104);"></path>
+
+        <circle class="hl-circle" cx="355" cy="50" r="15" style="fill: rgb(251, 215, 196); stroke-width: 2; cursor: pointer;"></circle>
+
+        <text class="hl-text node-text" x="65" y="90" text-anchor="left" style="fill: black;">Size of centre's influence on outer node</text>
+
+
+
+        <circle class="hl-circle" cx="60" cy="130" r="15" style="fill: rgb(255, 255, 255); stroke-width: 2; cursor: pointer;"></circle>
+
+        <path marker-end="url(#bluearrow)" d="M160,130L85,130M78,130" style="stroke-width: 9; stroke: rgb(107, 172, 208);"></path>
+        <path marker-end="url(#bluearrow)" d="M250,130L175,130M170,130" style="stroke-width: 6; stroke: rgb(107, 172, 208);"></path>
+        <path marker-end="url(#bluearrow)" d="M340,130L265,130M260,130" style="stroke-width: 3; stroke: rgb(107, 172, 208);"></path>
+
+        <circle class="hl-circle" cx="355" cy="130" r="15" style="fill: rgb(205, 227, 238); stroke-width: 2; cursor: pointer;"></circle>
+
+        <text class="hl-text node-text" x="65" y="170" text-anchor="left" style="fill: black;">Size of outer node's influence on centre node</text>
+    </g>
+    <g>
+    </g>
+</svg>

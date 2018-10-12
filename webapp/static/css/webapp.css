@@ -260,6 +260,14 @@ a {
   background: url('../images/loading.gif') no-repeat center center;
 }
 
+.loading {
+  position: absolute;
+  width: 100%;
+  height: 70%;
+  z-index: 300;
+  background: url('../images/loading.gif') no-repeat center center;
+}
+
 table, th, td, table.dataTable thead th, table.dataTable thead td {
   border: 0;
 }
