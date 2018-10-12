@@ -10,6 +10,7 @@
           <button class="btn-sm entity-type-btn"  data-entitytype="conference"><i class="fa fa-building"></i>  Conferences</button>
           <button class="btn-sm entity-type-btn"  data-entitytype="journal"><i class="fa fa-book"></i>  Journals</button>
           <button class="btn-sm entity-type-btn"  data-entitytype="paper"><i class="fa fa-file"></i>  Papers</button>
+
       </div>
       <div class="input-group searchbar">
         <input autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false" id="name-search-bar" type="text" class="form-control" value="" placeholder="Search">
@@ -21,9 +22,9 @@
       </div>
     </div>
     <div id="searchtable-container" style="padding: 0px 30px">
-    <div style="float: right; padding: 15px;">
-      <i id="instruction-activate" class="far fa-question-circle" style="font-size: 20px;"></i>
-    </div>
+      <div style="float:right;padding:15px 0">
+        <i id="instruction-activate" class="far fa-question-circle" style="font-size:20px;font-style:normal;"></i>
+      </div>
       <div id="loading" style="display: none"></div>
       <table id="searchtable" class="row-border hover order-column" cellspacing="0" width="100%"></table>
     </div>
@@ -48,7 +49,7 @@
   <li>Repeat until you have selected all entities you want included in your flower<br/><br/><img src='/static/images/2017_turing_winners_select2.gif'/><br/><br/><br/><br/><br/><br/></li>
   <li>You can remove a selection by unticking the checkbox or clicking on the selection on the right hand table<br/><br/><img src='/static/images/2017_turing_winners_unselect.gif'/><br/><br/><br/><br/><br/><br/></li>
   <li>(Optional) Name your flower.<br/><br/><img src='/static/images/2017_turing_winners_name.gif'/><br/><br/><br/><br/><br/><br/></li>
-  <li>Press <b>Go</b> to create your flower, but be patient, computation time depends on the selected entities<br/><br/><img src='/static/images/go.png'/></li></ol>
+  <li>Press <b>Go</b> to create your flower, but be patient, computation time depends on the selected entities<br/><br/><img src='/static/images/go.png' style="border:none"/></li></ol>
 
   </div>
 
@@ -176,7 +177,7 @@ table.dataTable.no-footer {
 .modal {
     display: none; /* Hidden by default */
     position: fixed; /* Stay in place */
-    z-index: 1; /* Sit on top */
+    z-index: 300; /* Sit on top */
     left: 0;
     top: 0;
     width: 100%; /* Full width */
@@ -188,11 +189,15 @@ table.dataTable.no-footer {
 
 /* Modal Content/Box */
 .modal-content {
+    z-index: 300;
     background-color: #fefefe;
-    margin: 15% auto; /* 15% from the top and centered */
+    margin: 5% auto; /* 15% from the top and centered */
     padding: 20px;
     border: 1px solid #888;
-    width: 80%; /* Could be more or less, depending on screen size */
+    width: 850px; /* Could be more or less, depending on screen size */
+}
+.modal-content img {
+  border: 1px solid #bbb;
 }
 
 /* The Close Button */
