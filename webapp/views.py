@@ -182,6 +182,7 @@ def search(request):
     for i in range(len(data)):
         entity = {'data': data[i][0]}
         entity['display-info'] = s[data[i][1]].format(**entity['data'])
+        if "Affiliation" in entity['data']: entity['display-info'] = entity['display-info'][0:-4] + ", Institution: {}</p>".format(entity['data']["Affiliation"])
         entity['table-id'] = "{}_{}".format(data[i][1], entity['data'][id_helper_dict[data[i][1]]])
         data[i] = entity
     return JsonResponse({'entities': data}, safe=False)

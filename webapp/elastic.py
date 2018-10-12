@@ -66,7 +66,7 @@ def query_paper_group(document_id):
     return paper_ids
 
 
-def query_names_with_matches(index, fields_list, search_phrase, max_return=15):
+def query_names_with_matches(index, fields_list, search_phrase, max_return=30):
     result = []
     matches = [{"match": {field: search_phrase}} for field in fields_list]
 
@@ -118,7 +118,12 @@ def query_paper(search_phrase):
     return query_names_with_matches("papers", ["PaperTitle", "OriginalTitle", "BookTitle"], search_phrase)
 
 def query_author(search_phrase):
-    return query_names_with_matches("authors", ["DisplayName", "NormalisedName"], search_phrase)
+    authors = query_names_with_matches("authors", ["DisplayName", "NormalisedName"], search_phrase)
+    for author in authors:
+        if "LastKnownAffiliationId" in author:
+            author["Affiliation"] = get_names_from_affiliation_ids([author["LastKnownAffiliationId"]])[0]
+            print(author["Affiliation"])
+    return authors
 
 def get_names_from_entity(entity_ids, index, id_field, name_field, with_id=False):
     if with_id:
@@ -146,7 +151,7 @@ def get_names_from_conference_ids(entity_ids):
     return get_names_from_entity(entity_ids, "conferenceseries", "ConferenceSeriesId", "NormalizedName")
 
 def get_names_from_affiliation_ids(entity_ids):
-    return get_names_from_entity(entity_ids, "affiliations", "AffiliationId", "NormalizedName")
+    return get_names_from_entity(entity_ids, "affiliations", "AffiliationId", "DisplayName")
 
 def get_names_from_journal_ids(entity_ids):
     return get_names_from_entity(entity_ids, "journals", "JournalId", "NormalizedName")
