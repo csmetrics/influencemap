@@ -387,6 +387,8 @@ def submit(request):
     session['year_ranges'] = {'pub_lower': min_pub_year, 'pub_upper': max_pub_year, 'cit_lower': min_cite_year, 'cit_upper': max_cite_year}
     session['flower_name']  = flower_name
     session['entity_names'] = entity_names
+    session['icoauthor'] = config['icoauthor']
+    session['self_cite'] = config['self_cite']
     #session['node_info']    = node_info
 
     data["session"] = session
@@ -515,6 +517,17 @@ def get_citation_papers(request):
     return JsonResponse({"papers": citations, "names": session["entity_names"] + session["node_info"],"node_info": session["node_information_store"]}, safe=False)
 
 
+def get_entities(paper):
+    ''' Gets the entities of a paper
+    '''
+    authors      = [author["AuthorName"] for author in paper["Authors"]]
+    affiliations = [author["AffiliationName"] for author in paper["Authors"] if "AffiliationName" in author]
+    conferences = [paper["ConferenceName"]] if ("ConferenceName" in paper) else []
+    journals = [paper["JournalName"]] if ("JournalName" in paper) else []
+
+    return authors, affiliations, conferences, journals
+
+
 def get_node_info_single(request, entity, year_ranges):
     pub_lower = year_ranges["pub_lower"]
     pub_upper = year_ranges["pub_upper"]
@@ -525,6 +538,17 @@ def get_node_info_single(request, entity, year_ranges):
     papers = paper_info_db_check_multiquery(session["cache"])
     papers_to_send = dict()
     links = dict()
+
+    # Calculate the self-citation/coauthor filters
+    if session['icoauthor'] == 'false':
+        coauthors = session['coauthors']
+    else:
+        coauthors = list()
+
+    if session['self_cite'] == 'false':
+        self = session['entity_names']
+    else:
+        self = list()
 
     node_info = {"References": {}, "Citations":{}}
     for paper in papers:
@@ -539,19 +563,22 @@ def get_node_info_single(request, entity, year_ranges):
                 # filter papers outside of selected citation range
                 if (relationship_type == "Citations")  and  (rel_paper["Year"] < cit_lower or rel_paper["Year"] > cit_upper): continue
 
+                authors, affiliations, conferences, journals = get_entities(rel_paper)
 
-                for author in rel_paper["Authors"]:
-                    try:
-                        author["AuthorName"]
-                    except:
-                        print(rel_paper)
-                        print(author)
+                # Remove self and coauthor
+                skip = False
+                for entity_list in [authors, affiliations]:
+                    if not set(coauthors + self).isdisjoint(set(entity_list)):
+                        skip = True
+                        break
+                for entity_list in [conferences, journals]:
+                    if not set(coauthors).isdisjoint(set(entity_list)):
+                        skip = True
+                        break
 
-                authors      = [author["AuthorName"] for author in rel_paper["Authors"]]
-                affiliations = [author["AffiliationName"] for author in rel_paper["Authors"] if "AffiliationName" in author]
-                conferences = [rel_paper["ConferenceName"]] if ("ConferenceName" in rel_paper) else []
-                journals = [rel_paper["JournalName"]] if ("JournalName" in rel_paper) else []
-                
+                if skip:
+                    continue
+
                 # check if node entity is one of the authors, affiliations, conferences or journals in the paper
                 relevant = entity in set(authors + affiliations + conferences + journals)
                 
@@ -570,7 +597,7 @@ def get_node_info_single(request, entity, year_ranges):
                         else:
                             links[paper["PaperId"]] = {"citation": [rel_paper["PaperId"]], "reference": list()}
 
-    paper_sort_func = lambda x: papers_to_send[x]["Year"]
+    paper_sort_func = lambda x: -papers_to_send[x]["Year"]
     links = sorted([{"citation": sorted(link["citation"],key=paper_sort_func), "reference": sorted(link["reference"],key=paper_sort_func), "ego_paper": key} for key, link in links.items()], key=lambda x: paper_sort_func(x["ego_paper"]))
 
     return {"node_links": links, "paper_info": papers_to_send}
