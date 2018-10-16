@@ -182,8 +182,9 @@ a {
 }
 .project-info .project-detail {
   padding: 10px 15%;
+  align: left
 }
-.project-info .logo img { float:right; width: 40px; margin-top: 20px;}
+.project-info .logo img { float:right; width: 80px; margin-top: 20px;}
 
 .dataset {
   padding: 15px 10%;
