@@ -36,7 +36,7 @@ Licence URI: http://www.os-templates.com/template-terms
             The influence flower is a visual metaphor for influence strength.
             Created around a center entity with its publications,
             the incoming influence is scaled by the number of references made (blue),
-            the outgoing influence is scaled by the number of citations recieved (red).
+            the outgoing influence is scaled by the number of citations recieved (red). (<a href="#about">more info<a>)
           </p>
           <div class="main-menu">
             <a href="/browse" class="btn btn-main btn-main-primary">
@@ -149,20 +149,29 @@ Licence URI: http://www.os-templates.com/template-terms
       </div>
 
 
-      <div class="project-info flow-influence">
-        <h3><b>Flow of influence</b></h3>
+      <div class="project-info">
         <div class="project-detail">
-          We define influence as a function of paper citations.
+          <h4><b>Computing influence scores</b></h4>
+          We compute influence as a function of paper citations.
           <!-- <br>Each citation which the ego is apart of contributes to the overall influence map of an ego. -->
         </div>
         <div align="center" style="padding: 15px 0;">
           <img width="48%" src="{% static 'images/influence_flow.svg' %}">
         </div>
         <div class="project-detail">
-          Each of the edges of the graph signifies the flow of influence to and from the ego node,
-          <br>the strenth of this relation is reflected in the thickness of the edge.
-          <br>The red edges denotes the influence the ego has towards the outer entities (an outer entity citing a paper by the ego). The blue edges denotes the influence the outer entities have towards the ego (the ego cites a paper by one of the outer entities).
-          <br>The hue of the outer nodes signify the ratio of influence in and out. A blue node indicates that the associated entity has influence the ego more than the ego has influenced itself. Likewise, a red node indicates the ego has influenced the node's entity more than it has influenced the ego.
+          Each of the edges of the graph signifies the flow of influence to and from the center node,
+          the strenth of this relation is reflected in the thickness of the edge.
+          <ul>
+          <li>The red edges denotes the influence the center has towards the outer entities,
+          i.e., an outer entity citing a paper by the center.
+          The blue edges denotes the influence the outer entities have towards the center,
+          i.e., the center cites a paper by an outer entities.
+          </li>
+          <li>The hue of the outer nodes signify the ratio of incoming and outgoing influence score.
+          A blue node indicates that the associated entity has influence the center more than the center has influenced itself.
+          Likewise, a red node indicates the center has influenced the node's entity more than it has influenced the center.
+          </li>
+          </ul>
         </div>
         <div align="center" style="padding: 15px 0;">
           <img width="27%" src="{% static 'images/influence_weight.svg' %}">
