@@ -44,6 +44,8 @@ function drawFlower(svg_id, data, idx, w) {
     var links = data["links"];
     var bars = data["bars"];
 
+    window_scaling_factor = w/1000
+
     v_margin = 150-(Math.max(5, nodes.length-15)*3);
     yheight = 120-Math.max(20, nodes.length-15);
 
@@ -120,8 +122,8 @@ function drawFlower(svg_id, data, idx, w) {
         .attr("viewBox", "0 -5 10 10")
         .attr("refX", function (d) { return 10+200*d.padding/Math.max(15, numnodes[idx]); })
         .attr("refY", function (d) { return -d.padding; })
-        .attr("markerWidth", function (d) { return arrow_size_calc(d.weight); })
-        .attr("markerHeight", function (d) { return arrow_size_calc(d.weight); })
+        .attr("markerWidth", function (d) { return window_scaling_factor*arrow_size_calc(d.weight); })
+        .attr("markerHeight", function (d) { return window_scaling_factor*arrow_size_calc(d.weight); })
         .attr("markerUnits", "userSpaceOnUse")
         .attr("orient", "auto")
       .append("path")
@@ -136,8 +138,8 @@ function drawFlower(svg_id, data, idx, w) {
         .attr("viewBox", "0 -5 10 10")
         .attr("refX", function (d) { return 10+200*d.padding/Math.max(15, numnodes[idx]); })
         .attr("refY", 0)
-        .attr("markerWidth", function (d) { return arrow_size_calc(d.weight); })
-        .attr("markerHeight", function (d) { return arrow_size_calc(d.weight); })
+        .attr("markerWidth", function (d) { return window_scaling_factor*arrow_size_calc(d.weight); })
+        .attr("markerHeight", function (d) { return window_scaling_factor*arrow_size_calc(d.weight); })
         .attr("markerUnits", "userSpaceOnUse")
         .attr("orient", "auto")
       .append("path")
@@ -159,7 +161,7 @@ function drawFlower(svg_id, data, idx, w) {
         .attr("cx", function(d) { if (d.id > 0) return transform_x(nodes[0]); else return transform_x(d); })
         .attr("cy", function(d) { if (d.id > 0) return transform_y(nodes[0])-magf; else return transform_y(d); })
         .attr("gtype", function(d) { return d.gtype; })
-        .attr("r", function(d) { return 8+200*d.size/Math.max(15, numnodes[idx]); })
+        .attr("r", function(d) { return (8+200*d.size/Math.max(15, numnodes[idx]))*window_scaling_factor; })
         .style("fill", function (d, i) {if (d.id == 0) return "#fff"; else return colors(d.weight);})
         .style("stroke", function (d, i) { if ((d.coauthor == 'True') && (d.id != 0)) return "green"; else return ""; })
         .style("stroke-width", 2)
@@ -199,7 +201,7 @@ function drawFlower(svg_id, data, idx, w) {
         .attr("class", function(d) { return "link " + d.type; })
         .attr('marker-end', function(d) { return "url(#" + d.gtype+"_"+d.type+"_"+d.id + ")"; })
         .attr("type", function(d) {d.type})
-        .style("stroke-width", function (d) { return arrow_width_calc(d.weight); })
+        .style("stroke-width", function (d) { return window_scaling_factor*arrow_width_calc(d.weight); })
         .style("stroke", function (d) { if (d.type == "in") return norcolor[0]; else return norcolor[1]; })
         .on("mouseover", function() { highlight_on(idx, this); })
         .on("mouseout", function() { highlight_off(idx); })
