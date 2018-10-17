@@ -308,7 +308,7 @@ def submit(request):
     print('TOTAL SCORE_DF TIME: ', datetime.now() - time_score)
 
     # Set up configuration of influence flowers
-    flower_config = default_config
+    flower_config = default_config()
     if config:
         flower_config = config
 
@@ -410,7 +410,7 @@ def resubmit(request):
     flower_name  = session['flower_name']
     entity_names = session['entity_names']
 
-    flower_config = default_config
+    flower_config = default_config()
     flower_config['self_cite'] = request.POST.get('selfcite') == 'true'
     flower_config['icoauthor'] = request.POST.get('coauthor') == 'true'
     flower_config['pub_lower'] = int(request.POST.get('from_pub_year'))
