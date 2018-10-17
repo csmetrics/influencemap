@@ -32,7 +32,8 @@ str_to_ent = {
         "institution": ent.Entity_type.AFFI
     }
 
-default_config = {
+def default_config():
+        return {
         'self_cite': False,
         'icoauthor': True,
         'pub_lower': None,
