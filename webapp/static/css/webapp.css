@@ -169,7 +169,7 @@ a {
 }
 
 .project-info {
-  padding: 0px 10%;
+  padding: 0px 5%;
   text-align: left;
 }
 .project-info h3 {
@@ -181,7 +181,7 @@ a {
   padding: 10px 0 6px 0;
 }
 .project-info .project-detail {
-  padding: 10px 10%;
+  padding: 10px 5%;
   text-align: left;
 }
 .project-info .logo img { float:right; width: 80px; margin-top: 20px;}
