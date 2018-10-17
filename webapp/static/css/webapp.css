@@ -169,8 +169,8 @@ a {
 }
 
 .project-info {
-  padding: 0px 0 70px 0;
-  text-align: center;
+  padding: 0px 10%;
+  text-align: left;
 }
 .project-info h3 {
   font-size: 28px;
@@ -181,8 +181,8 @@ a {
   padding: 10px 0 6px 0;
 }
 .project-info .project-detail {
-  padding: 10px 15%;
-  align: left
+  padding: 10px 10%;
+  text-align: left;
 }
 .project-info .logo img { float:right; width: 80px; margin-top: 20px;}
 
