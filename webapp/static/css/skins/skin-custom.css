@@ -4,7 +4,7 @@
  */
 .skin-custom .main-header .navbar {
   background-color: #fff;
-  margin-left: 38%;
+  margin-left: 40%;
   /* border-bottom: 1px solid #fff; */
 }
 .skin-custom .main-header .navbar-home,
@@ -59,7 +59,7 @@
   border-bottom: 0 solid transparent;
   text-align: left;
   padding-left: 40px;
-  width: 38%;
+  width: 40%;
 }
 .skin-custom .header-browse .logo {
   width: 270px;

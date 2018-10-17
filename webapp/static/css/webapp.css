@@ -43,28 +43,45 @@ a {
   padding: 15px 0 30px 0;
 }
 .project-intro {
-  width: 38%;
+  line-height: 1.3em;
+  width: 40%;
   height: 720px;
   background-color: #f9f9f9;
   position: absolute;
   z-index: 30;
-  padding: 100 3% 80 3%;
+  padding: 80 6% 80 8%;
 }
 .project-intro h3 {
+  line-height: 1.3em;
   text-align: left;
-  padding-left: 20%;
-  margin-top: 5px;
-  margin-bottom: 25px;
-  font-size: 35px;
+  margin-top: 0px;
+  margin-bottom: 15px;
+  font-size: 26px;
   color: #000;
 }
-.project-intro p {
-  text-align: left;
-  padding: 20 20 0 20%;
-  color: #000;
+.project-intro ul {
+  list-style: none;
+  padding: 5px 0 0 5px;
 }
+.project-intro li {
+  padding: 5px 0 0 20px;
+}
+.project-intro li:before {
+  content: "\f061"; /* FontAwesome Unicode */
+  font-family: FontAwesome;
+  display: inline-block;
+  margin-left: -1.3em; /* same as padding-left set on li */
+  width: 1.3em; /* same as padding-left set on li */
+}
+.project-intro li.arrow-blue:before {
+  color: #6bacd0;
+}
+.project-intro li.arrow-red:before {
+  color: #e48268;
+}
+
 .main-menu {
-  margin: 50 -500 0 18%;
+  margin: 50 -500 0 0;
 }
 .btn-main {
   display: inline-block;
@@ -169,26 +186,23 @@ a {
 }
 
 .project-info {
-  padding: 0px 5%;
-  text-align: left;
+  padding-bottom: 50px;
+  text-align: justify;
 }
 .project-info h3 {
+  padding: 0 0 0 15%;
   font-size: 28px;
-  padding-bottom: 10px;
-}
-.project-info h4 {
-  font-size: 20px;
-  padding: 10px 0 6px 0;
 }
 .project-info .project-detail {
-  padding: 10px 5%;
-  text-align: left;
+  padding: 10px 15%;
+  text-align: justify;
 }
 .project-info .logo img { float:right; width: 80px; margin-top: 20px;}
 
 .dataset {
   padding: 15px 10%;
   margin: 15 -20;
+  text-align: center;
   background-color: #49BEAA;
 }
 .data-box {
@@ -214,7 +228,7 @@ a {
   vertical-align: top;
   display: inline-block;
   text-align: left;
-  padding-bottom: 10px;
+  padding: 0 0 10px 0;
   font-size: 16px;
 }
 .detail-box a, .detail-box h4 { color: white; }
