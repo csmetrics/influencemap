@@ -135,7 +135,7 @@ def get_authors_from_paper(paper_id):
     q = {
       "_source": "AuthorId",
       "size": 3,
-      "sort": [{"AuthorSequenceNumber":"desc"}],
+      "sort": [{"AuthorSequenceNumber":"asc"}],
       "query": {
         "term": {"PaperId": paper_id}
       }
@@ -149,12 +149,10 @@ def get_authors_from_paper(paper_id):
 
 
 def get_names_from_entity(entity_ids, index, id_field, name_field, with_id=False):
-    if with_id:
-        name_field = [name_field, id_field]
 
     result = []
     q = {
-      "_source": name_field,
+      "_source": [name_field,id_field],
       "size": 100,
       "query": {
         "terms": {id_field : entity_ids}
@@ -164,10 +162,12 @@ def get_names_from_entity(entity_ids, index, id_field, name_field, with_id=False
     s.update_from_dict(q)
     response = s.execute()
     data = response.to_dict()["hits"]["hits"]
+    id_name_dict = {res["_source"][id_field]: res["_source"][name_field] for res in data}
     if with_id:
-        return {res["_source"][id_field]: res["_source"][name_field[0]] for res in data}
-    paper_ids = [res["_source"][name_field] for res in data]
-    return paper_ids
+        return id_name_dict
+    ids = [id_name_dict[eid] for eid in entity_ids]
+    
+    return ids
 
 
 def get_names_from_conference_ids(entity_ids):
