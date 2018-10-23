@@ -197,11 +197,11 @@ def gen_flower_data(score_df, flower_prop, entity_names, flower_name,
             top_score = top_score[ ~top_score['entity_name'].isin(entity_names) ]
 
         # Filter coauthors
+        print(coauthors)
         if config['icoauthor']:
             top_score = flag_coauthor(top_score, coauthors)
         else:
-            top_score = agg_score[ ~top_score['entity_name']\
-                                    .isin(coauthors) ]
+            top_score = top_score[ ~top_score['entity_name'].isin(coauthors) ]
 
         top_score = top_score.head(n=num_leaves)
         top_score.ego = flower_name
