@@ -61,15 +61,7 @@ function drawFlower(svg_id, data, idx, w) {
         .attr("x", function(d) { return transform_text_x(d); })
         .attr("y", function(d) { return transform_text_y(d); })
         .attr("text-anchor", locate_text)
-        .text(function(d) {
-          if (d.id == 0) {
-            if (idx == 0) return d.name+" to Authors";
-            if (idx == 1) return d.name+" to Venues";
-            if (idx == 2) return d.name+" to Institutions";
-          } else {
-            return d.name
-          }
-        })
+        .text(function(d) { return d.name; })
         .style("fill", function(d) { if (d.coauthor == 'False') return "black"; else return "#666"; })
 
     // flower graph edges
