@@ -7,7 +7,7 @@ var nestedTableSettings = nestedTableConfig['tableSettings'];
 
 // latest search variables
 var latestSearchTerm = "";
-var latestSearchOption = $('select[name="type"').val();
+var latestSearchOption = $('select[name="type"]').val();
 
 // data tables
 var selectiontable = $('#selectiontable').DataTable(selectionTableConfig['tableSettings']);
@@ -58,14 +58,14 @@ function search(){
   $(".entity-type-btn.selected-entity").each(function(){
     latestSearchOption.push(this.dataset.entitytype)
   });
-  
+
   latestSearchTerm = searchBar.value;
   searchtable = makeSearchTable(latestSearchOption);
   $.ajax({
     type: "POST",
     url: "/search",
-    data: { "data": 
-      JSON.stringify({ 
+    data: { "data":
+      JSON.stringify({
         keyword: latestSearchTerm,
         option: latestSearchOption,
       })
