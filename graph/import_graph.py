@@ -173,7 +173,7 @@ def import_PaperFieldsOfStudy(r):
     doc.meta.index = "PaperFieldsOfStudy".lower()
     doc.PaperId = int(r[0])
     doc.FieldOfStudyId = int(r[1])
-    doc.Similarity = Float(r[2])
+    doc.Similarity = float(r[2])
     doc.meta.id = doc.PaperId
     doc.save()
 
