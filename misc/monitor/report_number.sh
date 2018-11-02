@@ -4,7 +4,7 @@ DIR=/mnt/influencemap/misc/monitor
 WEBHOOK=https://www.cmlab.ml/hooks/fi1y5pxaztne5dj7demtpsihdo
 
 cd $DIR
-indices=("journals" "browse_author_group" "browse_paper_group" "conferenceinstances" \
+indices=("journals" "paperfieldsofstudy" "browse_cache" "conferenceinstances" \
          "fieldofstudychildren" "authors" "conferenceseries" "fieldsofstudy" "affiliations"\
          "paperauthoraffiliations" "papers" "paper_info" "paperreferences")
 
