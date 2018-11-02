@@ -220,7 +220,8 @@ options = {
     "ConferenceSeries": import_ConferenceSeries,
     "Journals": import_Journals,
     "FieldsOfStudy": import_FieldsOfStudy,
-    "FieldOfStudyChildren": import_FieldOfStudyChildren
+    "FieldOfStudyChildren": import_FieldOfStudyChildren,
+    "PaperFieldsOfStudy": import_PaperFieldsOfStudy
 }
 
 def graph_import(v):
