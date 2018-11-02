@@ -168,6 +168,14 @@ def import_FieldOfStudyChildren(r):
     doc.meta.id = "{}_{}".format(doc.FieldOfStudyId, doc.ChildFieldOfStudyId)
     doc.save()
 
+def import_PaperFieldsOfStudy(r):
+    doc = PaperFieldsOfStudy()
+    doc.meta.index = "PaperFieldsOfStudy".lower()
+    doc.PaperId = int(r[0])
+    doc.FieldOfStudyId = int(r[1])
+    doc.Similarity = Float(r[2])
+    doc.meta.id = doc.PaperId
+    doc.save()
 
 def update_Papers_FieldsOfStudy(filepath):
     ### need preprocessing on PaperFieldsOfStudy

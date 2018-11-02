@@ -140,6 +140,14 @@ class Journals(DocType):
     class Meta:
         index = 'Journals'.lower()
 
+class PaperFieldsOfStudy(DocType):
+    PaperId = Long(required = True)
+    FieldOfStudyId = Long(required = True)
+    Similarity = Float()
+
+    class Meta:
+        index = 'PaperFieldsOfStudy'.lower()
+
 
 class FieldsOfStudy(DocType):
     FieldOfStudyId = Long(required = True)
