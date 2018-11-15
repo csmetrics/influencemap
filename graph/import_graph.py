@@ -174,7 +174,7 @@ def import_PaperFieldsOfStudy(r):
     doc.PaperId = int(r[0])
     doc.FieldOfStudyId = int(r[1])
     doc.Similarity = float(r[2])
-    doc.meta.id = doc.PaperId
+    doc.meta.id = "{}_{}".format(doc.PaperId, doc.FieldOfStudyId)
     doc.save()
 
 def update_Papers_FieldsOfStudy(filepath):
