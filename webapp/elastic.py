@@ -191,7 +191,11 @@ def get_display_names_from_author_ids(entity_ids):
 def get_all_browse_cache():
     cache_index = "browse_cache"
     q = {"size": 10000,
-        "query": {"match_all": {}}}
+        "query": {
+          "bool":{
+            "must_not":{
+              "term": {"Type": "user_generated"}
+    }}}}
     s = Search(using=client, index=cache_index)
     s.update_from_dict(q)
     response = s.execute()

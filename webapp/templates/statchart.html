@@ -57,7 +57,7 @@
       <button class="btn " id="resubmitButton">Update Flower</button>
     </div>
   </div>
-  {% if curated %}
+  {% if curated or not curated %}
   <div class="wrapper" style="border-top:1px #eee solid;">
     <div class="row">
       <div class="col-sm-8" style="padding-right:0">
@@ -151,7 +151,7 @@ citSlider.noUiSlider.on('update', function ( values, handle, unencoded, isTap, p
 
 function updateConfigUrl() {
   if (copyText != null) {
-    copyText.value = "{{ request.build_absolute_uri }}"
+    copyText.value = "{{ url_base }}"
       + "&amp;pmin=" + handles[0].innerText + "&amp;pmax=" + handles[1].innerText
       + "&amp;cmin=" + handles[2].innerText + "&amp;cmax=" + handles[3].innerText
       + "&amp;selfcite=" + $("#self-cite").is(":checked")

@@ -207,6 +207,7 @@ def manualcache(request):
 @csrf_exempt
 def submit(request):
     print('Flower request: ', datetime.now())
+    session = dict()
     total_request_cur = datetime.now()
 
     time_cur = datetime.now()
@@ -224,6 +225,7 @@ def submit(request):
         entity_names = get_all_normalised_names(data["EntityIds"])
         keyword = ""
         flower_name = data.get('DisplayName')
+        session["url_base"] = "http://influencemap.ml/submit/?id="+request.GET.get("id") 
 
     else:
         data = json.loads(request.POST.get('data'))
@@ -236,8 +238,13 @@ def submit(request):
         entity_names = get_all_normalised_names(entity_ids)
         config = None
         flower_name = data.get('flower_name')
+
         if not flower_name:
             flower_name = '-'.join(entity_names)
+
+        doc_for_es_cache={"DisplayName": flower_name, "EntityIds": data["entities"], "Type": "user_generated"}
+        doc_id = saveNewBrowseCache(doc_for_es_cache)
+        session["url_base"] = "http://influencemap.ml/submit/?id="+doc_id 
 
     # Default Dates
     min_year = None
@@ -376,7 +383,6 @@ def submit(request):
     stats = get_stats(paper_information)
     data['stats'] = stats
 
-    session = dict()
 
     # Cache from flower data
     for key, value in cache.items():
