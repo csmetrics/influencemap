@@ -58,27 +58,29 @@ Licence URI: http://www.os-templates.com/template-terms
           <div id="preview-carousel" class="carousel slide" data-ride="carousel">
             <!-- Indicators -->
             <ol class="carousel-indicators">
-              <li data-target="#preview-carousel" data-slide-to="0" class="venue active">
-                ACMMM
+              <li data-target="#preview-carousel" data-slide-to="0" class="paper active">
+                <!-- DaCapo Project -->
+                DaCapo
               </li>
               <li data-target="#preview-carousel" data-slide-to="1">
-                <!-- Arnold Smeulders -->
-                <img title="Arnold Smeulders" src="https://staff.fnwi.uva.nl/a.w.m.smeulders/img/smeulders.jpg">
+                <!-- Brian Schmidt -->
+                <img title="Brian Schmidt" src="https://researchers.anu.edu.au/researchers/schmidt-bp/image">
               </li>
               <li data-target="#preview-carousel" data-slide-to="2">
-                <!-- Liangliang Cao -->
-                <img title="Liangliang Cao" src="https://www.cics.umass.edu/sites/default/files/styles/people_individual/public/headshots/liangliang.jpg?itok=ZUCaP7-b">
+                <!-- Kylie Catchpole -->
+                <img title="Kylie Catchpole" src="https://researchers.anu.edu.au/researchers/catchpole-kr/image">
               </li>
               <li data-target="#preview-carousel" data-slide-to="3" class="paper">
-                <!-- Revisiting the VLAD image representation -->
-                Top paper
-                <!-- <img title="Revisiting the VLAD image representation" src={% static 'images/icon-book.png' %}> -->
+                <!-- Republicanism: a theory of freedom and government -->
+                Republicanism Book
               </li>
               <li data-target="#preview-carousel" data-slide-to="4" >
-                <img title="Sir Tim Berners-Lee" src="https://upload.wikimedia.org/wikipedia/commons/thumb/4/4e/Sir_Tim_Berners-Lee_%28cropped%29.jpg/192px-Sir_Tim_Berners-Lee_%28cropped%29.jpg">
+                <!-- Anna Wierzbicka -->
+                <img title="Anna Wierzbicka" src="http://slll.cass.anu.edu.au/sites/default/files/styles/cass_profile_pic_164_205/public/image/person/wierzbickaa_0.JPG?itok=FTQlufoz">
               </li>
               <li data-target="#preview-carousel" data-slide-to="5">
-                <img title="John L Hennessy" src="https://amturing.acm.org/images/lg_aw/1426931.jpg">
+                <!-- Peter Gill -->
+                <img title="Peter Gill" src="http://chemistry.anu.edu.au/files/styles/anu_narrow_180_220/public/image_65_-_gill_headshot.jpg?itok=y4vszpjm">
               </li>
             </ol>
             <!-- Wrapper for slides -->
@@ -249,38 +251,38 @@ Licence URI: http://www.os-templates.com/template-terms
 <script src="{% static 'js/d3-selection-multi.v1.min.js' %}"></script>
 <script src="{% static 'js/d3-scale-chromatic.v1.min.js' %}"></script>
 <script src="{% static 'js/main_flowerGraph.js' %}"></script>
-<script src="{% static 'js/maindata/data_acm_mm.js' %}"></script>
+<script src="{% static 'js/maindata/data_dacapo.js' %}"></script>
 <script>
 var width = document.getElementById('preview-carousel').offsetWidth;
 drawFlower("#chart_1_1", author_data, 0, width);
 drawFlower("#chart_1_2", conf_data, 1, width);
 drawFlower("#chart_1_3", inst_data, 2, width);
 </script>
-<script src="{% static 'js/maindata/data_arnold_s.js' %}"></script>
+<script src="{% static 'js/maindata/data_b_schmidt.js' %}"></script>
 <script>
 drawFlower("#chart_2_1", author_data, 0, width);
 drawFlower("#chart_2_2", conf_data, 1, width);
 drawFlower("#chart_2_3", inst_data, 2, width);
 </script>
-<script src="{% static 'js/maindata/data_liangliang_c.js' %}"></script>
+<script src="{% static 'js/maindata/data_k_catchpole.js' %}"></script>
 <script>
 drawFlower("#chart_3_1", author_data, 0, width);
 drawFlower("#chart_3_2", conf_data, 1, width);
 drawFlower("#chart_3_3", inst_data, 2, width);
 </script>
-<script src="{% static 'js/maindata/data_paper_vlad.js' %}"></script>
+<script src="{% static 'js/maindata/data_republicanism.js' %}"></script>
 <script>
 drawFlower("#chart_4_1", author_data, 0, width);
 drawFlower("#chart_4_2", conf_data, 1, width);
 drawFlower("#chart_4_3", inst_data, 2, width);
 </script>
-<script src="{% static 'js/maindata/data_tim_bernerslee.js' %}"></script>
+<script src="{% static 'js/maindata/data_a_wierzbicka.js' %}"></script>
 <script>
 drawFlower("#chart_5_1", author_data, 0, width);
 drawFlower("#chart_5_2", conf_data, 1, width);
 drawFlower("#chart_5_3", inst_data, 2, width);
 </script>
-<script src="{% static 'js/maindata/data_j_hennessy.js' %}"></script>
+<script src="{% static 'js/maindata/data_p_gill.js' %}"></script>
 <script>
 drawFlower("#chart_6_1", author_data, 0, width);
 drawFlower("#chart_6_2", conf_data, 1, width);
