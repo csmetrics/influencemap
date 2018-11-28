@@ -37,6 +37,8 @@ from core.score.agg_utils         import get_coauthor_mapping
 from core.score.agg_utils         import flag_coauthor
 from core.utils.get_stats         import get_stats
 
+from webapp.shortener import shortener, unshorten_url_ext
+
 BASE_DIR = settings.BASE_DIR
 
 flower_leaves = [ ('author', [ent.Entity_type.AUTH])
@@ -54,6 +56,11 @@ def autocomplete(request):
 @csrf_exempt
 def main(request):
     return render(request, "main.html")
+
+#@csrf_exempt
+#def redirect(request):
+#    print(request.path)
+#    return HttpResponseRedirect(unshorten_url_ext(request.path))
 
 
 @csrf_exempt
@@ -225,7 +232,8 @@ def submit(request):
         entity_names = get_all_normalised_names(data["EntityIds"])
         keyword = ""
         flower_name = data.get('DisplayName')
-        session["url_base"] = "http://influencemap.ml/submit/?id="+request.GET.get("id") 
+        print("TEST1")
+        session["url_base"] = shortener("http://influencemap.ml/submit/?id="+request.GET.get("id"))
 
     else:
         data = json.loads(request.POST.get('data'))
@@ -244,7 +252,8 @@ def submit(request):
 
         doc_for_es_cache={"DisplayName": flower_name, "EntityIds": data["entities"], "Type": "user_generated"}
         doc_id = saveNewBrowseCache(doc_for_es_cache)
-        session["url_base"] = "http://influencemap.ml/submit/?id="+doc_id 
+        print("TEST2")
+        session["url_base"] = shortener("http://influencemap.ml/submit/?id="+doc_id)
 
     # Default Dates
     min_year = None
@@ -590,7 +599,10 @@ def get_node_info_single(request, entity, year_ranges):
                 
                 if relevant:
                     papers_to_send[paper["PaperId"]] = {k:v for k,v in paper.items() if k in ["PaperTitle", "Authors","PaperId","Year", "ConferenceName", "ConferenceSeriesId", "JournalName", "JournalId"]}
+                    papers_to_send[paper["PaperId"]] = add_author_order(papers_to_send[paper["PaperId"]])
+
                     papers_to_send[rel_paper["PaperId"]] = {k:v for k,v in rel_paper.items() if k in ["PaperTitle", "Authors","PaperId","Year", "ConferenceName", "ConferenceSeriesId", "JournalName", "JournalId"]}
+                    papers_to_send[rel_paper["PaperId"]] = add_author_order(papers_to_send[rel_paper["PaperId"]])
 
                     if relationship_type=="Citations":
                         if paper["PaperId"] in links:

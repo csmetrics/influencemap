@@ -103,3 +103,13 @@ def get_conf_journ_display_names(entityIds):
     if "JournalIds" in entityIds and entityIds["JournalIds"] != []: display_names["Journal"] = get_display_names_from_journal_ids(entityIds['JournalIds'])
 
     return display_names
+
+def add_author_order(paper_info):
+    '''
+    '''
+    author_order = author_order_query(paper_info['PaperId'])
+
+    for author in paper_info['Authors']:
+        author['AuthorOrder'] = author_order[author['AuthorId']]
+
+    return paper_info
