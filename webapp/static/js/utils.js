@@ -20,7 +20,7 @@ function toTitleCase(str) {
 
 
 function formatCitation(paper, authorsToHighlight=[]){
-  var authors = paper["Authors"];
+  var authors = paper["Authors"].sort(function(a, b) {return a['AuthorName'] - b['AuthorName']});
   var names = [];
   for (i in authors){
     var formatted_name = normaliseNameForCitation(authors[i]["AuthorName"]);
