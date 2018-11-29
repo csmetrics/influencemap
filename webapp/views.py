@@ -573,7 +573,7 @@ def get_node_info_single(request, entity, year_ranges):
             for rel_paper in paper[relationship_type]:
 
                 # filter papers outside of selected citation range
-                if (relationship_type == "Citations")  and  (rel_paper["Year"] < cit_lower or rel_paper["Year"] > cit_upper): continue
+                if (rel_paper["Year"] < cit_lower or rel_paper["Year"] > cit_upper): continue
 
                 authors, affiliations, conferences, journals = get_entities(rel_paper)
 
