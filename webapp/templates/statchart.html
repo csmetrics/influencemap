@@ -149,14 +149,87 @@ citSlider.noUiSlider.on('update', function ( values, handle, unencoded, isTap, p
   citechart.updateRange(parseInt(values[0]), parseInt(values[1]));
 });
 
+
+function encode(num, alphabet) {
+    if (typeof alphabet === "undefined") {
+        BASE62 = "0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ";
+        alphabet = BASE62;
+    }
+
+    if (num == 0) {
+        return alphabet[0];
+    }
+    var arr = [];
+    var base = alphabet.length;
+    while (num != 0) {
+        var rem = num % base;
+        var num = Math.floor(num / base);
+
+        arr.push(alphabet[rem]);
+    }
+
+    arr.reverse();
+    return arr.join('');
+}
+
+function encode2(num) {
+    if (num == 'true') {
+        return '1';
+    }
+    else {
+        return '0';
+    }
+}
+
+function from_url_ext(url_ext_str) {
+    var url_arg_list = url_ext_str.split('&amp;');
+    console.log(url_arg_list);
+
+    var arg_vals = [];
+    for (var i = 0; i < url_arg_list.length; i ++) {
+        var val = url_arg_list[i].split('=')[1];
+
+        arg_vals.push(val);
+    }
+
+    return arg_vals
+}
+
+function hash_args(arg_tuple) {
+    var conv64list = [arg_tuple[0], arg_tuple[1], arg_tuple[2], arg_tuple[3]];
+    var conv2list = [arg_tuple[4], arg_tuple[5]];
+    var newlist = [];
+    for (var i = 0; i < conv64list.length; i ++) {
+        newlist.push(encode(conv64list[i]));
+    }
+    for (var i = 0; i < conv2list.length; i ++) {
+        if (conv2list[i] == 'true') { newlist.push('1');
+        }
+        else {
+            newlist.push('0');
+        }
+    }
+    newlist.push(encode(conv64list[6]));
+    return newlist;
+}
+
 function updateConfigUrl() {
   if (copyText != null) {
+     
+    //copyText.value = "{{ url_base }}"
+    //  + "&amp;pmin=" + handles[0].innerText + "&amp;pmax=" + handles[1].innerText
+    //  + "&amp;cmin=" + handles[2].innerText + "&amp;cmax=" + handles[3].innerText
+    //  + "&amp;selfcite=" + $("#self-cite").is(":checked")
+    //  + "&amp;coauthor=" + $("#coauthor").is(":checked")
+    //  + "&amp;node=" + $("#num-petals").val();
+
     copyText.value = "{{ url_base }}"
-      + "&amp;pmin=" + handles[0].innerText + "&amp;pmax=" + handles[1].innerText
-      + "&amp;cmin=" + handles[2].innerText + "&amp;cmax=" + handles[3].innerText
-      + "&amp;selfcite=" + $("#self-cite").is(":checked")
-      + "&amp;coauthor=" + $("#coauthor").is(":checked")
-      + "&amp;node=" + $("#num-petals").val();
+      + "_" + encode(handles[0].innerText) + "_" + encode(handles[1].innerText)
+      + "_" + encode(handles[2].innerText) + "_" + encode(handles[3].innerText)
+      + "_" + encode2($("#self-cite").is(":checked"))
+      + "_" + encode2($("#coauthor").is(":checked"))
+      + "_" + encode($("#num-petals").val());
+
   }
 }
 
@@ -165,9 +238,9 @@ function updateNumbers() {
   p_max = parseInt(handles[1].innerText)
   c_min = parseInt(handles[2].innerText)
   c_max = parseInt(handles[3].innerText)
-  updateConfigUrl();
   updatePubNumbers(yearcounter, p_min, p_max);
   updateCiteNumbers(citationcounter, p_min, p_max, c_min, c_max);
+  updateConfigUrl();
 }
 
 function updatePubNumbers(data, min, max){

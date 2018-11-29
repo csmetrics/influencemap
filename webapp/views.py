@@ -37,7 +37,8 @@ from core.score.agg_utils         import get_coauthor_mapping
 from core.score.agg_utils         import flag_coauthor
 from core.utils.get_stats         import get_stats
 
-from webapp.shortener import shortener, unshorten_url_ext
+from django.http import HttpResponseRedirect
+from webapp.shortener import shorten_front, unshorten_url_ext
 
 BASE_DIR = settings.BASE_DIR
 
@@ -57,11 +58,9 @@ def autocomplete(request):
 def main(request):
     return render(request, "main.html")
 
-#@csrf_exempt
-#def redirect(request):
-#    print(request.path)
-#    return HttpResponseRedirect(unshorten_url_ext(request.path))
-
+@csrf_exempt
+def redirect(request):
+    return HttpResponseRedirect(unshorten_url_ext(request.get_full_path()))
 
 @csrf_exempt
 def browse(request):
@@ -232,8 +231,7 @@ def submit(request):
         entity_names = get_all_normalised_names(data["EntityIds"])
         keyword = ""
         flower_name = data.get('DisplayName')
-        print("TEST1")
-        session["url_base"] = shortener("http://influencemap.ml/submit/?id="+request.GET.get("id"))
+        session["url_base"] = shorten_front("http://influencemap.ml/submit/?id="+request.GET.get("id"))
 
     else:
         data = json.loads(request.POST.get('data'))
@@ -252,8 +250,7 @@ def submit(request):
 
         doc_for_es_cache={"DisplayName": flower_name, "EntityIds": data["entities"], "Type": "user_generated"}
         doc_id = saveNewBrowseCache(doc_for_es_cache)
-        print("TEST2")
-        session["url_base"] = shortener("http://influencemap.ml/submit/?id="+doc_id)
+        session["url_base"] = shorten_front("http://influencemap.ml/submit/?id="+doc_id)
 
     # Default Dates
     min_year = None
