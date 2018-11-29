@@ -6,7 +6,7 @@ Functions for shorterning urls
 arg_tuples = ('pmin', 'pmax', 'cmin', 'cmax', 'selfcite', 'coauthor', 'node')
 
 BASE62 = "0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ"
-BASE36 = "0123456789abcdefghijklmnopqrstuvwxyz"
+BASE37 = " 0123456789abcdefghijklmnopqrstuvwxyz"
 
 
 def encode(num, alphabet=BASE62):
@@ -116,16 +116,16 @@ def unhash_args(arg_tuple):
 def shorten_id(f_id):
     '''
     '''
-    print(decode(f_id[4:], BASE36))
-    return encode(decode(f_id[4:], BASE36))
+    print(decode(f_id[4:], BASE37))
+    return encode(decode(f_id[4:], BASE37))
 
 
 def unshorten_id(f_id):
     '''
     '''
     print(decode(f_id))
-    print(encode(int(decode(f_id)), BASE36))
-    return '?id=' + str(encode(int(decode(f_id)), BASE36))
+    print(encode(int(decode(f_id)), BASE37))
+    return '?id=' + str(encode(int(decode(f_id)), BASE37))
 
 
 def shorten_front(url):
