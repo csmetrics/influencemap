@@ -88,15 +88,18 @@ def score_df_to_graph(score_df):
         # Add ratio weight
         egoG.add_node(row['entity_name'], nratiow=row['normed_ratio'],
                 ratiow=row['ratio'], sumw=row['normed_sum'],
-                coauthor=row['coauthor'], dif=row['dif'])
+                coauthor=row['coauthor'], dif=row['dif'],
+                inf_in=row['influenced'], inf_out=row['influencing'])
 
         # Add influence weights
         egoG.add_edge(row['entity_name'], 'ego', weight=row['influencing'],
                 nweight=row['normed_influencing'], direction='out',
-                ratiow=row['ratio'], dif=row['dif'])
+                ratiow=row['ratio'], dif=row['dif'], sumw=row['normed_sum'],
+                inf_in=row['influenced'], inf_out=row['influencing'])
         egoG.add_edge('ego', row['entity_name'], weight=row['influenced'],
                 nweight=row['normed_influenced'], direction='in',
-                ratiow=row['ratio'], dif=row['dif'])
+                ratiow=row['ratio'], dif=row['dif'], sumw=row['normed_sum'],
+                inf_in=row['influenced'], inf_out=row['influencing'])
 
     print('{} finish graph generation\n---'.format(datetime.now()))
 

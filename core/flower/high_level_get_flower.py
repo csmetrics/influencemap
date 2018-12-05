@@ -1,4 +1,4 @@
-from webapp.graph                  import processdata
+#from webapp.graph                  import processdata
 from core.flower.draw_flower_test  import draw_flower
 from core.utils.get_entity         import entity_from_name
 from core.search.query_paper       import paper_query
@@ -41,9 +41,10 @@ def default_config():
         'cit_lower': None,
         'cit_upper': None,
         'num_leaves': 25,
+        'order': 'ratio',
         }
 
-def processdata(gtype, egoG, num_leaves):
+def processdata(gtype, egoG, num_leaves, order):
     center_node = egoG.graph['ego']
 
     # Radius of circle
@@ -56,14 +57,28 @@ def processdata(gtype, egoG, num_leaves):
     # Sort by name, influence dif, then ratio
     outer_nodes.sort()
     outer_nodes.sort(key=lambda n: -egoG.nodes[n]['dif'])
-    outer_nodes.sort(key=lambda n: -egoG.nodes[n]['ratiow'])
+    if order == 'blue':
+        outer_nodes.sort(key=lambda n: -egoG.nodes[n]['inf_out'])
+    elif order == 'red':
+        outer_nodes.sort(key=lambda n: -egoG.nodes[n]['inf_in'])
+    elif order == 'total':
+        outer_nodes.sort(key=lambda n: -egoG.nodes[n]['sumw'])
+    else:
+        outer_nodes.sort(key=lambda n: -egoG.nodes[n]['ratiow'])
 
     links = list(egoG.edges(data=True))
 
     # Sort by name, influence dif, then ratio
     links.sort(key=lambda l: (l[0], l[1]))
     links.sort(key=lambda l: -l[2]['dif'])
-    links.sort(key=lambda l: -l[2]['ratiow'])
+    if order == 'blue':
+        links.sort(key=lambda l: -l[2]['inf_out'])
+    elif order == 'red':
+        links.sort(key=lambda l: -l[2]['inf_in'])
+    elif order == 'total':
+        links.sort(key=lambda l: -l[2]['sumw'])
+    else:
+        links.sort(key=lambda l: -l[2]['ratiow'])
     links_in  = [l for l in links if l[2]['direction'] == 'in']
     links_out = [l for l in links if l[2]['direction'] == 'out']
 
@@ -217,6 +232,6 @@ def gen_flower_data(score_df, flower_prop, entity_names, flower_name,
     graph_score = score_df_to_graph(top_score)
 
     # D3 format
-    data = processdata(flower_type, graph_score, num_leaves)
+    data = processdata(flower_type, graph_score, num_leaves, config['order'])
 
     return flower_type, data #, node_info

@@ -361,7 +361,8 @@ def submit(request):
             "cit_upper": max_cite_year,
             "self_cite": "false",
             "icoauthor": "true",
-            "num_leaves": num_leaves
+            "num_leaves": num_leaves,
+            "order": "ratio",
         }
     else:
         config["self_cite"] = str(config["self_cite"]).lower()
@@ -430,6 +431,7 @@ def resubmit(request):
     flower_config['cit_lower'] = int(request.POST.get('from_cit_year'))
     flower_config['cit_upper'] = int(request.POST.get('to_cit_year'))
     flower_config['num_leaves'] = int(request.POST.get('numpetals'))
+    flower_config['order'] = request.POST.get('petalorder')
 
     session['year_ranges'] = {'pub_lower': flower_config['pub_lower'], 'pub_upper': flower_config['pub_upper'], 'cit_lower': flower_config['cit_lower'], 'cit_upper': flower_config['cit_upper']}
 

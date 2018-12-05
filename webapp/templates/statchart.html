@@ -46,6 +46,15 @@
       <input name="num-petals" id="num-petals" onchange="updateConfigUrl()" type="number" value="{{yearSlider.selected.num_leaves}}" min="1" max="50"/>
     </div>
     <div style="padding-top:10px">
+      <b>Petal order</b>
+	  <select id="petal-order">
+		  <option value="ratio">Influence Ratio</option>
+		  <option value="blue">Influenced By (Blue)</option>
+		  <option value="red">Influencing (Red)</option>
+		  <option value="total">Total Influence</option>
+	  </select>
+    </div>
+    <div style="padding-top:10px">
       <b>Include self citations</b>
       <input class="self-cite" type="checkbox" onclick="updateConfigUrl()" style="float:left; margin:5 10 0 0" name="self-cite" id="self-cite" {% if yearSlider.selected.self_cite == 'true' %} checked="checked" {% endif %}/>
     </div>
@@ -329,6 +338,7 @@ resubmitButton.addEventListener('click', function(){
       coauthor: coauthorCheckbox.checked,
       keyword: keyword,
       numpetals: document.getElementById('num-petals').value,
+      petalorder: document.getElementById('petal-order').value,
       session: JSON.stringify(session)
     },
     success: function(result){
