@@ -56,28 +56,30 @@ def processdata(gtype, egoG, num_leaves, order):
 
     # Sort by name, influence dif, then ratio
     outer_nodes.sort()
-    outer_nodes.sort(key=lambda n: -egoG.nodes[n]['dif'])
     if order == 'blue':
         outer_nodes.sort(key=lambda n: -egoG.nodes[n]['inf_out'])
     elif order == 'red':
         outer_nodes.sort(key=lambda n: -egoG.nodes[n]['inf_in'])
     elif order == 'total':
+        outer_nodes.sort(key=lambda n: -egoG.nodes[n]['dif'])
         outer_nodes.sort(key=lambda n: -egoG.nodes[n]['sumw'])
     else:
+        outer_nodes.sort(key=lambda n: -egoG.nodes[n]['dif'])
         outer_nodes.sort(key=lambda n: -egoG.nodes[n]['ratiow'])
 
     links = list(egoG.edges(data=True))
 
     # Sort by name, influence dif, then ratio
     links.sort(key=lambda l: (l[0], l[1]))
-    links.sort(key=lambda l: -l[2]['dif'])
     if order == 'blue':
         links.sort(key=lambda l: -l[2]['inf_out'])
     elif order == 'red':
         links.sort(key=lambda l: -l[2]['inf_in'])
     elif order == 'total':
+        links.sort(key=lambda l: -l[2]['dif'])
         links.sort(key=lambda l: -l[2]['sumw'])
     else:
+        links.sort(key=lambda l: -l[2]['dif'])
         links.sort(key=lambda l: -l[2]['ratiow'])
     links_in  = [l for l in links if l[2]['direction'] == 'in']
     links_out = [l for l in links if l[2]['direction'] == 'out']
