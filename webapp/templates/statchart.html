@@ -47,7 +47,7 @@
     </div>
     <div style="padding-top:10px">
       <b>Petal order</b>
-	  <select id="petal-order">
+	  <select id="petal-order" onchange="updateConfigUrl()">
 		  <option value="ratio">Influence Ratio</option>
 		  <option value="blue">Influenced By (Blue)</option>
 		  <option value="red">Influencing (Red)</option>
@@ -94,6 +94,8 @@ var processedcites = [];
 var pub_range = {{ yearSlider.pubrange | safe }};
 var cite_range = {{ yearSlider.citerange | safe }};
 var selected_config = {{ yearSlider.selected | safe }};
+var order_selector = document.getElementById("petal-order");
+order_selector.value = "{{ yearSlider.selected.order }}";
 
 var pubchart = new PubChart("#pub_chart");
 var citechart = new CiteChart("#cite_chart");
@@ -182,7 +184,7 @@ function encode(num, alphabet) {
 }
 
 function encode2(num) {
-    if (num == 'true') {
+    if (num) {
         return '1';
     }
     else {
@@ -190,9 +192,13 @@ function encode2(num) {
     }
 }
 
+function encodeOrder(ordering) {
+    var order = ["ratio", "blue", "red", "total"];
+
+    return order.indexOf(ordering);
+}
 function from_url_ext(url_ext_str) {
     var url_arg_list = url_ext_str.split('&amp;');
-    console.log(url_arg_list);
 
     var arg_vals = [];
     for (var i = 0; i < url_arg_list.length; i ++) {
@@ -224,20 +230,14 @@ function hash_args(arg_tuple) {
 
 function updateConfigUrl() {
   if (copyText != null) {
-     
-    //copyText.value = "{{ url_base }}"
-    //  + "&amp;pmin=" + handles[0].innerText + "&amp;pmax=" + handles[1].innerText
-    //  + "&amp;cmin=" + handles[2].innerText + "&amp;cmax=" + handles[3].innerText
-    //  + "&amp;selfcite=" + $("#self-cite").is(":checked")
-    //  + "&amp;coauthor=" + $("#coauthor").is(":checked")
-    //  + "&amp;node=" + $("#num-petals").val();
 
     copyText.value = "{{ url_base }}"
       + "_" + encode(handles[0].innerText) + "_" + encode(handles[1].innerText)
       + "_" + encode(handles[2].innerText) + "_" + encode(handles[3].innerText)
       + "_" + encode2($("#self-cite").is(":checked"))
       + "_" + encode2($("#coauthor").is(":checked"))
-      + "_" + encode($("#num-petals").val());
+      + "_" + encode($("#num-petals").val())
+      + "_" + encodeOrder($("#petal-order").val());
 
   }
 }

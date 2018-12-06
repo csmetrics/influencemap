@@ -220,6 +220,8 @@ def submit(request):
 
     curated_flag = False
     num_leaves = 25 # default
+    print("REQUEST")
+    print(request.GET)
     if request.method == "GET":
         # from url e.g.
         # /submit/?type=author_id&id=2146610949&name=stephen_m_blackburn
@@ -325,6 +327,7 @@ def submit(request):
     if config:
         flower_config = config
 
+    print("TESTESTSET")
     print(config)
 
     # Work function

@@ -3,7 +3,8 @@ Functions for shorterning urls
 
 '''
 
-arg_tuples = ('pmin', 'pmax', 'cmin', 'cmax', 'selfcite', 'coauthor', 'node')
+arg_tuples = ('pmin', 'pmax', 'cmin', 'cmax', 'selfcite', 'coauthor', 'node', 'order')
+order_list = ["ratio", "blue", "red", "total"];
 
 BASE62 = "0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ"
 BASE37 = " 0123456789abcdefghijklmnopqrstuvwxyz"
@@ -79,7 +80,7 @@ def to_url_ext(url_ext_arg):
 def hash_args(arg_tuple):
     #hash_fn = basehash.base62()
 
-    a, b, c, d, e, f, g = arg_tuple
+    a, b, c, d, e, f, g, h = arg_tuple
     conv64list = [a, b, c, d]
     conv2list = [e, f]
     newlist = []
@@ -92,13 +93,14 @@ def hash_args(arg_tuple):
         else:
             newlist.append('0')
     newlist.append(str(encode(int(g))))
+    newlist.append(str(order_list.index(h)))
     return newlist
 
 
 def unhash_args(arg_tuple):
     #hash_fn = basehash.base62()
 
-    a, b, c, d, e, f, g = arg_tuple
+    a, b, c, d, e, f, g, h = arg_tuple
     conv64list = [a, b, c, d]
     conv2list = [e, f]
     newlist = []
@@ -110,6 +112,7 @@ def unhash_args(arg_tuple):
         else:
             newlist.append('false')
     newlist.append(str(decode(g)))
+    newlist.append(str(order_list[int(h)]))
     return newlist
 
 
