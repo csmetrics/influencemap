@@ -191,7 +191,11 @@ def get_display_names_from_author_ids(entity_ids):
 def get_all_browse_cache():
     cache_index = "browse_cache"
     q = {"size": 10000,
-        "query": {"match_all": {}}}
+        "query": {
+          "bool":{
+            "must_not":{
+              "term": {"Type": "user_generated"}
+    }}}}
     s = Search(using=client, index=cache_index)
     s.update_from_dict(q)
     response = s.execute()
@@ -240,3 +244,21 @@ def check_browse_record_exists(cachetype, displayname):
     return (response["hits"]["total"] > 0, names)
 
 
+def author_order_query(paper_id):
+    ''' Find author name from id.
+    '''
+    # Elastic search client
+    client = Elasticsearch(conf.get("elasticsearch.hostname"))
+
+    # Query for paa
+    authors_s = Search(index = 'paperauthoraffiliations', using = client)
+    authors_s = authors_s.query('term', PaperId=paper_id)
+    authors_s = authors_s.source(['AuthorId', 'AuthorSequenceNumber'])
+    authors_s = authors_s.params(request_timeout=30)
+
+    order = dict()
+    for authors in authors_s.scan():
+        # Add to order dictionary
+        order[authors['AuthorId']] = authors['AuthorSequenceNumber']
+        
+    return order

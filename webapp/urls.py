@@ -33,5 +33,6 @@ urlpatterns = [
     url(r'^autocomplete', views.autocomplete),
     url(r'^resubmit/', views.resubmit),
     url(r'^get_node_info/', views.get_node_info),
-    url(r'^get_next_node_info_page/', views.get_next_node_info_page)
+    url(r'^get_next_node_info_page/', views.get_next_node_info_page),
+    url(r'^redirect/', views.redirect)
 ]

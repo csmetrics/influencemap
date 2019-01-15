@@ -185,6 +185,18 @@ a {
   object-fit: cover;
 }
 
+.carousel-background {
+  position: absolute;
+  top: 0;
+  left: 0;
+}
+.carousel-label {
+  transform: rotate(270deg);
+  position: relative;
+  opacity: 0.3;
+  font-weight: bolder;
+}
+
 .project-info {
   padding-bottom: 50px;
   text-align: justify;

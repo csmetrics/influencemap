@@ -89,7 +89,7 @@ function drawFlower(svg_id, data, idx, w) {
         .attr("transform", "translate(0," + (height+yheight-v_margin) + ")")
         .call(d3.axisBottom(x))
         .selectAll("text")
-          .text(function(d) { if (d.length > 20) return d.slice(0, 20)+"..."; else return d.slice(0, 20); })
+          .text(barText)
           .attr("id", function(d, i) { return i+1; })
           .attr("class", "hl-text node-text")
           .style("text-anchor", "end")
@@ -184,7 +184,7 @@ function drawFlower(svg_id, data, idx, w) {
         .attr("x", function(d) { if (d.id > 0) return transform_text_x(nodes[0]); else return transform_text_x(d); })
         .attr("y", function(d) { if (d.id > 0) return transform_text_y(nodes[0])-magf; else return transform_text_y(d); })
         .attr("text-anchor", locate_text)
-        .text(function(d) { return d.name; })
+        .text(function(d) { return capitalizeString(d.name); })
         .style("fill", function(d) { if (d.coauthor == 'False') return "black"; else return "gray"; })
       .transition()
         .duration(2000)
@@ -513,7 +513,6 @@ function formatNodeInfoTable(data) {
       var citations  = links[i]["citation"];
 
       var link_length = Math.max(references.length, citations.length);
-
       var ego_info = paper_map[links[i]["ego_paper"]];
       var ego_str = formatCitation(ego_info, data.entity_names);
       var ego_html = function (x) { return "<td width='32%' style='background-color:" + x + "'>" + ego_str + "</td>"; };
@@ -614,7 +613,8 @@ function populateNodeInfoContent(data){
 //  rgb(228, 130, 104);oranger
 
 function getData(param){
-  node_info_name  = param['name'];
+  node_info_name = param['name'].toLowerCase();
+  console.log(node_info_name);
   var data_dict = { // input to the views.py - search()
       "name": node_info_name,
       "session": session
@@ -627,7 +627,7 @@ function getData(param){
     success: function (result) { // return data if success
 
       console.log(result);
-      display_name = result['node_name'];
+      display_name = capitalizeString(result['node_name']);
       flower_name  = result['flower_name'];
       populateNodeInfoContent(result);
       document.getElementById("prev_node_page").disabled=true;
@@ -727,5 +727,27 @@ function prevPage() {
         error: function (result) {
         }
       });
+    }
+}
+
+function capitalizeString(string) {
+    var words = string.split(' ');
+    var res = [];
+
+    for (i = 0; i < words.length; i++) {
+        var fwords = words[i].charAt(0).toUpperCase() + words[i].slice(1);
+        res.push(fwords);
+    }
+
+    return res.join(' ');
+}
+
+function barText(string) {
+    var str = capitalizeString(string.slice(0, 20));
+    if (string.length > 20) {
+        return str+"...";
+    }
+    else {
+        return str;
     }
 }

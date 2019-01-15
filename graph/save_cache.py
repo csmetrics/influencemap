@@ -7,35 +7,6 @@ from graph.config import conf
 
 hostname = conf.get("elasticsearch.hostname")
 
-cache_types = {
-    "author_group": [
-        "anu_researchers",
-        "fields_medalists",
-        "turing_award_winners",
-        "pl_researchers",
-        "sigmm_award_taa",
-        "sigmm_thesisaward",
-        "sigmm_risingstaraward"
-    ],
-    "paper_group": [
-        "publication_venues",
-        "university_fields",
-        "projects",
-        "universities"
-    ],
-    "browse_cache": [
-        "anu_researchers",
-        "turing_award_winners",
-        "sigmm_conferences",
-        "sigmm_journals",
-        "sigmm_award_taa",
-        "sigmm_thesisaward",
-        "sigmm_risingstaraward",
-        "publication_venues",
-        "pl_researchers",
-        "projects","test"
-    ]
-}
 
 def generate_uuid(seed = None):
     return uuid.uuid1() if not seed else hashlib.sha1(str.encode(seed)).hexdigest()
@@ -89,10 +60,9 @@ def saveNewBrowseCache(cache):
     init_es()
 
     # validation
-    assert "Type" in cache
     assert "DisplayName" in cache
     assert "EntityIds" in cache
-    assert cache["Type"] in cache_types["browse_cache"]
+    assert "Type" in cache
 
     doc = BrowseCache()
 
@@ -121,6 +91,8 @@ def saveNewBrowseCache(cache):
     print(doc.to_dict())
     doc.save()
 
+    # return generated id for document
+    return doc.meta.id
 
 
 

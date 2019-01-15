@@ -10,7 +10,7 @@
   <aside class="main-sidebar main-sidebar-wide" style="background-color: #fff;">
     <section class="sidebar">
       <div id="statpane">
-        {% include 'statchart.html' with stats=stats curated=curated yearSlider=yearSlider %}
+        {% include 'statchart.html' with stats=stats curated=curated yearSlider=yearSlider url_base=session.url_base %}
       </div>
     </section>
   </aside>

@@ -55,6 +55,7 @@ class Papers(DocType):
     ReferenceCount = Long()
     CitationCount = Long()
     EstimatedCitation = Integer()
+    OriginalVenue = Text() # new attribute ver.2019-01-01
     CreatedDate = Date(required = True)
 
     LanguageCode = Keyword() # from PaperLanguages
@@ -85,6 +86,7 @@ class PaperAuthorAffiliations(DocType):
     AuthorId = Long(required = True)
     AffiliationId = Long()
     AuthorSequenceNumber = Integer(required = True)
+    OriginalAffiliation = Text() # new attribute ver.2019-01-01
 
     class Meta:
         index = 'PaperAuthorAffiliations'.lower()
@@ -92,7 +94,7 @@ class PaperAuthorAffiliations(DocType):
 
 class ConferenceInstances(DocType):
     ConferenceInstanceId = Long(required = True)
-    Rank = Integer(required = True)
+    # Rank = Integer(required = True) # removed attr ver.2019-01-01
     NormalizedName = Text(required = True, analyzer = "standard")
     DisplayName = Text(required = True, analyzer = "standard")
     ConferenceSeriesId = Long()
