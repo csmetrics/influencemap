@@ -9,7 +9,7 @@ KEY="bsynHW1UiWhFgXKT95ISSFBOyrTJqnBW/WCayqATwHY2luq88CmVFa5rm92Ps6SH8PAnYu+/7rx
 
 echo "getting graph version $VERSION"
 array=(
-    #"ConferenceInstances.txt"
+    "ConferenceInstances.txt"
     "ConferenceSeries.txt"
     "FieldsOfStudy.txt"
     "Journals.txt"
@@ -24,5 +24,19 @@ do
     if [ "$FILE" ]; then
         echo azcopy --source https://academicgraph2.blob.core.windows.net/mag-$VERSION/mag/$FILE --destination graph/$VERSION/$FILE
         azcopy --source https://academicgraph2.blob.core.windows.net/mag-$VERSION/mag/$FILE --destination graph/$VERSION/$FILE --source-key $KEY
+    fi
+done
+
+adv_array=(
+    "FieldOfStudyChildren.txt"
+    "PaperFieldsOfStudy.txt"
+    "PaperRecommendations.txt"
+    "RelatedFieldOfStudy.txt"
+)
+for FILE in "${adv_array[@]}"
+do
+    if [ "$FILE" ]; then
+        echo azcopy --source https://academicgraph2.blob.core.windows.net/mag-$VERSION/advanced/$FILE --destination graph/$VERSION/$FILE
+        azcopy --source https://academicgraph2.blob.core.windows.net/mag-$VERSION/advanced/$FILE --destination graph/$VERSION/$FILE --source-key $KEY
     fi
 done
