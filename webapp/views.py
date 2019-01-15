@@ -37,6 +37,9 @@ from core.score.agg_utils         import get_coauthor_mapping
 from core.score.agg_utils         import flag_coauthor
 from core.utils.get_stats         import get_stats
 
+from django.http import HttpResponseRedirect
+from webapp.shortener import shorten_front, unshorten_url_ext
+
 BASE_DIR = settings.BASE_DIR
 
 flower_leaves = [ ('author', [ent.Entity_type.AUTH])
@@ -55,6 +58,9 @@ def autocomplete(request):
 def main(request):
     return render(request, "main.html")
 
+@csrf_exempt
+def redirect(request):
+    return HttpResponseRedirect(unshorten_url_ext(request.get_full_path()))
 
 @csrf_exempt
 def browse(request):
@@ -207,12 +213,15 @@ def manualcache(request):
 @csrf_exempt
 def submit(request):
     print('Flower request: ', datetime.now())
+    session = dict()
     total_request_cur = datetime.now()
 
     time_cur = datetime.now()
 
     curated_flag = False
     num_leaves = 25 # default
+    print("REQUEST")
+    print(request.GET)
     if request.method == "GET":
         # from url e.g.
         # /submit/?type=author_id&id=2146610949&name=stephen_m_blackburn
@@ -224,6 +233,7 @@ def submit(request):
         entity_names = get_all_normalised_names(data["EntityIds"])
         keyword = ""
         flower_name = data.get('DisplayName')
+        session["url_base"] = shorten_front("http://influencemap.ml/submit/?id="+request.GET.get("id"))
 
     else:
         data = json.loads(request.POST.get('data'))
@@ -236,8 +246,13 @@ def submit(request):
         entity_names = get_all_normalised_names(entity_ids)
         config = None
         flower_name = data.get('flower_name')
+
         if not flower_name:
             flower_name = '-'.join(entity_names)
+
+        doc_for_es_cache={"DisplayName": flower_name, "EntityIds": data["entities"], "Type": "user_generated"}
+        doc_id = saveNewBrowseCache(doc_for_es_cache)
+        session["url_base"] = shorten_front("http://influencemap.ml/submit/?id="+doc_id)
 
     # Default Dates
     min_year = None
@@ -312,6 +327,7 @@ def submit(request):
     if config:
         flower_config = config
 
+    print("TESTESTSET")
     print(config)
 
     # Work function
@@ -348,7 +364,8 @@ def submit(request):
             "cit_upper": max_cite_year,
             "self_cite": "false",
             "icoauthor": "true",
-            "num_leaves": num_leaves
+            "num_leaves": num_leaves,
+            "order": "ratio",
         }
     else:
         config["self_cite"] = str(config["self_cite"]).lower()
@@ -376,7 +393,6 @@ def submit(request):
     stats = get_stats(paper_information)
     data['stats'] = stats
 
-    session = dict()
 
     # Cache from flower data
     for key, value in cache.items():
@@ -418,6 +434,7 @@ def resubmit(request):
     flower_config['cit_lower'] = int(request.POST.get('from_cit_year'))
     flower_config['cit_upper'] = int(request.POST.get('to_cit_year'))
     flower_config['num_leaves'] = int(request.POST.get('numpetals'))
+    flower_config['order'] = request.POST.get('petalorder')
 
     session['year_ranges'] = {'pub_lower': flower_config['pub_lower'], 'pub_upper': flower_config['pub_upper'], 'cit_lower': flower_config['cit_lower'], 'cit_upper': flower_config['cit_upper']}
 
@@ -553,6 +570,7 @@ def get_node_info_single(request, entity, year_ranges):
     node_info = {"References": {}, "Citations":{}}
     for paper in papers:
 
+
         # filter papers outside of selected publication range
         if paper["Year"] < pub_lower or paper["Year"] > pub_upper: continue
 
@@ -561,7 +579,8 @@ def get_node_info_single(request, entity, year_ranges):
             for rel_paper in paper[relationship_type]:
 
                 # filter papers outside of selected citation range
-                if (relationship_type == "Citations")  and  (rel_paper["Year"] < cit_lower or rel_paper["Year"] > cit_upper): continue
+                if ((relationship_type == "Citations")  and  (rel_paper["Year"] < cit_lower or rel_paper["Year"] > cit_upper)):
+                    continue
 
                 authors, affiliations, conferences, journals = get_entities(rel_paper)
 
@@ -584,7 +603,10 @@ def get_node_info_single(request, entity, year_ranges):
                 
                 if relevant:
                     papers_to_send[paper["PaperId"]] = {k:v for k,v in paper.items() if k in ["PaperTitle", "Authors","PaperId","Year", "ConferenceName", "ConferenceSeriesId", "JournalName", "JournalId"]}
+                    papers_to_send[paper["PaperId"]] = add_author_order(papers_to_send[paper["PaperId"]])
+
                     papers_to_send[rel_paper["PaperId"]] = {k:v for k,v in rel_paper.items() if k in ["PaperTitle", "Authors","PaperId","Year", "ConferenceName", "ConferenceSeriesId", "JournalName", "JournalId"]}
+                    papers_to_send[rel_paper["PaperId"]] = add_author_order(papers_to_send[rel_paper["PaperId"]])
 
                     if relationship_type=="Citations":
                         if paper["PaperId"] in links:

@@ -21,12 +21,13 @@ function toTitleCase(str) {
 
 function formatCitation(paper, authorsToHighlight=[]){
   var authors = paper["Authors"];
+  authors = authors.sort(function(a, b) {return a['AuthorOrder'] - b['AuthorOrder']});
+
   var names = [];
   for (i in authors){
     var formatted_name = normaliseNameForCitation(authors[i]["AuthorName"]);
     names.push({"AuthorName": authors[i]["AuthorName"], "FormattedName": formatted_name, "AuthorId": authors[i]["AuthorId"]});
   }
-  names.sort(function(a,b){return a["FormattedName"] > b["FormattedName"]});
   out_str = [];
   for (i in names){
     var a = names[i];

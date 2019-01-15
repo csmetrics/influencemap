@@ -1,5 +1,5 @@
 #!/bin/bash
-ES_ADDR=http://130.56.248.7:9200
+ES_ADDR=http://130.56.249.107:9200
 DIR=/mnt/influencemap/misc/monitor
 WEBHOOK=https://www.cmlab.ml/hooks/fi1y5pxaztne5dj7demtpsihdo
 

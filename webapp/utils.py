@@ -8,6 +8,8 @@ from core.search.query_name import journal_name_query
 from core.search.query_name import author_name_query
 from core.search.query_name import affiliation_name_query
 
+from core.flower.high_level_get_flower import default_config
+
 import matplotlib.pylab as plt
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 
@@ -70,8 +72,10 @@ def get_url_query(query):
             "cit_upper": int(query.get("cmax")),
             "self_cite": query.get("selfcite") == "true",
             "icoauthor": query.get("coauthor") == "true",
-            "num_leaves": int(query.get("node"))
+            "num_leaves": int(query.get("node")),
+            "order": query.get("order")
         }
+
     document_id = query.get("id")
     document = query_browse_group(document_id)
     return document, "author", config
@@ -103,3 +107,13 @@ def get_conf_journ_display_names(entityIds):
     if "JournalIds" in entityIds and entityIds["JournalIds"] != []: display_names["Journal"] = get_display_names_from_journal_ids(entityIds['JournalIds'])
 
     return display_names
+
+def add_author_order(paper_info):
+    '''
+    '''
+    author_order = author_order_query(paper_info['PaperId'])
+
+    for author in paper_info['Authors']:
+        author['AuthorOrder'] = author_order[author['AuthorId']]
+
+    return paper_info
