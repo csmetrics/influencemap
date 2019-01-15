@@ -65,7 +65,8 @@ def import_Papers(r):
     doc.ReferenceCount = int(r[17]) if r[17] != "" else None
     doc.CitationCount = int(r[18]) if r[18] != "" else None
     doc.EstimatedCitation = int(r[19]) if r[19] != "" else None
-    doc.CreatedDate = datetime.strptime(r[20], "%Y-%m-%d")
+    doc.OriginalVenue = r[20] # new attribute ver.2019-01-01
+    doc.CreatedDate = datetime.strptime(r[21], "%Y-%m-%d")
 
     doc.LanguageCode = None
     doc.FieldOfStudy = None
@@ -91,6 +92,7 @@ def import_PaperAuthorAffiliations(r):
     doc.meta.id = "{}_{}".format(doc.PaperId, doc.AuthorId)
     doc.AffiliationId = int(r[2]) if r[2] != "" else None
     doc.AuthorSequenceNumber = int(r[3])
+    doc.OriginalAffiliation = r[4] # new attribute ver.2019-01-01
     doc.save(op_type="create")
 
 
@@ -98,21 +100,21 @@ def import_ConferenceInstances(r):
     doc = ConferenceInstances()
     doc.meta.index = "ConferenceInstances".lower()
     doc.meta.id = doc.ConferenceInstanceId = int(r[0])
-    doc.Rank = int(r[1])
-    doc.NormalizedName = r[2]
-    doc.DisplayName = r[3]
-    doc.ConferenceSeriesId = int(r[4]) if r[4] != "" else None
-    doc.Location = r[5]
-    doc.OfficialUrl = r[6]
-    doc.StartDate = datetime.strptime(r[7], "%Y-%m-%d") if r[7] != "" else None
-    doc.EndDate = datetime.strptime(r[8], "%Y-%m-%d") if r[8] != "" else None
-    doc.AbstractRegistrationDate = datetime.strptime(r[9], "%Y-%m-%d") if r[9] != "" else None
-    doc.SubmissionDeadlineDate = datetime.strptime(r[10], "%Y-%m-%d") if r[10] != "" else None
-    doc.NotificationDueDate = datetime.strptime(r[11], "%Y-%m-%d") if r[11] != "" else None
-    doc.FinalVersionDueDate = datetime.strptime(r[12], "%Y-%m-%d") if r[12] != "" else None
-    doc.PaperCount = int(r[13]) if r[13] != "" else None
-    doc.CitationCount = int(r[14]) if r[14] != "" else None
-    doc.CreatedDate = datetime.strptime(r[15], "%Y-%m-%d")
+    # doc.Rank = int(r[1]) # removed attr ver.2019-01-01
+    doc.NormalizedName = r[1]
+    doc.DisplayName = r[2]
+    doc.ConferenceSeriesId = int(r[3]) if r[3] != "" else None
+    doc.Location = r[4]
+    doc.OfficialUrl = r[5]
+    doc.StartDate = datetime.strptime(r[6], "%Y-%m-%d") if r[6] != "" else None
+    doc.EndDate = datetime.strptime(r[7], "%Y-%m-%d") if r[7] != "" else None
+    doc.AbstractRegistrationDate = datetime.strptime(r[8], "%Y-%m-%d") if r[8] != "" else None
+    doc.SubmissionDeadlineDate = datetime.strptime(r[9], "%Y-%m-%d") if r[9] != "" else None
+    doc.NotificationDueDate = datetime.strptime(r[10], "%Y-%m-%d") if r[10] != "" else None
+    doc.FinalVersionDueDate = datetime.strptime(r[11], "%Y-%m-%d") if r[11] != "" else None
+    doc.PaperCount = int(r[12]) if r[12] != "" else None
+    doc.CitationCount = int(r[13]) if r[13] != "" else None
+    doc.CreatedDate = datetime.strptime(r[14], "%Y-%m-%d")
     doc.save()
 
 
