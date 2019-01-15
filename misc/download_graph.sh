@@ -1,34 +1,28 @@
-# you need to install Azure CLI 2.0
-# https://docs.microsoft.com/en-us/azure/data-lake-store/data-lake-store-get-started-cli-2.0#rename-download-and-delete-data-from-a-data-lake-store-account
-# [
-#  {
-#   "cloudName": "AzureCloud",
-#   "id": "cb1d9878-3345-441a-9b1b-8110acd72aeb",
-#   "isDefault": true,
-#   "name": "Pay-As-You-Go",
-#   "state": "Enabled",
-#   "tenantId": "e37d725c-ab5c-4624-9ae5-f0533e486437",
-#   "user": {
-#     "name": "u1033719@anu.edu.au",
-#     "type": "user"
-#   }
-#  }
-#]
+# download MSG from MS storage account
 
-#az dls fs download --account academicgraph --source-path /graph/2018-04-13 --destination-path 2018-04-13
+# you need to install AzCopy
+# sudo apt-get update; sudo apt-get install azcopy
+# https://docs.microsoft.com/en-us/azure/storage/common/storage-use-azcopy-linux?toc=%2fazure%2fstorage%2ftables%2ftoc.json#alternative-installation-on-ubuntu
 
-VERSION="2018-04-13"
+VERSION="2019-01-01"
+KEY="bsynHW1UiWhFgXKT95ISSFBOyrTJqnBW/WCayqATwHY2luq88CmVFa5rm92Ps6SH8PAnYu+/7rxu4dTJ7IYGAw=="
 
 echo "getting graph version $VERSION"
-flist=`az dls fs list --account academicgraph --path /graph/$VERSION | python -c "import sys, json; print([f['name'] for f in json.load(sys.stdin)])"`
-IFS="'[], " read -r -a array <<< "$flist"
-
+array=(
+    #"ConferenceInstances.txt"
+    "ConferenceSeries.txt"
+    "FieldsOfStudy.txt"
+    "Journals.txt"
+    "Affiliations.txt"
+    "PaperAuthorAffiliations.txt"
+    "PaperReferences.txt"
+    "Papers.txt"
+    "Authors.txt"
+)
 for FILE in "${array[@]}"
 do
     if [ "$FILE" ]; then
-        echo az dls fs download --account academicgraph --source-path $FILE --destination-path $FILE
-        az dls fs download --account academicgraph --source-path $FILE --destination-path $FILE
+        echo azcopy --source https://academicgraph2.blob.core.windows.net/mag-$VERSION/mag/$FILE --destination graph/$VERSION/$FILE
+        azcopy --source https://academicgraph2.blob.core.windows.net/mag-$VERSION/mag/$FILE --destination graph/$VERSION/$FILE --source-key $KEY
     fi
 done
-
-
