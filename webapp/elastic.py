@@ -122,7 +122,7 @@ def query_paper(search_phrase):
     return papers
 
 def query_author(search_phrase):
-    authors = query_names_with_matches("authors", ["DisplayName", "NormalisedName"], search_phrase)
+    authors = query_names_with_matches("authors", ["DisplayName", "NormalizedName"], search_phrase)
     for author in authors:
         if "LastKnownAffiliationId" in author:
             author["Affiliation"] = get_names_from_affiliation_ids([author["LastKnownAffiliationId"]])[0]
