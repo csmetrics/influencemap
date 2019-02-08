@@ -23,13 +23,15 @@ import core.utils.entity_type as ent
 
 flower_leaves = [ ('author', [ent.Entity_type.AUTH])
                 , ('conf'  , [ent.Entity_type.CONF, ent.Entity_type.JOUR])
-                , ('inst'  , [ent.Entity_type.AFFI]) ]
+                , ('inst'  , [ent.Entity_type.AFFI])
+                , ('fos'   , [ent.Entity_type.FSTD]) ]
 
 str_to_ent = {
         "author": ent.Entity_type.AUTH,
         "conference": ent.Entity_type.CONF,
         "journal": ent.Entity_type.JOUR,
-        "institution": ent.Entity_type.AFFI
+        "institution": ent.Entity_type.AFFI,
+        "fieldofstudy": ent.Entity_type.FSTD,
     }
 
 def default_config():
@@ -172,9 +174,9 @@ def gen_flower_data(score_df, flower_prop, entity_names, flower_name,
     # Flower properties
     flower_type, leaves = flower_prop
 
-    print(datetime.now(), 'score_leaves')
+    print(datetime.now(), 'start score_leaves')
     entity_score = score_leaves(score_df, leaves)
-    print(datetime.now(), 'score_leaves')
+    print(datetime.now(), 'finish score_leaves')
 
     # Ego name removal
     if (flower_type != 'conf'):

@@ -30,7 +30,7 @@ def author_name_query(author_ids):
     for authors in authors_s.scan():
         # Add names to result
         names.append(authors[authors_target])
-        
+
     return names
 
 
@@ -53,7 +53,30 @@ def author_name_dict_query(author_ids):
     for authors in authors_s.scan():
         # Add names to result
         names[int(authors.meta.id)] = authors[authors_target]
-        
+
+    return names
+
+
+def fos_name_dict_query(fos_ids):
+    ''' Find field of study name from id.
+    '''
+    # Elastic search client
+    client = Elasticsearch(conf.get("elasticsearch.hostname"))
+
+    # Target
+    fos_target = 'NormalizedName'
+
+    # Query for paa
+    fos_s = Search(index = 'fieldsofstudy', using = client)
+    fos_s = fos_s.query('terms', FieldOfStudyId=fos_ids)
+    fos_s = fos_s.source([fos_target])
+    fos_s = fos_s.params(request_timeout=30)
+
+    names = dict()
+    for fos in fos_s.scan():
+        # Add names to result
+        names[int(fos.meta.id)] = fos[fos_target]
+
     return names
 
 
@@ -76,7 +99,7 @@ def affiliation_name_query(affiliation_ids):
     for affi in affi_s.scan():
         # Add names to result
         names.append(affi[affi_target])
-        
+
     return names
 
 
@@ -99,7 +122,7 @@ def affiliation_name_dict_query(affiliation_ids):
     for affi in affi_s.scan():
         # Add names to result
         names[int(affi.meta.id)] = affi[affi_target]
-        
+
     return names
 
 
@@ -236,5 +259,5 @@ def normalized_to_display(entity_name, index):
         # Return display name
         print(query, index)
         return query['DisplayName']
-        
+
     return None

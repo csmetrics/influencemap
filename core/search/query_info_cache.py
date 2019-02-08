@@ -29,7 +29,7 @@ DEFAULT_BATCH = 1000
 #    seen = set()
 #
 #    for paper_chunk in chunker(paper_ids, batch_size=batch_size):
-#        
+#
 #        # Query for paper info
 #        paper_info_s = client.mget(index='paper_info', doc_type='doc', body={"ids": paper_chunk})
 #

@@ -44,7 +44,8 @@ BASE_DIR = settings.BASE_DIR
 
 flower_leaves = [ ('author', [ent.Entity_type.AUTH])
                 , ('conf'  , [ent.Entity_type.CONF, ent.Entity_type.JOUR])
-                , ('inst'  , [ent.Entity_type.AFFI]) ]
+                , ('inst'  , [ent.Entity_type.AFFI])
+                , ('fos'   , [ent.Entity_type.FSTD]) ]
 
 NUM_THREADS = 8
 NUM_NODE_INFO = 5
@@ -375,6 +376,7 @@ def submit(request):
         "author": flower_info[0],
         "conf"  : flower_info[1],
         "inst"  : flower_info[2],
+        "fos"   : flower_info[3],
         "curated": curated_flag,
         "yearSlider": {
             "title": "Publications range",
@@ -468,6 +470,7 @@ def resubmit(request):
         "author": flower_info[0],
         "conf"  : flower_info[1],
         "inst"  : flower_info[2],
+        "fos"   : flower_info[3],
         "navbarOption": get_navbar_option(keyword, option)
     }
 
@@ -600,7 +603,7 @@ def get_node_info_single(request, entity, year_ranges):
 
                 # check if node entity is one of the authors, affiliations, conferences or journals in the paper
                 relevant = entity in set(authors + affiliations + conferences + journals)
-                
+
                 if relevant:
                     papers_to_send[paper["PaperId"]] = {k:v for k,v in paper.items() if k in ["PaperTitle", "Authors","PaperId","Year", "ConferenceName", "ConferenceSeriesId", "JournalName", "JournalId"]}
                     papers_to_send[paper["PaperId"]] = add_author_order(papers_to_send[paper["PaperId"]])
@@ -645,15 +648,14 @@ def get_node_info(request):
 def get_next_node_info_page(request):
     data = json.loads(request.POST.get("data_string"))
     node_name = data.get("name")
-    session = data.get("session")    
+    session = data.get("session")
     entities = session["entity_names"]
     year_ranges = session["year_ranges"]
     flower_name = session["flower_name"]
-    page = int(data.get("page")) 
+    page = int(data.get("page"))
 
     node_info = get_node_info_single(request, node_name, year_ranges)
     page_length = 5
     page_info = {"paper_info": node_info["paper_info"], "node_links": node_info["node_links"][0+page_length*(page-1):min(page_length*page, len(node_info["node_links"]))]}
     print(page)
     return JsonResponse(page_info, safe=False)
-    

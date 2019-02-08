@@ -48,38 +48,46 @@ def score_paper_info(paper_info, self=list()):
         if not author_list:
             author_list = [(None, None)]
 
-        for auth_name, affi_name in author_list:
-            inst_res = dict()
+        fstd_list = list()
+        for pfos in reference['FieldsOfStudy']:
+            fstd_name = pfos['FieldOfStudyName'] \
+                    if 'FieldOfStudyName' in pfos else None
+            fstd_list.append(fstd_name)
 
-            # Entity Names
-            inst_res['AuthorName']      = auth_name
-            inst_res['AffiliationName'] = affi_name
-            inst_res['ConferenceName']  = conf_name
-            inst_res['JournalName']     = jour_name
+        for fstd_name in fstd_list:
+            for auth_name, affi_name in author_list:
+                inst_res = dict()
 
-            # Additional Properties
-            inst_res['self_cite'] = self_cite
+                # Entity Names
+                inst_res['AuthorName']      = auth_name
+                inst_res['AffiliationName'] = affi_name
+                inst_res['ConferenceName']  = conf_name
+                inst_res['JournalName']     = jour_name
+                inst_res['FieldOfStudyName']= fstd_name
 
-            # Scoring
-            inst_res['influenced_count']  = 0
-            inst_res['influencing_count'] = 1
-            
-            inst_res['influenced_paa']  = 0
-            inst_res['influencing_paa'] = 1 / len(author_list)
+                # Additional Properties
+                inst_res['self_cite'] = self_cite
 
-            # Year information
-            try:
-                inst_res['publication_year'] = paper_info['Year']
-                inst_res['influence_year']   = paper_info['Year']
-            except KeyError:
-                inst_res['publication_year'] = None
-                inst_res['influence_year']   = None
+                # Scoring
+                inst_res['influenced_count']  = 0
+                inst_res['influencing_count'] = 1
 
-            # Paper information
-            inst_res['ego_paper_id']     = int(paper_info['PaperId'])
-            inst_res['link_paper_id']    = int(reference['PaperId'])
+                inst_res['influenced_paa']  = 0
+                inst_res['influencing_paa'] = 1 / len(author_list)
 
-            score_list.append(inst_res)
+                # Year information
+                try:
+                    inst_res['publication_year'] = paper_info['Year']
+                    inst_res['influence_year']   = paper_info['Year']
+                except KeyError:
+                    inst_res['publication_year'] = None
+                    inst_res['influence_year']   = None
+
+                # Paper information
+                inst_res['ego_paper_id']     = int(paper_info['PaperId'])
+                inst_res['link_paper_id']    = int(reference['PaperId'])
+
+                score_list.append(inst_res)
 
     # Iterate through citations
     for citation in paper_info['Citations']:
@@ -104,40 +112,48 @@ def score_paper_info(paper_info, self=list()):
         if not author_list:
             author_list = [(None, None)]
 
-        for auth_name, affi_name in author_list:
-            inst_res = dict()
+        fstd_list = list()
+        for pfos in citation['FieldsOfStudy']:
+            fstd_name = pfos['FieldOfStudyName'] \
+                    if 'FieldOfStudyName' in pfos else None
+            fstd_list.append(fstd_name)
 
-            # Entity Names
-            inst_res['AuthorName']      = auth_name
-            inst_res['AffiliationName'] = affi_name
-            inst_res['ConferenceName']  = conf_name
-            inst_res['JournalName']     = jour_name
+        for fstd_name in fstd_list:
+            for auth_name, affi_name in author_list:
+                inst_res = dict()
 
-            # Additional Properties
-            inst_res['self_cite'] = self_cite
+                # Entity Names
+                inst_res['AuthorName']      = auth_name
+                inst_res['AffiliationName'] = affi_name
+                inst_res['ConferenceName']  = conf_name
+                inst_res['JournalName']     = jour_name
+                inst_res['FieldOfStudyName']= fstd_name
 
-            # Scoring
-            inst_res['influenced_count']  = 1
-            inst_res['influencing_count'] = 0
-            
-            inst_res['influenced_paa']  = influenced_paa
-            inst_res['influencing_paa'] = 0
+                # Additional Properties
+                inst_res['self_cite'] = self_cite
 
-            # Year information
-            try:
-                inst_res['publication_year'] = paper_info['Year']
-            except KeyError:
-                inst_res['publication_year'] = None
-            try:
-                inst_res['influence_year'] = citation['Year']
-            except KeyError:
-                inst_res['influence_year'] = None
+                # Scoring
+                inst_res['influenced_count']  = 1
+                inst_res['influencing_count'] = 0
 
-            # Paper information
-            inst_res['ego_paper_id']     = paper_info['PaperId']
-            inst_res['link_paper_id']    = citation['PaperId']
+                inst_res['influenced_paa']  = influenced_paa
+                inst_res['influencing_paa'] = 0
 
-            score_list.append(inst_res)
+                # Year information
+                try:
+                    inst_res['publication_year'] = paper_info['Year']
+                except KeyError:
+                    inst_res['publication_year'] = None
+                try:
+                    inst_res['influence_year'] = citation['Year']
+                except KeyError:
+                    inst_res['influence_year'] = None
+
+                # Paper information
+                inst_res['ego_paper_id']     = paper_info['PaperId']
+                inst_res['link_paper_id']    = citation['PaperId']
+
+                score_list.append(inst_res)
 
     return score_list
 
@@ -161,6 +177,10 @@ def get_influence_index(entity_type, influence_dir='influenced'):
     if entity_type == Entity_type.JOUR:
         return influence_dir + '_count'
 
+    # Field of Study
+    if entity_type == Entity_type.FSTD:
+        return influence_dir + '_count'
+
     return None
 
 
@@ -182,6 +202,10 @@ def get_name_index(entity_type):
     # Journal
     if entity_type == Entity_type.JOUR:
         return 'JournalName'
+
+    # Field of Study
+    if entity_type == Entity_type.FSTD:
+        return 'FieldOfStudyName'
 
     return None
 
@@ -214,7 +238,7 @@ def score_paper_info_list_parallel(paper_info_list, self=list(), num_proc=1):
                 res += score_list
             return pd.DataFrame(res)
 
-    
+
 def score_leaves(score_df, leaves):
     '''
     '''

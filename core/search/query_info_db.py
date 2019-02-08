@@ -16,7 +16,7 @@ from datetime import datetime
 from graph.config import conf
 from core.search.query_info_cache import base_paper_cache_query
 from core.search.query_name import *
- 
+
 from elasticsearch import Elasticsearch
 from elasticsearch_dsl import Search, Q
 
@@ -86,7 +86,7 @@ def papers_prop_query(paper_ids):
 def paa_prop_query(paper_ids):
     ''' Get properties of a paper.
     '''
-    
+
     # Elastic search client
     client = Elasticsearch(conf.get("elasticsearch.hostname"))
 
@@ -159,7 +159,63 @@ def paa_prop_query(paper_ids):
 
     # Return as dictionary
     return res
-    
+
+
+def pfos_prop_query(paper_ids):
+    ''' Get properties of a paper.
+    '''
+
+    # Elastic search client
+    client = Elasticsearch(conf.get("elasticsearch.hostname"))
+
+    # Targets
+    pfos_targets = ['PaperId', 'FieldOfStudyId']
+
+    # Query for paper affiliation
+    pfos_s = Search(index = 'paperfieldsofstudy', using = client)
+    pfos_s = pfos_s.query('terms', PaperId=paper_ids)
+    pfos_s = pfos_s.source(pfos_targets)
+    pfos_s = pfos_s.params(request_timeout=TIMEOUT)
+
+    # Convert paa into dictionary format
+    results = dict()
+    fos_ids = set()
+    for pfos in pfos_s.scan():
+        pfos_res = pfos.to_dict()
+
+        # Get fields
+        paper_id = pfos_res['PaperId']
+        del pfos_res['PaperId']
+
+        # Author
+        if 'FieldOfStudyId' in pfos_res:
+            fos_ids.add(pfos_res['FieldOfStudyId'])
+
+        # Aggregate results
+        if paper_id in results:
+            results[paper_id].append(pfos_res)
+        else:
+            results[paper_id] = [pfos_res]
+
+    fos_names = fos_name_dict_query(list(fos_ids))
+
+    res = dict()
+    for p_id, pfos_info_list in results.items():
+        pfos_res = list()
+        for pfos_info in pfos_info_list:
+            if 'FieldOfStudyId' in pfos_info:
+                if pfos_info['FieldOfStudyId'] in fos_names:
+                    pfos_info['FieldOfStudyName'] = fos_names[pfos_info['FieldOfStudyId']]
+                else:
+                    continue
+            pfos_res.append(pfos_info)
+
+        res[p_id] = pfos_res
+
+    # Return as dictionary
+    return res
+
+
 
 def pr_links_query(paper_ids):
     ''' Get properties of a paper.
@@ -168,16 +224,17 @@ def pr_links_query(paper_ids):
     client = Elasticsearch(conf.get("elasticsearch.hostname"))
 
     # Targets
-    pr_targets = ['PaperId', 'PaperReferenceId']
+    pr_targets = ['PaperId', 'PaperReferenceId', 'FieldOfStudyId']
 
     # Query results
     references = list()
     citations  = list()
+    fieldsofstudy = list()
 
     # Result dictionary
     results = dict()
     for paper_id in paper_ids:
-        results[paper_id] = {'References': [], 'Citations': []}
+        results[paper_id] = {'References': [], 'Citations': [], 'FieldsOfStudy': []}
 
     # Query for paper references
     ref_s = Search(index = 'paperreferences', using = client)
@@ -197,6 +254,15 @@ def pr_links_query(paper_ids):
     for cit_info in cit_s.scan():
         results[cit_info[pr_targets[1]]]['Citations'].append(cit_info[pr_targets[0]])
 
+    # Query for paper fields of study
+    fos_s = Search(index = 'paperfieldsofstudy', using = client)
+    fos_s = fos_s.query('terms', PaperId=paper_ids)
+    fos_s = fos_s.params(request_timeout=TIMEOUT)
+
+    # Convert into dictionary format
+    for fos_info in fos_s.scan():
+        results[fos_info[pr_targets[0]]]['FieldsOfStudy'].append(fos_info[pr_targets[2]])
+
     # Return results as a dictionary
     return results
 
@@ -215,13 +281,19 @@ def base_paper_db_query(paper_ids):
     paa_props = paa_prop_query(paper_ids)
     print('Get paa', datetime.now() - t_cur)
 
+    t_cur = datetime.now()
+    # Get fos information
+    pfos_props = pfos_prop_query(paper_ids)
+    print('Get pfos', datetime.now() - t_cur)
+
     # Create partial entry
     results = list()
     for paper_id in paper_ids:
-        if paper_id in papers_props and paper_id in paa_props:
+        if paper_id in papers_props and paper_id in paa_props and paper_id in pfos_props:
             # Make partial result
             partial_res = papers_props[paper_id]
             partial_res['Authors'] = paa_props[paper_id]
+            partial_res['FieldsOfStudy'] = pfos_props[paper_id]
 
             results.append(partial_res)
 
@@ -253,7 +325,7 @@ def link_paper_info_query(paper_id, cache = True):
             else:
                 # Set default to None
                 link_paper_prop = None
-            
+
             # If empty result
             if not link_paper_prop:
                 # Do full search
@@ -279,7 +351,7 @@ def paper_info_db_query(paper_id):
 
     # Add citation link information
     paper_info.update(link_paper_info_query(paper_id))
-    
+
     # Return paper_info
     return paper_info
 
@@ -294,7 +366,7 @@ def paper_info_multiquery(paper_ids, partial_info=list(), force=False):
 
     # List of papers we are interested in returning total results
     search_papers = paper_ids + list(paper_partial.keys())
-    
+
     t_cur = datetime.now()
     # Find all paper links
     paper_links = pr_links_query(search_papers)
@@ -305,6 +377,7 @@ def paper_info_multiquery(paper_ids, partial_info=list(), force=False):
     for paper_link in paper_links.values():
         find_partial.update(paper_link['References'])
         find_partial.update(paper_link['Citations'])
+        find_partial.update(paper_link['FieldsOfStudy'])
 
     print("Need to find,", len(find_partial))
 
@@ -340,7 +413,7 @@ def paper_info_multiquery(paper_ids, partial_info=list(), force=False):
             p_partial['cache_type'] = 'complete'
 
             # Create references and citations for total paper
-            p_links = {'References': [], 'Citations': []}
+            p_links = {'References': [], 'Citations': [], 'FieldsOfStudy': []}
 
             for r_id in paper_links[p_id]['References']:
                 if r_id in paper_partial:
@@ -349,6 +422,10 @@ def paper_info_multiquery(paper_ids, partial_info=list(), force=False):
             for c_id in paper_links[p_id]['Citations']:
                 if c_id in paper_partial:
                     p_links['Citations'].append(paper_partial[c_id])
+
+            for f_id in paper_links[p_id]['FieldsOfStudy']:
+                if f_id in paper_partial:
+                    p_links['FieldsOfStudy'].append(paper_partial[f_id])
 
             total_res.append(dict(p_partial, **p_links))
         # Otherwise just add as partial cache entry
@@ -360,7 +437,7 @@ def paper_info_multiquery(paper_ids, partial_info=list(), force=False):
             p_partial['cache_type'] = 'partial'
             partial_res.append(p_partial)
 
-    return total_res, partial_res 
+    return total_res, partial_res
 
 
 if __name__ == '__main__':
