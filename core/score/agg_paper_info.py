@@ -55,6 +55,9 @@ def score_paper_info(paper_info, self=list()):
             if pfos['FieldOfStudyLevel'] == 1:
                 fstd_list.append(fstd_name)
 
+        if not fstd_list:
+            fstd_list = [None]
+
         for auth_name, affi_name in author_list:
             for fstd_name in fstd_list:
                 inst_res = dict()
@@ -119,6 +122,9 @@ def score_paper_info(paper_info, self=list()):
                     if 'FieldOfStudyName' in pfos else None
             if pfos['FieldOfStudyLevel'] == 1:
                 fstd_list.append(fstd_name)
+
+        if not fstd_list:
+            fstd_list = [None]
 
         for auth_name, affi_name in author_list:
             for fstd_name in fstd_list:

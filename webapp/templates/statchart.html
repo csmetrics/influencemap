@@ -345,14 +345,17 @@ resubmitButton.addEventListener('click', function(){
       $("#graph1").empty();
       $("#graph2").empty();
       $("#graph3").empty();
+      $("#graph4").empty();
 
       author_data = result.author;
       conf_data = result.conf;
       inst_data = result.inst;
+      fos_data = result.fos;
 
       drawFlower("#graph1", author_data, 0, width);
       drawFlower("#graph2", conf_data, 1, width);
       drawFlower("#graph3", inst_data, 2, width);
+      drawFlower("#graph4", fos_data, 3, width);
       session = result["session"];
       // do not update stat for resubmit
       // updateStats(result.stats);
