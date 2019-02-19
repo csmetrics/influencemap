@@ -173,6 +173,7 @@ def gen_flower_data(score_df, flower_prop, entity_names, flower_name,
     '''
     # Flower properties
     flower_type, leaves = flower_prop
+    print("[gen_flower_data] flower_type", flower_type)
 
     print(datetime.now(), 'start score_leaves')
     entity_score = score_leaves(score_df, leaves)
@@ -195,7 +196,7 @@ def gen_flower_data(score_df, flower_prop, entity_names, flower_name,
     filter_score = filter_year(filter_score, config['cit_lower'],
                                              config['cit_upper'],
                                              index = 'influence_year')
-
+    # print("[gen_flower_data] filter_score", filter_score)
     # Aggregate
     agg_score = agg_score_df(filter_score)
 

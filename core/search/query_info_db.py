@@ -197,7 +197,7 @@ def pfos_prop_query(paper_ids):
         else:
             results[paper_id] = [pfos_res]
 
-    fos_names = fos_name_dict_query(list(fos_ids))
+    fos_names, fos_levels = fos_name_level_dict_query(list(fos_ids))
 
     res = dict()
     for p_id, pfos_info_list in results.items():
@@ -206,6 +206,7 @@ def pfos_prop_query(paper_ids):
             if 'FieldOfStudyId' in pfos_info:
                 if pfos_info['FieldOfStudyId'] in fos_names:
                     pfos_info['FieldOfStudyName'] = fos_names[pfos_info['FieldOfStudyId']]
+                    pfos_info['FieldOfStudyLevel'] = fos_levels[pfos_info['FieldOfStudyId']]
                 else:
                     continue
             pfos_res.append(pfos_info)

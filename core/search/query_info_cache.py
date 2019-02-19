@@ -84,7 +84,8 @@ def paper_info_cache_query(paper_ids, batch_size=DEFAULT_BATCH):
         field_del(paper_info_res, 'CreatedDate')
 
         # Check the type of the result
-        if paper_info_res['cache_type'] == 'partial':
+        if 'FieldsOfStudy' not in paper_info_res or paper_info_res['cache_type'] == 'partial':
+        # if paper_info_res['cache_type'] == 'partial':
             partial_info.append(paper_info_res)
         else:
             complete_info.append(paper_info_res)

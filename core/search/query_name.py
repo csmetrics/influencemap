@@ -57,27 +57,29 @@ def author_name_dict_query(author_ids):
     return names
 
 
-def fos_name_dict_query(fos_ids):
+def fos_name_level_dict_query(fos_ids):
     ''' Find field of study name from id.
     '''
     # Elastic search client
     client = Elasticsearch(conf.get("elasticsearch.hostname"))
 
     # Target
-    fos_target = 'NormalizedName'
+    fos_target = ['NormalizedName', 'Level']
 
     # Query for paa
     fos_s = Search(index = 'fieldsofstudy', using = client)
     fos_s = fos_s.query('terms', FieldOfStudyId=fos_ids)
-    fos_s = fos_s.source([fos_target])
+    fos_s = fos_s.source(fos_target)
     fos_s = fos_s.params(request_timeout=30)
 
     names = dict()
+    levels = dict()
     for fos in fos_s.scan():
         # Add names to result
-        names[int(fos.meta.id)] = fos[fos_target]
+        names[int(fos.meta.id)] = fos[fos_target[0]]
+        levels[int(fos.meta.id)] = fos[fos_target[1]]
 
-    return names
+    return names, levels
 
 
 def affiliation_name_query(affiliation_ids):

@@ -52,10 +52,11 @@ def score_paper_info(paper_info, self=list()):
         for pfos in reference['FieldsOfStudy']:
             fstd_name = pfos['FieldOfStudyName'] \
                     if 'FieldOfStudyName' in pfos else None
-            fstd_list.append(fstd_name)
+            if pfos['FieldOfStudyLevel'] == 1:
+                fstd_list.append(fstd_name)
 
-        for fstd_name in fstd_list:
-            for auth_name, affi_name in author_list:
+        for auth_name, affi_name in author_list:
+            for fstd_name in fstd_list:
                 inst_res = dict()
 
                 # Entity Names
@@ -116,10 +117,11 @@ def score_paper_info(paper_info, self=list()):
         for pfos in citation['FieldsOfStudy']:
             fstd_name = pfos['FieldOfStudyName'] \
                     if 'FieldOfStudyName' in pfos else None
-            fstd_list.append(fstd_name)
+            if pfos['FieldOfStudyLevel'] == 1:
+                fstd_list.append(fstd_name)
 
-        for fstd_name in fstd_list:
-            for auth_name, affi_name in author_list:
+        for auth_name, affi_name in author_list:
+            for fstd_name in fstd_list:
                 inst_res = dict()
 
                 # Entity Names

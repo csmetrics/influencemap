@@ -270,7 +270,9 @@ def submit(request):
     time_cur = datetime.now()
 
     # Turn selected paper into information dictionary list
+    print("[Submit] selected_papers", len(selected_papers))
     paper_information = paper_info_db_check_multiquery(selected_papers) # API
+    # print(paper_information)
 
     # Get coauthors
     coauthors = get_coauthor_mapping(paper_information)
@@ -544,8 +546,9 @@ def get_entities(paper):
     affiliations = [author["AffiliationName"] for author in paper["Authors"] if "AffiliationName" in author]
     conferences = [paper["ConferenceName"]] if ("ConferenceName" in paper) else []
     journals = [paper["JournalName"]] if ("JournalName" in paper) else []
+    fieldsofstudy = [fos["FieldOfStudyName"] for fos in paper["FieldsOfStudy"] if fos["FieldOfStudyLevel"] == 1] if ("FieldsOfStudy" in paper) else []
 
-    return authors, affiliations, conferences, journals
+    return authors, affiliations, conferences, journals, fieldsofstudy
 
 
 def get_node_info_single(request, entity, year_ranges):
@@ -558,6 +561,7 @@ def get_node_info_single(request, entity, year_ranges):
     papers = paper_info_db_check_multiquery(session["cache"])
     papers_to_send = dict()
     links = dict()
+    print("[get_node_info_single]", entity)
 
     # Calculate the self-citation/coauthor filters
     if session['icoauthor'] == 'false':
@@ -585,7 +589,7 @@ def get_node_info_single(request, entity, year_ranges):
                 if ((relationship_type == "Citations")  and  (rel_paper["Year"] < cit_lower or rel_paper["Year"] > cit_upper)):
                     continue
 
-                authors, affiliations, conferences, journals = get_entities(rel_paper)
+                authors, affiliations, conferences, journals, fos = get_entities(rel_paper)
 
                 # Remove self and coauthor
                 skip = False
@@ -602,7 +606,8 @@ def get_node_info_single(request, entity, year_ranges):
                     continue
 
                 # check if node entity is one of the authors, affiliations, conferences or journals in the paper
-                relevant = entity in set(authors + affiliations + conferences + journals)
+                # print("fos", fos)
+                relevant = entity in set(authors + affiliations + conferences + journals + fos)
 
                 if relevant:
                     papers_to_send[paper["PaperId"]] = {k:v for k,v in paper.items() if k in ["PaperTitle", "Authors","PaperId","Year", "ConferenceName", "ConferenceSeriesId", "JournalName", "JournalId"]}
