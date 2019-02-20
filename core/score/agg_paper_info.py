@@ -77,7 +77,7 @@ def score_paper_info(paper_info, self=list()):
                 inst_res['influencing_count'] = 1
 
                 inst_res['influenced_paa']  = 0
-                inst_res['influencing_paa'] = 1 / len(author_list)
+                inst_res['influencing_paa'] = 1 / len(author_list) / len(fstd_list)
 
                 # Year information
                 try:
@@ -144,7 +144,7 @@ def score_paper_info(paper_info, self=list()):
                 inst_res['influenced_count']  = 1
                 inst_res['influencing_count'] = 0
 
-                inst_res['influenced_paa']  = influenced_paa
+                inst_res['influenced_paa']  = influenced_paa / len(fstd_list)
                 inst_res['influencing_paa'] = 0
 
                 # Year information
