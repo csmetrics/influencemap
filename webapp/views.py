@@ -9,6 +9,7 @@ from collections import Counter
 from operator import itemgetter
 from webapp.elastic import *
 from webapp.utils import *
+from webapp.graph import ReferenceFlower, compare_flowers
 
 import core.utils.entity_type as ent
 from core.search.parse_academic_search import parse_search_results
@@ -39,6 +40,7 @@ from core.utils.get_stats         import get_stats
 
 from django.http import HttpResponseRedirect
 from webapp.shortener import shorten_front, unshorten_url_ext
+from itertools import product
 
 BASE_DIR = settings.BASE_DIR
 
@@ -48,6 +50,8 @@ flower_leaves = [ ('author', [ent.Entity_type.AUTH])
 
 NUM_THREADS = 8
 NUM_NODE_INFO = 5
+
+reference_flower = None
 
 def autocomplete(request):
     entity_type = request.GET.get('option')
@@ -364,12 +368,14 @@ def submit(request):
             "cit_upper": max_cite_year,
             "self_cite": "false",
             "icoauthor": "true",
+            "reference": "false",
             "num_leaves": num_leaves,
             "order": "ratio",
         }
     else:
         config["self_cite"] = str(config["self_cite"]).lower()
         config["icoauthor"] = str(config["icoauthor"]).lower()
+        config["reference"] = str(config["reference"]).lower()
 
     data = {
         "author": flower_info[0],
@@ -405,16 +411,20 @@ def submit(request):
     session['entity_names'] = entity_names
     session['icoauthor'] = config['icoauthor']
     session['self_cite'] = config['self_cite']
+    session['reference'] = config['reference']
     #session['node_info']    = node_info
 
     data["session"] = session
+
+    # save reference flower for comparison
+    global reference_flower
+    reference_flower = ReferenceFlower(data)
 
     return render(request, "flower.html", data)
 
 
 @csrf_exempt
 def resubmit(request):
-    print(request)
     option = request.POST.get('option')
     keyword = request.POST.get('keyword')
 
@@ -429,12 +439,16 @@ def resubmit(request):
     flower_config = default_config()
     flower_config['self_cite'] = request.POST.get('selfcite') == 'true'
     flower_config['icoauthor'] = request.POST.get('coauthor') == 'true'
+    flower_config['reference'] = request.POST.get('cmp_ref') == 'true'
     flower_config['pub_lower'] = int(request.POST.get('from_pub_year'))
     flower_config['pub_upper'] = int(request.POST.get('to_pub_year'))
     flower_config['cit_lower'] = int(request.POST.get('from_cit_year'))
     flower_config['cit_upper'] = int(request.POST.get('to_cit_year'))
     flower_config['num_leaves'] = int(request.POST.get('numpetals'))
     flower_config['order'] = request.POST.get('petalorder')
+
+    if flower_config['reference']: # Do not limit the size of new flower
+        flower_config['num_leaves'] = 5000
 
     session['year_ranges'] = {'pub_lower': flower_config['pub_lower'], 'pub_upper': flower_config['pub_upper'], 'cit_lower': flower_config['cit_lower'], 'cit_upper': flower_config['cit_upper']}
 
@@ -463,6 +477,10 @@ def resubmit(request):
         flower_info.append(f_info)
         #node_info.update(n_info)
         #node_info += n_info
+
+    # filter flower nodes by reference
+    if flower_config['reference']:
+        flower_info = compare_flowers(reference_flower, flower_info)
 
     data = {
         "author": flower_info[0],
@@ -600,7 +618,7 @@ def get_node_info_single(request, entity, year_ranges):
 
                 # check if node entity is one of the authors, affiliations, conferences or journals in the paper
                 relevant = entity in set(authors + affiliations + conferences + journals)
-                
+
                 if relevant:
                     papers_to_send[paper["PaperId"]] = {k:v for k,v in paper.items() if k in ["PaperTitle", "Authors","PaperId","Year", "ConferenceName", "ConferenceSeriesId", "JournalName", "JournalId"]}
                     papers_to_send[paper["PaperId"]] = add_author_order(papers_to_send[paper["PaperId"]])
@@ -645,15 +663,14 @@ def get_node_info(request):
 def get_next_node_info_page(request):
     data = json.loads(request.POST.get("data_string"))
     node_name = data.get("name")
-    session = data.get("session")    
+    session = data.get("session")
     entities = session["entity_names"]
     year_ranges = session["year_ranges"]
     flower_name = session["flower_name"]
-    page = int(data.get("page")) 
+    page = int(data.get("page"))
 
     node_info = get_node_info_single(request, node_name, year_ranges)
     page_length = 5
     page_info = {"paper_info": node_info["paper_info"], "node_links": node_info["node_links"][0+page_length*(page-1):min(page_length*page, len(node_info["node_links"]))]}
     print(page)
     return JsonResponse(page_info, safe=False)
-    

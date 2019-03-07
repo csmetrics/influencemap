@@ -40,6 +40,8 @@ function drawLegend() {
 }
 
 function drawFlower(svg_id, data, idx, w) {
+    var compare_ref = referenceCheckbox.checked;
+
     var nodes = data["nodes"];
     var links = data["links"];
     var bars = data["bars"];
@@ -137,7 +139,7 @@ function drawFlower(svg_id, data, idx, w) {
         .attr("id", function(d) { return d.gtype+"_"+d.type+"_"+d.id+"_selected"; })
         .attr("viewBox", "0 -5 10 10")
         .attr("refX", function (d) { return 10+200*d.padding/Math.max(15, numnodes[idx]); })
-        .attr("refY", 0)
+        .attr("refY", function (d) { return -d.padding; })
         .attr("markerWidth", function (d) { return window_scaling_factor*arrow_size_calc(d.weight); })
         .attr("markerHeight", function (d) { return window_scaling_factor*arrow_size_calc(d.weight); })
         .attr("markerUnits", "userSpaceOnUse")
@@ -148,10 +150,12 @@ function drawFlower(svg_id, data, idx, w) {
 
     link_g = svg[idx].append("g");
     node_g = svg[idx].append("g");
+    new_link_g = svg[idx].append("g");
+    new_node_g = svg[idx].append("g");
     text_g = svg[idx].append("g");
 
     // flower graph nodes
-    node_out[idx] = node_g.selectAll("circle")
+    original_nodes = node_out[idx] = node_g.selectAll("circle .hl-circle")
         .data(nodes)
       .enter().append("circle")
         .attr("id", function(d) { return d.id; })
@@ -162,17 +166,50 @@ function drawFlower(svg_id, data, idx, w) {
         .attr("cy", function(d) { if (d.id > 0) return transform_y(nodes[0])-magf; else return transform_y(d); })
         .attr("gtype", function(d) { return d.gtype; })
         .attr("r", function(d) { return (8+200*d.size/Math.max(15, numnodes[idx]))*window_scaling_factor; })
-        .style("fill", function (d, i) {if (d.id == 0) return "#fff"; else return colors(d.weight);})
-        .style("stroke", function (d, i) { if ((d.coauthor == 'True') && (d.id != 0)) return "green"; else return ""; })
+        .style("fill", function (d, i) {
+          if (d.id == 0) return "#fff";
+          else if (compare_ref) return "#ddd"; else return colors(d.weight); s})
+        .style("stroke", function (d, i) {
+          if (compare_ref) return "ddd";
+          else if ((d.coauthor == 'True') && (d.id != 0)) return "green"; else return "";
+        })
         .style("stroke-width", 2)
         .style("cursor", "pointer")
-        .on("mouseover", function() { highlight_on(idx, this); })
-        .on("mouseout", function() { highlight_off(idx); })
+        .on("mouseover", function() { highlight_on(idx, this, compare_ref); })
+        .on("mouseout", function() { highlight_off(idx, compare_ref); })
         .on("click", function(d) { if (d.id != 0) { showNodeData(idx, this);} })
       .transition()
         .duration(2000)
         .attr("cx", function(d) { return transform_x(d); })
         .attr("cy", function(d) { return transform_y(d); })
+
+    if (compare_ref) {
+      // flower graph nodes - new node size
+      node_out[idx] = new_node_g.selectAll("circle .hl-circle-new")
+          .data(nodes)
+        .enter().append("circle")
+          .attr("id", function(d) { return d.id; })
+          .attr("class", "hl-circle-new")
+          .attr("xpos", function(d) { return transform_x(d); })
+          .attr("ypos", function(d) { return transform_y(d); })
+          .attr("cx", function(d) { if (d.id > 0) return transform_x(nodes[0]); else return transform_x(d); })
+          .attr("cy", function(d) { if (d.id > 0) return transform_y(nodes[0])-magf; else return transform_y(d); })
+          .attr("gtype", function(d) { return d.gtype; })
+          .attr("r", function(d) {
+            if (d.new_size >= 0 || d.id == 0) return (8+200*d.new_size/Math.max(15, numnodes[idx]))*window_scaling_factor;
+            else return 0})
+          .style("fill", function (d, i) {if (d.id == 0) return "#fff"; else return colors(d.new_weight);})
+          .style("stroke", function (d, i) { if ((d.coauthor == 'True') && (d.id != 0)) return "green"; else return ""; })
+          .style("stroke-width", 2)
+          .style("cursor", "pointer")
+          .on("mouseover", function() { highlight_on(idx, this, compare_ref); })
+          .on("mouseout", function() { highlight_off(idx, compare_ref); })
+          .on("click", function(d) { if (d.id != 0) { showNodeData(idx, this);} })
+        .transition()
+          .duration(2000)
+          .attr("cx", function(d) { return transform_x(d); })
+          .attr("cy", function(d) { return transform_y(d); })
+    }
 
     // flower graph node text
     text_out[idx] = text_g.selectAll("text")
@@ -192,26 +229,47 @@ function drawFlower(svg_id, data, idx, w) {
         .attr("y", function(d) { return transform_text_y(d); })
 
     // flower graph edges
-    link[idx] = link_g.selectAll("path")
+    link[idx] = link_g.selectAll("path .link")
         .data(links)
       .enter().append("path")
         .attr("id", function(d) { return d.id; })
         .attr("d", function(d) { return linkArc(idx, d, false); })
         .attr("gtype", function(d) { return d.gtype; })
         .attr("class", function(d) { return "link " + d.type; })
-        .attr('marker-end', function(d) { return "url(#" + d.gtype+"_"+d.type+"_"+d.id + ")"; })
+        .attr('marker-end', function(d) {
+          if (!compare_ref) return "url(#" + d.gtype+"_"+d.type+"_"+d.id + ")"; })
         .attr("type", function(d) {d.type})
         .style("stroke-width", function (d) { return window_scaling_factor*arrow_width_calc(d.weight); })
-        .style("stroke", function (d) { if (d.type == "in") return norcolor[0]; else return norcolor[1]; })
-        .on("mouseover", function() { highlight_on(idx, this); })
-        .on("mouseout", function() { highlight_off(idx); })
+        .style("stroke", function (d) {
+          if (compare_ref) return "#ddd";
+          else if (d.type == "in") return norcolor[0]; else return norcolor[1];
+        })
       .transition()
         .duration(2000)
         .attr("d", function(d){ return linkArc(idx, d, true); })
 
+    if (compare_ref) {
+      // flower graph edges - new
+      link[idx] = new_link_g.selectAll("path .new-link")
+          .data(links)
+        .enter().append("path")
+          .attr("id", function(d) { return d.id; })
+          .attr("d", function(d) { return linkArc(idx, d, false); })
+          .attr("gtype", function(d) { return d.gtype; })
+          .attr("class", function(d) { return "new-link " + d.type; })
+          .attr('marker-end', function(d) {
+            if (d.new_weight > 0) return "url(#" + d.gtype+"_"+d.type+"_"+d.id + ")"; })
+          .attr("type", function(d) {d.type})
+          .style("stroke-width", function (d) {
+            if (d.new_weight > 0) return window_scaling_factor*arrow_width_calc(d.new_weight); else return 0 })
+          .style("stroke", function (d) { if (d.type == "in") return norcolor[0]; else return norcolor[1]; })
+        .transition()
+          .duration(2000)
+          .attr("d", function(d){ return linkArc(idx, d, true); })
+    }
 }
 
-function highlight_on(idx, selected) {
+function highlight_on(idx, selected, compare_ref) {
   id = d3.select(selected).attr("id");
   group = d3.select(selected).attr("gtype");
   if (id == 0) return;
@@ -231,35 +289,70 @@ function highlight_on(idx, selected) {
   });
 
   // highlight circles
-  svg[idx].selectAll("circle").each(function() {
-    if (d3.select(this).attr("class") == "hl-circle") {
-        d3.select(this).style("opacity", function (d) { if(id != d.id && d.id != 0 && group == d.gtype) return 0.4; else return 1; });
-    }
-  });
-
-  svg[idx].selectAll("path")
-    .attr('marker-end', function(d) {
-      if (d)
-      if(id == d.id && group == d.gtype) return "url(#" + d.gtype+"_"+d.type+"_"+d.id + "_selected)";
-      else return "url(#" + d.gtype+"_"+d.type+"_"+d.id + ")";
-    })
-    .style("stroke", function (d) {
-      if (d)
-      if(id == d.id && group == d.gtype) { if (d.type == "in") return selcolor[0]; else return selcolor[1]; }
-      else if(group != d.gtype) { if (d.type == "in") return norcolor[0]; else return norcolor[1]; }
-      else { if (d.type == "in") return hidcolor[0]; else return hidcolor[1]; }
-    })
-    .style("opacity", function (d) {
-      if (d)
-      if(id != d.id && group == d.gtype) return 0.4;
+  if (compare_ref) {
+    svg[idx].selectAll("circle").each(function() {
+      if (d3.select(this).attr("class") == "hl-circle-new") {
+          d3.select(this).style("opacity", function (d) { if(id != d.id && d.id != 0 && group == d.gtype) return 0.4; else return 1; });
+      }
     });
+  } else {
+    svg[idx].selectAll("circle").each(function() {
+      if (d3.select(this).attr("class") == "hl-circle") {
+          d3.select(this).style("opacity", function (d) { if(id != d.id && d.id != 0 && group == d.gtype) return 0.4; else return 1; });
+      }
+    });
+  }
+
+  if (compare_ref) {
+    svg[idx].selectAll(".new-link")
+      .attr('marker-end', function(d) {
+        if (d && d.new_weight > 0) {
+          if(id == d.id && group == d.gtype) return "url(#" + d.gtype+"_"+d.type+"_"+d.id + "_selected)";
+          else return "url(#" + d.gtype+"_"+d.type+"_"+d.id + ")";
+        }
+      })
+      .style("stroke", function (d) {
+        if (d)
+        if(id == d.id && group == d.gtype) { if (d.type == "in") return selcolor[0]; else return selcolor[1]; }
+        else if(group != d.gtype) { if (d.type == "in") return norcolor[0]; else return norcolor[1]; }
+        else { if (d.type == "in") return hidcolor[0]; else return hidcolor[1]; }
+      })
+      .style("opacity", function (d) {
+        if (d)
+        if(id != d.id && group == d.gtype) return 0.4;
+      });
+  } else {
+    svg[idx].selectAll(".link")
+      .attr('marker-end', function(d) {
+        if (d)
+        if(id == d.id && group == d.gtype) return "url(#" + d.gtype+"_"+d.type+"_"+d.id + "_selected)";
+        else return "url(#" + d.gtype+"_"+d.type+"_"+d.id + ")";
+      })
+      .style("stroke", function (d) {
+        if (d)
+        if(id == d.id && group == d.gtype) { if (d.type == "in") return selcolor[0]; else return selcolor[1]; }
+        else if(group != d.gtype) { if (d.type == "in") return norcolor[0]; else return norcolor[1]; }
+        else { if (d.type == "in") return hidcolor[0]; else return hidcolor[1]; }
+      })
+      .style("opacity", function (d) {
+        if (d)
+        if(id != d.id && group == d.gtype) return 0.4;
+      });
+  }
 }
 
-function highlight_off(idx) {
-  svg[idx].selectAll("path")
-    .attr('marker-end', function(d) { if (d) return "url(#" + d.gtype+"_"+d.type+"_"+d.id + ")"; })
-    .style("stroke", function (d) { if (d) if (d.type == "in") return norcolor[0]; else return norcolor[1]; })
-    .style("opacity", function (d) { if (d) return 1; } );
+function highlight_off(idx, compare_ref) {
+  if (compare_ref) {
+    svg[idx].selectAll(".new-link")
+      .attr('marker-end', function(d) { if (d.new_weight > 0) return "url(#" + d.gtype+"_"+d.type+"_"+d.id + ")"; })
+      .style("stroke", function (d) { if (d.type == "in") return norcolor[0]; else return norcolor[1]; })
+      .style("opacity", function (d) { if (d) return 1; } );
+  } else {
+    svg[idx].selectAll(".link")
+      .attr('marker-end', function(d) { if (d) return "url(#" + d.gtype+"_"+d.type+"_"+d.id + ")"; })
+      .style("stroke", function (d) { if (d) if (d.type == "in") return norcolor[0]; else return norcolor[1]; })
+      .style("opacity", function (d) { if (d) return 1; } );
+  }
 
   // un-highlight rectangles
   svg[idx].selectAll("rect").each(function() {
@@ -276,11 +369,19 @@ function highlight_off(idx) {
   });
 
   // un-highlight circles
-  svg[idx].selectAll("circle").each(function() {
-    if (d3.select(this).attr("class") == "hl-circle") {
-        d3.select(this).style("opacity", 1);
-    }
-  });
+  if (compare_ref) {
+    svg[idx].selectAll("circle").each(function() {
+      if (d3.select(this).attr("class") == "hl-circle-new") {
+          d3.select(this).style("opacity", 1);
+      }
+    });
+  } else {
+    svg[idx].selectAll("circle").each(function() {
+      if (d3.select(this).attr("class") == "hl-circle") {
+          d3.select(this).style("opacity", 1);
+      }
+    });
+  }
 }
 
 function linkArc(idx, d, bloom) {

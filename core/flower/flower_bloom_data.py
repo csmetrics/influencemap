@@ -87,7 +87,7 @@ def score_df_to_graph(score_df):
     for _, row in score_df.iterrows():
         # Add ratio weight
         egoG.add_node(row['entity_name'], nratiow=row['normed_ratio'],
-                ratiow=row['ratio'], sumw=row['normed_sum'],
+                ratiow=row['ratio'], sumw=row['normed_sum'], sum=row['sum'],
                 coauthor=row['coauthor'], dif=row['dif'],
                 inf_in=row['influenced'], inf_out=row['influencing'])
 

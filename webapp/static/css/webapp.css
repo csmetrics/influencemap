@@ -443,7 +443,8 @@ table th {
 }
 
 
-.link {
+.link,
+.new-link {
   fill: none;
 }
 

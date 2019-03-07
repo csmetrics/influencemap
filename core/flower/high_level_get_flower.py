@@ -108,6 +108,7 @@ def processdata(gtype, egoG, num_leaves, order):
             "id": i,
             "gtype": gtype,
             "size": egoG.nodes[key]["sumw"],
+            "sum": egoG.nodes[key]["sum"],
             "xpos": x_pos[i],
             "ypos": y_pos[i],
             "coauthor": str(egoG.nodes[key]['coauthor'])
@@ -134,7 +135,8 @@ def processdata(gtype, egoG, num_leaves, order):
             "id": nodedata[t]["id"],
             "gtype": gtype,
             "type": v["direction"],
-            "weight": v["nweight"]
+            "weight": v["nweight"],
+            "o_weight": v["weight"]
         } for s, t, v in links_in]
 
     edge_out = [{
@@ -144,7 +146,8 @@ def processdata(gtype, egoG, num_leaves, order):
             "id": nodedata[s]["id"],
             "gtype": gtype,
             "type": v["direction"],
-            "weight": v["nweight"]
+            "weight": v["nweight"],
+            "o_weight": v["weight"]
         } for s, t, v in links_out]
 
     linkdata = list()
@@ -214,7 +217,7 @@ def gen_flower_data(score_df, flower_prop, entity_names, flower_name,
             top_score = top_score[ ~top_score['entity_name'].isin(entity_names) ]
 
         # Filter coauthors
-        print(coauthors)
+        # print("[gen_flower_data]", coauthors)
         if config['icoauthor']:
             top_score = flag_coauthor(top_score, coauthors)
         else:
