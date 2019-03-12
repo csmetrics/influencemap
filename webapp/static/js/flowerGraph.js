@@ -419,10 +419,11 @@ function transform_text_x(d) {
 
 function transform_text_y(d) {
   shift = 0;
-  if (d.id > 0 && -.5 < d.xpos && d.xpos < .5) shift -= 5;
-  if (d.id > 0 && -.4 < d.xpos && d.xpos < .4) shift -= 6;
-  if (d.id > 0 && -.3 < d.xpos && d.xpos < .3) shift -= 11;
-  if (d.id > 0 && -.1 < d.xpos && d.xpos < .1) shift -= 15;
+  scale = numnodes[0]/20;
+  for(i = 6; i > 0; i--) {
+      xpos_p = i/10;
+      if (d.id > 0 && -xpos_p < d.xpos && d.xpos < xpos_p) shift -= (7-i)*scale;
+  }
 
   // Title
   if (d.id == 0) {
