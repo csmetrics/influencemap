@@ -81,7 +81,7 @@ def paper_info_mag_check_multiquery(paper_ids, force=False):
     return paper_info_res
 
 
-def paper_info_db_check_multiquery(paper_ids, force=True):
+def paper_info_db_check_multiquery(paper_ids, force=False):
     ''' Query which checks cache for existence first. Otherwise tries to
         generate paper info from basic tables and adds to cache.
     '''

@@ -16,263 +16,162 @@ import os
 from multiprocessing import Pool
 
 
+def to_influence_dict(name, infed, infing):
+    '''
+    '''
+    return {
+            'entity_name': name,
+            'influenced' : infed,
+            'influencing': infing
+            }
+
+
 def score_paper_info(paper_info, self=list()):
-    ''' Generates a dictionary with score values and relevant information to be
-        aggregated.
+    '''
     '''
     # Score results
-    score_list = list()
-    influenced_paa = 1 / len(paper_info['Authors']) \
-            if 'Authors' in paper_info else 1
-
-    # Iterate through references
+    score_list = {
+            'CONF': list(),
+            'JOUR': list(),
+            'AFFI': list(),
+            'AUTH': list(),
+            'FSTD': list(),
+            }
+    
+    # Calculate references influence
     for reference in paper_info['References']:
         # Check if it is a self citation
-        self_cite = is_self_cite(reference, self)
+        ref_const = {
+            'self_cite': is_self_cite(reference, self),
+            'publication_year': paper_info['Year'] if 'Year' in paper_info else None,
+            'influence_year': paper_info['Year'] if 'Year' in paper_info else None,
+            'ego_paper_id': int(paper_info['PaperId']),
+            'link_paper_id': int(reference['PaperId'])
+        }
+
+        make_score = lambda x: dict(**to_influence_dict(*x), **ref_const)
 
         # Get venue value
-        conf_name = reference['ConferenceName'] \
-                if 'ConferenceName' in reference else None
-        jour_name = reference['JournalName'] \
-                if 'JournalName' in reference else None
+        if 'ConferenceName' in reference:
+            score_list['CONF'].append(make_score((reference['ConferenceName'], 0, 1)))
+        if 'JournalName' in reference:
+            score_list['JOUR'].append(make_score((reference['JournalName'], 0, 1)))
 
         # Get author combinations
-        author_list = list()
+        influencing_paa = 1 / len(reference['Authors'])
         for paa in reference['Authors']:
-            auth_name = paa['AuthorName'] \
-                    if 'AuthorName' in paa else None
-            affi_name = paa['AffiliationName'] \
-                    if 'AffiliationName' in paa else None
-            author_list.append((auth_name, affi_name))
+            if 'AuthorName' in paa:
+                score_list['AUTH'].append(make_score((paa['AuthorName'], 0, influencing_paa)))
+            if 'AffiliationName' in paa:
+                score_list['AFFI'].append(make_score((paa['AffiliationName'], 0, influencing_paa)))
 
-        if not author_list:
-            author_list = [(None, None)]
+        # Get fos fields
+        try:
+            for pfos in reference['FieldsOfStudy']:
+                if 'FieldOfStudyName' in pfos and pfos['FieldOfStudyLevel'] == 1:
+                    score_list['FSTD'].append(make_score((pfos['FieldOfStudyName'], 0, 1)))
+        except:
+            print(paper_info['PaperId'], reference['PaperId'])
 
-        fstd_list = list()
-        for pfos in reference['FieldsOfStudy']:
-            fstd_name = pfos['FieldOfStudyName'] \
-                    if 'FieldOfStudyName' in pfos else None
-            if pfos['FieldOfStudyLevel'] == 1:
-                fstd_list.append(fstd_name)
 
-        if not fstd_list:
-            fstd_list = [None]
+    # Calculate the influenced score for paa (for this paper)
+    influenced_paa = 1 / len(paper_info['Authors']) if 'Authors' in paper_info else 1
 
-        for auth_name, affi_name in author_list:
-            for fstd_name in fstd_list:
-                inst_res = dict()
-
-                # Entity Names
-                inst_res['AuthorName']      = auth_name
-                inst_res['AffiliationName'] = affi_name
-                inst_res['ConferenceName']  = conf_name
-                inst_res['JournalName']     = jour_name
-                inst_res['FieldOfStudyName']= fstd_name
-
-                # Additional Properties
-                inst_res['self_cite'] = self_cite
-
-                # Scoring
-                inst_res['influenced_count']  = 0
-                inst_res['influencing_count'] = 1
-
-                inst_res['influenced_paa']  = 0
-                inst_res['influencing_paa'] = 1 / len(author_list) / len(fstd_list)
-
-                # Year information
-                try:
-                    inst_res['publication_year'] = paper_info['Year']
-                    inst_res['influence_year']   = paper_info['Year']
-                except KeyError:
-                    inst_res['publication_year'] = None
-                    inst_res['influence_year']   = None
-
-                # Paper information
-                inst_res['ego_paper_id']     = int(paper_info['PaperId'])
-                inst_res['link_paper_id']    = int(reference['PaperId'])
-
-                score_list.append(inst_res)
-
-    # Iterate through citations
+    # Calculate citation influence (influenced)
     for citation in paper_info['Citations']:
         # Check if it is a self citation
-        self_cite = is_self_cite(citation, self)
+        cit_const = {
+            'self_cite': is_self_cite(citation, self),
+            'publication_year': paper_info['Year'] if 'Year' in paper_info else None,
+            'influence_year': citation['Year'] if 'Year' in paper_info else None,
+            'ego_paper_id': int(paper_info['PaperId']),
+            'link_paper_id': int(citation['PaperId'])
+        }
+
+        make_score = lambda x: dict(**to_influence_dict(*x), **cit_const)
 
         # Get venue value
-        conf_name = citation['ConferenceName'] \
-                if 'ConferenceName' in citation else None
-        jour_name = citation['JournalName'] \
-                if 'JournalName' in citation else None
+        if 'ConferenceName' in citation:
+            score_list['CONF'].append(make_score((citation['ConferenceName'], 1, 0)))
+        if 'JournalName' in citation:
+            score_list['JOUR'].append(make_score((citation['JournalName'], 1, 0)))
 
         # Get author combinations
-        author_list = list()
+        influencing_paa = 1 / len(citation['Authors'])
         for paa in citation['Authors']:
-            auth_name = paa['AuthorName'] \
-                    if 'AuthorName' in paa else None
-            affi_name = paa['AffiliationName'] \
-                    if 'AffiliationName' in paa else None
-            author_list.append((auth_name, affi_name))
+            if 'AuthorName' in paa:
+                score_list['AUTH'].append(make_score((paa['AuthorName'], influenced_paa, 0)))
+            if 'AffiliationName' in paa:
+                score_list['AFFI'].append(make_score((paa['AffiliationName'], influenced_paa, 0)))
 
-        if not author_list:
-            author_list = [(None, None)]
-
-        fstd_list = list()
+        # Get fos fields
         for pfos in citation['FieldsOfStudy']:
-            fstd_name = pfos['FieldOfStudyName'] \
-                    if 'FieldOfStudyName' in pfos else None
-            if pfos['FieldOfStudyLevel'] == 1:
-                fstd_list.append(fstd_name)
-
-        if not fstd_list:
-            fstd_list = [None]
-
-        for auth_name, affi_name in author_list:
-            for fstd_name in fstd_list:
-                inst_res = dict()
-
-                # Entity Names
-                inst_res['AuthorName']      = auth_name
-                inst_res['AffiliationName'] = affi_name
-                inst_res['ConferenceName']  = conf_name
-                inst_res['JournalName']     = jour_name
-                inst_res['FieldOfStudyName']= fstd_name
-
-                # Additional Properties
-                inst_res['self_cite'] = self_cite
-
-                # Scoring
-                inst_res['influenced_count']  = 1
-                inst_res['influencing_count'] = 0
-
-                inst_res['influenced_paa']  = influenced_paa / len(fstd_list)
-                inst_res['influencing_paa'] = 0
-
-                # Year information
-                try:
-                    inst_res['publication_year'] = paper_info['Year']
-                except KeyError:
-                    inst_res['publication_year'] = None
-                try:
-                    inst_res['influence_year'] = citation['Year']
-                except KeyError:
-                    inst_res['influence_year'] = None
-
-                # Paper information
-                inst_res['ego_paper_id']     = paper_info['PaperId']
-                inst_res['link_paper_id']    = citation['PaperId']
-
-                score_list.append(inst_res)
+            if 'FieldOfStudyName' in pfos and pfos['FieldOfStudyLevel'] == 1:
+                score_list['FSTD'].append(make_score((pfos['FieldOfStudyName'], 1, 0)))
 
     return score_list
-
-
-def get_influence_index(entity_type, influence_dir='influenced'):
-    ''' Function to get the score index from the scoring dictionaries.
-    '''
-    # Author
-    if entity_type == Entity_type.AUTH:
-        return influence_dir + '_paa'
-
-    # Affiliation
-    if entity_type == Entity_type.AFFI:
-        return influence_dir + '_paa'
-
-    # Conference
-    if entity_type == Entity_type.CONF:
-        return influence_dir + '_count'
-
-    # Journal
-    if entity_type == Entity_type.JOUR:
-        return influence_dir + '_count'
-
-    # Field of Study
-    if entity_type == Entity_type.FSTD:
-        return influence_dir + '_count'
-
-    return None
-
-
-def get_name_index(entity_type):
-    ''' Function to get the name index from the scoring dictionaries.
-    '''
-    # Author
-    if entity_type == Entity_type.AUTH:
-        return 'AuthorName'
-
-    # Affiliation
-    if entity_type == Entity_type.AFFI:
-        return 'AffiliationName'
-
-    # Conference
-    if entity_type == Entity_type.CONF:
-        return 'ConferenceName'
-
-    # Journal
-    if entity_type == Entity_type.JOUR:
-        return 'JournalName'
-
-    # Field of Study
-    if entity_type == Entity_type.FSTD:
-        return 'FieldOfStudyName'
-
-    return None
 
 
 def score_paper_info_list(paper_info_list, self=list()):
     '''
     '''
     # Query results
-    score_list = list()
+    score_list = {
+            'CONF': list(),
+            'JOUR': list(),
+            'AFFI': list(),
+            'AUTH': list(),
+            'FSTD': list(),
+            }
 
     # Turn paper information into score dictionary
     for paper_info in paper_info_list:
-        score_list += score_paper_info(paper_info, self)
+        single_score = score_paper_info(paper_info, self)
+        for k, v in single_score.items():
+            score_list[k] += v
 
     # Score dataframe
-    return pd.DataFrame(score_list)
+    return score_list
 
 
-def score_paper_info_list_parallel(paper_info_list, self=list(), num_proc=1):
+score_paper_info_list_parallel = score_paper_info_list
+
+DF_COLUMNS = [
+        'entity_name',
+        'entity_type',
+        'influence_year',
+        'publication_year',
+        'self_cite',
+        'influenced',
+        'influencing',
+        'ego_paper_id',
+        'link_paper_id'
+        ]
+
+DF_DTYPES = [
+        'object',
+        'object',
+        'int32',
+        'int32',
+        'bool',
+        'float32',
+        'float32',
+        'int32',
+        'int32'
+        ]
+
+
+SINGLE_LEAF = [Entity_type.CONF, Entity_type.JOUR]
+
+
+def score_leaves(score_list, leaves):
     '''
     '''
-    if num_proc == 1:
-        return score_paper_info_list(paper_info_list, self=self)
-    else:
-        with Pool() as pool:
-        #with Pool(processes=num_proc) as pool:
-            score_lists = pool.map(score_paper_info, paper_info_list) #, chunksize=len(paper_info_list) // num_proc)
-            res = list()
-            for score_list in score_lists:
-                res += score_list
-            return pd.DataFrame(res)
+    score_df = pd.DataFrame(columns = DF_COLUMNS)
 
-
-def score_leaves(score_df, leaves):
-    '''
-    '''
-    # Final column values
-    score_cols = ['entity_name', 'entity_type', 'influence_year',
-            'publication_year', 'self_cite', 'influenced', 'influencing',
-            'ego_paper_id', 'link_paper_id']
-
-    # Set entity names and influence to specified
-    res_list = list()
-    col_id   = ['entity_name', 'ego_paper_id', 'link_paper_id']
     for leaf in leaves:
-        leaf_df = score_df.copy()
-        leaf_df['entity_name'] = leaf_df[get_name_index(leaf)]
-        leaf_df['entity_type'] = leaf
+        score_df = score_df.append(score_list[leaf.ident], ignore_index=True)
 
-        # Remove duplicates for specific types
-        if leaf not in [ Entity_type.AUTH, Entity_type.AFFI ]:
-            leaf_df.drop_duplicates(subset=col_id, inplace=True)
+    score_df['self_cite'] = score_df['self_cite'].astype('bool')
 
-        leaf_df.rename(columns={get_influence_index(leaf): 'influenced',
-            get_influence_index(leaf, influence_dir='influencing'):
-            'influencing'}, inplace=True)
-
-        leaf_df = leaf_df[score_cols]
-
-        res_list.append(leaf_df)
-
-    return pd.concat(res_list)
+    return score_df

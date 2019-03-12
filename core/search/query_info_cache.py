@@ -83,11 +83,29 @@ def paper_info_cache_query(paper_ids, batch_size=DEFAULT_BATCH):
         # Remove the creation date for query
         field_del(paper_info_res, 'CreatedDate')
 
+        print(paper_info_res['PaperId'], 'FieldsOfStudy' not in paper_info_res)
+
         # Check the type of the result
-        if 'FieldsOfStudy' not in paper_info_res or paper_info_res['cache_type'] == 'partial':
+        if 'FieldsOfStudy' not in paper_info_res:
+            continue
+
+        if paper_info_res['cache_type'] == 'partial':
         # if paper_info_res['cache_type'] == 'partial':
             partial_info.append(paper_info_res)
         else:
+            skip = False
+            for ref in paper_info_res['References']:
+                if 'FieldsOfStudy' not in ref:
+                    skip = True
+                    continue
+
+            for cit in paper_info_res['Citations']:
+                if 'FieldsOfStudy' not in cit:
+                    skip = True
+                    continue
+
+            if skip:
+                continue
             complete_info.append(paper_info_res)
 
         del paper_info_res['cache_type']
