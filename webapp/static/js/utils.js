@@ -19,7 +19,28 @@ function toTitleCase(str) {
 }
 
 
-function formatCitation(paper, authorsToHighlight=[]){
+var journal_format_list = {
+  'arxiv': 'arXiv',
+};
+
+
+function formatJournal(journal_name) {
+  var format_name = [];
+  var words = journal_name.split(' ');
+  for (i in words) {
+    if (words[i] in journal_format_list) {
+      format_name.push(journal_format_list[words[i]]);
+    }
+    else {
+      format_name.push(toTitleCase(words[i]));
+    }
+  }
+
+  return format_name.join(" ");
+}
+
+
+function formatCitation(paper, authorsToHighlight=[], node_name){
   var authors = paper["Authors"];
   authors = authors.sort(function(a, b) {return a['AuthorOrder'] - b['AuthorOrder']});
 
@@ -46,8 +67,17 @@ function formatCitation(paper, authorsToHighlight=[]){
     out_str.push("<a class='node_info_a' href=\"https://academic.microsoft.com/#/detail/"+a["AuthorId"]+"\">"+a["FormattedName"]+"</a>");
   }
 
-  var venue = ("JournalName" in paper) ? (", <a class='node_info_a' href='https://academic.microsoft.com/#/detail/"+paper["JournalId"]+"'>"+paper["JournalName"]+"</a>") : (("ConferenceName" in paper) ? (",  <a class='node_info_a' href='https://academic.microsoft.com/#/detail/"+paper["ConferenceSeriesId"]+"'>"+paper["ConferenceName"]+"</a>") : (""));
-
+  var venue = "";
+  if ("JournalName" in paper) {
+    venue = ", <a class='node_info_a' href='https://academic.microsoft.com/#/detail/";
+    venue += paper["JournalId"] + "'>";
+    venue += formatJournal(paper["JournalName"]) + "</a>";
+  }
+  if ((node_name != paper["JournalName"]) && ("ConferenceName" in paper)) {
+      venue = ",  <a class='node_info_a' href='https://academic.microsoft.com/#/detail/";
+      venue += paper["ConferenceSeriesId"] + "'>";
+      venue += paper["ConferenceName"].toUpperCase() + "</a>";
+  }
 
   return out_str.join(', ') + ". <i><a class='node_info_a' href=\"https://academic.microsoft.com/#/detail/"+paper["PaperId"]+"\">"+toTitleCase(paper["PaperTitle"]) + "</a></i>, " + paper["Year"] + venue;
 }
