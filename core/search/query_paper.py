@@ -27,7 +27,7 @@ def author_paper_query(author_ids):
     paa_s = Search(index = 'paperauthoraffiliations', using = client)
     paa_s = paa_s.query('terms', AuthorId=author_ids)
     paa_s = paa_s.source([paa_target])
-    
+
     # Parse to list
     for paa in paa_s.scan():
         auth_paper_res.append(paa[paa_target])
@@ -51,7 +51,7 @@ def affiliation_paper_query(affi_ids):
     paa_s = Search(index = 'paperauthoraffiliations', using = client)
     paa_s = paa_s.query('terms',  AffiliationId=affi_ids)
     paa_s = paa_s.source([paa_target])
-    
+
     # Parse to list
     for paa in paa_s.scan():
         affi_paper_res.append(paa[paa_target])
@@ -130,6 +130,10 @@ def paper_query(entity_type, entity_ids):
     # Journal
     if entity_type == Entity_type.JOUR:
         return journal_paper_query(entity_ids)
+
+    # Field of Study
+    if entity_type == Entity_type.FSTD:
+        pass
 
     # Otherwise
     return None

@@ -13,6 +13,7 @@ class Entity_type(Enum):
     AFFI = ('AFFI', 'affi', 'institution', 'affi_name', 'Affiliation', 'Affiliation', 'AffiliationIDs', 'Name')
     CONF = ('CONF', 'conf', 'conference', 'conf_abv', 'Conference', 'ConferenceSeries', 'ConferenceSeriesIDs', 'ShortName')
     JOUR = ('JOUR', 'journ', 'journal', 'journ_name', 'Journal', 'Journal', 'JournalID', 'NormalizedShortName')
+    FSTD = ('FSTD', 'fos', 'field', 'field_name', 'Field', 'Field', 'FieldOfStudyId', 'NormalizedName')
 
     def __init__(self, indent, prefix, eid, ename, text, api_type, api_id, api_name):
         self.ident = indent

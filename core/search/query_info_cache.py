@@ -29,7 +29,7 @@ DEFAULT_BATCH = 1000
 #    seen = set()
 #
 #    for paper_chunk in chunker(paper_ids, batch_size=batch_size):
-#        
+#
 #        # Query for paper info
 #        paper_info_s = client.mget(index='paper_info', doc_type='doc', body={"ids": paper_chunk})
 #
@@ -84,7 +84,8 @@ def paper_info_cache_query(paper_ids, batch_size=DEFAULT_BATCH):
         field_del(paper_info_res, 'CreatedDate')
 
         # Check the type of the result
-        if paper_info_res['cache_type'] == 'partial':
+        if 'FieldsOfStudy' not in paper_info_res or paper_info_res['cache_type'] == 'partial':
+        # if paper_info_res['cache_type'] == 'partial':
             partial_info.append(paper_info_res)
         else:
             complete_info.append(paper_info_res)
