@@ -290,11 +290,19 @@ def base_paper_db_query(paper_ids):
     # Create partial entry
     results = list()
     for paper_id in paper_ids:
-        if paper_id in papers_props and paper_id in paa_props and paper_id in pfos_props:
-            # Make partial result
+        # Make partial result
+        if paper_id in papers_props:
             partial_res = papers_props[paper_id]
-            partial_res['Authors'] = paa_props[paper_id]
-            partial_res['FieldsOfStudy'] = pfos_props[paper_id]
+            if paper_id in paa_props:
+                partial_res['Authors'] = paa_props[paper_id]
+            else:
+                partial_res['Authors'] = list()
+
+            if paper_id in pfos_props:
+                partial_res['FieldsOfStudy'] = pfos_props[paper_id]
+            else:
+                partial_res['FieldsOfStudy'] = list()
+
 
             results.append(partial_res)
 
@@ -381,6 +389,7 @@ def paper_info_multiquery(paper_ids, partial_info=list(), force=False):
         find_partial.update(paper_link['FieldsOfStudy'])
 
     print("Need to find,", len(find_partial))
+    print(find_partial)
 
     # Get list of papers which are in cache
     from_cached = list()
@@ -414,7 +423,7 @@ def paper_info_multiquery(paper_ids, partial_info=list(), force=False):
             p_partial['cache_type'] = 'complete'
 
             # Create references and citations for total paper
-            p_links = {'References': [], 'Citations': [], 'FieldsOfStudy': []}
+            p_links = {'References': [], 'Citations': []} #, 'FieldsOfStudy': []}
 
             for r_id in paper_links[p_id]['References']:
                 if r_id in paper_partial:
@@ -424,9 +433,9 @@ def paper_info_multiquery(paper_ids, partial_info=list(), force=False):
                 if c_id in paper_partial:
                     p_links['Citations'].append(paper_partial[c_id])
 
-            for f_id in paper_links[p_id]['FieldsOfStudy']:
-                if f_id in paper_partial:
-                    p_links['FieldsOfStudy'].append(paper_partial[f_id])
+            #for f_id in paper_links[p_id]['FieldsOfStudy']:
+            #    if f_id in paper_partial:
+            #        p_links['FieldsOfStudy'].append(paper_partial[f_id])
 
             total_res.append(dict(p_partial, **p_links))
         # Otherwise just add as partial cache entry

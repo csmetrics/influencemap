@@ -602,6 +602,7 @@ function formatNodeInfoLower(data) {
 function formatNodeInfoTable(data) {
   var links = data["node_links"];
   var paper_map = data["paper_info"];
+  var node_name = data["node_name"];
   var entities = data.entity_names;
 
   var style_str = "";
@@ -616,7 +617,7 @@ function formatNodeInfoTable(data) {
 
       var link_length = Math.max(references.length, citations.length);
       var ego_info = paper_map[links[i]["ego_paper"]];
-      var ego_str = formatCitation(ego_info, data.entity_names);
+      var ego_str = formatCitation(ego_info, data.entity_names, node_name);
       var ego_html = function (x) { return "<td width='32%' style='background-color:" + x + "'>" + ego_str + "</td>"; };
       var ego_empty = function (x) { return "<td width='32%' style='background-color:" + x + "'></td>"; };
 
@@ -637,7 +638,7 @@ function formatNodeInfoTable(data) {
           table_str += "<tr>";
           if (j < citations.length) {
               var cit_info = paper_map[citations[j]];
-              var cit_str = formatCitation(cit_info, data.entity_names);
+              var cit_str = formatCitation(cit_info, data.entity_names, node_name);
               var cit_html  = function (x) { return "<td width='32%' style='background-color:" + x + "'>" + cit_str + "</td>"; };
               var cit_arrow = function (x) { return "<td width='2%' style='color: rgb(107,172,208); font-size: 30px; background-color:" + x + "'>⟶</td>"; };
           } else {
@@ -648,7 +649,7 @@ function formatNodeInfoTable(data) {
 
           if (j < references.length) {
               var ref_info = paper_map[references[j]];
-              var ref_str = formatCitation(ref_info, data.entity_names);
+              var ref_str = formatCitation(ref_info, data.entity_names, node_name);
               var ref_html = function (x) { return "<td width='32%' style='background-color:" + x + "'>" + ref_str + "</td>"; };
               var ref_arrow = function (x) { return "<td width='2%' style='color: rgb(228,130,104); font-size: 30px; background-color:" + x + "'>⟶</td>"; };
           } else {
@@ -716,9 +717,11 @@ function populateNodeInfoContent(data){
 
 function getData(param){
   node_info_name = param['name'].toLowerCase();
+  node_info_type = param['gtype'];
   console.log(node_info_name);
   var data_dict = { // input to the views.py - search()
       "name": node_info_name,
+      "node_type": node_info_type,
       "session": session
     };
     var t0 = performance.now();
@@ -759,7 +762,7 @@ function getNodeName(e){
 
 function showNodeData(idx, selected){
     var name = getNodeName(selected);
-    var data = getData({"name": name});
+    var data = getData({"name": name, 'gtype': selected.getAttribute('gtype')});
 }
 
 function hideNodeData(){

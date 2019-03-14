@@ -4,7 +4,7 @@ from core.utils.get_entity         import entity_from_name
 from core.search.query_paper       import paper_query
 from core.search.query_paper_mag   import paper_mag_multiquery
 from core.search.query_info        import paper_info_check_query, paper_info_mag_check_multiquery
-from core.score.agg_paper_info     import score_paper_info_list, score_leaves
+from core.score.agg_paper_info     import score_leaves
 from core.score.agg_score          import agg_score_df#, select_node_info
 from core.flower.node_info         import select_node_info
 from core.score.agg_utils          import get_coauthor_mapping
@@ -189,7 +189,7 @@ def gen_flower_data(score_df, flower_prop, entity_names, flower_name,
 
     # Self citation filter
     if not config['self_cite']:
-        entity_score = entity_score[~entity_score['self_cite']]
+        entity_score = entity_score[-entity_score['self_cite']]
 
     # Filter publication year for ego's paper
     filter_score = filter_year(entity_score, config['pub_lower'],
