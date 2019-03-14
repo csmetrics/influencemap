@@ -49,11 +49,12 @@ def score_paper_info(paper_info, self=list()):
             author_list = [(None, None)]
 
         fstd_list = list()
-        for pfos in reference['FieldsOfStudy']:
-            fstd_name = pfos['FieldOfStudyName'] \
-                    if 'FieldOfStudyName' in pfos else None
-            if pfos['FieldOfStudyLevel'] == 1:
-                fstd_list.append(fstd_name)
+        if 'FieldsOfStudy' in reference:
+            for pfos in reference['FieldsOfStudy']:
+                fstd_name = pfos['FieldOfStudyName'] \
+                        if 'FieldOfStudyName' in pfos else None
+                if pfos['FieldOfStudyLevel'] == 1:
+                    fstd_list.append(fstd_name)
 
         if not fstd_list:
             fstd_list = [None]
@@ -117,11 +118,12 @@ def score_paper_info(paper_info, self=list()):
             author_list = [(None, None)]
 
         fstd_list = list()
-        for pfos in citation['FieldsOfStudy']:
-            fstd_name = pfos['FieldOfStudyName'] \
-                    if 'FieldOfStudyName' in pfos else None
-            if pfos['FieldOfStudyLevel'] == 1:
-                fstd_list.append(fstd_name)
+        if 'FieldsOfStudy' in citation:
+            for pfos in citation['FieldsOfStudy']:
+                fstd_name = pfos['FieldOfStudyName'] \
+                        if 'FieldOfStudyName' in pfos else None
+                if pfos['FieldOfStudyLevel'] == 1:
+                    fstd_list.append(fstd_name)
 
         if not fstd_list:
             fstd_list = [None]
