@@ -199,42 +199,43 @@ def gen_flower_data(score_df, flower_prop, entity_names, flower_name,
     filter_score = filter_year(filter_score, config['cit_lower'],
                                              config['cit_upper'],
                                              index = 'influence_year')
-    # print("[gen_flower_data] filter_score", filter_score)
+
     # Aggregate
     agg_score = agg_score_df(filter_score)
 
-    # Get the top scores with filter considerations
-    # Iteratively generates a top number of entries until filters get the right amount
-    i = 0
-    top_score = list()
-    max_search = False
-    num_leaves = config["num_leaves"]
-    while len(top_score) < num_leaves and not max_search :
-        top_score = agg_score.head(n=(4 + i) * num_leaves)
-
-        if len(agg_score) == len(top_score):
-            max_search = True
-
-        # Get top scores for graph
-        if (flower_type != 'conf'):
-            top_score = top_score[ ~top_score['entity_name'].isin(entity_names) ]
-
-        # Filter coauthors
-        # print("[gen_flower_data]", coauthors)
-        if config['icoauthor']:
-            top_score = flag_coauthor(top_score, coauthors)
-        else:
-            top_score = top_score[ ~top_score['entity_name'].isin(coauthors) ]
-
-        top_score = top_score.head(n=num_leaves)
+    # Need to take empty df into account
+    if agg_score.empty:
+        top_score = agg_score
         top_score.ego = flower_name
-        # Increase the search space
-        i += 1
+        num_leaves = config["num_leaves"]
+    else:
+        # Get the top scores with filter considerations
+        # Iteratively generates a top number of entries until filters get the right amount
+        i = 0
+        top_score = list()
+        max_search = False
+        num_leaves = config["num_leaves"]
+        while len(top_score) < num_leaves and not max_search :
+            top_score = agg_score.head(n=(4 + i) * num_leaves)
 
-    # Get papers to show info for each node
-    #print(datetime.now(), 'node_info')
-    #node_info = select_node_info(filter_score, top_score['entity_name'].tolist())
-    #print(datetime.now(), 'node_info')
+            if len(agg_score) == len(top_score):
+                max_search = True
+
+            # Get top scores for graph
+            if (flower_type != 'conf'):
+                top_score = top_score[ ~top_score['entity_name'].isin(entity_names) ]
+
+            # Filter coauthors
+            # print("[gen_flower_data]", coauthors)
+            if config['icoauthor']:
+                top_score = flag_coauthor(top_score, coauthors)
+            else:
+                top_score = top_score[ ~top_score['entity_name'].isin(coauthors) ]
+
+            top_score = top_score.head(n=num_leaves)
+            top_score.ego = flower_name
+            # Increase the search space
+            i += 1
 
     # Graph score
     graph_score = score_df_to_graph(top_score)

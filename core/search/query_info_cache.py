@@ -17,46 +17,6 @@ from elasticsearch_dsl import Search
 DEFAULT_BATCH = 1000
 
 
-#def paper_info_cache_query(paper_ids, batch_size=DEFAULT_BATCH):
-#    ''' Gets paper info from cache.
-#    '''
-#    # Elastic search client
-#    client = Elasticsearch(conf.get("elasticsearch.hostname"))
-#
-#    # Query results
-#    complete_info = list()
-#    partial_info  = list()
-#    seen = set()
-#
-#    for paper_chunk in chunker(paper_ids, batch_size=batch_size):
-#
-#        # Query for paper info
-#        paper_info_s = client.mget(index='paper_info', doc_type='doc', body={"ids": paper_chunk})
-#
-#        # Convert query into dictionary format
-#        for paper_info in paper_info_s['docs']: #paper_info_s.scan():
-#            #paper_info_res = paper_info.to_dict()
-#            paper_info_res = paper_info['_source']
-#
-#            # Remove the creation date for query
-#            field_del(paper_info_res, 'CreatedDate')
-#
-#            # Check the type of the result
-#            if paper_info_res['cache_type'] == 'partial':
-#                partial_info.append(paper_info_res)
-#            else:
-#                complete_info.append(paper_info_res)
-#
-#            del paper_info_res['cache_type']
-#
-#            # Add to seen set
-#            seen.add(paper_info_res['PaperId'])
-#
-#    # Check for no results and return
-#    return {'complete': complete_info, 'partial': partial_info,
-#            'missing': set(paper_ids) - seen}
-#
-
 def paper_info_cache_query(paper_ids, batch_size=DEFAULT_BATCH):
     ''' Gets paper info from cache.
     '''
@@ -73,7 +33,6 @@ def paper_info_cache_query(paper_ids, batch_size=DEFAULT_BATCH):
     # Query for paper info
     paper_info_s = Search(index = 'paper_info', using = client)
     paper_info_s = paper_info_s.filter('terms', _id = paper_ids)
-    #paper_info_s = paper_info_s.source(exclude=['*.FieldOfStudy'])
     paper_info_s = paper_info_s.params(size=DEFAULT_BATCH)
 
     # Convert query into dictionary format
@@ -82,8 +41,6 @@ def paper_info_cache_query(paper_ids, batch_size=DEFAULT_BATCH):
 
         # Remove the creation date for query
         field_del(paper_info_res, 'CreatedDate')
-
-        print(paper_info_res['PaperId'], 'FieldsOfStudy' not in paper_info_res)
 
         # Check the type of the result
         if 'FieldsOfStudy' not in paper_info_res:

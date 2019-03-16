@@ -448,30 +448,3 @@ def paper_info_multiquery(paper_ids, partial_info=list(), force=False):
             partial_res.append(p_partial)
 
     return total_res, partial_res
-
-
-if __name__ == '__main__':
-    from core.search.query_db import author_name_db_query
-    from elasticsearch import helpers
-    from core.search.query_utility import paper_info_to_cache_json
-    from core.search.query_cache import paper_info_cache_query
-
-    author_df = author_name_db_query('antony l hosking')
-
-    a_papers = list(author_df['PaperId'])
-    cache_json = list()
-
-    for paper in a_papers:
-        paper_info_cache_query(paper)
-
-'''
-    for paper in a_papers:
-        print(paper)
-        paper_info = paper_info_db_query(paper)
-        if paper_info:
-            cache_json.append(paper_info_to_cache_json(paper_info))
-        print('---\n')
-
-    client = Elasticsearch(conf.get("elasticsearch.hostname"))
-    helpers.bulk(client, cache_json)
-'''

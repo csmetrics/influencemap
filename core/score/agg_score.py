@@ -14,6 +14,9 @@ def agg_score_df(influence_df, coauthors=set([]), \
     '''
 
     print('\n---\n{} start score generation'.format(datetime.now()))
+    if influence_df.empty:
+        score_cols = ['entity_name', 'influenced', 'influencing', 'sum', 'ratio', 'coauthor']
+        return pd.DataFrame(columns=score_cols)
 
     # Remove year column
     score_cols = ['entity_name', 'influenced', 'influencing']

@@ -21,16 +21,17 @@ def filter_year(influence_df, score_year_min, score_year_max,
         if score_year_min == None:
             score_date_min = no_nan_date[index].min()
         else:
-            score_date_min = min(no_nan_date[index].max(),\
-                score_year_min)
+            #score_date_min = min(no_nan_date[index].max(), score_year_min)
+            score_date_min = score_year_min
 
         # Set maximum year if none set
         if score_year_max == None:
             score_date_max = no_nan_date[index].max()
         else:
-            score_date_max = max(no_nan_date[index].min(),\
-                score_year_max)
+            #score_date_max = max(no_nan_date[index].min(), score_year_max)
+            score_date_max = score_year_max
 
+        print(index, score_date_min, score_date_max)
         # Filter based on year
         return no_nan_date[(score_date_min <= no_nan_date[index]) & \
                            (no_nan_date[index] <= score_date_max)]

@@ -316,7 +316,6 @@ def submit(request):
 
     # Normalised entity names
     entity_names = list(set(entity_names))
-#    normal_names = list(map(lambda x: x.lower(), entity_names))
 
     print('Graph ops: ', datetime.now())
 
@@ -351,14 +350,9 @@ def submit(request):
     sorted(flower_res, key=lambda x: x[0])
 
     # Reduce
-    #node_info   = dict()
-    #node_info   = list()
     flower_info = list()
-    #for _, f_info, n_info in flower_res:
     for _, f_info in flower_res:
-        #node_info += n_info
         flower_info.append(f_info)
-        #node_info.update(n_info)
 
     print('TOTAL FLOWER TIME: ', datetime.now() - time_cur)
     print('TOTAL REQUEST TIME: ', datetime.now() - total_request_cur)
@@ -455,6 +449,7 @@ def resubmit(request):
         flower_config['num_leaves'] = 5000
 
     session['year_ranges'] = {'pub_lower': flower_config['pub_lower'], 'pub_upper': flower_config['pub_upper'], 'cit_lower': flower_config['cit_lower'], 'cit_upper': flower_config['cit_upper']}
+    print(session['year_ranges'])
 
     # Recompute flowers
     paper_information = paper_info_db_check_multiquery(cache) # API
@@ -473,14 +468,9 @@ def resubmit(request):
         flower_res = [make_flower(v) for v in flower_leaves]
 
     # Reduce
-    #node_info   = dict()
-    #node_info   = list()
     flower_info = list()
-    #for _, f_info, n_info in flower_res:
     for _, f_info in flower_res:
         flower_info.append(f_info)
-        #node_info.update(n_info)
-        #node_info += n_info
 
     # filter flower nodes by reference
     if flower_config['reference']:
@@ -659,90 +649,6 @@ def get_node_info_single(request, entity, entity_type, year_ranges):
     links = sorted([{"citation": sorted(link["citation"],key=paper_sort_func), "reference": sorted(link["reference"],key=paper_sort_func), "ego_paper": key} for key, link in links.items()], key=lambda x: paper_sort_func(x["ego_paper"]))
 
     return {"node_name": entity, "node_links": links, "paper_info": papers_to_send}
-
-
-'''
-def get_node_info_single(request, entity, year_ranges):
-    pub_lower = year_ranges["pub_lower"]
-    pub_upper = year_ranges["pub_upper"]
-    cit_lower = year_ranges["cit_lower"]
-    cit_upper = year_ranges["cit_upper"]
-    request_data = json.loads(request.POST.get("data_string"))
-    session = request_data.get("session")
-    papers = paper_info_db_check_multiquery(session["cache"])
-    papers_to_send = dict()
-    links = dict()
-    print("[get_node_info_single]", entity)
-
-    # Calculate the self-citation/coauthor filters
-    if session['icoauthor'] == 'false':
-        coauthors = session['coauthors']
-    else:
-        coauthors = list()
-
-    if session['self_cite'] == 'false':
-        self = session['entity_names']
-    else:
-        self = list()
-
-    node_info = {"References": {}, "Citations":{}}
-    for paper in papers:
-
-
-        # filter papers outside of selected publication range
-        if paper["Year"] < pub_lower or paper["Year"] > pub_upper: continue
-
-        for relationship_type in ["References", "Citations"]:
-
-            for rel_paper in paper[relationship_type]:
-
-                # filter papers outside of selected citation range
-                if ((relationship_type == "Citations")  and  (rel_paper["Year"] < cit_lower or rel_paper["Year"] > cit_upper)):
-                    continue
-
-                authors, affiliations, conferences, journals, fos = get_entities(rel_paper)
-
-                # Remove self and coauthor
-                skip = False
-                for entity_list in [authors, affiliations]:
-                    if not set(coauthors + self).isdisjoint(set(entity_list)):
-                        skip = True
-                        break
-                for entity_list in [conferences, journals]:
-                    if not set(coauthors).isdisjoint(set(entity_list)):
-                        skip = True
-                        break
-
-                if skip:
-                    continue
-
-                # check if node entity is one of the authors, affiliations, conferences or journals in the paper
-                # print("fos", fos)
-                relevant = entity in set(authors + affiliations + conferences + journals + fos)
-
-                if relevant:
-                    papers_to_send[paper["PaperId"]] = {k:v for k,v in paper.items() if k in ["PaperTitle", "Authors","PaperId","Year", "ConferenceName", "ConferenceSeriesId", "JournalName", "JournalId"]}
-                    papers_to_send[paper["PaperId"]] = add_author_order(papers_to_send[paper["PaperId"]])
-
-                    papers_to_send[rel_paper["PaperId"]] = {k:v for k,v in rel_paper.items() if k in ["PaperTitle", "Authors","PaperId","Year", "ConferenceName", "ConferenceSeriesId", "JournalName", "JournalId"]}
-                    papers_to_send[rel_paper["PaperId"]] = add_author_order(papers_to_send[rel_paper["PaperId"]])
-
-                    if relationship_type=="Citations":
-                        if paper["PaperId"] in links:
-                            links[paper["PaperId"]]["reference"].append(rel_paper["PaperId"])
-                        else:
-                            links[paper["PaperId"]] = {"reference": [rel_paper["PaperId"]], "citation": list()}
-                    if relationship_type=="References":
-                        if paper["PaperId"] in links:
-                            links[paper["PaperId"]]["citation"].append(rel_paper["PaperId"])
-                        else:
-                            links[paper["PaperId"]] = {"citation": [rel_paper["PaperId"]], "reference": list()}
-
-    paper_sort_func = lambda x: -papers_to_send[x]["Year"]
-    links = sorted([{"citation": sorted(link["citation"],key=paper_sort_func), "reference": sorted(link["reference"],key=paper_sort_func), "ego_paper": key} for key, link in links.items()], key=lambda x: paper_sort_func(x["ego_paper"]))
-
-    return {"node_links": links, "paper_info": papers_to_send}
-'''
 
 
 @csrf_exempt
