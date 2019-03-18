@@ -23,7 +23,7 @@ class ReferenceFlower:
         return new_norm_weight
 
     def compare(self, new_flower):
-        ntype = ["author", "conf", "inst"]
+        ntype = ["author", "conf", "inst", "fos"]
         filtered_flower = [self.reference_flower[type] for type in ntype]
         for nidx, nflower in enumerate(new_flower):
             new_names = [ff["name"] for ff in nflower["nodes"]]
