@@ -25,8 +25,8 @@ def agg_score_df(influence_df, coauthors=set([]), \
     # Aggrigatge scores up
     agg_cols = ['entity_name']
     score_df = score_df.groupby(agg_cols).agg(np.sum).reset_index()
-    score_df['influenced']  = score_df['influenced'].round(decimals = 5)
-    score_df['influencing'] = score_df['influencing'].round(decimals = 5)
+    score_df['influenced']  = score_df['influenced'].round(decimals = 5) if 'influenced' in score_df else 0
+    score_df['influencing'] = score_df['influencing'].round(decimals = 5) if 'influencing' in score_df else 0
 
     # calculate sum
     score_df['sum'] = score_df['influenced'] + score_df['influencing']
