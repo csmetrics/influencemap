@@ -76,7 +76,7 @@ information.
 
 #### Other candidate definitions of influence 
 
-We have described influence as the sum of citations from one person (or venue or affiliation) to another, weighted by the number of authors in the citing paper. Similar methods were considered early on in the project which included combinations of different weighting schemes. We looked at the eight combinations of three mutually exclusive weightings:
+We have described influence as the sum of citations from one person (or venue or affiliation) to another, weighted by the number of authors in the cited paper. Similar methods were considered early on in the project which included combinations of different weighting schemes. We looked at the eight combinations of three mutually exclusive weightings:
 
 1. Weighting by the number of authors on the citing paper;
 2. Weighting by the number of authors on the cited paper; and
