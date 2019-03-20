@@ -674,7 +674,7 @@ def get_node_info(request):
 def get_next_node_info_page(request):
     data = json.loads(request.POST.get("data_string"))
     node_name = data.get("name")
-    node_type = request_data.get("node_type")
+    node_type = data.get("node_type")
     session = data.get("session")
     entities = session["entity_names"]
     year_ranges = session["year_ranges"]

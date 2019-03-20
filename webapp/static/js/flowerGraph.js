@@ -773,6 +773,7 @@ function nextPage() {
     if (page_counter != max_page_num) {
       var data_dict = { // input to the views.py - search()
           "name": node_info_name,
+          "node_type": node_info_type,
           "page": page_counter + 1,
           "session": session
         };
@@ -844,7 +845,7 @@ function capitalizeString(entity_type, string) {
       return string.toUpperCase();
 
     var stopwords = ["and", "or", "of", "the", "at", "on", "in"],
-        capwords = ["ieee", "acm", "siam", "eth"];
+        capwords = ["ieee", "acm", "siam", "eth", "iacr", "ieice"];
     var spacialcase = {"arxiv": "arXiv:"}
     for (i = 0; i < words.length; i++) {
         var fwords = words[i];
