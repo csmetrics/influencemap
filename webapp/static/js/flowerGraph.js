@@ -844,11 +844,14 @@ function capitalizeString(entity_type, string) {
       return string.toUpperCase();
 
     var stopwords = ["and", "or", "of", "the", "at", "on", "in"],
-        capwords = ["ieee", "acm"];
+        capwords = ["ieee", "acm", "siam", "eth"];
+    var spacialcase = {"arxiv": "arXiv:"}
     for (i = 0; i < words.length; i++) {
         var fwords = words[i];
         if (capwords.includes(fwords)) {
           fwords = words[i].toUpperCase();
+        } else if (spacialcase[fwords] != undefined) {
+          fwords = spacialcase[words[i]];
         } else if (!stopwords.includes(fwords)) {
           fwords = words[i].charAt(0).toUpperCase() + words[i].slice(1);
         }
