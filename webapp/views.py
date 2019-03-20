@@ -276,7 +276,16 @@ def submit(request):
     # Turn selected paper into information dictionary list
     print("[Submit] selected_papers", len(selected_papers))
     paper_information = paper_info_db_check_multiquery(selected_papers) # API
-    # print(paper_information)
+
+    ### PAPER MODIFICATIONS ###
+    # Filter for Paper Year different
+    max_year_paper = max(paper_information, key=lambda x: x['Year'])['Year']
+    new_paper_information = list()
+    for paper in paper_information:
+        if paper['Year'] > max_year_paper - 100:
+            new_paper_information.append(paper)
+    paper_information = new_paper_information
+    ### PAPER MODIFICATIONS ###
 
     # Get coauthors
     coauthors = get_coauthor_mapping(paper_information)
@@ -453,6 +462,17 @@ def resubmit(request):
 
     # Recompute flowers
     paper_information = paper_info_db_check_multiquery(cache) # API
+
+    ### PAPER MODIFICATIONS ###
+    # Filter for Paper Year different
+    max_year_paper = max(paper_information, key=lambda x: x['Year'])['Year']
+    new_paper_information = list()
+    for paper in paper_information:
+        if paper['Year'] > max_year_paper - 100:
+            new_paper_information.append(paper)
+    paper_information = new_paper_information
+    ### PAPER MODIFICATIONS ###
+
     score_df = score_paper_info_list(paper_information, self=entity_names)
 
     # Work function
@@ -671,14 +691,14 @@ def get_node_info(request):
 
 @csrf_exempt
 def get_next_node_info_page(request):
-    data = json.loads(request.POST.get("data_string"))
-    node_name = data.get("name")
+    request_data = json.loads(request.POST.get("data_string"))
+    node_name = request_data.get("name")
     node_type = request_data.get("node_type")
-    session = data.get("session")
+    session = request_data.get("session")
     entities = session["entity_names"]
     year_ranges = session["year_ranges"]
     flower_name = session["flower_name"]
-    page = int(data.get("page"))
+    page = int(request_data.get("page"))
 
     node_info = get_node_info_single(request, node_name, node_type, year_ranges)
     page_length = 5

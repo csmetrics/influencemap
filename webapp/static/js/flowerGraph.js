@@ -576,6 +576,7 @@ var odd_ego  = '#e0e0e099';
 var page_counter = 0;
 var max_page_num = 0;
 var node_info_name = '';
+var node_info_type = '';
 var display_name   = '';
 var flower_name    = '';
 
@@ -770,69 +771,71 @@ function hideNodeData(){
 }
 
 function nextPage() {
-    if (page_counter != max_page_num) {
-      var data_dict = { // input to the views.py - search()
-          "name": node_info_name,
-          "page": page_counter + 1,
-          "session": session
-        };
-      $.ajax({
-        type: "POST",
-        url: "/get_next_node_info_page/",
-        data: {"data_string": JSON.stringify(data_dict)},
-        success: function (result) { // return data if success
-          var content_div = document.getElementById("node_info_content");
+  if (page_counter != max_page_num) {
+    var data_dict = { // input to the views.py - search()
+        "name": node_info_name,
+        "node_type": node_info_type,
+        "page": page_counter + 1,
+        "session": session
+      };
+    $.ajax({
+      type: "POST",
+      url: "/get_next_node_info_page/",
+      data: {"data_string": JSON.stringify(data_dict)},
+      success: function (result) { // return data if success
+        var content_div = document.getElementById("node_info_content");
 
-          // Make content
-          var html_string = formatNodeInfoTable(result);
-          var html_elem = new DOMParser().parseFromString(html_string, 'text/html').body.childNodes;
-          content_div.replaceWith(html_elem[0]);
+        // Make content
+        var html_string = formatNodeInfoTable(result);
+        var html_elem = new DOMParser().parseFromString(html_string, 'text/html').body.childNodes;
+        content_div.replaceWith(html_elem[0]);
 
-          document.getElementById("node_info_modal").style.display = "block";
+        document.getElementById("node_info_modal").style.display = "block";
 
-          // Set the page number
-          page_counter = Math.min(page_counter + 1, max_page_num);
-          document.getElementById("page_indicate").innerHTML = page_counter + "/" + max_page_num;
-          if (page_counter === max_page_num){document.getElementById("next_node_page").disabled=true}
-          document.getElementById("prev_node_page").disabled=false;
-        },
-        error: function (result) {
-        }
-      });
-    }
+        // Set the page number
+        page_counter = Math.min(page_counter + 1, max_page_num);
+        document.getElementById("page_indicate").innerHTML = page_counter + "/" + max_page_num;
+        if (page_counter === max_page_num){document.getElementById("next_node_page").disabled=true}
+        document.getElementById("prev_node_page").disabled=false;
+      },
+      error: function (result) {
+      }
+    });
+  }
 }
 
 function prevPage() {
-    if (page_counter != 1) {
-      var data_dict = { // input to the views.py - search()
-          "name": node_info_name,
-          "page": page_counter - 1,
-          "session": session
-        };
-      $.ajax({
-        type: "POST",
-        url: "/get_next_node_info_page/",
-        data: {"data_string": JSON.stringify(data_dict)},
-        success: function (result) { // return data if success
-          var content_div = document.getElementById("node_info_content");
+  if (page_counter != 1) {
+    var data_dict = { // input to the views.py - search()
+        "name": node_info_name,
+        "node_type": node_info_type,
+        "page": page_counter - 1,
+        "session": session
+      };
+    $.ajax({
+      type: "POST",
+      url: "/get_next_node_info_page/",
+      data: {"data_string": JSON.stringify(data_dict)},
+      success: function (result) { // return data if success
+        var content_div = document.getElementById("node_info_content");
 
-          // Make content
-          var html_string = formatNodeInfoTable(result);
-          var html_elem = new DOMParser().parseFromString(html_string, 'text/html').body.childNodes;
-          content_div.replaceWith(html_elem[0]);
+        // Make content
+        var html_string = formatNodeInfoTable(result);
+        var html_elem = new DOMParser().parseFromString(html_string, 'text/html').body.childNodes;
+        content_div.replaceWith(html_elem[0]);
 
-          document.getElementById("node_info_modal").style.display = "block";
+        document.getElementById("node_info_modal").style.display = "block";
 
-          // Set the page number
-          page_counter = Math.max(page_counter - 1, 1);
-          document.getElementById("page_indicate").innerHTML = page_counter + "/" + max_page_num;
-          if (page_counter === 1){document.getElementById("prev_node_page").disabled=true}
-          document.getElementById("next_node_page").disabled=false;
-        },
-        error: function (result) {
-        }
-      });
-    }
+        // Set the page number
+        page_counter = Math.max(page_counter - 1, 1);
+        document.getElementById("page_indicate").innerHTML = page_counter + "/" + max_page_num;
+        if (page_counter === 1){document.getElementById("prev_node_page").disabled=true}
+        document.getElementById("next_node_page").disabled=false;
+      },
+      error: function (result) {
+      }
+    });
+  }
 }
 
 function capitalizeString(string) {
