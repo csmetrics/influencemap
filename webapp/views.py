@@ -315,6 +315,7 @@ def submit(request):
     cite_chart = [{"year":k,"value":[{"year":y,"value":Counter(v)[y]} for y in cont_cite_years]} for k,v in citecounter.items()]
 
     # Normalised entity names
+    print("")
     entity_names = list(set(entity_names))
 
     print('Graph ops: ', datetime.now())
@@ -616,7 +617,7 @@ def get_node_info_single(request, entity, entity_type, year_ranges):
                 check['inst'] = coauthors + self
                 check['conf'] = coauthors
                 check['fos']  = list()
-                
+
                 skip = False
                 for n_type, check_val in check.items():
                     if not set(check_val).isdisjoint(fields[entity_type]):
@@ -648,7 +649,7 @@ def get_node_info_single(request, entity, entity_type, year_ranges):
     paper_sort_func = lambda x: -papers_to_send[x]["Year"]
     links = sorted([{"citation": sorted(link["citation"],key=paper_sort_func), "reference": sorted(link["reference"],key=paper_sort_func), "ego_paper": key} for key, link in links.items()], key=lambda x: paper_sort_func(x["ego_paper"]))
 
-    return {"node_name": entity, "node_links": links, "paper_info": papers_to_send}
+    return {"node_name": entity, "node_type": entity_type, "node_links": links, "paper_info": papers_to_send}
 
 
 @csrf_exempt

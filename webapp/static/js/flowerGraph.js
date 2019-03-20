@@ -91,7 +91,7 @@ function drawFlower(svg_id, data, idx, w) {
         .attr("transform", "translate(0," + (height+yheight-v_margin) + ")")
         .call(d3.axisBottom(x))
         .selectAll("text")
-          .text(barText)
+          .text(function(d, i) { return barText(idx, d); })
           .attr("id", function(d, i) { return i+1; })
           .attr("class", "hl-text node-text")
           .style("text-anchor", "end")
@@ -221,7 +221,7 @@ function drawFlower(svg_id, data, idx, w) {
         .attr("x", function(d) { if (d.id > 0) return transform_text_x(nodes[0]); else return transform_text_x(d); })
         .attr("y", function(d) { if (d.id > 0) return transform_text_y(nodes[0])-magf; else return transform_text_y(d); })
         .attr("text-anchor", locate_text)
-        .text(function(d) { return capitalizeString(d.name); })
+        .text(function(d) { return capitalizeString(d.gtype, d.name); })
         .style("fill", function(d) { if (d.coauthor == 'False') return "black"; else return "gray"; })
       .transition()
         .duration(2000)
@@ -420,8 +420,8 @@ function transform_text_x(d) {
 function transform_text_y(d) {
   shift = 0;
   scale = numnodes[0]/20;
-  for(i = 6; i > 0; i--) {
-      xpos_p = i/10;
+  for(i = 6; i >= 0; i--) {
+      xpos_p = i/10+0.05;
       if (d.id > 0 && -xpos_p < d.xpos && d.xpos < xpos_p) shift -= (7-i)*scale;
   }
 
@@ -732,7 +732,7 @@ function getData(param){
     success: function (result) { // return data if success
 
       console.log(result);
-      display_name = capitalizeString(result['node_name']);
+      display_name = capitalizeString(result['node_type'], result['node_name']);
       flower_name  = result['flower_name'];
       populateNodeInfoContent(result);
       document.getElementById("prev_node_page").disabled=true;
@@ -835,20 +835,33 @@ function prevPage() {
     }
 }
 
-function capitalizeString(string) {
+function capitalizeString(entity_type, string) {
     var words = string.split(' ');
     var res = [];
+    // console.log(entity_type, string, words.length)
+    if ((entity_type == "conf" && words.length == 1 && string.length < 8) // for conf names
+      || (entity_type == "inst" && words.length == 1 && string.length < 5)) // for inst names
+      return string.toUpperCase();
 
+    var stopwords = ["and", "or", "of", "the", "at", "on", "in"],
+        capwords = ["ieee", "acm"];
     for (i = 0; i < words.length; i++) {
-        var fwords = words[i].charAt(0).toUpperCase() + words[i].slice(1);
+        var fwords = words[i];
+        if (capwords.includes(fwords)) {
+          fwords = words[i].toUpperCase();
+        } else if (!stopwords.includes(fwords)) {
+          fwords = words[i].charAt(0).toUpperCase() + words[i].slice(1);
+        }
         res.push(fwords);
     }
 
     return res.join(' ');
 }
 
-function barText(string) {
-    var str = capitalizeString(string.slice(0, 20));
+function barText(e_id, string) {
+    // console.log("barText", entity_type, string)
+    e_types = ["author", "conf", "inst", "fos"];
+    var str = capitalizeString(e_types[e_id], string.slice(0, 20));
     if (string.length > 20) {
         return str+"...";
     }
