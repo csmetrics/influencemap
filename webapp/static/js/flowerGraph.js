@@ -20,6 +20,7 @@ var link = [], flower_split = [], bar = [],
     numnodes = [], cnode = [], svg = [],
     bar_axis_x = [], bar_axis_y = [],
     node_out = [], text_out = [];
+var node_min = 8, node_scale = 200;
 
 function drawLegend() {
   var colorScale = d3.scaleSequential(colors).domain([0, 500]);
@@ -165,7 +166,7 @@ function drawFlower(svg_id, data, idx, w) {
         .attr("cx", function(d) { if (d.id > 0) return transform_x(nodes[0]); else return transform_x(d); })
         .attr("cy", function(d) { if (d.id > 0) return transform_y(nodes[0])-magf; else return transform_y(d); })
         .attr("gtype", function(d) { return d.gtype; })
-        .attr("r", function(d) { return (8+200*d.size/Math.max(15, numnodes[idx]))*window_scaling_factor; })
+        .attr("r", function(d) { return (node_min+node_scale*d.size/Math.max(15, numnodes[idx]))*window_scaling_factor; })
         .style("fill", function (d, i) {
           if (d.id == 0) return "#fff";
           else if (compare_ref) return "#ddd"; else return colors(d.weight); s})
@@ -196,7 +197,7 @@ function drawFlower(svg_id, data, idx, w) {
           .attr("cy", function(d) { if (d.id > 0) return transform_y(nodes[0])-magf; else return transform_y(d); })
           .attr("gtype", function(d) { return d.gtype; })
           .attr("r", function(d) {
-            if (d.new_size >= 0 || d.id == 0) return (8+200*d.new_size/Math.max(15, numnodes[idx]))*window_scaling_factor;
+            if (d.new_size >= 0 || d.id == 0) return (node_min+node_scale*d.new_size/Math.max(15, numnodes[idx]))*window_scaling_factor;
             else return 0})
           .style("fill", function (d, i) {if (d.id == 0) return "#fff"; else return colors(d.new_weight);})
           .style("stroke", function (d, i) { if ((d.coauthor == 'True') && (d.id != 0)) return "green"; else return ""; })
@@ -846,7 +847,7 @@ function capitalizeString(entity_type, string) {
       || (entity_type == "inst" && words.length == 1 && string.length < 5)) // for inst names
       return string.toUpperCase();
 
-    var stopwords = ["and", "or", "of", "the", "at", "on", "in"],
+    var stopwords = ["and", "or", "of", "the", "at", "on", "in", "for"],
         capwords = ["ieee", "acm", "siam", "eth", "iacr", "ieice"];
     var spacialcase = {"arxiv": "arXiv:"}
     for (i = 0; i < words.length; i++) {
