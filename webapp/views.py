@@ -627,13 +627,13 @@ def get_node_info_single(request, entity, entity_type, year_ranges):
                 # Get fields
                 auth, inst, conf, jour, fos = get_entities(rel_paper)
                 fields = dict()
-                fields['auth'] = set(auth)
+                fields['author'] = set(auth)
                 fields['inst'] = set(inst)
                 fields['conf'] = set(conf + jour)
                 fields['fos']  = set(fos)
 
                 check = dict()
-                check['auth'] = coauthors + self
+                check['author'] = coauthors + self
                 check['inst'] = coauthors + self
                 check['conf'] = coauthors
                 check['fos']  = list()
