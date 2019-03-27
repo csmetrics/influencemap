@@ -171,10 +171,8 @@ function drawFlower(svg_id, data, idx, w) {
           if (d.id == 0) return "#fff";
           else if (compare_ref) return "#ddd"; else return colors(d.weight); s})
         .style("stroke", function (d, i) {
-          if (compare_ref) return "ddd";
-          else if ((d.coauthor == 'True') && (d.id != 0)) return "green"; else return "";
-        })
-        .style("stroke-width", 2)
+          if (compare_ref) return "#ddd"; else return "black";})
+        .style("stroke-width", 0.5)
         .style("cursor", "pointer")
         .on("mouseover", function() { highlight_on(idx, this, compare_ref); })
         .on("mouseout", function() { highlight_off(idx, compare_ref); })
@@ -200,8 +198,8 @@ function drawFlower(svg_id, data, idx, w) {
             if (d.new_size >= 0 || d.id == 0) return (node_min+node_scale*Math.sqrt(d.new_size)/Math.max(15, numnodes[idx]))*window_scaling_factor;
             else return 0})
           .style("fill", function (d, i) {if (d.id == 0) return "#fff"; else return colors(d.new_weight);})
-          .style("stroke", function (d, i) { if ((d.coauthor == 'True') && (d.id != 0)) return "green"; else return ""; })
-          .style("stroke-width", 2)
+          .style("stroke", "black")
+          .style("stroke-width", 0,5)
           .style("cursor", "pointer")
           .on("mouseover", function() { highlight_on(idx, this, compare_ref); })
           .on("mouseout", function() { highlight_off(idx, compare_ref); })
