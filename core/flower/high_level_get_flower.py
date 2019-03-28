@@ -92,7 +92,6 @@ def processdata(gtype, egoG, num_leaves, order):
         links.append(l_out)
         links.append(l_in)
 
-    num_leaves = 25
     if num_leaves > 25:
         anglelist = np.linspace(np.pi*(1+(num_leaves-25)/num_leaves/2), -np.pi*(num_leaves-25)/num_leaves/2, num=len(outer_nodes))
     elif num_leaves < 10:

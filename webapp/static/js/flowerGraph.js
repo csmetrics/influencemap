@@ -108,7 +108,7 @@ function drawFlower(svg_id, data, idx, w) {
     // bar chart x axis title
     var graph_types = ["authors", "institutions", "venues", "topics"];
     svg[idx].append("text")
-      .attr("transform", "translate(" + (width/2)+ "," +(height) + ")")
+      .attr("transform", "translate(" + (width/2)+ "," +(20+height+yheight-v_margin) + ")")
       .style("text-anchor", "start")
       .text("Top 50 of total "+total_entity_num+" "+graph_types[idx]);
 
