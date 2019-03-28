@@ -182,17 +182,8 @@ def processdata_all(gtype, egoG, num_leaves, order):
     outer_nodes.remove('ego')
 
     # Sort by name, influence dif, then ratio
-    outer_nodes.sort()
-    if order == 'blue':
-        outer_nodes.sort(key=lambda n: -egoG.nodes[n]['inf_out'])
-    elif order == 'red':
-        outer_nodes.sort(key=lambda n: -egoG.nodes[n]['inf_in'])
-    elif order == 'total':
-        outer_nodes.sort(key=lambda n: -egoG.nodes[n]['dif'])
-        outer_nodes.sort(key=lambda n: -egoG.nodes[n]['sumw'])
-    else:
-        outer_nodes.sort(key=lambda n: -egoG.nodes[n]['dif'])
-        outer_nodes.sort(key=lambda n: -egoG.nodes[n]['ratiow'])
+    outer_nodes.sort(key=lambda n: -egoG.nodes[n]['dif'])
+    outer_nodes.sort(key=lambda n: -egoG.nodes[n]['sumw'])
 
     links = list(egoG.edges(data=True))
 
@@ -200,16 +191,6 @@ def processdata_all(gtype, egoG, num_leaves, order):
     links.sort(key=lambda l: (l[0], l[1]))
     links.sort(key=lambda l: -l[2]['dif'])
     links.sort(key=lambda l: -l[2]['sumw'])
-    # if order == 'blue':
-    #     links.sort(key=lambda l: -l[2]['inf_out'])
-    # elif order == 'red':
-    #     links.sort(key=lambda l: -l[2]['inf_in'])
-    # elif order == 'total':
-    #     links.sort(key=lambda l: -l[2]['dif'])
-    #     links.sort(key=lambda l: -l[2]['sumw'])
-    # else:
-    #     links.sort(key=lambda l: -l[2]['dif'])
-    #     links.sort(key=lambda l: -l[2]['ratiow'])
     links_in  = [l for l in links if l[2]['direction'] == 'in']
     links_out = [l for l in links if l[2]['direction'] == 'out']
 
@@ -219,18 +200,6 @@ def processdata_all(gtype, egoG, num_leaves, order):
         links.append(l_out)
         links.append(l_in)
 
-    anglelist = np.linspace(np.pi, 0., num=len(outer_nodes))
-    # if num_leaves > 25:
-    #     anglelist = np.linspace(np.pi*(1+(num_leaves-25)/num_leaves/2), -np.pi*(num_leaves-25)/num_leaves/2, num=len(outer_nodes))
-    # elif num_leaves < 10:
-    #     anglelist = np.linspace((0.5+num_leaves/20)*np.pi, (0.5-num_leaves/20)*np.pi, num=len(outer_nodes))
-    # else:
-    #     anglelist = np.linspace(np.pi, 0., num=len(outer_nodes))
-    print(anglelist)
-    print(np.linspace(np.pi, 0., num=len(outer_nodes)))
-    x_pos = [0]; x_pos.extend(list(radius * np.cos(anglelist)))
-    y_pos = [0]; y_pos.extend(list(radius * np.sin(anglelist)))
-
     # Outer nodes data
     nodedata = { key:{
             "name": key,
@@ -239,12 +208,8 @@ def processdata_all(gtype, egoG, num_leaves, order):
             "gtype": gtype,
             "size": egoG.nodes[key]["sumw"],
             "sum": egoG.nodes[key]["sum"],
-            "xpos": x_pos[i],
-            "ypos": y_pos[i],
             "coauthor": str(egoG.nodes[key]['coauthor'])
         } for i, key in zip(range(1, len(outer_nodes)+1), outer_nodes)}
-
-    nodekeys = ['ego'] + [v["name"] for v in sorted(nodedata.values(), key=itemgetter("id"))]
 
     # Center node data
     nodedata['ego'] = {
@@ -253,38 +218,8 @@ def processdata_all(gtype, egoG, num_leaves, order):
         "id": 0,
         "gtype": gtype,
         "size": 1,
-        "xpos": x_pos[0],
-        "ypos": y_pos[0],
         "coauthor": str(False)
     }
-
-    edge_in = [{
-            "source": nodekeys.index(s),
-            "target": nodekeys.index(t),
-            "padding": nodedata[t]["size"],
-            "id": nodedata[t]["id"],
-            "gtype": gtype,
-            "type": v["direction"],
-            "weight": v["nweight"],
-            "o_weight": v["weight"]
-        } for s, t, v in links_in]
-
-    edge_out = [{
-            "source": nodekeys.index(s),
-            "target": nodekeys.index(t),
-            "padding": nodedata[t]["size"],
-            "id": nodedata[s]["id"],
-            "gtype": gtype,
-            "type": v["direction"],
-            "weight": v["nweight"],
-            "o_weight": v["weight"]
-        } for s, t, v in links_out]
-
-    linkdata = list()
-
-    for lin, lout in zip(edge_in, edge_out):
-        linkdata.append(lin)
-        linkdata.append(lout)
 
     chartdata = [{
             "id": nodedata[t]["id"] if v["direction"] == "in" else nodedata[s]["id"],
@@ -295,11 +230,11 @@ def processdata_all(gtype, egoG, num_leaves, order):
             "weight": v["weight"]
         } for s, t, v in links]
 
-    return { "nodes": sorted(list(nodedata.values()), key=itemgetter("id")), "links": linkdata, "bars": chartdata }
+    return { "bars": chartdata }
 
 
 def gen_flower_data(score_df, flower_prop, entity_names, flower_name,
-                    coauthors, config=default_config):
+                    coauthors, config=default_config, barchart=True):
     '''
     '''
     # Flower properties
@@ -365,15 +300,19 @@ def gen_flower_data(score_df, flower_prop, entity_names, flower_name,
             # Increase the search space
             i += 1
 
+    # Graph score
+    graph_score = score_df_to_graph(top_score)
+
+    # D3 format
+    data = processdata(flower_type, graph_score, num_leaves, config['order'])
+
+    print("len(agg_score)", len(agg_score))
+    if barchart:
         i = 0
         top_score_all = list()
-        num_leaves = 100
-        while len(top_score_all) < num_leaves and not max_search :
-            top_score_all = agg_score.head(n=(4 + i) * num_leaves)
-
-            if len(agg_score) == len(top_score_all):
-                max_search = True
-
+        num_leaves_barchart = min(len(agg_score), 50)
+        while len(top_score_all) < num_leaves_barchart:
+            top_score_all = agg_score.head(n=(4 + i) * num_leaves_barchart)
             # Get top scores for graph
             if (flower_type != 'conf'):
                 top_score_all = top_score_all[ ~top_score_all['entity_name'].isin(entity_names) ]
@@ -385,18 +324,14 @@ def gen_flower_data(score_df, flower_prop, entity_names, flower_name,
             else:
                 top_score_all = top_score_all[ ~top_score_all['entity_name'].isin(coauthors) ]
 
-            top_score_all = top_score_all.head(n=num_leaves)
+            top_score_all = top_score_all.head(n=num_leaves_barchart)
             top_score_all.ego = flower_name
             # Increase the search space
             i += 1
 
-    # Graph score
-    graph_score = score_df_to_graph(top_score)
-    graph_score_all = score_df_to_graph(top_score_all)
-
-    # D3 format
-    data = processdata(flower_type, graph_score, num_leaves, config['order'])
-    data_all = processdata_all(flower_type, graph_score_all, num_leaves, config['order'])
-    data["bars"] = data_all["bars"]
+        graph_score_all = score_df_to_graph(top_score_all)
+        data_all = processdata_all(flower_type, graph_score_all, num_leaves, config['order'])
+        data["bars"] = data_all["bars"]
+        data["total"] = len(agg_score)
 
     return flower_type, data #, node_info

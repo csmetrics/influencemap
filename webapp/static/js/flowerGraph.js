@@ -43,6 +43,7 @@ function drawLegend() {
 function drawFlower(svg_id, data, idx, w) {
     var compare_ref = referenceCheckbox.checked;
 
+    var total_entity_num = data["total"];
     var nodes = data["nodes"];
     var links = data["links"];
     var bars = data["bars"];
@@ -96,18 +97,26 @@ function drawFlower(svg_id, data, idx, w) {
         .attr("transform", "translate(0," + (height+yheight-v_margin) + ")")
         .call(d3.axisBottom(x))
         .selectAll("text")
-          .text(function(d, i) { return "" }) // .text(function(d, i) { return barText(idx, d); })
+          .text(function(d, i) { return barText(idx, d); })
           .attr("id", function(d, i) { return i+1; })
           .attr("class", "hl-text node-text")
           .style("text-anchor", "end")
           .attr("dx", "-.8em")
           .attr("dy", function() {return - x.bandwidth()/15; } )//"-3px")
-          .attr("transform", "rotate(-90)");
+          .attr("transform", "rotate(-90)")
+          .style("visibility", "hidden");
+    // bar chart x axis title
+    var graph_types = ["authors", "institutions", "venues", "topics"];
+    svg[idx].append("text")
+      .attr("transform", "translate(" + (width/2)+ "," +(height) + ")")
+      .style("text-anchor", "start")
+      .text("Top 50 of total "+total_entity_num+" "+graph_types[idx]);
 
     // bar chart y axis
     bar_axis_y[idx] = svg[idx].append("g")
         .attr("transform", "translate(" + bar_left + "," + (height-v_margin) + ")")
         .call(d3.axisLeft(y).ticks(5));
+
 
     // flower graph edge arrow
     svg[idx].append("defs").selectAll("marker")
