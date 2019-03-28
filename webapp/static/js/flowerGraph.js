@@ -107,10 +107,11 @@ function drawFlower(svg_id, data, idx, w) {
           .style("visibility", "hidden");
     // bar chart x axis title
     var graph_types = ["authors", "institutions", "venues", "topics"];
+    var top_numbers = Math.min(50, total_entity_num);
     svg[idx].append("text")
       .attr("transform", "translate(" + (width/2)+ "," +(20+height+yheight-v_margin) + ")")
       .style("text-anchor", "start")
-      .text("Top 50 of total "+total_entity_num+" "+graph_types[idx]);
+      .text("Top "+top_numbers+" of total "+total_entity_num+" "+graph_types[idx]);
 
     // bar chart y axis
     bar_axis_y[idx] = svg[idx].append("g")
