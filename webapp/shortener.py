@@ -3,7 +3,7 @@ Functions for shorterning urls
 
 '''
 
-arg_tuples = ('pmin', 'pmax', 'cmin', 'cmax', 'selfcite', 'coauthor', 'node', 'order')
+arg_tuples = ('pmin', 'pmax', 'cmin', 'cmax', 'selfcite', 'coauthor', 'node', 'order', 'ref')
 order_list = ["ratio", "blue", "red", "total"];
 
 BASE62 = "0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ"
@@ -80,7 +80,7 @@ def to_url_ext(url_ext_arg):
 def hash_args(arg_tuple):
     #hash_fn = basehash.base62()
 
-    a, b, c, d, e, f, g, h = arg_tuple
+    a, b, c, d, e, f, g, h, i = arg_tuple
     conv64list = [a, b, c, d]
     conv2list = [e, f]
     newlist = []
@@ -94,13 +94,17 @@ def hash_args(arg_tuple):
             newlist.append('0')
     newlist.append(str(encode(int(g))))
     newlist.append(str(order_list.index(h)))
+    if (i == 'true'):
+        newlist.append('1')
+    else:
+        newlist.append('0')
     return newlist
 
 
 def unhash_args(arg_tuple):
     #hash_fn = basehash.base62()
 
-    a, b, c, d, e, f, g, h = arg_tuple
+    a, b, c, d, e, f, g, h, i = arg_tuple
     conv64list = [a, b, c, d]
     conv2list = [e, f]
     newlist = []
@@ -113,6 +117,11 @@ def unhash_args(arg_tuple):
             newlist.append('false')
     newlist.append(str(decode(g)))
     newlist.append(str(order_list[int(h)]))
+
+    if (i == '1'):
+        newlist.append('true')
+    else:
+        newlist.append('false')
     return newlist
 
 
@@ -148,6 +157,7 @@ def unshorten_url_ext(url):
     _, flower_url = url.split('/redirect/')
     flower_vals = flower_url.split('_')
 
+    print(flower_vals)
     orig_flower = unshorten_id(flower_vals[0])
 
     if len(flower_vals) > 1:

@@ -73,7 +73,8 @@ def get_url_query(query):
             "self_cite": query.get("selfcite") == "true",
             "icoauthor": query.get("coauthor") == "true",
             "num_leaves": int(query.get("node")),
-            "order": query.get("order")
+            "order": query.get("order"),
+            "reference": query.get("ref") == "true",
         }
 
     document_id = query.get("id")

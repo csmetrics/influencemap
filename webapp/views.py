@@ -234,6 +234,7 @@ def submit(request):
         # data should be pre-processed and cached
         curated_flag = True
         data, option, config = get_url_query(request.GET)
+        print(config)
         selected_papers = get_all_paper_ids(data["EntityIds"])
         entity_names = get_all_normalised_names(data["EntityIds"])
         keyword = ""
