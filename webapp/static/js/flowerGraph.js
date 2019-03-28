@@ -20,7 +20,7 @@ var link = [], flower_split = [], bar = [],
     numnodes = [], cnode = [], svg = [],
     bar_axis_x = [], bar_axis_y = [],
     node_out = [], text_out = [];
-var node_max_area = 1500.0;
+var node_max_area = 1000.0;
 
 function drawLegend() {
   var colorScale = d3.scaleSequential(colors).domain([0, 500]);
@@ -115,7 +115,7 @@ function drawFlower(svg_id, data, idx, w) {
       .enter().append("marker")
         .attr("id", function(d) { return d.gtype+"_"+d.type+"_"+d.id; })
         .attr("viewBox", "0 -5 10 10")
-        .attr("refX", function (d) { return Math.max(8, nodeRadius(d.padding)*0.8); })
+        .attr("refX", function (d) { return Math.max(9, nodeRadius(d.padding)*0.75); })
         .attr("refY", function (d) { return -d.padding; })
         .attr("markerWidth", function (d) { return window_scaling_factor*arrow_size_calc(d.weight); })
         .attr("markerHeight", function (d) { return window_scaling_factor*arrow_size_calc(d.weight); })
@@ -131,7 +131,7 @@ function drawFlower(svg_id, data, idx, w) {
       .enter().append("marker")
         .attr("id", function(d) { return d.gtype+"_"+d.type+"_"+d.id+"_selected"; })
         .attr("viewBox", "0 -5 10 10")
-        .attr("refX", function (d) { return Math.max(8, nodeRadius(d.padding)*0.8); })
+        .attr("refX", function (d) { return Math.max(9, nodeRadius(d.padding)*0.75); })
         .attr("refY", function (d) { return -d.padding; })
         .attr("markerWidth", function (d) { return window_scaling_factor*arrow_size_calc(d.weight); })
         .attr("markerHeight", function (d) { return window_scaling_factor*arrow_size_calc(d.weight); })
