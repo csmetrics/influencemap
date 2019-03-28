@@ -20,7 +20,7 @@ var link = [], flower_split = [], bar = [],
     numnodes = [], cnode = [], svg = [],
     bar_axis_x = [], bar_axis_y = [],
     node_out = [], text_out = [];
-var node_min = 6, node_scale = 300;
+var node_max_area = 1000.0;
 
 function drawLegend() {
   var colorScale = d3.scaleSequential(colors).domain([0, 500]);
@@ -43,6 +43,7 @@ function drawLegend() {
 function drawFlower(svg_id, data, idx, w) {
     var compare_ref = referenceCheckbox.checked;
 
+    var total_entity_num = data["total"];
     var nodes = data["nodes"];
     var links = data["links"];
     var bars = data["bars"];
@@ -87,6 +88,10 @@ function drawFlower(svg_id, data, idx, w) {
         .style("opacity", 1)
         .style("fill", function(d) { if (d.type == "in") return norcolor[0]; else return norcolor[1]; });
 
+    for (var bar_index = numnodes[idx]*2; bar_index < bar[idx]["_groups"][0].length; bar_index++) {
+        bar[idx]["_groups"][0][bar_index].style = "fill:#ddd"
+    }
+
     // bar chart x axis
     bar_axis_x[idx] = svg[idx].append("g")
         .attr("transform", "translate(0," + (height+yheight-v_margin) + ")")
@@ -96,26 +101,23 @@ function drawFlower(svg_id, data, idx, w) {
           .attr("id", function(d, i) { return i+1; })
           .attr("class", "hl-text node-text")
           .style("text-anchor", "end")
-          .style("fill", function(d) {
-            for (var i in nodes) {
-                if (nodes[i]['name'] == d) {
-                    if (nodes[i]['coauthor'] == 'True') {
-                        return "gray";
-                    }
-                    else {
-                        return "black";
-                    }
-                }
-            };
-            return "black"; } )
           .attr("dx", "-.8em")
           .attr("dy", function() {return - x.bandwidth()/15; } )//"-3px")
-          .attr("transform", "rotate(-90)");
+          .attr("transform", "rotate(-90)")
+          .style("visibility", "hidden");
+    // bar chart x axis title
+    var graph_types = ["authors", "venues", "institutions", "topics"];
+    var top_numbers = Math.min(50, total_entity_num);
+    svg[idx].append("text")
+      .attr("transform", "translate(" + (width/2)+ "," +(20+height+yheight-v_margin) + ")")
+      .style("text-anchor", "start")
+      .text("Top "+top_numbers+" of total "+total_entity_num+" "+graph_types[idx]);
 
     // bar chart y axis
     bar_axis_y[idx] = svg[idx].append("g")
         .attr("transform", "translate(" + bar_left + "," + (height-v_margin) + ")")
         .call(d3.axisLeft(y).ticks(5));
+
 
     // flower graph edge arrow
     svg[idx].append("defs").selectAll("marker")
@@ -123,7 +125,7 @@ function drawFlower(svg_id, data, idx, w) {
       .enter().append("marker")
         .attr("id", function(d) { return d.gtype+"_"+d.type+"_"+d.id; })
         .attr("viewBox", "0 -5 10 10")
-        .attr("refX", function (d) { return 10+200*d.padding/Math.max(15, numnodes[idx]); })
+        .attr("refX", function (d) { return Math.max(9, nodeRadius(d.padding)*0.75); })
         .attr("refY", function (d) { return -d.padding; })
         .attr("markerWidth", function (d) { return window_scaling_factor*arrow_size_calc(d.weight); })
         .attr("markerHeight", function (d) { return window_scaling_factor*arrow_size_calc(d.weight); })
@@ -139,7 +141,7 @@ function drawFlower(svg_id, data, idx, w) {
       .enter().append("marker")
         .attr("id", function(d) { return d.gtype+"_"+d.type+"_"+d.id+"_selected"; })
         .attr("viewBox", "0 -5 10 10")
-        .attr("refX", function (d) { return 10+200*d.padding/Math.max(15, numnodes[idx]); })
+        .attr("refX", function (d) { return Math.max(9, nodeRadius(d.padding)*0.75); })
         .attr("refY", function (d) { return -d.padding; })
         .attr("markerWidth", function (d) { return window_scaling_factor*arrow_size_calc(d.weight); })
         .attr("markerHeight", function (d) { return window_scaling_factor*arrow_size_calc(d.weight); })
@@ -166,7 +168,7 @@ function drawFlower(svg_id, data, idx, w) {
         .attr("cx", function(d) { if (d.id > 0) return transform_x(nodes[0]); else return transform_x(d); })
         .attr("cy", function(d) { if (d.id > 0) return transform_y(nodes[0])-magf; else return transform_y(d); })
         .attr("gtype", function(d) { return d.gtype; })
-        .attr("r", function(d) { return (node_min+node_scale*Math.sqrt(d.size)/Math.max(15, numnodes[idx]))*window_scaling_factor; })
+        .attr("r", function(d) { return nodeRadius(d.size);})//(node_min+node_scale*Math.sqrt(d.size)/Math.max(15, numnodes[idx]))*window_scaling_factor; })
         .style("fill", function (d, i) {
           if (d.id == 0) return "#fff";
           else if (compare_ref) return "#ddd"; else return colors(d.weight); s})
@@ -195,7 +197,7 @@ function drawFlower(svg_id, data, idx, w) {
           .attr("cy", function(d) { if (d.id > 0) return transform_y(nodes[0])-magf; else return transform_y(d); })
           .attr("gtype", function(d) { return d.gtype; })
           .attr("r", function(d) {
-            if (d.new_size >= 0 || d.id == 0) return (node_min+node_scale*Math.sqrt(d.new_size)/Math.max(15, numnodes[idx]))*window_scaling_factor;
+            if (d.new_size >= 0 || d.id == 0) return nodeRadius(d.new_size);
             else return 0})
           .style("fill", function (d, i) {if (d.id == 0) return "#fff"; else return colors(d.new_weight);})
           .style("stroke", "black")
@@ -400,6 +402,10 @@ function linkArc(idx, d, bloom) {
   return "M" + sx + "," + sy + "A" + dr + "," + dr + " 0 0,1 " + tx + "," + ty;
 }
 
+function nodeRadius(size) {
+  return (Math.sqrt((node_max_area/Math.PI)*size)*window_scaling_factor);
+}
+
 function transform_x(d) {
   return center[0]+magf*d.xpos;
 }
@@ -411,8 +417,8 @@ function transform_y(d) {
 function transform_text_x(d) {
   shift = 0;
   circ_dif = 5;
-  if (d.xpos < -.3) shift -= 8+200*d.size/15 + circ_dif;
-  if (d.xpos > .3) shift += 8+200*d.size/15 + circ_dif;
+  if (d.xpos < -.3) shift -= nodeRadius(d.size) + circ_dif;
+  if (d.xpos > .3) shift += nodeRadius(d.size) + circ_dif;
   return transform_x(d) + shift
 }
 

@@ -25,6 +25,12 @@ def normalise_singular_linear(series):
     # Normalise
     return series.apply(lambda x : (x - min_val) / max_min_dif)
 
+def normalise_to_proportion_of_max(series):
+    ''' Function to normalise node sizes with max node being 1
+    '''
+    max_val = series.max()
+    return series.apply(lambda x: x/max_val)
+
 def normalise_colour_dif(series):
     ''' Function to normalise color
     '''
@@ -73,7 +79,7 @@ def score_df_to_graph(score_df):
     egoG = nx.DiGraph(ego='ego', max_influenced=score_df['influenced'].max(), max_influencing=score_df['influencing'].max())
 
     # Normalise values
-    score_df['normed_sum'] = normalise_singular_linear(score_df['sum'])
+    score_df['normed_sum'] = normalise_to_proportion_of_max(score_df['sum'])
     score_df['normed_ratio'] = normalise_colour_dif(score_df['ratio'])
     norm_influenced, norm_influencing = normalise_double_log(score_df['influenced'], score_df['influencing'])
     score_df['normed_influenced'] = norm_influenced
