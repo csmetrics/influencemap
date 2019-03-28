@@ -106,7 +106,7 @@ function drawFlower(svg_id, data, idx, w) {
           .attr("transform", "rotate(-90)")
           .style("visibility", "hidden");
     // bar chart x axis title
-    var graph_types = ["authors", "institutions", "venues", "topics"];
+    var graph_types = ["authors", "venues", "institutions", "topics"];
     var top_numbers = Math.min(50, total_entity_num);
     svg[idx].append("text")
       .attr("transform", "translate(" + (width/2)+ "," +(20+height+yheight-v_margin) + ")")
