@@ -87,6 +87,10 @@ function drawFlower(svg_id, data, idx, w) {
         .style("opacity", 1)
         .style("fill", function(d) { if (d.type == "in") return norcolor[0]; else return norcolor[1]; });
 
+    for (var bar_index = numnodes[idx]*2; bar_index < bar[idx]["_groups"][0].length; bar_index++) {
+        bar[idx]["_groups"][0][bar_index].style = "fill:#ddd"
+    }
+
     // bar chart x axis
     bar_axis_x[idx] = svg[idx].append("g")
         .attr("transform", "translate(0," + (height+yheight-v_margin) + ")")
@@ -98,14 +102,15 @@ function drawFlower(svg_id, data, idx, w) {
           .style("text-anchor", "end")
           .style("fill", function(d) {
             for (var i in nodes) {
-                if (nodes[i]['name'] == d) {
-                    if (nodes[i]['coauthor'] == 'True') {
-                        return "gray";
-                    }
-                    else {
-                        return "black";
-                    }
-                }
+                // if (nodes[i]['name'] == d) {
+                //     if (nodes[i]['coauthor'] == 'True') {
+                //         return "gray";
+                //     }
+                //     else {
+                //         return "black";
+                //     }
+                // }
+                return "white"
             };
             return "black"; } )
           .attr("dx", "-.8em")
