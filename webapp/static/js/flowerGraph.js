@@ -20,7 +20,7 @@ var link = [], flower_split = [], bar = [],
     numnodes = [], cnode = [], svg = [],
     bar_axis_x = [], bar_axis_y = [],
     node_out = [], text_out = [];
-var node_min = 6, node_scale = 300;
+var node_min = 6, node_scale = 300; node_max_area = 1500.0;
 
 function drawLegend() {
   var colorScale = d3.scaleSequential(colors).domain([0, 500]);
@@ -166,7 +166,7 @@ function drawFlower(svg_id, data, idx, w) {
         .attr("cx", function(d) { if (d.id > 0) return transform_x(nodes[0]); else return transform_x(d); })
         .attr("cy", function(d) { if (d.id > 0) return transform_y(nodes[0])-magf; else return transform_y(d); })
         .attr("gtype", function(d) { return d.gtype; })
-        .attr("r", function(d) { return (node_min+node_scale*Math.sqrt(d.size)/Math.max(15, numnodes[idx]))*window_scaling_factor; })
+        .attr("r", function(d) { return  (Math.sqrt((node_max_area/Math.PI)*d.size*window_scaling_factor**2));})//(node_min+node_scale*Math.sqrt(d.size)/Math.max(15, numnodes[idx]))*window_scaling_factor; })
         .style("fill", function (d, i) {
           if (d.id == 0) return "#fff";
           else if (compare_ref) return "#ddd"; else return colors(d.weight); s})
