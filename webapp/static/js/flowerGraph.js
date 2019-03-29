@@ -88,7 +88,7 @@ function drawFlower(svg_id, data, idx, w) {
         .style("opacity", 1)
         .style("fill", function(d) { if (d.type == "in") return norcolor[0]; else return norcolor[1]; });
 
-    for (var bar_index = numnodes[idx]*2; bar_index < bar[idx]["_groups"][0].length; bar_index++) {
+    for (var bar_index = (numnodes[idx]-1)*2; bar_index < bar[idx]["_groups"][0].length; bar_index++) {
         bar[idx]["_groups"][0][bar_index].style = "fill:#ddd"
     }
 
