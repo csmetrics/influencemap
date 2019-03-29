@@ -51,7 +51,8 @@ def normalise_double_log(series1, series2):
     ''' Normalise two series logwise
     '''
     max_val = max(series1.max(), series2.max())
-    min_val = min(series1.min(), series2.min())
+    # min_val = min(series1.min(), series2.min())
+    min_val = 0
 
     max_min_dif = max_val - min_val
 
