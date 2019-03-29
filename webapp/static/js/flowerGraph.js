@@ -88,7 +88,7 @@ function drawFlower(svg_id, data, idx, w) {
         .style("opacity", 1)
         .style("fill", function(d) { if (d.type == "in") return norcolor[0]; else return norcolor[1]; });
 
-    for (var bar_index = (numnodes[idx]-1)*2; bar_index < bar[idx]["_groups"][0].length; bar_index++) {
+    for (var bar_index = numnodes[idx]*2; bar_index < bar[idx]["_groups"][0].length; bar_index++) {
         bar[idx]["_groups"][0][bar_index].style = "fill:#ddd"
     }
 
@@ -276,11 +276,11 @@ function highlight_on(idx, selected, compare_ref) {
   if (id == 0) return;
 
   // highlight rectangles
-  svg[idx].selectAll("rect").each(function() {
-    if (d3.select(this).attr("class") == "bar") {
-        d3.select(this).style("opacity", function (d) { if(id != d.id && d.id != 0 && group == d.gtype) return 0.4; else return 1; });
-    }
-  });
+  // svg[idx].selectAll("rect").each(function() {
+  //   if (d3.select(this).attr("class") == "bar") {
+  //       d3.select(this).style("opacity", function (d) { if(id != d.id && d.id != 0 && group == d.gtype) return 0.4; else return 1; });
+  //   }
+  // });
 
   // highlight text
   svg[idx].selectAll("text").each(function() {
@@ -356,11 +356,11 @@ function highlight_off(idx, compare_ref) {
   }
 
   // un-highlight rectangles
-  svg[idx].selectAll("rect").each(function() {
-    if (d3.select(this).attr("class") == "bar") {
-        d3.select(this).style("opacity", 1);
-    }
-  });
+  // svg[idx].selectAll("rect").each(function() {
+  //   if (d3.select(this).attr("class") == "bar") {
+  //       d3.select(this).style("opacity", 1);
+  //   }
+  // });
 
   // un-highlight text
   svg[idx].selectAll("text").each(function() {
