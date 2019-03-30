@@ -125,7 +125,7 @@ function drawFlower(svg_id, data, idx, w) {
       .enter().append("marker")
         .attr("id", function(d) { return d.gtype+"_"+d.type+"_"+d.id; })
         .attr("viewBox", "0 -5 10 10")
-        .attr("refX", function (d) { return Math.max(9, nodeRadius(d.padding)*0.75); })
+        .attr("refX", function (d) { return Math.max(9, nodeRadius(d.padding)/window_scaling_factor); })
         .attr("refY", function (d) { return -d.padding; })
         .attr("markerWidth", function (d) { return window_scaling_factor*arrow_size_calc(d.weight); })
         .attr("markerHeight", function (d) { return window_scaling_factor*arrow_size_calc(d.weight); })
@@ -141,7 +141,7 @@ function drawFlower(svg_id, data, idx, w) {
       .enter().append("marker")
         .attr("id", function(d) { return d.gtype+"_"+d.type+"_"+d.id+"_selected"; })
         .attr("viewBox", "0 -5 10 10")
-        .attr("refX", function (d) { return Math.max(9, nodeRadius(d.padding)*0.75); })
+        .attr("refX", function (d) { return Math.max(9, nodeRadius(d.padding)/window_scaling_factor); })
         .attr("refY", function (d) { return -d.padding; })
         .attr("markerWidth", function (d) { return window_scaling_factor*arrow_size_calc(d.weight); })
         .attr("markerHeight", function (d) { return window_scaling_factor*arrow_size_calc(d.weight); })
@@ -276,11 +276,11 @@ function highlight_on(idx, selected, compare_ref) {
   if (id == 0) return;
 
   // highlight rectangles
-  svg[idx].selectAll("rect").each(function() {
-    if (d3.select(this).attr("class") == "bar") {
-        d3.select(this).style("opacity", function (d) { if(id != d.id && d.id != 0 && group == d.gtype) return 0.4; else return 1; });
-    }
-  });
+  // svg[idx].selectAll("rect").each(function() {
+  //   if (d3.select(this).attr("class") == "bar") {
+  //       d3.select(this).style("opacity", function (d) { if(id != d.id && d.id != 0 && group == d.gtype) return 0.4; else return 1; });
+  //   }
+  // });
 
   // highlight text
   svg[idx].selectAll("text").each(function() {
@@ -356,11 +356,11 @@ function highlight_off(idx, compare_ref) {
   }
 
   // un-highlight rectangles
-  svg[idx].selectAll("rect").each(function() {
-    if (d3.select(this).attr("class") == "bar") {
-        d3.select(this).style("opacity", 1);
-    }
-  });
+  // svg[idx].selectAll("rect").each(function() {
+  //   if (d3.select(this).attr("class") == "bar") {
+  //       d3.select(this).style("opacity", 1);
+  //   }
+  // });
 
   // un-highlight text
   svg[idx].selectAll("text").each(function() {
