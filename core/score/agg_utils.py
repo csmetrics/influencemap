@@ -82,6 +82,10 @@ def get_coauthor_mapping(paper_info_list):
         if 'JournalName' in paper_info:
             coauthors.add(paper_info['JournalName'])
 
+        for fos in paper_info['FieldsOfStudy']:
+            if 'FieldOfStudyName' in fos:
+                coauthors.add(fos['FieldOfStudyName'])
+
     return list(coauthors)
 
 
