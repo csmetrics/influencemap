@@ -278,6 +278,10 @@ def submit(request):
     print("[Submit] selected_papers", len(selected_papers))
     paper_information = paper_info_db_check_multiquery(selected_papers) # API
 
+    # Check if the paper information is not empty
+    if not paper_information:
+        return render(request, "missing_info.html")
+
     ### PAPER MODIFICATIONS ###
     # Filter for Paper Year different
     max_year_paper = max(paper_information, key=lambda x: x['Year'])['Year']
@@ -302,7 +306,7 @@ def submit(request):
     years = [info['Year'] for info in paper_information if 'Year' in info]
     min_pub_year, max_pub_year = min(years, default=0), max(years, default=0)
 
-    # caculate pub/cite chart data
+    # calculate pub/cite chart data
     cont_pub_years = range(min_pub_year, max_pub_year+1)
     cite_years = set()
     for info in paper_information:
@@ -439,7 +443,6 @@ def resubmit(request):
 
     session = json.loads(request.POST.get("session"))
 
-    pre_flower_data = []
     cache        = session['cache']
     coauthors    = session['coauthors']
     flower_name  = session['flower_name']
