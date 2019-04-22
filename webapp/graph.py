@@ -52,8 +52,12 @@ class ReferenceFlower:
                         old_l["new_weight"] = 0
         return filtered_flower
 
+    def data(self):
+        return json.dumps(self.reference_flower)
 
-def compare_flowers(reference_flower, flower_info):
+
+def compare_flowers(reference_flower_data, flower_info):
+    reference_flower = ReferenceFlower(json.loads(reference_flower_data))
     filtered_flower = reference_flower.compare(flower_info)
     # print(filtered_flower["links"])
     return filtered_flower

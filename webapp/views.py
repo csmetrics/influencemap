@@ -52,8 +52,6 @@ flower_leaves = [ ('author', [ent.Entity_type.AUTH])
 NUM_THREADS = 8
 NUM_NODE_INFO = 5
 
-reference_flower = None
-
 def autocomplete(request):
     entity_type = request.GET.get('option')
     data = loadList(entity_type)
@@ -413,6 +411,10 @@ def submit(request):
     data['stats'] = stats
 
 
+    # save reference flower for comparison
+    reference_flower = ReferenceFlower(data)
+    session["reference_flower"] = reference_flower.data()
+
     # Cache from flower data
     for key, value in cache.items():
         session[key] = value
@@ -428,10 +430,6 @@ def submit(request):
     #session['node_info']    = node_info
 
     data["session"] = session
-
-    # save reference flower for comparison
-    global reference_flower
-    reference_flower = ReferenceFlower(data)
 
     return render(request, "flower.html", data)
 
@@ -499,6 +497,7 @@ def resubmit(request):
 
     # filter flower nodes by reference
     if flower_config['reference']:
+        reference_flower = session["reference_flower"]
         flower_info = compare_flowers(reference_flower, flower_info)
 
     data = {
