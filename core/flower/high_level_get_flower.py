@@ -200,6 +200,7 @@ def processdata_all(gtype, egoG, num_leaves, order):
 
     # Sort by name, influence dif, then ratio
     links.sort(key=lambda l: (l[0], l[1]))
+    links.sort(key=lambda l: -l[2]['sumw'])
     if order == 'blue':
         links.sort(key=lambda l: -l[2]['inf_out'])
     elif order == 'red':
