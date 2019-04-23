@@ -57,7 +57,6 @@ def processdata(gtype, egoG, num_leaves, order):
     outer_nodes.remove('ego')
 
     # Sort by name, influence dif, then ratio
-    outer_nodes.sort()
     if order == 'blue':
         outer_nodes.sort(key=lambda n: -egoG.nodes[n]['inf_out'])
     elif order == 'red':
@@ -180,16 +179,38 @@ def processdata_all(gtype, egoG, num_leaves, order):
     outer_nodes = list(egoG)
     outer_nodes.remove('ego')
 
+    # for n in egoG.nodes:
+    #     print(n, egoG.nodes[n])
+
     # Sort by name, influence dif, then ratio
-    outer_nodes.sort(key=lambda n: -egoG.nodes[n]['dif'])
-    outer_nodes.sort(key=lambda n: -egoG.nodes[n]['sumw'])
+    outer_nodes.sort()
+    if order == 'blue':
+        outer_nodes.sort(key=lambda n: -egoG.nodes[n]['inf_out'])
+    elif order == 'red':
+        outer_nodes.sort(key=lambda n: -egoG.nodes[n]['inf_in'])
+    elif order == 'total':
+        # outer_nodes.sort(key=lambda n: -egoG.nodes[n]['dif'])
+        # outer_nodes.sort(key=lambda n: -egoG.nodes[n]['sumw'])
+        outer_nodes.sort(key=lambda n: min(-egoG.nodes[n]['inf_out'], -egoG.nodes[n]['inf_in']))
+    else:
+        outer_nodes.sort(key=lambda n: -egoG.nodes[n]['dif'])
+        outer_nodes.sort(key=lambda n: -egoG.nodes[n]['ratiow'])
 
     links = list(egoG.edges(data=True))
 
     # Sort by name, influence dif, then ratio
     links.sort(key=lambda l: (l[0], l[1]))
-    links.sort(key=lambda l: -l[2]['dif'])
-    links.sort(key=lambda l: -l[2]['sumw'])
+    if order == 'blue':
+        links.sort(key=lambda l: -l[2]['inf_out'])
+    elif order == 'red':
+        links.sort(key=lambda l: -l[2]['inf_in'])
+    elif order == 'total':
+        # links.sort(key=lambda l: -l[2]['dif'])
+        # links.sort(key=lambda l: -l[2]['sumw'])
+        links.sort(key=lambda l: min(-l[2]['inf_out'], -l[2]['inf_in']))
+    else:
+        links.sort(key=lambda l: -l[2]['dif'])
+        links.sort(key=lambda l: -l[2]['ratiow'])
     links_in  = [l for l in links if l[2]['direction'] == 'in']
     links_out = [l for l in links if l[2]['direction'] == 'out']
 
@@ -264,6 +285,7 @@ def gen_flower_data(score_df, flower_prop, entity_names, flower_name,
 
     # Aggregate
     agg_score = agg_score_df(filter_score)
+    # print(agg_score)
 
     # Need to take empty df into account
     if agg_score.empty:
@@ -306,6 +328,7 @@ def gen_flower_data(score_df, flower_prop, entity_names, flower_name,
     data = processdata(flower_type, graph_score, num_leaves, config['order'])
 
     print("len(agg_score)", len(agg_score))
+
     if barchart:
         i = 0
         top_score_all = list()

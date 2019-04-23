@@ -40,6 +40,7 @@ def agg_score_df(influence_df, coauthors=set([]), \
     score_df = score_df.sort_values('tmp', ascending=False)
 
     score_df = score_df.drop('tmp', axis=1)
+    # score_df = score_df.sort_values('sum', ascending=False)
 
     # Default value
     score_df['coauthor'] = False

@@ -80,6 +80,7 @@ function drawFlower(svg_id, data, idx, w) {
       .enter().append("rect")
         .attr("class", "bar")
         .attr("id", function(d) { return d.id; })
+        .attr("name", function(d) { return d.name; })
         .attr("x", function(d) { if (d.type == "out") return x(d.name)+x.bandwidth()/2; else return x(d.name); })
         .attr("y", function(d) { return y(d.weight)-v_margin; })
         .attr("width", x.bandwidth()/2)
@@ -88,10 +89,6 @@ function drawFlower(svg_id, data, idx, w) {
         .style("opacity", 1)
         .style("fill", function(d) { if (d.type == "in") return norcolor[0]; else return norcolor[1]; });
 
-    for (var bar_index = numnodes[idx]*2; bar_index < bar[idx]["_groups"][0].length; bar_index++) {
-        bar[idx]["_groups"][0][bar_index].style = "fill:#ddd"
-    }
-
     // bar chart x axis
     bar_axis_x[idx] = svg[idx].append("g")
         .attr("transform", "translate(0," + (height+yheight-v_margin) + ")")
@@ -99,17 +96,19 @@ function drawFlower(svg_id, data, idx, w) {
         .selectAll("text")
           .text(function(d, i) { return barText(idx, d); })
           .attr("id", function(d, i) { return i+1; })
-          .attr("class", "hl-text node-text")
+          .attr("name", function(d, i) { return d; })
+          .attr("class", "hl-bar-text node-text")
           .style("text-anchor", "end")
           .attr("dx", "-.8em")
-          .attr("dy", function() {return - x.bandwidth()/15; } )//"-3px")
-          .attr("transform", "rotate(-90)")
-          .style("visibility", "hidden");
+          .attr("dy", function() {return - x.bandwidth()/15-5; } )//"-3px")
+          .attr("transform", "rotate(-90)");
+          // .style("visibility", "hidden");
     // bar chart x axis title
     var graph_types = ["authors", "venues", "institutions", "topics"];
     var top_numbers = Math.min(50, total_entity_num);
     svg[idx].append("text")
-      .attr("transform", "translate(" + (width/2)+ "," +(20+height+yheight-v_margin) + ")")
+      // .attr("transform", "translate(" + (width/2)+ "," +(20+height+yheight-v_margin) + ")")
+      .attr("transform", "translate(" + (width/2)+ "," +(20+height-v_margin) + ")")
       .style("text-anchor", "start")
       .text("Top "+top_numbers+" of total "+total_entity_num+" "+graph_types[idx]);
 
@@ -162,6 +161,7 @@ function drawFlower(svg_id, data, idx, w) {
         .data(nodes)
       .enter().append("circle")
         .attr("id", function(d) { return d.id; })
+        .attr("name", function(d) { return d.name; })
         .attr("class", "hl-circle")
         .attr("xpos", function(d) { return transform_x(d); })
         .attr("ypos", function(d) { return transform_y(d); })
@@ -190,6 +190,7 @@ function drawFlower(svg_id, data, idx, w) {
           .data(nodes)
         .enter().append("circle")
           .attr("id", function(d) { return d.id; })
+          .attr("name", function(d) { return d.name; })
           .attr("class", "hl-circle-new")
           .attr("xpos", function(d) { return transform_x(d); })
           .attr("ypos", function(d) { return transform_y(d); })
@@ -268,19 +269,38 @@ function drawFlower(svg_id, data, idx, w) {
           .duration(2000)
           .attr("d", function(d){ return linkArc(idx, d, true); })
     }
+
+    for (var bar_index = 0; bar_index < bar[idx]["_groups"][0].length; bar_index++) {
+        var bname = bar[idx]["_groups"][0][bar_index].getAttribute("name");
+        // console.log(bname)
+        if ($("circle[name='"+bname+"']")[0] == undefined)
+          bar[idx]["_groups"][0][bar_index].style = "fill:#ddd"
+    }
 }
 
 function highlight_on(idx, selected, compare_ref) {
   id = d3.select(selected).attr("id");
+  name = d3.select(selected).attr("name");
   group = d3.select(selected).attr("gtype");
   if (id == 0) return;
 
   // highlight rectangles
-  // svg[idx].selectAll("rect").each(function() {
-  //   if (d3.select(this).attr("class") == "bar") {
-  //       d3.select(this).style("opacity", function (d) { if(id != d.id && d.id != 0 && group == d.gtype) return 0.4; else return 1; });
-  //   }
-  // });
+  svg[idx].selectAll("rect").each(function() {
+    if (d3.select(this).attr("class") == "bar") {
+        d3.select(this).style("opacity", function (d) {
+          if(name != d.name && d.id != 0 && group == d.gtype)
+            return 0.4;
+          else return 1; });
+    }
+  });
+
+  // highlight bar text
+  svg[idx].selectAll("text").each(function() {
+    if (d3.select(this).classed("hl-bar-text")) {
+        console.log(this.getAttribute("name"));
+        d3.select(this).style("opacity", function () { if(name != this.getAttribute("name")) return 0.4; else return 1; });
+    }
+  });
 
   // highlight text
   svg[idx].selectAll("text").each(function() {
@@ -356,11 +376,18 @@ function highlight_off(idx, compare_ref) {
   }
 
   // un-highlight rectangles
-  // svg[idx].selectAll("rect").each(function() {
-  //   if (d3.select(this).attr("class") == "bar") {
-  //       d3.select(this).style("opacity", 1);
-  //   }
-  // });
+  svg[idx].selectAll("rect").each(function() {
+    if (d3.select(this).attr("class") == "bar") {
+        d3.select(this).style("opacity", 1);
+    }
+  });
+
+  // un-highlight bar text
+  svg[idx].selectAll("text").each(function() {
+    if (d3.select(this).classed("hl-bar-text")) {
+        d3.select(this).style("opacity", 1);
+    }
+  });
 
   // un-highlight text
   svg[idx].selectAll("text").each(function() {
@@ -870,7 +897,7 @@ function capitalizeString(entity_type, string) {
 }
 
 function barText(e_id, string) {
-    // console.log("barText", entity_type, string)
+    // console.log("barText", string)
     e_types = ["author", "conf", "inst", "fos"];
     var str = capitalizeString(e_types[e_id], string.slice(0, 20));
     if (string.length > 20) {
