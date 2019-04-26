@@ -1,5 +1,5 @@
 [
-{"display":   "People",  
+{"display":   "People",
   "type": "outer",
   "subgroups": [
     {"display": "Turing Award Winners",
@@ -24,7 +24,7 @@
 {"display": "Organisations",
   "type": "outer",
   "subgroups":
-[{"display":   "SIG Multimedia", 
+[{"display":   "SIG Multimedia",
   "type": "outer",
   "subgroups": [
     {"display": "Multimedia Conferences",
@@ -66,7 +66,7 @@
   ]
 }]
 },
-{"display":   "Projects", 
+{"display":   "Projects",
   "type":    "outer",
   "subgroups": [
     {"display": "ANU Projects",
@@ -82,11 +82,11 @@
     {"display": "Computer Science",
       "type": "outer",
       "subgroups": [
-        {"display": "Programming Languages",
+        {"display": "Conferences",
           "type": "inner",
           "tag": "publication_venues"
         },
-        {"display": "Multimedia",
+        {"display": "ACM SIGMM",
           "type": "inner",
           "tag": "sigmm_conferences"
         }
@@ -95,4 +95,3 @@
   ]
 }
 ]
-

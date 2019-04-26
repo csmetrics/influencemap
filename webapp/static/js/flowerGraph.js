@@ -899,9 +899,9 @@ function capitalizeString(entity_type, string) {
 function barText(e_id, string) {
     // console.log("barText", string)
     e_types = ["author", "conf", "inst", "fos"];
-    var str = capitalizeString(e_types[e_id], string.slice(0, 20));
-    if (string.length > 20) {
-        return str+"...";
+    var str = capitalizeString(e_types[e_id], string.slice(0, 24));
+    if (string.length > 24) {
+        return str.slice(0, 20)+"...";
     }
     else {
         return str;

@@ -73,11 +73,11 @@
   {% if curated or not curated %}
   <div class="wrapper" style="border-top:1px #eee solid;">
     <div class="row">
-      <div class="col-sm-8" style="padding-right:0">
-        <input style="width:100%" type="text" value="{{ request.build_absolute_uri }}" id="configuration">
+      <div class="col-sm-7" style="padding-right:0">
+        <input style="width:100%;height:26px;" type="text" value="{{ request.build_absolute_uri }}" id="configuration">
       </div>
-      <div class="col-sm-4">
-        <button style="width:100%" onclick="copyConfig()">Copy Config</button>
+      <div class="col-sm-5">
+        <button style="width:100%;height:26px;" onclick="copyConfig()">Copy Config</button>
       </div>
     </div>
   </div>
