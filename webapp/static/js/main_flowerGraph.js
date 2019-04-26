@@ -48,8 +48,8 @@ function drawFlower(svg_id, data, idx, w) {
         .attr("gtype", function(d) { return d.gtype; })
         .attr("r", function(d) { return 6+100*d.size/Math.max(15, numnodes[idx]); })
         .style("fill", function (d, i) {if (d.id == 0) return "#fff"; else return colors(d.weight);})
-        .style("stroke", function (d, i) { if ((d.coauthor == 'True') && (d.id != 0)) return "green"; else return ""; })
-        .style("stroke-width", 2)
+        .style("stroke", function (d, i) { return "black"; })
+        .style("stroke-width", 0.5)
 
     // flower graph node text
     text_out[idx] = text_g.selectAll("text")
@@ -61,8 +61,8 @@ function drawFlower(svg_id, data, idx, w) {
         .attr("x", function(d) { return transform_text_x(d); })
         .attr("y", function(d) { return transform_text_y(d); })
         .attr("text-anchor", locate_text)
-        .text(function(d) { return d.name; })
-        .style("fill", function(d) { if (d.coauthor == 'False') return "black"; else return "#666"; })
+        .text(function(d) { return capitalizeString(d.gtype, d.name); })
+        .style("fill", function(d) { if (d.coauthor == 'False') return "black"; else return "gray"; })
 
     // flower graph edges
     link[idx] = link_g.selectAll("path")
@@ -140,4 +140,30 @@ function arrow_width_calc(weight) {
 function arrow_size_calc(weight) {
   if (weight == 0) { return 0; }
   else { return 15; }
+}
+
+function capitalizeString(entity_type, string) {
+    var words = string.split(' ');
+    var res = [];
+    // console.log(entity_type, string, words.length)
+    if ((entity_type == "conf" && words.length == 1 && string.length < 8) // for conf names
+      || (entity_type == "inst" && words.length == 1 && string.length < 5)) // for inst names
+      return string.toUpperCase();
+
+    var stopwords = ["and", "or", "of", "the", "at", "on", "in", "for"],
+        capwords = ["ieee", "acm", "siam", "eth", "iacr", "ieice"];
+    var spacialcase = {"arxiv": "arXiv:"}
+    for (i = 0; i < words.length; i++) {
+        var fwords = words[i];
+        if (capwords.includes(fwords)) {
+          fwords = words[i].toUpperCase();
+        } else if (spacialcase[fwords] != undefined) {
+          fwords = spacialcase[words[i]];
+        } else if (!stopwords.includes(fwords)) {
+          fwords = words[i].charAt(0).toUpperCase() + words[i].slice(1);
+        }
+        res.push(fwords);
+    }
+
+    return res.join(' ');
 }

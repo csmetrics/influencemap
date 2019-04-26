@@ -171,7 +171,7 @@ function drawFlower(svg_id, data, idx, w) {
         .attr("r", function(d) { return nodeRadius(d.size);})//(node_min+node_scale*Math.sqrt(d.size)/Math.max(15, numnodes[idx]))*window_scaling_factor; })
         .style("fill", function (d, i) {
           if (d.id == 0) return "#fff";
-          else if (compare_ref) return "#ddd"; else return colors(d.weight); s})
+          else if (compare_ref) return "#ddd"; else return colors(d.weight); })
         .style("stroke", function (d, i) {
           if (compare_ref) return "#ddd"; else return "black";})
         .style("stroke-width", 0.5)
