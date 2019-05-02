@@ -107,8 +107,8 @@ function drawFlower(svg_id, data, idx, w) {
     var graph_types = ["authors", "venues", "institutions", "topics"];
     var top_numbers = Math.min(50, total_entity_num);
     svg[idx].append("text")
-      // .attr("transform", "translate(" + (width/2)+ "," +(20+height+yheight-v_margin) + ")")
-      .attr("transform", "translate(" + (width/2)+ "," +(20+height-v_margin) + ")")
+      .attr("transform", "translate(" + (width/2)+ "," +(20+height+yheight-v_margin) + ")")
+      // .attr("transform", "translate(" + (width/2)+ "," +(20+height-v_margin) + ")")
       .style("text-anchor", "start")
       .text("Top "+top_numbers+" of total "+total_entity_num+" "+graph_types[idx]);
 
@@ -897,6 +897,7 @@ function capitalizeString(entity_type, string) {
 }
 
 function barText(e_id, string) {
+    return "" // print nothing
     // console.log("barText", string)
     e_types = ["author", "conf", "inst", "fos"];
     var str = capitalizeString(e_types[e_id], string.slice(0, 24));
