@@ -101,8 +101,8 @@ function drawFlower(svg_id, data, idx, w) {
           .style("text-anchor", "end")
           .attr("dx", "-.8em")
           .attr("dy", function() {return - x.bandwidth()/15-5; } )//"-3px")
-          .attr("transform", "rotate(-90)");
-          // .style("visibility", "hidden");
+          .attr("transform", "rotate(-90)")
+          .style("visibility", "hidden");
     // bar chart x axis title
     var graph_types = ["authors", "venues", "institutions", "topics"];
     var top_numbers = Math.min(50, total_entity_num);
@@ -897,7 +897,6 @@ function capitalizeString(entity_type, string) {
 }
 
 function barText(e_id, string) {
-    return "" // print nothing
     // console.log("barText", string)
     e_types = ["author", "conf", "inst", "fos"];
     var str = capitalizeString(e_types[e_id], string.slice(0, 24));
