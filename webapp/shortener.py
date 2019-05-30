@@ -161,9 +161,12 @@ def unshorten_url_ext(url):
     orig_flower = unshorten_id(flower_vals[0])
 
     if len(flower_vals) > 1:
-        flower_args = flower_vals[1:]
-        orig_args = to_url_ext(unhash_args(flower_args))
+        try:
+            flower_args = flower_vals[1:]
+            orig_args = to_url_ext(unhash_args(flower_args))
 
-        orig_flower += '&amp;' + orig_args
+            orig_flower += '&amp;' + orig_args
+        except Exception as e:
+            pass
 
     return '/submit/' + orig_flower
