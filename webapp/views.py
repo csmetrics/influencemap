@@ -344,7 +344,7 @@ def submit(request):
     if config:
         flower_config = config
 
-    if flower_config['cmp_ref']: # Do not limit the size of new flower
+    if 'cmp_ref' in flower_config and flower_config['cmp_ref']: # Do not limit the size of new flower
         flower_config['num_leaves'] = 5000
 
     print("TESTESTSET")
