@@ -74,7 +74,7 @@ def get_url_query(query):
             "icoauthor": query.get("coauthor") == "true",
             "num_leaves": int(query.get("node")),
             "order": query.get("order"),
-            "reference": query.get("ref") == "true",
+            "cmp_ref": query.get("cmp_ref") == "true",
         }
 
     document_id = query.get("id")

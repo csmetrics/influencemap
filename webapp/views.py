@@ -1,4 +1,4 @@
-import os, sys, json, pandas, string, math
+import os, sys, json, pandas, string, math, copy
 import multiprocess
 from django.shortcuts import render
 from django.http import JsonResponse
@@ -232,13 +232,11 @@ def submit(request):
         # data should be pre-processed and cached
         curated_flag = True
         data, option, config = get_url_query(request.GET)
-        print(config)
         selected_papers = get_all_paper_ids(data["EntityIds"])
         entity_names = get_all_normalised_names(data["EntityIds"])
         keyword = ""
         flower_name = data.get('DisplayName')
         session["url_base"] = shorten_front("http://influencemap.ml/submit/?id="+request.GET.get("id"))
-
     else:
         data = json.loads(request.POST.get('data'))
          # normalisedName: <string>   # the normalised name from entity with highest paper count of selected entities
@@ -346,6 +344,9 @@ def submit(request):
     if config:
         flower_config = config
 
+    if flower_config['cmp_ref']: # Do not limit the size of new flower
+        flower_config['num_leaves'] = 5000
+
     print("TESTESTSET")
     print(config)
 
@@ -378,14 +379,16 @@ def submit(request):
             "cit_upper": max_cite_year,
             "self_cite": "false",
             "icoauthor": "true",
-            "reference": "false",
+            "cmp_ref": "false",
             "num_leaves": num_leaves,
             "order": "ratio",
         }
     else:
         config["self_cite"] = str(config["self_cite"]).lower()
         config["icoauthor"] = str(config["icoauthor"]).lower()
-        config["reference"] = str(config["reference"]).lower()
+        config["cmp_ref"] = str(config["cmp_ref"]).lower()
+
+    print('!!!!!aasdadas', config["cmp_ref"])
 
     data = {
         "author": flower_info[0],
@@ -411,9 +414,43 @@ def submit(request):
     data['stats'] = stats
 
 
-    # save reference flower for comparison
-    reference_flower = ReferenceFlower(data)
-    session["reference_flower"] = reference_flower.data()
+    # filter flower nodes by reference
+    if config['cmp_ref'] == 'true':
+
+        make_ref = lambda x: gen_flower_data(score_df, x, entity_names,
+                flower_name, coauthors, config=default_config())
+
+        ref_res = [make_ref(v) for v in flower_leaves]
+        sorted(ref_res, key=lambda x: x[0])
+
+        # Reduce
+        ref_info = list()
+        for _, f_info in ref_res:
+            ref_info.append(f_info)
+
+        ref_data = copy.deepcopy(data)
+        ref_data["author"] = ref_info[0]
+        ref_data["conf"] = ref_info[1]
+        ref_data["inst"] = ref_info[2]
+        ref_data["fos"] = ref_info[3]
+
+        # save reference flower for comparison
+        reference_flower = ReferenceFlower(ref_data)
+        session["reference_flower"] = reference_flower.data()
+
+        print("Reference flower")
+        reference_flower = session["reference_flower"]
+        flower_info = compare_flowers(reference_flower, flower_info)
+
+        # Force updates to flower information
+        data["author"] = flower_info[0]
+        data["conf"] = flower_info[1]
+        data["inst"] = flower_info[2]
+        data["fos"] = flower_info[3]
+    else:
+        # save reference flower for comparison
+        reference_flower = ReferenceFlower(data)
+        session["reference_flower"] = reference_flower.data()
 
     # Cache from flower data
     for key, value in cache.items():
@@ -426,8 +463,7 @@ def submit(request):
     session['entity_names'] = entity_names
     session['icoauthor'] = config['icoauthor']
     session['self_cite'] = config['self_cite']
-    session['reference'] = config['reference']
-    #session['node_info']    = node_info
+    session['reference'] = config['cmp_ref']
 
     data["session"] = session
 

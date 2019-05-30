@@ -3,7 +3,7 @@ Functions for shorterning urls
 
 '''
 
-arg_tuples = ('pmin', 'pmax', 'cmin', 'cmax', 'selfcite', 'coauthor', 'node', 'order', 'ref')
+arg_tuples = ('pmin', 'pmax', 'cmin', 'cmax', 'selfcite', 'coauthor', 'node', 'order', 'cmp_ref')
 order_list = ["ratio", "blue", "red", "total"];
 
 BASE62 = "0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ"
