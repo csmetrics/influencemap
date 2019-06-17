@@ -47,7 +47,7 @@
     </div>
     <div style="padding-top:10px">
       <b>Petal order</b>
-	  <select id="petal-order" onchange="updateConfigUrl()">
+	  <select id="petal-order" onchange="petalChange()">
 		  <option value="ratio">Influence Ratio</option>
 		  <option value="blue">Influenced By (Blue)</option>
 		  <option value="red">Influencing (Red)</option>
@@ -86,6 +86,7 @@
 
 <script src="{% static 'js/d3.v4.min.js' %}"></script>
 <script src="{% static 'js/statchart.js' %}"></script>
+<script src="{% static 'js/flowerGraph.js' %}"></script>
 <script type="text/javascript">
 var selectedpublink = document.getElementById("selected_publication_link");
 var selectedcitelink = document.getElementById("selected_citation_link");
@@ -438,6 +439,12 @@ function populatePapersContent(papers, title, entity_names){
   var html_string = "<div id='node_info_content'>"+title+ul_string+"</div>";
   var html_elem = new DOMParser().parseFromString(html_string, 'text/html').body.childNodes;
   container_div.appendChild(html_elem[0]);
+}
+
+function petalChange() {
+  console.log($("#petal-order").val());
+  reorder_all($("#petal-order").val());
+  updateConfigUrl();
 }
 
 </script>

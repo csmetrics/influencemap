@@ -97,8 +97,6 @@ def processdata(gtype, egoG, num_leaves, order):
         anglelist = np.linspace((0.5+num_leaves/20)*np.pi, (0.5-num_leaves/20)*np.pi, num=len(outer_nodes))
     else:
         anglelist = np.linspace(np.pi, 0., num=len(outer_nodes))
-    print(anglelist)
-    print(np.linspace(np.pi, 0., num=len(outer_nodes)))
     x_pos = [0]; x_pos.extend(list(radius * np.cos(anglelist)))
     y_pos = [0]; y_pos.extend(list(radius * np.sin(anglelist)))
 
@@ -112,6 +110,10 @@ def processdata(gtype, egoG, num_leaves, order):
             "sum": egoG.nodes[key]["sum"],
             "xpos": x_pos[i],
             "ypos": y_pos[i],
+            "inf_in": egoG.nodes[key]['inf_in'],
+            "inf_out": egoG.nodes[key]['inf_out'],
+            "dif": egoG.nodes[key]['dif'],
+            "ratio": egoG.nodes[key]['ratiow'],
             "coauthor": str(egoG.nodes[key]['coauthor'])
         } for i, key in zip(range(1, len(outer_nodes)+1), outer_nodes)}
 

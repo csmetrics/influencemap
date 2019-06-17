@@ -388,8 +388,6 @@ def submit(request):
         config["icoauthor"] = str(config["icoauthor"]).lower()
         config["cmp_ref"] = str(config["cmp_ref"]).lower()
 
-    print('!!!!!aasdadas', config["cmp_ref"])
-
     data = {
         "author": flower_info[0],
         "conf"  : flower_info[1],
@@ -492,6 +490,8 @@ def resubmit(request):
     flower_config['cit_upper'] = int(request.POST.get('to_cit_year'))
     flower_config['num_leaves'] = int(request.POST.get('numpetals'))
     flower_config['order'] = request.POST.get('petalorder')
+
+    print(flower_config['order'])
 
     if flower_config['reference']: # Do not limit the size of new flower
         flower_config['num_leaves'] = 5000

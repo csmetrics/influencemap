@@ -16,10 +16,10 @@ var selcolor = [colors(0.2), colors(0.8)],
     hidcolor = [colors(0.4), colors(0.6)];
 
 var width, height, center, magf;
-var link = [], flower_split = [], bar = [],
-    numnodes = [], cnode = [], svg = [],
-    bar_axis_x = [], bar_axis_y = [],
-    node_out = [], text_out = [];
+var link = [], flower_split = [], bar = [], numnodes = [], cnode = [], 
+    svg = [], bar_axis_x = [], bar_axis_y = [], node_out = [], text_out = [],
+    data_arr = [], ref_node = [], ref_link = [], node_g_arr = [], link_g_arr
+    = [];
 var node_max_area = 1000.0;
 
 function drawLegend() {
@@ -47,6 +47,8 @@ function drawFlower(svg_id, data, idx, w) {
     var nodes = data["nodes"];
     var links = data["links"];
     var bars = data["bars"];
+
+    data_arr[idx] = data;
 
     window_scaling_factor = w/1000
 
@@ -150,14 +152,14 @@ function drawFlower(svg_id, data, idx, w) {
         .attr("d", "M0,-5L10,0L0,5")
         .style("fill", function (d) { if (d.type == "in") return selcolor[0]; else return selcolor[1]; });
 
-    link_g = svg[idx].append("g");
-    node_g = svg[idx].append("g");
+    link_g = link_g_arr[idx] = svg[idx].append("g");
+    node_g = node_g_arr[idx] = svg[idx].append("g");
     new_link_g = svg[idx].append("g");
     new_node_g = svg[idx].append("g");
     text_g = svg[idx].append("g");
 
     // flower graph nodes
-    original_nodes = node_out[idx] = node_g.selectAll("circle .hl-circle")
+    ref_node[idx] = node_out[idx] = node_g.selectAll("circle .hl-circle")
         .data(nodes)
       .enter().append("circle")
         .attr("id", function(d) { return d.id; })
@@ -225,13 +227,14 @@ function drawFlower(svg_id, data, idx, w) {
         .attr("text-anchor", locate_text)
         .text(function(d) { return capitalizeString(d.gtype, d.name); })
         .style("fill", function(d) { if (d.coauthor == 'False') return "black"; else return "gray"; })
+        .attr("node_size", function(d) { return d.size; })
       .transition()
         .duration(2000)
         .attr("x", function(d) { return transform_text_x(d); })
         .attr("y", function(d) { return transform_text_y(d); })
 
     // flower graph edges
-    link[idx] = link_g.selectAll("path .link")
+    ref_link[idx] = link[idx] = link_g.selectAll("path .link")
         .data(links)
       .enter().append("path")
         .attr("id", function(d) { return d.id; })
@@ -297,7 +300,6 @@ function highlight_on(idx, selected, compare_ref) {
   // highlight bar text
   svg[idx].selectAll("text").each(function() {
     if (d3.select(this).classed("hl-bar-text")) {
-        console.log(this.getAttribute("name"));
         d3.select(this).style("opacity", function () { if(name != this.getAttribute("name")) return 0.4; else return 1; });
     }
   });
@@ -431,38 +433,6 @@ function linkArc(idx, d, bloom) {
 
 function nodeRadius(size) {
   return (Math.sqrt((node_max_area/Math.PI)*size)*window_scaling_factor);
-}
-
-function transform_x(d) {
-  return center[0]+magf*d.xpos;
-}
-
-function transform_y(d) {
-  return center[1]-magf*d.ypos;
-}
-
-function transform_text_x(d) {
-  shift = 0;
-  circ_dif = 5;
-  if (d.xpos < -.3) shift -= nodeRadius(d.size) + circ_dif;
-  if (d.xpos > .3) shift += nodeRadius(d.size) + circ_dif;
-  return transform_x(d) + shift
-}
-
-function transform_text_y(d) {
-  shift = 0;
-  scale = numnodes[0]/20;
-  for(i = 6; i >= 0; i--) {
-      xpos_p = i/10+0.05;
-      if (d.id > 0 && -xpos_p < d.xpos && d.xpos < xpos_p) shift -= (7-i)*scale;
-  }
-
-  // Title
-  if (d.id == 0) {
-      shift += 50;
-  }
-
-  return transform_y(d) + shift
 }
 
 function locate_text(d) {
@@ -906,4 +876,257 @@ function barText(e_id, string) {
     else {
         return str;
     }
+}
+
+// ---------- Ordering and Sorting ----------
+function reorder(order, data) {
+
+  var sortable_data = data.nodes.slice(1);
+
+  // Pick the sort ordering
+  if (order == "blue") {
+    var sort_func = blue_order;
+  }
+  else if (order == "red") {
+    var sort_func = red_order;
+  }
+  else if (order == "total") {
+    var sort_func = total_order;
+  }
+  else {
+    var sort_func = ratio_order;
+  }
+
+  var sort_index = {0:0};
+
+  for (var i in sortable_data.sort(sort_func)) {
+    sort_index[sortable_data[i].id] = parseInt(i) + 1;
+  }
+
+  return sort_index;
+}
+
+function blue_order(a, b) {
+  return - (a.inf_out - b.inf_out);
+}
+
+function red_order(a, b) {
+  return - (a.inf_in - b.inf_in);
+}
+
+var SORT_TOL = 1e-9;
+
+function total_order(a, b) {
+  var a_val = a.size + SORT_TOL * a.dif;
+  var b_val = b.size + SORT_TOL * b.dif;
+  return - (a_val - b_val);
+}
+
+function ratio_order(a, b) {
+  var a_val = a.ratio + SORT_TOL * a.dif;
+  var b_val = b.ratio + SORT_TOL * b.dif;
+  return - (a_val - b_val);
+}
+
+function node_order(ordering, a, b) {
+  var a_val = ordering[a.id];
+  var b_val = ordering[b.id];
+
+  return - (a_val - b_val);
+}
+
+function link_order(ordering, a, b) {
+  var a_val = ordering[a.id];
+  var b_val = ordering[b.id];
+  if (a.class == "link_out") a_val += 0.5;
+  if (b.class == "link_out") b_val += 0.5;
+
+  return a_val - b_val;
+}
+
+// ---------- Transform and Positions ----------
+function linspace(start, end, num) {
+  if (num > 1) {
+    var step = (end - start) / (num - 1);
+  }
+  else {
+    var step = 0;
+  }
+  var lin = [];
+
+  for (var i = 0; i < num; i++) {
+    lin.push(start + i * step);
+  }
+
+  return lin;
+}
+
+var RADIUS = 1.2;
+
+function gen_pos(num) {
+  if (num > 25) {
+    var angles = linspace(Math.PI * (1 + (num - 25) / num / 2), - Math.PI * (num - 25) / num / 2, num);
+  }
+  else if (num < 10) {
+    var angles = linspace(Math.PI * (0.5 + num / 20), Math.PI * (0.5 - num / 20), num);
+  }
+  else {
+    var angles = linspace(Math.PI, 0, num);
+  }
+
+  var x_pos = {0: 0};
+  var y_pos = {0: 0};
+
+  for (var i in angles) {
+    var angle = angles[i];
+    x_pos[parseInt(i)+1] = RADIUS * Math.cos(angle);
+    y_pos[parseInt(i)+1] = RADIUS * Math.sin(angle);
+  }
+
+  return [x_pos, y_pos];
+//  return {"x_pos": x_pos, "y_pos": y_pos};
+}
+
+function transform_x(d) {
+  return center[0]+magf*d.xpos;
+}
+
+function transform_y(d) {
+  return center[1]-magf*d.ypos;
+}
+
+function transform_text_x(d) {
+  shift = 0;
+  circ_dif = 5;
+  if (d.xpos < -.3) shift -= nodeRadius(d.size) + circ_dif;
+  if (d.xpos > .3) shift += nodeRadius(d.size) + circ_dif;
+  return transform_x(d) + shift;
+}
+
+function transform_text_y(d) {
+  shift = 0;
+  scale = numnodes[0]/20;
+  for(i = 6; i >= 0; i--) {
+      xpos_p = i/10+0.05;
+      if (d.id > 0 && -xpos_p < d.xpos && d.xpos < xpos_p) shift -= (7-i)*scale;
+  }
+
+  // Title
+  if (d.id == 0) {
+      shift += 50;
+  }
+
+  return transform_y(d) + shift;
+}
+
+// ---------- Reorder Move ----------
+
+function reorder_nodes(idx, order, duration) {
+  var ordering = reorder(order, data_arr[idx]);
+  var [xpos, ypos] = gen_pos(data_arr[idx].nodes.length - 1);
+
+  // Reorder the layering of the nodes
+  node_g_arr[idx].selectAll("circle").sort(function(a, b) { return node_order(ordering, a, b); } );
+
+  // Move nodes
+  node_out[idx].each(function() {
+    d3.select(this)
+    .transition()
+    .duration(duration)
+    .attr("cx", function(d) { return center[0]+magf*xpos[ordering[d.id]]; })
+    .attr("cy", function(d) { return center[1]-magf*ypos[ordering[d.id]]; })
+    .attr("xpos", function(d) { return center[0]+magf*xpos[ordering[d.id]]; })
+    .attr("ypos", function(d) { return center[1]-magf*ypos[ordering[d.id]]; })
+  });
+
+  // Move reference nodes
+  if (ref_node[idx] != undefined) {
+    ref_node[idx].each(function() {
+      d3.select(this)
+      .transition()
+      .duration(duration)
+      .attr("cx", function(d) { return center[0]+magf*xpos[ordering[d.id]]; })
+      .attr("cy", function(d) { return center[1]-magf*ypos[ordering[d.id]]; })
+      .attr("xpos", function(d) { return center[0]+magf*xpos[ordering[d.id]]; })
+      .attr("ypos", function(d) { return center[1]-magf*ypos[ordering[d.id]]; })
+    });
+  }
+
+  // Move text
+  text_out[idx].each(function() {
+    d3.select(this)
+    .transition()
+    .duration(duration)
+    .attr("x", function(d) { 
+      shift = 0;
+      circ_dif = 5;
+      xval = xpos[ordering[d.id]];
+
+      if (xval < -.3) shift -= nodeRadius(d.size) + circ_dif;
+      if (xval > .3) shift += nodeRadius(d.size) + circ_dif;
+
+      return center[0] + magf*xval + shift;
+    })
+    .attr("y", function(d) { 
+      shift = 0;
+      scale = numnodes[idx]/20;
+      xval = xpos[ordering[d.id]];
+      yval = ypos[ordering[d.id]];
+
+      for(i = 6; i >= 0; i--) {
+          xpos_p = i/10+0.05;
+          if (d.id > 0 && -xpos_p < xval && xval < xpos_p) shift -= (7-i)*scale;
+      }
+
+      // Title
+      if (d.id == 0) {
+          shift += 50;
+      }
+
+      return center[1] - magf*yval + shift;
+    })
+    .attr("text-anchor", function(d) {
+      xval = xpos[ordering[d.id]];
+
+      if (xval < -0.1) return "end";
+      else if (xval > 0.1) return "start";
+      else return "middle";
+    })
+  });
+
+}
+
+function reorder_edges(idx, order, duration) {
+  // Reorder the layering of the edges
+  var ordering = reorder(order, data_arr[idx]);
+  link_g_arr[idx].selectAll("path").sort(function(a, b) { return link_order(ordering, a, b); } );
+
+  // Move reference links
+  if (ref_link[idx] != undefined) {
+    ref_link[idx].each(function(){
+      d3.select(this)
+      .transition()
+      .duration(duration)
+      .attr("d", function(d){ return linkArc(idx, d, true); })
+    });
+  }
+
+  // Move links
+  link[idx].each(function(){
+    d3.select(this)
+    .transition()
+    .duration(duration)
+    .attr("d", function(d){ return linkArc(idx, d, true); })
+  });
+}
+
+function reorder_flower(idx, order) {
+  reorder_nodes(idx, order, 1000);
+  setTimeout(function() { reorder_edges(idx, order, 500) }, 2100);
+}
+
+function reorder_all(order) {
+  for (var i in data_arr) {
+    reorder_flower(i, order);
+  }
 }
