@@ -90,7 +90,7 @@ function drawFlower(svg_id, data, idx, w) {
         .attr("height", function(d) { return yheight - y(d.weight); })
         .attr("transform", "translate(0," + height + ")")
         .style("opacity", 1)
-        .style("fill", function(d) { if (d.type == "in") return norcolor[0]; else return norcolor[1]; });
+        .style("fill", barColour);
 
     // bar chart x axis
     bar_axis_x[idx] = svg[idx].append("g")
@@ -106,6 +106,7 @@ function drawFlower(svg_id, data, idx, w) {
           .attr("dy", function() {return - x.bandwidth()/15-5; } )//"-3px")
           .attr("transform", "rotate(-90)")
           .style("visibility", "hidden");
+
     // bar chart x axis title
     var graph_types = ["authors", "venues", "institutions", "topics"];
     var top_numbers = Math.min(50, total_entity_num);
@@ -880,9 +881,11 @@ function barText(e_id, string) {
 }
 
 // ---------- Ordering and Sorting ----------
-function reorder(order, data) {
+function reorder(num, order, data) {
 
-  var sortable_data = data.nodes.slice(1);
+  var sortable_data = data.nodes
+    .slice(1)
+    .filter(function(d) { return d.bloom_order <= num; } );
 
   // Pick the sort ordering
   if (order == "blue") {
@@ -1021,27 +1024,16 @@ function transform_text_y(d) {
 }
 
 // ---------- Reorder Move ----------
-function reorder_nodes(idx, order, duration) {
-  var ordering = reorder(order, data_arr[idx]);
-  var [xpos, ypos] = gen_pos(data_arr[idx].nodes.length - 1);
+function reorder_nodes(idx, num, order, duration) {
+  var ordering = reorder(num, order, data_arr[idx]);
+  var [xpos, ypos] = gen_pos(num);
 
   // Reorder the layering of the nodes
   node_g_arr[idx].selectAll("circle").sort(function(a, b) { return node_order(ordering, a, b); } );
 
   // Move nodes
-  node_out[idx].each(function() {
-    d3.select(this)
-    .transition()
-    .duration(duration)
-    .attr("cx", function(d) { return center[0]+magf*xpos[ordering[d.id]]; })
-    .attr("cy", function(d) { return center[1]-magf*ypos[ordering[d.id]]; })
-    .attr("xpos", function(d) { return center[0]+magf*xpos[ordering[d.id]]; })
-    .attr("ypos", function(d) { return center[1]-magf*ypos[ordering[d.id]]; })
-  });
-
-  // Move reference nodes
-  if (ref_node[idx] != undefined) {
-    ref_node[idx].each(function() {
+  node_out[idx].filter(function(d) { return d.bloom_order <= num; })
+    .each(function() {
       d3.select(this)
       .transition()
       .duration(duration)
@@ -1050,87 +1042,103 @@ function reorder_nodes(idx, order, duration) {
       .attr("xpos", function(d) { return center[0]+magf*xpos[ordering[d.id]]; })
       .attr("ypos", function(d) { return center[1]-magf*ypos[ordering[d.id]]; })
     });
+
+  // Move reference nodes
+  if (ref_node[idx] != undefined) {
+    ref_node[idx].filter(function(d) { return d.bloom_order <= num; })
+      .each(function() {
+        d3.select(this)
+        .transition()
+        .duration(duration)
+        .attr("cx", function(d) { return center[0]+magf*xpos[ordering[d.id]]; })
+        .attr("cy", function(d) { return center[1]-magf*ypos[ordering[d.id]]; })
+        .attr("xpos", function(d) { return center[0]+magf*xpos[ordering[d.id]]; })
+        .attr("ypos", function(d) { return center[1]-magf*ypos[ordering[d.id]]; })
+      });
   }
 
   // Move text
-  text_out[idx].each(function() {
-    d3.select(this)
-    .transition()
-    .duration(duration)
-    .attr("x", function(d) { 
-      shift = 0;
-      circ_dif = 5;
-      xval = xpos[ordering[d.id]];
+  text_out[idx].filter(function(d) { return d.bloom_order <= num; })
+    .each(function() {
+      d3.select(this)
+      .transition()
+      .duration(duration)
+      .attr("x", function(d) { 
+        shift = 0;
+        circ_dif = 5;
+        xval = xpos[ordering[d.id]];
 
-      if (xval < -.3) shift -= nodeRadius(d.size) + circ_dif;
-      if (xval > .3) shift += nodeRadius(d.size) + circ_dif;
+        if (xval < -.3) shift -= nodeRadius(d.size) + circ_dif;
+        if (xval > .3) shift += nodeRadius(d.size) + circ_dif;
 
-      return center[0] + magf*xval + shift;
-    })
-    .attr("y", function(d) { 
-      shift = 0;
-      scale = numnodes[idx]/20;
-      xval = xpos[ordering[d.id]];
-      yval = ypos[ordering[d.id]];
+        return center[0] + magf*xval + shift;
+      })
+      .attr("y", function(d) { 
+        shift = 0;
+        scale = numnodes[idx]/20;
+        xval = xpos[ordering[d.id]];
+        yval = ypos[ordering[d.id]];
 
-      for(i = 6; i >= 0; i--) {
-          xpos_p = i/10+0.05;
-          if (d.id > 0 && -xpos_p < xval && xval < xpos_p) shift -= (7-i)*scale;
-      }
+        for(i = 6; i >= 0; i--) {
+            xpos_p = i/10+0.05;
+            if (d.id > 0 && -xpos_p < xval && xval < xpos_p) shift -= (7-i)*scale;
+        }
 
-      // Title
-      if (d.id == 0) {
-          shift += 50;
-      }
+        // Title
+        if (d.id == 0) {
+            shift += 50;
+        }
 
-      return center[1] - magf*yval + shift;
-    })
-    .attr("text-anchor", function(d) {
-      xval = xpos[ordering[d.id]];
+        return center[1] - magf*yval + shift;
+      })
+      .attr("text-anchor", function(d) {
+        xval = xpos[ordering[d.id]];
 
-      if (xval < -0.1) return "end";
-      else if (xval > 0.1) return "start";
-      else return "middle";
-    })
-  });
+        if (xval < -0.1) return "end";
+        else if (xval > 0.1) return "start";
+        else return "middle";
+      })
+    });
 
 }
 
-function reorder_edges(idx, order, duration) {
+function reorder_edges(idx, num, order, duration) {
   // Reorder the layering of the edges
-  var ordering = reorder(order, data_arr[idx]);
+  var ordering = reorder(num, order, data_arr[idx]);
   link_g_arr[idx].selectAll("path").sort(function(a, b) { return link_order(ordering, a, b); } );
 
   // Positioning
-  var [xpos, ypos] = gen_pos(data_arr[idx].nodes.length - 1);
+  var [xpos, ypos] = gen_pos(num);
 
   // Move reference links
   if (ref_link[idx] != undefined) {
-    ref_link[idx].each(function(){
+    ref_link[idx].filter(function(d) { return d.bloom_order <= num; })
+      .each(function(){
+        d3.select(this)
+        .transition()
+        .duration(duration)
+        .attr("d", function(d) { return linkOrderUpdate(d, ordering, xpos, ypos); })
+      });
+  }
+
+  // Move links
+  link[idx].filter(function(d) { return d.bloom_order <= num; })
+    .each(function(){
       d3.select(this)
       .transition()
       .duration(duration)
       .attr("d", function(d) { return linkOrderUpdate(d, ordering, xpos, ypos); })
     });
-  }
-
-  // Move links
-  link[idx].each(function(){
-    d3.select(this)
-    .transition()
-    .duration(duration)
-    .attr("d", function(d) { return linkOrderUpdate(d, ordering, xpos, ypos); })
-  });
 }
 
-function reorder_flower(idx, order) {
-  reorder_nodes(idx, order, 1000);
-  reorder_edges(idx, order, 1000);
+function reorder_flower(idx, num, order) {
+  reorder_nodes(idx, num, order, 1000);
+  reorder_edges(idx, num, order, 1000);
 }
 
-function reorder_all(order) {
+function reorder_all(num, order) {
   for (var i in data_arr) {
-    reorder_flower(i, order);
+    reorder_flower(i, num, order);
   }
 }
 
@@ -1153,3 +1161,98 @@ function arcUpdate(sx, sy, tx, ty) {
 }
 
 // ---------- Disable/Enable Shapes ----------
+function disableBloomNumNodes(num) {
+  d3.selectAll("circle")
+    .filter(function(d) {return d.bloom_order <= num;} )
+    .style("visibility", "visible");
+
+  d3.selectAll("circle")
+    .filter(function(d) {return d.bloom_order <= num;} )
+    .transition()
+    .duration(2000)
+    .style("opacity", 1.0);
+
+  d3.selectAll("circle")
+    .filter(function(d) {return d.bloom_order > num;} )
+    .transition()
+    .duration(2000)
+    .style("opacity", 0.0)
+    .transition()
+    .delay(2000)
+    .style("visibility", "hidden");
+}
+
+function findLinks(obj) {
+  return d3.select(obj).attr("class") == "link in" || d3.select(obj).attr("class") == "link out";
+}
+
+function disableBloomNumPaths(num) {
+  d3.selectAll("path")
+    .filter(function() { return findLinks(this); })
+    .filter(function(d) {return d.bloom_order <= num;} )
+    .style("visibility", "visible");
+
+  d3.selectAll("path")
+    .filter(function() { return findLinks(this); })
+    .filter(function(d) {return d.bloom_order <= num;} )
+    .transition()
+    .duration(2000)
+    .style("opacity", 1.0);
+
+  d3.selectAll("path")
+    .filter(function() { return findLinks(this); })
+    .filter(function(d) {return d.bloom_order > num;} )
+    .transition()
+    .duration(2000)
+    .style("opacity", 0.0)
+    .transition()
+    .delay(2000)
+    .style("visibility", "hidden");
+}
+
+function disableBloomNumText(num) {
+  d3.selectAll("text")
+    .filter(function(d) { if (d != undefined) return d.bloom_order <= num; } )
+    .style("visibility", "visible");
+
+  d3.selectAll("text")
+    .filter(function(d) { if (d != undefined) return d.bloom_order <= num; } )
+    .transition()
+    .duration(2000)
+    .style("opacity", 1.0);
+
+  d3.selectAll("text")
+    .filter(function(d) { if (d != undefined) return d.bloom_order > num; } )
+    .transition()
+    .duration(2000)
+    .style("opacity", 0.0)
+    .transition()
+    .delay(2000)
+    .style("visibility", "hidden");
+}
+
+function barColour(d) {
+  if (d.type == "in") return norcolor[0];
+  else return norcolor[1];
+}
+
+function disableBloomNumBars(num) {
+  d3.selectAll("rect")
+    .filter(function(d) { if (d != undefined) return d.bloom_order <= num; } )
+    .transition()
+    .duration(2000)
+    .style("fill", barColour);
+
+  d3.selectAll("rect")
+    .filter(function(d) { if (d != undefined) return d.bloom_order > num; } )
+    .transition()
+    .duration(2000)
+    .style("fill", "#ddd");
+}
+
+function disableBloomNum(num) {
+  disableBloomNumNodes(num);
+  disableBloomNumPaths(num);
+  disableBloomNumText(num);
+  disableBloomNumBars(num);
+}

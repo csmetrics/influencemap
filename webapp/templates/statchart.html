@@ -43,11 +43,11 @@
     </div>
     <div style="padding-top:10px">
       <b>Number of petals</b>
-      <input name="num-petals" id="num-petals" onchange="updateConfigUrl()" type="number" value="{{yearSlider.selected.num_leaves}}" min="1" max="50"/>
+      <input name="num-petals" id="num-petals" onchange="petalChange()" type="number" value="{{yearSlider.selected.num_leaves}}" min="1" max="50"/>
     </div>
     <div style="padding-top:10px">
       <b>Petal order</b>
-	  <select id="petal-order" onchange="petalChange()">
+	  <select id="petal-order" onchange="orderChange()">
 		  <option value="ratio">Influence Ratio</option>
 		  <option value="blue">Influenced By (Blue)</option>
 		  <option value="red">Influencing (Red)</option>
@@ -444,8 +444,27 @@ function populatePapersContent(papers, title, entity_names){
   container_div.appendChild(html_elem[0]);
 }
 
+function orderChange() {
+  reorder_all($("#num-petals").val(), $("#petal-order").val());
+  updateConfigUrl();
+}
+
+var prev_num_petals = parseInt($("#num-petals").val());
+
 function petalChange() {
-  reorder_all($("#petal-order").val());
+  new_num_petals = parseInt($("#num-petals").val());
+
+  // Animation ordering depending on growing or shrinking
+  if (new_num_petals < prev_num_petals) {
+    disableBloomNum(new_num_petals);
+    setTimeout(function() { reorder_all(new_num_petals, $("#petal-order").val()); }, 2100);
+  }
+  else {
+    reorder_all(new_num_petals, $("#petal-order").val());
+    setTimeout(function() { disableBloomNum(new_num_petals); }, 1100);
+  }
+
+  prev_num_petals = new_num_petals;
   updateConfigUrl();
 }
 

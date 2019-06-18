@@ -97,7 +97,8 @@ def processdata(gtype, egoG, num_leaves, order):
             "inf_out": egoG.nodes[key]['inf_out'],
             "dif": egoG.nodes[key]['dif'],
             "ratio": egoG.nodes[key]['ratiow'],
-            "coauthor": str(egoG.nodes[key]['coauthor'])
+            "coauthor": str(egoG.nodes[key]['coauthor']),
+            "bloom_order": egoG.nodes[key]['bloom_order'],
         } for i, key in zip(range(1, len(outer_nodes)+1), outer_nodes)}
 
     nodekeys = ['ego'] + [v["name"] for v in sorted(nodedata.values(), key=itemgetter("id"))]
@@ -111,7 +112,8 @@ def processdata(gtype, egoG, num_leaves, order):
         "size": 1,
         "xpos": x_pos[0],
         "ypos": y_pos[0],
-        "coauthor": str(False)
+        "bloom_order": 0,
+        "coauthor": str(False),
     }
 
     edge_in = [{
@@ -122,7 +124,8 @@ def processdata(gtype, egoG, num_leaves, order):
             "gtype": gtype,
             "type": v["direction"],
             "weight": v["nweight"],
-            "o_weight": v["weight"]
+            "o_weight": v["weight"],
+            "bloom_order": nodedata[t]["bloom_order"],
         } for s, t, v in links_in]
 
     edge_out = [{
@@ -133,7 +136,8 @@ def processdata(gtype, egoG, num_leaves, order):
             "gtype": gtype,
             "type": v["direction"],
             "weight": v["nweight"],
-            "o_weight": v["weight"]
+            "o_weight": v["weight"],
+            "bloom_order": nodedata[s]["bloom_order"],
         } for s, t, v in links_out]
 
     linkdata = list()
@@ -144,6 +148,7 @@ def processdata(gtype, egoG, num_leaves, order):
 
     chartdata = [{
             "id": nodedata[t]["id"] if v["direction"] == "in" else nodedata[s]["id"],
+            "bloom_order": nodedata[t]["bloom_order"] if v["direction"] == "in" else nodedata[s]["bloom_order"],
             "name": t if v["direction"] == "in" else s,
             "type": v["direction"],
             "gtype": gtype,
@@ -192,7 +197,8 @@ def processdata_all(gtype, egoG, num_leaves, order):
             "gtype": gtype,
             "size": egoG.nodes[key]["sumw"],
             "sum": egoG.nodes[key]["sum"],
-            "coauthor": str(egoG.nodes[key]['coauthor'])
+            "coauthor": str(egoG.nodes[key]['coauthor']),
+            "bloom_order": egoG.nodes[key]['bloom_order'],
         } for i, key in zip(range(1, len(outer_nodes)+1), outer_nodes)}
 
     # Center node data
@@ -202,11 +208,13 @@ def processdata_all(gtype, egoG, num_leaves, order):
         "id": 0,
         "gtype": gtype,
         "size": 1,
-        "coauthor": str(False)
+        "coauthor": str(False),
+        "bloom_order": 0,
     }
 
     chartdata = [{
             "id": nodedata[t]["id"] if v["direction"] == "in" else nodedata[s]["id"],
+            "bloom_order": nodedata[t]["bloom_order"] if v["direction"] == "in" else nodedata[s]["bloom_order"],
             "name": t if v["direction"] == "in" else s,
             "type": v["direction"],
             "gtype": gtype,
@@ -262,7 +270,7 @@ def gen_flower_data(score_df, flower_prop, entity_names, flower_name,
         i = 0
         top_score = list()
         max_search = False
-        num_leaves = config["num_leaves"]
+        num_leaves = 50 # config["num_leaves"]
         while len(top_score) < num_leaves and not max_search :
             top_score = agg_score.head(n=(4 + i) * num_leaves)
 
@@ -284,6 +292,9 @@ def gen_flower_data(score_df, flower_prop, entity_names, flower_name,
             top_score.ego = flower_name
             # Increase the search space
             i += 1
+    
+    # Calculate the bloom ordering
+    top_score["bloom_order"] = range(1, len(top_score) + 1)
 
     # Graph score
     graph_score = score_df_to_graph(top_score)
@@ -314,6 +325,9 @@ def gen_flower_data(score_df, flower_prop, entity_names, flower_name,
             top_score_all.ego = flower_name
             # Increase the search space
             i += 1
+
+        # Calculate the bloom ordering
+        top_score_all["bloom_order"] = range(1, len(top_score) + 1)
 
         graph_score_all = score_df_to_graph(top_score_all)
         data_all = processdata_all(flower_type, graph_score_all, num_leaves, config['order'])

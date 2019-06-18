@@ -77,12 +77,17 @@ def score_df_to_graph(score_df):
     print('\n---\n{} start graph generation'.format(datetime.now()))
 
     # Ego Graph
-    egoG = nx.DiGraph(ego='ego', max_influenced=score_df['influenced'].max(), max_influencing=score_df['influencing'].max())
+    egoG = nx.DiGraph(
+        ego='ego', max_influenced=score_df['influenced'].max(),
+        max_influencing=score_df['influencing'].max())
 
     # Normalise values
     score_df['normed_sum'] = normalise_to_proportion_of_max(score_df['sum'])
     score_df['normed_ratio'] = normalise_colour_dif(score_df['ratio'])
-    norm_influenced, norm_influencing = normalise_double_log(score_df['influenced'], score_df['influencing'])
+
+    norm_influenced, norm_influencing = normalise_double_log(
+        score_df['influenced'], score_df['influencing'])
+
     score_df['normed_influenced'] = norm_influenced
     score_df['normed_influencing'] = norm_influencing
     score_df['dif'] = score_df['influencing'] - score_df['influenced']
@@ -93,20 +98,26 @@ def score_df_to_graph(score_df):
     # Iterate over dataframe
     for _, row in score_df.iterrows():
         # Add ratio weight
-        egoG.add_node(row['entity_name'], nratiow=row['normed_ratio'],
-                ratiow=row['ratio'], sumw=row['normed_sum'], sum=row['sum'],
-                coauthor=row['coauthor'], dif=row['dif'],
-                inf_in=row['influenced'], inf_out=row['influencing'])
+        egoG.add_node(
+            row['entity_name'], nratiow=row['normed_ratio'],
+            ratiow=row['ratio'], sumw=row['normed_sum'], sum=row['sum'],
+            coauthor=row['coauthor'], dif=row['dif'],
+            inf_in=row['influenced'], inf_out=row['influencing'],
+            bloom_order=row['bloom_order'])
 
         # Add influence weights
-        egoG.add_edge(row['entity_name'], 'ego', weight=row['influencing'],
-                nweight=row['normed_influencing'], direction='out',
-                ratiow=row['ratio'], dif=row['dif'], sumw=row['normed_sum'],
-                inf_in=row['influenced'], inf_out=row['influencing'])
-        egoG.add_edge('ego', row['entity_name'], weight=row['influenced'],
-                nweight=row['normed_influenced'], direction='in',
-                ratiow=row['ratio'], dif=row['dif'], sumw=row['normed_sum'],
-                inf_in=row['influenced'], inf_out=row['influencing'])
+        egoG.add_edge(
+            row['entity_name'], 'ego', weight=row['influencing'],
+            nweight=row['normed_influencing'], direction='out',
+            ratiow=row['ratio'], dif=row['dif'], sumw=row['normed_sum'],
+            inf_in=row['influenced'], inf_out=row['influencing'],
+            bloom_order=row['bloom_order'])
+        egoG.add_edge(
+            'ego', row['entity_name'], weight=row['influenced'],
+            nweight=row['normed_influenced'], direction='in',
+            ratiow=row['ratio'], dif=row['dif'], sumw=row['normed_sum'],
+            inf_in=row['influenced'], inf_out=row['influencing'],
+            bloom_order=row['bloom_order'])
 
     print('{} finish graph generation\n---'.format(datetime.now()))
 
