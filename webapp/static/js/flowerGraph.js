@@ -1122,7 +1122,7 @@ function reorder_edges(idx, order, duration) {
 
 function reorder_flower(idx, order) {
   reorder_nodes(idx, order, 1000);
-  setTimeout(function() { reorder_edges(idx, order, 500) }, 2100);
+  setTimeout(function() { reorder_edges(idx, order, 500) }, 1100);
 }
 
 function reorder_all(order) {
