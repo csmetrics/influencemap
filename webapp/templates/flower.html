@@ -90,6 +90,7 @@ drawFlower("#graph2", conf_data, 1, width);
 drawFlower("#graph3", inst_data, 2, width);
 drawFlower("#graph4", fos_data, 3, width);
 
+setTimeout(function() { reorder_all($("#petal-order").val()); }, 2100);
 
 // Get the modal
 var  node_info_modal = document.getElementById('node_info_modal');

@@ -365,6 +365,11 @@ resubmitButton.addEventListener('click', function(){
       session = result["session"];
       // do not update stat for resubmit
       // updateStats(result.stats);
+
+      // Update the petal order
+      setTimeout(function() { reorder_all($("#petal-order").val()); }, 2100);
+      console.log($("#petal-order").val());
+      
       resubmitButton.className = "btn btn-primary";
     }
   });
@@ -423,8 +428,6 @@ function showPapers(type, year=NaN) {
   }
 }
 
-
-
 function populatePapersContent(papers, title, entity_names){
   var container_div = document.getElementById("node_info_container");
   var content_div = document.getElementById("node_info_content");
@@ -442,7 +445,6 @@ function populatePapersContent(papers, title, entity_names){
 }
 
 function petalChange() {
-  console.log($("#petal-order").val());
   reorder_all($("#petal-order").val());
   updateConfigUrl();
 }

@@ -9,6 +9,7 @@ var colormaps = [
   d3.interpolateRdYlGn,
   d3.interpolateSpectral,
 ];
+
 // var colors = colormaps[parseInt(Math.random()*colormaps.length)];
 var colors = colormaps[0];
 var selcolor = [colors(0.2), colors(0.8)],
@@ -1020,7 +1021,6 @@ function transform_text_y(d) {
 }
 
 // ---------- Reorder Move ----------
-
 function reorder_nodes(idx, order, duration) {
   var ordering = reorder(order, data_arr[idx]);
   var [xpos, ypos] = gen_pos(data_arr[idx].nodes.length - 1);
@@ -1101,13 +1101,16 @@ function reorder_edges(idx, order, duration) {
   var ordering = reorder(order, data_arr[idx]);
   link_g_arr[idx].selectAll("path").sort(function(a, b) { return link_order(ordering, a, b); } );
 
+  // Positioning
+  var [xpos, ypos] = gen_pos(data_arr[idx].nodes.length - 1);
+
   // Move reference links
   if (ref_link[idx] != undefined) {
     ref_link[idx].each(function(){
       d3.select(this)
       .transition()
       .duration(duration)
-      .attr("d", function(d){ return linkArc(idx, d, true); })
+      .attr("d", function(d) { return linkOrderUpdate(d, ordering, xpos, ypos); })
     });
   }
 
@@ -1116,13 +1119,13 @@ function reorder_edges(idx, order, duration) {
     d3.select(this)
     .transition()
     .duration(duration)
-    .attr("d", function(d){ return linkArc(idx, d, true); })
+    .attr("d", function(d) { return linkOrderUpdate(d, ordering, xpos, ypos); })
   });
 }
 
 function reorder_flower(idx, order) {
   reorder_nodes(idx, order, 1000);
-  setTimeout(function() { reorder_edges(idx, order, 500) }, 1100);
+  reorder_edges(idx, order, 1000);
 }
 
 function reorder_all(order) {
@@ -1130,3 +1133,23 @@ function reorder_all(order) {
     reorder_flower(i, order);
   }
 }
+
+function linkOrderUpdate(d, ordering, xpos, ypos) {
+  var sp_id = ordering[d.source];
+  var tp_id = ordering[d.target];
+
+  var sx_pos = center[0] + magf * xpos[sp_id];
+  var sy_pos = center[1] - magf * ypos[sp_id];
+  var tx_pos = center[0] + magf * xpos[tp_id];
+  var ty_pos = center[1] - magf * ypos[tp_id];
+  return arcUpdate(sx_pos, sy_pos, tx_pos, ty_pos);
+}
+
+function arcUpdate(sx, sy, tx, ty) {
+  var dx = tx-sx,
+      dy = ty-sy,
+      dr = Math.sqrt(dx * dx + dy * dy)*2;
+  return "M" + sx + "," + sy + "A" + dr + "," + dr + " 0 0,1 " + tx + "," + ty;
+}
+
+// ---------- Disable/Enable Shapes ----------
