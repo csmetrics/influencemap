@@ -358,17 +358,19 @@ resubmitButton.addEventListener('click', function(){
       inst_data = result.inst;
       fos_data = result.fos;
 
-      drawFlower("#graph1", author_data, 0, width);
-      drawFlower("#graph2", conf_data, 1, width);
-      drawFlower("#graph3", inst_data, 2, width);
-      drawFlower("#graph4", fos_data, 3, width);
+      cur_petals = parseInt($("#num-petals").val());
+      cur_order = $("#petal-order").val();
+
+      drawFlower("#graph1", author_data, 0, width, cur_petals, cur_order);
+      drawFlower("#graph2", conf_data, 1, width, cur_petals, cur_order);
+      drawFlower("#graph3", inst_data, 2, width, cur_petals, cur_order);
+      drawFlower("#graph4", fos_data, 3, width, cur_petals, cur_order);
       session = result["session"];
       // do not update stat for resubmit
       // updateStats(result.stats);
 
       // Update the petal order
       setTimeout(function() { reorder_all($("#petal-order").val()); }, 2100);
-      console.log($("#petal-order").val());
       
       resubmitButton.className = "btn btn-primary";
     }

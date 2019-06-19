@@ -79,19 +79,22 @@ inst_data = {{ inst|safe }}
 fos_data = {{ fos|safe }}
 session = {{ session|safe }}
 
+start_petals = parseInt($("#num-petals").val());
+start_order = $("#petal-order").val();
+
 var selfCiteCheckbox = document.getElementById('self-cite');
 var coauthorCheckbox = document.getElementById('coauthor');
 var referenceCheckbox = document.getElementById('reference');
 
 var width = document.getElementById('flower-container').offsetWidth;
 drawLegend();
-drawFlower("#graph1", author_data, 0, width);
-drawFlower("#graph2", conf_data, 1, width);
-drawFlower("#graph3", inst_data, 2, width);
-drawFlower("#graph4", fos_data, 3, width);
+drawFlower("#graph1", author_data, 0, width, start_petals, start_order);
+drawFlower("#graph2", conf_data, 1, width, start_petals, start_order);
+drawFlower("#graph3", inst_data, 2, width, start_petals, start_order);
+drawFlower("#graph4", fos_data, 3, width, start_petals, start_order);
 
-setTimeout(function() { disableBloomNum($("#num-petals").val()); }, 2100)
-setTimeout(function() { reorder_all($("#num-petals").val(), $("#petal-order").val()); }, 4100);
+setTimeout(function() { disableBloomNum(start_petals); }, 2100)
+setTimeout(function() { reorder_all(start_petals, start_order); }, 4100);
 
 // Get the modal
 var  node_info_modal = document.getElementById('node_info_modal');
