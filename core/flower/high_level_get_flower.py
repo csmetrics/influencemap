@@ -155,6 +155,8 @@ def processdata(gtype, egoG, num_leaves, order):
             "sum": nodedata[t]["weight"] if v["direction"] == "in" else nodedata[s]["weight"],
             "weight": v["weight"]
         } for s, t, v in links]
+    
+    chartdata.sort(key=lambda d: d['bloom_order'])
 
     return { "nodes": sorted(list(nodedata.values()), key=itemgetter("id")), "links": linkdata, "bars": chartdata }
 
@@ -221,6 +223,8 @@ def processdata_all(gtype, egoG, num_leaves, order):
             "sum": nodedata[t]["weight"] if v["direction"] == "in" else nodedata[s]["weight"],
             "weight": v["weight"]
         } for s, t, v in links]
+
+    chartdata.sort(key=lambda d: d['bloom_order'])
 
     return { "bars": chartdata }
 

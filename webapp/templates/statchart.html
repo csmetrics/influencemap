@@ -368,9 +368,6 @@ resubmitButton.addEventListener('click', function(){
       session = result["session"];
       // do not update stat for resubmit
       // updateStats(result.stats);
-
-      // Update the petal order
-      setTimeout(function() { reorder_all($("#petal-order").val()); }, 2100);
       
       resubmitButton.className = "btn btn-primary";
     }
@@ -447,7 +444,8 @@ function populatePapersContent(papers, title, entity_names){
 }
 
 function orderChange() {
-  reorder_all($("#num-petals").val(), $("#petal-order").val());
+  cur_num_petals = parseInt($("#num-petals").val());
+  reorder_all_flowers_grow(cur_num_petals, $("#petal-order").val(), 1500);
   updateConfigUrl();
 }
 
@@ -458,12 +456,10 @@ function petalChange() {
 
   // Animation ordering depending on growing or shrinking
   if (new_num_petals < prev_num_petals) {
-    disableBloomNum(new_num_petals);
-    setTimeout(function() { reorder_all(new_num_petals, $("#petal-order").val()); }, 2100);
+    reorder_all_flowers_shrink(new_num_petals, $("#petal-order").val(), 1500);
   }
   else {
-    reorder_all(new_num_petals, $("#petal-order").val());
-    setTimeout(function() { disableBloomNum(new_num_petals); }, 1100);
+    reorder_all_flowers_grow(new_num_petals, $("#petal-order").val(), 1500);
   }
 
   prev_num_petals = new_num_petals;

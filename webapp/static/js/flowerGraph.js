@@ -1085,91 +1085,7 @@ function text_order_anchor(d, xpos, ordering) {
 }
 
 // ---------- Reorder Move ----------
-function reorder_nodes(idx, num, order, duration) {
-  var ordering = reorder(num, order, data_arr[idx]);
-  var [xpos, ypos] = gen_pos(num);
-
-  // Reorder the layering of the nodes
-  node_g_arr[idx].selectAll("circle").sort(function(a, b) { return node_order(ordering, a, b); } );
-
-  // Move nodes
-  node_out[idx].filter(function(d) { return d.bloom_order <= num; })
-    .each(function() {
-      d3.select(this)
-      .transition()
-      .duration(duration)
-      .attr("cx", function(d) { return center[0]+magf*xpos[ordering[d.id]]; })
-      .attr("cy", function(d) { return center[1]-magf*ypos[ordering[d.id]]; })
-      .attr("xpos", function(d) { return center[0]+magf*xpos[ordering[d.id]]; })
-      .attr("ypos", function(d) { return center[1]-magf*ypos[ordering[d.id]]; })
-    });
-
-  // Move reference nodes
-  if (ref_node[idx] != undefined) {
-    ref_node[idx].filter(function(d) { return d.bloom_order <= num; })
-      .each(function() {
-        d3.select(this)
-        .transition()
-        .duration(duration)
-        .attr("cx", function(d) { return center[0]+magf*xpos[ordering[d.id]]; })
-        .attr("cy", function(d) { return center[1]-magf*ypos[ordering[d.id]]; })
-        .attr("xpos", function(d) { return center[0]+magf*xpos[ordering[d.id]]; })
-        .attr("ypos", function(d) { return center[1]-magf*ypos[ordering[d.id]]; })
-      });
-  }
-
-  // Move text
-  text_out[idx].filter(function(d) { return d.bloom_order <= num; })
-    .each(function() {
-      d3.select(this)
-      .transition()
-      .duration(duration)
-      .attr("x", function(d) { return text_order_xpos(d, xpos, ordering); })
-      .attr("y", function(d) { return text_order_ypos(d, xpos, ypos, num, ordering); })
-      .attr("text-anchor", function(d) { return text_order_anchor(d, xpos, ordering); })
-    });
-
-}
-
-function reorder_edges(idx, num, order, duration) {
-  // Reorder the layering of the edges
-  var ordering = reorder(num, order, data_arr[idx]);
-  link_g_arr[idx].selectAll("path").sort(function(a, b) { return link_order(ordering, a, b); } );
-
-  // Positioning
-  var [xpos, ypos] = gen_pos(num);
-
-  // Move reference links
-  if (ref_link[idx] != undefined) {
-    ref_link[idx].filter(function(d) { return d.bloom_order <= num; })
-      .each(function(){
-        d3.select(this)
-        .transition()
-        .duration(duration)
-        .attr("d", function(d) { return linkOrderUpdate(d, ordering, xpos, ypos); })
-      });
-  }
-
-  // Move links
-  link[idx].filter(function(d) { return d.bloom_order <= num; })
-    .each(function(){
-      d3.select(this)
-      .transition()
-      .duration(duration)
-      .attr("d", function(d) { return linkOrderUpdate(d, ordering, xpos, ypos); })
-    });
-}
-
-function reorder_flower(idx, num, order) {
-  reorder_nodes(idx, num, order, 1000);
-  reorder_edges(idx, num, order, 1000);
-}
-
-function reorder_all(num, order) {
-  for (var i in data_arr) {
-    reorder_flower(i, num, order);
-  }
-}
+var GTYPE_MAP = {0: "author", 1: "conf", 2: "inst", 3: "fos"};
 
 function linkOrderUpdate(d, ordering, xpos, ypos) {
   var sp_id = ordering[d.source];
@@ -1190,26 +1106,6 @@ function arcUpdate(sx, sy, tx, ty) {
 }
 
 // ---------- Disable/Enable Shapes ----------
-function disableBloomNumNodes(num) {
-  d3.selectAll("circle")
-    .filter(function(d) {return d.bloom_order <= num;} )
-    .style("visibility", "visible");
-
-  d3.selectAll("circle")
-    .filter(function(d) {return d.bloom_order <= num;} )
-    .transition()
-    .duration(2000)
-    .style("opacity", 1.0);
-
-  d3.selectAll("circle")
-    .filter(function(d) {return d.bloom_order > num;} )
-    .transition()
-    .duration(2000)
-    .style("opacity", 0.0)
-    .transition()
-    .delay(2000)
-    .style("visibility", "hidden");
-}
 
 var PATH_LINK = ["link in", "link out", "new-link in", "new-link out"];
 
@@ -1267,23 +1163,202 @@ function barColour(d) {
   else return norcolor[1];
 }
 
-function disableBloomNumBars(num) {
+function disableBloomNumBars(num, duration) {
   d3.selectAll("rect")
     .filter(function(d) { if (d != undefined) return d.bloom_order <= num; } )
+    .interrupt()
     .transition()
-    .duration(2000)
+    .duration(duration)
     .style("fill", barColour);
 
   d3.selectAll("rect")
     .filter(function(d) { if (d != undefined) return d.bloom_order > num; } )
+    .interrupt()
     .transition()
-    .duration(2000)
+    .duration(duration)
     .style("fill", "#ddd");
 }
 
-function disableBloomNum(num) {
-  disableBloomNumNodes(num);
-  disableBloomNumPaths(num);
-  disableBloomNumText(num);
-  disableBloomNumBars(num);
+function reorder_flower_grow(idx, num, order, duration) {
+  var ordering = reorder(num, order, data_arr[idx]);
+  var [xpos, ypos] = gen_pos(num);
+
+  // -- Reorder the layering --
+  d3.selectAll("circle")
+    .filter(function(d) { return d.gtype == GTYPE_MAP[idx]; } )
+    .sort(function(a, b) { return node_order(ordering, a, b); } );
+
+  d3.selectAll("path")
+    .filter(function() { return findLinks(this); })
+    .filter(function(d) { return d.gtype == GTYPE_MAP[idx]; } )
+    .sort(function(a, b) { return node_order(ordering, a, b); } );
+  // -- Reorder the layering --
+
+  // -- Re-enable --
+  d3.selectAll("circle")
+    .filter(function(d) { return d.gtype == GTYPE_MAP[idx]; } )
+    .filter(function(d) {return d.bloom_order <= num;} )
+    .style("visibility", "visible");
+
+  d3.selectAll("path")
+    .filter(function() { return findLinks(this); })
+    .filter(function(d) { return d.gtype == GTYPE_MAP[idx]; } )
+    .filter(function(d) {return d.bloom_order <= num;} )
+    .style("visibility", "visible");
+
+  d3.selectAll("text")
+    .filter(function(d) { if (d != undefined) return d.bloom_order <= num; } )
+    .filter(function(d) { return d.gtype == GTYPE_MAP[idx]; } )
+    .style("visibility", "visible");
+  // -- Re-enable --
+
+  // -- Move Then Enable --
+  d3.selectAll("circle")
+    .filter(function(d) { return d.bloom_order <= num; })
+    .filter(function(d) { return d.gtype == GTYPE_MAP[idx]; } )
+    .interrupt()
+    .transition()
+    .duration(duration)
+    .attr("cx", function(d) { return center[0]+magf*xpos[ordering[d.id]]; })
+    .attr("cy", function(d) { return center[1]-magf*ypos[ordering[d.id]]; })
+    .attr("xpos", function(d) { return center[0]+magf*xpos[ordering[d.id]]; })
+    .attr("ypos", function(d) { return center[1]-magf*ypos[ordering[d.id]]; })
+    .transition()
+    .duration(duration)
+    .style("opacity", 1.0);
+
+  d3.selectAll("text")
+    .filter(function(d) { if (d != undefined) return d.bloom_order <= num; } )
+    .filter(function(d) { return d.gtype == GTYPE_MAP[idx]; } )
+    .interrupt()
+    .transition()
+    .duration(duration)
+    .attr("x", function(d) { return text_order_xpos(d, xpos, ordering); })
+    .attr("y", function(d) { return text_order_ypos(d, xpos, ypos, num, ordering); })
+    .attr("text-anchor", function(d) { return text_order_anchor(d, xpos, ordering); })
+    .transition()
+    .duration(duration)
+    .style("opacity", 1.0);
+
+  d3.selectAll("path")
+    .filter(function() { return findLinks(this); })
+    .filter(function(d) { return d.bloom_order <= num; })
+    .filter(function(d) { return d.gtype == GTYPE_MAP[idx]; } )
+    .interrupt()
+    .transition()
+    .duration(duration)
+    .attr("d", function(d) { return linkOrderUpdate(d, ordering, xpos, ypos); })
+    .transition()
+    .duration(duration)
+    .style("opacity", 1.0);
+  // -- Move Then Enable --
+}
+
+var LEAF_FALL = 350;
+
+function reorder_flower_shrink(idx, num, order, duration) {
+  var ordering = reorder(num, order, data_arr[idx]);
+  var [xpos, ypos] = gen_pos(num);
+
+  // -- Reorder the layering --
+  d3.selectAll("circle")
+    .filter(function(d) { return d.gtype == GTYPE_MAP[idx]; } )
+    .sort(function(a, b) { return node_order(ordering, a, b); } );
+
+  d3.selectAll("path")
+    .filter(function() { return findLinks(this); })
+    .filter(function(d) { return d.gtype == GTYPE_MAP[idx]; } )
+    .sort(function(a, b) { return node_order(ordering, a, b); } );
+  // -- Reorder the layering --
+
+  // -- Wait then Move --
+  d3.selectAll("circle")
+    .filter(function(d) { return d.bloom_order <= num; })
+    .filter(function(d) { return d.gtype == GTYPE_MAP[idx]; } )
+    .interrupt()
+    .transition()
+    .delay(duration)
+    .duration(duration)
+    .attr("cx", function(d) { return center[0]+magf*xpos[ordering[d.id]]; })
+    .attr("cy", function(d) { return center[1]-magf*ypos[ordering[d.id]]; })
+    .attr("xpos", function(d) { return center[0]+magf*xpos[ordering[d.id]]; })
+    .attr("ypos", function(d) { return center[1]-magf*ypos[ordering[d.id]]; })
+    .style("opacity", 1.0);
+
+  d3.selectAll("text")
+    .filter(function(d) { if (d != undefined) return d.bloom_order <= num; } )
+    .filter(function(d) { return d.gtype == GTYPE_MAP[idx]; } )
+    .interrupt()
+    .transition()
+    .delay(duration)
+    .duration(duration)
+    .attr("x", function(d) { return text_order_xpos(d, xpos, ordering); })
+    .attr("y", function(d) { return text_order_ypos(d, xpos, ypos, num, ordering); })
+    .attr("text-anchor", function(d) { return text_order_anchor(d, xpos, ordering); })
+    .style("opacity", 1.0);
+
+  d3.selectAll("path")
+    .filter(function() { return findLinks(this); })
+    .filter(function(d) { return d.bloom_order <= num; })
+    .filter(function(d) { return d.gtype == GTYPE_MAP[idx]; } )
+    .interrupt()
+    .transition()
+    .delay(duration)
+    .duration(duration)
+    .attr("d", function(d) { return linkOrderUpdate(d, ordering, xpos, ypos); })
+    .style("opacity", 1.0);
+  // -- Wait then Move --
+
+  // -- Move and Disable
+  d3.selectAll("circle")
+    .filter(function(d) { return d.bloom_order > num; })
+    .filter(function(d) { return d.gtype == GTYPE_MAP[idx]; } )
+    .interrupt()
+    .transition()
+    .duration(duration*2)
+    //.attr("cx", center[0])
+    .attr("cy", center[1] + LEAF_FALL)
+    //.attr("xpos", center[0])
+    .attr("ypos", center[1] + LEAF_FALL)
+    .style("opacity", 0.0)
+    .transition()
+    .style("visibility", "hidden");
+
+  d3.selectAll("text")
+    .filter(function(d) { if (d != undefined) return d.bloom_order > num; } )
+    .filter(function(d) { return d.gtype == GTYPE_MAP[idx]; } )
+    .interrupt()
+    .transition()
+    .duration(duration*2)
+    //.attr("x", center[0])
+    .attr("y", center[1] + LEAF_FALL)
+    .style("opacity", 0.0)
+    .transition()
+    .style("visibility", "hidden");
+
+  d3.selectAll("path")
+    .filter(function() { return findLinks(this); })
+    .filter(function(d) { return d.bloom_order > num; })
+    .filter(function(d) { return d.gtype == GTYPE_MAP[idx]; } )
+    .interrupt()
+    .transition()
+    .duration(duration*2)
+    .style("opacity", 0.0)
+    .transition()
+    .style("visibility", "hidden");
+  // -- Move and Disable
+}
+
+function reorder_all_flowers_grow(num, order, duration) {
+  disableBloomNumBars(num, 2*duration);
+  for (var idx in data_arr) {
+    reorder_flower_grow(idx, num, order, duration);
+  }
+}
+
+function reorder_all_flowers_shrink(num, order, duration) {
+  disableBloomNumBars(num, 2*duration);
+  for (var idx in data_arr) {
+    reorder_flower_shrink(idx, num, order, duration);
+  }
 }
