@@ -17,7 +17,7 @@ var selcolor = [colors(0.2), colors(0.8)],
     hidcolor = [colors(0.4), colors(0.6)];
 
 var width, height, center, magf;
-var link = [], flower_split = [], bar = [], numnodes = [], cnode = [], 
+var link = [], flower_split = [], bar = [], numnodes = [], cnode = [],
     svg = [], bar_axis_x = [], bar_axis_y = [], node_out = [], text_out = [],
     data_arr = [], ref_node = [], ref_link = [], node_g_arr = [], link_g_arr
     = [];
@@ -88,13 +88,16 @@ function drawFlower(svg_id, data, idx, w, num, order) {
         .attr("class", "bar")
         .attr("id", function(d) { return d.id; })
         .attr("name", function(d) { return d.name; })
+        .attr("gtype", function(d) { return d.gtype; })
         .attr("x", function(d) { if (d.type == "out") return x(d.name)+x.bandwidth()/2; else return x(d.name); })
         .attr("y", function(d) { return y(d.weight)-v_margin; })
         .attr("width", x.bandwidth()/2)
         .attr("height", function(d) { return yheight - y(d.weight); })
         .attr("transform", "translate(0," + height + ")")
         .style("opacity", 1)
-        .style("fill", barColour);
+        .style("fill", barColour)
+        .on("mouseover", function() { highlight_on(idx, this, compare_ref); })
+        .on("mouseout", function() { highlight_off(idx, compare_ref); });
 
     // bar chart x axis
     bar_axis_x[idx] = svg[idx].append("g")
@@ -347,11 +350,19 @@ function drawFlower(svg_id, data, idx, w, num, order) {
 }
 
 function highlight_on(idx, selected, compare_ref) {
-  id = d3.select(selected).attr("id");
+  tag = selected.tagName;
   name = d3.select(selected).attr("name");
   group = d3.select(selected).attr("gtype");
-  if (id == 0) return;
+  id = d3.select(selected).attr("id");
 
+  if (tag == "circle" && id == 0) return;
+  if (tag == "rect") {
+    rel_circle = $("circle[name='"+name+"']")[0];
+    if (rel_circle == undefined) return;
+    id = rel_circle.id;
+  }
+
+  // console.log(tag, id, name, group)
   // highlight rectangles
   svg[idx].selectAll("rect").each(function() {
     if (d3.select(this).attr("class") == "bar") {
@@ -372,7 +383,7 @@ function highlight_on(idx, selected, compare_ref) {
   // highlight text
   svg[idx].selectAll("text").each(function() {
     if (d3.select(this).classed("hl-text")) {
-        d3.select(this).style("opacity", function () { if(id != this.id) return 0.4; else return 1; });
+        d3.select(this).style("opacity", function () { if(id == this.id || this.id == 0) return 1; else return 0.4; });
     }
   });
 
