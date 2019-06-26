@@ -49,7 +49,7 @@ function goToFlower(data){
    modal_display_function = make_modal(flowerLoadingModal);
    setTimeout(modal_display_function, 2000);
    data['option'] = latestSearchOption[0];
-   postData('/submit/', data, '{% csrf_token %}');
+   postData('/submit/', data, '{{ csrf_token }}');
 }
 
 setContinueFunction(goToFlower);
