@@ -992,14 +992,14 @@ function node_order(ordering, a, b) {
   var a_val = ordering[a.id];
   var b_val = ordering[b.id];
 
-  return - (a_val - b_val);
+  return a_val - b_val;
 }
 
 function link_order(ordering, a, b) {
   var a_val = ordering[a.id];
   var b_val = ordering[b.id];
-  if (a.class == "link_out") a_val += 0.5;
-  if (b.class == "link_out") b_val += 0.5;
+  if (a.class == "link_in") a_val += 100;
+  if (b.class == "link_in") b_val += 100;
 
   return a_val - b_val;
 }
@@ -1113,6 +1113,16 @@ function findLinks(obj) {
   return PATH_LINK.includes(d3.select(obj).attr("class"));
 }
 
+var PATH_COMPARE_LINK = ["new-link in", "new-link out"];
+
+function findCompareLinks(obj) {
+  return PATH_COMPARE_LINK.includes(d3.select(obj).attr("class"));
+}
+
+function findCompareNodes(obj) {
+  return "hl-circle-new" == d3.select(obj).attr("class");
+}
+
 function disableBloomNumPaths(num) {
   d3.selectAll("path")
     .filter(function() { return findLinks(this); })
@@ -1179,20 +1189,29 @@ function disableBloomNumBars(num, duration) {
     .style("fill", "#ddd");
 }
 
-function reorder_flower_grow(idx, num, order, duration) {
-  var ordering = reorder(num, order, data_arr[idx]);
-  var [xpos, ypos] = gen_pos(num);
+function reorder_layering(idx, order) {
+  var ordering = reorder(Math.min(data_arr[idx].nodes.length-1, 50), order, data_arr[idx]);
 
-  // -- Reorder the layering --
   d3.selectAll("circle")
+    .filter(function() { return findCompareNodes(this); })
     .filter(function(d) { return d.gtype == GTYPE_MAP[idx]; } )
     .sort(function(a, b) { return node_order(ordering, a, b); } );
 
   d3.selectAll("path")
-    .filter(function() { return findLinks(this); })
+    .filter(function() { return findCompareLinks(this); })
     .filter(function(d) { return d.gtype == GTYPE_MAP[idx]; } )
-    .sort(function(a, b) { return node_order(ordering, a, b); } );
-  // -- Reorder the layering --
+    .sort(function(a, b) { return link_order(ordering, a, b); } );
+}
+
+function reorder_all_layering(order) {
+  for (var idx in data_arr) {
+    reorder_layering(idx, order);
+  }
+}
+
+function reorder_flower_grow(idx, num, order, duration) {
+  var ordering = reorder(num, order, data_arr[idx]);
+  var [xpos, ypos] = gen_pos(num);
 
   // -- Re-enable --
   d3.selectAll("circle")
@@ -1259,17 +1278,6 @@ var LEAF_FALL = 350;
 function reorder_flower_shrink(idx, num, order, duration) {
   var ordering = reorder(num, order, data_arr[idx]);
   var [xpos, ypos] = gen_pos(num);
-
-  // -- Reorder the layering --
-  d3.selectAll("circle")
-    .filter(function(d) { return d.gtype == GTYPE_MAP[idx]; } )
-    .sort(function(a, b) { return node_order(ordering, a, b); } );
-
-  d3.selectAll("path")
-    .filter(function() { return findLinks(this); })
-    .filter(function(d) { return d.gtype == GTYPE_MAP[idx]; } )
-    .sort(function(a, b) { return node_order(ordering, a, b); } );
-  // -- Reorder the layering --
 
   // -- Wait then Move --
   d3.selectAll("circle")
@@ -1350,14 +1358,26 @@ function reorder_flower_shrink(idx, num, order, duration) {
 }
 
 function reorder_all_flowers_grow(num, order, duration) {
+  // Reorder the layering
+  reorder_all_layering(order);
+
+  // Disable bars
   disableBloomNumBars(num, 2*duration);
+
+  // Move flower
   for (var idx in data_arr) {
     reorder_flower_grow(idx, num, order, duration);
   }
 }
 
 function reorder_all_flowers_shrink(num, order, duration) {
+  // Reorder the layering
+  reorder_all_layering(order);
+
+  // Disable bars
   disableBloomNumBars(num, 2*duration);
+
+  // Move flower
   for (var idx in data_arr) {
     reorder_flower_shrink(idx, num, order, duration);
   }

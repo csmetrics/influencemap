@@ -274,7 +274,7 @@ def gen_flower_data(score_df, flower_prop, entity_names, flower_name,
         i = 0
         top_score = list()
         max_search = False
-        num_leaves = 50 # config["num_leaves"]
+        num_leaves = max(50, config["num_leaves"])
         while len(top_score) < num_leaves and not max_search :
             top_score = agg_score.head(n=(4 + i) * num_leaves)
 
@@ -297,6 +297,7 @@ def gen_flower_data(score_df, flower_prop, entity_names, flower_name,
             # Increase the search space
             i += 1
     
+    print(len(top_score))
     # Calculate the bloom ordering
     top_score["bloom_order"] = range(1, len(top_score) + 1)
 
@@ -330,12 +331,6 @@ def gen_flower_data(score_df, flower_prop, entity_names, flower_name,
             # Increase the search space
             i += 1
 
-        # Calculate the bloom ordering
-        top_score_all["bloom_order"] = range(1, len(top_score) + 1)
-
-        graph_score_all = score_df_to_graph(top_score_all)
-        data_all = processdata_all(flower_type, graph_score_all, num_leaves, config['order'])
-        data["bars"] = data_all["bars"]
         data["total"] = len(agg_score)
 
     return flower_type, data #, node_info

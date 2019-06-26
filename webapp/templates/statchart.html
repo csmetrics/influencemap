@@ -366,6 +366,10 @@ resubmitButton.addEventListener('click', function(){
       drawFlower("#graph3", inst_data, 2, width, cur_petals, cur_order);
       drawFlower("#graph4", fos_data, 3, width, cur_petals, cur_order);
 
+      // Reorder the layering
+      reorder_all_layering(cur_order);
+
+      // Disable bars
       disableBloomNumBars(cur_petals, 2000);
 
       session = result["session"];
