@@ -17,6 +17,8 @@ get_header = lambda x, keys : {
 
 #print('Using key {} with key: {}'.format(API_IDX, API_KEYS[API_IDX]))
 
+class APIKeyError(Exception):
+    pass
 
 def query_academic_search(type, url, query):
     i = 0
@@ -40,8 +42,12 @@ def query_academic_search(type, url, query):
             print("ERROR: problem with the request.")
             print(response.content)
             #exit()
-        if response.status_code not in [429, 403] or i >= MAX_API - 1: # 429 Rate limit, 403 Quota Exceeded
+        if response.status_code not in [429, 403]:
+            # 429 Rate limit, 403 Quota Exceeded
+            #raise APIKeyError
             processing = False
+        if i >= MAX_API - 1:
+            raise APIKeyError("Out of API keys")
         else:
             i += 1
             header = get_header(i, keys)

@@ -163,7 +163,6 @@ def paper_mag_query(entity_type, entity_name):
     # Otherwise
     return None
 
-
 def author_paper_mag_multiquery(author_ids):
     ''' Find author name from id.
     '''
@@ -171,9 +170,9 @@ def author_paper_mag_multiquery(author_ids):
     url = os.path.join(MAS_URL_PREFIX, "academic/v1.0/evaluate")
     queries = lambda x: {
         'expr': or_query_builder('Composite(AA.AuId={})', author_ids),
-        'count': 10000,
+        'count': 1000,
         'offset': x,
-        'attributes': 'Id'
+        'attributes': 'AA.AuId'
         }
 
     # Query result
@@ -184,7 +183,7 @@ def author_paper_mag_multiquery(author_ids):
     count    = 0
 
     while not finished:
-        data = query_academic_search('post', url, query(count))
+        data = query_academic_search('post', url, queries(count))
 
         # Check if no more data
         if len(data['entities']) > 0:

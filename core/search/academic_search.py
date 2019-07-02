@@ -3,23 +3,11 @@ import http.client, urllib.request, urllib.parse, urllib.error, base64
 from core.search.parse_academic_search import *
 
 MAS_URL_PREFIX = "https://api.labs.cognitive.microsoft.com"
-headers = {
-    # Request headers
-    #'Ocp-Apim-Subscription-Key': 'a27d17cc1a6044f5bb6accf68e10eefa',   # original
-    'Ocp-Apim-Subscription-Key': '4698d5e7b0244e828d1dc21134238650',    # bens
-}
+
+import core.search.mag_interface as mag_interface
 
 def query_academic_search(type, url, query):
-    if type == "get":
-        response = requests.get(url, params=urllib.parse.urlencode(query), headers=headers)
-    elif type == "post":
-        response = requests.post(url, json=query, headers=headers)
-    if response.status_code != 200:
-        print("return statue: " + str(response.status_code))
-        print("ERROR: problem with the request.")
-        print(response.content)
-        #exit()
-    return json.loads((response.content).decode("utf-8"))
+    return mag_interface.query_academic_search(type, url, query)
 
 def get_papers_from_field_of_study(field, citation):
     url = os.path.join(MAS_URL_PREFIX, "academic/v1.0/evaluate")

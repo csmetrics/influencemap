@@ -1,8 +1,8 @@
 import os
 from core.search.academic_search import *
 from webapp.elastic import *
-from core.search.query_paper import conference_paper_query
-from core.search.query_paper import journal_paper_query
+from core.search.query_paper_db import conference_paper_query
+from core.search.query_paper_db import journal_paper_query
 from core.search.query_name import conference_name_query
 from core.search.query_name import journal_name_query
 from core.search.query_name import author_name_query

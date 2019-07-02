@@ -29,7 +29,6 @@ from core.score.agg_paper_info         import score_paper_info_list, score_paper
 from core.search.query_name            import normalized_to_display
 
 # Imports for submit
-from core.search.query_paper      import paper_query
 from core.search.query_info       import paper_info_check_query
 #from core.search.query_info       import paper_info_mag_check_multiquery
 from core.search.query_info       import paper_info_db_check_multiquery
@@ -232,6 +231,9 @@ def submit(request):
         # data should be pre-processed and cached
         curated_flag = True
         data, option, config = get_url_query(request.GET)
+        print("!!!")
+        print(data)
+        print("!!!")
         selected_papers = get_all_paper_ids(data["EntityIds"])
         entity_names = get_all_normalised_names(data["EntityIds"])
         keyword = ""
@@ -244,6 +246,9 @@ def submit(request):
         option = data.get("option")   # last searched entity type (confusing for multiple entities)
         keyword = data.get('keyword') # last searched term (doesn't really work for multiple searches)
         entity_ids = data.get('entities')
+        print("!!!")
+        print(data)
+        print("!!!")
         selected_papers = get_all_paper_ids(entity_ids)
         entity_names = get_all_normalised_names(entity_ids)
         config = None
