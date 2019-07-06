@@ -1,12 +1,6 @@
 import os
 from core.search.academic_search import *
 from webapp.elastic import *
-from core.search.query_paper_db import conference_paper_query
-from core.search.query_paper_db import journal_paper_query
-from core.search.query_name import conference_name_query
-from core.search.query_name import journal_name_query
-from core.search.query_name import author_name_query
-from core.search.query_name import affiliation_name_query
 
 from core.flower.high_level_get_flower import default_config
 
@@ -35,14 +29,6 @@ def printNested(obj, indent=0):
             printNested(value,indent+1)
     else:
         print(indent*"\t"+str(obj))
-
-
-def printDict(d, nested=False):
-    if not nested:
-        for k,v in d.items():
-            print('k: {}\tv: {}'.format(k,v))
-    else:
-        printNested(d, 0)
 
 
 def loadList(entity):
@@ -80,34 +66,6 @@ def get_url_query(query):
     document_id = query.get("id")
     document = query_browse_group(document_id)
     return document, "author", config
-
-
-def get_all_paper_ids(entityIds):
-    paper_ids = entityIds['PaperIds'] if "PaperIds" in entityIds else []
-    if "AuthorIds" in entityIds and entityIds["AuthorIds"] != []: paper_ids += get_papers_from_author_ids(entityIds['AuthorIds'])
-    #if "ConferenceIds" in entityIds and entityIds["ConferenceIds"] != []: paper_ids += get_papers_from_conference_ids(entityIds['ConferenceIds'])
-    if "ConferenceIds" in entityIds and entityIds["ConferenceIds"] != []: paper_ids += conference_paper_query(entityIds['ConferenceIds'])
-    if "AffiliationIds" in entityIds and entityIds["AffiliationIds"] != []: paper_ids += get_papers_from_affiliation_ids(entityIds['AffiliationIds'])
-    #if "JournalIds" in entityIds and entityIds["JournalIds"] != []: paper_ids += get_papers_from_journal_ids(entityIds['JournalIds'])
-    if "JournalIds" in entityIds and entityIds["JournalIds"] != []: paper_ids += journal_paper_query(entityIds['JournalIds'])
-    return paper_ids
-
-
-def get_all_normalised_names(entityIds):
-    normalised_names = []
-    if "AuthorIds" in entityIds and entityIds["AuthorIds"] != []: normalised_names += author_name_query(entityIds['AuthorIds'])
-    if "ConferenceIds" in entityIds and entityIds["ConferenceIds"] != []: normalised_names += conference_name_query(entityIds['ConferenceIds'])
-    if "AffiliationIds" in entityIds and entityIds["AffiliationIds"] != []: normalised_names += affiliation_name_query(entityIds['AffiliationIds'])
-    if "JournalIds" in entityIds and entityIds["JournalIds"] != []: normalised_names += journal_name_query(entityIds['JournalIds'])
-
-    return normalised_names
-
-def get_conf_journ_display_names(entityIds):
-    display_names = dict()
-    if "ConferenceSeriesIds" in entityIds and entityIds["ConferenceSeriesIds"] != []: display_names["Conference"] = get_display_names_from_conference_ids(entityIds['ConferenceSeriesIds'])
-    if "JournalIds" in entityIds and entityIds["JournalIds"] != []: display_names["Journal"] = get_display_names_from_journal_ids(entityIds['JournalIds'])
-
-    return display_names
 
 def add_author_order(paper_info):
     '''

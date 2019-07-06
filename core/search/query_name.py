@@ -1,265 +1,61 @@
-'''
-Functions for querying database for entity names from entity ids.
+import core.search.query_name_db as qn_db
+import core.search.query_name_mag as qn_mag
 
-date:   24.06.18
-author: Alexander Soen
-'''
-
-from graph.config import conf
 from core.utils.entity_type import Entity_type
+from core.search.mag_interface import APIKeyError
 
-from elasticsearch import Elasticsearch
-from elasticsearch_dsl import Search
+def name_check_query(entity_type, entity_ids, mag_first=False):
+    
+    if mag_first:
+        try:
+            return qn_mag.name_mag_multiquery(entity_type, entity_ids).values()
+        except APIKeyError:
+            pass
 
-def author_name_query(author_ids):
-    ''' Find author name from id.
-    '''
-    # Elastic search client
-    client = Elasticsearch(conf.get("elasticsearch.hostname"))
+    return qn_db.name_query(entity_type, entity_ids)
 
-    # Target
-    authors_target = 'NormalizedName'
+def name_check_dict_query(entity_type, entity_ids, mag_first=False):
+    
+    if mag_first:
+        try:
+            return qn_mag.name_mag_multiquery(entity_type, entity_ids)
+        except APIKeyError:
+            pass
 
-    # Query for paa
-    authors_s = Search(index = 'authors', using = client)
-    authors_s = authors_s.query('terms', AuthorId=author_ids)
-    authors_s = authors_s.source([authors_target])
-    authors_s = authors_s.params(request_timeout=30)
+    return qn_db.name_dict_query(entity_type, entity_ids)
 
-    names = list()
-    for authors in authors_s.scan():
-        # Add names to result
-        names.append(authors[authors_target])
+def get_all_normalised_names(entity_dict, mag_first=False):
 
-    return names
+    normalised_names = []
 
+    if "AuthorIds" in entity_dict and entity_dict["AuthorIds"]:
+        normalised_names += name_check_query(
+            Entity_type.AUTH, entity_dict['AuthorIds'], mag_first=mag_first)
 
-def author_name_dict_query(author_ids):
-    ''' Find author name from id.
-    '''
-    # Elastic search client
-    client = Elasticsearch(conf.get("elasticsearch.hostname"))
+    if "ConferenceIds" in entity_dict and entity_dict["ConferenceIds"]:
+        normalised_names += name_check_query(
+            Entity_type.CONF, entity_dict['ConferenceIds'], mag_first=mag_first)
 
-    # Target
-    authors_target = 'NormalizedName'
+    if "AffiliationIds" in entity_dict and entity_dict["AffiliationIds"]:
+        normalised_names += name_check_query(
+            Entity_type.AFFI, entity_dict['AffiliationIds'], mag_first=mag_first)
 
-    # Query for paa
-    authors_s = Search(index = 'authors', using = client)
-    authors_s = authors_s.query('terms', AuthorId=author_ids)
-    authors_s = authors_s.source([authors_target])
-    authors_s = authors_s.params(request_timeout=30)
+    if "JournalIds" in entity_dict and entity_dict["JournalIds"]:
+        normalised_names += name_check_query(
+            Entity_type.JOUR, entity_dict['JournalIds'], mag_first=mag_first)
 
-    names = dict()
-    for authors in authors_s.scan():
-        # Add names to result
-        names[int(authors.meta.id)] = authors[authors_target]
+    return normalised_names
 
-    return names
+def get_conf_journ_display_names(entity_dict, mag_first=False):
 
+    display_dict = dict()
 
-def fos_name_level_dict_query(fos_ids):
-    ''' Find field of study name from id.
-    '''
-    # Elastic search client
-    client = Elasticsearch(conf.get("elasticsearch.hostname"))
+    if "ConferenceIds" in entity_dict and entity_dict["ConferenceIds"]:
+        display_dict["Conference"] = name_check_query(
+            Entity_type.CONF, entity_dict['ConferenceIds'], mag_first=mag_first)
 
-    # Target
-    fos_target = ['NormalizedName', 'Level']
+    if "JournalIds" in entity_dict and entity_dict["JournalIds"]:
+        display_dict["Journal"] = name_check_query(
+            Entity_type.JOUR, entity_dict['JournalIds'], mag_first=mag_first)
 
-    # Query for paa
-    fos_s = Search(index = 'fieldsofstudy', using = client)
-    fos_s = fos_s.query('terms', FieldOfStudyId=fos_ids)
-    fos_s = fos_s.source(fos_target)
-    fos_s = fos_s.params(request_timeout=30)
-
-    names = dict()
-    levels = dict()
-    for fos in fos_s.scan():
-        # Add names to result
-        names[int(fos.meta.id)] = fos[fos_target[0]]
-        levels[int(fos.meta.id)] = fos[fos_target[1]]
-
-    return names, levels
-
-
-def affiliation_name_query(affiliation_ids):
-    ''' Find affiliation name from id.
-    '''
-    # Elastic search client
-    client = Elasticsearch(conf.get("elasticsearch.hostname"))
-
-    # Target
-    affi_target = 'NormalizedName'
-
-    # Query for paa
-    affi_s = Search(index = 'affiliations', using = client)
-    affi_s = affi_s.query('terms', AffiliationId=affiliation_ids)
-    affi_s = affi_s.source([affi_target])
-    affi_s = affi_s.params(request_timeout=30)
-
-    names = list()
-    for affi in affi_s.scan():
-        # Add names to result
-        names.append(affi[affi_target])
-
-    return names
-
-
-def affiliation_name_dict_query(affiliation_ids):
-    ''' Find affiliation name from id.
-    '''
-    # Elastic search client
-    client = Elasticsearch(conf.get("elasticsearch.hostname"))
-
-    # Target
-    affi_target = 'NormalizedName'
-
-    # Query for paa
-    affi_s = Search(index = 'affiliations', using = client)
-    affi_s = affi_s.query('terms', AffiliationId=affiliation_ids)
-    affi_s = affi_s.source([affi_target])
-    affi_s = affi_s.params(request_timeout=30)
-
-    names = dict()
-    for affi in affi_s.scan():
-        # Add names to result
-        names[int(affi.meta.id)] = affi[affi_target]
-
-    return names
-
-
-def conference_name_query(conference_ids):
-    ''' Find conference name from id.
-    '''
-    # Elastic search client
-    client = Elasticsearch(conf.get("elasticsearch.hostname"))
-
-    # Target
-    conf_target = 'NormalizedName'
-
-    # Query for paa
-    conf_s = Search(index = 'conferenceseries', using = client)
-    conf_s = conf_s.query('terms', ConferenceSeriesId=conference_ids)
-    conf_s = conf_s.source([conf_target])
-    conf_s = conf_s.params(request_timeout=30)
-
-    names = list()
-    for conference in conf_s.scan():
-        # Add names to result
-        names.append(conference[conf_target].lower())
-
-    return names
-
-
-def conference_name_dict_query(conference_ids):
-    ''' Find conference name from id.
-    '''
-    # Elastic search client
-    client = Elasticsearch(conf.get("elasticsearch.hostname"))
-
-    # Target
-    conf_target = 'NormalizedName'
-
-    # Query for paa
-    conf_s = Search(index = 'conferenceseries', using = client)
-    conf_s = conf_s.query('terms', ConferenceSeriesId=conference_ids)
-    conf_s = conf_s.source([conf_target])
-    conf_s = conf_s.params(request_timeout=30)
-
-    names = dict()
-    for conference in conf_s.scan():
-        # Add names to result
-        names[int(conference.meta.id)] = conference[conf_target].lower()
-
-    return names
-
-
-def journal_name_query(journal_ids):
-    ''' Find journal name from id.
-    '''
-    # Elastic search client
-    client = Elasticsearch(conf.get("elasticsearch.hostname"))
-
-    # Target
-    jour_target = 'NormalizedName'
-
-    # Query for paa
-    jour_s = Search(index = 'journals', using = client)
-    jour_s = jour_s.query('terms', JournalId=journal_ids)
-    jour_s = jour_s.source([jour_target])
-    jour_s = jour_s.params(request_timeout=30)
-
-    names = list()
-    for jour in jour_s.scan():
-        # Add names to result
-        names.append(jour[jour_target])
-
-    return names
-
-
-def journal_name_dict_query(journal_ids):
-    ''' Find journal name from id.
-    '''
-    # Elastic search client
-    client = Elasticsearch(conf.get("elasticsearch.hostname"))
-
-    # Target
-    jour_target = 'NormalizedName'
-
-    # Query for paa
-    jour_s = Search(index = 'journals', using = client)
-    jour_s = jour_s.query('terms', JournalId=journal_ids)
-    jour_s = jour_s.source([jour_target])
-    jour_s = jour_s.params(request_timeout=30)
-
-    names = dict()
-    for jour in jour_s.scan():
-        # Add names to result
-        names[int(jour.meta.id)] = jour[jour_target]
-
-    return names
-
-
-def name_query(entity_type, entity_name):
-    ''' Query entity id for name depending on type.
-    '''
-    # Call query functions depending on type given
-    # Author
-    if entity_type == Entity_type.AUTH:
-        return author_name_query(entity_name)
-
-    # Affiliation
-    if entity_type == Entity_type.AFFI:
-        return affiliation_name_query(entity_name)
-
-    # Conference
-    if entity_type == Entity_type.CONF:
-        return conference_name_query(entity_name)
-
-    # Journal
-    if entity_type == Entity_type.JOUR:
-        return journal_name_query(entity_name)
-
-    # Otherwise
-    return None
-
-
-def normalized_to_display(entity_name, index):
-    '''
-    '''
-    # Elastic search client
-    client = Elasticsearch(conf.get("elasticsearch.hostname"))
-
-    # Query for paa
-    query_s = Search(index=index, using=client)
-    query_s = query_s.query('match', NormalizedName=entity_name)
-    query_s = query_s.source(['DisplayName'])
-
-    print()
-    print(index)
-    for query in query_s.scan():
-        # Return display name
-        print(query, index)
-        return query['DisplayName']
-
-    return None
+    return display_dict

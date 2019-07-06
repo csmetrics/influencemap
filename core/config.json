@@ -22,7 +22,7 @@
     "mag_api":{
         "prefix":"https://api.labs.cognitive.microsoft.com",
         "json_postfix":"academic/v1.0/graph/search?mode=json",
-        "api_key_dir":"/mnt/common/api_keys",
+        "api_key_dir":"/home/alexander/Documents/influencemap/api_keys",
         "res_count":1000,
         "timeout":10000
     }

@@ -15,7 +15,7 @@ from datetime import datetime
 
 from graph.config import conf
 from core.search.query_info_cache import base_paper_cache_query
-from core.search.query_name import *
+from core.search.query_name_db import *
 
 from elasticsearch import Elasticsearch
 from elasticsearch_dsl import Search, Q

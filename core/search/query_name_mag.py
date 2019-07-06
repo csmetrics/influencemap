@@ -7,7 +7,6 @@ author: Alexander Soen
 
 from core.config import *
 from core.search.mag_interface import *
-from core.search.query_name import name_query
 from core.utils.entity_type import Entity_type
 from core.search.parse_academic_search import or_query_builder
 
@@ -44,6 +43,8 @@ def author_name_mag_multiquery(author_ids):
         for res in data['entities']:
             # Set name
             auth_name_res[res['Id']] = res['AuN']
+
+    print(auth_name_res)
 
     return auth_name_res
 
@@ -211,28 +212,6 @@ def name_mag_multiquery(entity_type, entity_names):
 
     # Otherwise
     return None
-
-
-def name_try_mag_multiquery(entity_type, entity_names):
-    ''' Check ES first, else use the MAG API.
-    '''
-    to_process = list()
-    name_maps  = dict()
-    # Try ES
-    #for entity_name in entity_names:
-    #    name_dict = name_query(entity_type, entity_name)
-    #    if name_dict:
-    #        name_maps.update(name_dict)
-    #    else:
-    #        to_process.append(entity_name)
-    #        print(entity_name, "Failed ES lookup on index \
-    #                '{}s'".format(entity_type.text))
-    to_process = entity_names
-
-    # Use API search for the remainding papers
-    name_maps.update(name_mag_multiquery(entity_type, to_process))
-
-    return name_maps
 
 
 if __name__ == '__main__':

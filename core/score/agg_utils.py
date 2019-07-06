@@ -5,7 +5,7 @@ date:   27.06.18
 author: Alexander Soen
 '''
 
-from core.search.query_name_mag import name_try_mag_multiquery
+from core.search.query_name import name_check_query
 
 def get_name_mapping(score_df):
     ''' Creates a name mapping for a score dataframe with both an entity id and
@@ -17,7 +17,7 @@ def get_name_mapping(score_df):
         entity_names =  list(set(entity_df['entity_name']))
 
         # Naming dictionary for specific type
-        name_map = name_try_mag_multiquery(entity_type, entity_names)
+        name_map = name_check_query(entity_type, entity_names)
         name_mapping[entity_type] = name_map
 
     return name_mapping

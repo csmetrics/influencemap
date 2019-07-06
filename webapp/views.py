@@ -26,11 +26,12 @@ from core.utils.load_tsv import tsv_to_dict
 from core.flower.high_level_get_flower import gen_flower_data
 from core.flower.high_level_get_flower import default_config
 from core.score.agg_paper_info         import score_paper_info_list, score_paper_info_list_parallel
-from core.search.query_name            import normalized_to_display
+from core.search.query_name            import get_all_normalised_names, get_conf_journ_display_names
+from core.search.query_name_db         import normalized_to_display
+from core.search.query_paper           import get_all_paper_ids
 
 # Imports for submit
 from core.search.query_info       import paper_info_check_query
-#from core.search.query_info       import paper_info_mag_check_multiquery
 from core.search.query_info       import paper_info_db_check_multiquery
 from core.search.query_info_cache import base_paper_cache_query
 from core.score.agg_utils         import get_coauthor_mapping
@@ -253,6 +254,7 @@ def submit(request):
         entity_names = get_all_normalised_names(entity_ids)
         config = None
         flower_name = data.get('flower_name')
+        print(entity_names)
 
         if not flower_name:
             flower_name = '-'.join(entity_names)

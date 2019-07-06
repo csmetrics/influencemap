@@ -9,16 +9,15 @@ import sys
 from datetime import datetime
 from core.config import *
 
-get_header = lambda x, keys : {
-    # Request headers
-    'Ocp-Apim-Subscription-Key': keys[x]
-}
-
-
-#print('Using key {} with key: {}'.format(API_IDX, API_KEYS[API_IDX]))
-
 class APIKeyError(Exception):
     pass
+
+def get_header(idx, keys):
+    # Request headers
+    header = {
+        'Ocp-Apim-Subscription-Key': keys[idx]
+        }
+    return header
 
 def query_academic_search(type, url, query):
     i = 0
@@ -60,21 +59,3 @@ def to_datetime(strtime):
         Turns string format of MAG dates into datetime object.
     """
     return datetime.strptime(strtime, '%Y-%m-%dT%X')
-
-
-def auth_name_to_auth_id(auth_name):
-    """
-        Turns an author name into its set of ids.
-    """
-    query = {
-        "path": "/author",
-        "author": {
-            "type": "Author",
-            "match": {
-                "Name": auth_name
-                }
-            }
-        }
-
-    data = query_academic_search('post', JSON_URL, query)
-    return list(map(lambda x : x[0]['CellID'], data['Results']))
