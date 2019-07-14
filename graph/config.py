@@ -13,7 +13,7 @@ def get(key, default = None):
 mandatory_confs = [
 	"elasticsearch.hostname",
 	"data.filedir",
-	"data.version"
+	"data.version",
 ]
 
 conf_dir  = os.path.abspath(os.path.dirname(__file__))

@@ -97,7 +97,7 @@ def flag_coauthor(score_df, coauthors):
         return score_df
 
     # Set flag
-    score_df['coauthor'] = score_df.apply(lambda x: x['entity_name'] in coauthors,
-                                          axis = 1)
+    score_df['coauthor'] = score_df.apply(
+        lambda x: x['entity_name'] in coauthors, axis = 1)
 
     return score_df

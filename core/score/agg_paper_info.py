@@ -37,12 +37,50 @@ def score_paper_info(paper_info, self=list()):
             'AUTH': list(),
             'FSTD': list(),
             }
+
+    ###  COAUTHOR DUMMY VALUES ###
+    coauthor_const = {
+        'self_cite': False,
+        'coauthor': True,
+        'publication_year': paper_info['Year'] if 'Year' in paper_info else None,
+        'influence_year': paper_info['Year'] if 'Year' in paper_info else None,
+        'ego_paper_id': int(paper_info['PaperId']),
+        'link_paper_id': int(paper_info['PaperId'])
+    }
+
+    make_dummy = lambda x: dict(**to_influence_dict(x, 0, 0), **coauthor_const)
+
+    # Get venue value
+    if 'ConferenceName' in paper_info:
+        score_list['CONF'].append(make_dummy(paper_info['ConferenceName']))
+    if 'JournalName' in paper_info:
+        score_list['JOUR'].append(make_dummy(paper_info['JournalName']))
+
+    # Get author combinations
+    for paa in paper_info['Authors']:
+        if 'AuthorName' in paa:
+            score_list['AUTH'].append(make_dummy(paa['AuthorName']))
+        if 'AffiliationName' in paa:
+            score_list['AFFI'].append(make_dummy(paa['AffiliationName']))
+
+    # Get fos fields
+    try:
+        for pfos in paper_info['FieldsOfStudy']:
+            if 'FieldOfStudyName' in pfos and pfos['FieldOfStudyLevel'] == 1:
+                if pfos['FieldOfStudyName'] == 'world wide web':
+                    print(paper_info)
+                score_list['FSTD'].append(make_dummy(pfos['FieldOfStudyName']))
+    except:
+        print(paper_info['PaperId'])
+    ###  COAUTHOR DUMMY VALUES ###
     
+    ###  REFERENCE VALUES ###
     # Calculate references influence
     for reference in paper_info['References']:
         # Check if it is a self citation
         ref_const = {
             'self_cite': is_self_cite(reference, self),
+            'coauthor': False,
             'publication_year': paper_info['Year'] if 'Year' in paper_info else None,
             'influence_year': paper_info['Year'] if 'Year' in paper_info else None,
             'ego_paper_id': int(paper_info['PaperId']),
@@ -72,7 +110,10 @@ def score_paper_info(paper_info, self=list()):
                     score_list['FSTD'].append(make_score((pfos['FieldOfStudyName'], 0, 1)))
         except:
             print(paper_info['PaperId'], reference['PaperId'])
+    ###  REFERENCE VALUES ###
 
+
+    ###  CITATION VALUES ###
 
     # Calculate the influenced score for paa (for this paper)
     influenced_paa = 1 / len(paper_info['Authors']) if 'Authors' in paper_info else 1
@@ -82,6 +123,7 @@ def score_paper_info(paper_info, self=list()):
         # Check if it is a self citation
         cit_const = {
             'self_cite': is_self_cite(citation, self),
+            'coauthor': False,
             'publication_year': paper_info['Year'] if 'Year' in paper_info else None,
             'influence_year': citation['Year'] if 'Year' in paper_info else None,
             'ego_paper_id': int(paper_info['PaperId']),
@@ -108,6 +150,7 @@ def score_paper_info(paper_info, self=list()):
         for pfos in citation['FieldsOfStudy']:
             if 'FieldOfStudyName' in pfos and pfos['FieldOfStudyLevel'] == 1:
                 score_list['FSTD'].append(make_score((pfos['FieldOfStudyName'], 1, 0)))
+    ###  CITATION VALUES ###
 
     return score_list
 
@@ -142,6 +185,7 @@ DF_COLUMNS = [
         'influence_year',
         'publication_year',
         'self_cite',
+        'coauthor',
         'influenced',
         'influencing',
         'ego_paper_id',
@@ -153,6 +197,7 @@ DF_DTYPES = [
         'object',
         'int32',
         'int32',
+        'bool',
         'bool',
         'float32',
         'float32',
@@ -173,5 +218,6 @@ def score_leaves(score_list, leaves):
         score_df = score_df.append(score_list[leaf.ident], ignore_index=True)
 
     score_df['self_cite'] = score_df['self_cite'].astype('bool')
+    score_df['coauthor'] = score_df['coauthor'].astype('bool')
 
     return score_df

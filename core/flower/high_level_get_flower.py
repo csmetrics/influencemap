@@ -244,15 +244,11 @@ def gen_flower_data(score_df, flower_prop, entity_names, flower_name,
         entity_score = entity_score[~entity_score['entity_name'].str.lower()\
                 .isin(entity_names)]
 
-    # Self citation filter
-    if not config['self_cite']:
-        entity_score = entity_score[-entity_score['self_cite']]
-
     # Filter publication year for ego's paper
     filter_score = filter_year(entity_score, config['pub_lower'],
                                              config['pub_upper'])
 
-    # Filter Citaiton year for reference links
+    # Filter Citation year for reference links
     filter_score = filter_year(filter_score, config['cit_lower'],
                                              config['cit_upper'],
                                              index = 'influence_year')
@@ -261,41 +257,50 @@ def gen_flower_data(score_df, flower_prop, entity_names, flower_name,
     agg_score = agg_score_df(filter_score)
     # print(agg_score)
 
+    # Select the influence type from self citations
+    if config["self_cite"] and config['icoauthor']:
+        agg_score["influenced"] = agg_score.influenced_tot
+        agg_score["influencing"] = agg_score.influencing_tot
+        agg_score["sum"] = agg_score.sum_tot
+        agg_score["ratio"] = agg_score.ratio_tot
+    elif config["self_cite"]:
+        agg_score["influenced"] = agg_score.influenced_nca
+        agg_score["influencing"] = agg_score.influencing_nca
+        agg_score["sum"] = agg_score.sum_nca
+        agg_score["ratio"] = agg_score.ratio_nca
+    elif config['icoauthor']:
+        agg_score["influenced"] = agg_score.influenced_nsc
+        agg_score["influencing"] = agg_score.influencing_nsc
+        agg_score["sum"] = agg_score.sum_nsc
+        agg_score["ratio"] = agg_score.ratio_nsc
+    else:
+        agg_score["influenced"] = agg_score.influenced_nscnca
+        agg_score["influencing"] = agg_score.influencing_nscnca
+        agg_score["sum"] = agg_score.sum_nscnca
+        agg_score["ratio"] = agg_score.ratio_nscnca
+
+    # Sort alphabetical first
+    agg_score.sort_values('entity_name', ascending=False, inplace=True)
+
+    # Sort by sum of influence
+    agg_score["tmp_sort"] = agg_score.influencing + agg_score.influenced
+    agg_score.sort_values("tmp_sort", ascending=False, inplace=True)
+
+    # Sort by max of influence
+    agg_score["tmp_sort"] = np.maximum(agg_score.influencing, agg_score.influenced)
+    agg_score.sort_values("tmp_sort", ascending=False, inplace=True)
+    agg_score.drop("tmp_sort", axis=1, inplace=True)
+
     # Need to take empty df into account
     if agg_score.empty:
         top_score = agg_score
         top_score.ego = flower_name
         num_leaves = config["num_leaves"]
     else:
-        # Get the top scores with filter considerations
-        # Iteratively generates a top number of entries until filters get the right amount
-        i = 0
-        top_score = list()
-        max_search = False
         num_leaves = max(50, config["num_leaves"])
-        while len(top_score) < num_leaves and not max_search :
-            top_score = agg_score.head(n=(4 + i) * num_leaves)
+        top_score = agg_score.head(n=num_leaves)
+        top_score.ego = flower_name
 
-            if len(agg_score) == len(top_score):
-                max_search = True
-
-            # Get top scores for graph
-            if (flower_type != 'conf'):
-                top_score = top_score[ ~top_score['entity_name'].isin(entity_names) ]
-
-            # Filter coauthors
-            # print("[gen_flower_data]", coauthors)
-            if config['icoauthor']:
-                top_score = flag_coauthor(top_score, coauthors)
-            else:
-                top_score = top_score[ ~top_score['entity_name'].isin(coauthors) ]
-
-            top_score = top_score.head(n=num_leaves)
-            top_score.ego = flower_name
-            # Increase the search space
-            i += 1
-    
-    print(len(top_score))
     # Calculate the bloom ordering
     top_score["bloom_order"] = range(1, len(top_score) + 1)
 
@@ -307,28 +312,6 @@ def gen_flower_data(score_df, flower_prop, entity_names, flower_name,
 
     print("len(agg_score)", len(agg_score))
 
-    if barchart:
-        i = 0
-        top_score_all = list()
-        num_leaves_barchart = min(len(agg_score), 50)
-        while len(top_score_all) < num_leaves_barchart:
-            top_score_all = agg_score.head(n=(4 + i) * num_leaves_barchart)
-            # Get top scores for graph
-            if (flower_type != 'conf'):
-                top_score_all = top_score_all[ ~top_score_all['entity_name'].isin(entity_names) ]
-
-            # Filter coauthors
-            # print("[gen_flower_data]", coauthors)
-            if config['icoauthor']:
-                top_score_all = flag_coauthor(top_score_all, coauthors)
-            else:
-                top_score_all = top_score_all[ ~top_score_all['entity_name'].isin(coauthors) ]
-
-            top_score_all = top_score_all.head(n=num_leaves_barchart)
-            top_score_all.ego = flower_name
-            # Increase the search space
-            i += 1
-
-        data["total"] = len(agg_score)
+    data["total"] = len(agg_score)
 
     return flower_type, data #, node_info

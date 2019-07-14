@@ -354,9 +354,6 @@ def submit(request):
     if 'cmp_ref' in flower_config and flower_config['cmp_ref']: # Do not limit the size of new flower
         flower_config['num_leaves'] = 5000
 
-    print("TESTESTSET")
-    print(config)
-
     # Work function
     make_flower = lambda x: gen_flower_data(score_df, x, entity_names,
             flower_name, coauthors, config=flower_config)
