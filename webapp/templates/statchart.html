@@ -353,10 +353,12 @@ resubmitButton.addEventListener('click', function(){
       $("#graph3").empty();
       $("#graph4").empty();
 
-      author_data = result.author;
-      conf_data = result.conf;
-      inst_data = result.inst;
-      fos_data = result.fos;
+      console.log(result);
+
+      author_data = result.author[0];
+      conf_data = result.conf[0];
+      inst_data = result.inst[0];
+      fos_data = result.fos[0];
 
       cur_petals = parseInt($("#num-petals").val());
       cur_order = $("#petal-order").val();

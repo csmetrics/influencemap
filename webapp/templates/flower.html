@@ -73,10 +73,10 @@
 <script>
 option = '{{ navbarOption.selectedOption.id }}';
 keyword = '{{ navbarOption.selectedKeyword }}';
-author_data = {{ author|safe }}
-conf_data = {{ conf|safe }}
-inst_data = {{ inst|safe }}
-fos_data = {{ fos|safe }}
+author_data = {{ author|safe }}[0]
+conf_data = {{ conf|safe }}[0]
+inst_data = {{ inst|safe }}[0]
+fos_data = {{ fos|safe }}[0]
 session = {{ session|safe }}
 
 start_petals = parseInt($("#num-petals").val());

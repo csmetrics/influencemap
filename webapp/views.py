@@ -213,6 +213,22 @@ def manualcache(request):
     return JsonResponse({},safe=False)
 
 
+def to_flower_dict(data):
+
+    res = []
+    for flower_set in zip(*data):
+        flower_dict = {
+            'author': flower_set[0],
+            'conf': flower_set[1],
+            'inst': flower_set[2],
+            'fos': flower_set[3],
+            }
+
+        res.append(flower_dict)
+
+    return res
+
+
 @csrf_exempt
 def submit(request):
     print('Flower request: ', datetime.now())
@@ -355,8 +371,11 @@ def submit(request):
         flower_config['num_leaves'] = 5000
 
     # Work function
+##    make_flower = lambda x: gen_flower_data(score_df, x, entity_names,
+##            flower_name, config=flower_config)
+# TEST
     make_flower = lambda x: gen_flower_data(score_df, x, entity_names,
-            flower_name, coauthors, config=flower_config)
+            flower_name, config=flower_config)
 
     # Concurrently calculate the aggregations
     # Concurrent map
@@ -415,12 +434,11 @@ def submit(request):
     stats = get_stats(paper_information)
     data['stats'] = stats
 
-
     # filter flower nodes by reference
     if config['cmp_ref'] == 'true':
 
         make_ref = lambda x: gen_flower_data(score_df, x, entity_names,
-                flower_name, coauthors, config=default_config())
+                flower_name, config=default_config())
 
         ref_res = [make_ref(v) for v in flower_leaves]
         sorted(ref_res, key=lambda x: x[0])
@@ -430,29 +448,44 @@ def submit(request):
         for _, f_info in ref_res:
             ref_info.append(f_info)
 
-        ref_data = copy.deepcopy(data)
-        ref_data["author"] = ref_info[0]
-        ref_data["conf"] = ref_info[1]
-        ref_data["inst"] = ref_info[2]
-        ref_data["fos"] = ref_info[3]
+        flower_data = to_flower_dict(ref_info)
+        session["reference_flower"] = []
+        data["author"] = []
+        data["conf"] = []
+        data["inst"] = []
+        data["fos"] = []
+        orig_flower = list(zip(*flower_info))
+        for flower_dict, flower_set in zip(flower_data, orig_flower):
 
-        # save reference flower for comparison
-        reference_flower = ReferenceFlower(ref_data)
-        session["reference_flower"] = reference_flower.data()
+            ref_data = copy.deepcopy(data)
+            ref_data.update(flower_dict)
 
-        print("Reference flower")
-        reference_flower = session["reference_flower"]
-        flower_info = compare_flowers(reference_flower, flower_info)
+            reference_flower = ReferenceFlower(ref_data)
 
-        # Force updates to flower information
-        data["author"] = flower_info[0]
-        data["conf"] = flower_info[1]
-        data["inst"] = flower_info[2]
-        data["fos"] = flower_info[3]
+            # save reference flower for comparison
+            session["reference_flower"].append(reference_flower.data())
+
+            cmp_flower = compare_flowers(
+                reference_flower.data(), flower_set)
+
+            # Force updates to flower information
+            data["author"].append(cmp_flower[0])
+            data["conf"].append(cmp_flower[1])
+            data["inst"].append(cmp_flower[2])
+            data["fos"].append(cmp_flower[3])
+
     else:
-        # save reference flower for comparison
-        reference_flower = ReferenceFlower(data)
-        session["reference_flower"] = reference_flower.data()
+        flower_data = to_flower_dict(flower_info)
+        session["reference_flower"] = []
+
+        for flower_dict in flower_data:
+
+            ref_data = copy.deepcopy(data)
+            ref_data.update(flower_dict)
+
+            # save reference flower for comparison
+            reference_flower = ReferenceFlower(ref_data)
+            session["reference_flower"].append(reference_flower.data())
 
     # Cache from flower data
     for key, value in cache.items():
@@ -520,7 +553,7 @@ def resubmit(request):
 
     # Work function
     make_flower = lambda x: gen_flower_data(score_df, x, entity_names,
-            flower_name, coauthors, config=flower_config)
+            flower_name, config=flower_config)
 
     # Concurrently calculate the aggregations
     # Concurrent map
@@ -538,7 +571,17 @@ def resubmit(request):
     # filter flower nodes by reference
     if flower_config['reference']:
         reference_flower = session["reference_flower"]
-        flower_info = compare_flowers(reference_flower, flower_info)
+
+        new_flower_info = [[], [], [], []]
+
+        orig_flower = list(zip(*flower_info))
+        for ref_flower, info_flower in zip(reference_flower, orig_flower):
+            cmp_flower = compare_flowers(ref_flower, info_flower)
+            for i in range(len(flower_info)):
+                new_flower_info[i].append(cmp_flower[i])
+
+        for i in range(len(new_flower_info)):
+            flower_info[i] = new_flower_info[i]
 
     data = {
         "author": flower_info[0],

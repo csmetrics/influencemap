@@ -25,11 +25,11 @@ flower_leaves = [ ('author', [ent.Entity_type.AUTH])
                 , ('fos'   , [ent.Entity_type.FSTD]) ]
 
 str_to_ent = {
-        "author": ent.Entity_type.AUTH,
-        "conference": ent.Entity_type.CONF,
-        "journal": ent.Entity_type.JOUR,
-        "institution": ent.Entity_type.AFFI,
-        "fieldofstudy": ent.Entity_type.FSTD,
+        'author': ent.Entity_type.AUTH,
+        'conference': ent.Entity_type.CONF,
+        'journal': ent.Entity_type.JOUR,
+        'institution': ent.Entity_type.AFFI,
+        'fieldofstudy': ent.Entity_type.FSTD,
     }
 
 def default_config():
@@ -44,7 +44,7 @@ def default_config():
         'order': 'ratio',
         }
 
-def processdata(gtype, egoG, num_leaves, order):
+def processdata(gtype, egoG, num_leaves, order, filter_num):
     center_node = egoG.graph['ego']
 
     # Radius of circle
@@ -83,59 +83,63 @@ def processdata(gtype, egoG, num_leaves, order):
 
     # Outer nodes data
     nodedata = { key:{
-            "name": key,
-            "weight": egoG.nodes[key]["nratiow"],
-            "id": i,
-            "gtype": gtype,
-            "size": egoG.nodes[key]["sumw"],
-            "sum": egoG.nodes[key]["sum"],
-            "xpos": x_pos[i],
-            "ypos": y_pos[i],
-            "inf_in": egoG.nodes[key]['inf_in'],
-            "inf_out": egoG.nodes[key]['inf_out'],
-            "dif": egoG.nodes[key]['dif'],
-            "ratio": egoG.nodes[key]['ratiow'],
-            "coauthor": str(egoG.nodes[key]['coauthor']),
-            "bloom_order": egoG.nodes[key]['bloom_order'],
+            'name': key,
+            'weight': egoG.nodes[key]['nratiow'],
+            'id': i,
+            'gtype': gtype,
+            'size': egoG.nodes[key]['sumw'],
+            'sum': egoG.nodes[key]['sum'],
+            'xpos': x_pos[i],
+            'ypos': y_pos[i],
+            'inf_in': egoG.nodes[key]['inf_in'],
+            'inf_out': egoG.nodes[key]['inf_out'],
+            'dif': egoG.nodes[key]['dif'],
+            'ratio': egoG.nodes[key]['ratiow'],
+            'coauthor': str(egoG.nodes[key]['coauthor']),
+            'bloom_order': egoG.nodes[key]['bloom_order'],
+            'filter_num': filter_num,
         } for i, key in zip(range(1, len(outer_nodes)+1), outer_nodes)}
 
-    nodekeys = ['ego'] + [v["name"] for v in sorted(nodedata.values(), key=itemgetter("id"))]
+    nodekeys = ['ego'] + [v['name'] for v in sorted(nodedata.values(), key=itemgetter('id'))]
 
     # Center node data
     nodedata['ego'] = {
-        "name": egoG.nodes['ego']['name'],
-        "weight": 1,
-        "id": 0,
-        "gtype": gtype,
-        "size": 1,
-        "xpos": x_pos[0],
-        "ypos": y_pos[0],
-        "bloom_order": 0,
-        "coauthor": str(False),
+        'name': egoG.nodes['ego']['name'],
+        'weight': 1,
+        'id': 0,
+        'gtype': gtype,
+        'size': 1,
+        'xpos': x_pos[0],
+        'ypos': y_pos[0],
+        'bloom_order': 0,
+        'coauthor': str(False),
+        'filter_num': filter_num,
     }
 
     edge_in = [{
-            "source": nodekeys.index(s),
-            "target": nodekeys.index(t),
-            "padding": nodedata[t]["size"],
-            "id": nodedata[t]["id"],
-            "gtype": gtype,
-            "type": v["direction"],
-            "weight": v["nweight"],
-            "o_weight": v["weight"],
-            "bloom_order": nodedata[t]["bloom_order"],
+            'source': nodekeys.index(s),
+            'target': nodekeys.index(t),
+            'padding': nodedata[t]['size'],
+            'id': nodedata[t]['id'],
+            'gtype': gtype,
+            'type': v['direction'],
+            'weight': v['nweight'],
+            'o_weight': v['weight'],
+            'bloom_order': nodedata[t]['bloom_order'],
+            'filter_num': filter_num,
         } for s, t, v in links_in]
 
     edge_out = [{
-            "source": nodekeys.index(s),
-            "target": nodekeys.index(t),
-            "padding": nodedata[t]["size"],
-            "id": nodedata[s]["id"],
-            "gtype": gtype,
-            "type": v["direction"],
-            "weight": v["nweight"],
-            "o_weight": v["weight"],
-            "bloom_order": nodedata[s]["bloom_order"],
+            'source': nodekeys.index(s),
+            'target': nodekeys.index(t),
+            'padding': nodedata[t]['size'],
+            'id': nodedata[s]['id'],
+            'gtype': gtype,
+            'type': v['direction'],
+            'weight': v['nweight'],
+            'o_weight': v['weight'],
+            'bloom_order': nodedata[s]['bloom_order'],
+            'filter_num': filter_num,
         } for s, t, v in links_out]
 
     linkdata = list()
@@ -145,18 +149,19 @@ def processdata(gtype, egoG, num_leaves, order):
         linkdata.append(lout)
 
     chartdata = [{
-            "id": nodedata[t]["id"] if v["direction"] == "in" else nodedata[s]["id"],
-            "bloom_order": nodedata[t]["bloom_order"] if v["direction"] == "in" else nodedata[s]["bloom_order"],
-            "name": t if v["direction"] == "in" else s,
-            "type": v["direction"],
-            "gtype": gtype,
-            "sum": nodedata[t]["weight"] if v["direction"] == "in" else nodedata[s]["weight"],
-            "weight": v["weight"]
+            'id': nodedata[t]['id'] if v['direction'] == 'in' else nodedata[s]['id'],
+            'bloom_order': nodedata[t]['bloom_order'] if v['direction'] == 'in' else nodedata[s]['bloom_order'],
+            'name': t if v['direction'] == 'in' else s,
+            'type': v['direction'],
+            'gtype': gtype,
+            'sum': nodedata[t]['weight'] if v['direction'] == 'in' else nodedata[s]['weight'],
+            'weight': v['weight'],
+            'filter_num': filter_num,
         } for s, t, v in links]
     
     chartdata.sort(key=lambda d: d['bloom_order'])
 
-    return { "nodes": sorted(list(nodedata.values()), key=itemgetter("id")), "links": linkdata, "bars": chartdata }
+    return { 'nodes': sorted(list(nodedata.values()), key=itemgetter('id')), 'links': linkdata, 'bars': chartdata }
 
 
 def processdata_all(gtype, egoG, num_leaves, order):
@@ -191,49 +196,49 @@ def processdata_all(gtype, egoG, num_leaves, order):
 
     # Outer nodes data
     nodedata = { key:{
-            "name": key,
-            "weight": egoG.nodes[key]["nratiow"],
-            "id": i,
-            "gtype": gtype,
-            "size": egoG.nodes[key]["sumw"],
-            "sum": egoG.nodes[key]["sum"],
-            "coauthor": str(egoG.nodes[key]['coauthor']),
-            "bloom_order": egoG.nodes[key]['bloom_order'],
+            'name': key,
+            'weight': egoG.nodes[key]['nratiow'],
+            'id': i,
+            'gtype': gtype,
+            'size': egoG.nodes[key]['sumw'],
+            'sum': egoG.nodes[key]['sum'],
+            'coauthor': str(egoG.nodes[key]['coauthor']),
+            'bloom_order': egoG.nodes[key]['bloom_order'],
         } for i, key in zip(range(1, len(outer_nodes)+1), outer_nodes)}
 
     # Center node data
     nodedata['ego'] = {
-        "name": egoG.nodes['ego']['name'],
-        "weight": 1,
-        "id": 0,
-        "gtype": gtype,
-        "size": 1,
-        "coauthor": str(False),
-        "bloom_order": 0,
+        'name': egoG.nodes['ego']['name'],
+        'weight': 1,
+        'id': 0,
+        'gtype': gtype,
+        'size': 1,
+        'coauthor': str(False),
+        'bloom_order': 0,
     }
 
     chartdata = [{
-            "id": nodedata[t]["id"] if v["direction"] == "in" else nodedata[s]["id"],
-            "bloom_order": nodedata[t]["bloom_order"] if v["direction"] == "in" else nodedata[s]["bloom_order"],
-            "name": t if v["direction"] == "in" else s,
-            "type": v["direction"],
-            "gtype": gtype,
-            "sum": nodedata[t]["weight"] if v["direction"] == "in" else nodedata[s]["weight"],
-            "weight": v["weight"]
+            'id': nodedata[t]['id'] if v['direction'] == 'in' else nodedata[s]['id'],
+            'bloom_order': nodedata[t]['bloom_order'] if v['direction'] == 'in' else nodedata[s]['bloom_order'],
+            'name': t if v['direction'] == 'in' else s,
+            'type': v['direction'],
+            'gtype': gtype,
+            'sum': nodedata[t]['weight'] if v['direction'] == 'in' else nodedata[s]['weight'],
+            'weight': v['weight']
         } for s, t, v in links]
 
     chartdata.sort(key=lambda d: d['bloom_order'])
 
-    return { "bars": chartdata }
+    return { 'bars': chartdata }
 
 
 def gen_flower_data(score_df, flower_prop, entity_names, flower_name,
-                    coauthors, config=default_config, barchart=True):
+                    config=default_config):
     '''
     '''
     # Flower properties
     flower_type, leaves = flower_prop
-    print("[gen_flower_data] flower_type", flower_type)
+    print('[gen_flower_data] flower_type', flower_type)
 
     print(datetime.now(), 'start score_leaves')
     entity_score = score_leaves(score_df, leaves)
@@ -258,60 +263,60 @@ def gen_flower_data(score_df, flower_prop, entity_names, flower_name,
     # print(agg_score)
 
     # Select the influence type from self citations
-    if config["self_cite"] and config['icoauthor']:
-        agg_score["influenced"] = agg_score.influenced_tot
-        agg_score["influencing"] = agg_score.influencing_tot
-        agg_score["sum"] = agg_score.sum_tot
-        agg_score["ratio"] = agg_score.ratio_tot
-    elif config["self_cite"]:
-        agg_score["influenced"] = agg_score.influenced_nca
-        agg_score["influencing"] = agg_score.influencing_nca
-        agg_score["sum"] = agg_score.sum_nca
-        agg_score["ratio"] = agg_score.ratio_nca
+    if config['self_cite'] and config['icoauthor']:
+        agg_score['influenced'] = agg_score.influenced_tot
+        agg_score['influencing'] = agg_score.influencing_tot
+        agg_score['sum'] = agg_score.sum_tot
+        agg_score['ratio'] = agg_score.ratio_tot
+    elif config['self_cite']:
+        agg_score['influenced'] = agg_score.influenced_nca
+        agg_score['influencing'] = agg_score.influencing_nca
+        agg_score['sum'] = agg_score.sum_nca
+        agg_score['ratio'] = agg_score.ratio_nca
     elif config['icoauthor']:
-        agg_score["influenced"] = agg_score.influenced_nsc
-        agg_score["influencing"] = agg_score.influencing_nsc
-        agg_score["sum"] = agg_score.sum_nsc
-        agg_score["ratio"] = agg_score.ratio_nsc
+        agg_score['influenced'] = agg_score.influenced_nsc
+        agg_score['influencing'] = agg_score.influencing_nsc
+        agg_score['sum'] = agg_score.sum_nsc
+        agg_score['ratio'] = agg_score.ratio_nsc
     else:
-        agg_score["influenced"] = agg_score.influenced_nscnca
-        agg_score["influencing"] = agg_score.influencing_nscnca
-        agg_score["sum"] = agg_score.sum_nscnca
-        agg_score["ratio"] = agg_score.ratio_nscnca
+        agg_score['influenced'] = agg_score.influenced_nscnca
+        agg_score['influencing'] = agg_score.influencing_nscnca
+        agg_score['sum'] = agg_score.sum_nscnca
+        agg_score['ratio'] = agg_score.ratio_nscnca
 
     # Sort alphabetical first
     agg_score.sort_values('entity_name', ascending=False, inplace=True)
 
     # Sort by sum of influence
-    agg_score["tmp_sort"] = agg_score.influencing + agg_score.influenced
-    agg_score.sort_values("tmp_sort", ascending=False, inplace=True)
+    agg_score['tmp_sort'] = agg_score.influencing + agg_score.influenced
+    agg_score.sort_values('tmp_sort', ascending=False, inplace=True)
 
     # Sort by max of influence
-    agg_score["tmp_sort"] = np.maximum(agg_score.influencing, agg_score.influenced)
-    agg_score.sort_values("tmp_sort", ascending=False, inplace=True)
-    agg_score.drop("tmp_sort", axis=1, inplace=True)
+    agg_score['tmp_sort'] = np.maximum(agg_score.influencing, agg_score.influenced)
+    agg_score.sort_values('tmp_sort', ascending=False, inplace=True)
+    agg_score.drop('tmp_sort', axis=1, inplace=True)
 
     # Need to take empty df into account
     if agg_score.empty:
         top_score = agg_score
         top_score.ego = flower_name
-        num_leaves = config["num_leaves"]
+        num_leaves = config['num_leaves']
     else:
-        num_leaves = max(50, config["num_leaves"])
+        num_leaves = max(50, config['num_leaves'])
         top_score = agg_score.head(n=num_leaves)
         top_score.ego = flower_name
 
     # Calculate the bloom ordering
-    top_score["bloom_order"] = range(1, len(top_score) + 1)
+    top_score['bloom_order'] = range(1, len(top_score) + 1)
 
     # Graph score
     graph_score = score_df_to_graph(top_score)
 
     # D3 format
-    data = processdata(flower_type, graph_score, num_leaves, config['order'])
+    data = processdata(flower_type, graph_score, num_leaves, config['order'], 0)
 
-    print("len(agg_score)", len(agg_score))
+    print('len(agg_score)', len(agg_score))
 
-    data["total"] = len(agg_score)
+    data['total'] = len(agg_score)
 
-    return flower_type, data #, node_info
+    return flower_type, [data, data.copy(), data.copy()]#, data.copy()] #, node_info
