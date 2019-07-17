@@ -1393,3 +1393,10 @@ function reorder_all_flowers_shrink(num, order, duration) {
     reorder_flower_shrink(idx, num, order, duration);
   }
 }
+
+function removeAll(duration) {
+  d3.selectAll("#graph1").selectAll("*").remove();
+  d3.selectAll("#graph2").selectAll("*").remove();
+  d3.selectAll("#graph3").selectAll("*").remove();
+  d3.selectAll("#graph4").selectAll("*").remove();
+}

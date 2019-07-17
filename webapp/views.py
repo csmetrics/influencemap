@@ -49,6 +49,13 @@ flower_leaves = [ ('author', [ent.Entity_type.AUTH])
                 , ('inst'  , [ent.Entity_type.AFFI])
                 , ('fos'   , [ent.Entity_type.FSTD]) ]
 
+filter_type = {
+    ('true', 'true'): 0,
+    ('true', 'false'): 1,
+    ('false', 'true'): 2,
+    ('false', 'false'): 3,
+}
+
 NUM_THREADS = 8
 NUM_NODE_INFO = 5
 
@@ -417,6 +424,7 @@ def submit(request):
         "inst"  : flower_info[2],
         "fos"   : flower_info[3],
         "curated": curated_flag,
+        'filter_type': filter_type[config["self_cite"], config["icoauthor"]],
         "yearSlider": {
             "title": "Publications range",
             "pubrange": [min_pub_year, max_pub_year, (max_pub_year-min_pub_year+1)],
@@ -528,6 +536,9 @@ def resubmit(request):
     flower_config['num_leaves'] = int(request.POST.get('numpetals'))
     flower_config['order'] = request.POST.get('petalorder')
 
+    ftype = filter_type[
+        request.POST.get('selfcite'), request.POST.get('coauthor')]
+
     print(flower_config['order'])
 
     if flower_config['reference']: # Do not limit the size of new flower
@@ -588,6 +599,7 @@ def resubmit(request):
         "conf"  : flower_info[1],
         "inst"  : flower_info[2],
         "fos"   : flower_info[3],
+        'filter_type': ftype,
         "navbarOption": get_navbar_option(keyword, option)
     }
 
