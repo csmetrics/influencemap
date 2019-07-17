@@ -1395,8 +1395,35 @@ function reorder_all_flowers_shrink(num, order, duration) {
 }
 
 function removeAll(duration) {
-  d3.selectAll("#graph1").selectAll("*").remove();
-  d3.selectAll("#graph2").selectAll("*").remove();
-  d3.selectAll("#graph3").selectAll("*").remove();
-  d3.selectAll("#graph4").selectAll("*").remove();
+  d3.selectAll("#graph1").selectAll("*")
+    .interrupt()
+    .transition()
+    .duration(duration)
+    .style("opacity", 0.0)
+    .transition()
+    .remove();
+
+  d3.selectAll("#graph2").selectAll("*")
+    .interrupt()
+    .transition()
+    .duration(duration)
+    .style("opacity", 0.0)
+    .transition()
+    .remove();
+
+  d3.selectAll("#graph3").selectAll("*")
+    .interrupt()
+    .transition()
+    .duration(duration)
+    .style("opacity", 0.0)
+    .transition()
+    .remove();
+
+  d3.selectAll("#graph4").selectAll("*")
+    .interrupt()
+    .transition()
+    .duration(duration)
+    .style("opacity", 0.0)
+    .transition()
+    .remove();
 }
