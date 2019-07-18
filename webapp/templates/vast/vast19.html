@@ -1,0 +1,86 @@
+{% load staticfiles %}
+<html>
+{% include 'header.html' %}
+<body class="hold-transition skin-custom sidebar-mini">
+<div class="wrapper">
+  <!-- <header class="main-header header-flower">
+    {% include 'pagehead.html' %}
+  </header> -->
+  <div class="content-wrapper content-wrapper-doc">
+    <section class="content">
+      <div class="row">
+
+        <div class="col-sm-8">
+          <h3><b>Influence Flowers of Academic Entities</b></h3>
+          <span style="font-style:italic">Minjeong Shin, Alexander Soen, Benjamin T. Readshaw, Stephen M. Blackburn, Mitchell Whitelaw, Lexing Xie<br/>
+          Australian National University
+          </span>
+          <br/>
+          <small>
+            <br/>
+            We present the Influence Flower, a new visual metaphor for theinfluence profile of academic entities, including people, projects,institutions, conferences, and journals. While many toolsquantifyinfluence, we aim to exposethe flow of influence between entities.The Influence Flower is an ego-centric graph, with a query entityplaced in the centre. The petals are styled to reflect the strength ofinfluence to and from other entities of the same or different type. Forexample, one can break down the incoming and outgoing influencesof a research lab by research topics.  The Influence Flower uses arecent snapshot of Microsoft Academic Graph, consisting of 200+million authors, their publications, and 1+ billion citations. An in-teractive web app, Influence Map, is constructed around this centralmetaphor for searching and curating visualisations. We also proposea visual comparison method that highlights change in influence pat-terns over time. We demonstrate through several case studies that theInfluence Flower supports data-driven inquiries about the following:researchers’ careers over time; paper(s) and projects, including thosewith delayed recognition; the interdiciplinary profile of a research in-stitution; and the shifting topical trends in conferences. We also usethis tool on influence data beyond academic citations, by contrastingthe academic and twitter activities of a researcher.
+          </small>
+
+          <br/><br/>
+          <h4>Published in the IEEE Conference on Visual Analytics Science & Technology (VAST), 2019<br/></h4>
+          <a href=""><u>Paper</u></a>  <a href=""><u>BibTex</u></a>
+
+
+          <br/><br/>
+          <h4>* Go to the Influence Map website: <a href="http://influencemap.ml/">http://influencemap.ml</a></h4>
+          <h4>* Github Repository: <a href="https://github.com/csmetrics/influencemap">https://github.com/csmetrics/influencemap</a></h4>
+
+          <h4>* Demo video:</h4>
+          <iframe width="300px" height="200" src="https://www.youtube.com/embed/uZDJe0EZEjM" frameborder="0" allow="autoplay; encrypted-media" allowfullscreen></iframe>
+
+          <br/><br/>
+          <div style="padding: 10px 0; border-top: 1px solid #ddd">
+            <small>
+            The influencemap project is supported by
+            <a href=https://cecs.anu.edu.au/>ANU College of Engineering and Computer Science</a>,
+            and <a href=http://www.sigmm.org/>ACM SIGMM</a>.
+            We thank Microsoft for sharing the Academic Graph data,
+            and <a href=https://nectar.org.au/about/>NECTAR</a> for providing computing infrastructure.
+            </small>
+          </div>
+        </div>
+
+        <div class="col-sm-2" style="padding: 20px 0 10px 50px;">
+          <div style="padding-bottom: 10px">
+            <img src="{% static 'vast/vast.png' %}" style="width: 100%"/>
+            <a href="" style="font-size: 14px">Figure 1: Venue-to-author Influence Flower of VAST (The IEEE Conference on Visual Analytics Science and Technology).</a>
+          </div>
+          <div style="padding-bottom: 10px">
+            <img src="{% static 'vast/ben_shneiderman.png' %}" style="width: 100%"/>
+            <a href="" style="font-size: 14px">Figure 3: Comparing author-to-author Influence Flower of Ben Shneiderman.</a>
+          </div>
+          <div style="padding-bottom: 10px">
+            <img src="{% static 'vast/shafi_author.png' %}" style="width: 100%"/>
+            <a href="" style="font-size: 14px">Figure 8: Author-to-author Influence Flower over Shafi Goldwasser’s career 1982 – 2017.</a>
+          </div>
+          <div style="padding-bottom: 10px">
+            <img src="{% static 'vast/sleeping.png' %}" style="width: 100%"/>
+            <a href="" style="font-size: 14px">Figure 9:  Paper-to-topic Influence Flower of a physics paper with delayed recognition.</a>
+          </div>
+        </div>
+        <div class="col-sm-2" style="padding: 20px 0 10px 50px;">
+          <div style="padding-bottom: 10px">
+            <img src="{% static 'vast/santa_fe.png' %}" style="width: 100%"/>
+            <a href="" style="font-size: 14px">Figure 10: Institution-to-topic Influence Flower of the Santa Fe Institute 1988 – 2008.</a>
+          </div>
+          <div style="padding-bottom: 10px">
+            <img src="{% static 'vast/www_trends.png' %}" style="width: 100%"/>
+            <a href="" style="font-size: 14px">Figure 11:  Venue-to-topic Influence Flowers of International World Wide Web Conference (WWW).</a>
+          </div>
+          <div style="padding-bottom: 10px">
+            <img src="{% static 'vast/yann_lecun.png' %}" style="width: 100%"/>
+            <a href="" style="font-size: 14px">Figure 12: Academic (top) vs Twitter (bottom) Influence Flowers for Yann  LeCun,  2018  Turing  co-awardee  for  breakthroughs  in  deep neural networks.</a>
+          </div>
+        </div>
+      </div>
+    </section>
+  </div>
+</div>
+
+</body>
+</html>

@@ -11,6 +11,9 @@
   margin-left: 270px;
   z-index: 800;
 }
+.content-wrapper-doc {
+  margin: 0 10%;
+}
 a {
   color: #456990;
 }
