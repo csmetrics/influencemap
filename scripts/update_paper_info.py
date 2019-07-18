@@ -1,87 +1,75 @@
-'''
-'''
-
+#%%
+# Imports
 import os
-import argparse
-import threading
-#from multiprocessing import Pool
-from multiprocess import Pool
+import json
+
 from datetime import datetime
 
 from graph.config import conf
 from elasticsearch import Elasticsearch
 from elasticsearch_dsl import Search, Q
 
-#from core.search.query_info import paper_info_db_check_multiquery
-from core.search.query_info_db    import paper_info_multiquery
-from core.search.cache_data       import cache_paper_info
+from core.search.query_info_db import paper_info_multiquery
+from core.search.cache_data import cache_paper_info
 
-NUM_PAPERS = 20
-THREADS = 4
-PER_THREAD = NUM_PAPERS // THREADS
+#%%
+# Consts
+SCRIPT_CONFIG = 'script_config.json'
 
-#update = lambda x : paper_info_db_check_multiquery(x, force=True)
+START_VERSION = 0
+THREADS = 1
+BATCH_SIZE = 10
 
-def update(paper_in):
-    papers, all_papers = paper_in
+#%%
+# Try load config
+try:
+    config_path = os.path.join('scripts', SCRIPT_CONFIG)
 
-    print(os.getpid(), 'updating', papers)
+    with open(config_path, 'r') as f:
+        config = json.load(f)
+        START_VERSION = config['update_version']
+        THREADS = config['threads']
+        BATCH_SIZE = config['batch_size']
+except FileExistsError:
+    pass
 
-    total_res, partial_res = paper_info_multiquery(papers, force=True)
-
-    cache_paper_info(total_res)
-
-    print([p['PaperId'] for p in total_res])
-    missing_papers = set(papers)
-    for paper_info in total_res:
-        missing_papers.remove(paper_info['PaperId'])
-
-    partial_uniq = [p for p in partial_res if p['PaperId'] not in all_papers]
-    cache_paper_info(partial_res)
-
-    return missing_papers
-
-pool = Pool(THREADS)
-
+#%%
 # Elastic search client
-client = Elasticsearch(conf.get("elasticsearch.hostname"))
+client = Elasticsearch(conf.get('elasticsearch.hostname'))
 
-'''
-update(([1519075555], [1519075555]))
+#%%
+query = Q('bool',
+        should=[~ Q('exists', field='UpdateVersion'), Q('range', UpdateVersion={'lt': START_VERSION})],
+        minimum_should_match=1
+        )
 
-'''
+cache_allow = Q('bool',
+        must=[Q('exists', field='UpdateVersion'), Q('range', UpdateVersion={'gte': START_VERSION})],
+        minimum_should_match=1
+        )
+
+#%%
+counter = 1
 while True:
+    print('\n[{}] - Start batch {}'.format(datetime.now(), counter))
     paper_info_s = Search(index='paper_info', using=client)
-    #paper_info_s = paper_info_s.query('')
     paper_info_s = paper_info_s.source('PaperId')
-    paper_info_s = paper_info_s.sort({ "CreatedDate": { "order": "asc" } })
+    paper_info_s = paper_info_s.sort({ 'CreatedDate': { 'order': 'desc' } })
+    paper_info_s = paper_info_s.query(query)
 
-    results = paper_info_s[:NUM_PAPERS]
+    print('[{}] -- Find papers to update'.format(datetime.now()))
+    paper_ids = [p.PaperId for p in paper_info_s.execute()]
+    print(paper_ids[0])
 
-    papers = [x.PaperId for x in results.execute()]
+    if not paper_ids:   
+        break
 
-    vals = list()
-    for i in range(THREADS):
-        t_papers = papers[i * PER_THREAD: min((i+1) * PER_THREAD, NUM_PAPERS)]
-        vals.append((t_papers, papers))
-        #x = pool.apply_async(update, (t_papers))
+    print('[{}] -- Generate cache entries'.format(datetime.now()))
+    total_res, partial_res = paper_info_multiquery(paper_ids, query_filter=cache_allow)
 
-    res = pool.map(update, vals)
-    missing = set()
-    for r in res:
-        missing.update(r)
+    print('[{}] -- Add to cache'.format(datetime.now()))
+    cache_paper_info(total_res, additional_tag={'UpdateVersion': START_VERSION})
+    cache_paper_info(partial_res, additional_tag={'UpdateVersion': START_VERSION})
 
-    print()
-    print(missing)
-
-    missing_s = Search(index='paper_info', using=client)
-    missing_s = missing_s.query('terms', PaperId=list(missing))
-
-    repost = list()
-    for paper_info in missing_s.scan():
-        paper_info = paper_info.to_dict()
-        del paper_info['CreatedDate']
-
-        repost.append(paper_info)
-
-    cache_paper_info(repost)
+    print('[{}] - Finish batch {}\n'.format(datetime.now(), counter))
+    counter += 1

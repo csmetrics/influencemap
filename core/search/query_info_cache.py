@@ -17,9 +17,10 @@ from elasticsearch_dsl import Search
 DEFAULT_BATCH = 1000
 
 
-def paper_info_cache_query(paper_ids, batch_size=DEFAULT_BATCH):
-    ''' Gets paper info from cache.
-    '''
+def paper_info_cache_query(
+        paper_ids, batch_size=DEFAULT_BATCH, query_filter=None):
+    """ Gets paper info from cache.
+    """
     start = datetime.now()
 
     # Elastic search client
@@ -34,6 +35,8 @@ def paper_info_cache_query(paper_ids, batch_size=DEFAULT_BATCH):
     paper_info_s = Search(index = 'paper_info', using = client)
     paper_info_s = paper_info_s.filter('terms', _id = paper_ids)
     paper_info_s = paper_info_s.params(size=DEFAULT_BATCH)
+    if query_filter is not None:
+        paper_info_s = paper_info_s.query(query_filter)
 
     # Convert query into dictionary format
     for paper_info in paper_info_s.scan():
@@ -77,11 +80,11 @@ def paper_info_cache_query(paper_ids, batch_size=DEFAULT_BATCH):
             'missing': set(paper_ids) - seen}
 
 
-def base_paper_cache_query(paper_ids):
+def base_paper_cache_query(paper_ids, query_filter=None):
     ''' Gets basic paper information required for reference links from cache.
     '''
     # Get properties
-    es_res = paper_info_cache_query(paper_ids)
+    es_res = paper_info_cache_query(paper_ids, query_filter=query_filter)
     es_prop = es_res['complete'] + es_res['partial']
 
     # If empty results

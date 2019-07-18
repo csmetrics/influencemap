@@ -49,20 +49,10 @@ def papers_prop_query(paper_ids):
         # Rename Conference
         if 'ConferenceSeriesId' in paper_res:
             conf_ids.add(paper_res['ConferenceSeriesId'])
-            #conf_name = conference_name_query([paper_res['ConferenceId']])
-            #if not conf_name:
-            #    paper_res['ConferenceName'] = None
-            #else:
-            #    paper_res['ConferenceName'] = conf_name[0]
 
         # Journal
         if 'JournalId' in paper_res:
             jour_ids.add(paper_res['JournalId'])
-            #jour_name = journal_name_query([paper_res['JournalId']])
-            #if not jour_name:
-            #    paper_res['JournalName'] = None
-            #else:
-            #    paper_res['JournalName'] = jour_name[0]
 
         paper_res['PaperId'] = p_id
         results[p_id] = paper_res
@@ -113,20 +103,10 @@ def paa_prop_query(paper_ids):
         # Author
         if 'AuthorId' in paa_res:
             auth_ids.add(paa_res['AuthorId'])
-            #auth_name = author_name_query([paa_res['AuthorId']])
-            #if not auth_name:
-            #    paa_res['AuthorName'] = None
-            #else:
-            #    paa_res['AuthorName'] = auth_name[0]
 
         # Affiliation
         if 'AffiliationId' in paa_res:
             affi_ids.add(paa_res['AffiliationId'])
-            #affi_name = affiliation_name_query([paa_res['AffiliationId']])
-            #if not affi_name:
-            #    paa_res['AffiliationName'] = None
-            #else:
-            #    paa_res['AffiliationName'] = affi_name[0]
 
         # Aggregate results
         if paper_id in results:
@@ -365,9 +345,10 @@ def paper_info_db_query(paper_id):
     return paper_info
 
 
-def paper_info_multiquery(paper_ids, partial_info=list(), force=False):
-    '''
-    '''
+def paper_info_multiquery(
+        paper_ids, partial_info=list(), force=False, query_filter=None):
+    """
+    """
     # Create partial information dictionary
     paper_partial = dict()
     for p_info in partial_info:
@@ -386,7 +367,7 @@ def paper_info_multiquery(paper_ids, partial_info=list(), force=False):
     for paper_link in paper_links.values():
         find_partial.update(paper_link['References'])
         find_partial.update(paper_link['Citations'])
-        find_partial.update(paper_link['FieldsOfStudy'])
+        #find_partial.update(paper_link['FieldsOfStudy'])
 
     print("Need to find,", len(find_partial))
     print(find_partial)
@@ -396,7 +377,8 @@ def paper_info_multiquery(paper_ids, partial_info=list(), force=False):
 
     if not force:
         # Get partial information for papers from cache
-        for p_info in base_paper_cache_query(list(find_partial)):
+        for p_info in base_paper_cache_query(
+                list(find_partial), query_filter=query_filter):
             p_id = p_info['PaperId']
             find_partial.remove(p_id)
             paper_partial[p_id] = p_info
