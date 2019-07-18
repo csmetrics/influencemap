@@ -93,5 +93,14 @@
       ]
     }
   ]
+},
+{"display": "Collections",
+  "type": "outer",
+  "subgroups": [
+    {"display": "Nature Collections",
+    "type": "inner",
+    "tag": "nature_collections"
+    }
+  ]
 }
 ]
