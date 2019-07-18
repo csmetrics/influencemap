@@ -53,19 +53,22 @@ counter = 1
 while True:
     print('\n[{}] - Start batch {}'.format(datetime.now(), counter))
     paper_info_s = Search(index='paper_info', using=client)
-    paper_info_s = paper_info_s.source('PaperId')
+    paper_info_s = paper_info_s.source(['PaperId', 'cache_type'])
     paper_info_s = paper_info_s.sort({ 'CreatedDate': { 'order': 'desc' } })
     paper_info_s = paper_info_s.query(query)
 
     print('[{}] -- Find papers to update'.format(datetime.now()))
-    paper_ids = [p.PaperId for p in paper_info_s.execute()]
+    paper_ids = [(p.PaperId, p.cache_type) for p in paper_info_s.execute()]
     print(paper_ids[0])
 
     if not paper_ids:   
         break
 
+    total_papers = [p for (p, t) in paper_ids if t == 'complete']
+    partial_papers = [p for (p, t) in paper_ids if t == 'partial']
+
     print('[{}] -- Generate cache entries'.format(datetime.now()))
-    total_res, partial_res = paper_info_multiquery(paper_ids, query_filter=cache_allow)
+    total_res, partial_res = paper_info_multiquery(total_papers, query_filter=cache_allow, partial_updates=partial_papers ,recache=True)
 
     print('[{}] -- Add to cache'.format(datetime.now()))
     cache_paper_info(total_res, additional_tag={'UpdateVersion': START_VERSION})
