@@ -495,7 +495,7 @@ function includeFilterChange() {
   inc_ca = $("#coauthor").is(":checked");
   inc_sc = $("#self-cite").is(":checked");
 
-  filter_type = filter_type_dict[[inc_ca, inc_sc]];
+  filter_type = filter_type_dict[[inc_sc, inc_ca]];
 
   if (filter_type != prev_filter_type) {
 
