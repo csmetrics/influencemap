@@ -50,6 +50,9 @@ cache_allow = Q('bool',
 
 #%%
 counter = 1
+complete_updated = 0
+partial_updated = 0
+removed = 0
 while True:
     print('\n[{}] - Start batch {}'.format(datetime.now(), counter))
     paper_info_s = Search(index='paper_info', using=client)
@@ -64,15 +67,30 @@ while True:
     if not paper_ids:   
         break
 
-    total_papers = [p for (p, t) in paper_ids if t == 'complete']
+    complete_papers = [p for (p, t) in paper_ids if t == 'complete']
     partial_papers = [p for (p, t) in paper_ids if t == 'partial']
 
     print('[{}] -- Generate cache entries'.format(datetime.now()))
-    total_res, partial_res = paper_info_multiquery(total_papers, query_filter=cache_allow, partial_updates=partial_papers ,recache=True)
+    complete_res, partial_res = paper_info_multiquery(complete_papers, query_filter=cache_allow, partial_updates=partial_papers ,recache=True)
 
     print('[{}] -- Add to cache'.format(datetime.now()))
-    cache_paper_info(total_res, additional_tag={'UpdateVersion': START_VERSION})
+    cache_paper_info(complete_res, additional_tag={'UpdateVersion': START_VERSION})
     cache_paper_info(partial_res, additional_tag={'UpdateVersion': START_VERSION})
+
+    print('[{}] -- Remove old paper ids'.format(datetime.now()))
+    res_ids = [p['PaperId'] for p in complete_res + partial_res]
+    old_ids = [p for p in next(zip(*paper_ids)) if p not in res_ids]
+    if len(old_ids) > 0:
+        remove_s = Search(index='paper_info', using=client)
+        remove_s = remove_s.query('terms', PaperId=old_ids)
+        remove_s.delete()
 
     print('[{}] - Finish batch {}\n'.format(datetime.now(), counter))
     counter += 1
+    complete_updated += len(complete_res)
+    partial_updated += len(partial_res)
+    removed += len(old_ids)
+
+    print('\n[{}] - Complete: {}, Partial: {}, Total: {}, Remove: {}\n'.format(
+        datetime.now(), complete_updated, partial_updated, complete_updated +
+        partial_updated, removed))
