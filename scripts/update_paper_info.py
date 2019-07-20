@@ -1,3 +1,4 @@
+
 #%%
 # Imports
 import os
@@ -39,12 +40,14 @@ client = Elasticsearch(conf.get('elasticsearch.hostname'))
 
 #%%
 query = Q('bool',
-        should=[~ Q('exists', field='UpdateVersion'), Q('range', UpdateVersion={'lt': START_VERSION})],
+        should=[~ Q('exists', field='UpdateVersion'),
+            Q('range', UpdateVersion={'lt': START_VERSION})],
         minimum_should_match=1
         )
 
 cache_allow = Q('bool',
-        must=[Q('exists', field='UpdateVersion'), Q('range', UpdateVersion={'gte': START_VERSION})],
+        must=[Q('exists', field='UpdateVersion'),
+            Q('range', UpdateVersion={'gte': START_VERSION})],
         minimum_should_match=1
         )
 
@@ -71,11 +74,15 @@ while True:
     partial_papers = [p for (p, t) in paper_ids if t == 'partial']
 
     print('[{}] -- Generate cache entries'.format(datetime.now()))
-    complete_res, partial_res = paper_info_multiquery(complete_papers, query_filter=cache_allow, partial_updates=partial_papers ,recache=True)
+    complete_res, partial_res = paper_info_multiquery(
+        complete_papers, query_filter=cache_allow,
+        partial_updates=partial_papers ,recache=True)
 
     print('[{}] -- Add to cache'.format(datetime.now()))
-    cache_paper_info(complete_res, additional_tag={'UpdateVersion': START_VERSION})
-    cache_paper_info(partial_res, additional_tag={'UpdateVersion': START_VERSION})
+    cache_paper_info(
+        complete_res, additional_tag={'UpdateVersion': START_VERSION})
+    cache_paper_info(
+        partial_res, additional_tag={'UpdateVersion': START_VERSION})
 
     print('[{}] -- Remove old paper ids'.format(datetime.now()))
     res_ids = [p['PaperId'] for p in complete_res + partial_res]

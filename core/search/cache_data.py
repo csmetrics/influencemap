@@ -10,7 +10,7 @@ from elasticsearch import Elasticsearch, helpers
 from elasticsearch_dsl import Search
 from core.search.query_utility import paper_info_to_cache_json
 
-def cache_paper_info(paper_infos, chunk_size=20, additional_tag={}):
+def cache_paper_info(paper_infos, chunk_size=20, request_timeout=100, additional_tag={}):
     ''' Converts and caches a single paper info dictionary.
     '''
     # Elastic search client
@@ -24,4 +24,5 @@ def cache_paper_info(paper_infos, chunk_size=20, additional_tag={}):
     for chunk in paper_info_chunks:
         cache_datas = (paper_info_to_cache_json(
             pi, additional_tag=additional_tag) for pi in chunk)
-        helpers.bulk(client, cache_datas, refresh=True, stats_only=True)
+        helpers.bulk(client, cache_datas, request_timeout=request_timeout,
+            refresh=True, stats_only=True)
