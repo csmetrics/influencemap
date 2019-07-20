@@ -30,6 +30,7 @@ try:
         START_VERSION = config['update_version']
         THREADS = config['threads']
         BATCH_SIZE = config['batch_size']
+        print(BATCH_SIZE)
 except FileExistsError:
     pass
 
@@ -59,9 +60,10 @@ while True:
     paper_info_s = paper_info_s.source(['PaperId', 'cache_type'])
     paper_info_s = paper_info_s.sort({ 'CreatedDate': { 'order': 'desc' } })
     paper_info_s = paper_info_s.query(query)
+    paper_info_s_res = paper_info_s[:BATCH_SIZE]
 
     print('[{}] -- Find papers to update'.format(datetime.now()))
-    paper_ids = [(p.PaperId, p.cache_type) for p in paper_info_s.execute()]
+    paper_ids = [(p.PaperId, p.cache_type) for p in paper_info_s_res.execute()]
     print(paper_ids[0])
 
     if not paper_ids:   
