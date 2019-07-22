@@ -1,0 +1,5 @@
+{
+    "update_version": 1,
+    "threads": 1,
+    "batch_size": 20
+}

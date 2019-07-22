@@ -7,7 +7,7 @@ author: Alexander Soen
 
 from datetime import datetime
 
-def paper_info_to_cache_json(paper_info):
+def paper_info_to_cache_json(paper_info, additional_tag={}):
     ''' Cache a paper_info dictionary.
     '''
     # Setup meta data
@@ -19,6 +19,7 @@ def paper_info_to_cache_json(paper_info):
     # Source data
     source = paper_info
     source['CreatedDate'] = datetime.now()
+    source.update(additional_tag)
 
     # Return join of data
     meta_json['_source'] = source
