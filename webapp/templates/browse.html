@@ -61,8 +61,7 @@
                   {% endfor %}
                 </li>
               </div>
-              <a href="/submit/?id={{ entity.document_id }}">
-                <div class="info-box">
+                <div class="info-box" onclick="document.location.href = '/submit/?id={{ entity.document_id }}'; return false">
                     {% if entity.PhotoUrl %}
                       <span class="info-box-icon" style="background-image: url('{{entity.PhotoUrl}}');"></span>
                     {% else %}
@@ -85,10 +84,9 @@
                     {% for keyword in entity.Keywords %}
                       <li>{{ keyword }}</li>
                     {% endfor %} <br/>
-                    <small>{{entity.Citation}}</small>
+                    <small>{{entity.Citation | safe}}</small>
                   </div>
                 </div>
-              </a>
             {% endfor %}
           </div>
         </div>
