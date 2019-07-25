@@ -346,7 +346,7 @@ def paper_info_db_query(paper_id):
 
 
 def paper_info_multiquery(
-        paper_ids, partial_info=list(), force=False, query_filter=None):
+        paper_ids, partial_info=list(), force=False, query_filter=None, partial_updates=list(), recache=False):
     """
     """
     # Create partial information dictionary
@@ -363,7 +363,7 @@ def paper_info_multiquery(
     print('Get links', datetime.now() - t_cur)
 
     # Calculate papers to query es for partials
-    find_partial = set(paper_ids)
+    find_partial = set(paper_ids + partial_updates)
     for paper_link in paper_links.values():
         find_partial.update(paper_link['References'])
         find_partial.update(paper_link['Citations'])
@@ -382,7 +382,8 @@ def paper_info_multiquery(
             p_id = p_info['PaperId']
             find_partial.remove(p_id)
             paper_partial[p_id] = p_info
-            from_cached.append(p_id)
+            if not recache:
+                from_cached.append(p_id)
 
     # Get partial information from db
     for p_info in base_paper_db_query(list(find_partial)):
