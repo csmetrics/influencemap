@@ -15,6 +15,7 @@ from core.config                   import *
 from datetime    import datetime
 from collections import Counter
 from operator    import itemgetter
+from multiprocessing import Process, Queue
 
 import numpy as np
 import core.utils.entity_type as ent
@@ -172,6 +173,7 @@ def gen_flower_data(score_df, flower_prop, entity_names, flower_name,
     flower_type, leaves = flower_prop
     print('[gen_flower_data] flower_type', flower_type)
 
+    t1 = datetime.now()
     print(datetime.now(), 'start score_leaves')
     entity_score = score_leaves(score_df, leaves)
     print(datetime.now(), 'finish score_leaves')
@@ -189,70 +191,91 @@ def gen_flower_data(score_df, flower_prop, entity_names, flower_name,
     filter_score = filter_year(filter_score, config['cit_lower'],
                                              config['cit_upper'],
                                              index = 'influence_year')
-
+    t2 = datetime.now()
     # Aggregate
     agg_score = agg_score_df(filter_score)
+    t3 = datetime.now()
 
     data_list = []
+
+    q = Queue()
+    processes = []
+    results = []
     for filter_type in range(4):
+        p = Process(target=p_worker, args=(q, filter_type, agg_score, flower_type, flower_name, config))
+        processes.append(p)
+        p.start()
+    for p in processes:
+        ret = q.get()
+        results.append(ret)
+        p.join()
+    data_list = sorted(results, key=itemgetter("filter_type"))
 
-        # Select the influence type from self citations
-        if filter_type == 0:  #config['self_cite'] and config['icoauthor']:
-            agg_score['influenced'] = agg_score.influenced_tot
-            agg_score['influencing'] = agg_score.influencing_tot
-            agg_score['sum'] = agg_score.sum_tot
-            agg_score['ratio'] = agg_score.ratio_tot
-        elif filter_type == 1:  #config['self_cite']:
-            agg_score['influenced'] = agg_score.influenced_nca
-            agg_score['influencing'] = agg_score.influencing_nca
-            agg_score['sum'] = agg_score.sum_nca
-            agg_score['ratio'] = agg_score.ratio_nca
-        elif filter_type == 2:  #config['icoauthor']:
-            agg_score['influenced'] = agg_score.influenced_nsc
-            agg_score['influencing'] = agg_score.influencing_nsc
-            agg_score['sum'] = agg_score.sum_nsc
-            agg_score['ratio'] = agg_score.ratio_nsc
-        else:  # filter_type == 3
-            agg_score['influenced'] = agg_score.influenced_nscnca
-            agg_score['influencing'] = agg_score.influencing_nscnca
-            agg_score['sum'] = agg_score.sum_nscnca
-            agg_score['ratio'] = agg_score.ratio_nscnca
+    t4 = datetime.now()
 
-        # Sort alphabetical first
-        agg_score.sort_values('entity_name', ascending=False, inplace=True)
-
-        # Sort by sum of influence
-        agg_score['tmp_sort'] = agg_score.influencing + agg_score.influenced
-        agg_score.sort_values('tmp_sort', ascending=False, inplace=True)
-
-        # Sort by max of influence
-        agg_score['tmp_sort'] = np.maximum(agg_score.influencing, agg_score.influenced)
-        agg_score.sort_values('tmp_sort', ascending=False, inplace=True)
-        agg_score.drop('tmp_sort', axis=1, inplace=True)
-
-        # Need to take empty df into account
-        if agg_score.empty:
-            top_score = agg_score
-            top_score.ego = flower_name
-            num_leaves = config['num_leaves']
-        else:
-            num_leaves = max(50, config['num_leaves'])
-            top_score = agg_score.head(n=num_leaves)
-            top_score.ego = flower_name
-
-        # Calculate the bloom ordering
-        top_score['bloom_order'] = range(1, len(top_score) + 1)
-
-        # Graph score
-        graph_score = score_df_to_graph(top_score)
-
-        # D3 format
-        data = processdata(flower_type, graph_score, num_leaves, config['order'], 0)
-
-        #print('len(agg_score)', len(agg_score))
-
-        data['total'] = len(agg_score)
-
-        data_list.append(data)
+    print("[t]", t2-t1, "score_leaves")
+    print("[t]", t3-t2, "agg_score_df")
+    print("[t]", t4-t3, "processdata")
 
     return flower_type, data_list  #[data, data.copy(), data.copy()]#, data.copy()] #, node_info
+
+def p_worker(queue, filter_type, agg_score, flower_type, flower_name, config):
+
+    # Select the influence type from self citations
+    if filter_type == 0:  #config['self_cite'] and config['icoauthor']:
+        agg_score['influenced'] = agg_score.influenced_tot
+        agg_score['influencing'] = agg_score.influencing_tot
+        agg_score['sum'] = agg_score.sum_tot
+        agg_score['ratio'] = agg_score.ratio_tot
+    elif filter_type == 1:  #config['self_cite']:
+        agg_score['influenced'] = agg_score.influenced_nca
+        agg_score['influencing'] = agg_score.influencing_nca
+        agg_score['sum'] = agg_score.sum_nca
+        agg_score['ratio'] = agg_score.ratio_nca
+    elif filter_type == 2:  #config['icoauthor']:
+        agg_score['influenced'] = agg_score.influenced_nsc
+        agg_score['influencing'] = agg_score.influencing_nsc
+        agg_score['sum'] = agg_score.sum_nsc
+        agg_score['ratio'] = agg_score.ratio_nsc
+    else:  # filter_type == 3
+        agg_score['influenced'] = agg_score.influenced_nscnca
+        agg_score['influencing'] = agg_score.influencing_nscnca
+        agg_score['sum'] = agg_score.sum_nscnca
+        agg_score['ratio'] = agg_score.ratio_nscnca
+
+    # Sort alphabetical first
+    agg_score.sort_values('entity_name', ascending=False, inplace=True)
+
+    # Sort by sum of influence
+    agg_score['tmp_sort'] = agg_score.influencing + agg_score.influenced
+    agg_score.sort_values('tmp_sort', ascending=False, inplace=True)
+
+    # Sort by max of influence
+    agg_score['tmp_sort'] = np.maximum(agg_score.influencing, agg_score.influenced)
+    agg_score.sort_values('tmp_sort', ascending=False, inplace=True)
+    agg_score.drop('tmp_sort', axis=1, inplace=True)
+
+    # Need to take empty df into account
+    if agg_score.empty:
+        top_score = agg_score
+        top_score.ego = flower_name
+        num_leaves = config['num_leaves']
+    else:
+        num_leaves = max(50, config['num_leaves'])
+        top_score = agg_score.head(n=num_leaves)
+        top_score.ego = flower_name
+
+    # Calculate the bloom ordering
+    top_score.loc[:,'bloom_order'] = range(1, len(top_score) + 1)
+
+    # Graph score
+    graph_score = score_df_to_graph(top_score)
+
+    # D3 format
+    data = processdata(flower_type, graph_score, num_leaves, config['order'], 0)
+    #print('len(agg_score)', len(agg_score))
+
+    data['filter_type'] = filter_type
+    data['total'] = len(agg_score)
+
+    queue.put(data)
