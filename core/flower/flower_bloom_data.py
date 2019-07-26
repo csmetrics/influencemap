@@ -82,15 +82,15 @@ def score_df_to_graph(score_df):
         max_influencing=score_df['influencing'].max())
 
     # Normalise values
-    score_df['normed_sum'] = normalise_to_proportion_of_max(score_df['sum'])
-    score_df['normed_ratio'] = normalise_colour_dif(score_df['ratio'])
+    score_df.loc[:,'normed_sum'] = normalise_to_proportion_of_max(score_df['sum'])
+    score_df.loc[:,'normed_ratio'] = normalise_colour_dif(score_df['ratio'])
 
     norm_influenced, norm_influencing = normalise_double_log(
         score_df['influenced'], score_df['influencing'])
 
-    score_df['normed_influenced'] = norm_influenced
-    score_df['normed_influencing'] = norm_influencing
-    score_df['dif'] = score_df['influencing'] - score_df['influenced']
+    score_df.loc[:,'normed_influenced'] = norm_influenced
+    score_df.loc[:,'normed_influencing'] = norm_influencing
+    score_df.loc[:,'dif'] = score_df['influencing'] - score_df['influenced']
 
     # Add ego
     egoG.add_node('ego', name=score_df.ego, weight=None)
