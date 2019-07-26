@@ -9,7 +9,7 @@ class ReferenceFlower:
     def calculate_node_size(self, original_node, new_sum):
         o_sum = original_node["sum"]
         o_size = original_node["size"]
-        new_size = o_size * new_sum / o_sum
+        new_size = (o_size * new_sum / o_sum) if o_sum > 0 else 0
         # print(o_sum, o_size, new_sum, new_size)
         return new_size
 
