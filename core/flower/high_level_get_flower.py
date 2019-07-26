@@ -158,78 +158,10 @@ def processdata(gtype, egoG, num_leaves, order, filter_num):
             'weight': v['weight'],
             'filter_num': filter_num,
         } for s, t, v in links]
-    
+
     chartdata.sort(key=lambda d: d['bloom_order'])
 
     return { 'nodes': sorted(list(nodedata.values()), key=itemgetter('id')), 'links': linkdata, 'bars': chartdata }
-
-
-def processdata_all(gtype, egoG, num_leaves, order):
-    center_node = egoG.graph['ego']
-
-    # Radius of circle
-    radius = 1.2
-
-    # Get basic node information from ego graph
-    outer_nodes = list(egoG)
-    outer_nodes.remove('ego')
-
-    # Sort by name, influence dif, then ratio
-    outer_nodes.sort()
-    outer_nodes.sort(key=lambda n: min(-egoG.nodes[n]['inf_out'], -egoG.nodes[n]['inf_in']))
-
-    links = list(egoG.edges(data=True))
-
-    # Sort by name, influence dif, then ratio
-    links.sort(key=lambda l: (l[0], l[1]))
-    links.sort(key=lambda l: -l[2]['sumw'])
-    links.sort(key=lambda l: min(-l[2]['inf_out'], -l[2]['inf_in']))
-
-    links_in  = [l for l in links if l[2]['direction'] == 'in']
-    links_out = [l for l in links if l[2]['direction'] == 'out']
-
-    # Make sure in/out bars are in order
-    links = list()
-    for l_in, l_out in zip(links_in, links_out):
-        links.append(l_out)
-        links.append(l_in)
-
-    # Outer nodes data
-    nodedata = { key:{
-            'name': key,
-            'weight': egoG.nodes[key]['nratiow'],
-            'id': i,
-            'gtype': gtype,
-            'size': egoG.nodes[key]['sumw'],
-            'sum': egoG.nodes[key]['sum'],
-            'coauthor': str(egoG.nodes[key]['coauthor']),
-            'bloom_order': egoG.nodes[key]['bloom_order'],
-        } for i, key in zip(range(1, len(outer_nodes)+1), outer_nodes)}
-
-    # Center node data
-    nodedata['ego'] = {
-        'name': egoG.nodes['ego']['name'],
-        'weight': 1,
-        'id': 0,
-        'gtype': gtype,
-        'size': 1,
-        'coauthor': str(False),
-        'bloom_order': 0,
-    }
-
-    chartdata = [{
-            'id': nodedata[t]['id'] if v['direction'] == 'in' else nodedata[s]['id'],
-            'bloom_order': nodedata[t]['bloom_order'] if v['direction'] == 'in' else nodedata[s]['bloom_order'],
-            'name': t if v['direction'] == 'in' else s,
-            'type': v['direction'],
-            'gtype': gtype,
-            'sum': nodedata[t]['weight'] if v['direction'] == 'in' else nodedata[s]['weight'],
-            'weight': v['weight']
-        } for s, t, v in links]
-
-    chartdata.sort(key=lambda d: d['bloom_order'])
-
-    return { 'bars': chartdata }
 
 
 def gen_flower_data(score_df, flower_prop, entity_names, flower_name,
