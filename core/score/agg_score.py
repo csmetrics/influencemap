@@ -100,9 +100,9 @@ def agg_score_df(
 def post_agg_score_df(score_df, ratio_func=np.subtract):
     """ Post column calculation after aggregation and filtering.
     """
-    score_df.loc[:,'sum'] = score_df.influenced + score_df.influencing
-    score_df.loc[:,'ratio'] = ratio_func(
-        score_df.influencing, score_df.influenced)/score_df['sum']
+    score_df.loc[:,'sum'] = (score_df.influenced + score_df.influencing).fillna(0)
+    score_df.loc[:,'ratio'] = (ratio_func(
+        score_df.influencing, score_df.influenced)/score_df['sum']).fillna(0)
     score_df.loc[:,'ratio'].replace([np.inf, -np.inf], 0, inplace=True)
 
     return score_df
