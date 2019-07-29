@@ -67,13 +67,11 @@ def score_paper_info(paper_info, self=list()):
     try:
         for pfos in paper_info['FieldsOfStudy']:
             if 'FieldOfStudyName' in pfos and pfos['FieldOfStudyLevel'] == 1:
-                if pfos['FieldOfStudyName'] == 'world wide web':
-                    print(paper_info)
                 score_list['FSTD'].append(make_dummy(pfos['FieldOfStudyName']))
     except:
         print(paper_info['PaperId'])
     ###  COAUTHOR DUMMY VALUES ###
-    
+
     ###  REFERENCE VALUES ###
     # Calculate references influence
     for reference in paper_info['References']:
