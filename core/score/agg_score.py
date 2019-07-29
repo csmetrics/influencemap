@@ -28,10 +28,11 @@ AGG_COLS = [
     ]
 
 AGG_FUNC = {
-    'self_cite': np.all,
     'coauthor': np.any,
     'influenced_tot': np.nansum,
     'influencing_tot': np.nansum,
+    'influenced_nsc': np.nansum,
+    'influencing_nsc': np.nansum,
     }
 
 SCORE_PREC = 5
@@ -54,12 +55,13 @@ def agg_score_df(
     score_df.rename(index=str, columns=INF_RENAME, inplace=True)
 
     # Create influence values for self citation
+    score_df.loc[~score_df.self_cite, 'influenced_nsc'] = score_df.influenced_tot
+    score_df.loc[~score_df.self_cite, 'influencing_nsc'] = score_df.influencing_tot
+
     t2 = datetime.now()
     # Aggregate scores up
     score_df = score_df.groupby(AGG_COLS).agg(AGG_FUNC).reset_index()
 
-    score_df.loc[~score_df.self_cite, 'influenced_nsc'] = score_df.influenced_tot
-    score_df.loc[~score_df.self_cite, 'influencing_nsc'] = score_df.influencing_tot
     score_df.loc[~score_df.coauthor, 'influenced_nca'] = score_df.influenced_tot
     score_df.loc[~score_df.coauthor, 'influencing_nca'] = score_df.influencing_tot
     score_df.loc[~score_df.coauthor, 'influenced_nscnca'] = score_df.influenced_nsc

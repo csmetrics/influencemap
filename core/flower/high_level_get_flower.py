@@ -198,19 +198,9 @@ def gen_flower_data(score_df, flower_prop, entity_names, flower_name,
 
     data_list = []
 
-    q = Queue()
-    processes = []
-    results = []
     for filter_type in range(4):
-        p_worker(q, filter_type, agg_score, flower_type, flower_name, config)
-    #     p = Process(target=p_worker, args=(q, filter_type, agg_score, flower_type, flower_name, config))
-    #     processes.append(p)
-    #     p.start()
-    # for p in processes:
-        ret = q.get()
-        results.append(ret)
-        # p.join()
-    data_list = sorted(results, key=itemgetter("filter_type"))
+        data = p_worker(filter_type, agg_score, flower_type, flower_name, config)
+        data_list.append(data)
 
     t4 = datetime.now()
 
@@ -220,7 +210,7 @@ def gen_flower_data(score_df, flower_prop, entity_names, flower_name,
 
     return flower_type, data_list  #[data, data.copy(), data.copy()]#, data.copy()] #, node_info
 
-def p_worker(queue, filter_type, agg_score, flower_type, flower_name, config):
+def p_worker(filter_type, agg_score, flower_type, flower_name, config):
 
     # Select the influence type from self citations
     if filter_type == 0:  #config['self_cite'] and config['icoauthor']:
@@ -273,4 +263,4 @@ def p_worker(queue, filter_type, agg_score, flower_type, flower_name, config):
     data['filter_type'] = filter_type
     data['total'] = len(agg_score)
 
-    queue.put(data)
+    return data
