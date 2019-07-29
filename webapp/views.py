@@ -77,8 +77,8 @@ def browse(request):
 
     with open("webapp/static/browse_list.json", "r") as fh:
         browse_list = json.load(fh)
-    for b in browse_list:
-        print(b)
+    # for b in browse_list:
+    #     print(b)
     browse_cache = get_all_browse_cache()
     for group in browse_list:
         for subgroup in group["subgroups"]:
@@ -91,7 +91,7 @@ def browse(request):
                         #subsubgroup["document_ids"] = [cache["document_id"] for cache in browse_cache if cache["Type"] == subsubgroup["tag"]]
                         subsubgroup["docs"] = sorted([cache for cache in browse_cache if cache["Type"] == subsubgroup["tag"]], key=lambda x: (x["Year"], x["DisplayName"]) if ("Year" in x) else (0, x["DisplayName"]))
     browse_cache = {cache["document_id"]: cache for cache in browse_cache}
-    printNested(browse_list)
+    #printNested(browse_list)
 
     return render(request, "browse.html", {"browse_groups": browse_list, "cache_data": browse_cache})
 

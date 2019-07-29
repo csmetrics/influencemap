@@ -202,13 +202,14 @@ def gen_flower_data(score_df, flower_prop, entity_names, flower_name,
     processes = []
     results = []
     for filter_type in range(4):
-        p = Process(target=p_worker, args=(q, filter_type, agg_score, flower_type, flower_name, config))
-        processes.append(p)
-        p.start()
-    for p in processes:
+        p_worker(q, filter_type, agg_score, flower_type, flower_name, config)
+    #     p = Process(target=p_worker, args=(q, filter_type, agg_score, flower_type, flower_name, config))
+    #     processes.append(p)
+    #     p.start()
+    # for p in processes:
         ret = q.get()
         results.append(ret)
-        p.join()
+        # p.join()
     data_list = sorted(results, key=itemgetter("filter_type"))
 
     t4 = datetime.now()
