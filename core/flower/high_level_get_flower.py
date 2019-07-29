@@ -3,7 +3,7 @@ from core.flower.draw_flower_test  import draw_flower
 from core.utils.get_entity         import entity_from_name
 from core.search.query_info        import paper_info_check_query, paper_info_mag_check_multiquery
 from core.score.agg_paper_info     import score_leaves
-from core.score.agg_score          import agg_score_df#, select_node_info
+from core.score.agg_score          import agg_score_df, post_agg_score_df
 from core.flower.node_info         import select_node_info
 from core.score.agg_utils          import get_coauthor_mapping
 from core.score.agg_utils          import flag_coauthor
@@ -225,23 +225,15 @@ def p_worker(queue, filter_type, agg_score, flower_type, flower_name, config):
     if filter_type == 0:  #config['self_cite'] and config['icoauthor']:
         agg_score['influenced'] = agg_score.influenced_tot
         agg_score['influencing'] = agg_score.influencing_tot
-        agg_score['sum'] = agg_score.sum_tot
-        agg_score['ratio'] = agg_score.ratio_tot
     elif filter_type == 1:  #config['self_cite']:
         agg_score['influenced'] = agg_score.influenced_nca
         agg_score['influencing'] = agg_score.influencing_nca
-        agg_score['sum'] = agg_score.sum_nca
-        agg_score['ratio'] = agg_score.ratio_nca
     elif filter_type == 2:  #config['icoauthor']:
         agg_score['influenced'] = agg_score.influenced_nsc
         agg_score['influencing'] = agg_score.influencing_nsc
-        agg_score['sum'] = agg_score.sum_nsc
-        agg_score['ratio'] = agg_score.ratio_nsc
     else:  # filter_type == 3
         agg_score['influenced'] = agg_score.influenced_nscnca
         agg_score['influencing'] = agg_score.influencing_nscnca
-        agg_score['sum'] = agg_score.sum_nscnca
-        agg_score['ratio'] = agg_score.ratio_nscnca
 
     # Sort alphabetical first
     agg_score.sort_values('entity_name', ascending=False, inplace=True)
@@ -258,12 +250,14 @@ def p_worker(queue, filter_type, agg_score, flower_type, flower_name, config):
     # Need to take empty df into account
     if agg_score.empty:
         top_score = agg_score
-        top_score.ego = flower_name
         num_leaves = config['num_leaves']
     else:
         num_leaves = max(50, config['num_leaves'])
         top_score = agg_score.head(n=num_leaves)
-        top_score.ego = flower_name
+
+    # Calculate post filter statistics (sum and ratio)
+    top_score = post_agg_score_df(top_score)
+    top_score.ego = flower_name
 
     # Calculate the bloom ordering
     top_score.loc[:,'bloom_order'] = range(1, len(top_score) + 1)

@@ -346,7 +346,8 @@ def paper_info_db_query(paper_id):
 
 
 def paper_info_multiquery(
-        paper_ids, partial_info=list(), force=False, query_filter=None, partial_updates=list(), recache=False):
+        paper_ids, partial_info=list(), force=False, query_filter=None,
+        partial_updates=list(), recache=False):
     """
     """
     # Create partial information dictionary

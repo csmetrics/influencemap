@@ -37,19 +37,6 @@ AGG_FUNC = {
 
 SCORE_PREC = 5
 
-def safe_ratio(ratio_func, inf_type, row):
-
-    if row['sum_{}'.format(inf_type)] == 0:
-        return 0
-
-    ratio = ratio_func(
-        row['influencing_{}'.format(inf_type)],
-        row['influenced_{}'.format(inf_type)])
-
-    ratio /= row['sum_{}'.format(inf_type)]
-    return ratio
-
-
 def agg_score_df(
         influence_df, coauthors=set([]), ratio_func=np.subtract,
         sort_func=np.maximum):
@@ -99,32 +86,26 @@ def agg_score_df(
     score_df['influencing_nscnca'] = score_df.influencing_nscnca.round(SCORE_PREC)
 
     t5 = datetime.now()
-    # calculate sum
-    score_df['sum_tot'] = score_df.influenced_tot + score_df.influencing_tot
-    score_df['sum_nsc'] = score_df.influenced_nsc + score_df.influencing_nsc
-    score_df['sum_nca'] = score_df.influenced_nca + score_df.influencing_nca
-    score_df['sum_nscnca'] = score_df.influenced_nscnca + score_df.influencing_nscnca
 
-    t6 = datetime.now()
-    # calculate influence ratios
-    score_df['ratio_tot'] = ratio_func(score_df.influencing_tot, score_df.influenced_tot)/score_df.sum_tot
-    score_df['ratio_nsc'] = ratio_func(score_df.influencing_nsc, score_df.influenced_nsc)/score_df.sum_nsc
-    score_df['ratio_nca'] = ratio_func(score_df.influencing_nca, score_df.influenced_nca)/score_df.sum_nca
-    score_df['ratio_nscnca'] = ratio_func(score_df.influencing_nscnca, score_df.influenced_nscnca)/score_df.sum_nscnca
-
-    t7 = datetime.now()
     print("agg_score_df")
     print("t1", t2-t1)
     print("t2", t3-t2)
     print("t3", t4-t3)
     print("t4", t5-t4)
-    print("t5", t6-t5)
-    print("t6", t7-t6)
 
     print('{} finish score generation\n---'.format(datetime.now()))
 
     return score_df
 
+def post_agg_score_df(score_df, ratio_func=np.subtract):
+    """ Post column calculation after aggregation and filtering.
+    """
+    score_df['sum'] = score_df.influenced + score_df.influencing
+    score_df['ratio'] = ratio_func(
+        score_df.influencing, score_df.influenced)/score_df['sum']
+    score_df['ratio'].replace([np.inf, -np.inf], 0, inplace=True)
+
+    return score_df
 
 def select_node_info(influence_df, node_names, num_papers=3):
 
