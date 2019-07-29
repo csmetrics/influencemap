@@ -28,11 +28,10 @@ AGG_COLS = [
     ]
 
 AGG_FUNC = {
+    'self_cite': np.all,
     'coauthor': np.any,
     'influenced_tot': np.nansum,
     'influencing_tot': np.nansum,
-    'influenced_nsc': np.nansum,
-    'influencing_nsc': np.nansum,
     }
 
 SCORE_PREC = 5
@@ -55,13 +54,12 @@ def agg_score_df(
     score_df.rename(index=str, columns=INF_RENAME, inplace=True)
 
     # Create influence values for self citation
-    score_df.loc[~score_df.self_cite, 'influenced_nsc'] = score_df.influenced_tot
-    score_df.loc[~score_df.self_cite, 'influencing_nsc'] = score_df.influencing_tot
-
     t2 = datetime.now()
     # Aggregate scores up
     score_df = score_df.groupby(AGG_COLS).agg(AGG_FUNC).reset_index()
 
+    score_df.loc[~score_df.self_cite, 'influenced_nsc'] = score_df.influenced_tot
+    score_df.loc[~score_df.self_cite, 'influencing_nsc'] = score_df.influencing_tot
     score_df.loc[~score_df.coauthor, 'influenced_nca'] = score_df.influenced_tot
     score_df.loc[~score_df.coauthor, 'influencing_nca'] = score_df.influencing_tot
     score_df.loc[~score_df.coauthor, 'influenced_nscnca'] = score_df.influenced_nsc
@@ -87,11 +85,11 @@ def agg_score_df(
 
     t5 = datetime.now()
 
-    print("agg_score_df")
-    print("t1", t2-t1)
-    print("t2", t3-t2)
-    print("t3", t4-t3)
-    print("t4", t5-t4)
+    # print("agg_score_df")
+    # print("t1", t2-t1)
+    # print("t2", t3-t2)
+    # print("t3", t4-t3)
+    # print("t4", t5-t4)
 
     print('{} finish score generation\n---'.format(datetime.now()))
 
@@ -100,10 +98,10 @@ def agg_score_df(
 def post_agg_score_df(score_df, ratio_func=np.subtract):
     """ Post column calculation after aggregation and filtering.
     """
-    score_df['sum'] = score_df.influenced + score_df.influencing
-    score_df['ratio'] = ratio_func(
+    score_df.loc[:,'sum'] = score_df.influenced + score_df.influencing
+    score_df.loc[:,'ratio'] = ratio_func(
         score_df.influencing, score_df.influenced)/score_df['sum']
-    score_df['ratio'].replace([np.inf, -np.inf], 0, inplace=True)
+    score_df.loc[:,'ratio'].replace([np.inf, -np.inf], 0, inplace=True)
 
     return score_df
 
