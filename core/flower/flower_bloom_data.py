@@ -23,13 +23,13 @@ def normalise_singular_linear(series):
         return series
 
     # Normalise
-    return series.apply(lambda x : (x - min_val) / max_min_dif)
+    return (series - min_val) / max_min_dif
 
 def normalise_to_proportion_of_max(series):
     ''' Function to normalise node sizes with max node being 1
     '''
     max_val = series.max()
-    return series.apply(lambda x: x/max_val)
+    return series / max_val
 
 def normalise_colour_dif(series):
     ''' Function to normalise color
@@ -45,7 +45,7 @@ def normalise_colour_dif(series):
         return series
 
     # Normalise
-    return series.apply(lambda x : (x + normalisation) / (2 * normalisation))
+    return (series + normalisation) / (2 * normalisation)
 
 def normalise_double_log(series1, series2):
     ''' Normalise two series logwise
@@ -63,11 +63,11 @@ def normalise_double_log(series1, series2):
         return pd.Series([1] * series.size), pd.Series([1] * series.size)
 
     # Scale from 1 to 1024
-    scaled1 = series1.apply(lambda x : 1 + (x - min_val) / max_min_dif)
-    scaled2 = series2.apply(lambda x : 1 + (x - min_val) / max_min_dif)
+    scaled1 = (1 + (series1 - min_val) / max_min_dif)
+    scaled2 = (1 + (series2 - min_val) / max_min_dif)
 
     # Log down to 0 to 1
-    return scaled1.apply(np.log2), scaled2.apply(np.log2)
+    return np.log2(scaled1), np.log2(scaled2)
 
 def score_df_to_graph(score_df):
     ''' Turns the dataframe for flower into networkx graph.
