@@ -213,7 +213,8 @@ def score_leaves(score_list, leaves):
     score_df = pd.DataFrame(columns = DF_COLUMNS)
 
     for leaf in leaves:
-        score_df = score_df.append(score_list[leaf.ident], ignore_index=True)
+        if (score_list[leaf.ident]):
+            score_df = score_df.append(score_list[leaf.ident], ignore_index=True)
 
     score_df['self_cite'] = score_df['self_cite'].astype('bool')
     score_df['coauthor'] = score_df['coauthor'].astype('bool')
