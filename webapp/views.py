@@ -378,9 +378,6 @@ def submit(request):
         flower_config['num_leaves'] = 5000
 
     # Work function
-##    make_flower = lambda x: gen_flower_data(score_df, x, entity_names,
-##            flower_name, config=flower_config)
-# TEST
     make_flower = lambda x: gen_flower_data(score_df, x, entity_names,
             flower_name, config=flower_config)
 
@@ -392,11 +389,7 @@ def submit(request):
     else: # temporary fix
         flower_res = [make_flower(v) for v in flower_leaves]
     sorted(flower_res, key=lambda x: x[0])
-
-    # Reduce
-    flower_info = list()
-    for _, f_info in flower_res:
-        flower_info.append(f_info)
+    flower_info = [f_info for _, f_info in flower_res]
 
     print('TOTAL FLOWER TIME: ', datetime.now() - time_cur)
     print('TOTAL REQUEST TIME: ', datetime.now() - total_request_cur)
