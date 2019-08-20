@@ -475,6 +475,8 @@ def submit(request):
             data["inst"].append(cmp_flower[2])
             data["fos"].append(cmp_flower[3])
 
+        data["yearSlider"]["selected"]["num_leaves"] = num_leaves
+
     else:
         flower_data = to_flower_dict(flower_info)
         session["reference_flower"] = []
