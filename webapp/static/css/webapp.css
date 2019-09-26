@@ -200,6 +200,14 @@ a {
   font-weight: bolder;
 }
 
+.banner {
+  text-align: center;
+  color: #f9f9f9;
+  background-color: #49BEAA;
+  margin: 15 -20;
+  padding: 3px;
+}
+
 .project-info {
   padding-bottom: 50px;
   text-align: justify;
