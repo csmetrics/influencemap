@@ -209,6 +209,8 @@ function getSelectedData(){
      var type_and_id = datatable_row['table-id'].split('_');
      entities[type_and_id[0]].push(type_and_id[1]);
      var row_data = selectiontable.row(a).data()['data'];
+     row_data['entity-type'] = type_and_id[0];
+
      // If not a paper
      if (row_data['entity-type'] != 'paper') {
        // Add names and papers
@@ -219,6 +221,7 @@ function getSelectedData(){
      }
      // Otherwise just pass id
      else {
+       names.push(row_data['OriginalTitle']);
        papers.push(row_data['eid']);
      };
    });

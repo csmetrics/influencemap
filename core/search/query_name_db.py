@@ -18,18 +18,16 @@ def author_name_query(author_ids):
     client = Elasticsearch(conf.get("elasticsearch.hostname"))
 
     # Target
-    authors_target = 'NormalizedName'
+    authors_targets = ['AuthorId', 'NormalizedName']
 
     # Query for paa
     authors_s = Search(index = 'authors', using = client)
     authors_s = authors_s.query('terms', AuthorId=author_ids)
-    authors_s = authors_s.source([authors_target])
+    authors_s = authors_s.source(authors_targets)
     authors_s = authors_s.params(request_timeout=30)
 
-    names = list()
-    for authors in authors_s.scan():
-        # Add names to result
-        names.append(authors[authors_target])
+    authors = {str(a[authors_targets[0]]):a[authors_targets[1]] for a in authors_s.scan()}
+    names = [authors[id] for id in author_ids]    # Add names to result
 
     return names
 

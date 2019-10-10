@@ -277,10 +277,13 @@ def submit(request):
         entity_names = get_all_normalised_names(entity_ids)
         config = None
         flower_name = data.get('flower_name')
-        print(entity_names)
 
+        if not entity_names:
+            entity_names = data["names"]
         if not flower_name:
-            flower_name = '-'.join(entity_names)
+            flower_name = "" + entity_names[0]
+            if len(data["names"]) > 1:
+                flower_name += " +{} more".format(len(entity_names)-1)
 
         doc_for_es_cache={"DisplayName": flower_name, "EntityIds": data["entities"], "Type": "user_generated"}
         doc_id = saveNewBrowseCache(doc_for_es_cache)
