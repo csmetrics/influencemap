@@ -5,7 +5,7 @@ Influence in the academic communities has been an area of interest for researche
 We aim to provide a visualisation tool which allows users to easily search and visualise the flow of academic influence. Our visualisation maps influence in the form of an influence flower. We calculate influence as a function of the number of citations between two entities (look below for information on our definition of influence).
 
 <p align="center">
-  <img src="https://github.com/csmetrics/influencemap/blob/master/assets/img/example_flower_2.png"/>
+  <img width="80%" src="https://github.com/csmetrics/influencemap/blob/master/assets/img/example_flower_2.png"/>
 </p>
 
 The node in the centre of the flower denotes the ego entity, the entitiy in which we are looking at influence with respect to. The leaf nodes are the most influential entities with respect to the ego. (We define the ego as a collection of papers. If it is an author, it is the collection of papers that the author has authored)
