@@ -196,11 +196,9 @@ def gen_flower_data(score_df, flower_prop, entity_names, flower_name,
     agg_score = agg_score_df(filter_score)
     t3 = datetime.now()
 
-    data_list = []
-
-    for filter_type in range(4):
-        data = p_worker(filter_type, agg_score, flower_type, flower_name, config)
-        data_list.append(data)
+    data_list = ["Null", "Null", "Null", "Null"]
+    data = p_worker(0, agg_score, flower_type, flower_name, config)
+    data_list[data["filter_type"]] = data
 
     t4 = datetime.now()
 
@@ -213,18 +211,25 @@ def gen_flower_data(score_df, flower_prop, entity_names, flower_name,
 def p_worker(filter_type, agg_score, flower_type, flower_name, config):
 
     # Select the influence type from self citations
-    if filter_type == 0:  #config['self_cite'] and config['icoauthor']:
+    # if filter_type == 0:
+    if config['self_cite'] and config['icoauthor']:
         agg_score['influenced'] = agg_score.influenced_tot
         agg_score['influencing'] = agg_score.influencing_tot
-    elif filter_type == 1:  #config['self_cite']:
+        filter_type = 0
+    # elif filter_type == 1:
+    elif config['self_cite']:
         agg_score['influenced'] = agg_score.influenced_nca
         agg_score['influencing'] = agg_score.influencing_nca
-    elif filter_type == 2:  #config['icoauthor']:
+        filter_type = 1
+    # elif filter_type == 2:
+    elif config['icoauthor']:
         agg_score['influenced'] = agg_score.influenced_nsc
         agg_score['influencing'] = agg_score.influencing_nsc
+        filter_type = 2
     else:  # filter_type == 3
         agg_score['influenced'] = agg_score.influenced_nscnca
         agg_score['influencing'] = agg_score.influencing_nscnca
+        filter_type = 3
 
     # Sort alphabetical first
     agg_score.sort_values('entity_name', ascending=False, inplace=True)
