@@ -43,13 +43,11 @@
     </div>
     <div style="padding-top:10px">
       <b>Include self citations</b>
-      <input class="self-cite" type="checkbox" style="float:left; margin:5 10 0 0" name="self-cite" id="self-cite" {% if yearSlider.selected.self_cite == 'true' %} checked="checked" {% endif %}/>
-      <!-- <input class="self-cite" type="checkbox" onclick="includeFilterChange()" style="float:left; margin:5 10 0 0" name="self-cite" id="self-cite" {% if yearSlider.selected.self_cite == 'true' %} checked="checked" {% endif %}/> -->
+      <input class="self-cite" type="checkbox" onclick="includeFilterChange()" style="float:left; margin:5 10 0 0" name="self-cite" id="self-cite" {% if yearSlider.selected.self_cite == 'true' %} checked="checked" {% endif %}/>
     </div>
     <div>
       <b>Include coauthors</b>
-      <input class="coauthor" type="checkbox" style="float:left; margin:5 10 0 0" name="self-coauthor" id="coauthor" {% if yearSlider.selected.icoauthor == 'true' %} checked="checked" {% endif %}/>
-      <!-- <input class="coauthor" type="checkbox" onclick="includeFilterChange()" style="float:left; margin:5 10 0 0" name="self-coauthor" id="coauthor" {% if yearSlider.selected.icoauthor == 'true' %} checked="checked" {% endif %}/> -->
+      <input class="coauthor" type="checkbox" onclick="includeFilterChange()" style="float:left; margin:5 10 0 0" name="self-coauthor" id="coauthor" {% if yearSlider.selected.icoauthor == 'true' %} checked="checked" {% endif %}/>
     </div>
     <div style="padding-top:10px">
       <b>(Beta) Compare with anchor flower</b>
@@ -391,7 +389,7 @@ resubmitButton.addEventListener('click', function(){
       session = result["session"];
       // do not update stat for resubmit
       // updateStats(result.stats);
-
+      
       resubmitButton.className = "btn btn-primary";
     }
   });
