@@ -73,15 +73,11 @@
 <script>
 option = '{{ navbarOption.selectedOption.id }}';
 keyword = '{{ navbarOption.selectedKeyword }}';
-
-filter_num = {{ filter_type|safe }};
-
-author_data = {{ author|safe }};
-conf_data = {{ conf|safe }};
-inst_data = {{ inst|safe }};
-fos_data = {{ fos|safe }};
-session = {{ session|safe }};
-
+author_data = {{ author|safe }}[0]
+conf_data = {{ conf|safe }}[0]
+inst_data = {{ inst|safe }}[0]
+fos_data = {{ fos|safe }}[0]
+session = {{ session|safe }}
 
 start_petals = parseInt($("#num-petals").val());
 start_order = $("#petal-order").val();
@@ -92,10 +88,10 @@ var referenceCheckbox = document.getElementById('reference');
 
 var width = document.getElementById('flower-container').offsetWidth;
 drawLegend();
-drawFlower("#graph1", author_data[filter_num], 0, width, start_petals, start_order);
-drawFlower("#graph2", conf_data[filter_num], 1, width, start_petals, start_order);
-drawFlower("#graph3", inst_data[filter_num], 2, width, start_petals, start_order);
-drawFlower("#graph4", fos_data[filter_num], 3, width, start_petals, start_order);
+drawFlower("#graph1", author_data, 0, width, start_petals, start_order);
+drawFlower("#graph2", conf_data, 1, width, start_petals, start_order);
+drawFlower("#graph3", inst_data, 2, width, start_petals, start_order);
+drawFlower("#graph4", fos_data, 3, width, start_petals, start_order);
 
 // Reorder the layering
 reorder_all_layering(start_order);
@@ -104,7 +100,7 @@ reorder_all_layering(start_order);
 disableBloomNumBars(start_petals, 2000);
 
 // Get the modal
-var node_info_modal = document.getElementById('node_info_modal');
+var  node_info_modal = document.getElementById('node_info_modal');
 
 
 // Get the <span> element that closes the modal

@@ -194,35 +194,19 @@ def gen_flower_data(score_df, flower_prop, entity_names, flower_name,
     t2 = datetime.now()
     # Aggregate
     agg_score = agg_score_df(filter_score)
-    t3 = datetime.now()
-
-    data_list = []
-
-    for filter_type in range(4):
-        data = p_worker(filter_type, agg_score, flower_type, flower_name, config)
-        data_list.append(data)
-
-    t4 = datetime.now()
-
-    print("[t]", t2-t1, "score_leaves")
-    print("[t]", t3-t2, "agg_score_df")
-    print("[t]", t4-t3, "processdata")
-
-    return flower_type, data_list  #[data, data.copy(), data.copy()]#, data.copy()] #, node_info
-
-def p_worker(filter_type, agg_score, flower_type, flower_name, config):
+    # print(agg_score)
 
     # Select the influence type from self citations
-    if filter_type == 0:  #config['self_cite'] and config['icoauthor']:
+    if config['self_cite'] and config['icoauthor']:
         agg_score['influenced'] = agg_score.influenced_tot
         agg_score['influencing'] = agg_score.influencing_tot
-    elif filter_type == 1:  #config['self_cite']:
+    elif config['self_cite']:
         agg_score['influenced'] = agg_score.influenced_nca
         agg_score['influencing'] = agg_score.influencing_nca
-    elif filter_type == 2:  #config['icoauthor']:
+    elif config['icoauthor']:
         agg_score['influenced'] = agg_score.influenced_nsc
         agg_score['influencing'] = agg_score.influencing_nsc
-    else:  # filter_type == 3
+    else:
         agg_score['influenced'] = agg_score.influenced_nscnca
         agg_score['influencing'] = agg_score.influencing_nscnca
 
@@ -251,16 +235,16 @@ def p_worker(filter_type, agg_score, flower_type, flower_name, config):
     top_score.ego = flower_name
 
     # Calculate the bloom ordering
-    top_score.loc[:,'bloom_order'] = range(1, len(top_score) + 1)
+    top_score['bloom_order'] = range(1, len(top_score) + 1)
 
-    # Graph score
+    # Graph scores
     graph_score = score_df_to_graph(top_score)
 
     # D3 format
     data = processdata(flower_type, graph_score, num_leaves, config['order'], 0)
-    #print('len(agg_score)', len(agg_score))
 
-    data['filter_type'] = filter_type
+    print('len(agg_score)', len(agg_score))
+
     data['total'] = len(agg_score)
 
-    return data
+    return flower_type, [data, data.copy(), data.copy()]#, data.copy()] #, node_info

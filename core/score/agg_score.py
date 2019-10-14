@@ -37,6 +37,18 @@ AGG_FUNC = {
 
 SCORE_PREC = 5
 
+def safe_ratio(ratio_func, inf_type, row):
+
+    if row['sum_{}'.format(inf_type)] == 0:
+        return 0
+
+    ratio = ratio_func(
+        row['influencing_{}'.format(inf_type)],
+        row['influenced_{}'.format(inf_type)])
+
+    ratio /= row['sum_{}'.format(inf_type)]
+    return ratio
+
 def agg_score_df(
         influence_df, coauthors=set([]), ratio_func=np.subtract,
         sort_func=np.maximum):
@@ -47,7 +59,6 @@ def agg_score_df(
     if influence_df.empty:
         return pd.DataFrame(columns=FINAL_COLS)
 
-    t1 = datetime.now()
     # Remove year column
     score_df = influence_df[SCORE_COLS]
 
@@ -58,7 +69,6 @@ def agg_score_df(
     score_df.loc[~score_df.self_cite, 'influenced_nsc'] = score_df.influenced_tot
     score_df.loc[~score_df.self_cite, 'influencing_nsc'] = score_df.influencing_tot
 
-    t2 = datetime.now()
     # Aggregate scores up
     score_df = score_df.groupby(AGG_COLS).agg(AGG_FUNC).reset_index()
 
@@ -67,14 +77,12 @@ def agg_score_df(
     score_df.loc[~score_df.coauthor, 'influenced_nscnca'] = score_df.influenced_nsc
     score_df.loc[~score_df.coauthor, 'influencing_nscnca'] = score_df.influencing_nsc
 
-    t3 = datetime.now()
     # Fill nan values to zero
     score_df['influenced_nca']  = score_df['influenced_nca'].fillna(0)
     score_df['influencing_nca'] = score_df['influencing_nca'].fillna(0)
     score_df['influenced_nscnca']  = score_df['influenced_nscnca'].fillna(0)
     score_df['influencing_nscnca'] = score_df['influencing_nscnca'].fillna(0)
 
-    t4 = datetime.now()
     # Limit precision of scoring
     score_df['influenced_tot']  = score_df.influenced_tot.round(SCORE_PREC)
     score_df['influencing_tot'] = score_df.influencing_tot.round(SCORE_PREC)
@@ -85,17 +93,29 @@ def agg_score_df(
     score_df['influenced_nscnca']  = score_df.influenced_nscnca.round(SCORE_PREC)
     score_df['influencing_nscnca'] = score_df.influencing_nscnca.round(SCORE_PREC)
 
-    t5 = datetime.now()
+    # calculate sum
+    score_df['sum_tot'] = score_df.influenced_tot + score_df.influencing_tot
+    score_df['sum_nsc'] = score_df.influenced_nsc + score_df.influencing_nsc
+    score_df['sum_nca'] = score_df.influenced_nca + score_df.influencing_nca
+    score_df['sum_nscnca'] = score_df.influenced_nscnca + score_df.influencing_nscnca
 
-    # print("agg_score_df")
-    # print("t1", t2-t1)
-    # print("t2", t3-t2)
-    # print("t3", t4-t3)
-    # print("t4", t5-t4)
+    # calculate influence ratios
+    score_df['ratio_tot'] = score_df.apply(
+        lambda r: safe_ratio(ratio_func, 'tot', r), axis=1)
+
+    score_df['ratio_nsc'] = score_df.apply(
+        lambda r: safe_ratio(ratio_func, 'nsc', r), axis=1)
+
+    score_df['ratio_nca'] = score_df.apply(
+        lambda r: safe_ratio(ratio_func, 'nca', r), axis=1)
+
+    score_df['ratio_nscnca'] = score_df.apply(
+        lambda r: safe_ratio(ratio_func, 'nscnca', r), axis=1)
 
     print('{} finish score generation\n---'.format(datetime.now()))
 
     return score_df
+
 
 def post_agg_score_df(score_df, ratio_func=np.subtract):
     """ Post column calculation after aggregation and filtering.
@@ -106,6 +126,7 @@ def post_agg_score_df(score_df, ratio_func=np.subtract):
     score_df.loc[:,'ratio'].replace([np.inf, -np.inf], 0, inplace=True)
 
     return score_df
+
 
 def select_node_info(influence_df, node_names, num_papers=3):
 

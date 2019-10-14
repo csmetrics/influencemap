@@ -43,11 +43,11 @@
     </div>
     <div style="padding-top:10px">
       <b>Include self citations</b>
-      <input class="self-cite" type="checkbox" onclick="includeFilterChange()" style="float:left; margin:5 10 0 0" name="self-cite" id="self-cite" {% if yearSlider.selected.self_cite == 'true' %} checked="checked" {% endif %}/>
+      <input class="self-cite" type="checkbox" onclick="updateConfigUrl()" style="float:left; margin:5 10 0 0" name="self-cite" id="self-cite" {% if yearSlider.selected.self_cite == 'true' %} checked="checked" {% endif %}/>
     </div>
     <div>
       <b>Include coauthors</b>
-      <input class="coauthor" type="checkbox" onclick="includeFilterChange()" style="float:left; margin:5 10 0 0" name="self-coauthor" id="coauthor" {% if yearSlider.selected.icoauthor == 'true' %} checked="checked" {% endif %}/>
+      <input class="coauthor" type="checkbox" onclick="updateConfigUrl()" style="float:left; margin:5 10 0 0" name="self-coauthor" id="coauthor" {% if yearSlider.selected.icoauthor == 'true' %} checked="checked" {% endif %}/>
     </div>
     <div style="padding-top:10px">
       <b>(Beta) Compare with anchor flower</b>
@@ -88,14 +88,6 @@
 <script src="{% static 'js/statchart.js' %}"></script>
 <script src="{% static 'js/flowerGraph.js' %}"></script>
 <script type="text/javascript">
-
-// Filter dictionary map
-filter_type_dict = {}
-filter_type_dict[[true, true]] = 0
-filter_type_dict[[true, false]] = 1
-filter_type_dict[[false, true]] = 2
-filter_type_dict[[false, false]] = 3
-
 var selectedpublink = document.getElementById("selected_publication_link");
 var selectedcitelink = document.getElementById("selected_citation_link");
 selectedpublink.onclick = function(){showPapers("all-pub")};
@@ -363,22 +355,18 @@ resubmitButton.addEventListener('click', function(){
 
       console.log(result);
 
-      filter_type = result.filter_type
-
-      author_data = result.author;
-      conf_data = result.conf;
-      inst_data = result.inst;
-      fos_data = result.fos;
+      author_data = result.author[0];
+      conf_data = result.conf[0];
+      inst_data = result.inst[0];
+      fos_data = result.fos[0];
 
       cur_petals = parseInt($("#num-petals").val());
       cur_order = $("#petal-order").val();
 
-      prev_filter_type = filter_type;
-
-      drawFlower("#graph1", author_data[filter_type], 0, width, cur_petals, cur_order);
-      drawFlower("#graph2", conf_data[filter_type], 1, width, cur_petals, cur_order);
-      drawFlower("#graph3", inst_data[filter_type], 2, width, cur_petals, cur_order);
-      drawFlower("#graph4", fos_data[filter_type], 3, width, cur_petals, cur_order);
+      drawFlower("#graph1", author_data, 0, width, cur_petals, cur_order);
+      drawFlower("#graph2", conf_data, 1, width, cur_petals, cur_order);
+      drawFlower("#graph3", inst_data, 2, width, cur_petals, cur_order);
+      drawFlower("#graph4", fos_data, 3, width, cur_petals, cur_order);
 
       // Reorder the layering
       reorder_all_layering(cur_order);
@@ -389,7 +377,7 @@ resubmitButton.addEventListener('click', function(){
       session = result["session"];
       // do not update stat for resubmit
       // updateStats(result.stats);
-      
+
       resubmitButton.className = "btn btn-primary";
     }
   });
@@ -485,39 +473,6 @@ function petalChange() {
 
   prev_num_petals = new_num_petals;
   updateConfigUrl();
-}
-
-var prev_inc_ca = $("#coauthor").is(":checked");
-var prev_inc_sc = $("#self-cite").is(":checked");
-var prev_filter_type = filter_type_dict[[prev_inc_ca, prev_inc_sc]];
-
-function includeFilterChange() {
-  inc_ca = $("#coauthor").is(":checked");
-  inc_sc = $("#self-cite").is(":checked");
-
-  filter_type = filter_type_dict[[inc_sc, inc_ca]];
-
-  if (filter_type != prev_filter_type) {
-
-    removeAll(1500);
-
-    cur_petals = parseInt($("#num-petals").val());
-    cur_order = $("#petal-order").val();
-
-    drawFlower("#graph1", author_data[filter_type], 0, width, cur_petals, cur_order);
-    drawFlower("#graph2", conf_data[filter_type], 1, width, cur_petals, cur_order);
-    drawFlower("#graph3", inst_data[filter_type], 2, width, cur_petals, cur_order);
-    drawFlower("#graph4", fos_data[filter_type], 3, width, cur_petals, cur_order);
-
-    // Reorder the layering
-    reorder_all_layering(cur_order);
-
-    // Disable bars
-    disableBloomNumBars(cur_petals, 2000);
-
-    prev_filter_type = filter_type;
-    updateConfigUrl();
-  }
 }
 
 </script>
