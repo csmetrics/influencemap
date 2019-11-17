@@ -67,6 +67,7 @@ def saveNewBrowseCache(cache):
     doc = BrowseCache()
 
     # required fields
+    doc.doc_type = "_doc"
     doc.Type = cache["Type"]
     doc.DisplayName = cache["DisplayName"]
     doc.EntityIds = {}
@@ -75,11 +76,11 @@ def saveNewBrowseCache(cache):
 
     # optional fields
     if "Citation" in cache:                               doc.Citation = cache["Citation"]
-    if "Year" in cache and str(cache["Year"]).isdigit() : doc.Year = cache["Year"] 
-    if "Field" in cache:                                  doc.Field = cache["Field"] 
-    if "Affiliations" in cache:                           doc.Affiliations = cache["Affiliations"] 
-    if "Url" in cache:                                    doc.Url = cache["Url"] 
-    if "PhotoUrl" in cache:                               doc.PhotoUrl = cache["PhotoUrl"] 
+    if "Year" in cache and str(cache["Year"]).isdigit() : doc.Year = cache["Year"]
+    if "Field" in cache:                                  doc.Field = cache["Field"]
+    if "Affiliations" in cache:                           doc.Affiliations = cache["Affiliations"]
+    if "Url" in cache:                                    doc.Url = cache["Url"]
+    if "PhotoUrl" in cache:                               doc.PhotoUrl = cache["PhotoUrl"]
 
     for key,value in cache.items():
         if key not in ["Type","DisplayName","EntityIds","Citation","Year","Field","Affiliations","Url","PhotoUrl"]: doc[key] = value
