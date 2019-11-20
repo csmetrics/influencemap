@@ -37,7 +37,9 @@ def import_Affiliations(r):
     doc.WikiPage = r[6]
     doc.PaperCount = int(r[7]) if r[7] != "" else None
     doc.CitationCount = int(r[8]) if r[8] != "" else None
-    doc.CreatedDate = datetime.strptime(r[9], "%Y-%m-%d")
+    doc.Latitude = float(r[9]) if r[9] != "" else None # after ver 2019-11-08
+    doc.Longitude = float(r[10]) if r[10] != "" else None # after ver 2019-11-08
+    doc.CreatedDate = datetime.strptime(r[11], "%Y-%m-%d")
     doc.save(op_type="create")
 
 
@@ -65,8 +67,10 @@ def import_Papers(r):
     doc.ReferenceCount = int(r[17]) if r[17] != "" else None
     doc.CitationCount = int(r[18]) if r[18] != "" else None
     doc.EstimatedCitation = int(r[19]) if r[19] != "" else None
+
     doc.OriginalVenue = r[20] # new attribute ver.2019-01-01
-    doc.CreatedDate = datetime.strptime(r[21], "%Y-%m-%d")
+    doc.FamilyId = r[21] # new attribute ver.2019-11-08
+    doc.CreatedDate = datetime.strptime(r[22], "%Y-%m-%d")
 
     doc.LanguageCode = None
     doc.FieldOfStudy = None
@@ -92,7 +96,8 @@ def import_PaperAuthorAffiliations(r):
     doc.meta.id = "{}_{}".format(doc.PaperId, doc.AuthorId)
     doc.AffiliationId = int(r[2]) if r[2] != "" else None
     doc.AuthorSequenceNumber = int(r[3])
-    doc.OriginalAffiliation = r[4] # new attribute ver.2019-01-01
+    doc.OriginalAuthor = r[4] # new attribute ver.2019-11-08
+    doc.OriginalAffiliation = r[5] # new attribute ver.2019-01-01
     doc.save(op_type="create")
 
 
@@ -114,7 +119,9 @@ def import_ConferenceInstances(r):
     doc.FinalVersionDueDate = datetime.strptime(r[11], "%Y-%m-%d") if r[11] != "" else None
     doc.PaperCount = int(r[12]) if r[12] != "" else None
     doc.CitationCount = int(r[13]) if r[13] != "" else None
-    doc.CreatedDate = datetime.strptime(r[14], "%Y-%m-%d")
+    doc.Latitude = float(r[14]) if r[14] != "" else None # after ver 2019-11-08
+    doc.Longitude = float(r[15]) if r[15] != "" else None # after ver 2019-11-08
+    doc.CreatedDate = datetime.strptime(r[16], "%Y-%m-%d")
     doc.save()
 
 
@@ -236,8 +243,8 @@ def graph_import(v):
         try:
             options[data_type](r)
         except Exception as e:
-            pass
-            #print("[Error]", e)
+            #pass
+            print("[Error]", e)
     print("Finished", filepath)
     os.remove(filepath)
 
