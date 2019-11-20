@@ -67,7 +67,6 @@ def saveNewBrowseCache(cache):
     doc = BrowseCache()
 
     # required fields
-    doc.doc_type = "_doc"
     doc.Type = cache["Type"]
     doc.DisplayName = cache["DisplayName"]
     doc.EntityIds = {}
