@@ -27,7 +27,7 @@ def author_name_query(author_ids):
     authors_s = authors_s.params(request_timeout=30)
 
     authors = {str(a[authors_targets[0]]):a[authors_targets[1]] for a in authors_s.scan()}
-    names = [authors[str(id)] for id in author_ids]    # Add names to result
+    names = [authors[str(id)] for id in author_ids if str(id) in authors]    # Add names to result
 
     return names
 
