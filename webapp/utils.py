@@ -73,6 +73,8 @@ def add_author_order(paper_info):
     author_order = author_order_query(paper_info['PaperId'])
 
     for author in paper_info['Authors']:
+        if author['AuthorId'] not in author_order:
+            continue
         author['AuthorOrder'] = author_order[author['AuthorId']]
 
     return paper_info
