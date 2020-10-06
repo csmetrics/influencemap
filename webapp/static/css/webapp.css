@@ -5,7 +5,6 @@
 }
 .main-sidebar-wide { width: 440px; background-color: #fff; }
 .main-sidebar-dark { width: 270px; background-color: #222d32; }
-.wrapper { min-width: 1024px; }
 .content-wrapper-narrow { margin-left: 440px; }
 .content-wrapper-browse {
   min-height: 0;
@@ -85,7 +84,7 @@ a {
 }
 .background-image img {
   height: 620px;
-  padding: 80px 0 80px 45%;
+  padding: 80px 0 80px 50%;
   opacity: 0.8;
 }
 
