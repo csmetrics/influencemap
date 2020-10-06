@@ -5,6 +5,7 @@
 }
 .main-sidebar-wide { width: 440px; background-color: #fff; }
 .main-sidebar-dark { width: 270px; background-color: #222d32; }
+.wrapper { min-width: 1024px; }
 .content-wrapper-narrow { margin-left: 440px; }
 .content-wrapper-browse {
   min-height: 0;
@@ -23,6 +24,9 @@ a {
   font-size: 18px;
   font-family: 'Lato', Helvetica, Arial, Verdana;
 }
+.main-header, .navbar {
+  background-color: #f6f6f6;
+}
 .main-header .logo img {
   width: 25px;
   height: 25px;
@@ -31,34 +35,30 @@ a {
 .navbar .btn {
   color: #666;
   height: 50px;
-  width: 100px;
+  width: 120px;
   padding: 12px 15px;
-  font-size: 18px;
+  font-size: 16px;
   margin-right: 10px;
-}
-.nav-item {
-  font-size: 17px;
+  text-transform: uppercase;
 }
 
 .top-panel {
   background-color: #fff;
   margin: -15px -15px 0 -15px;
   padding: 15px 0 30px 0;
+  min-height: 700px;
 }
 .project-intro {
   line-height: 1.3em;
-  width: 40%;
-  height: 720px;
-  background-color: #f9f9f9;
+  width: 45%;
   position: absolute;
   z-index: 30;
-  padding: 80 6% 80 8%;
+  padding: 100 0 60 15%;
 }
 .project-intro h3 {
   line-height: 1.3em;
   text-align: left;
-  margin-top: 0px;
-  margin-bottom: 15px;
+  margin: 0 -80px 15px -20px;
   font-size: 26px;
   color: #000;
 }
@@ -82,17 +82,22 @@ a {
 .project-intro li.arrow-red:before {
   color: #e48268;
 }
+.background-image img {
+  height: 620px;
+  padding: 80px 0 80px 45%;
+  opacity: 0.8;
+}
 
 .main-menu {
-  margin: 50 -500 0 0;
+  margin: 50px -500px 0 -20px;
 }
 .btn-main {
   display: inline-block;
   padding: 30px 0;
-  width: 260px;
+  width: 240px;
   text-align: center;
   font-size: 20px;
-  margin-right: 50px;
+  margin-right: 40px;
   border-radius: 50px;
   border: 1px solid #49BEAA;
   background-color: white;
@@ -101,111 +106,10 @@ a {
 .btn-main-primary {
   background-color: #49DCB1;
 }
-.btn-main.btn-main-white:hover{
-  background-color: #49BEAA;
-}
+.btn-main.btn-main-white:hover,
 .btn-main.btn-main-primary:hover {
   color: black;
   background-color: #49BEAA;
-}
-.subtitle {
-  width: 100%;
-  text-align: center;
-  font-size: 20px;
-  font-family: monospace;
-  color: #49BEAA;
-  padding-bottom: 60px;
-}
-
-.main-footer-home {
-  background-color: #f9f9f9;
-}
-.preview {
-  margin-left: 38%;
-  background-color: #fff;
-  height: 750px;
-}
-.carousel-indicators {
-  width: 100px;
-  height: 500px;
-  position: absolute;
-  top: 80px;
-  left: 80%;
-  margin-left: 0;
-  z-index: 15;
-  font-size: 12px;
-  font-weight: bold;
-  text-align: center;
-  text-shadow:
-   -1px -1px 0 #fff,
-    1px -1px 0 #fff,
-    -1px 1px 0 #fff,
-     1px 1px 0 #fff;
-}
-.carousel-indicators li {
-  border: 3px solid #fff;
-  width: 60px;
-  height: 60px;
-  margin: 10px;
-  padding: 18px 0;
-  text-indent: 0;
-  border-radius: 50%;
-  position: relative;
-  background-color: #fff;
-  border: 3px solid #EEB868;
-}
-.carousel-indicators .active {
-  background-color: #EEB868;
-  width: 80px;
-  height: 80px;
-  font-size: 16px;
-  padding: 25px 0;
-  border-radius: 50%;
-}
-.carousel-indicators .venue {
-  background: url('../images/venue.svg') no-repeat center center;
-  background-size: 70%;
-  background-color: #EEB868;
-}
-.carousel-indicators .paper {
-  background: url('../images/award.svg') no-repeat center center;
-  background-size: 70%;
-  background-color: #EEB868;
-}
-.other-previews {
-  width: 12%;
-  text-align: center;
-}
-.carousel-indicators img {
-  position: absolute;
-  top: 0;
-  left: 0;
-  bottom: 0;
-  right: 0;
-  width: 100%;
-  height: 100%;
-  border-radius: 50%;
-  object-fit: cover;
-}
-
-.carousel-background {
-  position: absolute;
-  top: 0;
-  left: 0;
-}
-.carousel-label {
-  transform: rotate(270deg);
-  position: relative;
-  opacity: 0.3;
-  font-weight: bolder;
-}
-
-.banner {
-  text-align: center;
-  color: #f9f9f9;
-  background-color: #49BEAA;
-  margin: 15 -20;
-  padding: 3px;
 }
 
 .project-info {
@@ -233,7 +137,7 @@ a {
   width: 18%;
   text-align: center;
   padding: 10px;
-  color: #f9f9f9;
+  color: #f6f6f6;
 }
 .data-box i {
   padding-bottom: 5px;
@@ -404,7 +308,7 @@ div#citation-range .noUi-connect {
 .nav-tabs>li.active>a:hover,
 .nav-tabs>li.active>a.tab-btn,
 .nav-tabs>li>a.tab-btn:hover{
-  color:#000; background-color:#f9f9f9;
+  color:#000; background-color:#f6f6f6;
   border-bottom: 5px #49BEAA solid;
 }
 
@@ -421,9 +325,6 @@ img.fit-wrapper {
 }
 
 table th {
-/*
-  background-color: #001F3F;
-  */
   background-color: #001F3F80;
 }
 

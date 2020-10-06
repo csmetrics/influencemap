@@ -9,7 +9,7 @@ Licence URI: http://www.os-templates.com/template-terms
 -->
 <html>
 {% include 'header.html' %}
-<body class="hold-transition skin-custom sidebar-mini">
+<body class="hold-transition sidebar-mini">
 <div class="wrapper">
   <header class="main-header">
     {% include 'pagehead.html' %}
@@ -18,10 +18,6 @@ Licence URI: http://www.os-templates.com/template-terms
   <div class="content-wrapper content-wrapper-home">
     <!-- Main content -->
     <section class="content">
-      <!-- Small boxes (Stat box) -->
-      <!-- <div class="banner">
-          <h3><b>Presenting at VAST19!!! Conference Page <a href=vast19>Here</a></b></h3>
-      </div> -->
       <div class="top-panel">
         <div class="project-intro">
           <!-- <h3><b>About Influence Map</b></h3> -->
@@ -30,17 +26,10 @@ Licence URI: http://www.os-templates.com/template-terms
             the flow of intellectual influence
             for academic entities.
             </b>
-            <!-- people, projects, publications venues, and institutions. -->
             </h3>
             <br/>
             The main visual metaphor is the influence flower,
             created around a center entity with its publications:
-            <!-- We do so by creating visualisations from the citation data curated in Microsoft Academic Graph. -->
-            <!-- To quantify academic influence, we define influence as a function of paper citations.
-            The scoring of influence is done with respect to entities (author, institute, journal, or conference) and how entities cite other entities.
-            To visualise influence we use influence flowers. -->
-            <!-- An influence flower aims to show a dense representation of the influence
-            in which an entity (the center node, denoted as the ego) has with several other entities. -->
             <ul>
             <li class="arrow-blue">Blue archs denote incoming influence, and is proportional to the number of references made.</li>
             <li class="arrow-red">Red archs denote outgoing influence, and is proportional to the number of citations recieved.</li>
@@ -56,76 +45,10 @@ Licence URI: http://www.os-templates.com/template-terms
             </a>
           </div>
         </div>
-
-        <div class="preview">
-          <div id="preview-carousel" class="carousel slide" data-ride="carousel">
-            <!-- Indicators -->
-            <ol class="carousel-indicators">
-              <li data-target="#preview-carousel" data-slide-to="0" class="paper active">
-                <!-- DaCapo Project -->
-                DaCapo
-              </li>
-              <li data-target="#preview-carousel" data-slide-to="1">
-                <!-- Brian Schmidt -->
-                <img title="Brian Schmidt" src="https://researchers.anu.edu.au/researchers/schmidt-bp/image">
-              </li>
-              <li data-target="#preview-carousel" data-slide-to="2">
-                <!-- Kylie Catchpole -->
-                <img title="Kylie Catchpole" src="https://researchers.anu.edu.au/researchers/catchpole-kr/image">
-              </li>
-              <li data-target="#preview-carousel" data-slide-to="3" class="paper">
-                <!-- Republicanism: a theory of freedom and government -->
-                Republicanism Book
-              </li>
-              <li data-target="#preview-carousel" data-slide-to="4" >
-                <!-- Anna Wierzbicka -->
-                <img title="Anna Wierzbicka" src="http://slll.cass.anu.edu.au/sites/default/files/styles/cass_profile_pic_164_205/public/image/person/wierzbickaa_0.JPG?itok=FTQlufoz">
-              </li>
-              <li data-target="#preview-carousel" data-slide-to="5">
-                <!-- Peter Gill -->
-                <img title="Peter Gill" src="https://chemistry.anu.edu.au/files/styles/anu_doublenarrow_440_587/public/image_65_-_gill_headshot.jpg?itok=y4vszpjm">
-              </li>
-            </ol>
-            <!-- Wrapper for slides -->
-            <div class="carousel-background">
-                <p class="carousel-label" style="left:30px; top: 100px">
-                Author
-                </p>
-                <p class="carousel-label" style="left:30px; top: 310px">
-                Venue
-                </p>
-                <p class="carousel-label" style="left:30px; top: 520px">
-                Affiliation
-                </p>
-            </div>
-            <div class="carousel-inner">
-              <div class="item active">
-                <svg id="chart_1_1" width=1600 height=240></svg>
-                <svg id="chart_1_2" width=1600 height=240></svg>
-                <svg id="chart_1_3" width=1600 height=240></svg>
-              </div>
-              {% with '23456' as list %}
-                {% for idx in list %}
-                <div class="item">
-                  <svg id="chart_{{idx}}_1" width=1600 height=240></svg>
-                  <svg id="chart_{{idx}}_2" width=1600 height=240></svg>
-                  <svg id="chart_{{idx}}_3" width=1600 height=240></svg>
-                </div>
-                {% endfor %}
-              {% endwith %}
-            </div>
-          </div>
-
+        <div class="background-image">
+          <img src="{% static 'js/maindata/figure_decapo.png' %}"></img>
         </div>
       </div>
-      <!--
-      <div class="subtitle">
-        <i class="fa fa-quote-left"></i>
-        The influence flower
-        aims to show a dense representation of the intellectual influence.
-        <i class="fa fa-quote-right"></i>
-      </div>
-      -->
 
       <a name=about></a>
       <div class="project-info">
@@ -190,12 +113,12 @@ Licence URI: http://www.os-templates.com/template-terms
           Each of the edges of the graph signifies the flow of influence to and from the center node,
           the strenth of this relation is reflected in the thickness of the edge.
           <ul>
-          <li>The red edges denotes the influence the center has towards the outer entities,
+          <li>The red edges denote the influence the center has towards the outer entities,
           i.e., an outer entity citing a paper by the center.
-          The blue edges denotes the influence the outer entities have towards the center,
+          The blue edges denote the influence the outer entities have towards the center,
           i.e., the center cites a paper by an outer entities.
           </li>
-          <li>The color of the outer nodes denote the difference between incoming and outgoing influence score.
+          <li>The color of the outer nodes denotes the difference between incoming and outgoing influence score.
           A blue node indicates that the associated entity has influence the center more than the center has influenced itself.
           Likewise, a red node indicates the center has influenced the node's entity more than it has influenced the center.
           </li>
@@ -261,44 +184,3 @@ Licence URI: http://www.os-templates.com/template-terms
 </div>
 </body>
 </html>
-<script src="{% static 'js/d3.v4.min.js' %}"></script>
-<script src="{% static 'js/d3-selection-multi.v1.min.js' %}"></script>
-<script src="{% static 'js/d3-scale-chromatic.v1.min.js' %}"></script>
-<script src="{% static 'js/main_flowerGraph.js' %}"></script>
-<script src="{% static 'js/maindata/data_dacapo.js' %}"></script>
-<script>
-var width = document.getElementById('preview-carousel').offsetWidth;
-drawFlower("#chart_1_1", author_data, 0, width);
-drawFlower("#chart_1_2", conf_data, 1, width);
-drawFlower("#chart_1_3", inst_data, 2, width);
-</script>
-<script src="{% static 'js/maindata/data_b_schmidt.js' %}"></script>
-<script>
-drawFlower("#chart_2_1", author_data, 0, width);
-drawFlower("#chart_2_2", conf_data, 1, width);
-drawFlower("#chart_2_3", inst_data, 2, width);
-</script>
-<script src="{% static 'js/maindata/data_k_catchpole.js' %}"></script>
-<script>
-drawFlower("#chart_3_1", author_data, 0, width);
-drawFlower("#chart_3_2", conf_data, 1, width);
-drawFlower("#chart_3_3", inst_data, 2, width);
-</script>
-<script src="{% static 'js/maindata/data_republicanism.js' %}"></script>
-<script>
-drawFlower("#chart_4_1", author_data, 0, width);
-drawFlower("#chart_4_2", conf_data, 1, width);
-drawFlower("#chart_4_3", inst_data, 2, width);
-</script>
-<script src="{% static 'js/maindata/data_a_wierzbicka.js' %}"></script>
-<script>
-drawFlower("#chart_5_1", author_data, 0, width);
-drawFlower("#chart_5_2", conf_data, 1, width);
-drawFlower("#chart_5_3", inst_data, 2, width);
-</script>
-<script src="{% static 'js/maindata/data_p_gill.js' %}"></script>
-<script>
-drawFlower("#chart_6_1", author_data, 0, width);
-drawFlower("#chart_6_2", conf_data, 1, width);
-drawFlower("#chart_6_3", inst_data, 2, width);
-</script>
