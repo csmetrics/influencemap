@@ -24,8 +24,9 @@ a {
   font-size: 18px;
   font-family: 'Lato', Helvetica, Arial, Verdana;
 }
-.main-header, .navbar {
-  background-color: #f6f6f6;
+.skin-custom .main-header .navbar,
+.skin-custom .main-header .logo {
+  background-color: #f4f4f4;
 }
 .main-header .logo img {
   width: 25px;
@@ -137,7 +138,7 @@ a {
   width: 18%;
   text-align: center;
   padding: 10px;
-  color: #f6f6f6;
+  color: #f4f4f4;
 }
 .data-box i {
   padding-bottom: 5px;
@@ -308,7 +309,7 @@ div#citation-range .noUi-connect {
 .nav-tabs>li.active>a:hover,
 .nav-tabs>li.active>a.tab-btn,
 .nav-tabs>li>a.tab-btn:hover{
-  color:#000; background-color:#f6f6f6;
+  color:#000; background-color:#f4f4f4;
   border-bottom: 5px #49BEAA solid;
 }
 
