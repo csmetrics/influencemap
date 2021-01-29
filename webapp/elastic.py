@@ -1,3 +1,4 @@
+import re
 from elasticsearch import Elasticsearch
 from elasticsearch_dsl import Search
 from core.search.query_info_cache import paper_info_cache_query
@@ -72,7 +73,7 @@ def query_names_with_matches(index, fields_list, search_phrase, max_return=30):
 
     # the script field nested within functions defines the formula used to order the retrieved documents
     # log citation count is included to ensure that large entities with slightly different names are not missed
-    # the addition of 10 is to account for relevant entities with 0, 1 or otherwise few citations 
+    # the addition of 10 is to account for relevant entities with 0, 1 or otherwise few citations
     # The _score is taken to a higher power to increase its significance
 
     q = {
@@ -80,7 +81,7 @@ def query_names_with_matches(index, fields_list, search_phrase, max_return=30):
       "from": 0,
       "query":{
           "function_score": {
-            "query": {      
+            "query": {
               "bool":{
                 "should": matches
               }
@@ -90,10 +91,40 @@ def query_names_with_matches(index, fields_list, search_phrase, max_return=30):
                 "script": "Math.pow(_score, 3) * (Math.log((doc['CitationCount'].value + 10)))"
               }}
             ]
-          } 
+          }
         }
       }
 
+    s = Search(using=client, index=index).params(preserve_order=True)
+    s.update_from_dict(q)
+
+    count = 0
+    for res in s.scan():
+        if count >= max_return:
+            break
+        result.append(res.to_dict())
+        count += 1
+    return result
+
+def query_names_with_exact_matches(index, field, search_phrase, max_return=30):
+    result = []
+    normalized_search_phrase = re.sub(r'\W+', ' ', search_phrase).lower()
+    # to reduce the search time, we only allow exact string match
+
+    q = {
+      "size": max_return,
+      "sort": [
+        { "CitationCount" : "desc" }
+      ],
+      "query":{
+          "match": {
+            field: {
+              "query": normalized_search_phrase,
+              "operator": "and"
+            }
+          }
+        }
+      }
     s = Search(using=client, index=index).params(preserve_order=True)
     s.update_from_dict(q)
 
@@ -115,14 +146,16 @@ def query_affiliation(search_phrase):
     return query_names_with_matches("affiliations", ["DisplayName", "NormalizedName"], search_phrase)
 
 def query_paper(search_phrase):
-    papers = query_names_with_matches("papers", ["PaperTitle", "OriginalTitle", "BookTitle"], search_phrase)
+    # papers = query_names_with_matches("papers", ["PaperTitle", "OriginalTitle", "BookTitle"], search_phrase)
+    papers = query_names_with_exact_matches("papers", "PaperTitle", search_phrase)
     for paper in papers:
         author_ids = get_authors_from_paper(paper["PaperId"])
         paper["Authors"] = get_display_names_from_author_ids(author_ids)
     return papers
 
 def query_author(search_phrase):
-    authors = query_names_with_matches("authors", ["DisplayName", "NormalizedName"], search_phrase)
+    # authors = query_names_with_matches("authors", ["DisplayName", "NormalizedName"], search_phrase)
+    authors = query_names_with_exact_matches("authors", "NormalizedName", search_phrase)
     for author in authors:
         if "LastKnownAffiliationId" in author:
             author["Affiliation"] = get_names_from_affiliation_ids([author["LastKnownAffiliationId"]])[0]
@@ -166,7 +199,7 @@ def get_names_from_entity(entity_ids, index, id_field, name_field, with_id=False
     if with_id:
         return id_name_dict
     ids = [id_name_dict[eid] for eid in entity_ids]
-    
+
     return ids
 
 
@@ -222,7 +255,7 @@ def check_browse_record_exists(cachetype, displayname):
     cache_index = "browse_cache"
     q = {
       "query" : {
-        "constant_score" : { 
+        "constant_score" : {
           "filter" : {
             "bool" : {
               "must" : [
@@ -260,5 +293,5 @@ def author_order_query(paper_id):
     for authors in authors_s.scan():
         # Add to order dictionary
         order[authors['AuthorId']] = authors['AuthorSequenceNumber']
-        
+
     return order
