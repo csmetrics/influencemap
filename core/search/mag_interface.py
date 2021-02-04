@@ -1,16 +1,18 @@
-import os, json, requests
-import http.client, urllib.request, urllib.parse, urllib.error, base64
-import pandas as pd
-import functools
-import itertools
-import operator
-import random
-import sys
+import json
 from datetime import datetime
+
+import http.client
+import requests
+import urllib.error
+import urllib.parse
+import urllib.request
+
 from core.config import *
+
 
 class APIKeyError(Exception):
     pass
+
 
 def get_header(idx, keys):
     # Request headers
@@ -19,11 +21,11 @@ def get_header(idx, keys):
         }
     return header
 
+
 def query_academic_search(type, url, query):
     i = 0
     processing = True
     keys = API_KEYS
-    #random.shuffle(keys)
     header = get_header(i, keys)
 
     # Keep trying API keys until failure or results
@@ -40,10 +42,8 @@ def query_academic_search(type, url, query):
             print(header)
             print("ERROR: problem with the request.")
             print(response.content)
-            #exit()
         if response.status_code not in [429, 403]:
             # 429 Rate limit, 403 Quota Exceeded
-            #raise APIKeyError
             processing = False
         if i >= MAX_API - 1:
             raise APIKeyError("Out of API keys")
