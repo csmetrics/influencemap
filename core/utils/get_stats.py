@@ -1,10 +1,9 @@
-
-
 def between(x, a, b):
     # return whether x lies between a and b inclusive
     low = min(a,b)
     high = max(a,b)
     return (x >= low and x <= high)
+
 
 def get_stats(papers, min_year=None, max_year=None):
 
@@ -36,7 +35,3 @@ def get_stats(papers, min_year=None, max_year=None):
         "avg_cites": avg_cites,
     }
     return stats
-
-def year_range(papers):
-    min_year = min([paper['year'] for paper in papers])
-    max_yera = max([paper['year'] for paper in papers])

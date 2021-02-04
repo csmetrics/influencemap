@@ -10,7 +10,6 @@ import copy
 
 from core.config import *
 from core.search.mag_interface import *
-from core.search.query_info_db import papers_prop_query
 from core.search.query_info_cache import base_paper_cache_query
 from core.search.parse_academic_search import or_query_builder
 

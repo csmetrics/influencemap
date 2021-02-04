@@ -1,7 +1,6 @@
 import re
 from elasticsearch import Elasticsearch
 from elasticsearch_dsl import Search
-from core.search.query_info_cache import paper_info_cache_query
 from graph.config import conf
 
 client = Elasticsearch(conf.get("elasticsearch.hostname"), timeout=30)

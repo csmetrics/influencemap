@@ -1,6 +1,3 @@
-'''
-'''
-
 import pandas as pd
 import networkx as nx
 import numpy as np
@@ -8,22 +5,6 @@ from datetime import datetime
 
 # Config setup
 from core.config import *
-
-def normalise_singular_linear(series):
-    ''' Function to normalise data for a singular series
-    '''
-    max_val = series.max()
-    min_val = series.min()
-
-    max_min_dif = max_val - min_val
-
-    # Cases if max equal to min
-    if max_min_dif == 0:
-        series = min_val
-        return series
-
-    # Normalise
-    return (series - min_val) / max_min_dif
 
 def normalise_to_proportion_of_max(series):
     ''' Function to normalise node sizes with max node being 1

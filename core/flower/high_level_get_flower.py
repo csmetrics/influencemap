@@ -1,15 +1,9 @@
-#from webapp.graph                  import processdata
-from core.flower.draw_flower_test  import draw_flower
-from core.utils.get_entity         import entity_from_name
-from core.search.query_info        import paper_info_check_query, paper_info_mag_check_multiquery
 from core.score.agg_paper_info     import score_leaves
 from core.score.agg_score          import agg_score_df, post_agg_score_df
-from core.flower.node_info         import select_node_info
 from core.score.agg_utils          import get_coauthor_mapping
 from core.score.agg_utils          import flag_coauthor
 from core.score.agg_filter         import filter_year
 from core.flower.flower_bloom_data import score_df_to_graph
-from core.utils.get_stats          import get_stats
 from core.config                   import *
 
 from datetime    import datetime
@@ -247,4 +241,4 @@ def gen_flower_data(score_df, flower_prop, entity_names, flower_name,
 
     data['total'] = len(agg_score)
 
-    return flower_type, [data, data.copy(), data.copy()]#, data.copy()] #, node_info
+    return flower_type, [data, data.copy(), data.copy()]

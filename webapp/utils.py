@@ -1,5 +1,4 @@
 import os
-from core.search.academic_search import *
 from webapp.elastic import *
 
 from core.flower.high_level_get_flower import default_config
@@ -17,18 +16,6 @@ optionlist = [  # option list
 
 # initialise as no autocomplete lists yet (wait until needed)
 autoCompleteLists = {}
-
-
-def printNested(obj, indent=0):
-    if type(obj) in [list,tuple,set]:
-        for elem in obj:
-            printNested(elem, indent)
-    elif type(obj) is dict:
-        for key, value in obj.items():
-            print((indent*"\t")+str(key)+":")
-            printNested(value,indent+1)
-    else:
-        print(indent*"\t"+str(obj))
 
 
 def loadList(entity):

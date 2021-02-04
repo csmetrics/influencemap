@@ -1,46 +1,31 @@
-import os, sys, json, pandas, string, math, copy
-import multiprocess
-from django.shortcuts import render
-from django.http import JsonResponse
-from django.views.decorators.csrf import csrf_exempt
-from django.conf import settings
-from datetime import datetime
+import copy
+import json
+import math
+import string
 from collections import Counter
-from operator import itemgetter
-from webapp.elastic import *
-from webapp.utils import *
-from webapp.graph import ReferenceFlower, compare_flowers
+from datetime import datetime
+
+import multiprocess
+from django.conf import settings
+from django.http import HttpResponseRedirect, JsonResponse
+from django.shortcuts import render
+from django.views.decorators.csrf import csrf_exempt
 
 import core.utils.entity_type as ent
-from core.search.parse_academic_search import parse_search_results
-from core.search.academic_search import *
-from core.flower.draw_flower_test import draw_flower
-from core.flower.flower_bloomer import getFlower, getPreFlowerData
-from core.search.mag_flower_bloom import *
-from core.utils.get_entity import entity_from_name
-from core.search.influence_df import get_filtered_score
-from core.search.search import search_name
-from graph.save_cache import *
+from core.search.query_info import paper_info_db_check_multiquery
+from core.flower.high_level_get_flower import default_config, gen_flower_data
+from core.score.agg_paper_info import score_paper_info_list
+from core.score.agg_utils import get_coauthor_mapping
+from core.search.query_name import (
+    get_all_normalised_names, get_conf_journ_display_names)
+from core.search.query_paper import get_all_paper_ids
+from core.utils.get_stats import get_stats
 from core.utils.load_tsv import tsv_to_dict
-
-from core.flower.high_level_get_flower import gen_flower_data
-from core.flower.high_level_get_flower import default_config
-from core.score.agg_paper_info         import score_paper_info_list, score_paper_info_list_parallel
-from core.search.query_name            import get_all_normalised_names, get_conf_journ_display_names
-from core.search.query_name_db         import normalized_to_display
-from core.search.query_paper           import get_all_paper_ids
-
-# Imports for submit
-from core.search.query_info       import paper_info_check_query
-from core.search.query_info       import paper_info_db_check_multiquery
-from core.search.query_info_cache import base_paper_cache_query
-from core.score.agg_utils         import get_coauthor_mapping
-from core.score.agg_utils         import flag_coauthor
-from core.utils.get_stats         import get_stats
-
-from django.http import HttpResponseRedirect
+from graph.save_cache import *
+from webapp.elastic import *
+from webapp.graph import ReferenceFlower, compare_flowers
 from webapp.shortener import shorten_front, unshorten_url_ext
-from itertools import product
+from webapp.utils import *
 
 BASE_DIR = settings.BASE_DIR
 
@@ -84,7 +69,6 @@ def browse(request):
                         #subsubgroup["document_ids"] = [cache["document_id"] for cache in browse_cache if cache["Type"] == subsubgroup["tag"]]
                         subsubgroup["docs"] = sorted([cache for cache in browse_cache if cache["Type"] == subsubgroup["tag"]], key=lambda x: (x["Year"], x["DisplayName"]) if ("Year" in x) else (0, x["DisplayName"]))
     browse_cache = {cache["document_id"]: cache for cache in browse_cache}
-    #printNested(browse_list)
 
     return render(request, "browse.html", {"browse_groups": browse_list, "cache_data": browse_cache})
 
@@ -180,14 +164,9 @@ def search(request):
     if "institution" in entityType:
         data += [(val, "institution") for val in query_affiliation(keyword)]
     if "paper" in entityType:
-#        data += [(val, "paper") for val in get_entities_from_search(keyword, "paper")]
         data += [(val, "paper") for val in query_paper(keyword)]
     if "author" in entityType:
         data += [(val, "author") for val in query_author(keyword)]
-#        try:
-#            data += [(val, "author") for val in get_entities_from_search(keyword, "author")]
-#        except Exception as e:
-#            print(e)
     for i in range(len(data)):
         entity = {'data': data[i][0]}
         entity['display-info'] = s[data[i][1]].format(**entity['data'])
@@ -361,7 +340,6 @@ def submit(request):
 
     # Generate scores from paper information
     time_score = datetime.now()
-    #score_df = score_paper_info_list_parallel(paper_information, self=entity_names, num_proc=4)
     score_df = score_paper_info_list(paper_information, self=entity_names)
     print('TOTAL SCORE_DF TIME: ', datetime.now() - time_score)
 

@@ -14,28 +14,6 @@ from core.search.query_info_mag   import paper_info_mag_multiquery
 from core.search.query_utility    import chunker
 from itertools import zip_longest
 
-def paper_info_check_query(paper_id):
-    ''' Query which checks cache for existence first. Otherwise tries to
-        generate paper info from basic tables and adds to cache.
-    '''
-    # Check cache
-    paper_info = paper_info_cache_query(paper_id)
-
-    # If non-empty result return
-    if paper_info:
-        return paper_info
-
-    # Otherwise check main database
-    paper_info = paper_info_db_query(paper_id)
-
-    # If empty result
-    if not paper_info:
-        return None
-
-    # Otherwise add to cache then return
-    cache_paper_info([paper_info])
-    return paper_info
-
 
 def paper_info_mag_check_multiquery(paper_ids, force=False):
     ''' Query which checks cache for existence first. Otherwise tries to
@@ -118,42 +96,3 @@ def paper_info_db_check_multiquery(paper_ids, force=False):
         paper_info_res += total_res
 
     return paper_info_res
-
-
-def get_paper_info_dict(paper_info):
-    ''' Generates a paper information dictionary of a paper information.
-        dictionary.
-
-        { 'title'          : str,
-          'author'         : list str,
-          'affiliation'    : list str,
-          'venue'          : list str,
-          'reference_count': int,
-          'citation_count' : int,
-        }
-    '''
-    paper_dict = dict()
-    paper_dict['title'] = paper_info['PaperTitle']
-
-    paper_dict['author']      = list()
-    paper_dict['affiliation'] = list()
-    for auth_dict in paper_info['Authors']:
-        if 'AuthorName' in auth_dict:
-            paper_dict['author'].append(auth_dict['AuthorName'])
-
-        if 'AffiliationName' in auth_dict:
-            paper_dict['affiliation'].append(auth_dict['AffiliationName'])
-
-    paper_dict['conference'] = None
-    paper_dict['journal']    = None
-    if 'ConferenceName' in paper_info:
-        paper_dict['conference'] = paper_info['ConferenceName']
-    if 'JournalName' in paper_info:
-        paper_dict['journal'] = paper_info['JournalName']
-
-    if 'Year' in paper_info:
-        paper_dict['year'] = paper_info['Year']
-    #paper_dict['reference_count'] = len(paper_info['References'])
-    #paper_dict['citation_count']  = len(paper_info['Citations'])
-
-    return paper_dict

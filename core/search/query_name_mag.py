@@ -12,6 +12,7 @@ from core.search.parse_academic_search import or_query_builder
 
 MAS_URL_PREFIX = "https://api.labs.cognitive.microsoft.com"
 
+
 def author_name_mag_multiquery(author_ids):
     ''' Find author name from id.
     '''
