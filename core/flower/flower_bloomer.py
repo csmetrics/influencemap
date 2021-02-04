@@ -14,7 +14,6 @@ plt.switch_backend('agg')
 from core.flower.get_flower_data import generate_scores, generate_score_df, generate_coauthors
 from core.flower.get_flower_df import gen_search_df
 from core.utils.entity_type import * #Entity, Entity_map, Entity_type
-from core.flower.draw_flower import draw_flower
 from core.flower.flower_bloom_data import score_df_to_graph
 
 # Config setup

@@ -14,7 +14,6 @@ from webapp.graph import ReferenceFlower, compare_flowers
 import core.utils.entity_type as ent
 from core.search.parse_academic_search import parse_search_results
 from core.search.academic_search import *
-from core.flower.draw_flower_test import draw_flower
 from core.flower.flower_bloomer import getFlower, getPreFlowerData
 from core.search.mag_flower_bloom import *
 from core.utils.get_entity import entity_from_name

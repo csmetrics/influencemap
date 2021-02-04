@@ -1,5 +1,4 @@
 #from webapp.graph                  import processdata
-from core.flower.draw_flower_test  import draw_flower
 from core.utils.get_entity         import entity_from_name
 from core.search.query_info        import paper_info_check_query, paper_info_mag_check_multiquery
 from core.score.agg_paper_info     import score_leaves
