@@ -74,7 +74,7 @@ def browse():
         browse_groups=browse_list, cache_data=browse_cache)
 
 
-@blueprint.route('/create')
+@blueprint.route('/create', methods=['POST'])
 def create():
 
     data = json.loads(flask.request.form.get('data'))
@@ -166,7 +166,7 @@ def search():
 
 
 
-@blueprint.route('/manualcache')
+@blueprint.route('/manualcache', methods=['POST'])
 def manualcache():
     cache_dictionary = (json.loads(flask.request.form.get('cache')))
     paper_action = flask.request.form.get('paperAction')
@@ -197,7 +197,7 @@ def to_flower_dict(data):
     return res
 
 
-@blueprint.route('/submit/')
+@blueprint.route('/submit/', methods=['GET', 'POST'])
 def submit():
     session = dict()
 
@@ -667,7 +667,7 @@ def get_node_info_single(entity, entity_type, year_ranges):
 
 
 
-@blueprint.route('/get_next_node_info/')
+@blueprint.route('/get_next_node_info/', methods=['POST'])
 def get_node_info():
     request_data = json.loads(flask.request.form.get("data_string"))
     node_name = request_data.get("name")
@@ -686,7 +686,7 @@ def get_node_info():
 
 
 
-@blueprint.route('/get_next_node_info_page/')
+@blueprint.route('/get_next_node_info_page/', methods=['POST'])
 def get_next_node_info_page():
     request_data = json.loads(flask.request.form.get("data_string"))
     node_name = request_data.get("name")
