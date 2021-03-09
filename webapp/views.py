@@ -74,7 +74,7 @@ def browse():
         browse_groups=browse_list, cache_data=browse_cache)
 
 
-@blueprint.route('/create', methods=['POST'])
+@blueprint.route('/create', methods=['GET, POST'])
 def create():
 
     data = json.loads(flask.request.form.get('data'))
