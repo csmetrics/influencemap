@@ -6,4 +6,4 @@ blueprint = flask.Blueprint('docs', __name__,
 
 @blueprint.route('/vast19')
 def vast19():
-    return render_template("vast19.html")
+    return flask.render_template("vast19.html")

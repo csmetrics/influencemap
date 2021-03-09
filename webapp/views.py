@@ -71,7 +71,7 @@ def browse():
 
     return flask.render_template(
         "browse.html",
-        {"browse_groups": browse_list, "cache_data": browse_cache})
+        browse_groups=browse_list, cache_data=browse_cache)
 
 
 @blueprint.route('/create')
@@ -85,10 +85,8 @@ def create():
     # render page with data
     return flask.render_template(
         "create.html",
-        {
-            "navbarOption": get_navbar_option(keyword, option),
-            "search": search
-        })
+        navbarOption=get_navbar_option(keyword, option),
+        search=search)
 
 
 
@@ -101,11 +99,11 @@ def curate():
     option = data.get('option')
 
     # render page with data
-    return flask.render_template("curate.html", {
-        "navbarOption": get_navbar_option(keyword, option),
-        "search": search,
-        "types": types
-    })
+    return flask.render_template(
+        "curate.html", 
+        navbarOption=get_navbar_option(keyword, option),
+        search=search,
+        types=types)
 
 
 @blueprint.route('/check_record')
@@ -205,7 +203,7 @@ def submit():
 
     curated_flag = False
     num_leaves = 25 # default
-    if request.method == "GET":
+    if flask.request.method == "GET":
         # from url e.g.
         # /submit/?type=author_id&id=2146610949&name=stephen_m_blackburn
         # /submit/?type=browse_author_group&name=lexing_xie
@@ -426,7 +424,7 @@ def submit():
 
     data["session"] = session
 
-    return flask.render_template("flower.html", data)
+    return flask.render_template("flower.html", *data)
 
 
 
