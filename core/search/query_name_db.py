@@ -11,7 +11,6 @@ from core.utils.entity_type import Entity_type
 from elasticsearch import Elasticsearch
 from elasticsearch_dsl import Search
 
-
 def author_name_query(author_ids):
     ''' Find author name from id.
     '''
@@ -54,6 +53,31 @@ def author_name_dict_query(author_ids):
         names[int(authors.meta.id)] = authors[authors_target]
 
     return names
+
+
+def fos_name_level_dict_query(fos_ids):
+    ''' Find field of study name from id.
+    '''
+    # Elastic search client
+    client = Elasticsearch(conf.get("elasticsearch.hostname"))
+
+    # Target
+    fos_target = ['NormalizedName', 'Level']
+
+    # Query for paa
+    fos_s = Search(index = 'fieldsofstudy', using = client)
+    fos_s = fos_s.query('terms', FieldOfStudyId=fos_ids)
+    fos_s = fos_s.source(fos_target)
+    fos_s = fos_s.params(request_timeout=30)
+
+    names = dict()
+    levels = dict()
+    for fos in fos_s.scan():
+        # Add names to result
+        names[int(fos.meta.id)] = fos[fos_target[0]]
+        levels[int(fos.meta.id)] = fos[fos_target[1]]
+
+    return names, levels
 
 
 def affiliation_name_query(affiliation_ids):
@@ -215,4 +239,46 @@ def name_query(entity_type, entity_name):
         return journal_name_query(entity_name)
 
     # Otherwise
+    return None
+
+
+def name_dict_query(entity_type, entity_name):
+    ''' Query entity id for name depending on type.
+    '''
+    # Call query functions depending on type given
+    # Author
+    if entity_type == Entity_type.AUTH:
+        return author_name_dict_query(entity_name)
+
+    # Affiliation
+    if entity_type == Entity_type.AFFI:
+        return affiliation_name_dict_query(entity_name)
+
+    # Conference
+    if entity_type == Entity_type.CONF:
+        return conference_name_dict_query(entity_name)
+
+    # Journal
+    if entity_type == Entity_type.JOUR:
+        return journal_name_dict_query(entity_name)
+
+    # Otherwise
+    return None
+
+
+def normalized_to_display(entity_name, index):
+    '''
+    '''
+    # Elastic search client
+    client = Elasticsearch(conf.get("elasticsearch.hostname"))
+
+    # Query for paa
+    query_s = Search(index=index, using=client)
+    query_s = query_s.query('match', NormalizedName=entity_name)
+    query_s = query_s.source(['DisplayName'])
+
+    for query in query_s.scan():
+        # Return display name
+        return query['DisplayName']
+
     return None
