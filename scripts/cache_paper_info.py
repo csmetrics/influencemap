@@ -39,17 +39,17 @@ except FileExistsError:
 client = Elasticsearch(conf.get('elasticsearch.hostname'))
 
 #%%
-counter = 1
+counter = 0
 complete_updated = 0
 while True:
     print('\n[{}] - Start batch {}'.format(datetime.now(), counter))
     paper_ids_s = Search(index='papers', using=client)
     paper_ids_s = paper_ids_s.source(['PaperId'])
-    paper_ids_s_res = paper_ids_s[:BATCH_SIZE]
+    paper_ids_s_res = paper_ids_s[BATCH_SIZE*counter:BATCH_SIZE*(counter+1)]
 
     print('[{}] -- Find papers to update'.format(datetime.now()))
     paper_ids = [p.PaperId for p in paper_ids_s_res.execute()]
-    print(len(paper_ids))
+    print("{}: from {} to {}".format(len(paper_ids), paper_ids[0], paper_ids[-1]))
 
     if not paper_ids:
         break
