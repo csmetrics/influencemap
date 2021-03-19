@@ -1,5 +1,5 @@
 {
-    "update_version": 1,
+    "update_version": 20210319,
     "threads": 1,
-    "batch_size": 20
+    "batch_size": 1000
 }
