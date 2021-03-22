@@ -235,7 +235,7 @@ function hash_args(arg_tuple) {
 function updateConfigUrl() {
   if (copyText != null) {
 
-    copyText.value = "{{ url_base }}"
+    copyText.value = "{{ session.url_base }}"
       + "_" + encode(handles[0].innerText) + "_" + encode(handles[1].innerText)
       + "_" + encode(handles[2].innerText) + "_" + encode(handles[3].innerText)
       + "_" + encode2($("#self-cite").is(":checked"))

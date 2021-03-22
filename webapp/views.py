@@ -74,13 +74,14 @@ def browse():
         browse_groups=browse_list, cache_data=browse_cache)
 
 
-@blueprint.route('/create', methods=['GET, POST'])
+@blueprint.route('/create', methods=['GET', 'POST'])
 def create():
 
-    data = json.loads(flask.request.form.get('data'))
+    json_data = flask.request.form.get('data')
+    data = {} if json_data is None else json.loads(json_data)
     keyword = data.get('keyword', '')
     search = data.get('search') == 'true'
-    option = data.get('option')
+    option = data.get('option', '')
 
     # render page with data
     return flask.render_template(
@@ -134,7 +135,7 @@ s = {
 }
 
 
-@blueprint.route('/search')
+@blueprint.route('/search', methods=['POST'])
 def search():
     request_data = json.loads(flask.request.form.get("data"))
     keyword = request_data.get("keyword")
@@ -424,11 +425,11 @@ def submit():
 
     data["session"] = session
 
-    return flask.render_template("flower.html", *data)
+    return flask.render_template("flower.html", **data)
 
 
 
-@blueprint.route('/resubmit/')
+@blueprint.route('/resubmit/', methods=['POST'])
 def resubmit():
     option = flask.request.form.get('option')
     keyword = flask.request.form.get('keyword')
@@ -667,7 +668,7 @@ def get_node_info_single(entity, entity_type, year_ranges):
 
 
 
-@blueprint.route('/get_next_node_info/', methods=['POST'])
+@blueprint.route('/get_node_info/', methods=['POST'])
 def get_node_info():
     request_data = json.loads(flask.request.form.get("data_string"))
     node_name = request_data.get("name")
