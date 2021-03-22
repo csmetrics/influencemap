@@ -1,1 +1,1 @@
-python manage.py runserver
+python -m webapp.app
