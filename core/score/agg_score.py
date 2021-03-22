@@ -23,7 +23,9 @@ SCORE_COLS = [
     'entity_name', 'influenced', 'influencing', 'self_cite', 'coauthor',
     ]
 
-AGG_COL = 'entity_name'
+AGG_COLS = [
+    'entity_name',
+    ]
 
 AGG_FUNC = {
     'coauthor': 'any',
@@ -35,6 +37,7 @@ AGG_FUNC = {
 
 SCORE_PREC = 5
 
+
 def safe_ratio(df, inf_type):
     res = (df['influencing_{}'.format(inf_type)]
             - df['influenced_{}'.format(inf_type)])
@@ -42,11 +45,10 @@ def safe_ratio(df, inf_type):
     res[df['sum_{}'.format(inf_type)] == 0] = 0
     return res
 
+
 def agg_score_df(influence_df):
     """ Aggregates the scoring generated from ES paper information values.
     """
-
-
 
     print('\n---\n{} start score generation'.format(datetime.now()))
     if influence_df.empty:
@@ -68,10 +70,8 @@ def agg_score_df(influence_df):
     score_df['influenced_nsc']  = score_df['influenced_nsc'].fillna(0)
     score_df['influencing_nsc'] = score_df['influencing_nsc'].fillna(0)
 
-    # breakpoint()
-
     # Aggregate scores up
-    score_df = score_df.groupby(AGG_COL).agg(AGG_FUNC).reset_index()
+    score_df = score_df.groupby(AGG_COLS).agg(AGG_FUNC).reset_index()
 
     score_df.loc[~score_df.coauthor, 'influenced_nca'] = score_df.influenced_tot
     score_df.loc[~score_df.coauthor, 'influencing_nca'] = score_df.influencing_tot
