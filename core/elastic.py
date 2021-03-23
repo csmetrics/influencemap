@@ -6,7 +6,8 @@ from graph.config import conf
 client = Elasticsearch(
     conf.get("elasticsearch.hostname"),
     timeout=30,
-    connection_class=RequestsHttpConnection)
+    connection_class=RequestsHttpConnection,
+    http_compress=True)
 
 def query_cache_paper_info(author_id):
     result = {}
