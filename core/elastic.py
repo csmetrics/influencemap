@@ -279,9 +279,6 @@ def check_browse_record_exists(cachetype, displayname):
 def author_order_query(paper_id):
     ''' Find author name from id.
     '''
-    # Elastic search client
-    client = Elasticsearch(conf.get("elasticsearch.hostname"))
-
     # Query for paa
     authors_s = Search(index = 'paperauthoraffiliations', using = client)
     authors_s = authors_s.query('term', PaperId=paper_id)

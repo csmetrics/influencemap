@@ -6,11 +6,10 @@ author: Alexander Soen
 '''
 from datetime import datetime
 
-from graph.config import conf
+from core.elastic import client
 from core.search.query_utility import field_del
 from core.search.query_utility import chunker
 
-from elasticsearch import Elasticsearch
 from elasticsearch_dsl import Search
 
 
@@ -22,9 +21,6 @@ def paper_info_cache_query(
     """ Gets paper info from cache.
     """
     start = datetime.now()
-
-    # Elastic search client
-    client = Elasticsearch(conf.get("elasticsearch.hostname"))
 
     # Query results
     complete_info = list()

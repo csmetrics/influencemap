@@ -3,18 +3,16 @@ Update cache to include fos information
 '''
 from datetime import datetime
 
-from graph.config      import conf
-from elasticsearch     import Elasticsearch
 from elasticsearch_dsl import Search, Q
 
-from core.search.query_info_db    import paper_info_multiquery
-from core.search.cache_data       import cache_paper_info
+from core.elastic import client
+from core.search.cache_data import cache_paper_info
+from core.search.query_info_db import paper_info_multiquery
 
 # Constants
 NUM_PAPERS = 1
 
 # Elastic search client
-client = Elasticsearch(conf.get("elasticsearch.hostname"))
 
 THRESHOLD_DATE = datetime(2019, 3, 6, 10, 43, 45, 734484) 
 

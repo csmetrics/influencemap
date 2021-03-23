@@ -5,18 +5,14 @@ date:   24.06.18
 author: Alexander Soen
 '''
 
-from graph.config import conf
+from core.elastic import client
 from core.utils.entity_type import Entity_type
 
-from elasticsearch import Elasticsearch
 from elasticsearch_dsl import Search
 
 def author_name_query(author_ids):
     ''' Find author name from id.
     '''
-    # Elastic search client
-    client = Elasticsearch(conf.get("elasticsearch.hostname"))
-
     # Target
     authors_targets = ['AuthorId', 'NormalizedName']
 
@@ -35,9 +31,6 @@ def author_name_query(author_ids):
 def author_name_dict_query(author_ids):
     ''' Find author name from id.
     '''
-    # Elastic search client
-    client = Elasticsearch(conf.get("elasticsearch.hostname"))
-
     # Target
     authors_target = 'NormalizedName'
 
@@ -58,9 +51,6 @@ def author_name_dict_query(author_ids):
 def fos_name_level_dict_query(fos_ids):
     ''' Find field of study name from id.
     '''
-    # Elastic search client
-    client = Elasticsearch(conf.get("elasticsearch.hostname"))
-
     # Target
     fos_target = ['NormalizedName', 'Level']
 
@@ -83,9 +73,6 @@ def fos_name_level_dict_query(fos_ids):
 def affiliation_name_query(affiliation_ids):
     ''' Find affiliation name from id.
     '''
-    # Elastic search client
-    client = Elasticsearch(conf.get("elasticsearch.hostname"))
-
     # Target
     affi_target = 'NormalizedName'
 
@@ -106,9 +93,6 @@ def affiliation_name_query(affiliation_ids):
 def affiliation_name_dict_query(affiliation_ids):
     ''' Find affiliation name from id.
     '''
-    # Elastic search client
-    client = Elasticsearch(conf.get("elasticsearch.hostname"))
-
     # Target
     affi_target = 'NormalizedName'
 
@@ -129,9 +113,6 @@ def affiliation_name_dict_query(affiliation_ids):
 def conference_name_query(conference_ids):
     ''' Find conference name from id.
     '''
-    # Elastic search client
-    client = Elasticsearch(conf.get("elasticsearch.hostname"))
-
     # Target
     conf_target = 'NormalizedName'
 
@@ -152,9 +133,6 @@ def conference_name_query(conference_ids):
 def conference_name_dict_query(conference_ids):
     ''' Find conference name from id.
     '''
-    # Elastic search client
-    client = Elasticsearch(conf.get("elasticsearch.hostname"))
-
     # Target
     conf_target = 'NormalizedName'
 
@@ -175,9 +153,6 @@ def conference_name_dict_query(conference_ids):
 def journal_name_query(journal_ids):
     ''' Find journal name from id.
     '''
-    # Elastic search client
-    client = Elasticsearch(conf.get("elasticsearch.hostname"))
-
     # Target
     jour_target = 'NormalizedName'
 
@@ -198,9 +173,6 @@ def journal_name_query(journal_ids):
 def journal_name_dict_query(journal_ids):
     ''' Find journal name from id.
     '''
-    # Elastic search client
-    client = Elasticsearch(conf.get("elasticsearch.hostname"))
-
     # Target
     jour_target = 'NormalizedName'
 
@@ -269,9 +241,6 @@ def name_dict_query(entity_type, entity_name):
 def normalized_to_display(entity_name, index):
     '''
     '''
-    # Elastic search client
-    client = Elasticsearch(conf.get("elasticsearch.hostname"))
-
     # Query for paa
     query_s = Search(index=index, using=client)
     query_s = query_s.query('match', NormalizedName=entity_name)

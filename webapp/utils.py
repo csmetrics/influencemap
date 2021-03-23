@@ -1,5 +1,5 @@
 import os
-from webapp.elastic import *
+from core.elastic import *
 
 from core.flower.high_level_get_flower import default_config
 

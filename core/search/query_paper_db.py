@@ -5,18 +5,14 @@ date:   24.06.18
 author: Alexander Soen
 '''
 
-from graph.config import conf
+from core.elastic import client
 from core.utils.entity_type import Entity_type
 
-from elasticsearch import Elasticsearch
 from elasticsearch_dsl import Search
 
 def author_paper_query(author_ids):
     ''' Query author id for availible papers.
     '''
-    # Elastic search client
-    client = Elasticsearch(conf.get("elasticsearch.hostname"))
-
     # Target
     paa_target = 'PaperId'
 
@@ -38,9 +34,6 @@ def author_paper_query(author_ids):
 def affiliation_paper_query(affi_ids):
     ''' Query affiliation id for availible papers.
     '''
-    # Elastic search client
-    client = Elasticsearch(conf.get("elasticsearch.hostname"))
-
     # Target
     paa_target = 'PaperId'
 
@@ -62,9 +55,6 @@ def affiliation_paper_query(affi_ids):
 def conference_paper_query(conf_ids):
     ''' Query conference (instance) id for availible papers.
     '''
-    # Elastic search client
-    client = Elasticsearch(conf.get("elasticsearch.hostname"))
-
     # Target
     papers_target = 'PaperId'
 
@@ -87,9 +77,6 @@ def conference_paper_query(conf_ids):
 def journal_paper_query(jour_ids):
     ''' Query journal id for availible papers.
     '''
-    # Elastic search client
-    client = Elasticsearch(conf.get("elasticsearch.hostname"))
-
     # Target
     papers_target = 'PaperId'
 

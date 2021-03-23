@@ -13,11 +13,10 @@ author: Alexander Soen
 import copy
 from datetime import datetime
 
-from graph.config import conf
+from core.elastic import client
 from core.search.query_info_cache import base_paper_cache_query
 from core.search.query_name_db import *
 
-from elasticsearch import Elasticsearch
 from elasticsearch_dsl import Search, Q
 
 TIMEOUT = 60
@@ -25,9 +24,6 @@ TIMEOUT = 60
 def papers_prop_query(paper_ids):
     ''' Get properties of a paper.
     '''
-    # Elastic search client
-    client = Elasticsearch(conf.get("elasticsearch.hostname"))
-
     # Targets
     papers_targets = ['PaperTitle', 'ConferenceSeriesId', 'JournalId', 'Year']
 
@@ -76,10 +72,6 @@ def papers_prop_query(paper_ids):
 def paa_prop_query(paper_ids):
     ''' Get properties of a paper.
     '''
-
-    # Elastic search client
-    client = Elasticsearch(conf.get("elasticsearch.hostname"))
-
     # Targets
     paa_targets = ['PaperId', 'AuthorId', 'AffiliationId']
 
@@ -144,10 +136,6 @@ def paa_prop_query(paper_ids):
 def pfos_prop_query(paper_ids):
     ''' Get properties of a paper.
     '''
-
-    # Elastic search client
-    client = Elasticsearch(conf.get("elasticsearch.hostname"))
-
     # Targets
     pfos_targets = ['PaperId', 'FieldOfStudyId']
 
@@ -201,9 +189,6 @@ def pfos_prop_query(paper_ids):
 def pr_links_query(paper_ids):
     ''' Get properties of a paper.
     '''
-    # Elastic search client
-    client = Elasticsearch(conf.get("elasticsearch.hostname"))
-
     # Targets
     pr_targets = ['PaperId', 'PaperReferenceId', 'FieldOfStudyId']
 
