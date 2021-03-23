@@ -210,11 +210,15 @@ SINGLE_LEAF = [Entity_type.CONF, Entity_type.JOUR]
 def score_leaves(score_list, leaves):
     '''
     '''
-    score_df = pd.DataFrame(columns = DF_COLUMNS)
-
+    dfs = []
     for leaf in leaves:
-        if (score_list[leaf.ident]):
-            score_df = score_df.append(score_list[leaf.ident], ignore_index=True)
+        if score_list[leaf.ident]:
+            dfs.append(pd.DataFrame(score_list[leaf.ident], columns=DF_COLUMNS))
+
+    score_df = (
+        pd.concat(dfs, ignore_index=True)
+        if dfs
+        else pd.DataFrame(columns=DF_COLUMNS))
 
     score_df['self_cite'] = score_df['self_cite'].astype('bool')
     score_df['coauthor'] = score_df['coauthor'].astype('bool')
