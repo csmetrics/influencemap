@@ -1,9 +1,12 @@
 import re
-from elasticsearch import Elasticsearch
+from elasticsearch import Elasticsearch, RequestsHttpConnection
 from elasticsearch_dsl import Search
 from graph.config import conf
 
-client = Elasticsearch(conf.get("elasticsearch.hostname"), timeout=30)
+client = Elasticsearch(
+    conf.get("elasticsearch.hostname"),
+    timeout=30,
+    connection_class=RequestsHttpConnection)
 
 def query_cache_paper_info(author_id):
     result = {}
