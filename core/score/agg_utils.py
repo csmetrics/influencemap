@@ -5,33 +5,6 @@ date:   27.06.18
 author: Alexander Soen
 '''
 
-from core.search.query_name import name_check_query
-
-def get_name_mapping(score_df):
-    ''' Creates a name mapping for a score dataframe with both an entity id and
-        entity type column
-    '''
-    # Create name mapping dictionary
-    name_mapping = dict()
-    for entity_type, entity_df in score_df.groupby('entity_type'):
-        entity_names =  list(set(entity_df['entity_name']))
-
-        # Naming dictionary for specific type
-        name_map = name_check_query(entity_type, entity_names)
-        name_mapping[entity_type] = name_map
-
-    return name_mapping
-
-
-def apply_name_mapping(row, name_mapping):
-    ''' Function to apply the name mapping given by "get_name_mapping".
-    '''
-    try:
-        return name_mapping[row['entity_type']][row['entity_name']]
-    except KeyError:
-        return None
-
-
 def is_self_cite(paper_prop, self):
     ''' Determines if a paper property is a self citation depending on a list
         of self names.
@@ -87,17 +60,3 @@ def get_coauthor_mapping(paper_info_list):
                 coauthors.add(fos['FieldOfStudyName'])
 
     return list(coauthors)
-
-
-def flag_coauthor(score_df, coauthors):
-    ''' Flags the coauthors of a dataframe.
-    '''
-    # Check if coauthor set exists
-    if not coauthors:
-        return score_df
-
-    # Set flag
-    score_df['coauthor'] = score_df.apply(
-        lambda x: x['entity_name'] in coauthors, axis = 1)
-
-    return score_df

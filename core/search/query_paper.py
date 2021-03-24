@@ -1,5 +1,4 @@
 import core.search.query_paper_db as qp_db
-import core.search.query_paper_mag as qp_mag
 
 from core.utils.entity_type import Entity_type
 from core.search.mag_interface import APIKeyError
@@ -33,5 +32,4 @@ if __name__ == "__main__":
     from core.utils.entity_type import Entity_type
     from core.search.academic_search import get_papers_from_entity_ids
 
-    test1 = qp_mag.paper_mag_multiquery(Entity_type.AUTH, [2100918400])
     test2 = qp_db.paper_query(Entity_type.AUTH, [2100918400])

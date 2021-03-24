@@ -52,10 +52,3 @@ def query_academic_search(type, url, query):
             header = get_header(i, keys)
 
     return json.loads((response.content).decode("utf-8"))
-
-
-def to_datetime(strtime):
-    """
-        Turns string format of MAG dates into datetime object.
-    """
-    return datetime.strptime(strtime, '%Y-%m-%dT%X')
