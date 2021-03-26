@@ -1,10 +1,8 @@
 from multiprocessing import Pool
-from elasticsearch import Elasticsearch
 from elasticsearch_dsl import Search
-from graph.config import conf
-from graph.save_cache import saveNewBrowseCache
 
-client = Elasticsearch(conf.get("elasticsearch.hostname"))
+from core.elastic import client
+from graph.save_cache import saveNewBrowseCache
 
 def get_documents(index):
     result = []

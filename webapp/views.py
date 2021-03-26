@@ -22,7 +22,7 @@ from core.search.query_paper import get_all_paper_ids
 from core.utils.get_stats import get_stats
 from core.utils.load_tsv import tsv_to_dict
 from graph.save_cache import *
-from webapp.elastic import *
+from core.elastic import *
 from webapp.graph import ReferenceFlower, compare_flowers
 from webapp.shortener import shorten_front, unshorten_url_ext
 from webapp.utils import *
