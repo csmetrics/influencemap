@@ -36,28 +36,27 @@
 -- mag/Journals.txt
 CREATE TABLE "journals" (
     "id" bigint NOT NULL PRIMARY KEY,
-    "rank" integer NOT NULL,
+    "normalized_name" text NOT NULL,
     "display_name" text NOT NULL
 );
 
 -- mag/ConferenceSeries.txt
 CREATE TABLE "conference_series" (
     "id" bigint NOT NULL PRIMARY KEY,
-    "rank" integer NOT NULL,
+    "normalized_name" text NOT NULL,
     "display_name" text NOT NULL
 );
 
 -- mag/Affiliations.txt
 CREATE TABLE "affiliations" (
     "id" bigint NOT NULL PRIMARY KEY,
-    "rank" integer NOT NULL,
+    "normalized_name" text NOT NULL,
     "display_name" text NOT NULL
 );
 
 -- mag/Papers.txt
 CREATE TABLE "papers" (
     "id" bigint NOT NULL PRIMARY KEY,
-    "rank" integer NOT NULL,
     "title" text NOT NULL,
     "year" smallint,
     "journal_id" bigint REFERENCES "journals",
@@ -74,12 +73,12 @@ CREATE TABLE "citations" (
 -- mag/Authors.txt
 CREATE TABLE "authors" (
     "id" bigint NOT NULL PRIMARY KEY,
-    "rank" integer NOT NULL,
+    "normalized_name" text NOT NULL,
     "display_name" text NOT NULL,
     "last_known_affiliation_id" bigint REFERENCES "affiliations"
 );
 
--- mag/PaperAuthorAffiliations.txtx
+-- mag/PaperAuthorAffiliations.txt
 CREATE TABLE "authorships" (
     "paper_id" bigint NOT NULL REFERENCES "papers",
     "author_id" bigint NOT NULL REFERENCES "authors",
@@ -87,3 +86,18 @@ CREATE TABLE "authorships" (
     PRIMARY KEY ("paper_id", "author_id", "affiliation_id")
 );
 
+-- advanced/FieldsOfStudy.txt
+CREATE TABLE "fields_of_study" (
+    "id" bigint NOT NULL PRIMARY KEY,
+    "normalized_name" text NOT NULL,
+    "display_name" text NOT NULL,
+    "level" smallint NOT NULL
+);
+
+
+-- advanced/PaperFieldsOfStudy.txt
+CREATE TABLE "paper_fields_studied" (
+    "paper_id" bigint NOT NULL REFERENCES "papers",
+    "field_of_study_id" bigint NOT NULL REFERENCES "fields_of_study",
+    PRIMARY KEY ("paper_id", "field_of_study_id")
+);
