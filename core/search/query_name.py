@@ -1,8 +1,5 @@
 import core.search.query_name_db as qn_db
-import core.search.query_name_mag as qn_mag
-
 from core.utils.entity_type import Entity_type
-from core.search.mag_interface import APIKeyError
 
 def name_check_query(entity_type, entity_ids):
     return qn_db.name_query(entity_type, entity_ids)

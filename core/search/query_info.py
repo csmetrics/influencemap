@@ -8,7 +8,6 @@ author: Alexander Soen
 
 from core.search.cache_data       import cache_paper_info
 from core.search.query_info_cache import paper_info_cache_query
-from core.search.query_info_db    import paper_info_db_query
 from core.search.query_info_db    import paper_info_multiquery
 from core.search.query_info_mag   import paper_info_mag_multiquery
 from core.search.query_utility    import chunker

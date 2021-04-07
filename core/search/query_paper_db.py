@@ -116,18 +116,5 @@ def paper_query(entity_type, entity_ids):
     if entity_type == Entity_type.JOUR:
         return journal_paper_query(entity_ids)
 
-    # Field of Study
-    if entity_type == Entity_type.FSTD:
-        pass
-
     # Otherwise
     return None
-
-
-if __name__ == '__main__':
-    # TESTING
-    #print(author_paper_query(1565612411))
-    #print(conference_paper_query(2793938785))
-    #print(journal_paper_query(148324379))
-    #print(affiliation_paper_query(219193219))
-    print()

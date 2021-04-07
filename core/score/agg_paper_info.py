@@ -8,12 +8,7 @@ author: Alexander Soen
 
 import pandas as pd
 from core.utils.entity_type import Entity_type
-from core.score.agg_utils   import get_name_mapping
-from core.score.agg_utils   import apply_name_mapping
 from core.score.agg_utils   import is_self_cite
-
-import os
-from multiprocessing import Pool
 
 
 def to_influence_dict(name, infed, infing):
@@ -175,8 +170,6 @@ def score_paper_info_list(paper_info_list, self=list()):
     return score_list
 
 
-score_paper_info_list_parallel = score_paper_info_list
-
 DF_COLUMNS = [
         'entity_name',
         'entity_type',
@@ -189,22 +182,6 @@ DF_COLUMNS = [
         'ego_paper_id',
         'link_paper_id'
         ]
-
-DF_DTYPES = [
-        'object',
-        'object',
-        'int32',
-        'int32',
-        'bool',
-        'bool',
-        'float32',
-        'float32',
-        'int32',
-        'int32'
-        ]
-
-
-SINGLE_LEAF = [Entity_type.CONF, Entity_type.JOUR]
 
 
 def score_leaves(score_list, leaves):

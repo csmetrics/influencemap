@@ -274,62 +274,6 @@ def base_paper_db_query(paper_ids):
     return results
 
 
-def link_paper_info_query(paper_id, cache = True):
-    ''' Gets the basic paper information required for the links.
-    '''
-    # Get citation links
-    pr_links = pr_links_query(paper_id)
-
-    # Query results
-    link_res = dict()
-
-    # Iterate through the link types
-    for link_type, link_papers in pr_links.items():
-
-        # Resulting link results
-        link_res[link_type] = list()
-
-        # Iterate through the papers
-        for link_paper in link_papers:
-
-            # If cache true
-            if cache:
-                # Check cache for entries
-                link_paper_prop = base_paper_cache_query([link_paper])[0]
-            else:
-                # Set default to None
-                link_paper_prop = None
-
-            # If empty result
-            if not link_paper_prop:
-                # Do full search
-                link_paper_prop = base_paper_db_query(link_paper)
-
-            # Check if query has result
-            if link_paper_prop:
-                link_res[link_type].append(link_paper_prop)
-
-    # Return results
-    return link_res
-
-
-def paper_info_db_query(paper_id):
-    ''' Generate paper info dictionary/json from base databases (not cache).
-    '''
-    # Query basic properties
-    paper_info = base_paper_db_query(paper_id)
-
-    # Check if result is empty
-    if not paper_info:
-        return None
-
-    # Add citation link information
-    paper_info.update(link_paper_info_query(paper_id))
-
-    # Return paper_info
-    return paper_info
-
-
 def paper_info_multiquery(
         paper_ids, partial_info=list(), force=False, query_filter=None,
         partial_updates=list(), recache=False):

@@ -1,31 +1,13 @@
 from core.score.agg_paper_info     import score_leaves
 from core.score.agg_score          import agg_score_df, post_agg_score_df
-from core.score.agg_utils          import get_coauthor_mapping
-from core.score.agg_utils          import flag_coauthor
 from core.score.agg_filter         import filter_year
 from core.flower.flower_bloom_data import score_df_to_graph
 from core.config                   import *
 
 from datetime    import datetime
-from collections import Counter
 from operator    import itemgetter
-from multiprocessing import Process, Queue
 
 import numpy as np
-import core.utils.entity_type as ent
-
-flower_leaves = [ ('author', [ent.Entity_type.AUTH])
-                , ('conf'  , [ent.Entity_type.CONF, ent.Entity_type.JOUR])
-                , ('inst'  , [ent.Entity_type.AFFI])
-                , ('fos'   , [ent.Entity_type.FSTD]) ]
-
-str_to_ent = {
-        'author': ent.Entity_type.AUTH,
-        'conference': ent.Entity_type.CONF,
-        'journal': ent.Entity_type.JOUR,
-        'institution': ent.Entity_type.AFFI,
-        'fieldofstudy': ent.Entity_type.FSTD,
-    }
 
 def default_config():
         return {
