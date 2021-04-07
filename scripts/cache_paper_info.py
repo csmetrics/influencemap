@@ -6,10 +6,9 @@ import json
 
 from datetime import datetime
 
-from graph.config import conf
-from elasticsearch import Elasticsearch
 from elasticsearch_dsl import Search, Q
 
+from core.elastic import client
 from core.search.query_info import paper_info_db_check_multiquery
 
 #%%
@@ -33,10 +32,6 @@ try:
         print(BATCH_SIZE)
 except FileExistsError:
     pass
-
-#%%
-# Elastic search client
-client = Elasticsearch(conf.get('elasticsearch.hostname'))
 
 #%%
 counter = 0
