@@ -768,3 +768,135 @@ def get_next_node_info_page(request):
     page_info = {"paper_info": node_info["paper_info"], "node_links": node_info["node_links"][0+page_length*(page-1):min(page_length*page, len(node_info["node_links"]))]}
     print(page)
     return JsonResponse(page_info, safe=False)
+
+
+def create_flower_from_list():
+    author_id = '2170939500';
+    entity_ids = {
+        'PaperIds': [],
+        'AuthorIds': [author_id],
+        'ConferenceIds': [],
+        'JournalIds': [],
+        'AffiliationIds': []
+    }
+    selected_papers = get_all_paper_ids(entity_ids)
+    entity_names = get_all_normalised_names(entity_ids)
+    config = None
+    flower_name = None
+
+    if not flower_name:
+        flower_name = "" + entity_names[0]
+        if len(data["names"]) > 1:
+            flower_name += " +{} more".format(len(entity_names)-1)
+
+    doc_for_es_cache={"DisplayName": flower_name, "EntityIds": data["entities"], "Type": "thinkers"}
+    doc_id = saveNewBrowseCache(doc_for_es_cache)
+    session["url_base"] = shorten_front("http://influencemap.ml/submit/?id="+doc_id)
+
+    # Default Dates
+    min_year = None
+    max_year = None
+
+    # Solving type issues
+    selected_papers = [int(p) for p in selected_papers]
+
+    print()
+    print('Number of Papers Found: ', len(selected_papers))
+    print('Time taken: ', datetime.now() - time_cur)
+    print()
+
+    time_cur = datetime.now()
+
+    # Turn selected paper into information dictionary list
+    print("[Submit] selected_papers", len(selected_papers))
+    paper_information = paper_info_db_check_multiquery(selected_papers) # API
+
+    # Check if the paper information is not empty
+    if not paper_information:
+        print("ERROR: missing_info -- no paper information")
+        return
+
+    ### PAPER MODIFICATIONS ###
+    # Filter for Paper Year different
+    max_year_paper = max(paper_information, key=lambda x: x['Year'])['Year']
+    new_paper_information = list()
+    for paper in paper_information:
+        if paper['Year'] > max_year_paper - 100:
+            new_paper_information.append(paper)
+    paper_information = new_paper_information
+    ### PAPER MODIFICATIONS ###
+
+    # Get coauthors
+    coauthors = get_coauthor_mapping(paper_information)
+
+    print()
+    print('Number of Paper Information Found: ', len(paper_information))
+    print('Time taken: ', datetime.now() - time_cur)
+    print()
+
+    print('Graph ops: ', datetime.now())
+
+    # Get min and maximum year
+    years = [info['Year'] for info in paper_information if 'Year' in info]
+    min_pub_year, max_pub_year = min(years, default=0), max(years, default=0)
+
+    # calculate pub/cite chart data
+    cont_pub_years = range(min_pub_year, max_pub_year+1)
+    cite_years = set()
+    for info in paper_information:
+        if 'Citations' in info:
+            cite_years.update({entity["Year"] for entity in info['Citations'] if "Year" in entity})
+
+    # Add publication years as well
+    cite_years.add(min_pub_year)
+    cite_years.add(max_pub_year)
+
+    min_cite_year, max_cite_year = min(cite_years, default=0), max(cite_years, default=0)
+    cont_cite_years = range(min(cite_years, default=0), max(cite_years,default=0)+1)
+    pub_chart = [{"year":k,"value":Counter(years)[k] if k in Counter(years) else 0} for k in cont_cite_years]
+    citecounter = {k:[] for k in cont_cite_years}
+    for info in paper_information:
+        if 'Citations' in info:
+            for entity in info['Citations']:
+                citecounter[info['Year']].append(entity["Year"])
+
+    cite_chart = [{"year":k,"value":[{"year":y,"value":Counter(v)[y]} for y in cont_cite_years]} for k,v in citecounter.items()]
+
+    # Normalised entity names
+    print("")
+    entity_names = list(set(entity_names))
+
+    print('Graph ops: ', datetime.now())
+
+    # TEST TOTAL TIME FOR SCORING
+    time_cur = datetime.now()
+
+    # Generate scores from paper information
+    time_score = datetime.now()
+    score_df = score_paper_info_list(paper_information, self=entity_names)
+    print('TOTAL SCORE_DF TIME: ', datetime.now() - time_score)
+
+    # Set up configuration of influence flowers
+    flower_config = default_config()
+    if config:
+        flower_config = config
+
+    if 'cmp_ref' in flower_config and flower_config['cmp_ref']: # Do not limit the size of new flower
+        flower_config['num_leaves'] = 5000
+
+    # Work function
+    make_flower = lambda x: gen_flower_data(score_df, x, entity_names,
+            flower_name, config=flower_config)
+
+    # Calaulate author_flower only
+    flower_res = make_flower(flower_leaves[0])
+    sorted(flower_res, key=lambda x: x[0])
+    flower_info = flower_res[1]
+
+    print('TOTAL FLOWER TIME: ', datetime.now() - time_cur)
+    print('TOTAL REQUEST TIME: ', datetime.now() - total_request_cur)
+
+    print("AUTHOR FLOWER")
+    print(flower_info)
+
+    return
