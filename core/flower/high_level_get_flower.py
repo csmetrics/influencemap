@@ -168,6 +168,7 @@ def gen_flower_data(score_df, flower_prop, entity_names, flower_name,
                                              config['cit_upper'],
                                              index = 'influence_year')
     t2 = datetime.now()
+
     # Aggregate
     agg_score = agg_score_df(filter_score)
     # print(agg_score)
@@ -186,9 +187,6 @@ def gen_flower_data(score_df, flower_prop, entity_names, flower_name,
         agg_score['influenced'] = agg_score.influenced_nscnca
         agg_score['influencing'] = agg_score.influencing_nscnca
 
-    # Sort alphabetical first
-    agg_score.sort_values('entity_name', ascending=False, inplace=True)
-
     # Sort by sum of influence
     agg_score['tmp_sort'] = agg_score.influencing + agg_score.influenced
     agg_score.sort_values('tmp_sort', ascending=False, inplace=True)
@@ -198,29 +196,14 @@ def gen_flower_data(score_df, flower_prop, entity_names, flower_name,
     agg_score.sort_values('tmp_sort', ascending=False, inplace=True)
     agg_score.drop('tmp_sort', axis=1, inplace=True)
 
-    # Need to take empty df into account
-    if agg_score.empty:
-        top_score = agg_score
-        num_leaves = config['num_leaves']
-    else:
-        num_leaves = max(50, config['num_leaves'])
-        top_score = agg_score.head(n=num_leaves)
+    top_score = agg_score[['entity_name', 'coauthor', 'influenced', 'influencing']].head(10)
 
-    # Calculate post filter statistics (sum and ratio)
-    top_score = post_agg_score_df(top_score)
-    top_score.ego = flower_name
+    data = []
+    for values in top_score.to_dict('records'):
+        name = values['entity_name']
+        score_df = filter_score[filter_score['entity_name'] == name]
+        score_df = score_df.groupby(['influence_year']).agg({'influenced':'sum', 'influencing':'sum'}).reset_index()
+        values['year'] = score_df.to_dict('records')
+        data.append(values)
 
-    # Calculate the bloom ordering
-    top_score['bloom_order'] = range(1, len(top_score) + 1)
-
-    # Graph scores
-    graph_score = score_df_to_graph(top_score)
-
-    # D3 format
-    data = processdata(flower_type, graph_score, num_leaves, config['order'], 0)
-
-    print('len(agg_score)', len(agg_score))
-
-    data['total'] = len(agg_score)
-
-    return flower_type, [data, data.copy(), data.copy()]
+    return data

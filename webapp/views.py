@@ -771,6 +771,9 @@ def get_next_node_info_page(request):
 
 
 def create_flower_from_list():
+    total_request_cur = datetime.now()
+    time_cur = datetime.now()
+
     author_id = '2170939500';
     entity_ids = {
         'PaperIds': [],
@@ -782,16 +785,10 @@ def create_flower_from_list():
     selected_papers = get_all_paper_ids(entity_ids)
     entity_names = get_all_normalised_names(entity_ids)
     config = None
-    flower_name = None
+    flower_name = str(entity_names[0])
 
-    if not flower_name:
-        flower_name = "" + entity_names[0]
-        if len(data["names"]) > 1:
-            flower_name += " +{} more".format(len(entity_names)-1)
-
-    doc_for_es_cache={"DisplayName": flower_name, "EntityIds": data["entities"], "Type": "thinkers"}
+    doc_for_es_cache={"DisplayName": flower_name, "EntityIds": entity_ids, "Type": "thinkers"}
     doc_id = saveNewBrowseCache(doc_for_es_cache)
-    session["url_base"] = shorten_front("http://influencemap.ml/submit/?id="+doc_id)
 
     # Default Dates
     min_year = None
@@ -876,22 +873,8 @@ def create_flower_from_list():
     score_df = score_paper_info_list(paper_information, self=entity_names)
     print('TOTAL SCORE_DF TIME: ', datetime.now() - time_score)
 
-    # Set up configuration of influence flowers
-    flower_config = default_config()
-    if config:
-        flower_config = config
-
-    if 'cmp_ref' in flower_config and flower_config['cmp_ref']: # Do not limit the size of new flower
-        flower_config['num_leaves'] = 5000
-
-    # Work function
-    make_flower = lambda x: gen_flower_data(score_df, x, entity_names,
-            flower_name, config=flower_config)
-
     # Calaulate author_flower only
-    flower_res = make_flower(flower_leaves[0])
-    sorted(flower_res, key=lambda x: x[0])
-    flower_info = flower_res[1]
+    flower_info = gen_flower_data(score_df, flower_leaves[0], entity_names, flower_name, config=default_config())
 
     print('TOTAL FLOWER TIME: ', datetime.now() - time_cur)
     print('TOTAL REQUEST TIME: ', datetime.now() - total_request_cur)
