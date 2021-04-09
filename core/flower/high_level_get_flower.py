@@ -196,13 +196,13 @@ def gen_flower_data(score_df, flower_prop, entity_names, flower_name,
     agg_score.sort_values('tmp_sort', ascending=False, inplace=True)
     agg_score.drop('tmp_sort', axis=1, inplace=True)
 
-    top_score = agg_score[['entity_name', 'coauthor', 'influenced', 'influencing']].head(10)
+    top_score = agg_score[['entity_name', 'coauthor', 'influenced', 'influencing']].head(25)
 
     data = []
     for values in top_score.to_dict('records'):
         name = values['entity_name']
         score_df = filter_score[filter_score['entity_name'] == name]
-        score_df = score_df.groupby(['influence_year']).agg({'influenced':'sum', 'influencing':'sum'}).reset_index()
+        score_df = score_df.groupby(['influence_year', 'publication_year']).agg({'influenced':'sum', 'influencing':'sum'}).reset_index()
         values['year'] = score_df.to_dict('records')
         data.append(values)
 
