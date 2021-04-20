@@ -770,11 +770,10 @@ def get_next_node_info_page(request):
     return JsonResponse(page_info, safe=False)
 
 
-def create_flower_from_list():
+def create_flower_from_list(author_id):
     total_request_cur = datetime.now()
     time_cur = datetime.now()
 
-    author_id = '2170939500';
     entity_ids = {
         'PaperIds': [],
         'AuthorIds': [author_id],
@@ -882,4 +881,5 @@ def create_flower_from_list():
     print("AUTHOR FLOWER")
     print(flower_info)
 
+    json.dump(flower_info, open(author_id+".json", "w"))
     return
