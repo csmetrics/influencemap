@@ -74,7 +74,7 @@ def score_paper_info(paper_info, self=list()):
         ref_const = {
             'self_cite': is_self_cite(reference, self),
             'coauthor': False,
-            'publication_year': paper_info['Year'] if 'Year' in paper_info else None,
+            'publication_year': reference['Year'] if 'Year' in paper_info else None,
             'influence_year': paper_info['Year'] if 'Year' in paper_info else None,
             'ego_paper_id': int(paper_info['PaperId']),
             'link_paper_id': int(reference['PaperId'])
