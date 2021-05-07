@@ -6,21 +6,27 @@ import numpy as np
 
 ro_array = nb.types.Array(nb.u4, 1, 'C', readonly=True)
 
-@nb.jit(nb.u4[::1](ro_array, ro_array, nb.u4[::1]),
+@nb.jit(nb.types.Tuple([nb.u4[::1], nb.f4[::1]])(
+            ro_array, ro_array, nb.u4[::1], nb.f4[::1]),
         nopython=True, nogil=True)
-def traverse(indptr, indices, origins):
-    sinks = set()
-    for vo in origins:
-        start = indptr[vo]
-        end = indptr[vo + 1]
-        sinks.update(indices[start:end])
-    res = np.empty(len(sinks), dtype=np.uint32)
-    for i, s in enumerate(sinks):
-        res[i] = s
-    return res
+def _traverse(indptr, indices, origins, origins_mul):
+    sinks = nb.typed.Dict.empty(key_type=nb.u4, value_type=nb.f4)
+    for v, m in zip(origins, origins_mul):
+        start = indptr[v]
+        end = indptr[v + 1]
+        for i in indices[start:end]:
+            sinks[i] = sinks.get(i, nb.f4(0.)) + m
+    res_indices = np.empty(len(sinks), dtype=np.uint32)
+    res_mul = np.empty(len(sinks), dtype=np.float32)
+    for i, (s, m) in enumerate(sinks.items()):
+        res_indices[i] = s
+        res_mul[i] = m
+    return res_indices, res_mul
 
 
 class Graph:
+    __slots__ = ['indptr', 'indices', 'indptr_mmap', 'indices_mmap']
+
     def __init__(self, indptr_path, indices_path):
         with open(indptr_path, 'rb') as f:
             self.indptr_mmap = mmap.mmap(f.fileno(), 0, prot=mmap.PROT_READ)
@@ -33,28 +39,7 @@ class Graph:
         self.indptr_mmap.close()
         self.indices_mmap.close()
 
-
-class InfluenceeGetter:
-    def __init__(self, path):
-        self.author_to_paper = Graph(
-            path / 'author2paper-indptr.bin',
-            path / 'author2paper-indices.bin',
-        )
-        self.citee_to_citor = Graph(
-            path / 'citee2citor-indptr.bin',
-            path / 'citee2citor-indices.bin',
-        )
-        self.paper_to_author = Graph(
-            path / 'paper2author-indptr.bin',
-            path / 'paper2author-indices.bin',
-        )
-
-    def get_influencees(self, author_id):
-        origin = np.array([author_id], dtype=np.uint32)
-        papers = traverse(self.author_to_paper.indptr,
-                          self.author_to_paper.indices, origin)
-        citing_papers = traverse(self.citee_to_citor.indptr,
-                                 self.citee_to_citor.indices, papers)
-        influencees = traverse(self.paper_to_author.indptr,
-                               self.paper_to_author.indices, citing_papers)
-        return influencees
+    def traverse(self, origins, origins_mul=None):
+        if origins_mul is None:
+            origins_mul = np.ones_like(origins, dtype=np.float32)
+        return _traverse(self.indptr, self.indices, origins, origins_mul)
