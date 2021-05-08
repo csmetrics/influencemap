@@ -1,3 +1,4 @@
+import json
 import pathlib
 
 import numba as nb
@@ -5,10 +6,10 @@ import numpy as np
 
 from directed_graph import Graph
 
-ro_f4_arr = nb.types.Array(nb.u4, 1, 'C', readonly=True)
+ro_u4_arr = nb.types.Array(nb.u4, 1, 'C', readonly=True)
 
 
-@nb.jit(nb.f4[::1](nb.u4[::1], nb.f4[::1], ro_f4_arr),
+@nb.jit(nb.f4[::1](nb.u4[::1], nb.f4[::1], ro_u4_arr),
         nopython=True, nogil=True)
 def _weight_papers(paper_ids, paper_mul, paper_to_author_indptr):
     retval = np.empty_like(paper_mul)
@@ -19,6 +20,33 @@ def _weight_papers(paper_ids, paper_mul, paper_to_author_indptr):
             num_authors = 1
         retval[i] = mul / nb.f4(num_authors)
     return retval
+
+
+@nb.jit(nb.types.Tuple([nb.u4[::1], nb.f4[::1]])(
+            nb.u4[::1], nb.u4[::1], nb.f4[::1], ro_u4_arr, ro_u4_arr),
+        nopython=True, nogil=True)
+def _filter_self_citations(
+    author_ids,
+    paper_ids, paper_muls,
+    paper_to_author_indptr, paper_to_author_indices
+):
+    new_paper_ids = []
+    new_paper_muls = []
+    for paper_id, paper_mul in zip(paper_ids, paper_muls):
+        start = paper_to_author_indptr[paper_id]
+        end = paper_to_author_indptr[paper_id + 1]
+        # Below equivalent to:
+        #     if not any(any(author_id == other_author_id
+        #                    for other_author_id
+        #                        in paper_to_author_indices[start:end])
+        #                for author_id in author_ids):
+        for author_id in author_ids:
+            if author_id in paper_to_author_indices[start:end]:
+                break
+        else:
+            new_paper_ids.append(paper_id)
+            new_paper_muls.append(paper_mul)
+    return np.array(new_paper_ids), np.array(new_paper_muls)
 
 
 class Flower:
@@ -47,6 +75,9 @@ class Florist:
             path / 'paper2author-indptr.bin',
             path / 'paper2author-indices.bin',
         )
+        with open(path / 'paper-years.json') as f:
+            data = json.load(f)
+        self.year_starts = {int(year): start for year, start in data.items()}
 
     def weight_papers(self, papers_with_mul):
         paper_ids, paper_mul = papers_with_mul
@@ -54,13 +85,43 @@ class Florist:
                                  self.paper_to_author.indptr)
         return paper_ids, new_mul
 
-    def get_flower(self, author_ids):
+    def filter_self_citations(self, author_ids, papers_with_mul):
+        paper_ids, paper_muls = papers_with_mul
+        return _filter_self_citations(
+            author_ids,
+            paper_ids, paper_muls,
+            self.paper_to_author.indptr, self.paper_to_author.indices)
+        
+    def get_id_year_range(self, start, end):
+        return self.year_starts.get(start), self.year_starts.get(end)
+
+    def get_flower(
+        self,
+        author_ids,
+        *,
+        self_citations=False,
+        pub_year_start=None, pub_year_end=None,
+        cit_year_start=None, cit_year_end=None,
+    ):
+        pub_year_start, pub_year_end = self.get_id_year_range(
+            pub_year_start, pub_year_end)
+        cit_year_start, cit_year_end = self.get_id_year_range(
+            cit_year_start, cit_year_end)
+
         origin = np.array(author_ids, dtype=np.uint32)
-        origin_papers = self.author_to_paper.traverse(origin)
+        origin_papers = self.author_to_paper.traverse(
+            origin, id_start=pub_year_start, id_end=pub_year_end)
         weighted_origin_papers = self.weight_papers(origin_papers)
 
-        citing_papers = self.citee_to_citor.traverse(*weighted_origin_papers)
-        cited_papers = self.citor_to_citee.traverse(*origin_papers)
+        citing_papers = self.citee_to_citor.traverse(
+            *weighted_origin_papers,
+            id_start=cit_year_start, id_end=cit_year_end)
+        if not self_citations:
+            citing_papers = self.filter_self_citations(origin, citing_papers)
+        cited_papers = self.citor_to_citee.traverse(
+            *origin_papers, id_start=pub_year_start, id_end=pub_year_end)
+        if not self_citations:
+            cited_papers = self.filter_self_citations(origin, cited_papers)
         weighted_cited_papers = self.weight_papers(cited_papers)
 
         influencers = self.paper_to_author.traverse(*weighted_cited_papers)

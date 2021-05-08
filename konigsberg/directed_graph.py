@@ -7,15 +7,22 @@ import numpy as np
 ro_array = nb.types.Array(nb.u4, 1, 'C', readonly=True)
 
 @nb.jit(nb.types.Tuple([nb.u4[::1], nb.f4[::1]])(
-            ro_array, ro_array, nb.u4[::1], nb.f4[::1]),
+            ro_array, ro_array,
+            nb.u4[::1], nb.f4[::1],
+            nb.u4, nb.u4),
         nopython=True, nogil=True)
-def _traverse(indptr, indices, origins, origins_mul):
+def _traverse(
+    indptr, indices,
+    origins, origins_mul,
+    id_start, id_end,
+):
     sinks = nb.typed.Dict.empty(key_type=nb.u4, value_type=nb.f4)
     for v, m in zip(origins, origins_mul):
         start = indptr[v]
         end = indptr[v + 1]
         for i in indices[start:end]:
-            sinks[i] = sinks.get(i, nb.f4(0.)) + m
+            if id_start <= i < id_end:
+                sinks[i] = sinks.get(i, nb.f4(0.)) + m
     res_indices = np.empty(len(sinks), dtype=np.uint32)
     res_mul = np.empty(len(sinks), dtype=np.float32)
     for i, (s, m) in enumerate(sinks.items()):
@@ -39,7 +46,20 @@ class Graph:
         self.indptr_mmap.close()
         self.indices_mmap.close()
 
-    def traverse(self, origins, origins_mul=None):
+    def traverse(
+        self,
+        origins, origins_mul=None,
+        *,
+        id_start=None, id_end=None,
+    ):
         if origins_mul is None:
             origins_mul = np.ones_like(origins, dtype=np.float32)
-        return _traverse(self.indptr, self.indices, origins, origins_mul)
+        if id_start is None:
+            id_start = 0
+        if id_end is None:
+            id_end = (1 << 32) - 1
+        return _traverse(
+            self.indptr, self.indices,
+            origins, origins_mul,
+            id_start, id_end,
+        )

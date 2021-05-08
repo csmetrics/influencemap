@@ -1,4 +1,5 @@
 import csv
+import json
 import pathlib
 import pickle
 
@@ -19,55 +20,55 @@ class MAGDialect(csv.Dialect):
     strict = True
 
 
-# def load_authors_df(f):
-#     authors_df = pd.read_csv(
-#         f,
-#         dialect=MAGDialect(),
-#         engine='c',
-#         usecols=[0,1],
-#         names=['author_id', 'rank'],
-#         dtype={'author_id': np.uint32, 'rank': np.uint16},
-#         na_filter=False,
-#     )
-#     authors_df.sort_values(
-#         'rank',
-#         inplace=True,
-#         ignore_index=True,
-#         kind='mergesort',
-#     )
-#     del authors_df['rank']
-#     return authors_df
+def load_authors_df(f):
+    authors_df = pd.read_csv(
+        f,
+        dialect=MAGDialect(),
+        engine='c',
+        usecols=[0,1],
+        names=['author_id', 'rank'],
+        dtype={'author_id': np.uint32, 'rank': np.uint16},
+        na_filter=False,
+    )
+    authors_df.sort_values(
+        'rank',
+        inplace=True,
+        ignore_index=True,
+        kind='mergesort',
+    )
+    del authors_df['rank']
+    return authors_df
 
 
-# def load_papers_df(f):
-#     papers_df = pd.read_csv(
-#         f,
-#         dialect=MAGDialect(),
-#         engine='c',
-#         usecols=[0,1,7],
-#         names=['paper_id', 'rank', 'year'],
-#         dtype={'paper_id': np.uint32,
-#                'rank': np.uint16,
-#                'year': pd.UInt16Dtype()},
-#         keep_default_na=False,
-#         na_values={'year': ['']}
-#     )
-#     papers_df.sort_values(
-#         'rank',
-#         inplace=True,
-#         ignore_index=True,
-#         kind='mergesort',
-#     )
-#     papers_df.sort_values(
-#         'year',
-#         inplace=True,
-#         ignore_index=True,
-#         kind='mergesort',
-#     )
-#     del papers_df['rank']
-#     papers_df['year'].fillna(np.uint16(-1), inplace=True)
-#     papers_df['year'] = papers_df['year'].astype(np.uint16)
-#     return papers_df
+def load_papers_df(f):
+    papers_df = pd.read_csv(
+        f,
+        dialect=MAGDialect(),
+        engine='c',
+        usecols=[0,1,7],
+        names=['paper_id', 'rank', 'year'],
+        dtype={'paper_id': np.uint32,
+               'rank': np.uint16,
+               'year': pd.UInt16Dtype()},
+        keep_default_na=False,
+        na_values={'year': ['']}
+    )
+    papers_df.sort_values(
+        'rank',
+        inplace=True,
+        ignore_index=True,
+        kind='mergesort',
+    )
+    papers_df.sort_values(
+        'year',
+        inplace=True,
+        ignore_index=True,
+        kind='mergesort',
+    )
+    del papers_df['rank']
+    papers_df['year'].fillna(np.uint16(-1), inplace=True)
+    papers_df['year'] = papers_df['year'].astype(np.uint16)
+    return papers_df
 
 
 def load_citations_df(f):
@@ -107,9 +108,26 @@ def replace_ids_inplace(df, colname, mapping):
     df[colname] = df[colname].map(mapping)
 
 
-def save_paper_years_inplace(df):
-    # Save in /dev/null for now.
+def save_paper_years_inplace(df, path):
+    start_by_year = df.groupby('year')['new_paper_id'].aggregate('min')
     del df['year']
+    no_year_val = (1 << 16) - 1
+    if no_year_val in start_by_year:
+        no_year_start = start_by_year[no_year_val]
+    else:
+        no_year_start = len(df)
+    del start_by_year[no_year_val]
+    min_year = int(start_by_year.index.min())
+    max_year = int(start_by_year.index.max()) + 1
+    start_by_year[max_year] = no_year_start
+    for year in range(max_year - 1, min_year, -1):
+        if year not in start_by_year:
+            # Length 0
+            start_by_year[year] = start_by_year[year + 1]
+    years_dict = {
+        str(year): int(min_id) for year, min_id in start_by_year.iteritems()}
+    with open(path / 'paper-years.json', 'w') as f:
+        json.dump(years_dict, f)
 
 
 def save_citations(df, n_papers, path):
@@ -144,13 +162,13 @@ def get_dataset(in_path, out_path):
     authorships_path = in_path / 'PaperAuthorAffiliations.txt'
 
     # papers_df = load_papers_df(papers_path)
-    # save_paper_years_inplace(papers_df)
     # make_mag_id_index_inplace(papers_df, 'paper_id', 'new_paper_id')
     # with open(out_path / 'papers-index.pkl', 'wb') as f:
     #     pickle.dump(papers_df, f)
     # print('unpickling papers')
-    # with open(out_path / 'papers-index.pkl', 'rb') as f:
-    #     papers_df = pickle.load(f)
+    with open(out_path / 'papers-index.pkl', 'rb') as f:
+        papers_df = pickle.load(f)
+    save_paper_years_inplace(papers_df, out_path)
     # n_papers = len(papers_df)
 
     # print('loading citations')
@@ -174,16 +192,16 @@ def get_dataset(in_path, out_path):
     # save_citations(citations_df, n_papers, out_path)
     # del citations_df  # Free memory
 
-    print('loading authorships')
-    authorships_df = load_authorships_df(authorships_path)
+    # print('loading authorships')
+    # authorships_df = load_authorships_df(authorships_path)
     
-    print('unpickling papers')
-    with open(out_path / 'papers-index.pkl', 'rb') as f:
-        papers_df = pickle.load(f)
-    n_papers = len(papers_df)
-    print('replacing1')
-    replace_ids_inplace(authorships_df, 'paper_id', papers_df['new_paper_id'])
-    del papers_df  # Free memory
+    # print('unpickling papers')
+    # with open(out_path / 'papers-index.pkl', 'rb') as f:
+    #     papers_df = pickle.load(f)
+    # n_papers = len(papers_df)
+    # print('replacing1')
+    # replace_ids_inplace(authorships_df, 'paper_id', papers_df['new_paper_id'])
+    # del papers_df  # Free memory
 
     # authors_df = load_authors_df(authors_path)
     # make_mag_id_index_inplace(authors_df, 'author_id', 'new_author_id')
@@ -194,22 +212,22 @@ def get_dataset(in_path, out_path):
     # with open(out_path / 'authorships-table.pkl', 'rb') as f:
     #     authorships_df = pickle.load(f)
 
-    print('unpickling authors')
-    with open(out_path / 'authors-index.pkl', 'rb') as f:
-        authors_df = pickle.load(f)
-    n_authors = len(authors_df)
-    print('replacing2')
-    replace_ids_inplace(authorships_df, 'author_id', authors_df['new_author_id'])
-    del authors_df  # Free memory
-    print('pickling authorships')
-    try:
-        with open(out_path / 'authorships-table.pkl', 'wb') as f:
-            pickle.dump(authorships_df, f, pickle.HIGHEST_PROTOCOL)
-    except Exception:
-        breakpoint()
-    print('saving authorships')
-    save_authorships(authorships_df, n_papers, n_authors, out_path)
-    del authorships_df
+    # print('unpickling authors')
+    # with open(out_path / 'authors-index.pkl', 'rb') as f:
+    #     authors_df = pickle.load(f)
+    # n_authors = len(authors_df)
+    # print('replacing2')
+    # replace_ids_inplace(authorships_df, 'author_id', authors_df['new_author_id'])
+    # del authors_df  # Free memory
+    # print('pickling authorships')
+    # try:
+    #     with open(out_path / 'authorships-table.pkl', 'wb') as f:
+    #         pickle.dump(authorships_df, f, pickle.HIGHEST_PROTOCOL)
+    # except Exception:
+    #     breakpoint()
+    # print('saving authorships')
+    # save_authorships(authorships_df, n_papers, n_authors, out_path)
+    # del authorships_df
 
 
 def main():
