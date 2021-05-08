@@ -49,6 +49,46 @@ def _filter_self_citations(
     return np.array(new_paper_ids), np.array(new_paper_muls)
 
 
+@nb.jit(nb.types.Tuple([nb.u4[::1], nb.f4[::1]])(
+            nb.u4[::1], nb.u4[::1], nb.f4[::1]),
+        nopython=True, nogil=True)
+def _filter_ego(
+    author_ids_ego,
+    author_ids_other, author_muls_other,
+):
+    new_author_ids_other = []
+    new_author_muls_other = []
+    for author_id, author_mul in zip(author_ids_other, author_muls_other):
+        if author_id not in author_ids_ego:
+            new_author_ids_other.append(author_id)
+            new_author_muls_other.append(author_mul)
+    return np.array(new_author_ids_other), np.array(new_author_muls_other)
+
+
+@nb.jit(nb.types.Tuple([nb.u4[::1], nb.f4[::1]])(
+            nb.u4[::1], nb.u4[::1], nb.f4[::1], ro_u4_arr, ro_u4_arr),
+        nopython=True, nogil=True)
+def _filter_coauthors(
+    ego_paper_ids,
+    author_ids_other, author_muls_other,
+    p2a_ptr, p2a_idx,
+):
+    coauthors = set()
+    for paper_id in ego_paper_ids:
+        start = p2a_ptr[paper_id]
+        end = p2a_ptr[paper_id + 1]
+        coauthors.update(p2a_idx[start:end])
+
+    new_author_ids_other = []
+    new_author_muls_other = []
+    for author_id, author_mul in zip(author_ids_other, author_muls_other):
+        if author_id not in coauthors:
+            new_author_ids_other.append(author_id)
+            new_author_muls_other.append(author_mul)
+
+    return np.array(new_author_ids_other), np.array(new_author_muls_other)
+
+
 class Flower:
     __slots__ = ['influencers', 'influencees']
     def __init__(self, *, influencers=None, influencees=None):
@@ -100,6 +140,7 @@ class Florist:
         author_ids,
         *,
         self_citations=False,
+        coauthors=True,
         pub_year_start=None, pub_year_end=None,
         cit_year_start=None, cit_year_end=None,
     ):
@@ -111,6 +152,7 @@ class Florist:
         origin = np.array(author_ids, dtype=np.uint32)
         origin_papers = self.author_to_paper.traverse(
             origin, id_start=pub_year_start, id_end=pub_year_end)
+        origin_papers = origin_papers[0], np.ones_like(origin_papers[1])
         weighted_origin_papers = self.weight_papers(origin_papers)
 
         citing_papers = self.citee_to_citor.traverse(
@@ -125,5 +167,19 @@ class Florist:
         weighted_cited_papers = self.weight_papers(cited_papers)
 
         influencers = self.paper_to_author.traverse(*weighted_cited_papers)
+        if coauthors:
+            influencers = _filter_ego(origin, *influencers)
+        else:
+            influencers = _filter_coauthors(
+                origin_papers[0],
+                influencers[0], influencers[1],
+                self.paper_to_author.indptr, self.paper_to_author.indices)
         influencees = self.paper_to_author.traverse(*citing_papers)
+        if coauthors:
+            influencees = _filter_ego(origin, *influencees)
+        else:
+            influencees = _filter_coauthors(
+                origin_papers[0],
+                influencees[0], influencees[1],
+                self.paper_to_author.indptr, self.paper_to_author.indices)
         return Flower(influencers=influencers, influencees=influencees)
