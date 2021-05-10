@@ -17,12 +17,30 @@ mmapped_arr = nb.types.Array(nb.u4, 1, 'C', readonly=True)
 mapping_arrs = nb.types.Tuple([mmapped_arr, mmapped_arr])
 
 
-@nb.jit(mmapped_arr(mapping_arrs, nb.u4), nopython=True, nogil=True)
+@nb.njit(mmapped_arr(mapping_arrs, nb.u4), nogil=True)
 def traverse_one(mapping, i):
     indptr, indices = mapping
     start = indptr[i]
     end = indptr[i + 1]
     return indices[start:end]
+
+
+@nb.njit(nb.u4(mapping_arrs, nb.u4), nogil=True)
+def mag_id_to_id(mapping, mag_id):
+    magid2id, id2magid = mapping
+    hashed_mag_id = nb.u4(mag_id * nb.u4(0x9e3779b1))
+    hashed_mag_id &= nb.u4(0x0fffffff)
+    while True:
+        candidate_id = magid2id[hashed_mag_id]
+        if id2magid[candidate_id] == mag_id:
+            return candidate_id
+        hashed_mag_id = nb.u4(nb.u4(hashed_mag_id + 1) & nb.u4(0x0fffffff))
+
+
+@nb.njit(nb.u4(mapping_arrs, nb.u4), nogil=True)
+def id_to_mag_id(mapping, id_):
+    magid2id, id2magid = mapping
+    return id2magid[id_]
 
 
 class Mapping:
@@ -46,6 +64,28 @@ class Mapping:
         return self.indptr, self.indices
 
 
+class IdMapper:
+    __slots__ = ['magid2id', 'id2magid',
+                 'magid2id_mmap', 'id2magid_mmap']
+
+    def __init__(self, path):
+        path = pathlib.Path(path)
+        with open(path / 'id2index.bin', 'rb') as f:
+            self.magid2id_mmap = mmap.mmap(f.fileno(), 0, prot=mmap.PROT_READ)
+        self.magid2id = np.frombuffer(self.magid2id_mmap, dtype=np.uint32)
+        with open(path / 'index2id.bin', 'rb') as f:
+            self.id2magid_mmap = mmap.mmap(f.fileno(), 0, prot=mmap.PROT_READ)
+        self.id2magid = np.frombuffer(self.id2magid_mmap, dtype=np.uint32)
+
+    def __del__(self):
+        self.magid2id_mmap.close()
+        self.id2magid_mmap.close()
+
+    @property
+    def arrs(self):
+        return self.magid2id, self.id2magid
+
+
 class Florist:
     def __init__(self, path):
         path = pathlib.Path(path)
@@ -53,6 +93,7 @@ class Florist:
         self.citee2citor = Mapping(path / 'citee2citor')
         self.citor2citee = Mapping(path / 'citor2citee')
         self.paper2author = Mapping(path / 'paper2author')
+        self.author_magid2id = IdMapper(path / 'author-id-map')
         with open(path / 'paper-years.json') as f:
             self.year_starts = {
                 int(year): start
@@ -79,6 +120,7 @@ class Florist:
 
         influencers, influencees = _make_flower(
             np.array(author_ids, dtype=np.uint32),
+            self.author_magid2id.arrs,
             self.author2paper.arrs, self.paper2author.arrs,
             self.citor2citee.arrs, self.citee2citor.arrs,
             pub_ids, cit_ids,
@@ -88,7 +130,7 @@ class Florist:
         return Flower(influencers=influencers, influencees=influencees)
 
 
-@nb.jit(nopython=True, nogil=True)
+@nb.njit(nogil=True)
 def _is_self_citation(ego_set, author_ids):
     for author_id in author_ids:
         if author_id in ego_set:
@@ -96,12 +138,12 @@ def _is_self_citation(ego_set, author_ids):
     return False
 
 
-@nb.jit(nopython=True, nogil=True)
-def _result_dict_to_arr(res):
+@nb.njit(nogil=True)
+def _result_dict_to_arr(res, author_magid2id):
     ids = np.empty(len(res), dtype=nb.u4)
     scores = np.empty(len(res), dtype=nb.f4)
     for i, (id_, score) in enumerate(res.items()):
-        ids[i] = id_
+        ids[i] = id_to_mag_id(author_magid2id, id_)
         scores[i] = score
     return ids, scores
 
@@ -114,16 +156,18 @@ def _is_in_range(range_, i):
         return lambda range_, i: range_[0] <= i < range_[1]
 
 
-@nb.jit(nopython=True, nogil=True)
+@nb.njit(nogil=True)
 def _make_flower(
-    author_ids,
+    mag_author_ids,
+    author_magid2id,
     author2paper, paper2author, citor2citee, citee2citor,
     pub_ids, cit_ids,
     self_citations, coauthors,
 ):
     ego_papers = set()
     ego_set = set()
-    for author_id in author_ids:
+    for mag_author_id in mag_author_ids:
+        author_id = mag_id_to_id(author_magid2id, mag_author_id)
         for paper_id in traverse_one(author2paper, author_id):
             if _is_in_range(pub_ids, paper_id):
                 ego_papers.add(paper_id)
@@ -168,5 +212,5 @@ def _make_flower(
                 citee_authors[author_id] = (
                     citee_authors.get(author_id, nb.f4(0.)) + weight)
 
-    return (_result_dict_to_arr(citee_authors),
-            _result_dict_to_arr(citor_authors))
+    return (_result_dict_to_arr(citee_authors, author_magid2id),
+            _result_dict_to_arr(citor_authors, author_magid2id))

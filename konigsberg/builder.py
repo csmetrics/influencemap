@@ -6,6 +6,7 @@ import pickle
 import numpy as np
 import pandas as pd
 
+import hashutil
 import sparseutil
 
 
@@ -164,11 +165,11 @@ def get_dataset(in_path, out_path):
     # papers_df = load_papers_df(papers_path)
     # make_mag_id_index_inplace(papers_df, 'paper_id', 'new_paper_id')
     # with open(out_path / 'papers-index.pkl', 'wb') as f:
-    #     pickle.dump(papers_df, f)
+    # #     pickle.dump(papers_df, f)
     # print('unpickling papers')
-    with open(out_path / 'papers-index.pkl', 'rb') as f:
-        papers_df = pickle.load(f)
-    save_paper_years_inplace(papers_df, out_path)
+    # with open(out_path / 'papers-index.pkl', 'rb') as f:
+    #     papers_df = pickle.load(f)
+    # save_paper_years_inplace(papers_df, out_path)
     # n_papers = len(papers_df)
 
     # print('loading citations')
@@ -212,9 +213,10 @@ def get_dataset(in_path, out_path):
     # with open(out_path / 'authorships-table.pkl', 'rb') as f:
     #     authorships_df = pickle.load(f)
 
-    # print('unpickling authors')
-    # with open(out_path / 'authors-index.pkl', 'rb') as f:
-    #     authors_df = pickle.load(f)
+    print('unpickling authors')
+    with open(out_path / 'authors-index.pkl', 'rb') as f:
+        authors_df = pickle.load(f)
+    hashutil.make_id_hash_map(authors_df.index.to_numpy().astype(np.uint32), out_path / 'author-id-map')
     # n_authors = len(authors_df)
     # print('replacing2')
     # replace_ids_inplace(authorships_df, 'author_id', authors_df['new_author_id'])
