@@ -41,6 +41,26 @@ def load_authors_df(f):
     return authors_df
 
 
+def load_fields_of_study_df(f):
+    fields_of_study_df = pd.read_csv(
+        f,
+        dialect=MAGDialect(),
+        engine='c',
+        usecols=[0,1],
+        names=['field_of_study_id', 'rank'],
+        dtype={'field_of_study_id': np.uint32, 'rank': np.uint16},
+        na_filter=False,
+    )
+    fields_of_study_df.sort_values(
+        'rank',
+        inplace=True,
+        ignore_index=True,
+        kind='mergesort',
+    )
+    del fields_of_study_df['rank']
+    return fields_of_study_df
+
+
 def load_papers_df(f):
     papers_df = pd.read_csv(
         f,
@@ -99,6 +119,19 @@ def load_authorships_df(f):
     return authorships_df
 
 
+def load_paper_fields_studied_df(f):
+    paper_fields_studied_df = pd.read_csv(
+        f,
+        dialect=MAGDialect(),
+        engine='c',
+        usecols=[0,1],
+        names=['paper_id', 'field_of_study_id'],
+        dtype=np.uint32,
+        na_filter=False,
+    )
+    return paper_fields_studied_df
+
+
 def make_mag_id_index_inplace(df, mag_colname, own_colname):
     df[own_colname] = df.index.to_numpy(np.uint32)
     df.index = df[mag_colname]
@@ -142,6 +175,16 @@ def save_citations(df, n_papers, path):
         path / 'citee2citor-indptr.bin', path / 'citee2citor-indices.bin')
 
 
+def save_paper_fields_studied(df, n_papers, n_fields_of_study, path):
+    print('paper2fos')
+    sparseutil.make_sparse_matrix(
+        df['paper_id'], df['field_of_study_id'], n_papers, path / 'paper2fos')
+    print('fos2paper')
+    sparseutil.make_sparse_matrix(
+        df['field_of_study_id'], df['paper_id'], n_fields_of_study,
+        path / 'fos2paper')
+
+
 def save_authorships(df, n_papers, n_authors, path):
     print('sa1')
     sparseutil.make_sparse_matrix(
@@ -161,6 +204,8 @@ def get_dataset(in_path, out_path):
     papers_path = in_path / 'Papers.txt'
     citations_path = in_path / 'PaperReferences.txt'
     authorships_path = in_path / 'PaperAuthorAffiliations.txt'
+    fields_of_study_path = in_path / 'FieldsOfStudy.txt'
+    paper_fields_studied_path = in_path / 'PaperFieldsOfStudy.txt'
 
     # papers_df = load_papers_df(papers_path)
     # make_mag_id_index_inplace(papers_df, 'paper_id', 'new_paper_id')
@@ -213,10 +258,10 @@ def get_dataset(in_path, out_path):
     # with open(out_path / 'authorships-table.pkl', 'rb') as f:
     #     authorships_df = pickle.load(f)
 
-    print('unpickling authors')
-    with open(out_path / 'authors-index.pkl', 'rb') as f:
-        authors_df = pickle.load(f)
-    hashutil.make_id_hash_map(authors_df.index.to_numpy().astype(np.uint32), out_path / 'author-id-map')
+    # print('unpickling authors')
+    # with open(out_path / 'authors-index.pkl', 'rb') as f:
+    #     authors_df = pickle.load(f)
+    # hashutil.make_id_hash_map(authors_df.index.to_numpy().astype(np.uint32), out_path / 'author-id-map')
     # n_authors = len(authors_df)
     # print('replacing2')
     # replace_ids_inplace(authorships_df, 'author_id', authors_df['new_author_id'])
@@ -230,6 +275,63 @@ def get_dataset(in_path, out_path):
     # print('saving authorships')
     # save_authorships(authorships_df, n_papers, n_authors, out_path)
     # del authorships_df
+
+    # print('loading fields of study')
+    # fields_of_study_df = load_fields_of_study_df(fields_of_study_path)
+    # print('replacing ids')
+    # make_mag_id_index_inplace(fields_of_study_df,
+    #                           'field_of_study_id', 'new_field_of_study_id')
+    # print('pickling fields of study')
+    # with open(out_path / 'fields-of-study-table.pkl', 'wb') as f:
+    #     pickle.dump(fields_of_study_df, f, pickle.HIGHEST_PROTOCOL)
+
+    # print('unpickling fields of study')
+    # with open(out_path / 'fields-of-study-table.pkl', 'rb') as f:
+    #     fields_of_study_df = pickle.load(f)
+    # n_fields_of_study = len(fields_of_study_df)
+    # print('loading paper fields studied')
+    # paper_fields_studied_df = load_paper_fields_studied_df(
+    #     paper_fields_studied_path)
+    # print('replacing fos ids')
+    # replace_ids_inplace(paper_fields_studied_df, 'field_of_study_id',
+    #                     fields_of_study_df['new_field_of_study_id'])
+    # del fields_of_study_df
+    # print('unpickling papers')
+    # with open(out_path / 'papers-index.pkl', 'rb') as f:
+    #     papers_df = pickle.load(f)
+    # n_papers = len(papers_df)
+    # print('replacing paper ids')
+    # replace_ids_inplace(paper_fields_studied_df, 'paper_id',
+    #                     papers_df['new_paper_id'])
+    # print('pickling paper fields of studied')
+    # with open(out_path / 'paper-fields-studied-table.pkl', 'wb') as f:
+    #     pickle.dump(paper_fields_studied_df, f, pickle.HIGHEST_PROTOCOL)
+
+    print('unpickling fields of study')
+    with open(out_path / 'fields-of-study-table.pkl', 'rb') as f:
+        fields_of_study_df = pickle.load(f)
+    n_fields_of_study = len(fields_of_study_df)
+    del fields_of_study_df
+
+    print('unpickling papers')
+    with open(out_path / 'papers-index.pkl', 'rb') as f:
+        papers_df = pickle.load(f)
+    n_papers = len(papers_df)
+    del papers_df
+
+    # hashutil.make_id_hash_map(
+    #     fields_of_study_df.index.to_numpy().astype(np.uint32),
+    #     out_path / 'field-of-study-id-map')
+
+
+    print('unpickling paper fields studied')
+    with open(out_path / 'paper-fields-studied-table.pkl', 'rb') as f:
+        paper_fields_studied_df = pickle.load(f)
+    print('saving paper fields studied')
+    save_paper_fields_studied(
+        paper_fields_studied_df, n_papers, n_fields_of_study, out_path)
+
+
 
 
 def main():

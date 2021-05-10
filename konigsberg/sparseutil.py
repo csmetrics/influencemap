@@ -31,11 +31,9 @@ def place_indices(indptr_arr, indices_arr, from_arr, to_arr):
             indices_arr[start:end].sort()
 
 
-def make_sparse_matrix(
-    from_series, to_series, n_from_ids,
-    indptr_path, indices_path,
-):
-    with open(indptr_path, 'wb+') as f_indptr:
+def make_sparse_matrix(from_series, to_series, n_from_ids, path):
+    path.mkdir(exist_ok=True)
+    with open(path / 'indptr.bin', 'wb+') as f_indptr:
         f_indptr.write(np.zeros(n_from_ids + 1, dtype=np.uint32))
         f_indptr.flush()
         map_indptr = mmap.mmap(f_indptr.fileno(), 0)
@@ -43,7 +41,7 @@ def make_sparse_matrix(
         arr_indptr = np.frombuffer(map_indptr, dtype=np.uint32)
         print('counting')
         make_counts(arr_indptr, from_series.to_numpy())
-        with open(indices_path, 'wb+') as f_indices:
+        with open(path / 'indices.bin', 'wb+') as f_indices:
             f_indices.write(np.zeros(len(from_series), dtype=np.uint32))
             f_indices.flush()
             map_indices = mmap.mmap(f_indices.fileno(), 0)
