@@ -50,3 +50,22 @@ def make_sparse_matrix(from_series, to_series, n_from_ids, path):
             print('placing')
             place_indices(arr_indptr, arr_indices,
                           from_series.to_numpy(), to_series.to_numpy())
+
+
+@nb.jit(nb.void(nb.u4[::1], nb.u4[::1], nb.u4[::1]),
+        nopython=True, nogil=True, parallel=True)
+def place_vec(vec_arr, from_arr, to_arr):
+    for i in nb.prange(len(from_arr)):
+        from_index = from_arr[i]
+        to_index = to_arr[i]
+        vec_arr[from_index] = to_index
+
+
+def make_sparse_vector(from_series, to_series, n_from_ids, path):
+    with open(path, 'wb+') as f:
+        f.write(np.full(n_from_ids, np.uint32(-1), dtype=np.uint32))
+        f.flush()
+        vec_mmap = mmap.mmap(f.fileno(), 0)
+    with vec_mmap:
+        vec_arr = np.frombuffer(vec_mmap, dtype=np.uint32)
+        place_vec(vec_arr, from_series.to_numpy(), to_series.to_numpy())
