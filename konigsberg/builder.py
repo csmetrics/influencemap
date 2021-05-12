@@ -29,14 +29,9 @@ def load_authors_df(f):
         usecols=[0,1],
         names=['author_id', 'rank'],
         dtype={'author_id': np.uint32, 'rank': np.uint16},
-        na_filter=False,
-    )
+        na_filter=False)
     authors_df.sort_values(
-        'rank',
-        inplace=True,
-        ignore_index=True,
-        kind='mergesort',
-    )
+        'rank', inplace=True, ignore_index=True, kind='mergesort')
     del authors_df['rank']
     return authors_df
 
@@ -49,14 +44,9 @@ def load_fields_of_study_df(f):
         usecols=[0,1],
         names=['field_of_study_id', 'rank'],
         dtype={'field_of_study_id': np.uint32, 'rank': np.uint16},
-        na_filter=False,
-    )
+        na_filter=False)
     fields_of_study_df.sort_values(
-        'rank',
-        inplace=True,
-        ignore_index=True,
-        kind='mergesort',
-    )
+        'rank', inplace=True, ignore_index=True, kind='mergesort')
     del fields_of_study_df['rank']
     return fields_of_study_df
 
@@ -72,20 +62,11 @@ def load_papers_df(f):
                'rank': np.uint16,
                'year': pd.UInt16Dtype()},
         keep_default_na=False,
-        na_values={'year': ['']}
-    )
+        na_values={'year': ['']})
     papers_df.sort_values(
-        'rank',
-        inplace=True,
-        ignore_index=True,
-        kind='mergesort',
-    )
+        'rank', inplace=True, ignore_index=True, kind='mergesort')
     papers_df.sort_values(
-        'year',
-        inplace=True,
-        ignore_index=True,
-        kind='mergesort',
-    )
+        'year', inplace=True, ignore_index=True, kind='mergesort')
     del papers_df['rank']
     papers_df['year'].fillna(np.uint16(-1), inplace=True)
     papers_df['year'] = papers_df['year'].astype(np.uint16)
@@ -99,8 +80,7 @@ def load_citations_df(f):
         engine='c',
         names=['citor_paper_id', 'citee_paper_id'],
         dtype=np.uint32,
-        na_filter=False,
-    )
+        na_filter=False)
     return citations_df
 
 
@@ -112,49 +92,10 @@ def load_authorships_df(f):
         usecols=[0,1],
         names=['paper_id', 'author_id'],
         dtype=np.uint32,
-        na_filter=False,
-    )
-    print('deduping authorships')
+        na_filter=False)
     authorships_df.drop_duplicates(inplace=True, ignore_index=True)
     return authorships_df
 
-# def load_affiliations(f):
-#     affiliations_df = pd.read_csv(
-#         f,
-#         dialect=MAGDialect(),
-#         engine='c',
-#         usecols=[0,2],
-#         names=['paper_id', 'affiliation_id'],
-#         dtype={'paper_id': np.uint32,
-#                'affiliation_id': pd.UInt32Dtype()},
-#         keep_default_na=False,
-#         na_values={'affiliation_id': ['']}
-#     )
-#     return authorships_df
-
-
-# def load_venues(f_journals, f_conference_series):
-#     journals_df = pd.read_csv(
-#         f_journals,
-#         dialect=MAGDialect(),
-#         engine='c',
-#         usecols=[0,1],
-#         names=['venue_id', 'rank'],
-#         dtype={'venue_id': np.uint32, 'rank': np.uint16},
-#         na_filter=False,
-#     )
-#     conference_series_df = pd.read_csv(
-#         f_conference_series,
-#         dialect=MAGDialect(),
-#         engine='c',
-#         usecols=[0,1],
-#         names=['venue_id', 'rank'],
-#         dtype={'venue_id': np.uint32, 'rank': np.uint16},
-#         na_filter=False,
-#     )
-#     journals_df['type'] = np.uint8(0)
-#     conference_series_df['type'] = np.uint8(0)
-#     import pdb; pdb.set_trace()    
 
 def load_journals(f):
     journals_df = pd.read_csv(
@@ -194,8 +135,7 @@ def load_paper_fields_studied_df(f):
         usecols=[0,1],
         names=['paper_id', 'field_of_study_id'],
         dtype=np.uint32,
-        na_filter=False,
-    )
+        na_filter=False)
     return paper_fields_studied_df
 
 
@@ -225,7 +165,8 @@ def load_paper_conference_series_df(f):
         dtype={'paper_id': np.uint32, 'conference_series_id': pd.UInt32Dtype()},
         keep_default_na=False,
         na_values={'conference_series_id': ['']})
-    paper_conference_series_df.dropna(subset=['conference_series_id'], inplace=True)
+    paper_conference_series_df.dropna(
+        subset=['conference_series_id'], inplace=True)
     paper_conference_series_df['conference_series_id'] \
         = paper_conference_series_df['conference_series_id'].astype(np.uint32)
     return paper_conference_series_df
@@ -255,8 +196,7 @@ def save_paper_years_inplace(df, path):
     start_by_year[max_year] = no_year_start
     for year in range(max_year - 1, min_year, -1):
         if year not in start_by_year:
-            # Length 0
-            start_by_year[year] = start_by_year[year + 1]
+            start_by_year[year] = start_by_year[year + 1]  # Length 0
     years_dict = {
         str(year): int(min_id) for year, min_id in start_by_year.iteritems()}
     with open(path / 'paper-years.json', 'w') as f:
@@ -264,32 +204,26 @@ def save_paper_years_inplace(df, path):
 
 
 def save_citations(df, n_papers, path):
-    print('sc1')
     sparseutil.make_sparse_matrix(
         df['citor_paper_id'], df['citee_paper_id'], n_papers,
         path / 'citor2citee-indptr.bin', path / 'citor2citee-indices.bin')
-    print('sc2')
     sparseutil.make_sparse_matrix(
         df['citee_paper_id'], df['citor_paper_id'], n_papers,
         path / 'citee2citor-indptr.bin', path / 'citee2citor-indices.bin')
 
 
 def save_paper_fields_studied(df, n_papers, n_fields_of_study, path):
-    print('paper2fos')
     sparseutil.make_sparse_matrix(
         df['paper_id'], df['field_of_study_id'], n_papers, path / 'paper2fos')
-    print('fos2paper')
     sparseutil.make_sparse_matrix(
         df['field_of_study_id'], df['paper_id'], n_fields_of_study,
         path / 'fos2paper')
 
 
 def save_authorships(df, n_papers, n_authors, path):
-    print('sa1')
     sparseutil.make_sparse_matrix(
         df['paper_id'], df['author_id'], n_papers,
         path / 'paper2author-indptr.bin', path / 'paper2author-indices.bin')
-    print('sa2')
     sparseutil.make_sparse_matrix(
         df['author_id'], df['paper_id'], n_authors,
         path / 'author2paper-indptr.bin', path / 'author2paper-indices.bin')
@@ -475,48 +409,48 @@ def get_dataset(in_path, out_path):
     #     paper_journals_df['journal_id'],
     #     n_papers, out_path / 'paper2journal.bin')
 
-    conference_series_df = load_conference_series(conference_series_path)
-    make_mag_id_index_inplace(conference_series_df, 'conference_series_id', 'new_conference_series_id')
-    print('making conference series map')
-    hashutil.make_id_hash_map(conference_series_df.index.to_numpy().astype(np.uint32),
-                              out_path / 'conference-series-id-map')
-    n_conference_series = len(conference_series_df)
+    # conference_series_df = load_conference_series(conference_series_path)
+    # make_mag_id_index_inplace(conference_series_df, 'conference_series_id', 'new_conference_series_id')
+    # print('making conference series map')
+    # hashutil.make_id_hash_map(conference_series_df.index.to_numpy().astype(np.uint32),
+    #                           out_path / 'conference-series-id-map')
+    # n_conference_series = len(conference_series_df)
 
-    print('loading paper conference series')
-    paper_conference_series_df = load_paper_conference_series_df(papers_path)
+    # print('loading paper conference series')
+    # paper_conference_series_df = load_paper_conference_series_df(papers_path)
 
-    print('replacing conference series ids')
-    replace_ids_inplace(paper_conference_series_df, 'conference_series_id',
-                        conference_series_df['new_conference_series_id'])
-    del conference_series_df
+    # print('replacing conference series ids')
+    # replace_ids_inplace(paper_conference_series_df, 'conference_series_id',
+    #                     conference_series_df['new_conference_series_id'])
+    # del conference_series_df
 
-    print('unpickling papers')
-    with open(out_path / 'papers-index.pkl', 'rb') as f:
-        papers_df = pickle.load(f)
-    n_papers = len(papers_df)
+    # print('unpickling papers')
+    # with open(out_path / 'papers-index.pkl', 'rb') as f:
+    #     papers_df = pickle.load(f)
+    # n_papers = len(papers_df)
 
-    print('replacing paper ids')
-    replace_ids_inplace(paper_conference_series_df, 'paper_id',
-                        papers_df['new_paper_id'])
-    del papers_df
+    # print('replacing paper ids')
+    # replace_ids_inplace(paper_conference_series_df, 'paper_id',
+    #                     papers_df['new_paper_id'])
+    # del papers_df
 
-    print('pickling paper conference series')
-    with open(out_path / 'paper-conference-series-table.pkl', 'wb') as f:
-        pickle.dump(paper_conference_series_df, f, pickle.HIGHEST_PROTOCOL)
-    # print('unpickling paper conference series')
-    # with open(out_path / 'paper-conference-series-table.pkl', 'rb') as f:
-    #     paper_conference_series_df = pickle.load(f)
+    # print('pickling paper conference series')
+    # with open(out_path / 'paper-conference-series-table.pkl', 'wb') as f:
+    #     pickle.dump(paper_conference_series_df, f, pickle.HIGHEST_PROTOCOL)
+    # # print('unpickling paper conference series')
+    # # with open(out_path / 'paper-conference-series-table.pkl', 'rb') as f:
+    # #     paper_conference_series_df = pickle.load(f)
 
-    print('making conference series to paper graph')
-    sparseutil.make_sparse_matrix(
-        paper_conference_series_df['conference_series_id'], paper_conference_series_df['paper_id'],
-        n_conference_series, out_path / 'cs2paper')
+    # print('making conference series to paper graph')
+    # sparseutil.make_sparse_matrix(
+    #     paper_conference_series_df['conference_series_id'], paper_conference_series_df['paper_id'],
+    #     n_conference_series, out_path / 'cs2paper')
 
-    print('making paper to conference series')
-    sparseutil.make_sparse_vector(
-        paper_conference_series_df['paper_id'],
-        paper_conference_series_df['conference_series_id'],
-        n_papers, out_path / 'paper2cs.bin')
+    # print('making paper to conference series')
+    # sparseutil.make_sparse_vector(
+    #     paper_conference_series_df['paper_id'],
+    #     paper_conference_series_df['conference_series_id'],
+    #     n_papers, out_path / 'paper2cs.bin')
 
 
 
