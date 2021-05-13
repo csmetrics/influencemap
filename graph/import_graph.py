@@ -41,7 +41,7 @@ def import_Affiliations(r):
     doc.IsoCode = r[10] # after ver 2021-02-15
     doc.Latitude = float(r[11]) if r[11] != "" else None # after ver 2019-11-08
     doc.Longitude = float(r[12]) if r[12] != "" else None # after ver 2019-11-08
-    doc.CreatedDate = datetime.strptime(r[13]], "%Y-%m-%d")
+    doc.CreatedDate = datetime.strptime(r[13], "%Y-%m-%d")
     doc.save(op_type="create")
 
 
