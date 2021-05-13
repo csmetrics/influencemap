@@ -36,10 +36,12 @@ def import_Affiliations(r):
     doc.OfficialPage = r[5]
     doc.WikiPage = r[6]
     doc.PaperCount = int(r[7]) if r[7] != "" else None
-    doc.CitationCount = int(r[8]) if r[8] != "" else None
-    doc.Latitude = float(r[9]) if r[9] != "" else None # after ver 2019-11-08
-    doc.Longitude = float(r[10]) if r[10] != "" else None # after ver 2019-11-08
-    doc.CreatedDate = datetime.strptime(r[11], "%Y-%m-%d")
+    doc.PaperFamilyCount = int(r[8]) if r[8] != "" else None # after ver 2021-02-15
+    doc.CitationCount = int(r[9]) if r[9] != "" else None
+    doc.IsoCode = r[10] # after ver 2021-02-15
+    doc.Latitude = float(r[11]) if r[11] != "" else None # after ver 2019-11-08
+    doc.Longitude = float(r[12]) if r[12] != "" else None # after ver 2019-11-08
+    doc.CreatedDate = datetime.strptime(r[13]], "%Y-%m-%d")
     doc.save(op_type="create")
 
 
@@ -55,23 +57,24 @@ def import_Papers(r):
     doc.BookTitle = r[6]
     doc.Year = int(r[7]) if r[7] != "" else None
     doc.date = datetime.strptime(r[8], "%Y-%m-%d") if r[8] != "" else None
-    doc.Publisher = r[9]
+    doc.OnlineDate = datetime.strptime(r[9], "%Y-%m-%d") if r[9] != "" else None # new attribute ver.2021-02-15
+    doc.Publisher = r[10]
 
-    doc.JournalId = int(r[10]) if r[10] != "" else None
-    doc.ConferenceSeriesId = int(r[11]) if r[11] != "" else None
-    doc.ConferenceInstanceId = int(r[12]) if r[12] != "" else None
-    doc.Volume = r[13]
-    doc.Issue = r[14]
-    doc.FirstPage = r[15]
-    doc.LastPage = r[16]
-    doc.ReferenceCount = int(r[17]) if r[17] != "" else None
-    doc.CitationCount = int(r[18]) if r[18] != "" else None
-    doc.EstimatedCitation = int(r[19]) if r[19] != "" else None
+    doc.JournalId = int(r[11]) if r[11] != "" else None
+    doc.ConferenceSeriesId = int(r[12]) if r[12] != "" else None
+    doc.ConferenceInstanceId = int(r[13]) if r[13] != "" else None
+    doc.Volume = r[14]
+    doc.Issue = r[15]
+    doc.FirstPage = r[16]
+    doc.LastPage = r[17]
+    doc.ReferenceCount = int(r[18]) if r[18] != "" else None
+    doc.CitationCount = int(r[19]) if r[19] != "" else None
+    doc.EstimatedCitation = int(r[20]) if r[20] != "" else None
 
-    doc.OriginalVenue = r[20] # new attribute ver.2019-01-01
-    doc.FamilyId = r[21] # new attribute ver.2019-11-08
-    doc.FamilyRank = int(r[22]) # new attribute ver.2021-02-15
-    doc.CreatedDate = datetime.strptime(r[23], "%Y-%m-%d")
+    doc.OriginalVenue = r[21] # new attribute ver.2019-01-01
+    doc.FamilyId = r[22] # new attribute ver.2019-11-08
+    doc.FamilyRank = int(r[23]) if r[23] != "" else None # new attribute ver.2021-02-15
+    doc.CreatedDate = datetime.strptime(r[24], "%Y-%m-%d")
 
     doc.LanguageCode = None
     doc.FieldOfStudy = None
