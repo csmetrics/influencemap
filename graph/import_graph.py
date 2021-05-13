@@ -70,7 +70,8 @@ def import_Papers(r):
 
     doc.OriginalVenue = r[20] # new attribute ver.2019-01-01
     doc.FamilyId = r[21] # new attribute ver.2019-11-08
-    doc.CreatedDate = datetime.strptime(r[22], "%Y-%m-%d")
+    doc.FamilyRank = int(r[22]) # new attribute ver.2021-02-15
+    doc.CreatedDate = datetime.strptime(r[23], "%Y-%m-%d")
 
     doc.LanguageCode = None
     doc.FieldOfStudy = None
