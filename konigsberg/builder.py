@@ -1,7 +1,7 @@
 import csv
 import json
+import logging
 import pathlib
-import pickle
 
 import numpy as np
 import pandas as pd
@@ -9,8 +9,15 @@ import pandas as pd
 import hashutil
 import sparseutil
 
+YEAR_SENTINEL = np.uint16(-1)  # Denotes missing year
+INDEX_SENTINEL = np.uint32(-1)
+
+logger = logging.getLogger(__name__)
+logger.setLevel(logging.INFO)
+
 
 class MAGDialect(csv.Dialect):
+    """Microsoft Academic Graph table file format."""
     delimiter = '\t'
     doublequote = False
     escapechar = None
@@ -21,440 +28,246 @@ class MAGDialect(csv.Dialect):
     strict = True
 
 
-def load_authors_df(f):
-    authors_df = pd.read_csv(
-        f,
-        dialect=MAGDialect(),
-        engine='c',
-        usecols=[0,1],
-        names=['author_id', 'rank'],
-        dtype={'author_id': np.uint32, 'rank': np.uint16},
-        na_filter=False)
-    authors_df.sort_values(
-        'rank', inplace=True, ignore_index=True, kind='mergesort')
-    del authors_df['rank']
-    return authors_df
+def load_entity_df(path, filter_column=None):
+    indices = [0, 1]
+    names = ['id', 'rank']
+    dtypes = {'id': np.uint32, 'rank': np.uint16}
+    if filter_column:
+        filter_col_i, filter_col_name, filter_col_dtype, _ = filter_column
+        indices.append(filter_col_i)
+        names.append(filter_col_name)
+        dtypes[filter_col_name] = filter_col_dtype
+    df = pd.read_csv(
+        path,
+        dialect=MAGDialect(), engine='c', na_filter=False,
+        usecols=indices, names=names, dtype=dtypes)
+    if filter_column:
+        _, filter_col_name, _, filter_f = filter_column
+        df = df[filter_f(df[filter_col_name])]
+        df.reset_index(drop=True, inplace=True)
+        del df[filter_col_name]
+    df.sort_values('rank', inplace=True, ignore_index=True, kind='mergesort')
+    del df['rank']
+    return df
 
 
-def load_fields_of_study_df(f):
-    fields_of_study_df = pd.read_csv(
-        f,
-        dialect=MAGDialect(),
-        engine='c',
-        usecols=[0,1],
-        names=['field_of_study_id', 'rank'],
-        dtype={'field_of_study_id': np.uint32, 'rank': np.uint16},
-        na_filter=False)
-    fields_of_study_df.sort_values(
-        'rank', inplace=True, ignore_index=True, kind='mergesort')
-    del fields_of_study_df['rank']
-    return fields_of_study_df
+def process_entity_listings(entity_paths, out_path_ind2id):
+    counts = []
+    with open(out_path_ind2id, 'wb') as ind_to_id_f:
+        offset = 0
+        for in_path, out_path_id2ind, filter_info in entity_paths:
+            df = load_entity_df(in_path, filter_info)
+            id_arr = df['id'].to_numpy()
+            ind_to_id_f.write(id_arr)
+            hashutil.make_id_hash_map(id_arr, out_path_id2ind, offset)
+            count = len(df)
+            counts.append(count)
+            offset += count
+
+    ind2id_map = hashutil.Ind2IdMap(out_path_ind2id)
+    id2ind_maps = tuple(hashutil.Id2IndHashMap(path, ind2id_map)
+                        for _, path, _ in entity_paths)
+    return id2ind_maps, counts
 
 
-def load_papers_df(f):
-    papers_df = pd.read_csv(
-        f,
-        dialect=MAGDialect(),
-        engine='c',
-        usecols=[0,1,7],
-        names=['paper_id', 'rank', 'year'],
-        dtype={'paper_id': np.uint32,
-               'rank': np.uint16,
-               'year': pd.UInt16Dtype()},
+def load_papers_df(path):
+    df = pd.read_csv(
+        path,
+        dialect=MAGDialect(), engine='c',
+        usecols=[0, 1, 7, 10, 11],
+        names=['paper_id', 'rank', 'year', 'journal_id', 'cs_id'],
+        dtype={'paper_id': np.uint32, 'rank': np.uint16,
+               'year': pd.UInt16Dtype(), 'journal_id': pd.UInt32Dtype(),
+               'cs_id': pd.UInt32Dtype()},
         keep_default_na=False,
-        na_values={'year': ['']})
-    papers_df.sort_values(
-        'rank', inplace=True, ignore_index=True, kind='mergesort')
-    papers_df.sort_values(
-        'year', inplace=True, ignore_index=True, kind='mergesort')
-    del papers_df['rank']
-    papers_df['year'].fillna(np.uint16(-1), inplace=True)
-    papers_df['year'] = papers_df['year'].astype(np.uint16)
-    return papers_df
+        na_values={'year': [''], 'journal_id': [''], 'cs_id': ['']})
 
-
-def load_citations_df(f):
-    citations_df = pd.read_csv(
-        f,
-        dialect=MAGDialect(),
-        engine='c',
-        names=['citor_paper_id', 'citee_paper_id'],
-        dtype=np.uint32,
-        na_filter=False)
-    return citations_df
-
-
-def load_authorships_df(f):
-    authorships_df = pd.read_csv(
-        f,
-        dialect=MAGDialect(),
-        engine='c',
-        usecols=[0,1],
-        names=['paper_id', 'author_id'],
-        dtype=np.uint32,
-        na_filter=False)
-    authorships_df.drop_duplicates(inplace=True, ignore_index=True)
-    return authorships_df
-
-
-def load_journals(f):
-    journals_df = pd.read_csv(
-        f,
-        dialect=MAGDialect(),
-        engine='c',
-        usecols=[0,1],
-        names=['journal_id', 'rank'],
-        dtype={'journal_id': np.uint32, 'rank': np.uint16},
-        na_filter=False)
-    journals_df.sort_values(
-        'rank', inplace=True, ignore_index=True, kind='mergesort')
-    del journals_df['rank']
-    return journals_df
-
-
-def load_conference_series(f):
-    conference_series_df = pd.read_csv(
-        f,
-        dialect=MAGDialect(),
-        engine='c',
-        usecols=[0,1],
-        names=['conference_series_id', 'rank'],
-        dtype={'conference_series_id': np.uint32, 'rank': np.uint16},
-        na_filter=False)
-    conference_series_df.sort_values(
-        'rank', inplace=True, ignore_index=True, kind='mergesort')
-    del conference_series_df['rank']
-    return conference_series_df
-
-
-def load_paper_fields_studied_df(f):
-    paper_fields_studied_df = pd.read_csv(
-        f,
-        dialect=MAGDialect(),
-        engine='c',
-        usecols=[0,1],
-        names=['paper_id', 'field_of_study_id'],
-        dtype=np.uint32,
-        na_filter=False)
-    return paper_fields_studied_df
-
-
-def load_paper_journals_df(f):
-    paper_journals_df = pd.read_csv(
-        f,
-        dialect=MAGDialect(),
-        engine='c',
-        usecols=[0,10],
-        names=['paper_id', 'journal_id'],
-        dtype={'paper_id': np.uint32, 'journal_id': pd.UInt32Dtype()},
-        keep_default_na=False,
-        na_values={'journal_id': ['']})
-    paper_journals_df.dropna(subset=['journal_id'], inplace=True)
+    paper_journals_df = df.loc[df['journal_id'].notna(),
+                               ['paper_id', 'journal_id']]
+    paper_journals_df.reset_index(drop=True, inplace=True)
     paper_journals_df['journal_id'] \
         = paper_journals_df['journal_id'].astype(np.uint32)
-    return paper_journals_df
+    del df['journal_id']
+    paper_cs_df = df.loc[df['cs_id'].notna(), ['paper_id', 'cs_id']]
+    paper_cs_df.reset_index(drop=True, inplace=True)
+    paper_cs_df['cs_id'] = paper_cs_df['cs_id'].astype(np.uint32)
+    del df['cs_id']
+
+    df['year'].fillna(YEAR_SENTINEL, inplace=True)
+    df['year'] = df['year'].astype(np.uint16)
+    df.sort_values('rank', inplace=True, ignore_index=True, kind='mergesort')
+    del df['rank']
+    df.sort_values('year', inplace=True, ignore_index=True, kind='mergesort')
+
+    return df, paper_journals_df, paper_cs_df
 
 
-def load_paper_conference_series_df(f):
-    paper_conference_series_df = pd.read_csv(
-        f,
-        dialect=MAGDialect(),
-        engine='c',
-        usecols=[0,11],
-        names=['paper_id', 'conference_series_id'],
-        dtype={'paper_id': np.uint32, 'conference_series_id': pd.UInt32Dtype()},
-        keep_default_na=False,
-        na_values={'conference_series_id': ['']})
-    paper_conference_series_df.dropna(
-        subset=['conference_series_id'], inplace=True)
-    paper_conference_series_df['conference_series_id'] \
-        = paper_conference_series_df['conference_series_id'].astype(np.uint32)
-    return paper_conference_series_df
+def load_authorships_df(path):
+    df = pd.read_csv(
+        path,
+        dialect=MAGDialect(), engine='c',
+        usecols=[0, 1, 2], names=['paper_id', 'author_id', 'affiliation_id'],
+        dtype={'paper_id': np.uint32, 'author_id': np.uint32,
+               'affiliation_id': pd.UInt32Dtype()},
+        keep_default_na=False, na_values={'affiliation_id': ['']})
+
+    paper_affiliations_df = df.loc[df['affiliation_id'].notna(),
+                                   ['paper_id', 'affiliation_id']]
+    paper_affiliations_df.reset_index(drop=True, inplace=True)
+    paper_affiliations_df['affiliation_id'] \
+        = paper_affiliations_df['affiliation_id'].astype(np.uint32)
+    del df['affiliation_id']
+    return df, paper_affiliations_df
 
 
-def make_mag_id_index_inplace(df, mag_colname, own_colname):
-    df[own_colname] = df.index.to_numpy(np.uint32)
-    df.index = df[mag_colname]
-    del df[mag_colname]
+def load_many_to_many_mapping(path, colname1, colname2):
+    return pd.read_csv(
+        path,
+        dialect=MAGDialect(), engine='c', na_filter=False,
+        usecols=[0, 1], names=[colname1, colname2],
+        dtype={colname1: np.uint32, colname2: np.uint32})
 
 
-def replace_ids_inplace(df, colname, mapping):
-    df[colname] = df[colname].map(mapping)
+def load_citations_df(path):
+    return load_many_to_many_mapping(path, 'citor_id', 'citee_id')
 
 
-def save_paper_years_inplace(df, path):
-    start_by_year = df.groupby('year')['new_paper_id'].aggregate('min')
-    del df['year']
-    no_year_val = (1 << 16) - 1
-    if no_year_val in start_by_year:
-        no_year_start = start_by_year[no_year_val]
-    else:
-        no_year_start = len(df)
-    del start_by_year[no_year_val]
-    min_year = int(start_by_year.index.min())
-    max_year = int(start_by_year.index.max()) + 1
-    start_by_year[max_year] = no_year_start
-    for year in range(max_year - 1, min_year, -1):
-        if year not in start_by_year:
-            start_by_year[year] = start_by_year[year + 1]  # Length 0
-    years_dict = {
-        str(year): int(min_id) for year, min_id in start_by_year.iteritems()}
-    with open(path / 'paper-years.json', 'w') as f:
+def load_paper_fos_df(path):
+    return load_many_to_many_mapping(path, 'paper_id', 'fos_id')
+
+
+def save_paper_years(df, path):
+    end_by_year = df.groupby('year')['paper_id'].count().sort_index().cumsum()
+    assert end_by_year[YEAR_SENTINEL] == len(df)
+    end_by_year.drop(YEAR_SENTINEL, inplace=True)
+    years_start = int(end_by_year.index.min())
+    years_end = int(end_by_year.index.max()) + 1
+    years_dict = {str(years_start): 0}
+    last = 0
+    for year in range(years_start, years_end):
+        years_dict[str(year + 1)] = last = int(end_by_year.get(year, last)) 
+    with open(path, 'w') as f:
         json.dump(years_dict, f)
 
 
-def save_citations(df, n_papers, path):
-    sparseutil.make_sparse_matrix(
-        df['citor_paper_id'], df['citee_paper_id'], n_papers,
-        path / 'citor2citee-indptr.bin', path / 'citor2citee-indices.bin')
-    sparseutil.make_sparse_matrix(
-        df['citee_paper_id'], df['citor_paper_id'], n_papers,
-        path / 'citee2citor-indptr.bin', path / 'citee2citor-indices.bin')
+def process_paper_listings(
+    in_path,
+    out_path_id2ind, out_path_ind2id,
+    out_path_year_bounds,
+):
+    with open(out_path_ind2id, 'wb') as ind_to_id_f:
+        df, paper_journals_df, paper_cs_df = load_papers_df(in_path)
+        papers_count = len(df)
+        id_arr = df['paper_id'].to_numpy()
+        ind_to_id_f.write(id_arr)
+    
+    hashutil.make_id_hash_map(id_arr, out_path_id2ind)
+    save_paper_years(df, out_path_year_bounds)
+    del df
+
+    ind2id_map = hashutil.Ind2IdMap(out_path_ind2id)
+    id2ind_map = hashutil.Id2IndHashMap(out_path_id2ind, ind2id_map)
+    return id2ind_map, paper_journals_df, paper_cs_df, papers_count
 
 
-def save_paper_fields_studied(df, n_papers, n_fields_of_study, path):
-    sparseutil.make_sparse_matrix(
-        df['paper_id'], df['field_of_study_id'], n_papers, path / 'paper2fos')
-    sparseutil.make_sparse_matrix(
-        df['field_of_study_id'], df['paper_id'], n_fields_of_study,
-        path / 'fos2paper')
+def save_entity_counts(counts, path):
+    authors_n, aff_n, fos_n, journals_n, cs_n = counts
+    with open(path, 'w') as f:
+        json.dump({'authors': authors_n, 'aff': aff_n, 'fos': fos_n,
+                   'journals': journals_n, 'cs': cs_n}, f)
 
 
-def save_authorships(df, n_papers, n_authors, path):
-    sparseutil.make_sparse_matrix(
-        df['paper_id'], df['author_id'], n_papers,
-        path / 'paper2author-indptr.bin', path / 'paper2author-indices.bin')
-    sparseutil.make_sparse_matrix(
-        df['author_id'], df['paper_id'], n_authors,
-        path / 'author2paper-indptr.bin', path / 'author2paper-indices.bin')
-
-
-def get_dataset(in_path, out_path):
+def make_dataset(in_path, out_path):
     in_path = pathlib.Path(in_path)
     out_path = pathlib.Path(out_path)
 
-    authors_path = in_path / 'Authors.txt'
-    papers_path = in_path / 'Papers.txt'
-    citations_path = in_path / 'PaperReferences.txt'
-    authorships_path = in_path / 'PaperAuthorAffiliations.txt'
-    fields_of_study_path = in_path / 'FieldsOfStudy.txt'
-    paper_fields_studied_path = in_path / 'PaperFieldsOfStudy.txt'
-    journals_path = in_path / 'Journals.txt'
-    conference_series_path = in_path / 'ConferenceSeries.txt'
+    logger.info('(0/7) making entity id to index map')
+    entities_id2ind_maps, entities_counts = process_entity_listings(
+        [(in_path / 'Authors.txt', out_path / 'author-id2ind.bin', None),
+         (in_path / 'Affiliations.txt', out_path / 'affltn-id2ind.bin', None),
+         (in_path / 'FieldsOfStudy.txt', out_path / 'fos-id2ind.bin',
+          (5, 'level', np.uint8, lambda level: level <= 1)),
+         (in_path / 'Journals.txt', out_path / 'journl-id2ind.bin', None),
+         (in_path / 'ConferenceSeries.txt', out_path / 'cs-id2ind.bin', None)],
+        out_path / 'entities-ind2id.bin')
+    save_entity_counts(entities_counts, out_path / 'entity-counts.json')
+    authors_id2ind, aff_id2ind, fos_id2ind, journals_id2ind, cs_id2ind \
+        = entities_id2ind_maps
 
-    # papers_df = load_papers_df(papers_path)
-    # make_mag_id_index_inplace(papers_df, 'paper_id', 'new_paper_id')
-    # with open(out_path / 'papers-index.pkl', 'wb') as f:
-    # #     pickle.dump(papers_df, f)
-    # print('unpickling papers')
-    # with open(out_path / 'papers-index.pkl', 'rb') as f:
-    #     papers_df = pickle.load(f)
-    # save_paper_years_inplace(papers_df, out_path)
-    # n_papers = len(papers_df)
+    logger.info('(1/7) making paper id to index map')
+    papers_id2ind, paper_journals_df, paper_cs_df, papers_count \
+        = process_paper_listings(in_path / 'Papers.txt',
+                                 out_path / 'paper-id2ind.bin',
+                                 out_path / 'paper-ind2id.bin',
+                                 out_path / 'paper-years.json')
 
-    # print('loading citations')
-    # citations_df = load_citations_df(citations_path)
-    # print('replacing1')
-    # replace_ids_inplace(citations_df, 'citor_paper_id',
-    #                     papers_df['new_paper_id'])
-    # print('replacing2')
-    # replace_ids_inplace(citations_df, 'citee_paper_id',
-    #                     papers_df['new_paper_id'])
-    # print('pickling citations')
-    # try:
-    #     with open(out_path / 'citations-table.pkl', 'wb') as f:
-    #         pickle.dump(citations_df, f, pickle.HIGHEST_PROTOCOL)
-    # except Exception:
-    #     breakpoint()/
-    # print('unpickling citations')
-    # with open(out_path / 'citations-table.pkl', 'rb') as f:
-    #     citations_df = pickle.load(f)
-    # print('saving citations')
-    # save_citations(citations_df, n_papers, out_path)
-    # del citations_df  # Free memory
+    logger.info('(2/7) loading MAG graph')
+    citations_df = load_citations_df(in_path / 'PaperReferences.txt')
+    authorships_df, paper_aff_df \
+        = load_authorships_df(in_path / 'PaperAuthorAffiliations.txt')
+    paper_fos_df = load_paper_fos_df(in_path / 'PaperFieldsOfStudy.txt')
 
-    # print('loading authorships')
-    # authorships_df = load_authorships_df(authorships_path)
+    logger.info('(3/7) converting MAG IDs to indices')
+    with authors_id2ind, aff_id2ind, fos_id2ind, journals_id2ind, cs_id2ind:
+        authors_id2ind.convert_inplace(authorships_df['author_id'])
+        aff_id2ind.convert_inplace(paper_aff_df['affiliation_id'])
+        journals_id2ind.convert_inplace(paper_journals_df['journal_id'])
+        cs_id2ind.convert_inplace(paper_cs_df['cs_id'])
+
+        fos_id2ind.convert_inplace(paper_fos_df['fos_id'], allow_missing=True)
+        paper_fos_df = paper_fos_df[paper_fos_df['fos_id'] != INDEX_SENTINEL]
+        paper_fos_df.reset_index(drop=True, inplace=True)
+
+    with papers_id2ind:
+        papers_id2ind.convert_inplace(authorships_df['paper_id'])
+        papers_id2ind.convert_inplace(paper_aff_df['paper_id'])
+        papers_id2ind.convert_inplace(paper_journals_df['paper_id'])
+        papers_id2ind.convert_inplace(paper_cs_df['paper_id'])
+        papers_id2ind.convert_inplace(paper_fos_df['paper_id'])
+
+        papers_id2ind.convert_inplace(citations_df['citor_id'])
+        papers_id2ind.convert_inplace(citations_df['citee_id'])
+
+    logger.info('(4/7) writing edges: entities -> papers')
+    sparseutil.make_sparse_matrix(
+        sum(entities_counts),
+        [[(authorships_df['author_id'], authorships_df['paper_id']),
+          (paper_aff_df['affiliation_id'], paper_aff_df['paper_id']),
+          (paper_journals_df['journal_id'], paper_journals_df['paper_id']),
+          (paper_cs_df['cs_id'], paper_cs_df['paper_id']),
+          (paper_fos_df['fos_id'], paper_fos_df['paper_id'])]],
+        out_path / 'entity2paper-ptr.bin', out_path / 'entity2paper-ind.bin')
+
+    logger.info('(5/7) writing edges: papers -> entities')
+    sparseutil.make_sparse_matrix(
+        papers_count,
+        [[(authorships_df['paper_id'], authorships_df['author_id']),
+          (paper_aff_df['paper_id'], paper_aff_df['affiliation_id']),
+          (paper_journals_df['paper_id'], paper_journals_df['journal_id']),
+          (paper_cs_df['paper_id'], paper_cs_df['cs_id']),
+          (paper_fos_df['paper_id'], paper_fos_df['fos_id'])]],
+        out_path / 'paper2entity-ptr.bin',
+        out_path / 'paper2entity-ind.bin')
+
+    logger.info('(6/7) writing edges: papers -> citors, citees')
+    sparseutil.make_sparse_matrix(
+        papers_count,
+        [[(citations_df['citee_id'], citations_df['citor_id'])],
+         [(citations_df['citor_id'], citations_df['citee_id'])]],
+        out_path / 'paper2citor-citee-ptr.bin',
+        out_path / 'paper2citor-citee-ind.bin')
     
-    # print('unpickling papers')
-    # with open(out_path / 'papers-index.pkl', 'rb') as f:
-    #     papers_df = pickle.load(f)
-    # n_papers = len(papers_df)
-    # print('replacing1')
-    # replace_ids_inplace(authorships_df, 'paper_id', papers_df['new_paper_id'])
-    # del papers_df  # Free memory
-
-    # authors_df = load_authors_df(authors_path)
-    # make_mag_id_index_inplace(authors_df, 'author_id', 'new_author_id')
-    # with open(out_path / 'authors-index.pkl', 'wb') as f:
-    #     pickle.dump(authors_df, f)
-
-    # print('unpickling authorships')
-    # with open(out_path / 'authorships-table.pkl', 'rb') as f:
-    #     authorships_df = pickle.load(f)
-
-    # print('unpickling authors')
-    # with open(out_path / 'authors-index.pkl', 'rb') as f:
-    #     authors_df = pickle.load(f)
-    # hashutil.make_id_hash_map(authors_df.index.to_numpy().astype(np.uint32), out_path / 'author-id-map')
-    # n_authors = len(authors_df)
-    # print('replacing2')
-    # replace_ids_inplace(authorships_df, 'author_id', authors_df['new_author_id'])
-    # del authors_df  # Free memory
-    # print('pickling authorships')
-    # try:
-    #     with open(out_path / 'authorships-table.pkl', 'wb') as f:
-    #         pickle.dump(authorships_df, f, pickle.HIGHEST_PROTOCOL)
-    # except Exception:
-    #     breakpoint()
-    # print('saving authorships')
-    # save_authorships(authorships_df, n_papers, n_authors, out_path)
-    # del authorships_df
-
-    # print('loading fields of study')
-    # fields_of_study_df = load_fields_of_study_df(fields_of_study_path)
-    # print('replacing ids')
-    # make_mag_id_index_inplace(fields_of_study_df,
-    #                           'field_of_study_id', 'new_field_of_study_id')
-    # print('pickling fields of study')
-    # with open(out_path / 'fields-of-study-table.pkl', 'wb') as f:
-    #     pickle.dump(fields_of_study_df, f, pickle.HIGHEST_PROTOCOL)
-
-    # print('unpickling fields of study')
-    # with open(out_path / 'fields-of-study-table.pkl', 'rb') as f:
-    #     fields_of_study_df = pickle.load(f)
-    # n_fields_of_study = len(fields_of_study_df)
-    # print('loading paper fields studied')
-    # paper_fields_studied_df = load_paper_fields_studied_df(
-    #     paper_fields_studied_path)
-    # print('replacing fos ids')
-    # replace_ids_inplace(paper_fields_studied_df, 'field_of_study_id',
-    #                     fields_of_study_df['new_field_of_study_id'])
-    # del fields_of_study_df
-    # print('unpickling papers')
-    # with open(out_path / 'papers-index.pkl', 'rb') as f:
-    #     papers_df = pickle.load(f)
-    # n_papers = len(papers_df)
-    # print('replacing paper ids')
-    # replace_ids_inplace(paper_fields_studied_df, 'paper_id',
-    #                     papers_df['new_paper_id'])
-    # print('pickling paper fields of studied')
-    # with open(out_path / 'paper-fields-studied-table.pkl', 'wb') as f:
-    #     pickle.dump(paper_fields_studied_df, f, pickle.HIGHEST_PROTOCOL)
-
-    # print('unpickling fields of study')
-    # with open(out_path / 'fields-of-study-table.pkl', 'rb') as f:
-    #     fields_of_study_df = pickle.load(f)
-    # n_fields_of_study = len(fields_of_study_df)
-    # del fields_of_study_df
-
-    # print('unpickling papers')
-    # with open(out_path / 'papers-index.pkl', 'rb') as f:
-    #     papers_df = pickle.load(f)
-    # n_papers = len(papers_df)
-    # del papers_df
-
-    # # hashutil.make_id_hash_map(
-    # #     fields_of_study_df.index.to_numpy().astype(np.uint32),
-    # #     out_path / 'field-of-study-id-map')
-
-
-    # print('unpickling paper fields studied')
-    # with open(out_path / 'paper-fields-studied-table.pkl', 'rb') as f:
-    #     paper_fields_studied_df = pickle.load(f)
-    # print('saving paper fields studied')
-    # save_paper_fields_studied(
-    #     paper_fields_studied_df, n_papers, n_fields_of_study, out_path)
-
-    # journals_df = load_journals(journals_path)
-    # make_mag_id_index_inplace(journals_df, 'journal_id', 'new_journal_id')
-    # print('making journal map')
-    # hashutil.make_id_hash_map(journals_df.index.to_numpy().astype(np.uint32),
-    #                           out_path / 'journal-id-map')
-    # n_journals = len(journals_df)
-
-    # print('loading paper journals')
-    # paper_journals_df = load_paper_journals_df(papers_path)
-
-    # print('replacing journal ids')
-    # replace_ids_inplace(paper_journals_df, 'journal_id',
-    #                     journals_df['new_journal_id'])
-    # del journals_df
-
-    # print('unpickling papers')
-    # with open(out_path / 'papers-index.pkl', 'rb') as f:
-    #     papers_df = pickle.load(f)
-    # n_papers = len(papers_df)
-
-    # print('replacing paper ids')
-    # replace_ids_inplace(paper_journals_df, 'paper_id',
-    #                     papers_df['new_paper_id'])
-    # del papers_df
-
-    # print('pickling paper journals')
-    # with open(out_path / 'paper-journals-table.pkl', 'wb') as f:
-    #     pickle.dump(paper_journals_df, f, pickle.HIGHEST_PROTOCOL)
-    # # print('unpickling paper journals')
-    # # with open(out_path / 'paper-journals-table.pkl', 'rb') as f:
-    # #     paper_journals_df = pickle.load(f)
-
-    # print('making journal to paper graph')
-    # sparseutil.make_sparse_matrix(
-    #     paper_journals_df['journal_id'], paper_journals_df['paper_id'],
-    #     n_journals, out_path / 'journal2paper')
-
-    # print('making paper to journal')
-    # sparseutil.make_sparse_vector(
-    #     paper_journals_df['paper_id'],
-    #     paper_journals_df['journal_id'],
-    #     n_papers, out_path / 'paper2journal.bin')
-
-    # conference_series_df = load_conference_series(conference_series_path)
-    # make_mag_id_index_inplace(conference_series_df, 'conference_series_id', 'new_conference_series_id')
-    # print('making conference series map')
-    # hashutil.make_id_hash_map(conference_series_df.index.to_numpy().astype(np.uint32),
-    #                           out_path / 'conference-series-id-map')
-    # n_conference_series = len(conference_series_df)
-
-    # print('loading paper conference series')
-    # paper_conference_series_df = load_paper_conference_series_df(papers_path)
-
-    # print('replacing conference series ids')
-    # replace_ids_inplace(paper_conference_series_df, 'conference_series_id',
-    #                     conference_series_df['new_conference_series_id'])
-    # del conference_series_df
-
-    # print('unpickling papers')
-    # with open(out_path / 'papers-index.pkl', 'rb') as f:
-    #     papers_df = pickle.load(f)
-    # n_papers = len(papers_df)
-
-    # print('replacing paper ids')
-    # replace_ids_inplace(paper_conference_series_df, 'paper_id',
-    #                     papers_df['new_paper_id'])
-    # del papers_df
-
-    # print('pickling paper conference series')
-    # with open(out_path / 'paper-conference-series-table.pkl', 'wb') as f:
-    #     pickle.dump(paper_conference_series_df, f, pickle.HIGHEST_PROTOCOL)
-    # # print('unpickling paper conference series')
-    # # with open(out_path / 'paper-conference-series-table.pkl', 'rb') as f:
-    # #     paper_conference_series_df = pickle.load(f)
-
-    # print('making conference series to paper graph')
-    # sparseutil.make_sparse_matrix(
-    #     paper_conference_series_df['conference_series_id'], paper_conference_series_df['paper_id'],
-    #     n_conference_series, out_path / 'cs2paper')
-
-    # print('making paper to conference series')
-    # sparseutil.make_sparse_vector(
-    #     paper_conference_series_df['paper_id'],
-    #     paper_conference_series_df['conference_series_id'],
-    #     n_papers, out_path / 'paper2cs.bin')
-
-
-
+    logger.info('(7/7) done')
 
 
 def main():
-    get_dataset('/data/u1033719/graph/mag-2019-11-08/', 'bingraph')
+    stream_handler = logging.StreamHandler()  # Log to stderr.
+    try:
+        logger.addHandler(stream_handler)
+        make_dataset('/data/u1033719/graph/mag-2019-11-08/', 'bingraph')
+    finally:
+        logger.removeHandler(stream_handler)
+
+
+if __name__ == '__main__':
+    main()

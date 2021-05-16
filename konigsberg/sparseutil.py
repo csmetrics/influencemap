@@ -2,70 +2,63 @@ import mmap
 
 import numba as nb
 import numpy as np
+from numba.types import List, Tuple
 
 
-@nb.jit(nb.void(nb.u4[::1], nb.u4[::1]), nopython=True, nogil=True)
-def make_counts(indptr_arr, from_arr):
-    for i in from_arr:
-        indptr_arr[i] += 1
+@nb.njit(nogil=True)
+def make_counts(maps, ptr_arr):
+    number_maps = len(maps)
+    ptr_arr_2d = ptr_arr[:-1].reshape(-1, number_maps)
+    for i, map_ in enumerate(maps):
+        map_ptr = ptr_arr_2d[...,i]
+        for from_arr, _ in map_:
+            for j in from_arr:
+                map_ptr[j] += 1
 
     cumul = 0
-    for i in range(len(indptr_arr)):
-        cumul += indptr_arr[i]
-        indptr_arr[i] = cumul
+    for i in range(len(ptr_arr)):
+        ptr_arr[i] = cumul = ptr_arr[i] + cumul
 
 
-@nb.jit(nb.void(nb.u4[::1], nb.u4[::1], nb.u4[::1], nb.u4[::1]),
-        nopython=True, nogil=True, parallel=True)
-def place_indices(indptr_arr, indices_arr, from_arr, to_arr):
-    for i, j in zip(from_arr, to_arr):
-        index = indptr_arr[i]
-        index -= 1
-        indptr_arr[i] = index
-        indices_arr[index] = j
+@nb.njit(nogil=True)
+def place_indices(maps, ptr_arr, ind_arr):
+    number_maps = len(maps)
+    ptr_arr_2d = ptr_arr[:-1].reshape(-1, number_maps)
+    for i, map_ in enumerate(maps):
+        map_ptr = ptr_arr_2d[...,i]
+        for from_arr, to_arr in map_:
+            for j, k in zip(from_arr, to_arr):
+                index = map_ptr[j] = map_ptr[j] - 1
+                ind_arr[index] = k
 
-    for i in nb.prange(len(indptr_arr) - 1):
-        start = indptr_arr[i]
-        end = indptr_arr[i + 1]
+    for i in range(len(ptr_arr) - 1):
+        start = ptr_arr[i]
+        end = ptr_arr[i + 1]
         if end > start + 1:
-            indices_arr[start:end].sort()
+            ind_arr[start:end].sort()
 
 
-def make_sparse_matrix(from_series, to_series, n_from_ids, path):
-    path.mkdir(exist_ok=True)
-    with open(path / 'indptr.bin', 'wb+') as f_indptr:
-        f_indptr.write(np.zeros(n_from_ids + 1, dtype=np.uint32))
-        f_indptr.flush()
-        map_indptr = mmap.mmap(f_indptr.fileno(), 0)
-    with map_indptr:
-        arr_indptr = np.frombuffer(map_indptr, dtype=np.uint32)
-        print('counting')
-        make_counts(arr_indptr, from_series.to_numpy())
-        with open(path / 'indices.bin', 'wb+') as f_indices:
-            f_indices.write(np.zeros(len(from_series), dtype=np.uint32))
-            f_indices.flush()
-            map_indices = mmap.mmap(f_indices.fileno(), 0)
-        with map_indices:
-            arr_indices = np.frombuffer(map_indices, dtype=np.uint32)
-            print('placing')
-            place_indices(arr_indptr, arr_indices,
-                          from_series.to_numpy(), to_series.to_numpy())
-
-
-@nb.jit(nb.void(nb.u4[::1], nb.u4[::1], nb.u4[::1]),
-        nopython=True, nogil=True, parallel=True)
-def place_vec(vec_arr, from_arr, to_arr):
-    for i in nb.prange(len(from_arr)):
-        from_index = from_arr[i]
-        to_index = to_arr[i]
-        vec_arr[from_index] = to_index
-
-
-def make_sparse_vector(from_series, to_series, n_from_ids, path):
-    with open(path, 'wb+') as f:
-        f.write(np.full(n_from_ids, np.uint32(-1), dtype=np.uint32))
-        f.flush()
-        vec_mmap = mmap.mmap(f.fileno(), 0)
-    with vec_mmap:
-        vec_arr = np.frombuffer(vec_mmap, dtype=np.uint32)
-        place_vec(vec_arr, from_series.to_numpy(), to_series.to_numpy())
+def make_sparse_matrix(n_from_ids, maps, ptr_path, ind_path):
+    maps = nb.typed.List([
+        nb.typed.List([
+            (from_series.to_numpy(), to_series.to_numpy())
+            for from_series, to_series in map_])
+        for map_ in maps])
+    n_maps = len(maps)
+    n_links = sum(sum(len(s) for s, _ in map_) for map_ in maps)
+    with open(ptr_path, 'wb+') as f_ptr:
+        f_ptr.seek((n_maps * n_from_ids + 1) * np.uint32().nbytes - 1)
+        f_ptr.write(b'\x00')
+        f_ptr.flush()
+        map_ptr = mmap.mmap(f_ptr.fileno(), 0)
+    with map_ptr:
+        arr_ptr = np.frombuffer(map_ptr, dtype=np.uint32)
+        make_counts(maps, arr_ptr)
+        with open(ind_path, 'wb+') as f_ind:
+            f_ind.seek(n_links * np.uint32().nbytes - 1)
+            f_ind.write(b'\x00')
+            f_ind.flush()
+            map_ind = mmap.mmap(f_ind.fileno(), 0)
+        with map_ind:
+            arr_ind = np.frombuffer(map_ind, dtype=np.uint32)
+            place_indices(maps, arr_ptr, arr_ind)
