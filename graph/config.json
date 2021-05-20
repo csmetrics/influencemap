@@ -1,9 +1,0 @@
-{
-  "elasticsearch":{
-    "hostname":"localhost:9200",
-  },
-  "data":{
-    "filedir":"/graph/data/graph",
-    "version":"2019-11-08"
-  }
-}
