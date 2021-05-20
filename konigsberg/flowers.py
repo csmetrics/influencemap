@@ -5,9 +5,42 @@ import pathlib
 import numba as nb
 import numpy as np
 
-
 mmapped_arr = nb.types.Array(nb.u4, 1, 'C', readonly=True)
 mapping_arrs = nb.types.Tuple([mmapped_arr, mmapped_arr])
+id_mapping_arrs = nb.types.Tuple([mmapped_arr, mmapped_arr, nb.u4])
+
+
+class ResultArrays:
+    """Holder for ID and score arrays."""
+    __slots__ = ['ids', 'scores']
+    def __init__(self, ids, scores):
+        self.ids = ids
+        self.scores = scores
+
+
+class PartFlower:
+    """Result for a particular entity type."""
+    __slots__ = ['influencers', 'influencees']
+    def __init__(self, *, influencers, influencees):
+        self.influencers = influencers
+        self.influencees = influencees
+
+
+class Flower:
+    """Full result."""
+    __slots__ = ['author_part', 'affiliation_part', 'field_of_study_part',
+                 'journal_part', 'conference_series_part']
+    def __init__(
+        self,
+        *,
+        author_part, affiliation_part, field_of_study_part,
+        journal_part, conference_series_part,
+    ):
+        self.author_part = author_part
+        self.affiliation_part = affiliation_part
+        self.field_of_study_part = field_of_study_part
+        self.journal_part = journal_part
+        self.conference_series_part = conference_series_part
 
 
 class Mapping:
@@ -33,6 +66,42 @@ class Mapping:
         return self.ptr, self.ind
 
 
+class IndToIdMapper:
+    """Memory-mapped array mapping indices to MAG IDs."""
+    __slots__ = ['ind2id_mmap', 'ind2id']
+
+    def __init__(self, ind2id_path):
+        with open(ind2id_path, 'rb') as f:
+            self.ind2id_mmap = mmap.mmap(f.fileno(), 0, prot=mmap.PROT_READ)
+        self.ind2id = np.frombuffer(self.ind2id_mmap, dtype=np.uint32)
+
+    def __del__(self):
+        self.ind2id_mmap.close()
+
+    @property
+    def arrs(self):
+        return self.ind2id
+
+
+class IdToIndMapper:
+    """Memory-mapped hash table mapping MAG IDs to indices."""
+    __slots__ = ['id2ind_mmap', 'id2ind', 'ind2id_mapper']
+
+    def __init__(self, id2ind_path, ind2id_mapper):
+        with open(id2ind_path, 'rb') as f:
+            self.id2ind_mmap = mmap.mmap(f.fileno(), 0, prot=mmap.PROT_READ)
+        self.id2ind = np.frombuffer(self.id2ind_mmap, dtype=np.uint32)
+        self.ind2id_mapper = ind2id_mapper
+
+    def __del__(self):
+        self.id2ind_mmap.close()
+
+    @property
+    def arrs(self):
+        mask = nb.u4(len(self.id2ind) - 1)
+        return self.id2ind, self.ind2id_mapper.arrs, mask
+
+
 class Florist:
     """Makes flowers."""
     def __init__(self, path):
@@ -44,6 +113,17 @@ class Florist:
                                         path / 'paper2entity-ind.bin')
         self.citation_maps = Mapping(path / 'paper2citor-citee-ptr.bin',
                                      path / 'paper2citor-citee-ind.bin')
+        self.entity_ind2id_map = IndToIdMapper(path / 'entities-ind2id.bin')
+        self.author_id2ind_map = IdToIndMapper(
+            path / 'author-id2ind.bin', self.entity_ind2id_map)
+        self.aff_id2ind_map = IdToIndMapper(
+            path / 'affltn-id2ind.bin', self.entity_ind2id_map)
+        self.fos_id2ind_map = IdToIndMapper(
+            path / 'fos-id2ind.bin', self.entity_ind2id_map)
+        self.journal_id2ind_map = IdToIndMapper(
+            path / 'journl-id2ind.bin', self.entity_ind2id_map)
+        self.cs_id2ind_map = IdToIndMapper(
+            path / 'cs-id2ind.bin', self.entity_ind2id_map)
         with open(path / 'paper-years.json') as f:
             # Maps year (int) to the index of the first paper published
             # that year. Since the papers are sorted in chronological
@@ -57,8 +137,11 @@ class Florist:
             entity_counts_data = json.load(f)
         self.author_range = entity_counts_data['authors']
         self.aff_range = self.author_range + entity_counts_data['aff']
+        self.fos_range = self.aff_range + entity_counts_data['fos']
+        self.journal_range = self.fos_range + entity_counts_data['journals']
+        self.cs_range = self.journal_range + entity_counts_data['cs']
 
-    def get_id_year_range(self, years):
+    def _get_id_year_range(self, years):
         """Get range of paper indices corresponding to a range of years.
 
         years is None or a 2-tuple of ints. Returns a 2-tuple of Numpy
@@ -71,10 +154,83 @@ class Florist:
         end_id = self.year_starts[end_year]
         return nb.u4(start_id), nb.u4(end_id)
 
+    def _ids_to_indices(self, ids, mapper):
+        """Convert IDs to indices."""
+        indices = np.array(ids, dtype=np.uint32)
+        _ids_to_ind(mapper.arrs, indices)
+        return indices
+
+
+    def _get_entity_indices(
+        self,
+        *,
+        author_ids, aff_ids, fos_ids, journal_ids, cs_ids
+    ):
+        """Convert IDs to indices and concatenate."""
+        author_indices = self._ids_to_indices(author_ids,
+                                              self.author_id2ind_map)
+        aff_indices = self._ids_to_indices(aff_ids, self.aff_id2ind_map)
+        fos_indices = self._ids_to_indices(fos_ids, self.fos_id2ind_map)
+        journal_indices = self._ids_to_indices(journal_ids,
+                                              self.journal_id2ind_map)
+        cs_indices = self._ids_to_indices(cs_ids, self.cs_id2ind_map)
+        return np.concatenate([author_indices, aff_indices, fos_indices,
+                               journal_indices, cs_indices])
+
+
+    def _make_flower_from_dicts(self, influencers, influencees):
+        """Turn result dicts returned by _make_flower into a Flower."""
+        (infcer_author_res, infcer_aff_res, infcer_fos_res,
+         infcer_journal_res, infcer_cs_res) = split_results_dict(
+            influencers, self.author_range, self.aff_range, self.fos_range,
+            self.journal_range, self.cs_range)
+        (infcee_author_res, infcee_aff_res, infcee_fos_res,
+         infcee_journal_res, infcee_cs_res) = split_results_dict(
+            influencees, self.author_range, self.aff_range, self.fos_range,
+            self.journal_range, self.cs_range)
+
+        ind2id = self.entity_ind2id_map.arrs
+        author_part = PartFlower(
+            influencers=ResultArrays(
+                *result_list_to_arr(infcer_author_res, ind2id)),
+            influencees=ResultArrays(
+                *result_list_to_arr(infcee_author_res, ind2id)))
+        aff_part = PartFlower(
+            influencers=ResultArrays(
+                *result_list_to_arr(infcer_aff_res, ind2id)),
+            influencees=ResultArrays(
+                *result_list_to_arr(infcee_aff_res, ind2id)))
+        fos_part = PartFlower(
+            influencers=ResultArrays(
+                *result_list_to_arr(infcer_fos_res, ind2id)),
+            influencees=ResultArrays(
+                *result_list_to_arr(infcee_fos_res, ind2id)))
+        journal_part = PartFlower(
+            influencers=ResultArrays(
+                *result_list_to_arr(infcer_journal_res, ind2id)),
+            influencees=ResultArrays(
+                *result_list_to_arr(infcee_journal_res, ind2id)))
+        cs_part = PartFlower(
+            influencers=ResultArrays(
+                *result_list_to_arr(infcer_cs_res, ind2id)),
+            influencees=ResultArrays(
+                *result_list_to_arr(infcee_cs_res, ind2id)))
+
+        return Flower(author_part=author_part,
+                      affiliation_part=aff_part,
+                      field_of_study_part=fos_part,
+                      journal_part=journal_part,
+                      conference_series_part=cs_part)
+
+
     def get_flower(
         self,
-        entity_ids,
         *,
+        author_ids=[],
+        affiliation_ids=[],
+        field_of_study_ids=[],
+        journal_ids=[],
+        conference_series_ids=[],
         self_citations=False, coauthors=True,
         pub_years=None, cit_years=None,
     ):
@@ -95,13 +251,18 @@ class Florist:
         # out whether it's faster to include or exclude them and set it
         # to that.
 
-        pub_ids = self.get_id_year_range(pub_years)
-        cit_ids = self.get_id_year_range(cit_years)
+        indices = self._get_entity_indices(
+            author_ids=author_ids, aff_ids=affiliation_ids,
+            fos_ids=field_of_study_ids, journal_ids=journal_ids,
+            cs_ids=conference_series_ids)
+
+        pub_ids = self._get_id_year_range(pub_years)
+        cit_ids = self._get_id_year_range(cit_years)
 
         # nb.literally makes it a compile-time constant. This does
         # require one compilation per value.
         influencers, influencees = _make_flower(
-            np.array(entity_ids, dtype=np.uint32),
+            indices,
             self.entity2paper_map.arrs,
             self.paper2entity_map.arrs,
             self.citation_maps.arrs,
@@ -110,7 +271,68 @@ class Florist:
             coauthors=nb.literally(bool(coauthors)),
             author_range=nb.literally(self.author_range),
             aff_range=nb.literally(self.aff_range))
-        return influencers, influencees
+        return self._make_flower_from_dicts(influencers, influencees)
+
+
+score_tuple_t = nb.types.Tuple([nb.u4, nb.f4])
+
+
+@nb.njit(nogil=True)
+def split_results_dict(
+    res,
+    author_range, aff_range, fos_range, journal_range, cs_range
+):
+    """Split a dict of indices and scores by entity type."""
+    author_res = nb.typed.List.empty_list(score_tuple_t)
+    aff_res = nb.typed.List.empty_list(score_tuple_t)
+    fos_res = nb.typed.List.empty_list(score_tuple_t)
+    journals_res = nb.typed.List.empty_list(score_tuple_t)
+    cs_res = nb.typed.List.empty_list(score_tuple_t)
+    for index, score in res.items():
+        if index < author_range:
+            author_res.append((index, score))
+        elif index < aff_range:
+            aff_res.append((index, score))
+        elif index < fos_range:
+            fos_res.append((index, score))
+        elif index < journal_range:
+            journals_res.append((index, score))
+        elif index < cs_range:
+            cs_res.append((index, score))
+        else:
+            raise IndexError('entity index out of range')
+    return author_res, aff_res, fos_res, journals_res, cs_res
+
+
+@nb.njit(nogil=True)
+def result_list_to_arr(res, ind2id):
+    """Unzip list of indices and scores, replacing indices with IDs."""
+    res_ids = np.empty(len(res), dtype=np.uint32)
+    res_scores = np.empty(len(res), dtype=np.float32)
+    for i, (index, score) in enumerate(res):
+        res_ids[i] = ind2id[index]
+        res_scores[i] = score
+    return res_ids, res_scores
+
+
+@nb.njit(nb.void(id_mapping_arrs, nb.u4[::1]), nogil=True)
+def _ids_to_ind(mapping, arr):
+    """Replace all IDs in arr with indices in-place."""
+    id2ind, ind2id, mask = mapping
+    for i, id_ in enumerate(arr):
+        # Size is a power of 2, so (& mask) == (% len(id2ind)).
+        hash_ = nb.u4(id_ * nb.u4(0x9e3779b1)) & mask
+        while True:
+            index = id2ind[hash_]
+            if index == nb.u4(-1):
+                raise KeyError('id not found')
+            # id2ind[hash_] might be the correct index, but this is not
+            # guaranteed due to collisions. Look it up in ind2id to make
+            # sure.
+            if ind2id[index] == id_:
+                arr[i] = index
+                break
+            hash_ = nb.u4(hash_ + 1) & mask
 
 
 @nb.njit(mmapped_arr(mapping_arrs, nb.u4), nogil=True)
