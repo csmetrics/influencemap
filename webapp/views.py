@@ -886,5 +886,5 @@ def create_flower_from_list(author_id):
         "flower": flower_info
     }
 
-    json.dump(flower_info, open(author_id+".json", "w"))
+    json.dump(data, open(author_id+".json", "w"))
     return
