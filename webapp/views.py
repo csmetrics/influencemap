@@ -880,6 +880,11 @@ def create_flower_from_list(author_id):
 
     print("AUTHOR FLOWER")
     print(flower_info)
+    data = {
+        "pub_chart": pub_chart,
+        "cite_chart": cite_chart,
+        "flower": flower_info
+    }
 
     json.dump(flower_info, open(author_id+".json", "w"))
     return

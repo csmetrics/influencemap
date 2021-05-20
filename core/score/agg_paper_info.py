@@ -54,7 +54,7 @@ def score_paper_info(paper_info, self=list()):
     # Get author combinations
     for paa in paper_info['Authors']:
         if 'AuthorName' in paa:
-            score_list['AUTH'].append(make_dummy(paa['AuthorName']))
+            score_list['AUTH'].append(make_dummy("{};{}".format(paa['AuthorId'],paa['AuthorName'])))
         if 'AffiliationName' in paa:
             score_list['AFFI'].append(make_dummy(paa['AffiliationName']))
 
@@ -74,8 +74,8 @@ def score_paper_info(paper_info, self=list()):
         ref_const = {
             'self_cite': is_self_cite(reference, self),
             'coauthor': False,
-            'publication_year': paper_info['Year'] if 'Year' in paper_info else None,
-            'influence_year': reference['Year'] if 'Year' in paper_info else None,
+            'publication_year': reference['Year'] if 'Year' in paper_info else None,
+            'influence_year': paper_info['Year'] if 'Year' in paper_info else None,
             'ego_paper_id': int(paper_info['PaperId']),
             'link_paper_id': int(reference['PaperId'])
         }
@@ -92,7 +92,7 @@ def score_paper_info(paper_info, self=list()):
         influencing_paa = 1 / len(reference['Authors'])
         for paa in reference['Authors']:
             if 'AuthorName' in paa:
-                score_list['AUTH'].append(make_score((paa['AuthorName'], 0, influencing_paa)))
+                score_list['AUTH'].append(make_score(("{};{}".format(paa['AuthorId'],paa['AuthorName']), 0, influencing_paa)))
             if 'AffiliationName' in paa:
                 score_list['AFFI'].append(make_score((paa['AffiliationName'], 0, influencing_paa)))
 
@@ -135,7 +135,7 @@ def score_paper_info(paper_info, self=list()):
         influencing_paa = 1 / len(citation['Authors'])
         for paa in citation['Authors']:
             if 'AuthorName' in paa:
-                score_list['AUTH'].append(make_score((paa['AuthorName'], influenced_paa, 0)))
+                score_list['AUTH'].append(make_score(("{};{}".format(paa['AuthorId'],paa['AuthorName']), influenced_paa, 0)))
             if 'AffiliationName' in paa:
                 score_list['AFFI'].append(make_score((paa['AffiliationName'], influenced_paa, 0)))
 
