@@ -1,0 +1,100 @@
+2721559750	19777	men	Men		1	0	2017-06-30
+2655137541	19777	김순희	김순희		1	0	2017-06-30
+2735289595	19777	lisa sanderson	Lisa Sanderson		1	0	2017-07-21
+2721559439	18644	j g robson	Robson Jg		1	71	2017-06-30
+2710560167	19777	d l maiden	D. L. Maiden		1	0	2017-06-30
+2612951461	19174	r l hilderbrandt	R.L. Hilderbrandt	86519309	1	18	2017-05-19
+2278528406	19647	t v z carinus	T.V.Z. Carinus		1	7	2016-06-24
+2544142279	19777	h satoh	Satoh H		1	0	2016-11-04
+2396032835	19777	李苓	李苓		1	0	2016-06-24
+2130940209	19777	edilberto lagos roa	Edilberto Lagos Roa		1	0	2016-06-24
+2439510708	19501	m h yousefi	M. H. Yousefi		1	2	2016-06-24
+2780685758	19777	bhaskar gowda	Bhaskar Gowda		1	0	2018-01-05
+2559839978	19777	antonio masa gragera	Antonio Masa Gragera		1	0	2016-12-16
+2333323727	19777	julia molinari	Julia Molinari	142263535	1	0	2016-06-24
+2512873836	19777	s n vishnyakov	S.N. Vishnyakov		1	0	2016-09-16
+2746320997	19777	eliana straticamihail	Eliana Stratica-Mihail		1	0	2017-08-31
+2684175238	19777	小野 寿之	小野 寿之		1	0	2017-06-30
+2401446609	19777	a osenda	Osenda A		2	0	2016-06-24
+2671799199	19777	u janiga	U Janiga		1	0	2017-06-30
+2779724226	19777	g d andria	G D’Andria		1	0	2018-01-05
+2620948120	19404	daniel p cardinali	Daniel P. Cardinali	197323543	1	14	2017-06-09
+2576081281	19777	이정우	이정우		1	0	2017-01-26
+2280711262	19584	t f duque	T.F Duque		1	6	2016-06-24
+2144619115	19777	gaylord johnson	Gaylord Johnson		1	0	2016-06-24
+2223141572	19559	changchi lee	Chang-chi Lee		1	3	2016-06-24
+2696920973	19777	patricia diaz cayeros	Patricia Díaz Cayeros		1	0	2017-06-30
+2607140081	19777	唐琳	唐琳		1	0	2017-04-28
+2736607218	19777	titi pratitis	Titi Pratitis		1	0	2017-07-31
+2631670774	19260	m kaminski	M Kaminski		1	15	2017-06-30
+2679278058	19777	tong zhi	Tong Zhi		1	0	2017-06-30
+2517703739	19777	tara donovan	Tara Donovan		6	0	2016-09-16
+2777184790	19777	hansjuergen dr ing schulz	Hans-Juergen Dr Ing Schulz		1	0	2018-01-05
+2479780880	19777	r iranzo	Iranzo R		1	0	2016-08-23
+2650385805	19650	paul burrows	Paul Burrows		1	2	2017-06-30
+2703980142	19732	sangwuk ku	Sang-Wuk Ku		1	2	2017-06-30
+2631671253	19777	午朗 稲葉	午朗 稲葉		2	0	2017-06-30
+2529441649	19777	giovanni bariani	Giovanni Bariani		1	0	2016-10-14
+2117764121	18666	jorn rolighed larsen	Jørn Rolighed Larsen		3	75	2016-06-24
+2620172477	19777	cedric bouchetmarquis	Cedric Bouchet-Marquis		1	0	2017-06-05
+2703985867	19690	e szarekgwiazda	E. Szarek-Gwiazda		1	2	2017-06-30
+2745147422	19777	大卫 h 埃尔沃特	大卫·H·埃尔沃特		1	0	2017-08-17
+2370264014	19777	liu bi	Liu Bi	116953780	1	0	2016-06-24
+2650392692	19777	fan zhang	Fan Zhang		1	0	2017-06-30
+2110271111	19777	tamiko fukumoto	Tamiko Fukumoto	80345338	5	0	2016-06-24
+2594595280	19777	a larson	A Larson		1	0	2017-03-16
+2511973849	19777	l a tolchkova	L. A. Tolchkova		1	0	2016-09-16
+2636306599	19777	songyuan dai	Song-Yuan Dai		1	0	2017-06-30
+2710559246	19777	m tauber	M. Tauber		1	0	2017-06-30
+2140727556	19595	hernan m palermo	Hernán M. Palermo	151201029	7	2	2016-06-24
+2659898785	19633	changmou wu	Chang-Mou Wu		1	4	2017-06-30
+2041128917	18898	indrakumar selvaratnam	Indrakumar Selvaratnam		1	1	2016-06-24
+2768949927	19777	m keller	M. Keller		1	0	2017-12-04
+2659901401	19777	jinxi zhang	Jinxi Zhang	37796252	1	0	2017-06-30
+2726551108	19777	michel pouyllau	Michel Pouyllau		1	0	2017-07-14
+2696913716	19742	j l caddell	Caddell Jl		1	1	2017-06-30
+2570194071	19777	k adugyamfi	K. Adu-Gyamfi		1	0	2017-01-13
+2144620235	19777	barry cullen	Barry Cullen		1	0	2016-06-24
+350729106	18963	m haandlykken	M. Haandlykken		1	30	2016-06-24
+2650383684	19777	松岡 伴和	松岡 伴和		1	0	2017-06-30
+2645660334	19476	閔泰基	閔泰基		1	1	2017-06-30
+2129163680	19777	idelvânia de paula silva	Idelvânia de Paula Silva		2	0	2016-06-24
+2741334463	19777	kazuyuki atsumi	Kazuyuki Atsumi		1	0	2017-08-08
+2756480963	19777	郭炜	郭炜		1	0	2017-10-06
+2214847848	17378	james r lindquist	James R. Lindquist		3	71	2016-06-24
+2753068260	19777	z colombet	Z. Colombet	184646667	1	0	2017-09-15
+2103911724	19642	m ito	M. Ito		2	8	2016-06-24
+2201371277	19766	f nestor	Néstor F		1	1	2016-06-24
+2684175306	19743	chen yuze	Chen Yuze		1	1	2017-06-30
+1688501171	19240	d plakalovic	D. Plakalovic		1	8	2016-06-24
+2501032709	19777	yustitia dilla s	Yustitia Dilla S		1	0	2016-08-23
+2640973979	19777	sam peltzman	Sam Peltzman		1	0	2017-06-30
+2659916542	19777	차상균	차상균		1	0	2017-06-30
+2237410406	19416	robert lee	Robert Lee	1321826891	6	7	2016-06-24
+2648372153	19777	박병권	박병권		1	0	2017-06-30
+2694037138	19777	傅德刚	傅德刚		1	0	2017-06-30
+2640966713	19777	t morimitsu	T Morimitsu		1	0	2017-06-30
+2323055339	19777	ian marshman	Ian Marshman	153648349	2	0	2016-06-24
+2496019236	19178	y johzaki	Y. Johzaki		1	10	2016-08-23
+2256355196	19586	jon a holmes	Jon A. Holmes		1	10	2016-06-24
+2189627032	19733	emerson souza freire	Emerson Souza Freire		2	2	2016-06-24
+2574300352	19777	r k r thornton	R. K. R. Thornton		1	0	2017-01-26
+1226295823	19697	david wainman	David Wainman		1	2	2016-06-24
+2604536619	19777	shuheng wang	ShuHeng Wang		1	0	2017-04-14
+2655137939	19777	georges meslin	Georges Meslin		1	0	2017-06-30
+2601265026	19777	mariam	Mariam		1	0	2017-04-07
+2623384974	19777	a o jiyuan	Jiyuan Ao		1	0	2017-06-15
+2434398103	19721	m o vilain	Vilain Mo		1	2	2016-06-24
+2565159843	19777	patrick dugan	Patrick Dugan		1	0	2017-01-06
+2186195635	19777	u u youbo	You-bo Uu		1	0	2016-06-24
+2637621969	19777	jorg rupke	Jörg Rupke		1	0	2017-06-30
+2750942973	19777	t shimoji	T. Shimoji	135598925	1	0	2017-09-15
+1977809379	19777	caroline lanoue	Caroline Lanoue		1	0	2016-06-24
+2689098075	19667	l nasi	L. Nasi		1	10	2017-06-30
+2648372975	19777	w mohr	W. Mohr		1	0	2017-06-30
+2679279791	19720	donggu lee	Dong-Gu Lee		1	1	2017-06-30
+2480958794	19748	xuefei jin	Xuefei Jin	194450716	1	2	2016-08-23
+2478453090	19777	j bessell	J. Bessell		1	0	2016-08-23
+2760587441	19777	徐政	徐政		1	0	2017-10-06
+2483521140	19777	saracatrin cook	Sara-Catrin Cook		1	0	2016-08-23
+2106556656	18824	yutaka shimazu	Yutaka Shimazu	22299242	14	76	2016-06-24
