@@ -1,6 +1,3 @@
-{% load staticfiles %}
-<!-- Content Wrapper. Contains page content -->
-
 <div class="searchtables-container">
   <div class="left-col col-sm-9">
     <div class="search-div">
@@ -228,10 +225,10 @@ entitytypebtns.on("click",function(){
 });
 </script>
 
-<script src="{% static 'js/searchTableConfig.js' %}"></script>
-<script src="{% static 'js/selectionTableConfig.js' %}"></script>
-<script src="{% static 'js/search_tables.js' %}"></script>
-<script src="{% static 'js/modal.js' %}"></script>
+<script src="{{ url_for('static', filename='js/searchTableConfig.js') }}"></script>
+<script src="{{ url_for('static', filename='js/selectionTableConfig.js') }}"></script>
+<script src="{{ url_for('static', filename='js/search_tables.js') }}"></script>
+<script src="{{ url_for('static', filename='js/modal.js') }}"></script>
 
 <script>
 

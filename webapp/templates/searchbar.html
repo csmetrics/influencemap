@@ -1,5 +1,3 @@
-{% load staticfiles %}
-
 <div class="search-bar" align="center">
   <div class="input-group input-group-lg">
     <div class="input-group-addon bg-gray" style="width:120px; padding:0">
@@ -18,5 +16,5 @@
     </span>
   </div>
 </div>
-<script src="{% static 'js/auto-complete.min.js' %}"></script>
-<script src="{% static 'js/navbar.js' %}"></script>
+<script src="{{ url_for('static', filename='js/auto-complete.min.js') }}"></script>
+<script src="{{ url_for('static', filename='js/navbar.js') }}"></script>
