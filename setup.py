@@ -6,5 +6,5 @@ setup(
     packages=find_packages(exclude=['assets', 'demos', 'misc']),
     install_requires=['networkx', 'seaborn', 'requests',
         'flask', 'numpy', 'elasticsearch_dsl==6.2.1', 'pyhocon', 'unidecode',
-        'multiprocess']
+        'multiprocess', 'flask_sqlalchemy', 'flask_migrate']
 )

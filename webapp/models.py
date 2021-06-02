@@ -1,131 +1,161 @@
-from django.db.models import (
-    BigIntegerField, DO_NOTHING, ForeignKey, ManyToManyField, Model,
-    SmallIntegerField, TextField)
+from flask import Flask
+from flask_sqlalchemy import SQLAlchemy
+from flask_migrate import Migrate
 
+flask_app = Flask(__name__)
+flask_app.config['SQLALCHEMY_DATABASE_URI'] = "postgresql://postgres:postgres@localhost:5432"
+db = SQLAlchemy(flask_app)
+migrate = Migrate(flask_app, db)
 
 # Elementary models
 
-class Affiliation(Model):
-    id = BigIntegerField(primary_key=True)
-    normalized_name = TextField()
-    display_name = TextField()
+class Affiliation(db.Model):
+    __tablename__ = 'affiliations'
 
-    class Meta:
-        db_table = 'affiliations'
-        managed = False
+    id = db.Column(db.BigInteger, primary_key=True)
+    normalized_name = db.Column(db.String())
+    display_name = db.Column(db.String())
 
+    def __init__(self, id, normalized_name, display_name):
+        self.id = id
+        self.normalized_name = normalized_name
+        self.display_name = display_name
 
-class Author(Model):
-    id = BigIntegerField(primary_key=True)
-    normalized_name = TextField()
-    display_name = TextField()
-    last_known_affiliation = ForeignKey(Affiliation,
-                                        null=True, on_delete=DO_NOTHING)
-
-    class Meta:
-        db_table = 'authors'
-        managed = False
+    def __repr__(self):
+        return f"<Affiliation {self.id}>"
 
 
-class ConferenceSeries(Model):
-    id = BigIntegerField(primary_key=True)
-    normalized_name = TextField()
-    display_name = TextField()
+class Author(db.Model):
+    __tablename__ = 'authors'
 
-    class Meta:
-        db_table = 'conference_series'
-        managed = False
+    id = db.Column(db.BigInteger, primary_key=True)
+    normalized_name = db.Column(db.String())
+    display_name = db.Column(db.String())
+    last_known_affiliation = db.Column(db.BigInteger, db.ForeignKey('affiliations.id'), nullable=True)
 
+    def __init__(self, id, normalized_name, display_name, last_known_affiliation):
+        self.id = id
+        self.normalized_name = normalized_name
+        self.display_name = display_name
+        self.last_known_affiliation = None
 
-class FieldOfStudy(Model):
-    id = BigIntegerField(primary_key=True)
-    normalized_name = TextField()
-    display_name = TextField()
-    level = SmallIntegerField()
-
-    class Meta:
-        db_table = 'fields_of_study'
-        managed = False
+    def __repr__(self):
+        return f"<Authors {self.id}>"
 
 
-class Journal(Model):
-    id = BigIntegerField(primary_key=True)
-    normalized_name = TextField()
-    display_name = TextField()
+class ConferenceSeries(db.Model):
+    __tablename__ = 'conference_series'
 
-    class Meta:
-        db_table = 'journals'
-        managed = False
+    id = db.Column(db.BigInteger, primary_key=True)
+    normalized_name = db.Column(db.String())
+    display_name = db.Column(db.String())
+
+    def __init__(self, id, normalized_name, display_name):
+        self.id = id
+        self.normalized_name = normalized_name
+        self.display_name = display_name
+
+    def __repr__(self):
+        return f"<ConferenceSeries {self.id}>"
 
 
-class Paper(Model):
-    id = BigIntegerField(primary_key=True)
-    title = TextField()
-    year = SmallIntegerField(null=True)
-    journal = ForeignKey(Journal, null=True, on_delete=DO_NOTHING)
-    conference_series = ForeignKey(ConferenceSeries,
-                                   null=True, on_delete=DO_NOTHING)
-    # number_authors = SmallIntegerField(null=True)  # Not populated.
-    author_set = ManyToManyField(
-        Author, related_name='paper_set', through='UniqueAuthorship')
-    field_of_study_set = ManyToManyField(
-        FieldOfStudy, related_name='paper_set', through='PaperFieldStudied')
-    citee_paper_set = ManyToManyField(
-        'Paper',
-        related_name='citor_paper_set', symmetrical=False,
-        through='Citation', through_fields=('citor_paper', 'citee_paper'))
+class FieldOfStudy(db.Model):
+    __tablename__ = 'fields_of_study'
 
-    class Meta:
-        db_table = 'papers'
-        managed = False
+    id = db.Column(db.BigInteger, primary_key=True)
+    normalized_name = db.Column(db.String())
+    display_name = db.Column(db.String())
+    level = db.Column(db.Integer)
+
+    def __init__(self, id, normalized_name, display_name, level):
+        self.id = id
+        self.normalized_name = normalized_name
+        self.display_name = display_name
+        self.level = level
+
+    def __repr__(self):
+        return f"<FieldOfStudy {self.id}>"
+
+
+class Journal(db.Model):
+    __tablename__ = 'journals'
+
+    id = db.Column(db.BigInteger, primary_key=True)
+    normalized_name = db.Column(db.String())
+    display_name = db.Column(db.String())
+
+    def __init__(self, id, normalized_name, display_name):
+        self.id = id
+        self.normalized_name = normalized_name
+        self.display_name = display_name
+
+    def __repr__(self):
+        return f"<Journal {self.id}>"
+
 
 
 # Many-to-many relationships
 
-class PaperFieldStudied(Model):
-    paper = ForeignKey(Paper, on_delete=DO_NOTHING, related_name='+')
-    field_of_study = ForeignKey(FieldOfStudy,
-                                on_delete=DO_NOTHING, related_name='+')
+authorships = db.Table('authorships',
+    db.Column('paper_id', db.BigInteger, db.ForeignKey('papers.id')),
+    db.Column('author_id', db.BigInteger, db.ForeignKey('authors.id')),
+    db.Column('affiliation_id', db.BigInteger, db.ForeignKey('affiliations.id')),
+    db.ForeignKeyConstraint(
+        ('paper_id', 'author_id', 'affiliation_id'),
+        ('authorships.paper_id', 'authorships.author_id', 'authorships.author_id')
+    )
+)
 
-    class Meta:
-        db_table = 'paper_fields_studied'
-        managed = False
+unique_authorships = db.Table('unique_authorships',
+    db.Column('paper_id', db.BigInteger, db.ForeignKey('papers.id')),
+    db.Column('author_id', db.BigInteger, db.ForeignKey('authors.id')),
+    db.ForeignKeyConstraint(
+        ('paper_id', 'author_id'),
+        ('unique_authorships.paper_id', 'unique_authorships.author_id')
+    )
+)
+
+paper_fields_studied = db.Table('paper_fields_studied',
+    db.Column('paper_id', db.BigInteger, db.ForeignKey('papers.id')),
+    db.Column('field_of_study_id', db.BigInteger, db.ForeignKey('fields_of_study.id')),
+    db.ForeignKeyConstraint(
+        ('paper_id', 'field_of_study_id'),
+        ('paper_fields_studied.paper_id', 'paper_fields_studied.field_of_study_id')
+    )
+)
+citations = db.Table('citations',
+    db.Column('citor_paper_id', db.BigInteger, db.ForeignKey('papers.id')),
+    db.Column('citee_paper_id', db.BigInteger, db.ForeignKey('papers.id')),
+    db.ForeignKeyConstraint(
+        ('citor_paper_id', 'citee_paper_id'),
+        ('citations.citor_paper_id', 'citations.citee_paper_id')
+    )
+)
+
+class Paper(db.Model):
+    __tablename__ = 'papers'
+
+    id = db.Column(db.BigInteger, primary_key=True)
+    title = db.Column(db.String())
+    year = db.Column(db.Integer, nullable=True)
+    journal = db.Column(db.BigInteger, db.ForeignKey('journals.id'), nullable=True)
+    conference_series = db.Column(db.BigInteger, db.ForeignKey('conference_series.id'), nullable=True)
+    number_authors = db.Column(db.Integer, nullable=True)
+
+    author_set = db.relationship('authors', secondary=unique_authorships, backref='paper_set')
+    field_of_study_set = db.relationship('fields_of_study', secondary=paper_fields_studied, backref='paper_set')
+    citee_paper_set = db.relationship('papers', secondary=citations, backref='citor_paper_set')
+    citor_paper_set = db.relationship('papers', secondary=citations, backref='citee_paper_set')
+
+    def __init__(self, id, title):
+        self.id = id
+        self.title = title
+
+    def __repr__(self):
+        return f"<Paper {self.id}>"
 
 
-class UniqueAuthorship(Model):
-    paper = ForeignKey(Paper, on_delete=DO_NOTHING, related_name='+')
-    author = ForeignKey(Author, on_delete=DO_NOTHING, related_name='+')
 
-    class Meta:
-        db_table = 'unique_authorships'
-        managed = False
-
-
-class Citation(Model):
-    citor_paper = ForeignKey(Paper, on_delete=DO_NOTHING, related_name='+')
-    citee_paper = ForeignKey(Paper, on_delete=DO_NOTHING, related_name='+')
-
-    class Meta:
-        db_table = 'citations'
-        managed = False
-
-
-# Leaving out for now. Django does not like composite primary keys!
-# Options:
-# - give it a surrogate key
-# - this trick: https://stackoverflow.com/a/65404017
-
-# class AuthorshipAffiliation(Model):
-#     paper = ForeignKey(
-#         Paper,
-#         on_delete=DO_NOTHING, related_name='authorship_affiliation_set')
-#     author = ForeignKey(
-#         Author,
-#         on_delete=DO_NOTHING, related_name='authorship_affiliation_set')
-#     affiliation = ForeignKey(
-#         Affiliation,
-#         on_delete=DO_NOTHING, related_name='authorship_affiliation_set')
-
-#     class Meta:
-#         db_table = 'authorships'
-#         managed = False
+def search(type, name):
+    print(type, name)
+    pass
