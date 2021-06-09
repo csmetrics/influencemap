@@ -108,6 +108,7 @@ class ConferenceInstances(DocType):
     NotificationDueDate = Date()
     FinalVersionDueDate = Date()
     PaperCount = Long()
+    PaperFamilyCount = Long()
     CitationCount = Long()
     CreatedDate = Date(required  = True)
 
@@ -121,6 +122,7 @@ class ConferenceSeries(DocType):
     NormalizedName = Text(required = True, analyzer = "standard")
     DisplayName = Text(required = True, analyzer = "standard")
     PaperCount = Long()
+    PaperFamilyCount = Long()
     CitationCount = Long()
     CreatedDate = Date(required  = True)
 
@@ -137,6 +139,7 @@ class Journals(DocType):
     Publisher = Text()
     Webpage = Text()
     PaperCount = Long()
+    PaperFamilyCount = Long()
     CitationCount = Long()
     CreatedDate = Date(required  = True)
 
