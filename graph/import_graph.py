@@ -1,5 +1,6 @@
 import os, sys, csv
 from multiprocessing import Pool
+from elasticsearch.helpers import bulk
 from elasticsearch_dsl.connections import connections
 from datetime import datetime
 from config import conf
@@ -20,9 +21,10 @@ def import_Authors(r):
     doc.DisplayName = r[3]
     doc.LastKnownAffiliationId = int(r[4]) if r[4] != "" else None
     doc.PaperCount = int(r[5]) if r[5] != "" else None
-    doc.CitationCount = int(r[6]) if r[6] != "" else None
-    doc.CreatedDate = datetime.strptime(r[7], "%Y-%m-%d")
-    doc.save(op_type="create")
+    doc.PaperFamilyCount = int(r[6]) if r[6] != "" else None
+    doc.CitationCount = int(r[7]) if r[7] != "" else None
+    doc.CreatedDate = datetime.strptime(r[8], "%Y-%m-%d")
+    return doc.to_dict(True)
 
 
 def import_Affiliations(r):
@@ -243,12 +245,8 @@ def graph_import(v):
     init_es()
     myfile = (line.replace('\0','') for line in open(filepath))
     reader = csv.reader(myfile, delimiter="\t", quoting=csv.QUOTE_NONE)
-    for r in reader:
-        try:
-            options[data_type](r)
-        except Exception as e:
-            #pass
-            print("[Error]", e)
+    data = [options[data_type](r) for r in reader]
+    bulk(connections.get_connection(), data)
     print("Finished", filepath)
     os.remove(filepath)
 

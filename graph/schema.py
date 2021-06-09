@@ -10,6 +10,7 @@ class Authors(DocType):
     DisplayName = Text(required = True, analyzer = "standard")
     LastKnownAffiliationId  = Long()
     PaperCount = Long()
+    PaperFamilyCount = Long()
     CitationCount = Long()
     CreatedDate = Date(required = True)
 
