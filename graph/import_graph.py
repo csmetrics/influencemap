@@ -99,8 +99,8 @@ def import_PaperAuthorAffiliations(r):
     doc.meta.index = "PaperAuthorAffiliations".lower()
     doc.PaperId = int(r[0])
     doc.AuthorId = int(r[1])
-    doc.meta.id = "{}_{}".format(doc.PaperId, doc.AuthorId)
     doc.AffiliationId = int(r[2]) if r[2] != "" else None
+    doc.meta.id = "{}_{}_{}".format(doc.PaperId, doc.AuthorId, doc.AffiliationId)
     doc.AuthorSequenceNumber = int(r[3])
     doc.OriginalAuthor = r[4] # new attribute ver.2019-11-08
     doc.OriginalAffiliation = r[5] # new attribute ver.2019-01-01
