@@ -13,7 +13,7 @@ author: Alexander Soen
 import copy
 from datetime import datetime
 
-from core.elastic import client
+from core.search.elastic import client
 from core.search.query_info_cache import base_paper_cache_query
 from core.search.query_name_db import *
 

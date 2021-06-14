@@ -1,6 +1,5 @@
 import os
-from core.elastic import *
-
+from core.search.elastic import *
 from core.flower.high_level_get_flower import default_config
 
 import matplotlib.pylab as plt
