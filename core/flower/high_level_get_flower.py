@@ -2,7 +2,6 @@ from core.score.agg_paper_info     import score_leaves
 from core.score.agg_score          import agg_score_df, post_agg_score_df
 from core.score.agg_filter         import filter_year
 from core.flower.flower_bloom_data import score_df_to_graph
-from core.config                   import *
 
 from datetime    import datetime
 from operator    import itemgetter
