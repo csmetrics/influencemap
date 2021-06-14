@@ -1,3 +1,4 @@
+from core.search.elastic import client
 from core.utils.entity_type import Entity_type
 from elasticsearch_dsl import Search
 
