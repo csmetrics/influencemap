@@ -143,18 +143,9 @@ def search():
     keyword = keyword.lower()
     keyword = " ".join(keyword.split())
     id_helper_dict = {"conference": "ConferenceSeriesId", "journal": "JournalId", "institution": "AffiliationId", "paper": "PaperId", "author": "AuthorId"}
-    data = []
+
     print(entityType, keyword)
-    if "conference" in entityType:
-        data += [(val, "conference") for val in query_conference_series(keyword)]
-    if "journal" in entityType:
-        data += [(val, "journal") for val in query_journal(keyword)]
-    if "institution" in entityType:
-        data += [(val, "institution") for val in query_affiliation(keyword)]
-    if "paper" in entityType:
-        data += [(val, "paper") for val in query_paper(keyword)]
-    if "author" in entityType:
-        data += [(val, "author") for val in query_author(keyword)]
+    data = query_entity(entityType, keyword)
     for i in range(len(data)):
         entity = {'data': data[i][0]}
         entity['display-info'] = s[data[i][1]].format(**entity['data'])
