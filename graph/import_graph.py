@@ -1,5 +1,6 @@
 import os, sys, csv
 from multiprocessing import Pool
+from elasticsearch.helpers import bulk
 from elasticsearch_dsl.connections import connections
 from datetime import datetime
 from config import conf
@@ -20,9 +21,10 @@ def import_Authors(r):
     doc.DisplayName = r[3]
     doc.LastKnownAffiliationId = int(r[4]) if r[4] != "" else None
     doc.PaperCount = int(r[5]) if r[5] != "" else None
-    doc.CitationCount = int(r[6]) if r[6] != "" else None
-    doc.CreatedDate = datetime.strptime(r[7], "%Y-%m-%d")
-    doc.save(op_type="create")
+    doc.PaperFamilyCount = int(r[6]) if r[6] != "" else None # after ver 2021-02-15
+    doc.CitationCount = int(r[7]) if r[7] != "" else None
+    doc.CreatedDate = datetime.strptime(r[8], "%Y-%m-%d")
+    return doc.to_dict(True)
 
 
 def import_Affiliations(r):
@@ -36,11 +38,13 @@ def import_Affiliations(r):
     doc.OfficialPage = r[5]
     doc.WikiPage = r[6]
     doc.PaperCount = int(r[7]) if r[7] != "" else None
-    doc.CitationCount = int(r[8]) if r[8] != "" else None
-    doc.Latitude = float(r[9]) if r[9] != "" else None # after ver 2019-11-08
-    doc.Longitude = float(r[10]) if r[10] != "" else None # after ver 2019-11-08
-    doc.CreatedDate = datetime.strptime(r[11], "%Y-%m-%d")
-    doc.save(op_type="create")
+    doc.PaperFamilyCount = int(r[8]) if r[8] != "" else None # after ver 2021-02-15
+    doc.CitationCount = int(r[9]) if r[9] != "" else None
+    doc.IsoCode = r[10] # after ver 2021-02-15
+    doc.Latitude = float(r[11]) if r[11] != "" else None # after ver 2019-11-08
+    doc.Longitude = float(r[12]) if r[12] != "" else None # after ver 2019-11-08
+    doc.CreatedDate = datetime.strptime(r[13], "%Y-%m-%d")
+    return doc.to_dict(True)
 
 
 def import_Papers(r):
@@ -55,28 +59,30 @@ def import_Papers(r):
     doc.BookTitle = r[6]
     doc.Year = int(r[7]) if r[7] != "" else None
     doc.date = datetime.strptime(r[8], "%Y-%m-%d") if r[8] != "" else None
-    doc.Publisher = r[9]
+    doc.OnlineDate = datetime.strptime(r[9], "%Y-%m-%d") if r[9] != "" else None # new attribute ver.2021-02-15
+    doc.Publisher = r[10]
 
-    doc.JournalId = int(r[10]) if r[10] != "" else None
-    doc.ConferenceSeriesId = int(r[11]) if r[11] != "" else None
-    doc.ConferenceInstanceId = int(r[12]) if r[12] != "" else None
-    doc.Volume = r[13]
-    doc.Issue = r[14]
-    doc.FirstPage = r[15]
-    doc.LastPage = r[16]
-    doc.ReferenceCount = int(r[17]) if r[17] != "" else None
-    doc.CitationCount = int(r[18]) if r[18] != "" else None
-    doc.EstimatedCitation = int(r[19]) if r[19] != "" else None
+    doc.JournalId = int(r[11]) if r[11] != "" else None
+    doc.ConferenceSeriesId = int(r[12]) if r[12] != "" else None
+    doc.ConferenceInstanceId = int(r[13]) if r[13] != "" else None
+    doc.Volume = r[14]
+    doc.Issue = r[15]
+    doc.FirstPage = r[16]
+    doc.LastPage = r[17]
+    doc.ReferenceCount = int(r[18]) if r[18] != "" else None
+    doc.CitationCount = int(r[19]) if r[19] != "" else None
+    doc.EstimatedCitation = int(r[20]) if r[20] != "" else None
 
-    doc.OriginalVenue = r[20] # new attribute ver.2019-01-01
-    doc.FamilyId = r[21] # new attribute ver.2019-11-08
-    doc.CreatedDate = datetime.strptime(r[22], "%Y-%m-%d")
+    doc.OriginalVenue = r[21] # new attribute ver.2019-01-01
+    doc.FamilyId = r[22] # new attribute ver.2019-11-08
+    doc.FamilyRank = int(r[23]) if r[23] != "" else None # new attribute ver.2021-02-15
+    doc.CreatedDate = datetime.strptime(r[24], "%Y-%m-%d")
 
     doc.LanguageCode = None
     doc.FieldOfStudy = None
     doc.SourceType = None
     doc.SourceUrl = None
-    doc.save(op_type="create")
+    return doc.to_dict(True)
 
 
 def import_PaperReferences(r):
@@ -85,7 +91,7 @@ def import_PaperReferences(r):
     doc.PaperId = int(r[0])
     doc.PaperReferenceId = int(r[1])
     doc.meta.id = "{}_{}".format(doc.PaperId, doc.PaperReferenceId)
-    doc.save(op_type="create")
+    return doc.to_dict(True)
 
 
 def import_PaperAuthorAffiliations(r):
@@ -93,12 +99,12 @@ def import_PaperAuthorAffiliations(r):
     doc.meta.index = "PaperAuthorAffiliations".lower()
     doc.PaperId = int(r[0])
     doc.AuthorId = int(r[1])
-    doc.meta.id = "{}_{}".format(doc.PaperId, doc.AuthorId)
     doc.AffiliationId = int(r[2]) if r[2] != "" else None
+    doc.meta.id = "{}_{}_{}".format(doc.PaperId, doc.AuthorId, doc.AffiliationId)
     doc.AuthorSequenceNumber = int(r[3])
     doc.OriginalAuthor = r[4] # new attribute ver.2019-11-08
     doc.OriginalAffiliation = r[5] # new attribute ver.2019-01-01
-    doc.save(op_type="create")
+    return doc.to_dict(True)
 
 
 def import_ConferenceInstances(r):
@@ -118,11 +124,12 @@ def import_ConferenceInstances(r):
     doc.NotificationDueDate = datetime.strptime(r[10], "%Y-%m-%d") if r[10] != "" else None
     doc.FinalVersionDueDate = datetime.strptime(r[11], "%Y-%m-%d") if r[11] != "" else None
     doc.PaperCount = int(r[12]) if r[12] != "" else None
-    doc.CitationCount = int(r[13]) if r[13] != "" else None
-    doc.Latitude = float(r[14]) if r[14] != "" else None # after ver 2019-11-08
-    doc.Longitude = float(r[15]) if r[15] != "" else None # after ver 2019-11-08
-    doc.CreatedDate = datetime.strptime(r[16], "%Y-%m-%d")
-    doc.save()
+    doc.PaperFamilyCount = int(r[13]) if r[13] != "" else None # after ver 2021-02-15
+    doc.CitationCount = int(r[14]) if r[14] != "" else None
+    doc.Latitude = float(r[15]) if r[15] != "" else None # after ver 2019-11-08
+    doc.Longitude = float(r[16]) if r[16] != "" else None # after ver 2019-11-08
+    doc.CreatedDate = datetime.strptime(r[17], "%Y-%m-%d")
+    return doc.to_dict(True)
 
 
 def import_ConferenceSeries(r):
@@ -133,9 +140,10 @@ def import_ConferenceSeries(r):
     doc.NormalizedName = r[2]
     doc.DisplayName = r[3]
     doc.PaperCount = int(r[4]) if r[4] != "" else None
-    doc.CitationCount = int(r[5]) if r[5] != "" else None
-    doc.CreatedDate = datetime.strptime(r[6], "%Y-%m-%d")
-    doc.save()
+    doc.PaperFamilyCount = int(r[5]) if r[5] != "" else None # after ver 2021-02-15
+    doc.CitationCount = int(r[6]) if r[6] != "" else None
+    doc.CreatedDate = datetime.strptime(r[7], "%Y-%m-%d")
+    return doc.to_dict(True)
 
 
 def import_Journals(r):
@@ -149,9 +157,10 @@ def import_Journals(r):
     doc.Publisher = r[5]
     doc.Webpage = r[6]
     doc.PaperCount = int(r[7]) if r[7] != "" else None
-    doc.CitationCount = int(r[8]) if r[8] != "" else None
-    doc.CreatedDate = datetime.strptime(r[9], "%Y-%m-%d")
-    doc.save(op_type="create")
+    doc.PaperFamilyCount = int(r[8]) if r[8] != "" else None # after ver 2021-02-15
+    doc.CitationCount = int(r[9]) if r[9] != "" else None
+    doc.CreatedDate = datetime.strptime(r[10], "%Y-%m-%d")
+    return doc.to_dict(True)
 
 
 def import_FieldsOfStudy(r):
@@ -175,7 +184,8 @@ def import_FieldOfStudyChildren(r):
     doc.FieldOfStudyId = int(r[0])
     doc.ChildFieldOfStudyId = int(r[1])
     doc.meta.id = "{}_{}".format(doc.FieldOfStudyId, doc.ChildFieldOfStudyId)
-    doc.save()
+    return doc.to_dict(True)
+
 
 def import_PaperFieldsOfStudy(r):
     doc = PaperFieldsOfStudy()
@@ -184,39 +194,7 @@ def import_PaperFieldsOfStudy(r):
     doc.FieldOfStudyId = int(r[1])
     doc.Similarity = float(r[2])
     doc.meta.id = "{}_{}".format(doc.PaperId, doc.FieldOfStudyId)
-    doc.save()
-
-def update_Papers_FieldsOfStudy(filepath):
-    ### need preprocessing on PaperFieldsOfStudy
-    ### sort --parallel=8 -T /mnt/tmp -uo sorted_PaperFieldsOfStudy.txt PaperFieldsOfStudy.txt
-    print("Starting", filepath)
-    init_es()
-    myfile = (line.replace('\0','') for line in open(filepath))
-    reader = csv.reader(myfile, delimiter="\t", quoting=csv.QUOTE_NONE)
-
-    last_paperid = 0
-    fields = []
-    for r in reader:
-        paperid = int(r[0])
-        if last_paperid != 0 and last_paperid != paperid:
-            try:
-                p = Papers.get(id=last_paperid)
-                p.update(FieldOfStudy=fields)
-            except Exception as e:
-                pass
-            fields = []
-
-        fields.append({
-            "FieldOfStudyId": int(r[1]),
-            "Similarity": float(r[2])
-        })
-        last_paperid = paperid
-
-    try:
-        p = Papers.get(id=last_paperid)
-        p.update(FieldOfStudy=fields)
-    except Exception as e:
-        pass
+    return doc.to_dict(True)
 
 
 options = {
@@ -239,12 +217,8 @@ def graph_import(v):
     init_es()
     myfile = (line.replace('\0','') for line in open(filepath))
     reader = csv.reader(myfile, delimiter="\t", quoting=csv.QUOTE_NONE)
-    for r in reader:
-        try:
-            options[data_type](r)
-        except Exception as e:
-            #pass
-            print("[Error]", e)
+    data = [options[data_type](r) for r in reader]
+    bulk(connections.get_connection(), data)
     print("Finished", filepath)
     os.remove(filepath)
 

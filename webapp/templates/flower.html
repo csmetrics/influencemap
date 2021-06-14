@@ -1,5 +1,3 @@
-{% load staticfiles %}
-
 <html>
 {% include 'header.html' %}
 <body class="hold-transition skin-custom sidebar-mini">
@@ -10,7 +8,7 @@
   <aside class="main-sidebar main-sidebar-wide" style="background-color: #fff;">
     <section class="sidebar">
       <div id="statpane">
-        {% include 'statchart.html' with stats=stats curated=curated yearSlider=yearSlider url_base=session.url_base %}
+        {% include 'statchart.html' %}
       </div>
     </section>
   </aside>
@@ -66,10 +64,10 @@
 </div>
 </body>
 </html>
-<script src="{% static 'js/d3.v4.min.js' %}"></script>
-<script src="{% static 'js/d3-selection-multi.v1.min.js' %}"></script>
-<script src="{% static 'js/d3-scale-chromatic.v1.min.js' %}"></script>
-<script src="{% static 'js/flowerGraph.js' %}"></script>
+<script src="{{ url_for('static', filename='js/d3.v4.min.js') }}"></script>
+<script src="{{ url_for('static', filename='js/d3-selection-multi.v1.min.js') }}"></script>
+<script src="{{ url_for('static', filename='js/d3-scale-chromatic.v1.min.js') }}"></script>
+<script src="{{ url_for('static', filename='js/flowerGraph.js') }}"></script>
 <script>
 option = '{{ navbarOption.selectedOption.id }}';
 keyword = '{{ navbarOption.selectedKeyword }}';

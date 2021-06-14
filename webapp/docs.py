@@ -1,8 +1,9 @@
-import os, sys, json, pandas, string, math, copy
-import multiprocess
-from django.shortcuts import render
-from django.http import JsonResponse
-from django.conf import settings
+import flask
 
-def vast19(request):
-    return render(request, "vast/vast19.html")
+blueprint = flask.Blueprint('docs', __name__,
+                            template_folder='templates/vast')
+
+
+@blueprint.route('/vast19')
+def vast19():
+    return flask.render_template("vast19.html")

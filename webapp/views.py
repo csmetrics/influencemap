@@ -3,13 +3,8 @@ import json
 import math
 import string
 from collections import Counter
-from datetime import datetime
 
-import multiprocess
-from django.conf import settings
-from django.http import HttpResponseRedirect, JsonResponse
-from django.shortcuts import render
-from django.views.decorators.csrf import csrf_exempt
+import flask
 
 import core.utils.entity_type as ent
 from core.search.query_info import paper_info_db_check_multiquery
@@ -22,12 +17,10 @@ from core.search.query_paper import get_all_paper_ids
 from core.utils.get_stats import get_stats
 from core.utils.load_tsv import tsv_to_dict
 from graph.save_cache import *
-from core.elastic import *
 from webapp.graph import ReferenceFlower, compare_flowers
 from webapp.shortener import shorten_front, unshorten_url_ext
 from webapp.utils import *
-
-BASE_DIR = settings.BASE_DIR
+from webapp.models import search
 
 flower_leaves = [ ('author', [ent.Entity_type.AUTH])
                 , ('conf'  , [ent.Entity_type.CONF, ent.Entity_type.JOUR])
@@ -37,26 +30,32 @@ flower_leaves = [ ('author', [ent.Entity_type.AUTH])
 NUM_THREADS = 8
 NUM_NODE_INFO = 5
 
-def autocomplete(request):
-    entity_type = request.GET.get('option')
+
+blueprint = flask.Blueprint('views', __name__)
+
+
+@blueprint.route('/autocomplete')
+def autocomplete():
+    entity_type = flask.request.args.get('option')
     data = loadList(entity_type)
-    return JsonResponse(data,safe=False)
+    return flask.jsonify(data)
 
-@csrf_exempt
-def main(request):
-    return render(request, "main.html")
 
-@csrf_exempt
-def redirect(request):
-    return HttpResponseRedirect(unshorten_url_ext(request.get_full_path()))
+@blueprint.route('/')
+def main():
+    return flask.render_template("main.html")
 
-@csrf_exempt
-def browse(request):
+
+@blueprint.route('/redirect/')
+def redirect():
+    return flask.redirect(unshorten_url_ext(flask.request.full_path))
+
+
+@blueprint.route('/browse')
+def browse():
 
     with open("webapp/static/browse_list.json", "r") as fh:
         browse_list = json.load(fh)
-    # for b in browse_list:
-    #     print(b)
     browse_cache = get_all_browse_cache()
     for group in browse_list:
         for subgroup in group["subgroups"]:
@@ -70,70 +69,60 @@ def browse(request):
                         subsubgroup["docs"] = sorted([cache for cache in browse_cache if cache["Type"] == subsubgroup["tag"]], key=lambda x: (x["Year"], x["DisplayName"]) if ("Year" in x) else (0, x["DisplayName"]))
     browse_cache = {cache["document_id"]: cache for cache in browse_cache}
 
-    return render(request, "browse.html", {"browse_groups": browse_list, "cache_data": browse_cache})
+    return flask.render_template(
+        "browse.html",
+        browse_groups=browse_list, cache_data=browse_cache)
 
-@csrf_exempt
-def create(request):
-    print(request)
 
-    try:
-        data = json.loads(request.POST.get('data'))
-        keyword = data.get('keyword', '')
-        search = data.get('search') == 'true'
-        option = data.get('option')
-    except:
-        keyword = ""
-        option = ""
-        search = False
+@blueprint.route('/create', methods=['GET', 'POST'])
+def create():
 
-    print(search)
+    json_data = flask.request.form.get('data')
+    data = {} if json_data is None else json.loads(json_data)
+    keyword = data.get('keyword', '')
+    search = data.get('search') == 'true'
+    option = data.get('option', '')
+
     # render page with data
-    return render(request, "create.html", {
-        "navbarOption": get_navbar_option(keyword, option),
-        "search": search
-    })
+    return flask.render_template(
+        "create.html",
+        navbarOption=get_navbar_option(keyword, option),
+        search=search)
 
 
-@csrf_exempt
-def curate(request):
-    print(request)
+
+@blueprint.route('/curate')
+def curate():
     types = get_cache_types()
-    try:
-        data = json.loads(request.POST.get('data'))
-        keyword = data.get('keyword', '')
-        search = data.get('search') == 'true'
-        option = data.get('option')
-    except:
-        keyword = ""
-        option = ""
-        search = False
+    data = json.loads(flask.request.form.get('data'))
+    keyword = data.get('keyword', '')
+    search = data.get('search') == 'true'
+    option = data.get('option')
 
-    print(search)
-    print(types)
     # render page with data
-    return render(request, "curate.html", {
-        "navbarOption": get_navbar_option(keyword, option),
-        "search": search,
-        "types": types
-    })
+    return flask.render_template(
+        "curate.html",
+        navbarOption=get_navbar_option(keyword, option),
+        search=search,
+        types=types)
 
-@csrf_exempt
-def check_record(request):
-    exists, names = check_browse_record_exists(request.POST.get("type"), request.POST.get("name"))
-    return JsonResponse({"exists": exists, "names": names})
 
-@csrf_exempt
-def curate_load_file(request):
-    print("this is in the curate_load_file func")
-    filename = request.POST.get("filename")
-    print("filename: ", filename)
+@blueprint.route('/check_record')
+def check_record():
+    exists, names = check_browse_record_exists(flask.request.form.get("type"), flask.request.form.get("name"))
+    return flask.jsonify({"exists": exists, "names": names})
+
+
+@blueprint.route('/crate_load_file')
+def curate_load_file():
+    filename = flask.request.form.get("filename")
     try:
         data = tsv_to_dict(filename)
         success = "true"
     except FileNotFoundError:
         data = {}
         success = "false"
-    return JsonResponse({'data': data, 'success': success}, safe=False)
+    return flask.jsonify({'data': data, 'success': success})
 
 
 
@@ -145,42 +134,44 @@ s = {
     'paper': ('<i class="fa fa-file"></i><h4>{OriginalTitle}</h4><p>Citations: {CitationCount}</p>')
 }
 
-@csrf_exempt
-def search(request):
-    request_data = json.loads(request.POST.get("data"))
+
+@blueprint.route('/search', methods=['POST'])
+def search():
+    request_data = json.loads(flask.request.form.get("data"))
     keyword = request_data.get("keyword")
     entityType = request_data.get("option")
-    print(entityType, request_data)
     exclude = set(string.punctuation)
     keyword = ''.join(ch for ch in keyword if ch not in exclude)
     keyword = keyword.lower()
     keyword = " ".join(keyword.split())
     id_helper_dict = {"conference": "ConferenceSeriesId", "journal": "JournalId", "institution": "AffiliationId", "paper": "PaperId", "author": "AuthorId"}
     data = []
-    if "conference" in entityType:
-        data += [(val, "conference") for val in query_conference_series(keyword)]
-    if "journal" in entityType:
-        data += [(val, "journal") for val in query_journal(keyword)]
-    if "institution" in entityType:
-        data += [(val, "institution") for val in query_affiliation(keyword)]
-    if "paper" in entityType:
-        data += [(val, "paper") for val in query_paper(keyword)]
-    if "author" in entityType:
-        data += [(val, "author") for val in query_author(keyword)]
-    for i in range(len(data)):
-        entity = {'data': data[i][0]}
-        entity['display-info'] = s[data[i][1]].format(**entity['data'])
-        if "Affiliation" in entity['data']: entity['display-info'] = entity['display-info'][0:-4] + ", Institution: {}</p>".format(entity['data']["Affiliation"])
-        if "Authors" in entity['data']: entity['display-info'] += "<p>Authors: {}</p>".format(", ".join(entity['data']["Authors"]))
-        entity['table-id'] = "{}_{}".format(data[i][1], entity['data'][id_helper_dict[data[i][1]]])
-        data[i] = entity
-    return JsonResponse({'entities': data}, safe=False)
+    search(entityType, keyword)
+    # if "conference" in entityType:
+    #     data += [(val, "conference") for val in query_conference_series(keyword)]
+    # if "journal" in entityType:
+    #     data += [(val, "journal") for val in query_journal(keyword)]
+    # if "institution" in entityType:
+    #     data += [(val, "institution") for val in query_affiliation(keyword)]
+    # if "paper" in entityType:
+    #     data += [(val, "paper") for val in query_paper(keyword)]
+    # if "author" in entityType:
+    #     data += [(val, "author") for val in query_author(keyword)]
+    # for i in range(len(data)):
+    #     entity = {'data': data[i][0]}
+    #     entity['display-info'] = s[data[i][1]].format(**entity['data'])
+    #     if "Affiliation" in entity['data']: entity['display-info'] = entity['display-info'][0:-4] + ", Institution: {}</p>".format(entity['data']["Affiliation"])
+    #     if "Authors" in entity['data']: entity['display-info'] += "<p>Authors: {}</p>".format(", ".join(entity['data']["Authors"]))
+    #     entity['table-id'] = "{}_{}".format(data[i][1], entity['data'][id_helper_dict[data[i][1]]])
+    #     data[i] = entity
+    return flask.jsonify({'entities': data})
 
 
-@csrf_exempt
-def manualcache(request):
-    cache_dictionary = (json.loads(request.POST.get('cache')))
-    paper_action = request.POST.get('paperAction')
+
+@blueprint.route('/manualcache', methods=['POST'])
+def manualcache():
+    cache_dictionary = (json.loads(flask.request.form.get('cache')))
+    paper_action = flask.request.form.get('paperAction')
     saveNewBrowseCache(cache_dictionary)
 
     if paper_action == "batch":
@@ -189,7 +180,7 @@ def manualcache(request):
     if paper_action == "cache":
         paper_ids = get_all_paper_ids(cache_dictionary["EntityIds"])
         paper_info_db_check_multiquery(paper_ids)
-    return JsonResponse({},safe=False)
+    return flask.jsonify({})
 
 
 def to_flower_dict(data):
@@ -208,43 +199,31 @@ def to_flower_dict(data):
     return res
 
 
-@csrf_exempt
-def submit(request):
-    print('Flower request: ', datetime.now())
+@blueprint.route('/submit/', methods=['GET', 'POST'])
+def submit():
     session = dict()
-    total_request_cur = datetime.now()
-
-    time_cur = datetime.now()
 
     curated_flag = False
     num_leaves = 25 # default
-    print("REQUEST")
-    print(request.GET)
-    if request.method == "GET":
+    if flask.request.method == "GET":
         # from url e.g.
         # /submit/?type=author_id&id=2146610949&name=stephen_m_blackburn
         # /submit/?type=browse_author_group&name=lexing_xie
         # data should be pre-processed and cached
         curated_flag = True
-        data, option, config = get_url_query(request.GET)
-        print("!!!")
-        print(data)
-        print("!!!")
+        data, option, config = get_url_query(flask.request.args)
         selected_papers = get_all_paper_ids(data["EntityIds"])
         entity_names = get_all_normalised_names(data["EntityIds"])
         keyword = ""
         flower_name = data.get('DisplayName')
-        session["url_base"] = shorten_front("http://influencemap.ml/submit/?id="+request.GET.get("id"))
+        session["url_base"] = shorten_front("http://influencemap.ml/submit/?id="+flask.request.args.get("id"))
     else:
-        data = json.loads(request.POST.get('data'))
+        data = json.loads(flask.request.form.get('data'))
          # normalisedName: <string>   # the normalised name from entity with highest paper count of selected entities
          # entities: {"normalisedName": <string>, "eid": <int>, "entity_type": <author | conference | institution | journal | paper>
         option = data.get("option")   # last searched entity type (confusing for multiple entities)
         keyword = data.get('keyword') # last searched term (doesn't really work for multiple searches)
         entity_ids = data.get('entities')
-        print("!!!")
-        print(data)
-        print("!!!")
         selected_papers = get_all_paper_ids(entity_ids)
         entity_names = get_all_normalised_names(entity_ids)
         config = None
@@ -268,20 +247,12 @@ def submit(request):
     # Solving type issues
     selected_papers = [int(p) for p in selected_papers]
 
-    print()
-    print('Number of Papers Found: ', len(selected_papers))
-    print('Time taken: ', datetime.now() - time_cur)
-    print()
-
-    time_cur = datetime.now()
-
     # Turn selected paper into information dictionary list
-    print("[Submit] selected_papers", len(selected_papers))
     paper_information = paper_info_db_check_multiquery(selected_papers) # API
 
     # Check if the paper information is not empty
     if not paper_information:
-        return render(request, "missing_info.html")
+        return flask.render_template("missing_info.html")
 
     ### PAPER MODIFICATIONS ###
     # Filter for Paper Year different
@@ -295,13 +266,6 @@ def submit(request):
 
     # Get coauthors
     coauthors = get_coauthor_mapping(paper_information)
-
-    print()
-    print('Number of Paper Information Found: ', len(paper_information))
-    print('Time taken: ', datetime.now() - time_cur)
-    print()
-
-    print('Graph ops: ', datetime.now())
 
     # Get min and maximum year
     years = [info['Year'] for info in paper_information if 'Year' in info]
@@ -330,18 +294,10 @@ def submit(request):
     cite_chart = [{"year":k,"value":[{"year":y,"value":Counter(v)[y]} for y in cont_cite_years]} for k,v in citecounter.items()]
 
     # Normalised entity names
-    print("")
     entity_names = list(set(entity_names))
 
-    print('Graph ops: ', datetime.now())
-
-    # TEST TOTAL TIME FOR SCORING
-    time_cur = datetime.now()
-
     # Generate scores from paper information
-    time_score = datetime.now()
     score_df = score_paper_info_list(paper_information, self=entity_names)
-    print('TOTAL SCORE_DF TIME: ', datetime.now() - time_score)
 
     # Set up configuration of influence flowers
     flower_config = default_config()
@@ -355,18 +311,10 @@ def submit(request):
     make_flower = lambda x: gen_flower_data(score_df, x, entity_names,
             flower_name, config=flower_config)
 
-    # Concurrently calculate the aggregations
-    # Concurrent map
-    if settings.MULTIPROCESS:
-        p = multiprocess.Pool(NUM_THREADS)
-        flower_res = p.map(make_flower, flower_leaves)
-    else: # temporary fix
-        flower_res = [make_flower(v) for v in flower_leaves]
+    # Calculate the aggregations
+    flower_res = [make_flower(v) for v in flower_leaves]
     sorted(flower_res, key=lambda x: x[0])
     flower_info = [f_info for _, f_info in flower_res]
-
-    print('TOTAL FLOWER TIME: ', datetime.now() - time_cur)
-    print('TOTAL REQUEST TIME: ', datetime.now() - total_request_cur)
 
     if config == None:
         config = {
@@ -478,15 +426,16 @@ def submit(request):
 
     data["session"] = session
 
-    return render(request, "flower.html", data)
+    return flask.render_template("flower.html", **data)
 
 
-@csrf_exempt
-def resubmit(request):
-    option = request.POST.get('option')
-    keyword = request.POST.get('keyword')
 
-    session = json.loads(request.POST.get("session"))
+@blueprint.route('/resubmit/', methods=['POST'])
+def resubmit():
+    option = flask.request.form.get('option')
+    keyword = flask.request.form.get('keyword')
+
+    session = json.loads(flask.request.form.get("session"))
 
     cache        = session['cache']
     coauthors    = session['coauthors']
@@ -494,23 +443,20 @@ def resubmit(request):
     entity_names = session['entity_names']
 
     flower_config = default_config()
-    flower_config['self_cite'] = request.POST.get('selfcite') == 'true'
-    flower_config['icoauthor'] = request.POST.get('coauthor') == 'true'
-    flower_config['reference'] = request.POST.get('cmp_ref') == 'true'
-    flower_config['pub_lower'] = int(request.POST.get('from_pub_year'))
-    flower_config['pub_upper'] = int(request.POST.get('to_pub_year'))
-    flower_config['cit_lower'] = int(request.POST.get('from_cit_year'))
-    flower_config['cit_upper'] = int(request.POST.get('to_cit_year'))
-    flower_config['num_leaves'] = int(request.POST.get('numpetals'))
-    flower_config['order'] = request.POST.get('petalorder')
-
-    print(flower_config['order'])
+    flower_config['self_cite'] = flask.request.form.get('selfcite') == 'true'
+    flower_config['icoauthor'] = flask.request.form.get('coauthor') == 'true'
+    flower_config['reference'] = flask.request.form.get('cmp_ref') == 'true'
+    flower_config['pub_lower'] = int(flask.request.form.get('from_pub_year'))
+    flower_config['pub_upper'] = int(flask.request.form.get('to_pub_year'))
+    flower_config['cit_lower'] = int(flask.request.form.get('from_cit_year'))
+    flower_config['cit_upper'] = int(flask.request.form.get('to_cit_year'))
+    flower_config['num_leaves'] = int(flask.request.form.get('numpetals'))
+    flower_config['order'] = flask.request.form.get('petalorder')
 
     if flower_config['reference']: # Do not limit the size of new flower
         flower_config['num_leaves'] = 5000
 
     session['year_ranges'] = {'pub_lower': flower_config['pub_lower'], 'pub_upper': flower_config['pub_upper'], 'cit_lower': flower_config['cit_lower'], 'cit_upper': flower_config['cit_upper']}
-    print(session['year_ranges'])
 
     # Recompute flowers
     paper_information = paper_info_db_check_multiquery(cache) # API
@@ -531,13 +477,8 @@ def resubmit(request):
     make_flower = lambda x: gen_flower_data(score_df, x, entity_names,
             flower_name, config=flower_config)
 
-    # Concurrently calculate the aggregations
-    # Concurrent map
-    if settings.MULTIPROCESS:
-        p = multiprocess.Pool(NUM_THREADS)
-        flower_res = p.map(make_flower, flower_leaves)
-    else: # temporary fix
-        flower_res = [make_flower(v) for v in flower_leaves]
+    # Calculate the aggregations
+    flower_res = [make_flower(v) for v in flower_leaves]
 
     # Reduce
     flower_info = list()
@@ -573,7 +514,7 @@ def resubmit(request):
     # Update the node_info cache
     #session['node_info'] = node_info
     data["session"] = session
-    return JsonResponse(data, safe=False)
+    return flask.jsonify(data)
 
 
 def conf_journ_to_display_names(papers):
@@ -583,51 +524,44 @@ def conf_journ_to_display_names(papers):
         if "JournalId" in paper: conf_journ_ids["JournalIds"].append(paper["JournalId"])
     conf_journ_display_names = get_conf_journ_display_names(conf_journ_ids)
     for paper in papers.values():
-        try:
-            if "ConferenceSeriesId" in paper: paper["ConferenceName"] = conf_journ_display_names["Conference"][paper["ConferenceSeriesId"]]
-            if "JournalId" in paper: paper["JournalName"] = conf_journ_display_names["Journal"][paper["JournalId"]]
-        except:
-            print("Unable to match display name for journal/conference")
+        if "ConferenceSeriesId" in paper:
+            paper["ConferenceName"] = conf_journ_display_names["Conference"][paper["ConferenceSeriesId"]]
+        if "JournalId" in paper:
+            paper["JournalName"] = conf_journ_display_names["Journal"][paper["JournalId"]]
     return papers
 
-@csrf_exempt
-def get_publication_papers(request):
-    start = datetime.now()
-    # request should contain the ego author ids and the node author ids separately
-    print(request.POST)
-    request_data = json.loads(request.POST.get("data_string"))
+
+@blueprint.route('/get_publication_papers')
+def get_publication_papers():
+    request_data = json.loads(flask.request.form.get("data_string"))
     session = request_data.get("session")
 
-    pub_year_min = int(request.POST.get("pub_year_min"))
-    pub_year_max = int(request.POST.get("pub_year_max"))
+    pub_year_min = int(flask.request.form.get("pub_year_min"))
+    pub_year_max = int(flask.request.form.get("pub_year_max"))
     paper_ids = session['cache']
     papers = paper_info_db_check_multiquery(paper_ids)
     papers = [paper for paper in papers if (paper["Year"] >= pub_year_min and paper["Year"] <= pub_year_max)]
     papers = conf_journ_to_display_names({paper["PaperId"]: paper for paper in papers})
-    print((datetime.now()-start).total_seconds())
-    return JsonResponse({"papers": papers, "names": session["entity_names"]+ session["node_info"]}, safe=False)
+    return flask.jsonify({"papers": papers, "names": session["entity_names"]+ session["node_info"]})
 
-@csrf_exempt
-def get_citation_papers(request):
-    start = datetime.now()
+
+@blueprint.route('/get_citation_papers')
+def get_citation_papers():
     # request should contain the ego author ids and the node author ids separately
-    print(request.POST)
-
-    request_data = json.loads(request.POST.get("data_string"))
+    request_data = json.loads(flask.request.form.get("data_string"))
     session = request_data.get("session")
 
-    cite_year_min = int(request.POST.get("cite_year_min"))
-    cite_year_max = int(request.POST.get("cite_year_max"))
-    pub_year_min = int(request.POST.get("pub_year_min"))
-    pub_year_max = int(request.POST.get("pub_year_max"))
+    cite_year_min = int(flask.request.form.get("cite_year_min"))
+    cite_year_max = int(flask.request.form.get("cite_year_max"))
+    pub_year_min = int(flask.request.form.get("pub_year_min"))
+    pub_year_max = int(flask.request.form.get("pub_year_max"))
     paper_ids = session['cache']
     papers = paper_info_db_check_multiquery(paper_ids)
     cite_papers = [[citation for citation in paper["Citations"] if (citation["Year"] >= cite_year_min and citation["Year"] <= cite_year_max)] for paper in papers if (paper["Year"] >= pub_year_min and paper["Year"] <= pub_year_max)]
     citations = sum(cite_papers,[])
     citations = conf_journ_to_display_names({paper["PaperId"]: paper for paper in citations})
 
-    print((datetime.now()-start).total_seconds())
-    return JsonResponse({"papers": citations, "names": session["entity_names"] + session["node_info"],"node_info": session["node_information_store"]}, safe=False)
+    return flask.jsonify({"papers": citations, "names": session["entity_names"] + session["node_info"],"node_info": session["node_information_store"]})
 
 
 def get_entities(paper):
@@ -646,7 +580,7 @@ NODE_INFO_FIELDS = ["PaperTitle", "Authors", "PaperId", "Year", "ConferenceName"
         "ConferenceSeriesId", "JournalName", "JournalId"]
 
 
-def get_node_info_single(request, entity, entity_type, year_ranges):
+def get_node_info_single(entity, entity_type, year_ranges):
     # Determine the citation range
     pub_lower = year_ranges["pub_lower"]
     pub_upper = year_ranges["pub_upper"]
@@ -654,7 +588,7 @@ def get_node_info_single(request, entity, entity_type, year_ranges):
     cit_upper = year_ranges["cit_upper"]
 
     # Get paper to get information from
-    request_data = json.loads(request.POST.get("data_string"))
+    request_data = json.loads(flask.request.form.get("data_string"))
     session = request_data.get("session")
     papers = paper_info_db_check_multiquery(session["cache"])
 
@@ -734,27 +668,29 @@ def get_node_info_single(request, entity, entity_type, year_ranges):
     return {"node_name": entity, "node_type": entity_type, "node_links": links, "paper_info": papers_to_send}
 
 
-@csrf_exempt
-def get_node_info(request):
-    request_data = json.loads(request.POST.get("data_string"))
+
+@blueprint.route('/get_node_info/', methods=['POST'])
+def get_node_info():
+    request_data = json.loads(flask.request.form.get("data_string"))
     node_name = request_data.get("name")
     node_type = request_data.get("node_type")
-    print(node_name, node_type)
     session = request_data.get("session")
     entities = session["entity_names"]
     year_ranges = session["year_ranges"]
     flower_name = session["flower_name"]
 
-    data = get_node_info_single(request, node_name, node_type, year_ranges)
+    data = get_node_info_single(node_name, node_type, year_ranges)
     data["node_name"] = node_name
     data["flower_name"] = flower_name
     data["max_page"] = math.ceil(len(data["node_links"]) / 5)
     data["node_links"] = data["node_links"][0:min(5, len(data["node_links"]))]
-    return JsonResponse(data, safe=False)
+    return flask.jsonify(data)
 
-@csrf_exempt
-def get_next_node_info_page(request):
-    request_data = json.loads(request.POST.get("data_string"))
+
+
+@blueprint.route('/get_next_node_info_page/', methods=['POST'])
+def get_next_node_info_page():
+    request_data = json.loads(flask.request.form.get("data_string"))
     node_name = request_data.get("name")
     node_type = request_data.get("node_type")
     session = request_data.get("session")
@@ -763,8 +699,7 @@ def get_next_node_info_page(request):
     flower_name = session["flower_name"]
     page = int(request_data.get("page"))
 
-    node_info = get_node_info_single(request, node_name, node_type, year_ranges)
+    node_info = get_node_info_single(node_name, node_type, year_ranges)
     page_length = 5
     page_info = {"paper_info": node_info["paper_info"], "node_links": node_info["node_links"][0+page_length*(page-1):min(page_length*page, len(node_info["node_links"]))]}
-    print(page)
-    return JsonResponse(page_info, safe=False)
+    return flask.jsonify(page_info)
