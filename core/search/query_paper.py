@@ -1,7 +1,6 @@
 import core.search.query_paper_db as qp_db
 
 from core.utils.entity_type import Entity_type
-from core.search.mag_interface import APIKeyError
 
 def paper_check_query(entity_type, entity_ids):
     return qp_db.paper_query(entity_type, entity_ids)

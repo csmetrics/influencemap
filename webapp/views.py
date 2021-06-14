@@ -16,11 +16,9 @@ from core.search.query_name import (
 from core.search.query_paper import get_all_paper_ids
 from core.utils.get_stats import get_stats
 from core.utils.load_tsv import tsv_to_dict
-from graph.save_cache import *
 from webapp.graph import ReferenceFlower, compare_flowers
 from webapp.shortener import shorten_front, unshorten_url_ext
 from webapp.utils import *
-from webapp.models import search
 
 flower_leaves = [ ('author', [ent.Entity_type.AUTH])
                 , ('conf'  , [ent.Entity_type.CONF, ent.Entity_type.JOUR])
@@ -146,24 +144,24 @@ def search():
     keyword = " ".join(keyword.split())
     id_helper_dict = {"conference": "ConferenceSeriesId", "journal": "JournalId", "institution": "AffiliationId", "paper": "PaperId", "author": "AuthorId"}
     data = []
-    search(entityType, keyword)
-    # if "conference" in entityType:
-    #     data += [(val, "conference") for val in query_conference_series(keyword)]
-    # if "journal" in entityType:
-    #     data += [(val, "journal") for val in query_journal(keyword)]
-    # if "institution" in entityType:
-    #     data += [(val, "institution") for val in query_affiliation(keyword)]
-    # if "paper" in entityType:
-    #     data += [(val, "paper") for val in query_paper(keyword)]
-    # if "author" in entityType:
-    #     data += [(val, "author") for val in query_author(keyword)]
-    # for i in range(len(data)):
-    #     entity = {'data': data[i][0]}
-    #     entity['display-info'] = s[data[i][1]].format(**entity['data'])
-    #     if "Affiliation" in entity['data']: entity['display-info'] = entity['display-info'][0:-4] + ", Institution: {}</p>".format(entity['data']["Affiliation"])
-    #     if "Authors" in entity['data']: entity['display-info'] += "<p>Authors: {}</p>".format(", ".join(entity['data']["Authors"]))
-    #     entity['table-id'] = "{}_{}".format(data[i][1], entity['data'][id_helper_dict[data[i][1]]])
-    #     data[i] = entity
+    print(entityType, keyword)
+    if "conference" in entityType:
+        data += [(val, "conference") for val in query_conference_series(keyword)]
+    if "journal" in entityType:
+        data += [(val, "journal") for val in query_journal(keyword)]
+    if "institution" in entityType:
+        data += [(val, "institution") for val in query_affiliation(keyword)]
+    if "paper" in entityType:
+        data += [(val, "paper") for val in query_paper(keyword)]
+    if "author" in entityType:
+        data += [(val, "author") for val in query_author(keyword)]
+    for i in range(len(data)):
+        entity = {'data': data[i][0]}
+        entity['display-info'] = s[data[i][1]].format(**entity['data'])
+        if "Affiliation" in entity['data']: entity['display-info'] = entity['display-info'][0:-4] + ", Institution: {}</p>".format(entity['data']["Affiliation"])
+        if "Authors" in entity['data']: entity['display-info'] += "<p>Authors: {}</p>".format(", ".join(entity['data']["Authors"]))
+        entity['table-id'] = "{}_{}".format(data[i][1], entity['data'][id_helper_dict[data[i][1]]])
+        data[i] = entity
     return flask.jsonify({'entities': data})
 
 
@@ -172,7 +170,7 @@ def search():
 def manualcache():
     cache_dictionary = (json.loads(flask.request.form.get('cache')))
     paper_action = flask.request.form.get('paperAction')
-    saveNewBrowseCache(cache_dictionary)
+    #saveNewBrowseCache(cache_dictionary)
 
     if paper_action == "batch":
         paper_ids = get_all_paper_ids(cache_dictionary["EntityIds"])
@@ -237,8 +235,8 @@ def submit():
                 flower_name += " +{} more".format(len(entity_names)-1)
 
         doc_for_es_cache={"DisplayName": flower_name, "EntityIds": data["entities"], "Type": "user_generated"}
-        doc_id = saveNewBrowseCache(doc_for_es_cache)
-        session["url_base"] = shorten_front("http://influencemap.ml/submit/?id="+doc_id)
+        #doc_id = saveNewBrowseCache(doc_for_es_cache)
+        #session["url_base"] = shorten_front("http://influencemap.ml/submit/?id="+doc_id)
 
     # Default Dates
     min_year = None
