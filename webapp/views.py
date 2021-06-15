@@ -27,6 +27,10 @@ from webapp.graph import ReferenceFlower, compare_flowers
 from webapp.shortener import shorten_front, unshorten_url_ext
 from webapp.utils import *
 
+from webapp.konigsberg_client import KonigsbergClient
+
+kb_client = KonigsbergClient('http://localhost:8081/get-flower')
+
 BASE_DIR = settings.BASE_DIR
 
 flower_leaves = [ ('author', [ent.Entity_type.AUTH])
@@ -208,18 +212,29 @@ def to_flower_dict(data):
     return res
 
 
+def as_graph(flower):
+    import networkx as nx
+    g = nx.DiGraph(ego='ego')
+    g.add_node('ego', name='ego', weight=None)
+    for i, (id_, score) in enumerate(flower['influencers'].items()):
+        g.add_node(id_, nratiow=1, ratiow=1, sumw=1, sum=1, coauthor=False,
+                   dif=1, inf_in=0, inf_out=score, bloom_order=i)
+        g.add_edge('ego', id_, weight=score, nweight=1, direction='in',
+            ratiow=1, dif=1, sumw=1,
+            inf_in=score, inf_out=0,
+            bloom_order=i)
+        g.add_edge(id_, 'ego', weight=0, nweight=1, direction='out',
+            ratiow=1, dif=1, sumw=1,
+            inf_in=0, inf_out=score,
+            bloom_order=i)
+    return g
+
+
 @csrf_exempt
 def submit(request):
-    print('Flower request: ', datetime.now())
     session = dict()
-    total_request_cur = datetime.now()
 
-    time_cur = datetime.now()
-
-    curated_flag = False
     num_leaves = 25 # default
-    print("REQUEST")
-    print(request.GET)
     if request.method == "GET":
         # from url e.g.
         # /submit/?type=author_id&id=2146610949&name=stephen_m_blackburn
@@ -227,258 +242,38 @@ def submit(request):
         # data should be pre-processed and cached
         curated_flag = True
         data, option, config = get_url_query(request.GET)
-        print("!!!")
-        print(data)
-        print("!!!")
-        selected_papers = get_all_paper_ids(data["EntityIds"])
+        author_ids = data['EntityIds'].get('AuthorIds', [])
+        # selected_papers = get_all_paper_ids(data["EntityIds"])
         entity_names = get_all_normalised_names(data["EntityIds"])
-        keyword = ""
         flower_name = data.get('DisplayName')
-        session["url_base"] = shorten_front("http://influencemap.ml/submit/?id="+request.GET.get("id"))
     else:
-        data = json.loads(request.POST.get('data'))
-         # normalisedName: <string>   # the normalised name from entity with highest paper count of selected entities
-         # entities: {"normalisedName": <string>, "eid": <int>, "entity_type": <author | conference | institution | journal | paper>
-        option = data.get("option")   # last searched entity type (confusing for multiple entities)
-        keyword = data.get('keyword') # last searched term (doesn't really work for multiple searches)
-        entity_ids = data.get('entities')
-        print("!!!")
-        print(data)
-        print("!!!")
-        selected_papers = get_all_paper_ids(entity_ids)
-        entity_names = get_all_normalised_names(entity_ids)
-        config = None
-        flower_name = data.get('flower_name')
+        curated_flag = False
+        raise NotImplementedError()
 
-        if not entity_names:
-            entity_names = data["names"]
-        if not flower_name:
-            flower_name = "" + entity_names[0]
-            if len(data["names"]) > 1:
-                flower_name += " +{} more".format(len(entity_names)-1)
+    flower = kb_client.get_flower(author_ids=author_ids)
 
-        doc_for_es_cache={"DisplayName": flower_name, "EntityIds": data["entities"], "Type": "user_generated"}
-        doc_id = saveNewBrowseCache(doc_for_es_cache)
-        session["url_base"] = shorten_front("http://influencemap.ml/submit/?id="+doc_id)
+    from webapp.front_end_helper import make_response_data
+    rdata = make_response_data(flower, is_curated=curated_flag)
+    # from core.flower.high_level_get_flower import processdata
+    # author_flower = processdata(
+    #     'author',
+    #     as_graph(flower['author_part']),
+    #     50,
+    #     None,
+    #     0)
+    # author_flower['total'] = 20
 
-    # Default Dates
-    min_year = None
-    max_year = None
 
-    # Solving type issues
-    selected_papers = [int(p) for p in selected_papers]
+    # rdata = {}
+    # rdata['stats'] = {'min_year': 1950, 'max_year': 2012, 'num_papers': 70, 'avg_papers': 1.1, 'num_refs': 147, 'avg_refs': 2, 'num_cites': 1199, 'avg_cites': 17}
+    # rdata['navbarOption'] = {'optionlist': [{'id': 'author', 'name': 'Author'}, {'id': 'conference', 'name': 'Conference'}, {'id': 'journal', 'name': 'Journal'}, {'id': 'institution', 'name': 'Institution'}, {'id': 'paper', 'name': 'Paper'}], 'selectedKeyword': '', 'selectedOption': {'id': 'author', 'name': 'Author'}}
+    # rdata['yearSlider'] = {'title': 'Publications range', 'pubrange': [1950, 2012, 63], 'citerange': [1950, 2018, 69], 'pubChart': [], 'citeChart': [], 'selected': {'pub_lower': 1950, 'pub_upper': 2012, 'cit_lower': 1950, 'cit_upper': 2018, 'self_cite': 'false', 'icoauthor': 'true', 'cmp_ref': 'false', 'num_leaves': 25, 'order': 'ratio'}}
+    # rdata['curated'] = curated_flag
+    # rdata['conf'] = rdata['inst'] = rdata['fos'] = [{'nodes': [], 'links': [], 'bars': [], 'total': 0}] * 3
+    # rdata['author'] = [author_flower] * 3
+    return render(request, "flower.html", rdata)
 
-    print()
-    print('Number of Papers Found: ', len(selected_papers))
-    print('Time taken: ', datetime.now() - time_cur)
-    print()
 
-    time_cur = datetime.now()
-
-    # Turn selected paper into information dictionary list
-    print("[Submit] selected_papers", len(selected_papers))
-    paper_information = paper_info_db_check_multiquery(selected_papers) # API
-
-    # Check if the paper information is not empty
-    if not paper_information:
-        return render(request, "missing_info.html")
-
-    ### PAPER MODIFICATIONS ###
-    # Filter for Paper Year different
-    max_year_paper = max(paper_information, key=lambda x: x['Year'])['Year']
-    new_paper_information = list()
-    for paper in paper_information:
-        if paper['Year'] > max_year_paper - 100:
-            new_paper_information.append(paper)
-    paper_information = new_paper_information
-    ### PAPER MODIFICATIONS ###
-
-    # Get coauthors
-    coauthors = get_coauthor_mapping(paper_information)
-
-    print()
-    print('Number of Paper Information Found: ', len(paper_information))
-    print('Time taken: ', datetime.now() - time_cur)
-    print()
-
-    print('Graph ops: ', datetime.now())
-
-    # Get min and maximum year
-    years = [info['Year'] for info in paper_information if 'Year' in info]
-    min_pub_year, max_pub_year = min(years, default=0), max(years, default=0)
-
-    # calculate pub/cite chart data
-    cont_pub_years = range(min_pub_year, max_pub_year+1)
-    cite_years = set()
-    for info in paper_information:
-        if 'Citations' in info:
-            cite_years.update({entity["Year"] for entity in info['Citations'] if "Year" in entity})
-
-    # Add publication years as well
-    cite_years.add(min_pub_year)
-    cite_years.add(max_pub_year)
-
-    min_cite_year, max_cite_year = min(cite_years, default=0), max(cite_years, default=0)
-    cont_cite_years = range(min(cite_years, default=0), max(cite_years,default=0)+1)
-    pub_chart = [{"year":k,"value":Counter(years)[k] if k in Counter(years) else 0} for k in cont_cite_years]
-    citecounter = {k:[] for k in cont_cite_years}
-    for info in paper_information:
-        if 'Citations' in info:
-            for entity in info['Citations']:
-                citecounter[info['Year']].append(entity["Year"])
-
-    cite_chart = [{"year":k,"value":[{"year":y,"value":Counter(v)[y]} for y in cont_cite_years]} for k,v in citecounter.items()]
-
-    # Normalised entity names
-    print("")
-    entity_names = list(set(entity_names))
-
-    print('Graph ops: ', datetime.now())
-
-    # TEST TOTAL TIME FOR SCORING
-    time_cur = datetime.now()
-
-    # Generate scores from paper information
-    time_score = datetime.now()
-    score_df = score_paper_info_list(paper_information, self=entity_names)
-    print('TOTAL SCORE_DF TIME: ', datetime.now() - time_score)
-
-    # Set up configuration of influence flowers
-    flower_config = default_config()
-    if config:
-        flower_config = config
-
-    if 'cmp_ref' in flower_config and flower_config['cmp_ref']: # Do not limit the size of new flower
-        flower_config['num_leaves'] = 5000
-
-    # Work function
-    make_flower = lambda x: gen_flower_data(score_df, x, entity_names,
-            flower_name, config=flower_config)
-
-    # Concurrently calculate the aggregations
-    # Concurrent map
-    if settings.MULTIPROCESS:
-        p = multiprocess.Pool(NUM_THREADS)
-        flower_res = p.map(make_flower, flower_leaves)
-    else: # temporary fix
-        flower_res = [make_flower(v) for v in flower_leaves]
-    sorted(flower_res, key=lambda x: x[0])
-    flower_info = [f_info for _, f_info in flower_res]
-
-    print('TOTAL FLOWER TIME: ', datetime.now() - time_cur)
-    print('TOTAL REQUEST TIME: ', datetime.now() - total_request_cur)
-
-    if config == None:
-        config = {
-            "pub_lower": min_pub_year,
-            "pub_upper": max_pub_year,
-            "cit_lower": min_cite_year,
-            "cit_upper": max_cite_year,
-            "self_cite": "false",
-            "icoauthor": "true",
-            "cmp_ref": "false",
-            "num_leaves": num_leaves,
-            "order": "ratio",
-        }
-    else:
-        config["self_cite"] = str(config["self_cite"]).lower()
-        config["icoauthor"] = str(config["icoauthor"]).lower()
-        config["cmp_ref"] = str(config["cmp_ref"]).lower()
-
-    data = {
-        "author": flower_info[0],
-        "conf"  : flower_info[1],
-        "inst"  : flower_info[2],
-        "fos"   : flower_info[3],
-        "curated": curated_flag,
-        "yearSlider": {
-            "title": "Publications range",
-            "pubrange": [min_pub_year, max_pub_year, (max_pub_year-min_pub_year+1)],
-            "citerange": [min_cite_year, max_cite_year, (max_cite_year-min_cite_year+1)],
-            "pubChart": pub_chart,
-            "citeChart": cite_chart,
-            "selected": config
-        },
-        "navbarOption": get_navbar_option(keyword, option)
-    }
-
-    # Set cache
-    cache = {'cache': selected_papers, 'coauthors': coauthors}
-
-    stats = get_stats(paper_information)
-    data['stats'] = stats
-
-    # filter flower nodes by reference
-    if config['cmp_ref'] == 'true':
-
-        make_ref = lambda x: gen_flower_data(score_df, x, entity_names,
-                flower_name, config=default_config())
-
-        ref_res = [make_ref(v) for v in flower_leaves]
-        sorted(ref_res, key=lambda x: x[0])
-
-        # Reduce
-        ref_info = list()
-        for _, f_info in ref_res:
-            ref_info.append(f_info)
-
-        flower_data = to_flower_dict(ref_info)
-        session["reference_flower"] = []
-        data["author"] = []
-        data["conf"] = []
-        data["inst"] = []
-        data["fos"] = []
-        orig_flower = list(zip(*flower_info))
-        for flower_dict, flower_set in zip(flower_data, orig_flower):
-
-            ref_data = copy.deepcopy(data)
-            ref_data.update(flower_dict)
-
-            reference_flower = ReferenceFlower(ref_data)
-
-            # save reference flower for comparison
-            session["reference_flower"].append(reference_flower.data())
-
-            cmp_flower = compare_flowers(
-                reference_flower.data(), flower_set)
-
-            # Force updates to flower information
-            data["author"].append(cmp_flower[0])
-            data["conf"].append(cmp_flower[1])
-            data["inst"].append(cmp_flower[2])
-            data["fos"].append(cmp_flower[3])
-
-        data["yearSlider"]["selected"]["num_leaves"] = num_leaves
-
-    else:
-        flower_data = to_flower_dict(flower_info)
-        session["reference_flower"] = []
-
-        for flower_dict in flower_data:
-
-            ref_data = copy.deepcopy(data)
-            ref_data.update(flower_dict)
-
-            # save reference flower for comparison
-            reference_flower = ReferenceFlower(ref_data)
-            session["reference_flower"].append(reference_flower.data())
-
-    # Cache from flower data
-    for key, value in cache.items():
-        session[key] = value
-
-    for p in paper_information:
-        len(p['Citations'])
-    session['year_ranges'] = {'pub_lower': min_pub_year, 'pub_upper': max_pub_year, 'cit_lower': min_cite_year, 'cit_upper': max_cite_year}
-    session['flower_name']  = flower_name
-    session['entity_names'] = entity_names
-    session['icoauthor'] = config['icoauthor']
-    session['self_cite'] = config['self_cite']
-    session['reference'] = config['cmp_ref']
-
-    data["session"] = session
-
-    return render(request, "flower.html", data)
 
 
 @csrf_exempt
