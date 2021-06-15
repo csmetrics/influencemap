@@ -1,15 +1,14 @@
-{% load staticfiles %}
 <head>
   <title>InfluenceMap</title>
 
-  <link rel="icon" href="{% static 'images/influencemap_logo_network.png' %}" type="image/x-icon">
-  <link rel="stylesheet" href="{% static 'css/bootstrap.min.css' %}" />
-  <link rel="stylesheet" href="{% static 'css/font-awesome.min.css' %}" />
+  <link rel="icon" href="{{ url_for('static', filename='images/influencemap_logo_network.png') }}" type="image/x-icon">
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/bootstrap.min.css') }}" />
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/font-awesome.min.css') }}" />
   <link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.3.1/css/regular.css" integrity="sha384-ZlNfXjxAqKFWCwMwQFGhmMh3i89dWDnaFU2/VZg9CvsMGA7hXHQsPIqS+JIAmgEq" crossorigin="anonymous">
 
   <link href='https://fonts.googleapis.com/css?family=Lato:100,300,400,400italic,700,900' rel='stylesheet' type='text/css' property="link">
 
-  <script type="text/javascript" src="{% static 'js/popper.min.js' %}"></script>
+  <script type="text/javascript" src="{{ url_for('static', filename='js/popper.min.js') }}"></script>
   <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
   <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js"></script>
 
@@ -19,26 +18,26 @@
   <script type="text/javascript" src="https://cdn.datatables.net/select/1.2.5/js/dataTables.select.min.js"></script>
   <script type="text/css" src="https://cdn.datatables.net/select/1.2.5/css/select.dataTables.min.css"></script>
   <!-- rangepicker -->
-  <link rel="stylesheet" href="{% static 'css/nouislider.min.css' %}" />
-  <script type="text/javascript" src="{% static 'js/nouislider.min.js' %}"></script>
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/nouislider.min.css') }}" />
+  <script type="text/javascript" src="{{ url_for('static', filename='js/nouislider.min.js') }}"></script>
 
   <!-- function to post data -->
-  <script type="text/javascript" src="{% static 'js/postData.js' %}"></script>
+  <script type="text/javascript" src="{{ url_for('static', filename='js/postData.js') }}"></script>
 
-  <link rel="stylesheet" href="{% static 'css/AdminLTE.min.css' %}" />
-  <!-- <link rel="stylesheet" href="{% static 'css/skins/_all-skins.min.css' %}"> -->
-  <link rel="stylesheet" href="{% static 'css/skins/skin-custom.css' %}">
-  <link rel="stylesheet" href="{% static 'css/auto-complete.css' %}" />
-  <link rel="stylesheet" href="{% static 'css/webapp.css' %}" />
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/AdminLTE.min.css') }}" />
+  <!-- <link rel="stylesheet" href="{{ url_for('static', filename='css/skins/_all-skins.min.css') }}"> -->
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/skins/skin-custom.css') }}">
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/auto-complete.css') }}" />
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/webapp.css') }}" />
 
   <!-- js utils -->
-  <script type="text/javascript" src="{% static 'js/adminlte.min.js' %}"></script>
-  <script type="text/javascript" src="{% static 'js/utils.js' %}"></script>
+  <script type="text/javascript" src="{{ url_for('static', filename='js/adminlte.min.js') }}"></script>
+  <script type="text/javascript" src="{{ url_for('static', filename='js/utils.js') }}"></script>
 
   <!-- d3 -->
-  <script src="{% static 'js/d3.v4.min.js' %}"></script>
-  <script src="{% static 'js/d3-selection-multi.v1.min.js' %}"></script>
-  <script src="{% static 'js/d3-scale-chromatic.v1.min.js' %}"></script>
+  <script src="{{ url_for('static', filename='js/d3.v4.min.js') }}"></script>
+  <script src="{{ url_for('static', filename='js/d3-selection-multi.v1.min.js') }}"></script>
+  <script src="{{ url_for('static', filename='js/d3-scale-chromatic.v1.min.js') }}"></script>
 
   <!-- Global site tag (gtag.js) - Google Analytics -->
   <script async src="https://www.googletagmanager.com/gtag/js?id=UA-135269416-1"></script>

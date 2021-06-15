@@ -3,9 +3,6 @@ import networkx as nx
 import numpy as np
 from datetime import datetime
 
-# Config setup
-from core.config import *
-
 def normalise_to_proportion_of_max(series):
     ''' Function to normalise node sizes with max node being 1
     '''

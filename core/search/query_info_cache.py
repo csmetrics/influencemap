@@ -6,7 +6,7 @@ author: Alexander Soen
 '''
 from datetime import datetime
 
-from core.elastic import client
+from core.search.elastic import client
 from core.search.query_utility import field_del
 from core.search.query_utility import chunker
 

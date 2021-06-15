@@ -8,7 +8,7 @@ author: Alexander Soen
 from elasticsearch import helpers
 from elasticsearch_dsl import Search
 
-from core.elastic import client
+from core.search.elastic import client
 from core.search.query_utility import paper_info_to_cache_json
 
 def cache_paper_info(paper_infos, chunk_size=20, request_timeout=100, additional_tag={}):

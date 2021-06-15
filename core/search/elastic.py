@@ -9,6 +9,7 @@ client = Elasticsearch(
     connection_class=RequestsHttpConnection,
     http_compress=True)
 
+
 def query_cache_paper_info(author_id):
     result = {}
     cache_index = "paper_info"
@@ -24,6 +25,7 @@ def query_cache_paper_info(author_id):
     paper_ids = [e["_source"]["PaperId"] for e in data]
     return paper_ids
 
+
 def query_author_group(author_name):
     result = {}
     cache_index = "browse_author_group"
@@ -36,6 +38,7 @@ def query_author_group(author_name):
     author_ids = data[0]["_source"]["AuthorIds"]
     return query_cache_paper_info(author_ids)
 
+
 def query_browse_group(document_id):
     result = {}
     cache_index = "browse_cache"
@@ -47,6 +50,7 @@ def query_browse_group(document_id):
     document = data[0]["_source"]
     return document
 
+
 def search_cache(cache_index, cache_type):
     s = Search(using=client, index=cache_index).query("match", Type=cache_type)
     response = []
@@ -56,6 +60,7 @@ def search_cache(cache_index, cache_type):
         res["_id"] = res_id
         response.append(res)
     return response
+
 
 def query_paper_group(document_id):
     result = {}
@@ -109,6 +114,7 @@ def query_names_with_matches(index, fields_list, search_phrase, max_return=30):
         count += 1
     return result
 
+
 def query_names_with_exact_matches(index, field, search_phrase, max_return=30):
     result = []
     normalized_search_phrase = re.sub(r'\W+', ' ', search_phrase).lower()
@@ -139,6 +145,7 @@ def query_names_with_exact_matches(index, field, search_phrase, max_return=30):
         count += 1
     return result
 
+
 def query_conference_series(search_phrase):
     return query_names_with_matches("conferenceseries", ["DisplayName","NormalizedName"] , search_phrase)
 
@@ -164,6 +171,21 @@ def query_author(search_phrase):
             author["Affiliation"] = get_names_from_affiliation_ids([author["LastKnownAffiliationId"]])[0]
             print(author["Affiliation"])
     return authors
+
+
+def query_entity(entityType, keyword):
+    data = []
+    if "conference" in entityType:
+        data += [(val, "conference") for val in query_conference_series(keyword)]
+    if "journal" in entityType:
+        data += [(val, "journal") for val in query_journal(keyword)]
+    if "institution" in entityType:
+        data += [(val, "institution") for val in query_affiliation(keyword)]
+    if "paper" in entityType:
+        data += [(val, "paper") for val in query_paper(keyword)]
+    if "author" in entityType:
+        data += [(val, "author") for val in query_author(keyword)]
+    return data
 
 
 def get_authors_from_paper(paper_id):
@@ -223,6 +245,7 @@ def get_display_names_from_journal_ids(entity_ids):
 
 def get_display_names_from_author_ids(entity_ids):
     return get_names_from_entity(entity_ids, "authors", "AuthorId", "DisplayName", with_id=False)
+
 
 def get_all_browse_cache():
     cache_index = "browse_cache"
