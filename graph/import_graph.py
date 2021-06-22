@@ -173,8 +173,9 @@ def import_FieldsOfStudy(r):
     doc.MainType = r[4]
     doc.Level = int(r[5]) if r[5] != "" else None
     doc.PaperCount = int(r[6]) if r[6] != "" else None
-    doc.CitationCount = int(r[7]) if r[7] != "" else None
-    doc.CreatedDate = datetime.strptime(r[8], "%Y-%m-%d")
+    doc.PaperFamilyCount = int(r[7]) if r[7] != "" else None # after ver 2021-02-15
+    doc.CitationCount = int(r[8]) if r[8] != "" else None
+    doc.CreatedDate = datetime.strptime(r[9], "%Y-%m-%d")
     doc.save()
 
 
