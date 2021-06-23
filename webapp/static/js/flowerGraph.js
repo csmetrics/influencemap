@@ -344,6 +344,7 @@ function drawFlower(svg_id, data, idx, w, num, order) {
 
     for (var bar_index = 0; bar_index < bar[idx]["_groups"][0].length; bar_index++) {
         var bname = bar[idx]["_groups"][0][bar_index].getAttribute("name");
+        bname = bname.replace('\\', '\\\\').replace("'", "\\'");
         if ($("circle[name='"+bname+"']")[0] == undefined)
           bar[idx]["_groups"][0][bar_index].style = "fill:#ddd"
     }
@@ -352,12 +353,13 @@ function drawFlower(svg_id, data, idx, w, num, order) {
 function highlight_on(idx, selected, compare_ref) {
   tag = selected.tagName;
   name = d3.select(selected).attr("name");
+  var esc_name = name.replace('\\', '\\\\').replace("'", "\\'");
   group = d3.select(selected).attr("gtype");
   id = d3.select(selected).attr("id");
 
   if (tag == "circle" && id == 0) return;
   if (tag == "rect") {
-    rel_circle = $("circle[name='"+name+"']")[0];
+    rel_circle = $("circle[name='"+esc_name+"']")[0];
     if (rel_circle == undefined) return;
     id = rel_circle.id;
   }

@@ -71,11 +71,11 @@
 <script>
 option = '{{ navbarOption.selectedOption.id }}';
 keyword = '{{ navbarOption.selectedKeyword }}';
-author_data = {{ author|tojson }}[0]
-conf_data = {{ conf|tojson }}[0]
-inst_data = {{ inst|tojson }}[0]
-fos_data = {{ fos|tojson }}[0]
-session = {{ session|tojson }}
+author_data = {{ author|tojson }}[0];
+conf_data = {{ conf|tojson }}[0];
+inst_data = {{ inst|tojson }}[0];
+fos_data = {{ fos|tojson }}[0];
+session = {{ session|tojson }};
 
 start_petals = parseInt($("#num-petals").val());
 start_order = $("#petal-order").val();

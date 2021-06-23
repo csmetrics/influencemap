@@ -176,44 +176,8 @@ def manualcache():
     return flask.jsonify({})
 
 
-def to_flower_dict(data):
-
-    res = []
-    for flower_set in zip(*data):
-        flower_dict = {
-            'author': flower_set[0],
-            'conf': flower_set[1],
-            'inst': flower_set[2],
-            'fos': flower_set[3],
-            }
-
-        res.append(flower_dict)
-
-    return res
-
-
-def as_graph(flower):
-    import networkx as nx
-    g = nx.DiGraph(ego='ego')
-    g.add_node('ego', name='ego', weight=None)
-    for i, (id_, score) in enumerate(flower['influencers'].items()):
-        g.add_node(id_, nratiow=1, ratiow=1, sumw=1, sum=1, coauthor=False,
-                   dif=1, inf_in=0, inf_out=score, bloom_order=i)
-        g.add_edge('ego', id_, weight=score, nweight=1, direction='in',
-            ratiow=1, dif=1, sumw=1,
-            inf_in=score, inf_out=0,
-            bloom_order=i)
-        g.add_edge(id_, 'ego', weight=0, nweight=1, direction='out',
-            ratiow=1, dif=1, sumw=1,
-            inf_in=0, inf_out=score,
-            bloom_order=i)
-    return g
-
-
 @blueprint.route('/submit/', methods=['GET', 'POST'])
 def submit():
-    session = dict()
-
     num_leaves = 25 # default
     if flask.request.method == "GET":
         # from url e.g.
@@ -223,33 +187,30 @@ def submit():
         curated_flag = True
         data, option, config = get_url_query(flask.request.args)
         author_ids = data['EntityIds'].get('AuthorIds', [])
+        affiliation_ids = data['EntityIds'].get('AffiliationIds', [])
+        conference_ids = data['EntityIds'].get('ConferenceIds', [])
+        journal_ids = data['EntityIds'].get('JournalIds', [])
+        paper_ids = data['EntityIds'].get('PaperIds', [])
         # selected_papers = get_all_paper_ids(data["EntityIds"])
         entity_names = get_all_normalised_names(data["EntityIds"])
         flower_name = data.get('DisplayName')
     else:
         curated_flag = False
-        raise NotImplementedError()
+        data_str = flask.request.form['data']
+        data = json.loads(data_str)
+        author_ids = map(int, data['entities']['AuthorIds'])
+        affiliation_ids = map(int, data['entities']['AffiliationIds'])
+        conference_ids = map(int, data['entities']['ConferenceIds'])
+        journal_ids = map(int, data['entities']['JournalIds'])
+        paper_ids = map(int, data['entities']['PaperIds'])
 
-    flower = kb_client.get_flower(author_ids=author_ids)
+    flower = kb_client.get_flower(
+        author_ids=author_ids, affiliation_ids=affiliation_ids,
+        conference_series_ids=conference_ids, journal_ids=journal_ids,
+        paper_ids=paper_ids)
 
     from webapp.front_end_helper import make_response_data
     rdata = make_response_data(flower, is_curated=curated_flag)
-    # from core.flower.high_level_get_flower import processdata
-    # author_flower = processdata(
-    #     'author',
-    #     as_graph(flower['author_part']),
-    #     50,
-    #     None,
-    #     0)
-    # author_flower['total'] = 20
-
-    # rdata = {}
-    # rdata['stats'] = {'min_year': 1950, 'max_year': 2012, 'num_papers': 70, 'avg_papers': 1.1, 'num_refs': 147, 'avg_refs': 2, 'num_cites': 1199, 'avg_cites': 17}
-    # rdata['navbarOption'] = {'optionlist': [{'id': 'author', 'name': 'Author'}, {'id': 'conference', 'name': 'Conference'}, {'id': 'journal', 'name': 'Journal'}, {'id': 'institution', 'name': 'Institution'}, {'id': 'paper', 'name': 'Paper'}], 'selectedKeyword': '', 'selectedOption': {'id': 'author', 'name': 'Author'}}
-    # rdata['yearSlider'] = {'title': 'Publications range', 'pubrange': [1950, 2012, 63], 'citerange': [1950, 2018, 69], 'pubChart': [], 'citeChart': [], 'selected': {'pub_lower': 1950, 'pub_upper': 2012, 'cit_lower': 1950, 'cit_upper': 2018, 'self_cite': 'false', 'icoauthor': 'true', 'cmp_ref': 'false', 'num_leaves': 25, 'order': 'ratio'}}
-    # rdata['curated'] = curated_flag
-    # rdata['conf'] = rdata['inst'] = rdata['fos'] = [{'nodes': [], 'links': [], 'bars': [], 'total': 0}] * 3
-    # rdata['author'] = [author_flower] * 3
     return flask.render_template("flower.html", **rdata)
 
 
