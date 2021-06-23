@@ -5,8 +5,9 @@ import numpy as np
 import pandas as pd
 
 from core.search.elastic import (
-    get_display_names_from_author_ids, get_display_names_from_journal_ids,
-    get_display_names_from_conference_ids, get_names_from_affiliation_ids)
+    get_display_names_from_author_ids, get_display_names_from_conference_ids,
+    get_display_names_from_fos_ids, get_display_names_from_journal_ids,
+    get_names_from_affiliation_ids)
 
 
 
@@ -144,7 +145,7 @@ def make_response_data(
         gtype='inst')
     res['fos'] = _make_one_response_flower(
         [flower['field_of_study_part']],
-        [lambda ids: {id_: str(id_) for id_ in ids}],
+        [partial(get_display_names_from_fos_ids, with_id=True)],
         gtype='fos')
     res['author'] = _make_one_response_flower(
         [flower['author_part']],

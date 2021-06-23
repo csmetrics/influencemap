@@ -246,8 +246,8 @@ def get_display_names_from_journal_ids(entity_ids):
 def get_display_names_from_author_ids(entity_ids, with_id=False):
     return get_names_from_entity(entity_ids, "authors", "AuthorId", "DisplayName", with_id=with_id)
 
-def get_display_names_from_fos_ids(entity_ids):
-    return get_names_from_entity(entity_ids, "fieldsofstudy", "FieldOfStudyId", "DisplayName")
+def get_display_names_from_fos_ids(entity_ids, with_id=False):
+    return get_names_from_entity(entity_ids, "fieldsofstudy", "FieldOfStudyId", "DisplayName", with_id=with_id)
 
 
 
