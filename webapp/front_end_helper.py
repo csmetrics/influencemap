@@ -1,4 +1,5 @@
 import itertools
+import operator
 from functools import partial
 
 import numpy as np
@@ -121,6 +122,84 @@ def _make_one_response_flower(subflowers, name_lookup_fs, *, gtype):
     return [dict(nodes=nodes, links=links, bars=bars, total=total)]
 
 
+NAVBAR_OPTIONS = {
+    'optionlist': [{'id': 'author', 'name': 'Author'},
+                   {'id': 'conference', 'name': 'Conference'},
+                   {'id': 'journal', 'name': 'Journal'},
+                   {'id': 'institution', 'name': 'Institution'},
+                   {'id': 'paper', 'name': 'Paper'}],
+    'selectedKeyword': '',
+    'selectedOption': {'id': 'author', 'name': 'Author'}}
+
+
+def make_year_slider_and_stats(
+    pub_year_counts, cit_year_counts, pub_count, cit_count, ref_count,
+):
+    pub_year_counts = {int(year): count
+                       for year, count in pub_year_counts.items()
+                       if count}
+    cit_year_counts = {int(year): {int(year_): count
+                                   for year_, count in year_counts.items()
+                                   if count}
+                       for year, year_counts in cit_year_counts.items()
+                       if any(year_counts.values())}
+
+    pub_range_start = min(pub_year_counts)
+    pub_range_end = max(pub_year_counts)
+    pub_range_len = pub_range_end - pub_range_start + 1
+    cit_range_start = min(map(min, cit_year_counts.values()))
+    cit_range_end = max(map(max, cit_year_counts.values()))
+    cit_range_len = cit_range_end - cit_range_start + 1
+
+    stats = dict(
+        min_year=pub_range_start,
+        max_year=pub_range_end,
+        num_papers=pub_count,
+        avg_papers=round(pub_count / pub_range_len, 1),
+        num_refs=ref_count,
+        avg_refs=round(ref_count / pub_range_len, 1),
+        num_cites=cit_count,
+        avg_cites=round(cit_count / pub_range_len))
+
+    chart_start = min(pub_range_start, cit_range_start)
+    chart_end = max(pub_range_end, cit_range_end)
+
+    pub_chart = [
+        dict(year=year, value=pub_year_counts.get(year, 0))
+        for year in range(chart_start, chart_end + 1)
+    ]
+    cit_chart = [
+        dict(year=year,
+             value=[
+                dict(year=year_,
+                     value=cit_year_counts.get(year, {}).get(year_, 0))
+                for year_ in range(chart_start, chart_end + 1)
+             ])
+        for year in range(chart_start, chart_end + 1)
+    ]
+
+    year_slider = dict(
+        title='Publications range',
+        pubrange=[pub_range_start, pub_range_end, pub_range_len],
+        citerange=[cit_range_start, cit_range_end, cit_range_len],
+        pubChart=pub_chart,
+        citeChart=cit_chart,
+        selected=dict(
+            pub_lower=pub_range_start,
+            pub_upper=pub_range_end,
+            cit_lower=cit_range_start,
+            cit_upper=cit_range_end,
+            self_cite='false',
+            icoauthor='true',
+            cmp_ref='false',
+            num_leaves=25,
+            order='ratio',
+        )
+    )
+
+    return stats, year_slider
+
+
 def make_response_data(
     flower,
     *,
@@ -129,9 +208,7 @@ def make_response_data(
     res = {}
 
     res['curated'] = is_curated
-    res['stats'] = {'min_year': 1950, 'max_year': 2012, 'num_papers': 70, 'avg_papers': 1.1, 'num_refs': 147, 'avg_refs': 2, 'num_cites': 1199, 'avg_cites': 17}
-    res['navbarOption'] = {'optionlist': [{'id': 'author', 'name': 'Author'}, {'id': 'conference', 'name': 'Conference'}, {'id': 'journal', 'name': 'Journal'}, {'id': 'institution', 'name': 'Institution'}, {'id': 'paper', 'name': 'Paper'}], 'selectedKeyword': '', 'selectedOption': {'id': 'author', 'name': 'Author'}}
-    res['yearSlider'] = {'title': 'Publications range', 'pubrange': [1950, 2012, 63], 'citerange': [1950, 2018, 69], 'pubChart': [], 'citeChart': [], 'selected': {'pub_lower': 1950, 'pub_upper': 2012, 'cit_lower': 1950, 'cit_upper': 2018, 'self_cite': 'false', 'icoauthor': 'true', 'cmp_ref': 'false', 'num_leaves': 25, 'order': 'ratio'}}
+    res['navbarOption'] = NAVBAR_OPTIONS
     
     
     res['conf'] = _make_one_response_flower(
@@ -151,5 +228,9 @@ def make_response_data(
         [flower['author_part']],
         [partial(get_display_names_from_author_ids, with_id=True)],
         gtype='author')
+
+    res['stats'], res['yearSlider'] = make_year_slider_and_stats(
+        flower['pub_year_counts'], flower['cit_year_counts'],
+        flower['pub_count'], flower['cit_count'], flower['ref_count'])
 
     return res
