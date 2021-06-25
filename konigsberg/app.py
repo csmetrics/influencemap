@@ -46,15 +46,33 @@ def part_flower_as_dict(part_flower):
     }
 
 
+def stringify_keys(d):
+    # Convert keys from integers to strings so JSON can encode them.
+    return dict(zip(map(str, d.keys()), d.values()))
+
+
+def pub_year_counts_as_json_dict(pub_year_counts):
+    return stringify_keys(pub_year_counts)
+
+
+def cit_year_counts_as_json_dict(cit_year_counts):
+    return dict(zip(map(str, cit_year_counts.keys()),
+                    map(stringify_keys, cit_year_counts.values())))
+
+
 def flower_as_dict(flower):
-    return {
-        'author_part': part_flower_as_dict(flower.author_part),
-        'affiliation_part': part_flower_as_dict(flower.affiliation_part),
-        'field_of_study_part': part_flower_as_dict(flower.field_of_study_part),
-        'journal_part': part_flower_as_dict(flower.journal_part),
-        'conference_series_part':
-            part_flower_as_dict(flower.conference_series_part),
-    }
+    return dict(
+        author_part=part_flower_as_dict(flower.author_part),
+        affiliation_part=part_flower_as_dict(flower.affiliation_part),
+        field_of_study_part=part_flower_as_dict(flower.field_of_study_part),
+        journal_part=part_flower_as_dict(flower.journal_part),
+        conference_series_part=part_flower_as_dict(
+            flower.conference_series_part),
+        pub_year_counts=pub_year_counts_as_json_dict(flower.pub_year_counts),
+        cit_year_counts=cit_year_counts_as_json_dict(flower.cit_year_counts),
+        pub_count=flower.pub_count,
+        cit_count=flower.cit_count,
+        ref_count=flower.ref_count)
 
 
 @app.route('/get-flower')
@@ -64,6 +82,7 @@ def get_flower():
     field_of_study_ids = _get_ids_from_request('field-of-study-ids')
     journal_ids = _get_ids_from_request('journal-ids')
     conference_series_ids = _get_ids_from_request('conference-series-ids')
+    paper_ids = _get_ids_from_request('paper-ids')
 
     self_citations = _get_bool_from_request('self-citations')
     exclude_coauthors = _get_bool_from_request('exclude-coauthors')
@@ -74,9 +93,10 @@ def get_flower():
     flower = florist.get_flower(
         author_ids=author_ids, affiliation_ids=affiliation_ids,
         field_of_study_ids=field_of_study_ids, journal_ids=journal_ids,
-        conference_series_ids=conference_series_ids,
+        conference_series_ids=conference_series_ids, paper_ids=paper_ids,
         self_citations=self_citations, coauthors=not exclude_coauthors,
-        pub_years=pub_years, cit_years=cit_years)
+        pub_years=pub_years, cit_years=cit_years,
+        allow_not_found=True)
 
     return flask.jsonify(flower_as_dict(flower))
 

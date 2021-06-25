@@ -24,7 +24,7 @@ class KonigsbergClient:
         
         for name in ['author_ids', 'affiliation_ids',
                      'conference_series_ids', 'journal_ids',
-                     'field_of_study_ids']:
+                     'field_of_study_ids', 'paper_ids']:
             ids = locals()[name]
             if ids:
                 params[name.replace('_', '-')] = ','.join(map(str, ids))

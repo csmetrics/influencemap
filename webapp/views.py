@@ -20,6 +20,11 @@ from webapp.graph import ReferenceFlower, compare_flowers
 from webapp.shortener import shorten_front, unshorten_url_ext
 from webapp.utils import *
 
+from webapp.front_end_helper import make_response_data
+from webapp.konigsberg_client import KonigsbergClient
+
+kb_client = KonigsbergClient('http://localhost:8081/get-flower')
+
 flower_leaves = [ ('author', [ent.Entity_type.AUTH])
                 , ('conf'  , [ent.Entity_type.CONF, ent.Entity_type.JOUR])
                 , ('inst'  , [ent.Entity_type.AFFI])
@@ -172,27 +177,8 @@ def manualcache():
     return flask.jsonify({})
 
 
-def to_flower_dict(data):
-
-    res = []
-    for flower_set in zip(*data):
-        flower_dict = {
-            'author': flower_set[0],
-            'conf': flower_set[1],
-            'inst': flower_set[2],
-            'fos': flower_set[3],
-            }
-
-        res.append(flower_dict)
-
-    return res
-
-
 @blueprint.route('/submit/', methods=['GET', 'POST'])
 def submit():
-    session = dict()
-
-    curated_flag = False
     num_leaves = 25 # default
     if flask.request.method == "GET":
         # from url e.g.
@@ -201,222 +187,39 @@ def submit():
         # data should be pre-processed and cached
         curated_flag = True
         data, option, config = get_url_query(flask.request.args)
-        selected_papers = get_all_paper_ids(data["EntityIds"])
-        entity_names = get_all_normalised_names(data["EntityIds"])
-        keyword = ""
+        author_ids = data['EntityIds'].get('AuthorIds', [])
+        affiliation_ids = data['EntityIds'].get('AffiliationIds', [])
+        conference_ids = data['EntityIds'].get('ConferenceIds', [])
+        journal_ids = data['EntityIds'].get('JournalIds', [])
+        paper_ids = data['EntityIds'].get('PaperIds', [])
+        # selected_papers = get_all_paper_ids(data["EntityIds"])
         flower_name = data.get('DisplayName')
-        session["url_base"] = shorten_front("http://influencemap.ml/submit/?id="+flask.request.args.get("id"))
     else:
-        data = json.loads(flask.request.form.get('data'))
-         # normalisedName: <string>   # the normalised name from entity with highest paper count of selected entities
-         # entities: {"normalisedName": <string>, "eid": <int>, "entity_type": <author | conference | institution | journal | paper>
-        option = data.get("option")   # last searched entity type (confusing for multiple entities)
-        keyword = data.get('keyword') # last searched term (doesn't really work for multiple searches)
-        entity_ids = data.get('entities')
-        selected_papers = get_all_paper_ids(entity_ids)
-        entity_names = get_all_normalised_names(entity_ids)
-        config = None
-        flower_name = data.get('flower_name')
+        curated_flag = False
+        data_str = flask.request.form['data']
+        data = json.loads(data_str)
+        author_ids = map(int, data['entities']['AuthorIds'])
+        affiliation_ids = map(int, data['entities']['AffiliationIds'])
+        conference_ids = map(int, data['entities']['ConferenceIds'])
+        journal_ids = map(int, data['entities']['JournalIds'])
+        paper_ids = map(int, data['entities']['PaperIds'])
 
-        if not entity_names:
-            entity_names = data["names"]
+        entity_names = \
+            get_all_normalised_names(data.get('entities')) or data["names"]
+        flower_name = data.get('flower_name')
         if not flower_name:
             flower_name = "" + entity_names[0]
             if len(data["names"]) > 1:
-                flower_name += " +{} more".format(len(entity_names)-1)
+                flower_name += " +{} more".format(len(entity_names) - 1)
 
-        doc_for_es_cache={"DisplayName": flower_name, "EntityIds": data["entities"], "Type": "user_generated"}
-        #doc_id = saveNewBrowseCache(doc_for_es_cache)
-        #session["url_base"] = shorten_front("http://influencemap.ml/submit/?id="+doc_id)
+    flower = kb_client.get_flower(
+        author_ids=author_ids, affiliation_ids=affiliation_ids,
+        conference_series_ids=conference_ids, journal_ids=journal_ids,
+        paper_ids=paper_ids)
 
-    # Default Dates
-    min_year = None
-    max_year = None
-
-    # Solving type issues
-    selected_papers = [int(p) for p in selected_papers]
-
-    # Turn selected paper into information dictionary list
-    paper_information = paper_info_db_check_multiquery(selected_papers) # API
-
-    # Check if the paper information is not empty
-    if not paper_information:
-        return flask.render_template("missing_info.html")
-
-    ### PAPER MODIFICATIONS ###
-    # Filter for Paper Year different
-    max_year_paper = max(paper_information, key=lambda x: x['Year'])['Year']
-    new_paper_information = list()
-    for paper in paper_information:
-        if paper['Year'] > max_year_paper - 100:
-            new_paper_information.append(paper)
-    paper_information = new_paper_information
-    ### PAPER MODIFICATIONS ###
-
-    # Get coauthors
-    coauthors = get_coauthor_mapping(paper_information)
-
-    # Get min and maximum year
-    years = [info['Year'] for info in paper_information if 'Year' in info]
-    min_pub_year, max_pub_year = min(years, default=0), max(years, default=0)
-
-    # calculate pub/cite chart data
-    cont_pub_years = range(min_pub_year, max_pub_year+1)
-    cite_years = set()
-    for info in paper_information:
-        if 'Citations' in info:
-            cite_years.update({entity["Year"] for entity in info['Citations'] if "Year" in entity})
-
-    # Add publication years as well
-    cite_years.add(min_pub_year)
-    cite_years.add(max_pub_year)
-
-    min_cite_year, max_cite_year = min(cite_years, default=0), max(cite_years, default=0)
-    cont_cite_years = range(min(cite_years, default=0), max(cite_years,default=0)+1)
-    pub_chart = [{"year":k,"value":Counter(years)[k] if k in Counter(years) else 0} for k in cont_cite_years]
-    citecounter = {k:[] for k in cont_cite_years}
-    for info in paper_information:
-        if 'Citations' in info:
-            for entity in info['Citations']:
-                citecounter[info['Year']].append(entity["Year"])
-
-    cite_chart = [{"year":k,"value":[{"year":y,"value":Counter(v)[y]} for y in cont_cite_years]} for k,v in citecounter.items()]
-
-    # Normalised entity names
-    entity_names = list(set(entity_names))
-
-    # Generate scores from paper information
-    score_df = score_paper_info_list(paper_information, self=entity_names)
-
-    # Set up configuration of influence flowers
-    flower_config = default_config()
-    if config:
-        flower_config = config
-
-    if 'cmp_ref' in flower_config and flower_config['cmp_ref']: # Do not limit the size of new flower
-        flower_config['num_leaves'] = 5000
-
-    # Work function
-    make_flower = lambda x: gen_flower_data(score_df, x, entity_names,
-            flower_name, config=flower_config)
-
-    # Calculate the aggregations
-    flower_res = [make_flower(v) for v in flower_leaves]
-    sorted(flower_res, key=lambda x: x[0])
-    flower_info = [f_info for _, f_info in flower_res]
-
-    if config == None:
-        config = {
-            "pub_lower": min_pub_year,
-            "pub_upper": max_pub_year,
-            "cit_lower": min_cite_year,
-            "cit_upper": max_cite_year,
-            "self_cite": "false",
-            "icoauthor": "true",
-            "cmp_ref": "false",
-            "num_leaves": num_leaves,
-            "order": "ratio",
-        }
-    else:
-        config["self_cite"] = str(config["self_cite"]).lower()
-        config["icoauthor"] = str(config["icoauthor"]).lower()
-        config["cmp_ref"] = str(config["cmp_ref"]).lower()
-
-    data = {
-        "author": flower_info[0],
-        "conf"  : flower_info[1],
-        "inst"  : flower_info[2],
-        "fos"   : flower_info[3],
-        "curated": curated_flag,
-        "yearSlider": {
-            "title": "Publications range",
-            "pubrange": [min_pub_year, max_pub_year, (max_pub_year-min_pub_year+1)],
-            "citerange": [min_cite_year, max_cite_year, (max_cite_year-min_cite_year+1)],
-            "pubChart": pub_chart,
-            "citeChart": cite_chart,
-            "selected": config
-        },
-        "navbarOption": get_navbar_option(keyword, option)
-    }
-
-    # Set cache
-    cache = {'cache': selected_papers, 'coauthors': coauthors}
-
-    stats = get_stats(paper_information)
-    data['stats'] = stats
-
-    # filter flower nodes by reference
-    if config['cmp_ref'] == 'true':
-
-        make_ref = lambda x: gen_flower_data(score_df, x, entity_names,
-                flower_name, config=default_config())
-
-        ref_res = [make_ref(v) for v in flower_leaves]
-        sorted(ref_res, key=lambda x: x[0])
-
-        # Reduce
-        ref_info = list()
-        for _, f_info in ref_res:
-            ref_info.append(f_info)
-
-        flower_data = to_flower_dict(ref_info)
-        session["reference_flower"] = []
-        data["author"] = []
-        data["conf"] = []
-        data["inst"] = []
-        data["fos"] = []
-        orig_flower = list(zip(*flower_info))
-        for flower_dict, flower_set in zip(flower_data, orig_flower):
-
-            ref_data = copy.deepcopy(data)
-            ref_data.update(flower_dict)
-
-            reference_flower = ReferenceFlower(ref_data)
-
-            # save reference flower for comparison
-            session["reference_flower"].append(reference_flower.data())
-
-            cmp_flower = compare_flowers(
-                reference_flower.data(), flower_set)
-
-            # Force updates to flower information
-            data["author"].append(cmp_flower[0])
-            data["conf"].append(cmp_flower[1])
-            data["inst"].append(cmp_flower[2])
-            data["fos"].append(cmp_flower[3])
-
-        data["yearSlider"]["selected"]["num_leaves"] = num_leaves
-
-    else:
-        flower_data = to_flower_dict(flower_info)
-        session["reference_flower"] = []
-
-        for flower_dict in flower_data:
-
-            ref_data = copy.deepcopy(data)
-            ref_data.update(flower_dict)
-
-            # save reference flower for comparison
-            reference_flower = ReferenceFlower(ref_data)
-            session["reference_flower"].append(reference_flower.data())
-
-    # Cache from flower data
-    for key, value in cache.items():
-        session[key] = value
-
-    for p in paper_information:
-        len(p['Citations'])
-    session['year_ranges'] = {'pub_lower': min_pub_year, 'pub_upper': max_pub_year, 'cit_lower': min_cite_year, 'cit_upper': max_cite_year}
-    session['flower_name']  = flower_name
-    session['entity_names'] = entity_names
-    session['icoauthor'] = config['icoauthor']
-    session['self_cite'] = config['self_cite']
-    session['reference'] = config['cmp_ref']
-
-    data["session"] = session
-
-    return flask.render_template("flower.html", **data)
-
+    rdata = make_response_data(
+        flower, is_curated=curated_flag, flower_name=flower_name)
+    return flask.render_template("flower.html", **rdata)
 
 
 @blueprint.route('/resubmit/', methods=['POST'])
