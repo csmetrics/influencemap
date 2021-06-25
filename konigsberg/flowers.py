@@ -131,6 +131,11 @@ class Florist:
             path / 'journl-id2ind.bin', self.entity_ind2id_map)
         self.cs_id2ind_map = IdToIndMapper(
             path / 'cs-id2ind.bin', self.entity_ind2id_map)
+
+        self.paper_ind2id_map = IndToIdMapper(path / 'paper-ind2id.bin')
+        self.paper_id2ind_map = IdToIndMapper(
+            path / 'paper-id2ind.bin', self.paper_ind2id_map)
+
         with open(path / 'paper-years.json') as f:
             # Maps year (int) to the index of the first paper published
             # that year. Since the papers are sorted in chronological
@@ -190,6 +195,10 @@ class Florist:
             cs_ids, self.cs_id2ind_map, allow_not_found)
         return np.concatenate([author_indices, aff_indices, fos_indices,
                                journal_indices, cs_indices])
+
+    def _get_paper_indices(self, paper_ids, *, allow_not_found):
+        return self._ids_to_indices(
+            paper_ids, self.paper_id2ind_map, allow_not_found)
 
     def _make_pub_year_count_dict(self, pub_year_counts):
         min_year = min(self.year_starts)
@@ -279,6 +288,7 @@ class Florist:
         field_of_study_ids=[],
         journal_ids=[],
         conference_series_ids=[],
+        paper_ids=[],
         self_citations=False, coauthors=True,
         pub_years=None, cit_years=None,
         allow_not_found=False,
@@ -300,10 +310,12 @@ class Florist:
         # out whether it's faster to include or exclude them and set it
         # to that.
 
-        indices = self._get_entity_indices(
+        entity_indices = self._get_entity_indices(
             author_ids=author_ids, aff_ids=affiliation_ids,
             fos_ids=field_of_study_ids, journal_ids=journal_ids,
             cs_ids=conference_series_ids, allow_not_found=allow_not_found)
+        paper_indices = self._get_paper_indices(
+            paper_ids, allow_not_found=allow_not_found)
 
         pub_ids = self._get_id_year_range(pub_years)
         cit_ids = self._get_id_year_range(cit_years)
@@ -312,7 +324,7 @@ class Florist:
         # require one compilation per value.
         (influencers, influencees,
          pub_year_counts, cit_year_counts, ref_count) = _make_flower(
-            indices,
+            entity_indices, paper_indices,
             self.entity2paper_map.arrs,
             self.paper2entity_map.arrs,
             self.citation_maps.arrs,
@@ -479,7 +491,7 @@ dict_val = nb.types.Tuple([nb.u4, nb.f4])
 
 @nb.njit(nogil=True)
 def _make_flower(
-    entity_ids,
+    entity_ids, paper_ids,
     entity2paper_map, paper2entity_map, citation_maps,
     *,
     pub_ids, cit_ids, self_citations, coauthors,
@@ -505,6 +517,9 @@ def _make_flower(
             if _is_in_range(pub_ids, paper_id):
                 ego_papers.add(paper_id)
         ego_entities.add(entity_id)
+    for paper_id in paper_ids:
+        if _is_in_range(pub_ids, paper_id):
+            ego_papers.add(paper_id)
 
     # Entities to exclude from the flower.
     excluded_entities = ego_entities if coauthors else ego_entities.copy()

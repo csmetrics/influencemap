@@ -82,6 +82,7 @@ def get_flower():
     field_of_study_ids = _get_ids_from_request('field-of-study-ids')
     journal_ids = _get_ids_from_request('journal-ids')
     conference_series_ids = _get_ids_from_request('conference-series-ids')
+    paper_ids = _get_ids_from_request('paper-ids')
 
     self_citations = _get_bool_from_request('self-citations')
     exclude_coauthors = _get_bool_from_request('exclude-coauthors')
@@ -92,7 +93,7 @@ def get_flower():
     flower = florist.get_flower(
         author_ids=author_ids, affiliation_ids=affiliation_ids,
         field_of_study_ids=field_of_study_ids, journal_ids=journal_ids,
-        conference_series_ids=conference_series_ids,
+        conference_series_ids=conference_series_ids, paper_ids=paper_ids,
         self_citations=self_citations, coauthors=not exclude_coauthors,
         pub_years=pub_years, cit_years=cit_years,
         allow_not_found=True)
