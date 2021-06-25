@@ -161,9 +161,9 @@ def make_year_slider_and_stats(
         num_papers=pub_count,
         avg_papers=round(pub_count / pub_range_len, 1),
         num_refs=ref_count,
-        avg_refs=round(ref_count / pub_range_len, 1),
+        avg_refs=round(ref_count / pub_count, 1),
         num_cites=cit_count,
-        avg_cites=round(cit_count / pub_range_len))
+        avg_cites=round(cit_count / pub_count, 1))
 
     chart_start = min(pub_range_start, cit_range_start)
     chart_end = max(pub_range_end, cit_range_end)
