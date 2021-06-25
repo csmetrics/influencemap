@@ -20,6 +20,7 @@ from webapp.graph import ReferenceFlower, compare_flowers
 from webapp.shortener import shorten_front, unshorten_url_ext
 from webapp.utils import *
 
+from webapp.front_end_helper import make_response_data
 from webapp.konigsberg_client import KonigsbergClient
 
 kb_client = KonigsbergClient('http://localhost:8081/get-flower')
@@ -192,7 +193,6 @@ def submit():
         journal_ids = data['EntityIds'].get('JournalIds', [])
         paper_ids = data['EntityIds'].get('PaperIds', [])
         # selected_papers = get_all_paper_ids(data["EntityIds"])
-        entity_names = get_all_normalised_names(data["EntityIds"])
         flower_name = data.get('DisplayName')
     else:
         curated_flag = False
@@ -204,13 +204,21 @@ def submit():
         journal_ids = map(int, data['entities']['JournalIds'])
         paper_ids = map(int, data['entities']['PaperIds'])
 
+        entity_names = \
+            get_all_normalised_names(data.get('entities')) or data["names"]
+        flower_name = data.get('flower_name')
+        if not flower_name:
+            flower_name = "" + entity_names[0]
+            if len(data["names"]) > 1:
+                flower_name += " +{} more".format(len(entity_names) - 1)
+
     flower = kb_client.get_flower(
         author_ids=author_ids, affiliation_ids=affiliation_ids,
         conference_series_ids=conference_ids, journal_ids=journal_ids,
         paper_ids=paper_ids)
 
-    from webapp.front_end_helper import make_response_data
-    rdata = make_response_data(flower, is_curated=curated_flag)
+    rdata = make_response_data(
+        flower, is_curated=curated_flag, flower_name=flower_name)
     return flask.render_template("flower.html", **rdata)
 
 

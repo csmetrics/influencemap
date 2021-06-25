@@ -27,7 +27,11 @@ def _normalize_double_log(series1, series2):
     return np.log2(1 + series1 / max_val), np.log2(1 + series2 / max_val)
 
 
-def _make_one_response_flower(subflowers, name_lookup_fs, *, gtype):
+def _make_one_response_flower(
+    subflowers, name_lookup_fs,
+    *,
+    gtype, flower_name,
+):
     subflower_dfs = []
     for i, subflower in enumerate(subflowers):
         influencers_df = pd.DataFrame(
@@ -72,8 +76,8 @@ def _make_one_response_flower(subflowers, name_lookup_fs, *, gtype):
     df['bloom_order'] = range(1, 51)
 
     nodes = [
-        dict(name='ego', weight=1, id=0, gtype=gtype, size=1, bloom_order=0,
-             coauthor=str(False))
+        dict(name=flower_name, weight=1, id=0, gtype=gtype, size=1,
+             bloom_order=0, coauthor=str(False))
     ]
     nodes.extend(
         dict(name=row.name, weight=row.normed_ratio, id=row[0], gtype=gtype,
@@ -204,6 +208,7 @@ def make_response_data(
     flower,
     *,
     is_curated,
+    flower_name,
 ):
     res = {}
 
@@ -215,19 +220,19 @@ def make_response_data(
         [flower['journal_part'], flower['conference_series_part']],
         [get_display_names_from_journal_ids,
          get_display_names_from_conference_ids],
-        gtype='conf')
+        gtype='conf', flower_name=flower_name)
     res['inst'] = _make_one_response_flower(
         [flower['affiliation_part']],
         [partial(get_names_from_affiliation_ids, with_id=True)],
-        gtype='inst')
+        gtype='inst', flower_name=flower_name)
     res['fos'] = _make_one_response_flower(
         [flower['field_of_study_part']],
         [partial(get_display_names_from_fos_ids, with_id=True)],
-        gtype='fos')
+        gtype='fos', flower_name=flower_name)
     res['author'] = _make_one_response_flower(
         [flower['author_part']],
         [partial(get_display_names_from_author_ids, with_id=True)],
-        gtype='author')
+        gtype='author', flower_name=flower_name)
 
     res['stats'], res['yearSlider'] = make_year_slider_and_stats(
         flower['pub_year_counts'], flower['cit_year_counts'],
