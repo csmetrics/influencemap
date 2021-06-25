@@ -1100,9 +1100,10 @@ function text_order_anchor(d, xpos, ordering) {
 // ---------- Reorder Move ----------
 var GTYPE_MAP = {0: "author", 1: "conf", 2: "inst", 3: "fos"};
 
-function linkOrderUpdate(d, ordering, xpos, ypos) {
-  var sp_id = ordering[d.source];
-  var tp_id = ordering[d.target];
+function linkOrderUpdate(d, idx, ordering, xpos, ypos) {
+  var nodes = node_out[idx]._groups[0];
+  var sp_id = ordering[nodes[d.source].id];
+  var tp_id = ordering[nodes[d.target].id];
 
   var sx_pos = center[0] + magf * xpos[sp_id];
   var sy_pos = center[1] - magf * ypos[sp_id];
@@ -1279,7 +1280,7 @@ function reorder_flower_grow(idx, num, order, duration) {
     .interrupt()
     .transition()
     .duration(duration)
-    .attr("d", function(d) { return linkOrderUpdate(d, ordering, xpos, ypos); })
+    .attr("d", function(d) { return linkOrderUpdate(d, idx, ordering, xpos, ypos); })
     .transition()
     .duration(duration)
     .style("opacity", 1.0);
@@ -1326,7 +1327,7 @@ function reorder_flower_shrink(idx, num, order, duration) {
     .transition()
     .delay(duration)
     .duration(duration)
-    .attr("d", function(d) { return linkOrderUpdate(d, ordering, xpos, ypos); })
+    .attr("d", function(d) { return linkOrderUpdate(d, idx, ordering, xpos, ypos); })
     .style("opacity", 1.0);
   // -- Wait then Move --
 
