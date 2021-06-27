@@ -73,7 +73,7 @@ def _make_one_response_flower(
             names = tuple(map(ids_to_name.get, ids, map(str, ids)))
             df.loc[mask, 'name'] = names
 
-    df['bloom_order'] = range(1, 51)
+    df['bloom_order'] = range(1, len(df) + 1)
 
     nodes = [
         dict(name=flower_name, weight=1, id=0, gtype=gtype, size=1,
@@ -207,14 +207,16 @@ def make_year_slider_and_stats(
 def make_response_data(
     flower,
     *,
-    is_curated,
+    is_curated=None,
     flower_name,
+    session={},
+    for_resubmit=False,
 ):
     res = {}
 
-    res['curated'] = is_curated
+    if not for_resubmit:
+        res['curated'] = is_curated
     res['navbarOption'] = NAVBAR_OPTIONS
-    
     
     res['conf'] = _make_one_response_flower(
         [flower['journal_part'], flower['conference_series_part']],
@@ -234,8 +236,11 @@ def make_response_data(
         [partial(get_display_names_from_author_ids, with_id=True)],
         gtype='author', flower_name=flower_name)
 
-    res['stats'], res['yearSlider'] = make_year_slider_and_stats(
-        flower['pub_year_counts'], flower['cit_year_counts'],
-        flower['pub_count'], flower['cit_count'], flower['ref_count'])
+    if not for_resubmit:
+        res['stats'], res['yearSlider'] = make_year_slider_and_stats(
+            flower['pub_year_counts'], flower['cit_year_counts'],
+            flower['pub_count'], flower['cit_count'], flower['ref_count'])
+
+    res['session'] = session
 
     return res

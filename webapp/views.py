@@ -192,6 +192,7 @@ def submit():
         conference_ids = data['EntityIds'].get('ConferenceIds', [])
         journal_ids = data['EntityIds'].get('JournalIds', [])
         paper_ids = data['EntityIds'].get('PaperIds', [])
+        fos_ids = []
         # selected_papers = get_all_paper_ids(data["EntityIds"])
         flower_name = data.get('DisplayName')
     else:
@@ -203,6 +204,7 @@ def submit():
         conference_ids = map(int, data['entities']['ConferenceIds'])
         journal_ids = map(int, data['entities']['JournalIds'])
         paper_ids = map(int, data['entities']['PaperIds'])
+        fos_ids = []
 
         entity_names = \
             get_all_normalised_names(data.get('entities')) or data["names"]
@@ -214,99 +216,55 @@ def submit():
 
     flower = kb_client.get_flower(
         author_ids=author_ids, affiliation_ids=affiliation_ids,
-        conference_series_ids=conference_ids, journal_ids=journal_ids,
-        paper_ids=paper_ids)
+        conference_series_ids=conference_ids, field_of_study_ids=fos_ids,
+        journal_ids=journal_ids, paper_ids=paper_ids)
+
+    session = dict(
+        author_ids=author_ids, affiliation_ids=affiliation_ids,
+        conference_ids=conference_ids, journal_ids=journal_ids,
+        fos_ids=fos_ids, paper_ids=paper_ids, flower_name=flower_name)
 
     rdata = make_response_data(
-        flower, is_curated=curated_flag, flower_name=flower_name)
+        flower, is_curated=curated_flag, flower_name=flower_name,
+        session=session)
     return flask.render_template("flower.html", **rdata)
 
 
 @blueprint.route('/resubmit/', methods=['POST'])
 def resubmit():
-    option = flask.request.form.get('option')
-    keyword = flask.request.form.get('keyword')
+    # option = flask.request.form.get('option')
+    # keyword = flask.request.form.get('keyword')
+    # flower_config['reference'] = flask.request.form.get('cmp_ref') == 'true'
+    # flower_config['num_leaves'] = int(flask.request.form.get('numpetals'))
+    # flower_config['order'] = flask.request.form.get('petalorder')
 
     session = json.loads(flask.request.form.get("session"))
-
-    cache        = session['cache']
-    coauthors    = session['coauthors']
     flower_name  = session['flower_name']
-    entity_names = session['entity_names']
+    author_ids = session['author_ids']
+    affiliation_ids = session['affiliation_ids']
+    conference_ids = session['conference_ids']
+    journal_ids = session['journal_ids']
+    fos_ids = session['fos_ids']
+    paper_ids = session['paper_ids']
 
-    flower_config = default_config()
-    flower_config['self_cite'] = flask.request.form.get('selfcite') == 'true'
-    flower_config['icoauthor'] = flask.request.form.get('coauthor') == 'true'
-    flower_config['reference'] = flask.request.form.get('cmp_ref') == 'true'
-    flower_config['pub_lower'] = int(flask.request.form.get('from_pub_year'))
-    flower_config['pub_upper'] = int(flask.request.form.get('to_pub_year'))
-    flower_config['cit_lower'] = int(flask.request.form.get('from_cit_year'))
-    flower_config['cit_upper'] = int(flask.request.form.get('to_cit_year'))
-    flower_config['num_leaves'] = int(flask.request.form.get('numpetals'))
-    flower_config['order'] = flask.request.form.get('petalorder')
+    self_citations = flask.request.form.get('selfcite') == 'true'
+    coauthors = flask.request.form.get('coauthor') == 'true'
+    pub_lower = int(flask.request.form.get('from_pub_year'))
+    pub_upper = int(flask.request.form.get('to_pub_year'))
+    cit_lower = int(flask.request.form.get('from_cit_year'))
+    cit_upper = int(flask.request.form.get('to_cit_year'))
 
-    if flower_config['reference']: # Do not limit the size of new flower
-        flower_config['num_leaves'] = 5000
+    flower = kb_client.get_flower(
+        author_ids=author_ids, affiliation_ids=affiliation_ids,
+        conference_series_ids=conference_ids, field_of_study_ids=fos_ids,
+        journal_ids=journal_ids, paper_ids=paper_ids,
+        pub_years=(pub_lower, pub_upper), cit_years=(cit_lower, cit_upper),
+        coauthors=coauthors, self_citations=self_citations)
 
-    session['year_ranges'] = {'pub_lower': flower_config['pub_lower'], 'pub_upper': flower_config['pub_upper'], 'cit_lower': flower_config['cit_lower'], 'cit_upper': flower_config['cit_upper']}
+    rdata = make_response_data(
+        flower, flower_name=flower_name, for_resubmit=True, session=session)
 
-    # Recompute flowers
-    paper_information = paper_info_db_check_multiquery(cache) # API
-
-    ### PAPER MODIFICATIONS ###
-    # Filter for Paper Year different
-    max_year_paper = max(paper_information, key=lambda x: x['Year'])['Year']
-    new_paper_information = list()
-    for paper in paper_information:
-        if paper['Year'] > max_year_paper - 100:
-            new_paper_information.append(paper)
-    paper_information = new_paper_information
-    ### PAPER MODIFICATIONS ###
-
-    score_df = score_paper_info_list(paper_information, self=entity_names)
-
-    # Work function
-    make_flower = lambda x: gen_flower_data(score_df, x, entity_names,
-            flower_name, config=flower_config)
-
-    # Calculate the aggregations
-    flower_res = [make_flower(v) for v in flower_leaves]
-
-    # Reduce
-    flower_info = list()
-    for _, f_info in flower_res:
-        flower_info.append(f_info)
-
-    # filter flower nodes by reference
-    if flower_config['reference']:
-        reference_flower = session["reference_flower"]
-
-        new_flower_info = [[], [], [], []]
-
-        orig_flower = list(zip(*flower_info))
-        for ref_flower, info_flower in zip(reference_flower, orig_flower):
-            cmp_flower = compare_flowers(ref_flower, info_flower)
-            for i in range(len(flower_info)):
-                new_flower_info[i].append(cmp_flower[i])
-
-        for i in range(len(new_flower_info)):
-            flower_info[i] = new_flower_info[i]
-
-    data = {
-        "author": flower_info[0],
-        "conf"  : flower_info[1],
-        "inst"  : flower_info[2],
-        "fos"   : flower_info[3],
-        "navbarOption": get_navbar_option(keyword, option)
-    }
-
-    stats = get_stats(paper_information, flower_config['pub_lower'], flower_config['pub_upper'])
-    data['stats'] = stats
-
-    # Update the node_info cache
-    #session['node_info'] = node_info
-    data["session"] = session
-    return flask.jsonify(data)
+    return flask.jsonify(rdata)
 
 
 def conf_journ_to_display_names(papers):
