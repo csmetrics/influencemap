@@ -49,8 +49,8 @@ def main():
     return flask.render_template("main.html")
 
 
-@blueprint.route('/redirect/')
-def redirect():
+@blueprint.route('/redirect/<ident>')
+def redirect(ident):
     return flask.redirect(unshorten_url_ext(flask.request.full_path))
 
 
