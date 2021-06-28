@@ -200,12 +200,13 @@ def submit():
         # selected_papers = get_all_paper_ids(data["EntityIds"])
         flower_name = data.get('DisplayName')
         doc_id = request.args["id"]
-        if 'pub_lower' in config and 'pub_upper' in config:
-            pub_years = config['pub_lower'], config['pub_upper']
-        if 'cit_lower' in config and 'cit_upper' in config:
-            cit_years = config['cit_lower'], config['cit_upper']
-        self_citations = config.get('self_cite', self_citations)
-        coauthors = config.get('icoauthor', coauthors)
+        if config is not None:
+            if 'pub_lower' in config and 'pub_upper' in config:
+                pub_years = config['pub_lower'], config['pub_upper']
+            if 'cit_lower' in config and 'cit_upper' in config:
+                cit_years = config['cit_lower'], config['cit_upper']
+            self_citations = config.get('self_cite', self_citations)
+            coauthors = config.get('icoauthor', coauthors)
     else:
         curated_flag = False
         data_str = request.form['data']
