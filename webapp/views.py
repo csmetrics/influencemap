@@ -195,15 +195,17 @@ def submit():
         fos_ids = []
         # selected_papers = get_all_paper_ids(data["EntityIds"])
         flower_name = data.get('DisplayName')
+        doc_id = flask.request.args["id"]
     else:
         curated_flag = False
         data_str = flask.request.form['data']
         data = json.loads(data_str)
-        author_ids = map(int, data['entities']['AuthorIds'])
-        affiliation_ids = map(int, data['entities']['AffiliationIds'])
-        conference_ids = map(int, data['entities']['ConferenceIds'])
-        journal_ids = map(int, data['entities']['JournalIds'])
-        paper_ids = map(int, data['entities']['PaperIds'])
+        entities = data['entities']
+        author_ids = map(int, entities['AuthorIds'])
+        affiliation_ids = map(int, entities['AffiliationIds'])
+        conference_ids = map(int, entities['ConferenceIds'])
+        journal_ids = map(int, entities['JournalIds'])
+        paper_ids = map(int, entities['PaperIds'])
         fos_ids = []
 
         entity_names = \
@@ -214,15 +216,22 @@ def submit():
             if len(data["names"]) > 1:
                 flower_name += " +{} more".format(len(entity_names) - 1)
 
+        doc_for_es_cache = dict(
+            DisplayName=flower_name, EntityIds=entities, Type=user_generated)
+        doc_id = saveNewBrowseCache(doc_for_es_cache)
+
     flower = kb_client.get_flower(
         author_ids=author_ids, affiliation_ids=affiliation_ids,
         conference_series_ids=conference_ids, field_of_study_ids=fos_ids,
         journal_ids=journal_ids, paper_ids=paper_ids)
 
+    url_base = shorten_front(f"http://influencemap.ml/submit/?id={doc_id}")
+
     session = dict(
         author_ids=author_ids, affiliation_ids=affiliation_ids,
         conference_ids=conference_ids, journal_ids=journal_ids,
-        fos_ids=fos_ids, paper_ids=paper_ids, flower_name=flower_name)
+        fos_ids=fos_ids, paper_ids=paper_ids, flower_name=flower_name,
+        url_base=url_base)
 
     rdata = make_response_data(
         flower, is_curated=curated_flag, flower_name=flower_name,
@@ -425,7 +434,6 @@ def get_node_info():
     node_name = request_data.get("name")
     node_type = request_data.get("node_type")
     session = request_data.get("session")
-    entities = session["entity_names"]
     year_ranges = session["year_ranges"]
     flower_name = session["flower_name"]
 
@@ -444,9 +452,7 @@ def get_next_node_info_page():
     node_name = request_data.get("name")
     node_type = request_data.get("node_type")
     session = request_data.get("session")
-    entities = session["entity_names"]
     year_ranges = session["year_ranges"]
-    flower_name = session["flower_name"]
     page = int(request_data.get("page"))
 
     node_info = get_node_info_single(node_name, node_type, year_ranges)
