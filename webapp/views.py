@@ -5,6 +5,7 @@ import string
 from collections import Counter
 
 import flask
+from flask import request
 
 import core.utils.entity_type as ent
 from core.search.query_info import paper_info_db_check_multiquery
@@ -23,7 +24,7 @@ from webapp.utils import *
 from webapp.front_end_helper import make_response_data
 from webapp.konigsberg_client import KonigsbergClient
 
-kb_client = KonigsbergClient('http://localhost:8081/get-flower')
+kb_client = KonigsbergClient('http://localhost:8081')
 
 flower_leaves = [ ('author', [ent.Entity_type.AUTH])
                 , ('conf'  , [ent.Entity_type.CONF, ent.Entity_type.JOUR])
@@ -39,7 +40,7 @@ blueprint = flask.Blueprint('views', __name__)
 
 @blueprint.route('/autocomplete')
 def autocomplete():
-    entity_type = flask.request.args.get('option')
+    entity_type = request.args.get('option')
     data = loadList(entity_type)
     return flask.jsonify(data)
 
@@ -51,7 +52,7 @@ def main():
 
 @blueprint.route('/redirect/<ident>')
 def redirect(ident):
-    return flask.redirect(unshorten_url_ext(flask.request.full_path))
+    return flask.redirect(unshorten_url_ext(request.full_path))
 
 
 @blueprint.route('/browse')
@@ -80,7 +81,7 @@ def browse():
 @blueprint.route('/create', methods=['GET', 'POST'])
 def create():
 
-    json_data = flask.request.form.get('data')
+    json_data = request.form.get('data')
     data = {} if json_data is None else json.loads(json_data)
     keyword = data.get('keyword', '')
     search = data.get('search') == 'true'
@@ -97,7 +98,7 @@ def create():
 @blueprint.route('/curate')
 def curate():
     types = get_cache_types()
-    data = json.loads(flask.request.form.get('data'))
+    data = json.loads(request.form.get('data'))
     keyword = data.get('keyword', '')
     search = data.get('search') == 'true'
     option = data.get('option')
@@ -112,13 +113,13 @@ def curate():
 
 @blueprint.route('/check_record')
 def check_record():
-    exists, names = check_browse_record_exists(flask.request.form.get("type"), flask.request.form.get("name"))
+    exists, names = check_browse_record_exists(request.form.get("type"), request.form.get("name"))
     return flask.jsonify({"exists": exists, "names": names})
 
 
 @blueprint.route('/crate_load_file')
 def curate_load_file():
-    filename = flask.request.form.get("filename")
+    filename = request.form.get("filename")
     try:
         data = tsv_to_dict(filename)
         success = "true"
@@ -140,7 +141,7 @@ s = {
 
 @blueprint.route('/search', methods=['POST'])
 def search():
-    request_data = json.loads(flask.request.form.get("data"))
+    request_data = json.loads(request.form.get("data"))
     keyword = request_data.get("keyword")
     entityType = request_data.get("option")
     exclude = set(string.punctuation)
@@ -164,8 +165,8 @@ def search():
 
 @blueprint.route('/manualcache', methods=['POST'])
 def manualcache():
-    cache_dictionary = (json.loads(flask.request.form.get('cache')))
-    paper_action = flask.request.form.get('paperAction')
+    cache_dictionary = (json.loads(request.form.get('cache')))
+    paper_action = request.form.get('paperAction')
     #saveNewBrowseCache(cache_dictionary)
 
     if paper_action == "batch":
@@ -179,14 +180,17 @@ def manualcache():
 
 @blueprint.route('/submit/', methods=['GET', 'POST'])
 def submit():
-    num_leaves = 25 # default
-    if flask.request.method == "GET":
+    pub_years = None
+    cit_years = None
+    self_citations = False
+    coauthors = True
+    if request.method == "GET":
         # from url e.g.
         # /submit/?type=author_id&id=2146610949&name=stephen_m_blackburn
         # /submit/?type=browse_author_group&name=lexing_xie
         # data should be pre-processed and cached
         curated_flag = True
-        data, option, config = get_url_query(flask.request.args)
+        data, option, config = get_url_query(request.args)
         author_ids = data['EntityIds'].get('AuthorIds', [])
         affiliation_ids = data['EntityIds'].get('AffiliationIds', [])
         conference_ids = data['EntityIds'].get('ConferenceIds', [])
@@ -195,10 +199,16 @@ def submit():
         fos_ids = []
         # selected_papers = get_all_paper_ids(data["EntityIds"])
         flower_name = data.get('DisplayName')
-        doc_id = flask.request.args["id"]
+        doc_id = request.args["id"]
+        if 'pub_lower' in config and 'pub_upper' in config:
+            pub_years = config['pub_lower'], config['pub_upper']
+        if 'cit_lower' in config and 'cit_upper' in config:
+            cit_years = config['cit_lower'], config['cit_upper']
+        self_citations = config.get('self_cite', self_citations)
+        coauthors = config.get('icoauthor', coauthors)
     else:
         curated_flag = False
-        data_str = flask.request.form['data']
+        data_str = request.form['data']
         data = json.loads(data_str)
         entities = data['entities']
         author_ids = map(int, entities['AuthorIds'])
@@ -223,6 +233,13 @@ def submit():
     flower = kb_client.get_flower(
         author_ids=author_ids, affiliation_ids=affiliation_ids,
         conference_series_ids=conference_ids, field_of_study_ids=fos_ids,
+        journal_ids=journal_ids, paper_ids=paper_ids, pub_years=pub_years,
+        cit_years=cit_years, coauthors=coauthors,
+        self_citations=self_citations)
+
+    stats = kb_client.get_stats(
+        author_ids=author_ids, affiliation_ids=affiliation_ids,
+        conference_series_ids=conference_ids, field_of_study_ids=fos_ids,
         journal_ids=journal_ids, paper_ids=paper_ids)
 
     url_base = shorten_front(f"http://influencemap.ml/submit/?id={doc_id}")
@@ -231,23 +248,25 @@ def submit():
         author_ids=author_ids, affiliation_ids=affiliation_ids,
         conference_ids=conference_ids, journal_ids=journal_ids,
         fos_ids=fos_ids, paper_ids=paper_ids, flower_name=flower_name,
-        url_base=url_base)
+        url_base=url_base, icoauthor=coauthors, self_cite=self_citations)
 
     rdata = make_response_data(
-        flower, is_curated=curated_flag, flower_name=flower_name,
-        session=session)
+        flower, stats, is_curated=curated_flag, flower_name=flower_name,
+        session=session, selection=dict(
+            pub_years=pub_years, cit_years=cit_years, coauthors=coauthors,
+            self_citations=self_citations))
     return flask.render_template("flower.html", **rdata)
 
 
 @blueprint.route('/resubmit/', methods=['POST'])
 def resubmit():
-    # option = flask.request.form.get('option')
-    # keyword = flask.request.form.get('keyword')
-    # flower_config['reference'] = flask.request.form.get('cmp_ref') == 'true'
-    # flower_config['num_leaves'] = int(flask.request.form.get('numpetals'))
-    # flower_config['order'] = flask.request.form.get('petalorder')
+    # option = request.form.get('option')
+    # keyword = request.form.get('keyword')
+    # flower_config['reference'] = request.form.get('cmp_ref') == 'true'
+    # flower_config['num_leaves'] = int(request.form.get('numpetals'))
+    # flower_config['order'] = request.form.get('petalorder')
 
-    session = json.loads(flask.request.form.get("session"))
+    session = json.loads(request.form.get("session"))
     flower_name  = session['flower_name']
     author_ids = session['author_ids']
     affiliation_ids = session['affiliation_ids']
@@ -256,12 +275,12 @@ def resubmit():
     fos_ids = session['fos_ids']
     paper_ids = session['paper_ids']
 
-    self_citations = flask.request.form.get('selfcite') == 'true'
-    coauthors = flask.request.form.get('coauthor') == 'true'
-    pub_lower = int(flask.request.form.get('from_pub_year'))
-    pub_upper = int(flask.request.form.get('to_pub_year'))
-    cit_lower = int(flask.request.form.get('from_cit_year'))
-    cit_upper = int(flask.request.form.get('to_cit_year'))
+    self_citations = request.form.get('selfcite') == 'true'
+    coauthors = request.form.get('coauthor') == 'true'
+    pub_lower = int(request.form.get('from_pub_year'))
+    pub_upper = int(request.form.get('to_pub_year'))
+    cit_lower = int(request.form.get('from_cit_year'))
+    cit_upper = int(request.form.get('to_cit_year'))
 
     flower = kb_client.get_flower(
         author_ids=author_ids, affiliation_ids=affiliation_ids,
@@ -271,7 +290,7 @@ def resubmit():
         coauthors=coauthors, self_citations=self_citations)
 
     rdata = make_response_data(
-        flower, flower_name=flower_name, for_resubmit=True, session=session)
+        flower, flower_name=flower_name, session=session)
 
     return flask.jsonify(rdata)
 
@@ -292,11 +311,11 @@ def conf_journ_to_display_names(papers):
 
 @blueprint.route('/get_publication_papers')
 def get_publication_papers():
-    request_data = json.loads(flask.request.form.get("data_string"))
+    request_data = json.loads(request.form.get("data_string"))
     session = request_data.get("session")
 
-    pub_year_min = int(flask.request.form.get("pub_year_min"))
-    pub_year_max = int(flask.request.form.get("pub_year_max"))
+    pub_year_min = int(request.form.get("pub_year_min"))
+    pub_year_max = int(request.form.get("pub_year_max"))
     paper_ids = session['cache']
     papers = paper_info_db_check_multiquery(paper_ids)
     papers = [paper for paper in papers if (paper["Year"] >= pub_year_min and paper["Year"] <= pub_year_max)]
@@ -307,13 +326,13 @@ def get_publication_papers():
 @blueprint.route('/get_citation_papers')
 def get_citation_papers():
     # request should contain the ego author ids and the node author ids separately
-    request_data = json.loads(flask.request.form.get("data_string"))
+    request_data = json.loads(request.form.get("data_string"))
     session = request_data.get("session")
 
-    cite_year_min = int(flask.request.form.get("cite_year_min"))
-    cite_year_max = int(flask.request.form.get("cite_year_max"))
-    pub_year_min = int(flask.request.form.get("pub_year_min"))
-    pub_year_max = int(flask.request.form.get("pub_year_max"))
+    cite_year_min = int(request.form.get("cite_year_min"))
+    cite_year_max = int(request.form.get("cite_year_max"))
+    pub_year_min = int(request.form.get("pub_year_min"))
+    pub_year_max = int(request.form.get("pub_year_max"))
     paper_ids = session['cache']
     papers = paper_info_db_check_multiquery(paper_ids)
     cite_papers = [[citation for citation in paper["Citations"] if (citation["Year"] >= cite_year_min and citation["Year"] <= cite_year_max)] for paper in papers if (paper["Year"] >= pub_year_min and paper["Year"] <= pub_year_max)]
@@ -347,7 +366,7 @@ def get_node_info_single(entity, entity_type, year_ranges):
     cit_upper = year_ranges["cit_upper"]
 
     # Get paper to get information from
-    request_data = json.loads(flask.request.form.get("data_string"))
+    request_data = json.loads(request.form.get("data_string"))
     session = request_data.get("session")
     papers = paper_info_db_check_multiquery(session["cache"])
 
@@ -430,7 +449,7 @@ def get_node_info_single(entity, entity_type, year_ranges):
 
 @blueprint.route('/get_node_info/', methods=['POST'])
 def get_node_info():
-    request_data = json.loads(flask.request.form.get("data_string"))
+    request_data = json.loads(request.form.get("data_string"))
     node_name = request_data.get("name")
     node_type = request_data.get("node_type")
     session = request_data.get("session")
@@ -448,7 +467,7 @@ def get_node_info():
 
 @blueprint.route('/get_next_node_info_page/', methods=['POST'])
 def get_next_node_info_page():
-    request_data = json.loads(flask.request.form.get("data_string"))
+    request_data = json.loads(request.form.get("data_string"))
     node_name = request_data.get("name")
     node_type = request_data.get("node_type")
     session = request_data.get("session")

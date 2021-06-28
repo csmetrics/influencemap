@@ -29,20 +29,28 @@ class PartFlower:
 class Flower:
     """Full result."""
     __slots__ = ['author_part', 'affiliation_part', 'field_of_study_part',
-                 'journal_part', 'conference_series_part', 'pub_year_counts',
-                 'cit_year_counts', 'pub_count', 'cit_count', 'ref_count']
+                 'journal_part', 'conference_series_part']
     def __init__(
         self,
         *,
         author_part, affiliation_part, field_of_study_part,
-        journal_part, conference_series_part, pub_year_counts,
-        cit_year_counts, pub_count, cit_count, ref_count,
+        journal_part, conference_series_part,
     ):
         self.author_part = author_part
         self.affiliation_part = affiliation_part
         self.field_of_study_part = field_of_study_part
         self.journal_part = journal_part
         self.conference_series_part = conference_series_part
+
+
+class Stats:
+    __slots__ = ['pub_year_counts', 'cit_year_counts', 'pub_count',
+                 'cit_count', 'ref_count']
+    def __init__(
+        self,
+        *,
+        pub_year_counts, cit_year_counts, pub_count, cit_count, ref_count,
+    ):
         self.pub_year_counts = pub_year_counts
         self.cit_year_counts = cit_year_counts
         self.pub_count = pub_count
@@ -225,7 +233,6 @@ class Florist:
     def _make_flower_from_dicts(
         self,
         influencers, influencees,
-        pub_year_counts, cit_year_counts, ref_count,
     ):
         """Turn result dicts returned by _make_flower into a Flower."""
         (infcer_author_res, infcer_aff_res, infcer_fos_res,
@@ -264,21 +271,26 @@ class Florist:
             influencees=ResultArrays(
                 *result_list_to_arr(infcee_cs_res, ind2id)))
 
+        return Flower(author_part=author_part,
+                      affiliation_part=aff_part,
+                      field_of_study_part=fos_part,
+                      journal_part=journal_part,
+                      conference_series_part=cs_part)
+
+    def _make_stats_from_arrs(
+        self,
+        pub_year_counts, cit_year_counts, ref_count,
+    ):
         pub_year_count_dict = self._make_pub_year_count_dict(pub_year_counts)
         cit_year_count_dict = self._make_cit_year_count_dict(cit_year_counts)
         pub_count = np.sum(pub_year_counts)
         cit_count = np.sum(cit_year_counts)
 
-        return Flower(author_part=author_part,
-                      affiliation_part=aff_part,
-                      field_of_study_part=fos_part,
-                      journal_part=journal_part,
-                      conference_series_part=cs_part,
-                      pub_year_counts=pub_year_count_dict,
-                      cit_year_counts=cit_year_count_dict,
-                      pub_count=int(pub_count),
-                      cit_count=int(cit_count),
-                      ref_count=int(ref_count))
+        return Stats(pub_year_counts=pub_year_count_dict,
+                     cit_year_counts=cit_year_count_dict,
+                     pub_count=int(pub_count),
+                     cit_count=int(cit_count),
+                     ref_count=int(ref_count))
 
     def get_flower(
         self,
@@ -322,8 +334,7 @@ class Florist:
 
         # nb.literally makes it a compile-time constant. This does
         # require one compilation per value.
-        (influencers, influencees,
-         pub_year_counts, cit_year_counts, ref_count) = _make_flower(
+        influencers, influencees = _make_flower(
             entity_indices, paper_indices,
             self.entity2paper_map.arrs,
             self.paper2entity_map.arrs,
@@ -332,10 +343,35 @@ class Florist:
             self_citations=nb.literally(bool(self_citations)),
             coauthors=nb.literally(bool(coauthors)),
             author_range=nb.literally(self.author_range),
-            aff_range=nb.literally(self.aff_range),
+            aff_range=nb.literally(self.aff_range))
+        return self._make_flower_from_dicts(influencers, influencees)
+
+    def get_stats(
+        self,
+        *,
+        author_ids=[],
+        affiliation_ids=[],
+        field_of_study_ids=[],
+        journal_ids=[],
+        conference_series_ids=[],
+        paper_ids=[],
+        allow_not_found=False,
+    ):
+        entity_indices = self._get_entity_indices(
+            author_ids=author_ids, aff_ids=affiliation_ids,
+            fos_ids=field_of_study_ids, journal_ids=journal_ids,
+            cs_ids=conference_series_ids, allow_not_found=allow_not_found)
+        paper_indices = self._get_paper_indices(
+            paper_ids, allow_not_found=allow_not_found)
+
+        # nb.literally makes it a compile-time constant. This does
+        # require one compilation per value.
+        pub_year_counts, cit_year_counts, ref_count = _make_stats(
+            entity_indices, paper_indices,
+            self.entity2paper_map.arrs,
+            self.citation_maps.arrs,
             paper_year_map=self.paper_year_map)
-        return self._make_flower_from_dicts(
-            influencers, influencees,
+        return self._make_stats_from_arrs(
             pub_year_counts, cit_year_counts, ref_count)
 
 
@@ -496,16 +532,11 @@ def _make_flower(
     *,
     pub_ids, cit_ids, self_citations, coauthors,
     author_range, aff_range,
-    paper_year_map,
 ):
     ego_papers = set()  # Papers written by ego. Set needed to
                         # deduplicate, as ego may be multiple entities.
     ego_entities = set()  # Entities forming the ego, as a set for fast
                           # membership checking.
-    num_years, = paper_year_map.shape
-    pub_year_counts = np.zeros(num_years, dtype=np.uint32)
-    cit_year_counts = np.zeros((num_years, num_years), dtype=np.uint32)
-    ref_count = 0
     for entity_id in entity_ids:
         for paper_id in _traverse_one(entity2paper_map, entity_id):
             # TODO: It may be faster to do something more clever, since
@@ -531,8 +562,6 @@ def _make_flower(
     # counts: weights are computed later.
     citee_papers = nb.typed.Dict.empty(key_type=nb.u4, value_type=nb.u4)
     for paper_id in ego_papers:
-        pub_year = _get_year(paper_id, paper_year_map)
-        pub_year_counts[pub_year] += 1
         paper_entities = _traverse_one(paper2entity_map, paper_id)
         num_authors = 0
         for entity_id in paper_entities:
@@ -549,15 +578,12 @@ def _make_flower(
             if _is_in_range(cit_ids, citor_id):
                 # Numba can't inline dictionary accesses, so this is two
                 # function calls lol.
-                cit_year = _get_year(citor_id, paper_year_map)
-                cit_year_counts[pub_year, cit_year] += 1
                 count, score = citor_papers.get(citor_id,
                                                 (nb.u4(0), nb.f4(0.)))
                 citor_papers[citor_id] = count + 1, score + recip_weight
         for citee_id in citees:
             # TODO: Same optimization opportunity.
             if _is_in_range(pub_ids, citee_id):
-                ref_count += 1
                 # Another two calls.
                 citee_papers[citee_id] = nb.u4(
                     citee_papers.get(citee_id, nb.u4(0)) + nb.u4(1))
@@ -603,5 +629,30 @@ def _make_flower(
         citor_entities.pop(entity_id, None)
         citee_entities.pop(entity_id, None)
 
-    return (citor_entities, citee_entities,
-            pub_year_counts, cit_year_counts, ref_count)
+    return citor_entities, citee_entities
+
+
+@nb.njit(nogil=True)
+def _make_stats(
+    entity_ids, paper_ids,
+    entity2paper_map, citation_maps,
+    *,
+    paper_year_map,
+):
+    num_years, = paper_year_map.shape
+    pub_year_counts = np.zeros(num_years, dtype=np.uint32)
+    cit_year_counts = np.zeros((num_years, num_years), dtype=np.uint32)
+    ref_count = 0
+    ego_papers = set(paper_ids)
+    for entity_id in entity_ids:
+        ego_papers.update(_traverse_one(entity2paper_map, entity_id))
+    for paper_id in ego_papers:
+        pub_year = _get_year(paper_id, paper_year_map)
+        pub_year_counts[pub_year] += 1
+        citors, citees = _traverse_citations(citation_maps, paper_id)
+        for citor_id in citors:
+            cit_year = _get_year(citor_id, paper_year_map)
+            cit_year_counts[pub_year, cit_year] += 1
+        ref_count += len(citees)
+
+    return pub_year_counts, cit_year_counts, ref_count

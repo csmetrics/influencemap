@@ -74,7 +74,7 @@ def to_url_ext(url_ext_arg):
         arg_val = '='.join(arg_tuple)
         arg_str.append(arg_val)
 
-    return '&amp;'.join(arg_str)
+    return '&'.join(arg_str)
 
 
 def hash_args(arg_tuple):
@@ -157,7 +157,6 @@ def unshorten_url_ext(url):
     _, flower_url = url.split('/redirect/')
     flower_vals = flower_url.split('_')
 
-    print(flower_vals)
     orig_flower = unshorten_id(flower_vals[0])
 
     if len(flower_vals) > 1:
@@ -165,7 +164,7 @@ def unshorten_url_ext(url):
             flower_args = flower_vals[1:]
             orig_args = to_url_ext(unhash_args(flower_args))
 
-            orig_flower += '&amp;' + orig_args
+            orig_flower += '&' + orig_args
         except Exception as e:
             pass
 

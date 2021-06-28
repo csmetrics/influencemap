@@ -1,6 +1,17 @@
 import requests
 
 
+def get_ids(locals_):
+    params = {}
+    for name in ['author_ids', 'affiliation_ids',
+                 'conference_series_ids', 'journal_ids',
+                 'field_of_study_ids', 'paper_ids']:
+        ids = locals_[name]
+        if ids:
+            params[name.replace('_', '-')] = ','.join(map(str, ids))
+    return params
+
+
 class KonigsbergClient:
     def __init__(self, url):
         self.session = requests.Session()
@@ -21,13 +32,7 @@ class KonigsbergClient:
         self_citations=False,
     ):
         params = {}
-        
-        for name in ['author_ids', 'affiliation_ids',
-                     'conference_series_ids', 'journal_ids',
-                     'field_of_study_ids', 'paper_ids']:
-            ids = locals()[name]
-            if ids:
-                params[name.replace('_', '-')] = ','.join(map(str, ids))
+        params.update(get_ids(locals()))
 
         if self_citations:
             params['self-citations'] = 't'
@@ -41,6 +46,21 @@ class KonigsbergClient:
             start_year, end_year = cit_years
             params['cit-years'] = f'{start_year},{end_year}'
 
-        response = self.session.get(self.url, params=params)
+        response = self.session.get(self.url + '/get-flower', params=params)
+        response.raise_for_status()
+        return response.json()
+
+    def get_stats(
+        self,
+        *,
+        author_ids=(),
+        affiliation_ids=(),
+        conference_series_ids=(),
+        journal_ids=(),
+        field_of_study_ids=(),
+        paper_ids=(),
+    ):
+        params = get_ids(locals())
+        response = self.session.get(self.url + '/get-stats', params=params)
         response.raise_for_status()
         return response.json()

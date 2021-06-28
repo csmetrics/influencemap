@@ -138,6 +138,8 @@ NAVBAR_OPTIONS = {
 
 def make_year_slider_and_stats(
     pub_year_counts, cit_year_counts, pub_count, cit_count, ref_count,
+    *,
+    selection=None,
 ):
     pub_year_counts = {int(year): count
                        for year, count in pub_year_counts.items()
@@ -201,20 +203,34 @@ def make_year_slider_and_stats(
         )
     )
 
+    if selection is not None:
+        selected = year_slider['selected']
+        pub_years = selection.get('pub_years')
+        if pub_years is not None:
+            selected['pub_lower'], selected['pub_upper'] = pub_years
+        cit_years = selection.get('cit_years')
+        if cit_years is not None:
+            selected['cit_lower'], selected['cit_upper'] = cit_years
+        selected['self_cite'] = str(selection.get(
+            'self_citations', selected['self_cite'])).lower()
+        selected['icoauthor'] = str(selection.get(
+            'coauthors', selected['icoauthor'])).lower()
+
     return stats, year_slider
 
 
 def make_response_data(
     flower,
+    stats=None,
     *,
     is_curated=None,
     flower_name,
     session={},
-    for_resubmit=False,
+    selection=None,
 ):
     res = {}
 
-    if not for_resubmit:
+    if is_curated is not None:
         res['curated'] = is_curated
     res['navbarOption'] = NAVBAR_OPTIONS
     
@@ -236,10 +252,11 @@ def make_response_data(
         [partial(get_display_names_from_author_ids, with_id=True)],
         gtype='author', flower_name=flower_name)
 
-    if not for_resubmit:
+    if stats is not None:
         res['stats'], res['yearSlider'] = make_year_slider_and_stats(
-            flower['pub_year_counts'], flower['cit_year_counts'],
-            flower['pub_count'], flower['cit_count'], flower['ref_count'])
+            stats['pub_year_counts'], stats['cit_year_counts'],
+            stats['pub_count'], stats['cit_count'], stats['ref_count'],
+            selection=selection)
 
     res['session'] = session
 

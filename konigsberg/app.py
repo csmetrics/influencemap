@@ -67,12 +67,16 @@ def flower_as_dict(flower):
         field_of_study_part=part_flower_as_dict(flower.field_of_study_part),
         journal_part=part_flower_as_dict(flower.journal_part),
         conference_series_part=part_flower_as_dict(
-            flower.conference_series_part),
-        pub_year_counts=pub_year_counts_as_json_dict(flower.pub_year_counts),
-        cit_year_counts=cit_year_counts_as_json_dict(flower.cit_year_counts),
-        pub_count=flower.pub_count,
-        cit_count=flower.cit_count,
-        ref_count=flower.ref_count)
+            flower.conference_series_part))
+
+
+def stats_as_dict(stats):
+    return dict(
+        pub_year_counts=pub_year_counts_as_json_dict(stats.pub_year_counts),
+        cit_year_counts=cit_year_counts_as_json_dict(stats.cit_year_counts),
+        pub_count=stats.pub_count,
+        cit_count=stats.cit_count,
+        ref_count=stats.ref_count)
 
 
 @app.route('/get-flower')
@@ -101,5 +105,23 @@ def get_flower():
     return flask.jsonify(flower_as_dict(flower))
 
 
+@app.route('/get-stats')
+def get_stats():
+    author_ids = _get_ids_from_request('author-ids')
+    affiliation_ids = _get_ids_from_request('affiliation-ids')
+    field_of_study_ids = _get_ids_from_request('field-of-study-ids')
+    journal_ids = _get_ids_from_request('journal-ids')
+    conference_series_ids = _get_ids_from_request('conference-series-ids')
+    paper_ids = _get_ids_from_request('paper-ids')
+
+    stats = florist.get_stats(
+        author_ids=author_ids, affiliation_ids=affiliation_ids,
+        field_of_study_ids=field_of_study_ids, journal_ids=journal_ids,
+        conference_series_ids=conference_series_ids, paper_ids=paper_ids,
+        allow_not_found=True)
+
+    return flask.jsonify(stats_as_dict(stats))
+
+
 if __name__ == '__main__':
-    app.run('127.0.0.1', debug=True)
+    app.run('127.0.0.1', port=8081, debug=True)
