@@ -235,9 +235,10 @@ def submit():
             if len(data["names"]) > 1:
                 flower_name += " +{} more".format(len(entity_names) - 1)
 
-        doc_for_es_cache = dict(
-            DisplayName=flower_name, EntityIds=entities, Type=user_generated)
-        doc_id = saveNewBrowseCache(doc_for_es_cache)
+        # doc_for_es_cache = dict(
+        #     DisplayName=flower_name, EntityIds=entities, Type=user_generated)
+        # doc_id = saveNewBrowseCache(doc_for_es_cache)
+        doc_id = 'foobar'
 
     flower = kb_client.get_flower(
         author_ids=author_ids, affiliation_ids=affiliation_ids,
