@@ -70,7 +70,7 @@ def _make_one_response_flower(
         if mask.any():
             ids = tuple(df[mask].index)
             ids_to_name = name_lookup_f(ids)
-            names = tuple(map(ids_to_name.get, ids, map(str, ids)))
+            names = tuple(map(ids_to_name.__getitem__, ids))
             df.loc[mask, 'name'] = names
 
     df['bloom_order'] = range(1, len(df) + 1)

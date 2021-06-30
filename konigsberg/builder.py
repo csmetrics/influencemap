@@ -28,7 +28,7 @@ class MAGDialect(csv.Dialect):
     strict = True
 
 
-def load_entity_df(path, filter_column=None):
+def load_entity_df(path, meta_func=None, filter_column=None, sort_column=None):
     """Load a table listing non-paper entities.
 
     Non-paper entities are authors, affiliations, journals, conference
@@ -61,6 +61,10 @@ def load_entity_df(path, filter_column=None):
         path,
         dialect=MAGDialect(), engine='c', na_filter=False,
         usecols=indices, names=names, dtype=dtypes)
+    meta = None if meta_func is None else meta_func(df)
+    if sort_column:
+        df.sort_values(
+            sort_column, inplace=True, ignore_index=True, kind='mergesort')
     if filter_column:
         _, filter_col_name, _, filter_f = filter_column
         df = df[filter_f(df[filter_col_name])]
@@ -68,15 +72,19 @@ def load_entity_df(path, filter_column=None):
         del df[filter_col_name]
     df.sort_values('rank', inplace=True, ignore_index=True, kind='mergesort')
     del df['rank']
-    return df
+    return df, meta
 
 
-def process_entity_listings(entity_paths, out_path_ind2id):
+IN_SUFF = '.txt'
+ID2IND_SUFF = '-id2ind.bin'
+META_SUFF = '-meta.json'
+def process_entity_listings(in_dir, out_dir, out_fname_ind2id, entity_infos):
     """Load entity tables and make ID-index mappings.
 
     This function takes multiple entity tables and assigns them
     consecutive indices.
-
+    
+    ### caution: below docs are slightly out of date
     entity_path is an iterable of 3-tuples: path to table (read), path
     to the ID-to-index map (written), and an optional row filter (see 
     `load_entity_df`). out_path_ind2id is the path to the index-to-ID
@@ -87,21 +95,31 @@ def process_entity_listings(entity_paths, out_path_ind2id):
     Returns a list of ID-to-index maps, as well a list of the number of
     entities per table.
     """
+    in_dir = pathlib.Path(in_dir)
+    out_dir = pathlib.Path(out_dir)
     counts = []
-    with open(out_path_ind2id, 'wb') as ind_to_id_f:
+    with open(out_dir / out_fname_ind2id, 'wb') as ind_to_id_f:
         offset = 0
-        for in_path, out_path_id2ind, filter_info in entity_paths:
-            df = load_entity_df(in_path, filter_info)
+        for in_fname, out_fname, meta_info, filter_info, sort_info \
+                in entity_infos:
+            df, meta = load_entity_df(
+                in_dir / (in_fname + IN_SUFF),
+                meta_info, filter_info, sort_info)
             id_arr = df['id'].to_numpy()
             ind_to_id_f.write(id_arr)  # Index to ID: copy array of IDS.
-            hashutil.make_id_hash_map(id_arr, out_path_id2ind, offset)
+            hashutil.make_id_hash_map(
+                id_arr, out_dir / (out_fname + ID2IND_SUFF), offset)
             count = len(df)
             counts.append(count)
             offset += count
+            if meta is not None:
+                with open(out_dir / (out_fname + META_SUFF), 'w') as meta_f:
+                    json.dump(meta, meta_f)
 
-    ind2id_map = hashutil.Ind2IdMap(out_path_ind2id)
-    id2ind_maps = tuple(hashutil.Id2IndHashMap(path, ind2id_map)
-                        for _, path, _ in entity_paths)
+    ind2id_map = hashutil.Ind2IdMap(out_dir / out_fname_ind2id)
+    id2ind_maps = tuple(
+        hashutil.Id2IndHashMap(out_dir / (path + ID2IND_SUFF), ind2id_map)
+        for _, path, _, _, _ in entity_infos)
     return id2ind_maps, counts
 
 
@@ -121,7 +139,7 @@ def load_papers_df(path):
     df = pd.read_csv(
         path,
         dialect=MAGDialect(), engine='c',
-        usecols=[0, 1, 7, 10, 11],
+        usecols=[0, 1, 7, 11, 12],
         names=['paper_id', 'rank', 'year', 'journal_id', 'cs_id'],
         dtype={'paper_id': np.uint32, 'rank': np.uint16,
                'year': pd.UInt16Dtype(), 'journal_id': pd.UInt32Dtype(),
@@ -287,13 +305,14 @@ def make_dataset(in_path, out_path):
     logger.info('(0/7) making entity id to index map')
     # Looks convoluted, but see `process_entity_listings` docstring.
     entities_id2ind_maps, entities_counts = process_entity_listings(
-        [(in_path / 'Authors.txt', out_path / 'author-id2ind.bin', None),
-         (in_path / 'Affiliations.txt', out_path / 'affltn-id2ind.bin', None),
-         (in_path / 'FieldsOfStudy.txt', out_path / 'fos-id2ind.bin',
-          (5, 'level', np.uint8, lambda level: level <= 1)),
-         (in_path / 'Journals.txt', out_path / 'journl-id2ind.bin', None),
-         (in_path / 'ConferenceSeries.txt', out_path / 'cs-id2ind.bin', None)],
-        out_path / 'entities-ind2id.bin')
+        in_path, out_path, 'entities-ind2id.bin',
+        [('Authors', 'author', None, None, None),
+         ('Affiliations', 'affltn', None, None, None),
+         ('FieldsOfStudy', 'fos',
+          lambda df: dict(level0count=int((df['level'] == 0).sum())),
+          (5, 'level', np.uint8, lambda level: level <= 1), 'level'),
+         ('Journals', 'journl', None, None, None),
+         ('ConferenceSeries', 'cs', None, None, None)])
     save_entity_counts(entities_counts, out_path / 'entity-counts.json')
     authors_id2ind, aff_id2ind, fos_id2ind, journals_id2ind, cs_id2ind \
         = entities_id2ind_maps
@@ -371,7 +390,7 @@ def main():
     stream_handler = logging.StreamHandler()  # Log to stderr.
     try:
         logger.addHandler(stream_handler)
-        make_dataset('/data/u1033719/graph/mag-2019-11-08/', 'bingraph')
+        make_dataset('/data/u1033719/graph/mag-2021-02-15/', 'bingraph-new')
     finally:
         logger.removeHandler(stream_handler)
 
