@@ -163,6 +163,9 @@ class Florist:
         self.fos_range = self.aff_range + entity_counts_data['fos']
         self.journal_range = self.fos_range + entity_counts_data['journals']
         self.cs_range = self.journal_range + entity_counts_data['cs']
+        with open(path / 'fos-meta.json') as f:
+            fos_meta = json.load(f)
+        self.fos_l1_start = self.aff_range + fos_meta['level0count']
 
     def _get_id_year_range(self, years):
         """Get range of paper indices corresponding to a range of years.
@@ -238,11 +241,11 @@ class Florist:
         (infcer_author_res, infcer_aff_res, infcer_fos_res,
          infcer_journal_res, infcer_cs_res) = split_results_dict(
             influencers, self.author_range, self.aff_range, self.fos_range,
-            self.journal_range, self.cs_range)
+            self.journal_range, self.cs_range, self.fos_l1_start)
         (infcee_author_res, infcee_aff_res, infcee_fos_res,
          infcee_journal_res, infcee_cs_res) = split_results_dict(
             influencees, self.author_range, self.aff_range, self.fos_range,
-            self.journal_range, self.cs_range)
+            self.journal_range, self.cs_range, self.fos_l1_start)
 
         ind2id = self.entity_ind2id_map.arrs
         author_part = PartFlower(
@@ -381,7 +384,8 @@ score_tuple_t = nb.types.Tuple([nb.u4, nb.f4])
 @nb.njit(nogil=True)
 def split_results_dict(
     res,
-    author_range, aff_range, fos_range, journal_range, cs_range
+    author_range, aff_range, fos_range, journal_range, cs_range,
+    fos_l1_start,
 ):
     """Split a dict of indices and scores by entity type."""
     author_res = nb.typed.List.empty_list(score_tuple_t)
@@ -395,7 +399,8 @@ def split_results_dict(
         elif index < aff_range:
             aff_res.append((index, score))
         elif index < fos_range:
-            fos_res.append((index, score))
+            if index >= fos_l1_start:
+                fos_res.append((index, score))
         elif index < journal_range:
             journals_res.append((index, score))
         elif index < cs_range:
