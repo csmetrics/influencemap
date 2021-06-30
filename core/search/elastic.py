@@ -172,6 +172,10 @@ def query_author(search_phrase):
             print(author["Affiliation"])
     return authors
 
+def query_topic(search_phrase):
+    topics = query_names_with_matches("fieldsofstudy", ["DisplayName", "NormalizedName"], search_phrase)
+    return [t for t in topics if t["Level"] < 2] # only returns level 0 or 1 topics
+
 
 def query_entity(entityType, keyword):
     data = []
@@ -185,6 +189,8 @@ def query_entity(entityType, keyword):
         data += [(val, "paper") for val in query_paper(keyword)]
     if "author" in entityType:
         data += [(val, "author") for val in query_author(keyword)]
+    if "topic" in entityType:
+        data += [(val, "topic") for val in query_topic(keyword)]
     return data
 
 

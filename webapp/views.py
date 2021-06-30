@@ -135,7 +135,8 @@ s = {
     'conference': ('<i class="fa fa-building"></i><h4>{DisplayName}</h4><p>Papers: {PaperCount}, Citations: {CitationCount}</p>'),
     'institution': ('<i class="fa fa-university"></i><h4>{DisplayName}</h4><p>Papers: {PaperCount}, Citations: {CitationCount}</p>'),
     'journal': ('<i class="fa fa-book"></i><h4>{DisplayName}</h4><p>Papers: {PaperCount}, Citations: {CitationCount}</p>'),
-    'paper': ('<i class="fa fa-file"></i><h4>{OriginalTitle}</h4><p>Citations: {CitationCount}</p>')
+    'paper': ('<i class="fa fa-file"></i><h4>{OriginalTitle}</h4><p>Citations: {CitationCount}</p>'),
+    'topic': ('<i class="fa fa-flask"></i><h4>{DisplayName} (Level {Level})</h4><p>Papers: {PaperCount}, Citations: {CitationCount}</p>')
 }
 
 
@@ -148,7 +149,14 @@ def search():
     keyword = ''.join(ch for ch in keyword if ch not in exclude)
     keyword = keyword.lower()
     keyword = " ".join(keyword.split())
-    id_helper_dict = {"conference": "ConferenceSeriesId", "journal": "JournalId", "institution": "AffiliationId", "paper": "PaperId", "author": "AuthorId"}
+    id_helper_dict = {
+        "conference": "ConferenceSeriesId",
+        "journal": "JournalId",
+        "institution": "AffiliationId",
+        "paper": "PaperId",
+        "author": "AuthorId",
+        "topic": "FieldOfStudyId"
+    }
 
     print(entityType, keyword)
     data = query_entity(entityType, keyword)
