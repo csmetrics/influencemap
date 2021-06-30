@@ -5,7 +5,10 @@ import webapp.docs
 import webapp.views
 
 
-flask_app = flask.Flask(__name__)
+flask_app = flask.Flask(__name__,
+                        static_url_path='',
+                        static_folder='static',
+                        template_folder='templates')
 
 
 flask_app.register_blueprint(webapp.docs.blueprint)
