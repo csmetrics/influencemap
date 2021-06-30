@@ -220,11 +220,11 @@ def submit():
         data_str = request.form['data']
         data = json.loads(data_str)
         entities = data['entities']
-        author_ids = map(int, entities['AuthorIds'])
-        affiliation_ids = map(int, entities['AffiliationIds'])
-        conference_ids = map(int, entities['ConferenceIds'])
-        journal_ids = map(int, entities['JournalIds'])
-        paper_ids = map(int, entities['PaperIds'])
+        author_ids = list(map(int, entities['AuthorIds']))
+        affiliation_ids = list(map(int, entities['AffiliationIds']))
+        conference_ids = list(map(int, entities['ConferenceIds']))
+        journal_ids = list(map(int, entities['JournalIds']))
+        paper_ids = list(map(int, entities['PaperIds']))
         fos_ids = []
 
         entity_names = \
