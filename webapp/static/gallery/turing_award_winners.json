@@ -1,0 +1,681 @@
+[{
+	"Type": "turing_award_winners",
+	"Year": 1966,
+	"Affiliations": ["Purdue University", "Yale University", "Carnegie Mellon University"],
+	"DisplayName": "Alan J Perlis",
+	"EntityIds": {
+		"AuthorIds": [2685789577, 2659867364, 2671419070, 2718818279, 2515136405, 2684643246, 2657825531, 2654204609, 1497622285, 2652906761, 2798544979, 1980391989, 2640197775, 2525603987, 2635408736, 75351039]
+	},
+	"Citation": "For his influence in the area of advanced programming techniques and compiler construction.",
+	"PhotoUrl": "https://amturing.acm.org/images/lg_aw/0132439.jpg",
+	"Url": "https://amturing.acm.org/award_winners/perlis_0132439.cfm"
+}, {
+	"Type": "turing_award_winners",
+	"Year": 1967,
+	"Affiliations": ["University of Cambridge"],
+	"DisplayName": "Maurice V. Wilkes",
+	"EntityIds": {
+		"AuthorIds": [2477077487, 2691969857, 2681153077, 2017458922, 2669456880, 2661944573, 2156503972, 2698362164, 2224046207]
+	},
+	"Citation": "Professor Wilkes is best known as the builder and designer of the EDSAC, the first computer with an internally stored program. Built in 1949, the EDSAC used a mercury delay line memory. He is also known as the author, with Wheeler and Gill, of a volume on \"Preparation of Programs for Electronic Digital Computers\" in 1951, in which program libraries were effectively introduced.",
+	"PhotoUrl": "https://amturing.acm.org/images/lg_aw/1001395.jpg"
+}, {
+	"Type": "turing_award_winners",
+	"Year": 1968,
+	"Affiliations": ["Bell Labs"],
+	"DisplayName": "Richard W. Hamming",
+	"EntityIds": {
+		"AuthorIds": [2244377245, 2793262723, 2799252221, 2478207046, 2714515456]
+	},
+	"Citation": "For his work on numerical methods, automatic coding systems, and error-detecting and error-correcting codes.",
+	"PhotoUrl": "https://amturing.acm.org/images/lg_aw/1000652.jpg",
+	"Url": "https://amturing.acm.org/award_winners/hamming_1000652.cfm"
+}, {
+	"Type": "turing_award_winners",
+	"Year": 1969,
+	"DisplayName": "Marvin Minsky",
+	"EntityIds": {
+		"AuthorIds": [1968041664]
+	},
+	"Citation": "For his central role in creating, shaping, promoting, and advancing the field of Artificial Intelligence.",
+	"PhotoUrl": "https://amturing.acm.org/images/lg_aw/7440781.jpg",
+	"Url": "https://amturing.acm.org/award_winners/minsky_7440781.cfm"
+}, {
+	"Type": "turing_award_winners",
+	"Year": 1970,
+	"DisplayName": "James Hardy Wilkinson",
+	"EntityIds": {
+		"AuthorIds": [2193746894]
+	},
+	"Citation": "For his research in numerical analysis to facilitiate the use of the high-speed digital computer, having received special recognition for his work in computations in linear algebra and backward error analysis.",
+	"PhotoUrl": "https://amturing.acm.org/images/lg_aw/0671216.jpg",
+	"Url": "https://amturing.acm.org/award_winners/wilkinson_0671216.cfm"
+}, {
+	"Type": "turing_award_winners",
+	"Year": 1971,
+	"DisplayName": "John McCarthy",
+	"EntityIds": {
+		"AuthorIds": [2121245618]
+	},
+	"Citation": "Dr. McCarthys lecture The Present State of Research on Artificial Intelligence is a topic that covers the area in which he has achieved considerable recognition for his work.",
+	"PhotoUrl": "https://amturing.acm.org/images/lg_aw/1118322.jpg",
+	"Url": "https://amturing.acm.org/award_winners/mccarthy_1118322.cfm"
+}, {
+	"Type": "turing_award_winners",
+	"Year": 1972,
+	"DisplayName": "Edsger Wybe Dijkstra",
+	"EntityIds": {
+		"AuthorIds": [2137842401]
+	},
+	"Citation": "For fundamental contributions to programming as a high, intellectual challenge; for eloquent insistence and practical demonstration that programs should be composed correctly, not just debugged into correctness; for illuminating perception of problems at the foundations of program design.",
+	"PhotoUrl": "https://amturing.acm.org/images/lg_aw/1053701.jpg",
+	"Url": "https://amturing.acm.org/award_winners/dijkstra_1053701.cfm"
+}, {
+	"Type": "turing_award_winners",
+	"Year": 1973,
+	"DisplayName": "Charles William Bachman",
+	"EntityIds": {
+		"AuthorIds": [2315463675, 2765198732, 2137178283, 2767010939, 2719932568]
+	},
+	"Citation": "For his outstanding contributions to database technology.",
+	"PhotoUrl": "https://amturing.acm.org/images/lg_aw/9385610.jpg",
+	"Url": "https://amturing.acm.org/award_winners/bachman_9385610.cfm"
+}, {
+	"Type": "turing_award_winners",
+	"Year": 1974,
+	"DisplayName": "Donald Ervin Knuth",
+	"EntityIds": {
+		"AuthorIds": [2137000881, 2612019245, 1523621709, 2811012905, 2341705433, 2408465631, 2602510247, 2691052766, 2709292367, 2633385569, 2589905910]
+	},
+	"Citation": "For his major contributions to the analysis of algorithms and the design of programming languages, and in particular for his contributions to the art of computer programming through his well-known books in a continuous series by this title.",
+	"PhotoUrl": "https://amturing.acm.org/images/lg_aw/1013846.jpg",
+	"Url": "https://amturing.acm.org/award_winners/knuth_1013846.cfm"
+}, {
+	"Type": "turing_award_winners",
+	"Year": 1975,
+	"DisplayName": "Allen Newell",
+	"EntityIds": {
+		"AuthorIds": [2126658068]
+	},
+	"Citation": "In joint scientific efforts extending over twenty years, initially in collaboration with J. C. Shaw at the RAND Corporation, and subsequentially with numerous faculty and student collegues at Carnegie-Mellon University, Newell and co-recipient Herbert A. Simon made basic contributions to artificial intelligence, the psychology of human cognition, and list processing.",
+	"PhotoUrl": "https://amturing.acm.org/images/lg_aw/3167755.jpg",
+	"Url": "https://amturing.acm.org/award_winners/newell_3167755.cfm"
+}, {
+	"Type": "turing_award_winners",
+	"Year": 1975,
+	"DisplayName": "Herbert Alexander Simon",
+	"EntityIds": {
+		"AuthorIds": [2118103072]
+	},
+	"Citation": "In joint scientific efforts extending over twenty years, initially in collaboration with J. C. Shaw at the RAND Corporation, and subsequentially with numerous faculty and student collegues at Carnegie-Mellon University, Simon and co-recipient Allen Newell made basic contributions to artificial intelligence, the psychology of human cognition, and list processing.",
+	"PhotoUrl": "https://amturing.acm.org/images/lg_aw/1031467.jpg",
+	"Url": "https://amturing.acm.org/award_winners/simon_1031467.cfm"
+}, {
+	"Type": "turing_award_winners",
+	"Year": 1976,
+	"DisplayName": "Dana Stewart Scott",
+	"EntityIds": {
+		"AuthorIds": [2602723040, 2780530194, 2655906100, 2642681265, 2764557467, 2705007753, 2716833697, 2692058219, 2569117717, 2634537543, 2513756003]
+	},
+	"Citation": "Along with Michael O. Rabin, for their joint paper Finite Automata and Their Decision Problem, which introduced the idea of nondeterministic machines, which has proved to be an enormously valuable concept. Their (Scott & Rabin) classic paper has been a continuous source of inspiration for subsequent work in this field.",
+	"PhotoUrl": "https://amturing.acm.org/images/lg_aw/1193622.jpg",
+	"Url": "https://amturing.acm.org/award_winners/scott_1193622.cfm"
+}, {
+	"Type": "turing_award_winners",
+	"Year": 1976,
+	"DisplayName": "Michael O. Rabin",
+	"EntityIds": {
+		"AuthorIds": [2058972589, 2715875744, 2628621942, 2641697216, 2165542162, 2638710237, 2657575232, 2696039587, 2646133189]
+	},
+	"Citation": "Along with Dana S. Scott, for their joint paper Finite Automata and Their Decision Problem, which introduced the idea of nondeterministic machines, which has proved to be an enormously valuable concept. Their (Scott & Rabin) classic paper has been a continuous source of inspiration for subsequent work in this field.",
+	"PhotoUrl": "https://amturing.acm.org/images/lg_aw/9681074.jpg",
+	"Url": "https://amturing.acm.org/award_winners/rabin_9681074.cfm"
+}, {
+	"Type": "turing_award_winners",
+	"Year": 1977,
+	"DisplayName": "John Backus",
+	"EntityIds": {
+		"AuthorIds": [2150910180]
+	},
+	"Citation": "For profound, influential, and lasting contributions to the design of practical high-level programming systems, notably through his work on FORTRAN, and for seminal publication of formal procedures for the specification of programming languages.",
+	"PhotoUrl": "https://amturing.acm.org/images/lg_aw/0703524.jpg",
+	"Url": "https://amturing.acm.org/award_winners/backus_0703524.cfm"
+}, {
+	"Type": "turing_award_winners",
+	"Year": 1978,
+	"DisplayName": "Robert W Floyd",
+	"EntityIds": {
+		"AuthorIds": [2780789766, 2011551863, 2099237374, 2643457283, 2653123938, 2780904694]
+	},
+	"Citation": "For having a clear influence on methodologies for the creation of efficient and reliable software, and for helping to found the following important subfields of computer science: the theory of parsing, the semantics of programming languages, automatic program verification, automatic program synthesis, and analysis of algorithms.",
+	"PhotoUrl": "https://amturing.acm.org/images/lg_aw/3720707.jpg",
+	"Url": "https://amturing.acm.org/award_winners/floyd_3720707.cfm"
+}, {
+	"Type": "turing_award_winners",
+	"Year": 1979,
+	"DisplayName": "Kenneth E. Iverson",
+	"EntityIds": {
+		"AuthorIds": [2020580827, 2582772070]
+	},
+	"Citation": "For his pioneering effort in programming languages and mathematical notation resulting in what the computing field now knows as APL, for his contributions to the implementation of interactive systems, to educational uses of APL, and to programming language theory and practice.",
+	"PhotoUrl": "https://amturing.acm.org/images/lg_aw/9147499.jpg",
+	"Url": "https://amturing.acm.org/award_winners/iverson_9147499.cfm"
+}, {
+	"Type": "turing_award_winners",
+	"Year": 1980,
+	"DisplayName": "C. Antony R. Hoare",
+	"EntityIds": {
+		"AuthorIds": [2166230870, 2631191382, 2696942845, 2634427783, 2717840394, 2657399781, 2627445221, 2762302404, 2696705437, 2631723339]
+	},
+	"Citation": "For his fundamental contributions to the definition and design of programming languages.",
+	"PhotoUrl": "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcT819_neVKN_r8LvrMqKqIbsWS5KpdwzHAnoiK0FWp-CDeNmrnm2wo",
+	"Url": "https://amturing.acm.org/award_winners/hoare_4622167.cfm"
+}, {
+	"Type": "turing_award_winners",
+	"Year": 1981,
+	"DisplayName": "Edgar F. Codd",
+	"EntityIds": {
+		"AuthorIds": [1972300922, 2663969656, 2613172184, 2799061506, 2806122326, 2709065787, 2677607044, 2777092540, 2719155387]
+	},
+	"Citation": "For his fundamental and continuing contributions to the theory and practice of database management systems.",
+	"PhotoUrl": "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcSPdqlG6RqXPvzb9Tz4aJAqu7Gsl5YxPf00xf_xELMukTbOCuMLDey_awWgTsc9my0Eecw",
+	"Url": "https://amturing.acm.org/award_winners/codd_1000892.cfm"
+}, {
+	"Type": "turing_award_winners",
+	"Year": 1982,
+	"DisplayName": "Stephen Arthur Cook",
+	"EntityIds": {
+		"AuthorIds": [2098910421, 2781279330, 2761332591, 2660111824, 2109578512]
+	},
+	"Citation": "For his advancement of our understanding of the complexity of computation in a significant and profound way. His seminal paper, The Complexity of Theorem Proving Procedures, presented at the 1971 ACM SIGACT Symposium on the Theory of Computing, laid the foundations for the theory of NP-Completeness. The ensuing exploration of the boundaries and nature of NP-complete class of problems has been one of the most active and important research activities in computer science for the last decade.",
+	"PhotoUrl": "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQDHwAho0ggbQRUwSU8NOg3da_MPY9uMX2kJA8HOYBy1zh8GLcepnwFgneM294Gu78caME",
+	"Url": "https://amturing.acm.org/award_winners/cook_n991950.cfm"
+}, {
+	"Type": "turing_award_winners",
+	"Year": 1983,
+	"DisplayName": "Kenneth Lane Thompson",
+	"EntityIds": {
+		"AuthorIds": [2163136642, 2193803191, 2831969385, 2821346789, 2566845605]
+	},
+	"Citation": "With Dennis M. Ritchie, for their development of generic operating systems theory and specifically for the implementation of the UNIX operating system.",
+	"PhotoUrl": "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcRHwnHYf-7Mc1UbvvQXvLxBd6-XMH4LMPwTyNQqWK32ejqd8nQesY8p1jymHj01k2pvkPk",
+	"Url": "https://amturing.acm.org/award_winners/thompson_4588371.cfm"
+}, {
+	"Type": "turing_award_winners",
+	"Year": 1983,
+	"DisplayName": "Dennis M. Ritchie",
+	"EntityIds": {
+		"AuthorIds": [2110203303, 2675350459, 2132015894]
+	},
+	"Citation": "With Ken Thompson, for their development of generic operating systems theory and specifically for the implementation of the UNIX operating system.",
+	"PhotoUrl": "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcR8-Fhrm4qZeeTHoyTPQHqGNXjNsqmg2yBwrGKFxDbu_WcuzHVm0m6BL3NZpMu9r0of5jI",
+	"Url": "https://amturing.acm.org/award_winners/ritchie_1506389.cfm"
+}, {
+	"Type": "turing_award_winners",
+	"Year": 1984,
+	"DisplayName": "Niklaus E. Wirth",
+	"EntityIds": {
+		"AuthorIds": [2327738716, 2762804161]
+	},
+	"Citation": "For developing a sequence of innovative computer languages, EULER, ALGOL-W, MODULA and PASCAL. PASCAL has become pedagogically significant and has provided a foundation for future computer language, systems, and architectural research.",
+	"PhotoUrl": "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcTJCvJxFjuQRGXzAkMKIqRoQw3EcLCe59p-zgLpXQDwd3FobdcqGs9sOj_TRIUVbDbh70g",
+	"Url": "https://amturing.acm.org/award_winners/wirth_1025774.cfm"
+}, {
+	"Type": "turing_award_winners",
+	"Year": 1985,
+	"DisplayName": "Richard Manning Karp",
+	"EntityIds": {
+		"AuthorIds": [1964658237, 2670059659, 2686839300, 2147890022, 2703226559, 2618475577, 2654968194, 2805276816, 2745009522, 2639014637, 2807542332]
+	},
+	"Citation": "For his continuing contributions to the theory of algorithms including the development of efficient algorithms for network flow and other combinatorial optimization problems, the identification of polynomial-time computability with the intuitive notion of algorithmic efficiency, and, most notably, contributions to the theory of NP-completeness. Karp introduced the now standard methodology for proving problems to be NP-complete which has led to the identification of many theoretical and practical problems as being computationally difficult.",
+	"PhotoUrl": "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcREejC03iZpV68-3wYFabJ9FexAqIsUHScc4cJX-ObqW8U8FnXOlp1edxcCqL2s0A_QK8A",
+	"Url": "https://amturing.acm.org/award_winners/karp_3256708.cfm"
+}, {
+	"Type": "turing_award_winners",
+	"Year": 1986,
+	"DisplayName": "John E Hopcroft",
+	"EntityIds": {
+		"AuthorIds": [2079447303, 2463265474, 2797595757]
+	},
+	"Citation": "With Robert E Tarjan, for fundamental achievements in the design and analysis of algorithms and data structures.",
+	"PhotoUrl": "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcSAF_umzjAiHV2947eNr9S0UI-ZqbJsACV7PNIo7olTzk6l8NsMMRwsG_XrAw68yV731PM",
+	"Url": "https://amturing.acm.org/award_winners/hopcroft_1053917.cfm"
+}, {
+	"Type": "turing_award_winners",
+	"Year": 1986,
+	"DisplayName": "Robert Endre Tarjan",
+	"EntityIds": {
+		"AuthorIds": [350567680, 2673763892]
+	},
+	"Citation": "With John E Hopcroft, for fundamental achievements in the design and analysis of algorithms and data structures.",
+	"PhotoUrl": "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcR9bQlb1eHNepw7OohO7PXD6uD0P87VkUtCMSDLOoQLP67V5IGCYU5S5KqPz8ZsT5ESOEE",
+	"Url": "https://amturing.acm.org/award_winners/tarjan_1092048.cfm"
+}, {
+	"Type": "turing_award_winners",
+	"Year": 1987,
+	"DisplayName": "John Cocke",
+	"EntityIds": {
+		"AuthorIds": [2161752438, 2671603998, 2712489886, 2657446859, 2670136712, 2529467039]
+	},
+	"Citation": "For significant contributions in the design and theory of compilers, the architecture of large systems and the development of reduced instruction set computers (RISC); for discovering and systematizing many fundamental transformations now used in optimizing compilers including reduction of operator strength, elimination of common subexpressions, register allocation, constant propagation, and dead code elimination.",
+	"PhotoUrl": "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcTZbQCamFhhbWJ5BNRMuhNK-Hz77PXJ3xGyJI9GsvkhjEYkYdQatXLrRtnRUGXg9coH6oo",
+	"Url": "https://amturing.acm.org/award_winners/cocke_2083115.cfm"
+}, {
+	"Type": "turing_award_winners",
+	"Year": 1988,
+	"DisplayName": "Ivan Sutherland",
+	"EntityIds": {
+		"AuthorIds": [1941499373, 2573811802, 2683173949, 2723054100, 2798641315]
+	},
+	"Citation": "For his pioneering and visionary contributions to computer graphics, starting with Sketchpad, and continuing after.",
+	"PhotoUrl": "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcSMzTnapEES82AfiVYhbBfcV8QBdqiWAhkjQIPfREUxzrSCb4L_yWyHysGuUkXMphoB9fo",
+	"Url": "https://amturing.acm.org/award_winners/sutherland_3467412.cfm"
+}, {
+	"Type": "turing_award_winners",
+	"Year": 1989,
+	"DisplayName": "William Morton Kahan",
+	"EntityIds": {
+		"AuthorIds": [2053339767]
+	},
+	"Citation": "For his fundamental contributions to numerical analysis. One of the foremost experts on floating-point computations. Kahan has dedicated himself to making the world safe for numerical computations!",
+	"PhotoUrl": "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQnLHe4xLRyqpPCEW-7_USMzg2nYkLo5hVzaAWrKfsvovgn5HwLfbKGgADLMymrBo7Gego",
+	"Url": "https://amturing.acm.org/award_winners/kahan_1023746.cfm"
+}, {
+	"Type": "turing_award_winners",
+	"Year": 1990,
+	"DisplayName": "Fernando J Corbato",
+	"EntityIds": {
+		"AuthorIds": [2048198971, 2708374594, 2685944342, 2698319739, 2570600920, 2636730274]
+	},
+	"Citation": "For his pioneering work organizing the concepts and leading the development of the general-purpose, large-scale, time-sharing and resource-sharing computer systems, CTSS and Multics.",
+	"PhotoUrl": "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcTsXfbzVosJylh6y4vuHbQNsxnZt7Nxq_cm4FO0gI4tWOH9SGMdjsxvVqWTHYTnlvAImMA",
+	"Url": "https://amturing.acm.org/award_winners/corbato_1009471.cfm"
+}, {
+	"Type": "turing_award_winners",
+	"Year": 1991,
+	"DisplayName": "Arthur John Robin Gorell Milner",
+	"EntityIds": {
+		"AuthorIds": [2087817183, 2810991504, 2778123760, 2780249495]
+	},
+	"Citation": "For three distinct and complete achievements: LCF, the mechanization of Scotts Logic of Computable Functions, probably the first theoretically based yet practical tool for machine assisted proof construction;ML, the first language to include polymorphic type inference together with a type-safe exception-handling mechanism;CCS, a general theory of concurrency.In addition, he formulated and strongly advanced full abstraction, the study of the relationship between operational and denotational semantics.",
+	"PhotoUrl": "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcSbFnzdfI6FUOXLgSEP8xSiYNstBNJa4Dz9Sh_LM6xYL1H17DZHRCY",
+	"Url": "https://amturing.acm.org/award_winners/milner_1569367.cfm"
+}, {
+	"Type": "turing_award_winners",
+	"Year": 1992,
+	"DisplayName": "Butler W Lampson",
+	"EntityIds": {
+		"AuthorIds": [1785551945, 2290305372]
+	},
+	"Citation": "For contributions to the development of distributed, personal computing environments and the technology for their implementation: workstations, networks, operating systems, programming systems, displays, security and document publishing.",
+	"PhotoUrl": "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcS74K72z-sKoxYyWECdNarWoEUCzufHIE2_R9eGT5VMG1DpWGt7bsFWJ6KcEDY8lxwtCnQ",
+	"Url": "https://amturing.acm.org/award_winners/lampson_1142421.cfm"
+}, {
+	"Type": "turing_award_winners",
+	"Year": 1993,
+	"DisplayName": "Juris Hartmanis",
+	"EntityIds": {
+		"AuthorIds": [327575412, 2667906504]
+	},
+	"Citation": "With Richard E. Stearns, in recognition of their seminal paper which established the foundations for the field of computational complexity theory.",
+	"PhotoUrl": "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcSJ89x984yN1C1fXbHAiE9U7_UAYQ2x9QrLYCnw-7n7ngYl6g9kvwQ",
+	"Url": "https://amturing.acm.org/award_winners/hartmanis_1059260.cfm"
+}, {
+	"Type": "turing_award_winners",
+	"Year": 1993,
+	"DisplayName": "Richard Edwin Stearns",
+	"EntityIds": {
+		"AuthorIds": [2102135011, 2689427247]
+	},
+	"Citation": "With Juris Hartmanis, in recognition of their seminal paper which established the foundations for the field of computational complexity theory.",
+	"PhotoUrl": "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcSKEAra1dgxIbrkPLsw3R76d6XbyBV3t7XERMzJF5rkMOuPExJK8UOGep7r4iu_sZmLMZI",
+	"Url": "https://amturing.acm.org/award_winners/stearns_1081900.cfm"
+}, {
+	"Type": "turing_award_winners",
+	"Year": 1994,
+	"DisplayName": "Edward A Feigenbaum",
+	"EntityIds": {
+		"AuthorIds": [2086686599, 2507050112]
+	},
+	"Citation": "For pioneering the design and construction of large scale artificial intelligence systems, demonstrating the practical importance and potential commercial impact of artificial intelligence technology.",
+	"PhotoUrl": "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcRyLS6lXUZxr-bo0xivPCl1144v-cvwvLHYb1HEuEcc2yc9NyHLrQvSn8nKo1QmcDrKa1M",
+	"Url": "https://amturing.acm.org/award_winners/feigenbaum_4167235.cfm"
+}, {
+	"Type": "turing_award_winners",
+	"Year": 1994,
+	"DisplayName": "Dabbala Rajagopal Reddy",
+	"EntityIds": {
+		"AuthorIds": [2685365618, 2664620483, 2140227900, 2660100608]
+	},
+	"Citation": "For pioneering the design and construction of large scale artificial intelligence systems, demonstrating the practical importance and potential commercial impact of artificial intelligence technology.",
+	"PhotoUrl": "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcS5_MpXtOJ3qLf6sdWte8uqhEoJhkmzDobZYBKN2vR5AgYI_69mAjassAkugkQ63U02rAI",
+	"Url": "https://amturing.acm.org/award_winners/reddy_9634208.cfm"
+}, {
+	"Type": "turing_award_winners",
+	"Year": 1995,
+	"DisplayName": "Manuel Blum",
+	"EntityIds": {
+		"AuthorIds": [2163096604, 2787258733, 2705463751, 2049272966, 2691741726, 2785459692, 2693628943, 2134576118]
+	},
+	"Citation": "In recognition of his contributions to the foundations of computational complexity theory and its application to cryptography and program checking.",
+	"PhotoUrl": "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcShx-M_cFPNRSUAo9FkeKAWtaAOfXNXecOMl3Xtzze2RBJxCVYlrf8peyFWYuMsH20OcHE",
+	"Url": "https://amturing.acm.org/award_winners/blum_4659082.cfm"
+}, {
+	"Type": "turing_award_winners",
+	"Year": 1996,
+	"DisplayName": "Amir Pnueli",
+	"EntityIds": {
+		"AuthorIds": [2171343426, 2562656478, 2627510313]
+	},
+	"Citation": "For seminal work introducing temporal logic into computing science and for outstanding contributions to program and system verification.",
+	"PhotoUrl": "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcRnErkXf20nO1qd0Gkkh1vYMnVjk9-Gvyeodbshft5uRMj9gTw7aFTu4MyyOYh9Q04cFS0",
+	"Url": "https://amturing.acm.org/award_winners/pnueli_4725172.cfm"
+}, {
+	"Type": "turing_award_winners",
+	"Year": 1997,
+	"DisplayName": "Douglas Engelbart",
+	"EntityIds": {
+		"AuthorIds": [2208808115, 2672047240, 2639763832, 2692069271]
+	},
+	"Citation": "For an inspiring vision of the future of interactive computing and the invention of key technologies to help realize this vision.",
+	"PhotoUrl": "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcTx4zyTrAelmR0lqVVYDnKHZF-OBoKy2X5ARuyZDPiPxTKF_SHdA-Rzozysgy99TGO_K0Y",
+	"Url": "https://amturing.acm.org/award_winners/engelbart_5078811.cfm"
+}, {
+	"Type": "turing_award_winners",
+	"Year": 1998,
+	"DisplayName": "James Nicholas Gray",
+	"EntityIds": {
+		"AuthorIds": [2131537204, 2805851979, 2761476238, 2669191463, 2689436954, 2604605380, 2713093116, 2164407786, 2619481729]
+	},
+	"Citation": "For seminal contributions to database and transaction processing research and technical leadership in system implementation.",
+	"PhotoUrl": "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcS_Lcg4e2ANSm9GxcVvyqUry4MEWwhmoM74k8SRskpvJlYK6ZxeZw9U7lqQoTHqrtoYNPo",
+	"Url": "https://amturing.acm.org/award_winners/gray_3649936.cfm"
+}, {
+	"Type": "turing_award_winners",
+	"Year": 1999,
+	"DisplayName": "Frederick Brooks",
+	"EntityIds": {
+		"AuthorIds": [2097474894, 2280805888, 2631808137, 2590361911, 2157919910]
+	},
+	"Citation": "For landmark contributions to computer architecture, operating systems, and software engineering.",
+	"PhotoUrl": "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcROxqTrC1lOogJQuHoUlOUPwzy_WuELEgGTBGPElnDE9OPj3S-blqeApB0VsqXeEd_tB1k",
+	"Url": "https://amturing.acm.org/award_winners/brooks_1002187.cfm"
+}, {
+	"Type": "turing_award_winners",
+	"Year": 2000,
+	"DisplayName": "Andrew Chi-Chih Yao",
+	"EntityIds": {
+		"AuthorIds": [2088166175, 2659092675]
+	},
+	"Citation": "In recognition of his fundamental contributions to the theory of computation, including the complexity-based theory of pseudorandom number generation, cryptography, and communication complexity.",
+	"PhotoUrl": "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQXTXK1qiQ-PDBkFxlp5n_-RjKu6p2S_CMIHSeGaA-OUqN7TxNHC2kMUU6ncHR-IVIbP1M",
+	"Url": "https://amturing.acm.org/award_winners/yao_1611524.cfm"
+}, {
+	"Type": "turing_award_winners",
+	"Year": 2001,
+	"DisplayName": "Kristen Nygaard",
+	"EntityIds": {
+		"AuthorIds": [2096116960, 2684671528]
+	},
+	"Citation": "With Ole-Johan Dahl, for ideas fundamental to the emergence of object oriented programming, through their design of the programming languages Simula I and Simula 67.",
+	"PhotoUrl": "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcS0gmrecEq_gZ2yNEfe1FtaalWDnXryn6bxAe1aLEv0Gfgn3ddzCx8_o8rszDBOBRhwkDg",
+	"Url": "https://amturing.acm.org/award_winners/nygaard_5916220.cfm"
+}, {
+	"Type": "turing_award_winners",
+	"Year": 2001,
+	"DisplayName": "Ole-Johan Dahl",
+	"EntityIds": {
+		"AuthorIds": [2141765675, 2336801576, 2148070008]
+	},
+	"Citation": "With Kristen Nygaard, for ideas fundamental to the emergence of object oriented programming, through their design of the programming languages Simula I and Simula 67.",
+	"PhotoUrl": "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcSHbNs9KFgQhFEmT1n8oQvbnWSRjkHmkW0SIop8YU4z5V4hwM6_ud64izIT6ymcCwh7oR8",
+	"Url": "https://amturing.acm.org/award_winners/dahl_6917600.cfm"
+}, {
+	"Type": "turing_award_winners",
+	"Year": 2002,
+	"DisplayName": "Adi Shamir",
+	"EntityIds": {
+		"AffiliationIds": [2201755339, 1989409785, 2730608940, 2067689229, 2278836960, 1952791344, 1928965098, 2343250918, 2718424325, 2561034013, 2608140770, 2651385153, 2798706845]
+	},
+	"Citation": "Together with Leonard M. Adleman and Ronald Rivest, for their ingenious contribution to making public-key cryptography useful in practice.",
+	"PhotoUrl": "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcRT6TssLOUw45MblTPlr94BB6f88gLlRoQcAiUACHhT1ZLg1ipr4m6khVHnclVKr-8WOWI",
+	"Url": "https://amturing.acm.org/award_winners/shamir_2327856.cfm"
+}, {
+	"Type": "turing_award_winners",
+	"Year": 2002,
+	"DisplayName": "Ronald Linn Rivest",
+	"EntityIds": {
+		"AuthorIds": [695545146, 2689843314, 2796796565, 2686412306]
+	},
+	"Citation": "Together with Leonard M. Adleman and Adi Shamir, for their ingenious contribution to making public-key cryptography useful in practice.",
+	"PhotoUrl": "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcRtNa8i5gBY803gVlPaYlXqIwSy76NKj7ZkiUkQQtcxBYW4uXFvSbm-pEHvFi_eqbHuHqg",
+	"Url": "https://amturing.acm.org/award_winners/rivest_1403005.cfm"
+}, {
+	"Type": "turing_award_winners",
+	"Year": 2002,
+	"DisplayName": "Leonard Max Adleman",
+	"EntityIds": {
+		"AuthorIds": [2009176085, 2667875590, 2776482359]
+	},
+	"Citation": "Together with Ronald Rivest and Adi Shamir, for their ingenious contribution to making public-key cryptography useful in practice.",
+	"PhotoUrl": "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcTqp9J2UcdVDxNvarQhixv0gKk9ofqyZJi6cUlmjnlCn47pqKDZMgX4a22YZvIHRxJZqH8",
+	"Url": "https://amturing.acm.org/award_winners/adleman_7308544.cfm"
+}, {
+	"Type": "turing_award_winners",
+	"Year": 2003,
+	"DisplayName": "Alan Kay",
+	"EntityIds": {
+		"AuthorIds": [1974749230, 2565560577, 2678079781, 2567613651, 2690106712]
+	},
+	"Citation": "For pioneering many of the ideas at the root of contemporary object-oriented programming languages, leading the team that developed Smalltalk, and for fundamental contributions to personal computing.",
+	"PhotoUrl": "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcR-s0E93tHUuiyWe7B_zgI_dcRUOGHBs7j7bxsHPmJ1vkcXk2wq1RspwZEmx-CjcIfaQ9w",
+	"Url": "https://amturing.acm.org/award_winners/kay_3972189.cfm"
+}, {
+	"Type": "turing_award_winners",
+	"Year": 2004,
+	"DisplayName": "Vinton Gray Cerf",
+	"EntityIds": {
+		"AuthorIds": [2029905547, 2672483304, 2803565862, 2652700467, 2675869057, 2076278055, 2721017608, 2716467717]
+	},
+	"Citation": "With Robert E. Kahn, for pioneering work on internetworking, including the design and implementation of the Internets basic communications protocols, TCP/IP, and for inspired leadership in networking.",
+	"PhotoUrl": "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcS1seP_m_NfCanghfWjBiQnCymbGN1uWIYU_IrTBgQyRKXJmaHd37z7OaLp9057fj7r4TA",
+	"Url": "https://amturing.acm.org/award_winners/cerf_1083211.cfm"
+}, {
+	"Type": "turing_award_winners",
+	"Year": 2004,
+	"DisplayName": "Robert Elliot Kahn",
+	"EntityIds": {
+		"AuthorIds": [2115857049, 2610176178, 2512357330, 2610555666, 2674478022]
+	},
+	"Citation": "With Vinton Cerf, for pioneering work on internetworking, including the design and implementation of the Internets basic communications protocols, TCP/IP, and for inspired leadership in networking.",
+	"PhotoUrl": "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcRIRwWy0fh53sZJgnchuXyjq5b_IBP4128ShFLHPnNLEKF4IEu8XV1MwPJp1KwgXKAd5-k",
+	"Url": "https://amturing.acm.org/award_winners/kahn_4598637.cfm"
+}, {
+	"Type": "turing_award_winners",
+	"Year": 2005,
+	"DisplayName": "Peter Naur",
+	"EntityIds": {
+		"AuthorIds": [587396187]
+	},
+	"Citation": "For fundamental contributions to programming language design and the definition of Algol 60, to compiler design, and to the art and practice of computer programming.",
+	"PhotoUrl": "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQmdmJANm3wPDEWOM66QqFH-LcPkxyoFeeHEHrECpl5D7a9RiyUMGA",
+	"Url": "https://amturing.acm.org/award_winners/naur_1024454.cfm"
+}, {
+	"Type": "turing_award_winners",
+	"Year": 2006,
+	"DisplayName": "Frances Elizabeth Allen",
+	"EntityIds": {
+		"AuthorIds": [2102409281]
+	},
+	"Citation": "For pioneering contributions to the theory and practice of optimizing compiler techniques that laid the foundation for modern optimizing compilers and automatic parallel execution. press release",
+	"PhotoUrl": "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcS3oUZWm4GRNaZk6ufxNLZIWi-_i9H7N8lWRp2EMINRlAioOWHAVSM",
+	"Url": "https://amturing.acm.org/award_winners/allen_1012327.cfm"
+}, {
+	"Type": "turing_award_winners",
+	"Year": 2007,
+	"DisplayName": "Joseph Sifakis",
+	"EntityIds": {
+		"AuthorIds": [2105927184, 2789239302, 2777392451, 2778871009, 1384773180, 2682969415, 2807000528, 2423191938, 2779497083, 2685802181]
+	},
+	"Citation": "Together with Edmund Clarke and E. Allen Emerson, for their role in developing Model-Checking into a highly effective verification technology that is widely adopted in the hardware and software industries.",
+	"PhotoUrl": "data:image/jpeg;base64,/9j/4AAQSkZJRgABAQAAAQABAAD/2wCEAAkGBwgHBgkIBwgKCgkLDRYPDQwMDRsUFRAWIB0iIiAdHx8kKDQsJCYxJx8fLT0tMTU3Ojo6Iys/RD84QzQ5OjcBCgoKDQwNGg8PGjclHyU3Nzc3Nzc3Nzc3Nzc3Nzc3Nzc3Nzc3Nzc3Nzc3Nzc3Nzc3Nzc3Nzc3Nzc3Nzc3Nzc3N//AABEIADgAOAMBIgACEQEDEQH/xAAbAAABBQEBAAAAAAAAAAAAAAAGAAEEBQcDAv/EADgQAAEDAwIDBQUECwAAAAAAAAECAwQABRESIQYxQRMiUWGRBzJScYEUI6GxFRZCQ1NUYnKCwdH/xAAXAQEBAQEAAAAAAAAAAAAAAAAEAwUC/8QAIREAAgICAgMAAwAAAAAAAAAAAAECEQMSBFETIUEiMTL/2gAMAwEAAhEDEQA/ANLApxSrhPkphwnpCzshOfr0rpukcq2cLhdosElDjiS6BnRnGB5npUL9ZGQNXZpI/pXv+W9CkJh+5ynHnXFtLdWFK0nCh5Z8KvHeFYzrILkhxS/i1ZrOny5KVI0YcOOibCCPdIT4RokNhSxkJUcGpmKz+VbW4klLbDii0ASG1HPeGcEHmKMOHpSplojvKOVYIJ+RxSsGbyoNnweJ0WFKnpVcOeapeMXVNWJ3R7ylADHr/qrsVWcSxFyrUtLbRdKSFFA2yOtcz/lncK2VgTw7MHYh13bCyk5PrRRGvMN5twNnWG9WpSVBQ257g9KFLI21EkOx3U6mFrK0BQzkE7H8Pwqzk3S1Rp3Yl0hRQpvujJGRyOOXIYzWVrcnS9m3H1FW/RDvdxQ+VhlCmnmlZOygRtzyRj0zRB7P3w/ZcoCuz1kpzyobVNgSbY40wFl1tHeQo6SlJ2zg0ecO28W6zRY4TgpbBV4k+dL4yptUC5rtJ3ZPxSqIbrB/mU48gaVO1fRm7R7LIBFVd64ksljSr9J3FhpxKc9gFanVfJA3rDr1x/xHdypK5yojCv3MP7sY/u94+uPKhkFIJSRurO4HOpbFdWaNDvqL5OnXiFHMeLHkIaMb3lIQoEhxR8zkYGwxjJzmrNi2QHJTkltsF5xRU4FKzueuD8+lCPsqmNwOLhDlp7SHcmVMOII7pV7yc+hH+VH3GEWNwgyLgzJbVF1pT2KzlwJUcDA/aA8iDt1xUZYvyuInHnqOsvhTOxIsF18/ZlIOguyFBJKlNIyogeOwOPPFapbblAu0FubbZDcmM4O642dvkfA+R3oEamtTOEeJriEJU+wmRGBBB0pQ2FqxgnGSRtnpWIWa83KySDItU5+K7gai0rAXjooclfUGq44akMuTdm6pAwKes8sntCkgJRd4yHh/GYGlX1TyP0xSpvlj2AeKXQJbHI6/nTIVvg09Kgtex6/R1becjPtSY6gl5haXG1eCkkEH1ArWuM7FC43ctU/tUw2BG1PL0fenVgpRv8Pe3PxHalSqGfLKCSj9E8fDHI25fCHefs3DPA3EEOGJTyJ6lrU68nZK3ClJwcDY4H/axhsZWMjanpVXjycoWyfJhGGSoomoGEimpUq7JH//2Q==",
+	"Url": "https://amturing.acm.org/award_winners/sifakis_1701095.cfm"
+}, {
+	"Type": "turing_award_winners",
+	"Year": 2007,
+	"DisplayName": "E. Allen Emerson",
+	"EntityIds": {
+		"AuthorIds": [2115834734, 2687136434]
+	},
+	"Citation": "Together with Edmund Clarke and Joseph Sifakis, for their role in developing Model-Checking into a highly effective verification technology that is widely adopted in the hardware and software industries.",
+	"PhotoUrl": "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQyyooYP6bcmURHz89GYfYq4qXUBmYw8uvAp8kopxP18X5Yuem1K7JyP_5P7lmTSfobHBE",
+	"Url": "https://amturing.acm.org/award_winners/emerson_1671460.cfm"
+}, {
+	"Type": "turing_award_winners",
+	"Year": 2007,
+	"DisplayName": "Edmund Melson Clarke",
+	"EntityIds": {
+		"AuthorIds": [2129477832, 2682890728, 2643937162, 2642528711]
+	},
+	"Citation": "Together with E. Allen Emerson and Joseph Sifakis, for their role in developing Model-Checking into a highly effective verification technology that is widely adopted in the hardware and software industries.",
+	"PhotoUrl": "data:image/jpeg;base64,/9j/4AAQSkZJRgABAQAAAQABAAD/2wCEAAkGBwgHBgkIBwgKCgkLDRYPDQwMDRsUFRAWIB0iIiAdHx8kKDQsJCYxJx8fLT0tMTU3Ojo6Iys/RD84QzQ5OjcBCgoKDQwNGg8PGjclHyU3Nzc3Nzc3Nzc3Nzc3Nzc3Nzc3Nzc3Nzc3Nzc3Nzc3Nzc3Nzc3Nzc3Nzc3Nzc3Nzc3N//AABEIADgAOAMBIgACEQEDEQH/xAAbAAACAgMBAAAAAAAAAAAAAAAABwUGAQMECP/EADAQAAIBAwIEBAQGAwAAAAAAAAECAwAEEQUhBhIxQSIyUWETFHGRByOBocHhM1Kx/8QAGQEAAwEBAQAAAAAAAAAAAAAAAQIDAAUE/8QAHxEAAgICAwADAAAAAAAAAAAAAAECEQMSITFRM0GB/9oADAMBAAIRAxEAPwBIVlFZ2CoCWJwAO9Yrbazvbyh4zg+tYckrTQp5iPiZHqF7frUo3CTG3Z1aZWAz4lyP2FX3gfh43tql3qDvyvgrENs/WmIumxR2OY0RVBxyKKbgqsXp5YuIXgkKSDDDtWqmRxxoKT6vcEARKu68qgY2zS8uIvgzSRg5CsQD60KJvh0aqKKKADArps1VbqFpfJzb5rXbxmRwAKnY9O5olPRozzj3xTa2gXTGRwtxXAkSrPFLDGAPHJyqN++M5x74qwX3E+oQkWtnZwyJI5CykyOduvhVdu/XFL+6NjDokbusEbTuPEPNtv17CmKt7aKiXUJMicqtN8u4BbIGT03P0oI6Di/srvEfzF4Mz26r8wFh5h1LeuO2QaWmqaer3UrwDwE7A06NVurSGF75FZ7eFTNjrkDelQNT0y6YlblVY7/mDl/fpTrw8edayKrPavEdxiirVc2auu4DKelZraEdiB0eHmbnPQd6k31qxtQVXmmPTwdPvVdllYRiFWIUeYDua0VnKuEarGFp1jNqllazafKFhjX8wEczb+n03q+adoQurEQxXE0bnOHDAcp9cAf9zSW4e1W7069jW3lKpKwVlPTemHo3EmoPcGwETJPKcIqjPN7g+9GKtWVWRt0Tf4gaha6VwtdW5kDTvH8ugB8xIwf5NIyrr+KUwj1iDTvifEkt4g9w2esr74+gXl+59apVJLuhHLbk7LPUruzAWKTMf+jbr/X6UVx0Vk2haAnJyaKKKATq0qFrjVLSFPM8yKPuKtKW9xcay+ZDHMWCLKD/AIlVc5B7Hbb3NZoq+NJx/UHF8jfkWVjWbqa91S6ubmRpZXkPM7dWxtk/auKiioy7FXQUUUUAn//Z",
+	"Url": "https://amturing.acm.org/award_winners/clarke_1167964.cfm"
+}, {
+	"Type": "turing_award_winners",
+	"Year": 2008,
+	"DisplayName": "Barbara Liskov",
+	"EntityIds": {
+		"AuthorIds": [2084056563, 2713551510, 591132625, 2840460938]
+	},
+	"Citation": "For contributions to practical and theoretical foundations of programming language and system design, especially related to data abstraction, fault tolerance, and distributed computing.",
+	"PhotoUrl": "data:image/jpeg;base64,/9j/4AAQSkZJRgABAQAAAQABAAD/2wCEAAkGBwgHBgkIBwgKCgkLDRYPDQwMDRsUFRAWIB0iIiAdHx8kKDQsJCYxJx8fLT0tMTU3Ojo6Iys/RD84QzQ5OjcBCgoKDQwNGg8PGjclHyU3Nzc3Nzc3Nzc3Nzc3Nzc3Nzc3Nzc3Nzc3Nzc3Nzc3Nzc3Nzc3Nzc3Nzc3Nzc3Nzc3N//AABEIADgAOAMBIgACEQEDEQH/xAAbAAACAwEBAQAAAAAAAAAAAAAFBgAEBwEDAv/EADEQAAEEAQMCBQEGBwAAAAAAAAECAwQRAAUSITFBBhMiYYFRIzJxkaHhFBUkQsHw8f/EABgBAAMBAQAAAAAAAAAAAAAAAAMEBQIG/8QAIREAAgICAgIDAQAAAAAAAAAAAAECAwQRIjESIUFRYQX/2gAMAwEAAhEDEQA/APhfobUs87QTQwFL1JzzVNMukqUdt7RtGGdUeTGirUpwI9PVQsAfXFHT5AU6411XfIBBC09xfft+WDmzcUVJi/LdC9/CidySfvHtnrGnPOjzNhbTZFqF3Qv5/fGHUtJGrs/0zB88/wB1WD164S0fwNNEYqlPbfo2OBx0FdsA5xXYeNU5dIWGn5aAhxtDrBFlJJNKAHcdMZYMtqUj0kBSU2Rd/OU5umSIbqmHyrcnncCSCff9cFR1uwJLKlForcu7VZJ5oH9M3CwxZW12NZTWTPtqnWULqtyQazuMAAN4nDrTKgysBcgbdquQQO4+hF/gcXvDzKHJSg6OWzyPqcMeLpReUGI4cLzatpIFIBPa/jj34wdo6FrmOLCR5wIRQ4B9zit79DNEdvZpWiNJbICAAntWMzFpQQOtYhRdU1PzC3H051SEC1KU0Uivb/mHZU+edGYlQR9s8AQKuh81iTTRST2j21hhKgVLQCqqusy2S028+64o7y0opSk9Ryc0ODI1ebG3ahFeYFXTu3/HTE/UYWybNkpCW0SHEobvoV1ZofH+3hKuMtAL+UdhXSS44xuVuKd5SLv7tWDR/LJl3SWko0yOEqSv0AlSQACe5498mUl0TGUfFrN6O+GmPMdWAOOD2545OJ3hWV5b3kvHbJZVykjkp/bpmny4TcpgoWDyCLBo85lmpRv5L4nRHdD5Uvj+Iec3b0q6e/Udzgb4bixjHlqaNRk6jFY0tR9PnuJ2o5qzl+G4lrS2BtS6NvKOOfbnESfBVIhR3Y6ySDTiF8/lh/Q4640Sm3EuLoV6CVD25PHxeT17RXS/A27qMV2FcSgD14o/OZ7OlO6prgYi2iLGSEepW3zXLJJ9xfFe34Y3KiJipdkPEKWpO5ZAoX34wH4N0aUibMl6jDSnefs1KUFd+2Gxo7kxXMl4wSQxR2Esx220dAO/fOZdUjJlAlHqrahBUtQSkdSo0BiR4zmwNRZVGjRw/JSLTIKa21zSe5zuTFsm1x4orfzcaFj85fAL0PV7aSHeU9FpPUEY6QNV09tF+YLIrbfOdyYjJaloeUVrZWmzlOLbr0NlaQLNE84ZZloIAdGw/UcjJkzddkq+jSxa8ivmWNoWm0kEdiMmTJlOL8ls522ChNx+j//Z",
+	"Url": "https://amturing.acm.org/award_winners/liskov_1108679.cfm"
+}, {
+	"Type": "turing_award_winners",
+	"Year": 2009,
+	"DisplayName": "Charles P. Thacker",
+	"EntityIds": {
+		"AuthorIds": [2883849627, 2100283947, 2105549443, 2248849381, 2250633790, 2247952217, 2247196197, 2155552796, 2718628586]
+	},
+	"Citation": "For the pioneering design and realization of the first modern personal computer -- the Alto at Xerox PARC -- and seminal inventions and contributions to local area networks (including the Ethernet), multiprocessor workstations, snooping cache coherence protocols, and tablet personal computers.",
+	"PhotoUrl": "data:image/jpeg;base64,/9j/4AAQSkZJRgABAQAAAQABAAD/2wCEAAkGBwgHBgkIBwgKCgkLDRYPDQwMDRsUFRAWIB0iIiAdHx8kKDQsJCYxJx8fLT0tMTU3Ojo6Iys/RD84QzQ5OjcBCgoKDQwNGg8PGjclHyU3Nzc3Nzc3Nzc3Nzc3Nzc3Nzc3Nzc3Nzc3Nzc3Nzc3Nzc3Nzc3Nzc3Nzc3Nzc3Nzc3N//AABEIADgAOAMBIgACEQEDEQH/xAAbAAACAwEBAQAAAAAAAAAAAAAABAMFBgEHAv/EAC4QAAIBAwQABAQGAwAAAAAAAAECAwAEEQUSITEiQVGBBhORoRQyYXGC4SNCUv/EABkBAAMBAQEAAAAAAAAAAAAAAAMEBQIAAf/EACIRAAICAQMEAwAAAAAAAAAAAAECAAMREiExBAUiURMyQf/aAAwDAQACEQMRAD8A0N9ELuSCyjIBlYLk+VWKaudLnj09x8qFMKoRc8VDZxxwTS3jrve3jLLluieM496xGq6vJfai/oGwtRu2V6KdXuP2eb4nomtarbJbvEziR2H+uO/1rHyXLN22RVZbzNtw7E0yrjaBtqhrM2lIAjMN48bg7jXdetotZtfxMC7J4h/kiXgOB5gUtIqsfDxUto2yXD/kdSrD1BrjhxgzFte2ZmY9TXSpI5VHXDDuire7+HoZoBz40bk+tFTSKGPnzFtTj6y90a5mu5LhYw0hNtLuwMgeE4z7isUu+NzLsPLEDjHPmKla8lgg3BnAEqPwcZwGx9zUF1i7neTJTec89gGmenUImBGgpxq9xy0N7O67IbdQTjdJNtFNw3++FisHiQhTk4AbP91Tpp9tHC8s8gc47ds/SpdLiH4OUHcyyHcaMN4ZcyziD3DkSalbRnsKoA4/UmpWnkKyLChYr02QM0rDa2kuS0W5mPeym44lghwq7Tx4fQV6G/JllMtdPaKeN3ZsN+Vx6HFFVsVxGsQdjtV2BP0oqTchNhMVcBTiLRWQvtLliKFWZPCTxz2Kplbb8tieccmtg11BbKsbe9ZzWIbRSoswEUqQQCTg9g0fprSSVI5ha2AGIXEkclo8GcM643elQ2MN5GjR/OjEZ4XA5xXbyNZrVGiJjd/+fXFctUYKu6eXPtTo3EaG5lhEz25RtoZh2B51OJDId4HDDIpZLUZ3mSQnyycY9qZl4AHW7AOB0KyTic3E+bqLMCoq4DDd+1FaDRII7wvJKASTgZ8hXKjv1oRiCIqatW8x+raggkGThseVUq3El1ew20J8U0ix57xk4rtFV6K12ibE5jl3O1pcPb4bEMpAJHY5HNOWt7ATuZgeOqKKKRjiUEcyZr+LAWE7mJ6HNXPw9Yy3+oBpTiFYn+YB5hlKgffP8aKK8TdxOtY/GTEtB+I4bS7awuyEuEcxmTICOQce3X7UUUUG/ttFj6uIotzAT//Z",
+	"Url": "https://amturing.acm.org/award_winners/thacker_1336106.cfm"
+}, {
+	"Type": "turing_award_winners",
+	"Year": 2010,
+	"DisplayName": "Leslie Gabriel Valiant",
+	"EntityIds": {
+		"AuthorIds": [2000097935, 2531935988, 2641332450]
+	},
+	"Citation": "For transformative contributions to the theory of computation, including the theory of probably approximately correct (PAC) learning, the complexity of enumeration and of algebraic computation, and the theory of parallel and distributed computing.",
+	"PhotoUrl": "data:image/jpeg;base64,/9j/4AAQSkZJRgABAQAAAQABAAD/2wCEAAkGBwgHBgkIBwgKCgkLDRYPDQwMDRsUFRAWIB0iIiAdHx8kKDQsJCYxJx8fLT0tMTU3Ojo6Iys/RD84QzQ5OjcBCgoKDQwNGg8PGjclHyU3Nzc3Nzc3Nzc3Nzc3Nzc3Nzc3Nzc3Nzc3Nzc3Nzc3Nzc3Nzc3Nzc3Nzc3Nzc3Nzc3N//AABEIADgAOAMBIgACEQEDEQH/xAAbAAADAAMBAQAAAAAAAAAAAAAABQYCAwQBB//EADMQAAIBAwICBwcDBQAAAAAAAAECAwAEERIhBTETQVFhcYHBBiIkMqGx8HLR4RQjQlKy/8QAGQEBAQEAAwAAAAAAAAAAAAAAAwQCAAEF/8QAIBEAAgMAAQQDAAAAAAAAAAAAAQIAAxEhBDEyURITQf/aAAwDAQACEQMRAD8Azt01ywocgO2DiqC24dbAjMZb9RP70ns1+Ktx3n7Gqa3jAIOKjoUFdll7ENkwney4bEJHjRSdlVUGWPdXLD0M8ks6xSo8zBiG8APSuPjzNFxqJyRp/pwE1HYHUc+lbbO5bpBmaPPZq50jlexE5XUSPlsfcOgWEOik7tqw3Mcv2pmmBtSdIrmTjFkynCOnvjtx/FOE+Y88Z2zSrmcSdwQxm7q2ooHKiu5ifO7MfGW/n/yaooMEjA+tIbFc3sPg32qggXB2xU3T+Mqv8oi9tY0aG3LOyfNuCeQxt9aTRw2nQ2csV02qMASFGbAOTzxVJ7XWZuOGpLtiFvf35Kds+RxU7Y2KvayLLKAnPKvz8e2tPwY9GFJdQIX4VZvbyMZxMQj6uQ5t9KYxMOQJ865+CQsOBxI40SF8hTtn89K6F1KcMMeNKikDmSWsCcH5N6nvxXta80VqFkhbDBvos/6tVHEEChtWAdqmeHt8cn6G9KdpMWtg2xJzjFY6Ov5JzF6p8aL/AGud7vgk9tDnEhCyADJZc748snyqW4Hb3K3CtOhKppWNhj59S+8PAA7+tWcoAT3t9uoc81ksUSMojQLoWrfqXQfUmFrAEe41imDEySthRuM9VdFrcOz526PqVt8/n53oJ5ivRxjfU2Dns/PvTSyLlQe3rPXSEDIcazoECOuQr8h2UUXZZba3DDGdRHfyoqNuDHHaQXDoDpec4DacR56x1+lbOET/ANy8gb/E6lHaMc6KKbp0CVLkzcxZzs6GuNTxI+MrIdXZtuPStvTD3jnme2iiqcgzls0muuJRBQWjjyST11WWsStpBzgnlnlRRQliREZQGyb/AGjvLaziga5kWMKQuo9pBOPpXlFFeddaUfBK6qg67P/Z",
+	"Url": "https://amturing.acm.org/award_winners/valiant_2612174.cfm"
+}, {
+	"Type": "turing_award_winners",
+	"Year": 2011,
+	"DisplayName": "Judea Pearl",
+	"EntityIds": {
+		"AuthorIds": [2248165042, 2668925348, 2684904657, 2302450675]
+	},
+	"CreatedDate": "2018-09-19T12:55:32.387122",
+	"Citation": "For fundamental contributions to artificial intelligence through the development of a calculus for probabilistic and causal reasoning.",
+	"PhotoUrl": "data:image/jpeg;base64,/9j/4AAQSkZJRgABAQAAAQABAAD/2wCEAAkGBwgHBgkIBwgKCgkLDRYPDQwMDRsUFRAWIB0iIiAdHx8kKDQsJCYxJx8fLT0tMTU3Ojo6Iys/RD84QzQ5OjcBCgoKDQwNGg8PGjclHyU3Nzc3Nzc3Nzc3Nzc3Nzc3Nzc3Nzc3Nzc3Nzc3Nzc3Nzc3Nzc3Nzc3Nzc3Nzc3Nzc3N//AABEIADgAOAMBIgACEQEDEQH/xAAcAAACAgMBAQAAAAAAAAAAAAAFBwAGAQIEAwj/xAA0EAABAwIEBAQDBwUAAAAAAAABAgMEABEFBhIhEzFBUWFxgZEiMqEHFENSscHRFUJi8PH/xAAUAQEAAAAAAAAAAAAAAAAAAAAA/8QAFBEBAAAAAAAAAAAAAAAAAAAAAP/aAAwDAQACEQMRAD8AbS3FKcurcEc6WGbs+Ol9cHA0qDCSUuykn5yOYR4dL1bM/wCJqwfKOIy2SUulsNoUOhWQkH0vXz1hmIKecajaVlbh0ghW4HS3b+KAuvjPvl5ZPFVfrfT5n+KMR8sYjLw4vvgoaG6bp3Ubc+/Si+VMEjmeUtt60j5lK38+fqPSrzK0pTwxsDYAE/pQKrB52I5amF5iU4GALLbJuEenamxlDNEfMcdaSgCXHtxEDkQeSh4Ut864M4zxcQYRoQ2glZ6evua5fsmxVLebY6CbKlsrasfDf9U/Wgeg+E6kjSodqxWCLjmfepQVz7RISsSyZicYfOEJc27JUFE+wNLPA8sQYUSPiTCFypr7QDLIGyDyUf23705pLZdacbd+NpxJQoeB2IpcjAZsPXhjL5S80oht0/3NKJII7cyPMeVARgTmoMFTMZpKZSUXWHFD3vQhyQVOBa4kibJcPxO3BSgc9geQ8vejGX8vsYXKTxH3XXS0pCi+vUpQNtzffmOvjW0V/C4qxFGl3mrhMugkAHclPag8WIDkiC4jEFNutn8FW4I7Hv5VVcvYExDztBVGSUJbkhSCTtpFxb61d3cXhSU2ihPDG2x3T4VWsYnNYWt2W2Vam9K026qC0kD15UDXI3Jud6lDsExVrFoCJTSXEBXNDidKkntWaDrKtKQCeatvehePFxmJ96aF1tE6iOYB/wBFElk7KG+4JFYWhK2ihwBQULKHcdaBQT5k3EFuokMTCpxeocPUgADYfELDlc7960gYPNhtKbgcJpx03U6tZWvxJI2PvRXE539GxhcNbrT8U7suIWCQL7gjuK5Z2a48VlRj6L6SL38KDURmcCi8KTNW686vWtxzmewA7VVc4Y2gtuMNlK1u6RY72SN7++w9aF4/jhmP8VxWt0AADpfx8Krq1rdcK1kqUo7k0D6+y3NzU7L7EKe4luTHPDS4rk6LXFz+bp42rNUPLcZUGC22q4X8y/BR6egt9azQPHGZKcKhvvSjpDSeXc9APM0vMWzRPnBTYVwW1fhoO3qetSpQK/N83j4ihlDhPATuf8juf2odNEoRGHZCNKXR8CvzjvUqUHlAw+RPWQwBYc1K5UUwbBpCMUa+9MqCEXXe1wSOW48be1SpQXbDI7059DUZlbrq1EJQgXJ32/7UqVKD/9k=",
+	"Url": "https://amturing.acm.org/award_winners/pearl_2658896.cfm",
+	"document_id": "037ad41b86e15ce60f81f324b3418bd05e94efcf"
+}, {
+	"Type": "turing_award_winners",
+	"Year": 2012,
+	"DisplayName": "Silvio Micali",
+	"EntityIds": {
+		"AuthorIds": [699581604, 2762568629, 2777050197, 2558954640, 2672602589, 2709498248, 2665777469, 2283895873, 2777414775, 2059874445, 2706479975, 2137072215, 2649825388, 584398624, 2303034529, 2204484497, 2672004744, 2537128648, 2090331776, 2192513248, 2563769694, 1825869116, 2523884195, 2125924410, 2246990829, 2629094804]
+	},
+	"Citation": "Along with Shafi Goldwasser, for transformative work that laid the complexity-theoretic foundations for the science of cryptography, and in the process pioneered new methods for efficient verification of mathematical proofs in complexity theory.",
+	"PhotoUrl": "data:image/jpeg;base64,/9j/4AAQSkZJRgABAQAAAQABAAD/2wCEAAkGBwgHBgkIBwgKCgkLDRYPDQwMDRsUFRAWIB0iIiAdHx8kKDQsJCYxJx8fLT0tMTU3Ojo6Iys/RD84QzQ5OjcBCgoKDQwNGg8PGjclHyU3Nzc3Nzc3Nzc3Nzc3Nzc3Nzc3Nzc3Nzc3Nzc3Nzc3Nzc3Nzc3Nzc3Nzc3Nzc3Nzc3N//AABEIADgAOAMBIgACEQEDEQH/xAAcAAABBQEBAQAAAAAAAAAAAAAAAwQFBgcBAgj/xAA2EAABAwMCAwUECQUAAAAAAAABAgMEAAURBhITIVEHMUFhcRQiocEVMkJSgZGisfAIQ2Jy0f/EABgBAAMBAQAAAAAAAAAAAAAAAAADBAIF/8QAIBEAAgICAgIDAAAAAAAAAAAAAAECEQMSBCFB4SIxUf/aAAwDAQACEQMRAD8A2/8AuD0Neq8E4cGehqG1pfxpvTE+6hAccZQA0g9ynFEJSD5ZI/CgENNU62tmnXkxFhcq4LTuTFZGSB1Ufsj4+VQsXtFkqVul2Fxtnq29uV+RAz8KrujdJPy0/Sl0lqVMlnjPOr5rUTz/AA9KvAscZDW1S9/qBUzyyb6LI4YJfL7JuzXiFeovtEFwkA7VoWNqkHoR4VIVkermXrUBdbU7wJsQ5bcT4jxSrqMeFaDo7ULOp9OxLq0jhl1JDjec7FjkoZ6Z7vLFNxz2QjLj0ZN0VwHPdRTBQ2mOcNSPMH5Vl3bvclM6XhNIOeJOSVI+8EoV8ymtEv7vCDB67vlVF1vb27vbN+1Cno4ykqGeWUkj9NZk6RqCuVC9h1BGgWhlEpD7j7TIU8GWVLDfqR3VIv6ugItomlt3hKOBhBznpioZy3WhcRqXNUlKgUhI+sVK/wARzwfSlLlDt7drjY4ewSS4SHBn6pB8efLwqKzpa/pB64vrU+0OMxGX2nCjiAOo27047x/PGnPYJeG3dOTrepeH48subD37FpTz/MK+FF2t1sTbnpkZaHVLB95I2kHzGO/1rnZlbEWq2LlFCUuPjaMDHugk/wA9KdhffRPyIurZrcRfEQT50UzsLvFjOHo5j4CiqSMi9bPcFuIeqlfKqmuWFoUhR5KBBqb7UH+DHt56rX+wqge3+dACUeDOlSVKYmbZUPOxt4bmz5gDmDjIzTm46ThnbN+kU8XAc4JjHhhXfn6+3OfOoWVenrdcxcGE72kHY8nwPLn/AM9QOlLOa+0+hJU1a3VO8yAruCvTuxUji06R0YTjKK2Zy4wpMZhPFllyZLIKkt+62kZ6HvPMDPnVxiPIiRWo7ZJS2naCfGspkX2Xc7gbgU7WkOBaUZ5Eg8h6D96tsC+MT2A7HcB+8nPNB6GnYo0rZNyJW+jX9Fvca3vq6PEfpFFMOzJ7jWeWrpKI/Qmimk5Xe3e5IttutLrgWQp5wAJ/1FYdN1TKeQURk8DP285Vj5UUUAWqxoDMKMiVzS8gJWVc8KPME/iTSU+zRA8GfY2/aCeSkg4x1NFFHPgseRa+V6KOM9oO/DGV1QmNDWhCcJQeGk4wFK8celU1D7jL6lsOLbVk+8hWDiiimyio4oJCZtubPov+nqU/L0jPXIdU4oXBSQVHnjht0UUUoyf/2Q==",
+	"Url": "https://amturing.acm.org/award_winners/micali_9954407.cfm"
+}, {
+	"Type": "turing_award_winners",
+	"Year": 2012,
+	"DisplayName": "Shafi Goldwasser",
+	"EntityIds": {
+		"AuthorIds": [1728759264, 2763067961, 2760821248]
+	},
+	"Citation": "Along with Silvio Micali, for transformative work that laid the complexity-theoretic foundations for the science of cryptography, and in the process pioneered new methods for efficient verification of mathematical proofs in complexity theory.",
+	"PhotoUrl": "data:image/jpeg;base64,/9j/4AAQSkZJRgABAQAAAQABAAD/2wCEAAkGBwgHBgkIBwgKCgkLDRYPDQwMDRsUFRAWIB0iIiAdHx8kKDQsJCYxJx8fLT0tMTU3Ojo6Iys/RD84QzQ5OjcBCgoKDQwNGg8PGjclHyU3Nzc3Nzc3Nzc3Nzc3Nzc3Nzc3Nzc3Nzc3Nzc3Nzc3Nzc3Nzc3Nzc3Nzc3Nzc3Nzc3N//AABEIADgAOAMBEQACEQEDEQH/xAAaAAADAQEBAQAAAAAAAAAAAAAFBgcDBAIB/8QANhAAAgECBAMFBgMJAAAAAAAAAQIDBBEABRIhEzFBBgdRcYEUIjJhkaFCsfAVIyQzcoKSsuH/xAAZAQADAQEBAAAAAAAAAAAAAAACAwQBAAX/xAAlEQACAgIBAwMFAAAAAAAAAAAAAQIRAyExEiJBBFFhEzJCUnH/2gAMAwEAAhEDEQA/AE2gpTCY62oY0z1RLkJHdbXPoLj/AJfAKaukHFW0+GPmXJT0VOxkVZmnNmdBoBjIuNBPLYtuLbg7DCZTuXGwnRy1NDD+yp4p6OEUxmWQM6MxdNNtzyAv9+eAk25Jx0a2n4BWR5WxpeOr3icsFkWRn0ryVb8x5et8PdqtmJaTOej7G19KR7NCH1ylVOvRwluNLXt53sd9sc5i9Jh6AvBDV0KzvNNRzqov7y89LFbGwsDy52UjGpx8jE40HKLKo4BUteTXJDc2awvcG4A+d/0MY22ZxZOpIq+oipWhjikjjZb6UsoBHO1unzwbxqOzJY5KmGKLKswo5LU0yuTAFGkCSNbt8IBHunluLjCciBSo95ln+a9oKj9i5ZwhxAqSiNviC87ta4UeQvttvY7jgorrkMSb0jmq+7LOIUepgrYHkQh0jGpSfHfx8OXpg/qoN4X7hrJ89rKim0OQauj+NSQGlTkQL9QbX8vE4GcalfgU0N9LTmoDFYNnWxcmxPXfbCJvLfbR1nSMsAUjVYn8Rbl5bY5SyeaMZIOzkgGY+zmq40FUeHHIxKBSoGy35WItt+WK5d2gU6YSizBKeprxSyxxSBpDGmn3vdYiy2tzIv05+eFOjU0Zd01HXJltZmMUavPJLw7yeCjn9Sfpjsr2kU4FpspMlfWmng4VMsrHaUKPTa7DC0x7jRMaqvnyLvLZIG4ZqJ0OnnpElr/ck4ctwJcvLKlBmcpW7S0z7XuZLA+tsKJ+o0GcJ1ERbrpnBxtHdRD6aODL5K9czcBkIVtFl1Rte3u2ub67/Xph1+x1bNe0X8PETBBSmNI14bBDJqRlNzsepP2xnDo0Y+6nNlkyh6KNx7TTxXKkn37s1unhYbX6YXnVbLfTyTVD7StJCE0bKE3Ln4R4fo4V/CiVeSNdtc3jqe2iVFGkbPGRGZSQbsGIPInptvviqMajs8/LJOQcpalpPzuCcC9EiD+URmtj/dzNxh+HhkkD+oHAN0GT2maOSSA1ZWavq/58gUlkvawsBYc0G+GPjQS2bVdJBQUlS0VYtpiQscp32O1gb3GOVt3Rq+DPu71L2iEbhlSoQpG4NirLuCD6EeuNyp9I7A6kWRaSRoBxqqaVQL6WsB9gMTIrciEZjSPQ9oZ/bZFDCpZufiScVxdxIpx6Z7H/ACmjo6gxT0M8dZc+8C1vDqAMLla5AlCPKGuLLatGT2eOOEK3vLqZr+XTCnQBF8xzOR5HWJrawDIQtiTa3pinHBAIGElmBvueuHG2UnumyzL5YJswlLe2wzNEhZrqqFVN7dD8QwrJiySXatFGLLjj9z2U/VENVpEA+W+FR9Pl/Ua8+JfkRHvCMUna2v4SraPQt7czoUn88UwxuCqXJPkyLI+pACknlpZlankaN0IKshsR5HBfAos3YDP588yg+0MJKmmbhuTYFlJurH0uP7cRZoKMtcG2Qyqkda2biKFbVZlUbA9QPle+KY8GH0fEB8sGYPXdPWhMwraRif3kQkUfNTY/7fbD8D20Ky8WU7VckHnioQRPtLUiqzvMJgNnqXUfMKdIP0GIpu5MsjqKBJa0zEdFwHk4e+6qqlhq6+GnQyNJCCFB22Y7n/LE/qFcUHFLyf/Z",
+	"Url": "https://amturing.acm.org/award_winners/goldwasser_8627889.cfm"
+}, {
+	"Type": "turing_award_winners",
+	"Year": 2013,
+	"Affiliations": ["Microsoft"],
+	"DisplayName": "Leslie Lamport",
+	"EntityIds": {
+		"AuthorIds": [2096750770, 2325198650, 2339101223, 2709291716, 2696106115, 2645560998, 2637107712, 1964319037, 1741901885, 2659721834, 2694863315, 2638105828, 2711027282, 2651067531, 2186539237, 2716261492, 2631731708, 2315831784, 2679464680, 2685408925, 2712384689, 2646627918, 2712593035, 2272045876]
+	},
+	"Citation": "For fundamental contributions to the theory and practice of distributed and concurrent systems, notably the invention of concepts such as causality and logical clocks, safety and liveness, replicated state machines, and sequential consistency.",
+	"PhotoUrl": "data:image/jpeg;base64,/9j/4AAQSkZJRgABAQAAAQABAAD/2wCEAAkGBwgHBgkIBwgKCgkLDRYPDQwMDRsUFRAWIB0iIiAdHx8kKDQsJCYxJx8fLT0tMTU3Ojo6Iys/RD84QzQ5OjcBCgoKDQwNGg8PGjclHyU3Nzc3Nzc3Nzc3Nzc3Nzc3Nzc3Nzc3Nzc3Nzc3Nzc3Nzc3Nzc3Nzc3Nzc3Nzc3Nzc3N//AABEIADgAOAMBIgACEQEDEQH/xAAbAAADAQEBAQEAAAAAAAAAAAAABQYEBwECA//EADIQAAIBAgUCAwYFBQAAAAAAAAECAwQRAAUSIUETMQZRYSIycYGRoRQjscHRJDNC4fH/xAAYAQADAQEAAAAAAAAAAAAAAAACAwQFAf/EACARAAICAgIDAQEAAAAAAAAAAAABAgMRIQQSIjFBMhP/2gAMAwEAAhEDEQA/AOsTLWxflozSpOGRNLf2ybkG+5G3O+5Fhj7p69ujFBDTSgiDUTpJCW2A3sSTY+WPaqrmUSxKsTsEAABJ9om1rW+/2xP0mYSxPLpnk6ayEyPGqNe3vEknve4t5AWxK5dZYQly6sfRZkySBKpBEQha7EG/kNibbYzLmDVCSxsGQsSFYhtG+/vefbyttztiTm8RO8qUlGhBJtq0i55J+Py8sfgMwleQmSYIgO51dvnihVTx5MW5v0XlVPEkF3keBdi0i3va9hxzxzjEZqdYCd3cOEcyN7IF+55Nhc25wnp89/PWknmOhmAE0iaypt699ufTnG2qWnFebuHgVgWVlK2BGwS3vHyAGE3TlXs63nZviq1pqmnEEq/hygVllbSVtex+Gx+d8GMjdTQUqTJIqhNFk0tsb9rDSe3+t8GAhd7CUmiNy/xonVSOOZR1DZjERrsTc7Hfvc7Y053mlc1OymIJHKSkE0RA1+ZNu5sADcY55leXPKYpijEOTHfQHB7lfUC4YfEjFVPNJWU8Eqs0kkkg6YsQAOBY9tmAwVb7TSCnWovQto61UrpBKwtHGBYHknYfQX9bjDxKqKWk6FgGlPtX76cSpoBNJUxqNIaQszE31Hfcem/ONOTZHU/gq3pVJJdfymvfnc9v0xY5/A4VJ4kUWZBY6SEIQhRgVIPY3H7YrPDdZ1aTTOIyY1DK7D3R+/fb445tS5LLBQapagvZgWNySRcetjt8MdBycrT0UsldDG0TAMykAhVBFhuLWsfTsMLsS6NsGzTyGZTM9bNqEzdAizlQwIYC1rm3O4wYwNJWWeVySGNrMxvZvlba9t/K4wYxpNt5Qh7eiPpHGX0qQrMzruttiUsQbEDm9iMOcujM1PczAyaQ6IARxfnt3BuMZctz6geCPTBKUCaTT+yytpNibuNanfuDvYX740xmqarAhp5NTMAis2oEEbAm5tz2P3xRXZ1nkdZGS2xP4ihMVCtVTIWcxC+nluxH1GFmXT5hEtkEy8lElH2v68YsqrRGZI5FeMMQyo4sVfkfX9MK8voJVmBephETm1tNtv5xqpJvKOqTS2OPCdKtfT080iyKmosUcW0jn73+uNWYZxSq4jRmawOpNNlAP0vcW/jGnMMwioqNIKclWZgjSJ5nvvx27+ZGJ+MrVM6jSAwsdVl0g3I8uBf6bYi5luH/ADQLy1sd0Fuh19US9K+qF7+ytyLk2/kc8YMI43ekzhBTPJ+G3cRE2IAGykdtv39cGM9tpi8P4NfCngapy1IpM0np1kXURHEOoRe3ckWv8jisp8upaQs1NCvVYbzNu5+fHYdrdse4Mb9XHrreUti7eROz2Tni3I6iu/qKbdyLSRt/n6g9r8b/APZTL4KqDMAk8cyTbqodTufMfrgwYbOqL8g+PdL8susjykVHTergPSiDEaxbWWFreo5+IHI2+KrwdHSu0+WO8iMbvDIQSBzpJtv6n74MGJ7KYTWGddjchJLNDRzNHNPWK49hqJYrNG21grbHcG/nsPLHuDBjFsSjLBVGCwf/2Q==",
+	"Url": "https://amturing.acm.org/award_winners/lamport_1205376.cfm"
+}, {
+	"Type": "turing_award_winners",
+	"Year": 2014,
+	"Affiliations": ["Massachusetts Institute of Technology", "University of California Berkeley"],
+	"DisplayName": "Michael Stonebraker",
+	"EntityIds": {
+		"AuthorIds": [2627545066, 1998938290, 2700682933, 2632990670, 2639220682, 2698534509, 704262674, 738656912, 2716540896, 697779278, 2700256432, 2677182978, 2684280108, 2646916540, 2600156434, 2713004316, 2687077906, 2668426757, 2684834185, 2661643953, 1187866589, 1208524785, 2645463487, 2691051205, 2494883579, 2650895429, 2798505020, 2224687885]
+	},
+	"Citation": "For fundamental contributions to the concepts and practices underlying modern database systems.",
+	"PhotoUrl": "data:image/jpeg;base64,/9j/4AAQSkZJRgABAQAAAQABAAD/2wCEAAkGBwgHBgkIBwgKCgkLDRYPDQwMDRsUFRAWIB0iIiAdHx8kKDQsJCYxJx8fLT0tMTU3Ojo6Iys/RD84QzQ5OjcBCgoKDQwNGg8PGjclHyU3Nzc3Nzc3Nzc3Nzc3Nzc3Nzc3Nzc3Nzc3Nzc3Nzc3Nzc3Nzc3Nzc3Nzc3Nzc3Nzc3N//AABEIADgAOAMBIgACEQEDEQH/xAAcAAACAgIDAAAAAAAAAAAAAAAABwEGAgUDBAj/xAAzEAABAgUBBgQFAwUAAAAAAAABAgMABAURIRIGEzFBUWEHFCJxFTKRobGB8PEzQlJywf/EABkBAAMBAQEAAAAAAAAAAAAAAAIDBAABBf/EACARAAMAAgEEAwAAAAAAAAAAAAABAgMRBBIhMWEiQVH/2gAMAwEAAhEDEQA/AEhE2gjIQ5I4d6iUp2rz6JVpQbBF1uKBIQnrj8QypTYXZyXlQh4TM7MHKl6lJCeVhpsPzFe8MkI3lSdWLlCEAD31fv6QypWoU111mmeaLjpcDiUNGygRnPbES5sjVaRZx8M3O2LrbDYMU2SXUqWpRYaF32HFetsf5Dt2JvFGh+TdWpdQZeYYyFtqQ4w4MKSRY/zCDT8o9oZht1L2Lz41FdjJMTAkQQ+UTM4BGUESIKUYvXh222KfOvpUnetvI3gULjSR6fvqhh7y0rLfDWZfzKHQtTSllKcH3P8AyE5su1UHJxRkVqQ1dCZg6rJIKvSD1yOHY94ZDLkhNstif3W8QLWdZ3gB5i1wePMEcogzzqz0+La6NFiee0Sbbe5Y8yAAspVqSL8Lfj6wiqw221V59pkWaRMupQOwUQIaNacbl9nH5XZ8a3AgkblBQQSclIuTcC54kk94UvzZvcnN+sHxpemxXMpbUkJ4xMZJEEV6IjhabW64httClrWoJShIuVE8ABzMXig+FG1lX0rckRT2CL7ydVoNv9BdV/cCGP4L7LU+mUyWrEy2lyqTje8bcXndNm9gjoSnJPHNuENBatJ9Quk/aB62vBtCmZ2ao/hvRJhuoTKqnN1PSnd6Q2PQSQUjJSElVyo3zpwI1k9RzNyaZ6kMOTBUQFJQoKIxk2HTA/eGzOUSmTr5fmpSXmnSQdUw0FkW4AX4DJ+sQ7SWXXkOs3ln0CySgYI6W5j8doG5ip9/ozHkrHXoVZb+D0VE261pmpdSHd2s2uoKFr8yNRAIGc8RGgmPDOpVeVVWdmjKzMq+pS/KJXoWzfOgavSQOHEcLcYd4k2EvkOMpdWs2XqGu9v7Rflz/WO9JyjEm0pMuy1LNKNyltISL+wxHMfxx6+ws19d7Xg8pVOj1GkP7iqSMxKOngl5sp1ex4H9II9SVxiRqVOclJ+WamZRfzJdTce46EdRkQQaoTo6NIZapqJGSasG2mUJTi1kpSUj7ERunKjJNq0uTLWroFA2iIIKYVHG9HKhxh3+mpJxfBjCcDolHvLFIeCCWyoXAVbBgghb7BFb2Ek6sj4hUK2p0PTzgU3Ll8uIZQnA0Hve/LFr5vFmcQDmwv3ggjGNJUpuSbd8u++G1XGFA6Sb3GbWvfvBBBBox//Z",
+	"Url": "https://amturing.acm.org/award_winners/stonebraker_1172121.cfm"
+}, {
+	"Type": "turing_award_winners",
+	"Year": 2015,
+	"Affiliations": ["Stanford University", "Sun Microsystems"],
+	"DisplayName": "Whitfield Diffie ",
+	"EntityIds": {
+		"AuthorIds": [2559072797, 2804590257, 2630509453, 2031072802, 2306657861, 2307656538, 2611994183]
+	},
+	"Citation": "For inventing and promulgating both asymmetric public-key cryptography, including its application to digital signatures, and a practical cryptographic key-exchange method.",
+	"PhotoUrl": "https://amturing.acm.org/images/lg_aw/8371646.jpg",
+	"Url": "https://amturing.acm.org/award_winners/diffie_8371646.cfm"
+}, {
+	"Type": "turing_award_winners",
+	"Year": 2015,
+	"Affiliations": ["Stanford University"],
+	"DisplayName": "Martin Hellman ",
+	"EntityIds": {
+		"AuthorIds": [2401346935, 2673639554, 2083613645, 1911020364, 2639631625, 2656984546, 2258125224, 2585281118, 2210464107, 2643229268, 2146312211]
+	},
+	"Citation": "For inventing and promulgating both asymmetric public-key cryptography, including its application to digital signatures, and a practical cryptographic key-exchange method.",
+	"PhotoUrl": "https://amturing.acm.org/images/lg_aw/4055781.jpg",
+	"Url": "https://amturing.acm.org/award_winners/hellman_4055781.cfm"
+}, {
+	"Type": "turing_award_winners",
+	"Year": 2016,
+	"Affiliations": ["Massachusetts Institute of Technology"],
+	"DisplayName": "Sir Tim Berners-Lee",
+	"EntityIds": {
+		"AuthorIds": [2308609296, 2723908172, 2780339685, 2660412306, 2671592023, 2631142732, 2699297317, 2035802847, 2721914432, 57312153, 2799196852, 68927324, 1963240788, 2695833716, 2700152602, 2665074373, 2806952993, 2724069465, 2686712170, 2648282843, 2662200676, 2685594552, 1843565641, 710727033, 2660759671, 1209428399, 2710601163, 2719408269, 2688691556, 1543671956, 2662637403]
+	},
+	"Citation": "For inventing the World Wide Web, the first web browser, and the fundamental protocols and algorithms allowing the Web to scale.",
+	"PhotoUrl": "data:image/jpeg;base64,/9j/4AAQSkZJRgABAQAAAQABAAD/2wCEAAkGBwgHBgkIBwgKCgkLDRYPDQwMDRsUFRAWIB0iIiAdHx8kKDQsJCYxJx8fLT0tMTU3Ojo6Iys/RD84QzQ5OjcBCgoKDQwNGg8PGjclHyU3Nzc3Nzc3Nzc3Nzc3Nzc3Nzc3Nzc3Nzc3Nzc3Nzc3Nzc3Nzc3Nzc3Nzc3Nzc3Nzc3N//AABEIADgAOAMBIgACEQEDEQH/xAAbAAACAgMBAAAAAAAAAAAAAAAABwQGAQMFAv/EADQQAAIBAwIFAQQJBQEAAAAAAAECAwAEEQUhBhIxQVFhE3GR8BQVIlKBobHB4SMzQmJyB//EABgBAAMBAQAAAAAAAAAAAAAAAAIDBAUB/8QAHREAAgIDAQEBAAAAAAAAAAAAAQIAEQMSMSFBUf/aAAwDAQACEQMRAD8AUSTl2cdga87SdNz+lRIzys59DW20OW3IG/U0rSuR+0HUhhjr6d6tOgWc86JLcQtIoyNlJyPWu9wzoNld3EMssCNhebdcfid6bFhYqkKJFGAoHQAUl2s6x+PHY2J8ih1aPTTYoUtVt7hNuZGII8ZFc+wuDzcknnlb0PmmxxTodtf2rJLHyuASsijDIfntSov9OfSrhRL0clT4z870E6ya1JkkZR+cDvvRWyGQSRAOScDB/asUFzlRdiGUFsxsMg9q92lvNLKsSRMzMw+z0zjc/lXWadD0kGe9Fm0Euo2sdxOqQvMiu33QSAT+dUjIT8iTjH7GBwhe21srTXk8cIAx9o4z7vhTL0jVtOurQSWl1FIvdlcGl/wloVje2JNy3tWiLREo7KDg4O6kZBxnerDbaRpdqNQt7WxUQuiRyA5bmyT0PXyKDhuVKrFQPk6t7qNnexyraXUUpAIIWQE0q+NbgzPBGFP9MMSR4JGPhg/GmBJwpp9tCzWMk0Mb4JT2gZPXYgn4EGqrq9ozaLqmoNKVgCiCNUbBkctvnyoyNvQ56CuHpnGsgCVnTJDIArNswx+NFRNLflkXPQHI9KKV6YMrkDiReVz9qtNw4WQcvap5tsHIiArU1vlv7Yx3NVqQW8k7AgRj8ETXP1d9PNwXhcM06KuWLZXpj/o1JGozDUnMGr3Vpp87c0tu9rIJFPiMldh/NVzhO+k4buIUvUItbgDmP3M9R+nwplwLpRtGe31GaIMxwqXLBCD/AK5xXWxtjchhKMGRciWDItxfBtPd9PLpDjLpKpUggb7Hz/NLS+4imvYF05UCQ210xZgxJl3OM9gBk7D31dNTuvra6i0nR2LhmAkcdFQdXb56D1pWvE1pqF5DzZCSsoY7c3KxH7UDYzqWqC+Ub0DOtbHExXB71isx830sHlIJ7H1rFTLyE3ZBZXP+WfOTtXlyTygAAeBRRWvQHJlEkxqroNtd8LWk10w9lNaRSBm6qWUHHvycCl9ZWJbVp7YXNzFZW7ZmLDlcL3wCdj76zRWuiLnUFxySAnHesePD2maFBw0j8Oezkt513nzlm88x6567dqWP/rmiWOn6rZtYWwhmuIDNcBTtI+QObHYnv5PrmiioMqAWnwEygMb2lQ06RRKp5ttuvvooorKfAt+TQTMSPZ//2Q==",
+	"Url": "https://amturing.acm.org/award_winners/berners-lee_8087960.cfm"
+}, {
+	"Type": "turing_award_winners",
+	"Year": 2017,
+	"Affiliations": ["University of California Berkeley"],
+	"DisplayName": "David Patterson ",
+	"EntityIds": {
+		"AuthorIds": [2799012205, 2098984663]
+	},
+	"Citation": "For pioneering a systematic, quantitative approach to the design and evaluation of computer architectures with enduring impact on the microprocessor industry.",
+	"PhotoUrl": "https://amturing.acm.org/images/lg_aw/2316693.jpg",
+	"Url": "https://amturing.acm.org/award_winners/patterson_2316693.cfm"
+}, {
+	"Type": "turing_award_winners",
+	"Year": 2017,
+	"DisplayName": "John L Hennessy",
+	"EntityIds": {
+		"AuthorIds": [1965698830, 2628291168, 2128401281, 2630889659]
+	},
+	"Citation": "For pioneering a systematic, quantitative approach to the design and evaluation of computer architectures with enduring impact on the microprocessor industry.",
+	"PhotoUrl": "data:image/jpeg;base64,/9j/4AAQSkZJRgABAQAAAQABAAD/2wCEAAkGBwgHBgkIBwgKCgkLDRYPDQwMDRsUFRAWIB0iIiAdHx8kKDQsJCYxJx8fLT0tMTU3Ojo6Iys/RD84QzQ5OjcBCgoKDQwNGg8PGjclHyU3Nzc3Nzc3Nzc3Nzc3Nzc3Nzc3Nzc3Nzc3Nzc3Nzc3Nzc3Nzc3Nzc3Nzc3Nzc3Nzc3N//AABEIADgAOAMBIgACEQEDEQH/xAAbAAACAwEBAQAAAAAAAAAAAAAABgMEBQcCAf/EADEQAAEEAQMCBQEGBwAAAAAAAAEAAgMRBBIhMQVBBhMiUYFhFCQycaGxBxVCcpHR8P/EABkBAAIDAQAAAAAAAAAAAAAAAAIDAQQFAP/EAB0RAAICAwEBAQAAAAAAAAAAAAABAhEDITESQQT/2gAMAwEAAhEDEQA/AFqLFbXKnGNtypGh3ZqsRNe8bM70s3ZfoqY+DJKSImPefZrbU8/TsmBmp8EoFc6TSYMEvjA8q2U0D0/qVrRuklIa4k2jpHeWIjIW1uV5fE0cJ36n0aJ+MXllSuvQ9o7+xSr5HIIojlC1RBjZrPQK5QrU8BDzaFKZ1GjCAWhaGJEDESa/GP2P+1SiLAFdxXj1NF0d9vdBHTD6acFEbFoCuYskcUw82QN+iXcjDjinjlkne6StVF5/bgBaOZi4uRJjS5Dma3NDauwDzvR245RjKdDW7Q+OI2CGmwVz/Naf5jlhl6fOfQqv6inSMPxcB7Ihr0xucxpcT2sC9+6VMp/3uRz2kONEh3Ldhsfy4UTehahWzJ6gNEeondC99Vg8+AhvK+qI8BZJHFurEZ8t/p7iipWx915IAs+3KGwlokkbIyeMgMdE4HWat19trArlaYgEmPpgEczA6nam6KH03JtZmNlskjZI06oySGvbuDRo/wCDstjAyoNDtIP0FVZTvmw7tWi3FrgxJ/XeiPYnf/tqS2+LzHlzyS5xtxPcpw6cYTh52dnBv2KCCTXfD/SdXxWy5/0vqsTMWJmdIGyNjbcjjzt3XPFJx9ITPIvXk0RjtvdClEjHND43BzTw5psL6kBCz1fxbg4rjFhD7XKNrYaYD/d3+ErZnWM/Of8AeZtj+GGP0sb8d/m0IWhDDGHCnLJKR03w3iYuP4EhkzZBE2IySiQi6Jcdq73sKHel78NZPSurZkWPJlmMuBMbJBpMnuGn3+bQhDJJtWX/AMuP1hm74X/4pdSZ07w5D0zHphypA3Q3ao27n9aHyuUyz+YzQTsRSEJ6M5lPGz8nDdqxppIz3DXbH8x3QhCFxT6iU2f/2Q==",
+	"Url": "https://amturing.acm.org/award_winners/hennessy_1426931.cfm"
+}]

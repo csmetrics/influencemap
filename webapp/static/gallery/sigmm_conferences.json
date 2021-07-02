@@ -1,0 +1,25 @@
+[{
+	"Type": "sigmm_conferences",
+	"DisplayName": "ACM International Conference on Multimedia Retrieval",
+	"EntityIds": {
+		"ConferenceIds": [1159717609]
+	}
+}, {
+	"Type": "sigmm_conferences",
+	"DisplayName": "ACM Multimedia",
+	"EntityIds": {
+		"ConferenceIds": [1135237122]
+	}
+}, {
+	"Type": "sigmm_conferences",
+	"DisplayName": "ACM Multimedia Systems\u00a0Conference",
+	"EntityIds": {
+		"ConferenceIds": [2250491939]
+	}
+}, {
+	"Type": "sigmm_conferences",
+	"DisplayName": "ACM Workshop on Multimedia and Security",
+	"EntityIds": {
+		"ConferenceIds": [2756046829]
+	}
+}]

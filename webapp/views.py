@@ -57,25 +57,10 @@ def redirect(ident):
 
 @blueprint.route('/browse')
 def browse():
-
-    with open("webapp/static/browse_list.json", "r") as fh:
-        browse_list = json.load(fh)
-    browse_cache = get_all_browse_cache()
-    for group in browse_list:
-        for subgroup in group["subgroups"]:
-            if subgroup["type"] == "inner":
-                #subgroup["document_ids"] = [cache["document_id"] for cache in browse_cache if cache["Type"] == subgroup["tag"]]
-                subgroup["docs"] = sorted([cache for cache in browse_cache if cache["Type"] == subgroup["tag"]], key=lambda x: (x["Year"], x["DisplayName"]) if ("Year" in x) else (0, x["DisplayName"]))
-            else:
-                for subsubgroup in subgroup["subgroups"]:
-                    if subsubgroup["type"] == "inner":
-                        #subsubgroup["document_ids"] = [cache["document_id"] for cache in browse_cache if cache["Type"] == subsubgroup["tag"]]
-                        subsubgroup["docs"] = sorted([cache for cache in browse_cache if cache["Type"] == subsubgroup["tag"]], key=lambda x: (x["Year"], x["DisplayName"]) if ("Year" in x) else (0, x["DisplayName"]))
-    browse_cache = {cache["document_id"]: cache for cache in browse_cache}
-
+    browse_list = load_gallery()
     return flask.render_template(
         "browse.html",
-        browse_groups=browse_list, cache_data=browse_cache)
+        browse_groups=browse_list, cache_data=[])
 
 
 @blueprint.route('/create', methods=['GET', 'POST'])

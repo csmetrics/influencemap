@@ -1,0 +1,90 @@
+[{
+	"Type": "anu_researchers",
+	"Affiliations": ["School of Literature", "Language and Linguistics"],
+	"DisplayName": "Anna Wierzbicka",
+	"EntityIds": {
+		"AuthorIds": [1899979098, 2678781122, 2789245640, 2722017308, 2503496698]
+	}
+}, {
+	"Type": "anu_researchers",
+	"Affiliations": ["Research School of Astronomy and Astrophysics"],
+	"DisplayName": "Brian Paul Schmidt",
+	"EntityIds": {
+		"AuthorIds": [2114532821]
+	}
+}, {
+	"Type": "anu_researchers",
+	"Affiliations": ["Research School of Physics and Engineering"],
+	"DisplayName": "Chennupati Jagadish",
+	"EntityIds": {
+		"AuthorIds": [1974910167, 2713627047, 2698898188]
+	}
+}, {
+	"Type": "anu_researchers",
+	"Affiliations": ["Centre for Mental Health Research"],
+	"DisplayName": "Helen Christensen",
+	"EntityIds": {
+		"AuthorIds": [1965953510, 2792572751, 2712112456, 2789085447, 2898473429]
+	}
+}, {
+	"Type": "anu_researchers",
+	"Affiliations": ["Centre for Research on Ageing Health and Wellbeing"],
+	"DisplayName": "Kaarin J. Anstey",
+	"EntityIds": {
+		"AuthorIds": [612724871, 2777296243, 2694414187, 2779128262, 2169972260]
+	}
+}, {
+	"Type": "anu_researchers",
+	"Affiliations": ["Research School of Engineering"],
+	"DisplayName": "Kylie Catchpole",
+	"EntityIds": {
+		"AuthorIds": [2694484386, 2717251915, 1990885502, 2653356611]
+	}
+}, {
+	"Type": "anu_researchers",
+	"DisplayName": "Lexing Xie",
+	"EntityIds": {
+		"AuthorIds": [2799110339, 2100918400, 2765756256, 2803003591, 2762044394, 2783013707, 2755790700]
+	}
+}, {
+	"Type": "anu_researchers",
+	"Affiliations": ["Research School of Computer Science", "Data61"],
+	"DisplayName": "Michael Norrish",
+	"EntityIds": {
+		"AuthorIds": [2103706242, 2810624776, 2117139596, 2643606969, 2712854070, 2094383012, 2634504275]
+	}
+}, {
+	"Type": "anu_researchers",
+	"DisplayName": "Nick Birbilis",
+	"EntityIds": {
+		"AuthorIds": [1988665910]
+	}
+}, {
+	"Type": "anu_researchers",
+	"Affiliations": ["Research School of Chemistry"],
+	"DisplayName": "Peter M. W. Gill",
+	"EntityIds": {
+		"AuthorIds": [1976733055, 2428079980, 2776240723, 2893454507, 2761974903, 2668218151, 2237175892, 2631553234]
+	}
+}, {
+	"Type": "anu_researchers",
+	"Affiliations": ["Crawford School of Public Policy"],
+	"DisplayName": "Robert Costanza",
+	"EntityIds": {
+		"AuthorIds": [2346401459, 2709909351, 2706424323, 2654517815, 2774918674, 2667025747]
+	}
+}, {
+	"Type": "anu_researchers",
+	"Affiliations": ["Research School of Computer Science"],
+	"DisplayName": "Robert Williamson",
+	"EntityIds": {
+		"AuthorIds": [2672491353, 2122328552]
+	}
+}, {
+	"Type": "anu_researchers",
+	"Affiliations": ["National Centre for Epidemiology and Population Health", "ANU Medical School"],
+	"DisplayName": "Robyn M. Lucas",
+	"EntityIds": {
+		"AuthorIds": [2166335365, 2795280866, 2887528690]
+	}
+}]

@@ -1,0 +1,45 @@
+[{
+	"Type": "sigmm_risingstaraward",
+	"Year": 2014,
+	"Affiliations": ["Hefei University of Technology"],
+	"DisplayName": "Meng Wang",
+	"EntityIds": {
+		"AuthorIds": [2300598665]
+	},
+	"Citation": "For pioneering work on multimedia tagging and intelligent processing"
+}, {
+	"Type": "sigmm_risingstaraward",
+	"Year": 2015,
+	"Affiliations": ["Fudan University"],
+	"DisplayName": "Yu-Gang Jiang",
+	"EntityIds": {
+		"AuthorIds": [2143115300, 2247437602]
+	},
+	"Citation": "For significant contributions in the areas of video content recognition and search"
+}, {
+	"Type": "sigmm_risingstaraward",
+	"Year": 2016,
+	"Affiliations": ["Google"],
+	"DisplayName": "Bart Thom\u00e9e",
+	"EntityIds": {
+		"AuthorIds": [2344479558, 2659703139, 2640189229, 114219197, 2701908658]
+	},
+	"Citation": "For significant contributions in the areas of geo-multimedia computing, media evaluation, and open datasets for research"
+}, {
+	"Type": "sigmm_risingstaraward",
+	"Year": 2017,
+	"Affiliations": ["IBM"],
+	"DisplayName": "Liangliang Cao",
+	"EntityIds": {
+		"AuthorIds": [2165330392]
+	},
+	"Citation": "For significant contributions in large-scale multimedia recognition and social media mining"
+}, {
+	"Type": "sigmm_risingstaraward",
+	"Year": 2018,
+	"DisplayName": "Xavier Alameda-Pineda",
+	"EntityIds": {
+		"AuthorIds": [2760873313, 310258847]
+	},
+	"Citation": "For contribution to multimodal social behavior understanding"
+}]

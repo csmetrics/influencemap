@@ -1,0 +1,99 @@
+[{
+	"Type": "sigmm_award_taa",
+	"Year": 2008,
+	"Affiliations": ["Technische Iniversitat Darmstadt"],
+	"DisplayName": "Ralf Steinmetz",
+	"EntityIds": {
+		"AuthorIds": [2647121488, 2238793978, 2734573289]
+	},
+	"Citation": "For pioneering work in multimedia communications and the fundamentals of multimedia synchronization"
+}, {
+	"Type": "sigmm_award_taa",
+	"Year": 2009,
+	"Affiliations": ["University of California Berkeley"],
+	"DisplayName": "Lawrence A. Rowe",
+	"EntityIds": {
+		"AuthorIds": [2776257126, 2242628833, 2776512102, 2780402439]
+	},
+	"Citation": "For pioneering research in continuous media software systems and visionary leadership of the multimedia research community"
+}, {
+	"Type": "sigmm_award_taa",
+	"Year": 2010,
+	"Affiliations": ["University of California Irvine"],
+	"DisplayName": "Ramesh Jain",
+	"EntityIds": {
+		"AuthorIds": [2802642105, 2661971513, 2133201272, 2531514618]
+	},
+	"Citation": "For pioneering research and inspiring leadership that transformed multimedia information processing to enhance the quality of life and visionary leadership of the multimedia community"
+}, {
+	"Type": "sigmm_award_taa",
+	"Year": 2011,
+	"Affiliations": ["Columbia University"],
+	"DisplayName": "Shih-Fu Chang",
+	"EntityIds": {
+		"AuthorIds": [2149341496]
+	},
+	"Citation": "For pioneering research and inspiring contributions in multimedia analysis and retrieval"
+}, {
+	"Type": "sigmm_award_taa",
+	"Year": 2012,
+	"Affiliations": ["Microsoft"],
+	"DisplayName": "Hong-Jiang Zhang",
+	"EntityIds": {
+		"AuthorIds": [2107003637]
+	},
+	"Citation": "For pioneering contributions to and leadership in media computing including content-based media analysis and retrieval, and their applications"
+}, {
+	"Type": "sigmm_award_taa",
+	"Year": 2013,
+	"Affiliations": ["Centrum Wiskunde & Informatica"],
+	"DisplayName": "Dick Bulterman",
+	"EntityIds": {
+		"AuthorIds": [320529561]
+	},
+	"Citation": "For outstanding technical contributions in multimedia authoring through research, standardization, and entrepreneurship"
+}, {
+	"Type": "sigmm_award_taa",
+	"Year": 2014,
+	"Affiliations": ["University of Illinois at Urbana-Champaign"],
+	"DisplayName": "Klara Nahrstedt",
+	"EntityIds": {
+		"AuthorIds": [159144305]
+	},
+	"Citation": "For pioneering contributions in Quality of Service for MM systems and networking and for visionary leadership of the MM community"
+}, {
+	"Type": "sigmm_award_taa",
+	"Year": 2015,
+	"Affiliations": ["National University of Singapore"],
+	"DisplayName": "Tat-Seng Chua",
+	"EntityIds": {
+		"AuthorIds": [2730258684, 2698277438, 2667846486, 2687384770, 2671787982, 2631758314, 2699185748, 2777578312, 2654507368, 2794253754, 2645505362, 2673825682, 2677392124, 2657664707, 2719988570, 2160663097, 2808631080, 2186360933, 2633909360, 2653405788, 2683688526, 2800068338, 2704802438, 2189186976, 2789240277, 2711119025, 2679945639, 2711933960, 2617357775]
+	},
+	"Citation": "For pioneering contributions to multimedia, text and social media processing"
+}, {
+	"Type": "sigmm_award_taa",
+	"Year": 2016,
+	"Affiliations": ["University of Florence"],
+	"DisplayName": "Alberto del Bimbo",
+	"EntityIds": {
+		"AuthorIds": [691928724]
+	},
+	"Citation": "For outstanding, pioneering and continued research contributions in the areas of multimedia processing, multimedia content analysis, and multimedia applications, his leadership in multimedia education, and his outstanding and continued service to the community"
+}, {
+	"Type": "sigmm_award_taa",
+	"Year": 2017,
+	"Affiliations": ["University of Amsterdam"],
+	"DisplayName": "Arnold Smeulders",
+	"EntityIds": {
+		"AuthorIds": [92229816]
+	},
+	"Citation": "For outstanding and pioneering contributions to defining and bridging the semantic gap in content-based image retrieval"
+}, {
+	"Type": "sigmm_award_taa",
+	"Year": 2018,
+	"DisplayName": "Yong Rui",
+	"EntityIds": {
+		"AuthorIds": [2675370173, 2130014478, 2652197118, 2806034432, 2805973292]
+	},
+	"Citation": "For pioneering contributions to multimedia analysis, retrieval and understanding"
+}]

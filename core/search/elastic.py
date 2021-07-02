@@ -10,71 +10,6 @@ client = Elasticsearch(
     http_compress=True)
 
 
-def query_cache_paper_info(author_id):
-    result = {}
-    cache_index = "paper_info"
-    author_ids = author_id if type(author_id)==list else [author_id]
-    q = {"_source": "PaperId",
-        "size": 10000,
-        "query": {"terms": { "Authors.AuthorId": author_ids}}}
-    s = Search(using=client, index=cache_index)
-    s.update_from_dict(q)
-    response = s.execute()
-    data = response.to_dict()["hits"]["hits"]
-    # print(data["hits"]["total"])
-    paper_ids = [e["_source"]["PaperId"] for e in data]
-    return paper_ids
-
-
-def query_author_group(author_name):
-    result = {}
-    cache_index = "browse_author_group"
-    q = {"_source": "AuthorIds",
-        "query": {"match": {"NormalizedNames": author_name}}}
-    s = Search(using=client, index=cache_index)
-    s.update_from_dict(q)
-    response = s.execute()
-    data = response.to_dict()["hits"]["hits"]
-    author_ids = data[0]["_source"]["AuthorIds"]
-    return query_cache_paper_info(author_ids)
-
-
-def query_browse_group(document_id):
-    result = {}
-    cache_index = "browse_cache"
-    q = {"query": {"match": {"_id": document_id}}}
-    s = Search(using=client, index=cache_index)
-    s.update_from_dict(q)
-    response = s.execute()
-    data = response.to_dict()["hits"]["hits"]
-    document = data[0]["_source"]
-    return document
-
-
-def search_cache(cache_index, cache_type):
-    s = Search(using=client, index=cache_index).query("match", Type=cache_type)
-    response = []
-    for res in s.scan():
-        res_id = res.meta.id
-        res = res.to_dict()
-        res["_id"] = res_id
-        response.append(res)
-    return response
-
-
-def query_paper_group(document_id):
-    result = {}
-    cache_index = "browse_paper_group"
-    q = {"_source": "PaperIds",
-        "query": {"match": {"_id": document_id}}}
-    s = Search(using=client, index=cache_index)
-    s.update_from_dict(q)
-    response = s.execute()
-    data = response.to_dict()["hits"]["hits"]
-    paper_ids = data[0]["_source"]["PaperIds"]
-    return paper_ids
-
-
 def query_names_with_matches(index, fields_list, search_phrase, max_return=30):
     result = []
     matches = [{"match": {field: search_phrase}} for field in fields_list]
@@ -255,62 +190,6 @@ def get_display_names_from_author_ids(entity_ids, with_id=False):
 def get_display_names_from_fos_ids(entity_ids, with_id=False):
     return get_names_from_entity(entity_ids, "fieldsofstudy", "FieldOfStudyId", "DisplayName", with_id=with_id)
 
-
-
-def get_all_browse_cache():
-    cache_index = "browse_cache"
-    q = {"size": 10000,
-        "query": {
-          "bool":{
-            "must_not":{
-              "term": {"Type": "user_generated"}
-    }}}}
-    s = Search(using=client, index=cache_index)
-    s.update_from_dict(q)
-    response = s.execute()
-    data = response.to_dict()["hits"]["hits"]
-    result = [{**e["_source"],"document_id": e["_id"]} for e in data]
-    return result
-
-def get_cache_types():
-    q = {
-      "_source": ["Type"],
-      "size": 10000,
-      "query": {
-        "match_all": {}
-      }
-    }
-    s = Search(using = client, index="browse_cache")
-    s.update_from_dict(q)
-    response = s.execute()
-    data = response.to_dict()["hits"]["hits"]
-    result = sorted(list(set(hit["_source"]["Type"]  for hit in data)))
-    return result
-
-def check_browse_record_exists(cachetype, displayname):
-    cache_index = "browse_cache"
-    q = {
-      "query" : {
-        "constant_score" : {
-          "filter" : {
-            "bool" : {
-              "must" : [
-                { "term" : {"Type" : cachetype}},
-                { "match" : {"DisplayName" : displayname}}
-              ]
-            }
-          }
-        }
-      }
-    }
-    s = Search(using=client, index=cache_index)
-    s.update_from_dict(q)
-    response = s.execute()
-    print(response)
-    print(response["hits"])
-    print(response["hits"]["hits"])
-    names = [hit["_source"]["DisplayName"] for hit in response["hits"]["hits"]]
-    return (response["hits"]["total"] > 0, names)
 
 
 def author_order_query(paper_id):

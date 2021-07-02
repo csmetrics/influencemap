@@ -1,0 +1,22 @@
+[{
+	"Type": "nature_collections",
+	"DisplayName": "Deep imaging of live tissue",
+	"EntityIds": {
+		"PaperIds": [2600585421, 2589689453, 2571462224, 2545370334, 2540220299, 2533568726, 2472683490, 2407201545, 2245458847, 2179218972, 988518085, 2197930781, 2040215769, 2068809501, 1988783616, 1996258924, 2067751321, 1984454737, 2598427385, 2500522403, 2602293332, 2410418094, 2603409505, 1992752896, 2558975985, 2277139950, 2564926487, 2045489899, 2517589701, 1533361117]
+	},
+	"Citation": "This flower consists of 12 review or comment papers and 18 primary research papers that make up a <a href=\"https://www.nature.com/collections/vsdqjkylml\">collection of Deep imaging of live tissue</a> research as selected by the the editors at Nature Methods journals in 2017. The collection is was intended to be a representative (but not comprehensive) set of methodological developments that facilitate imaging of biological proccesses within organisms and tissues."
+}, {
+	"Type": "nature_collections",
+	"DisplayName": "Innovations in the Microbiome",
+	"EntityIds": {
+		"PaperIds": [2161331256, 1982594769, 2481469379, 2151241623, 2083102356, 2004549986, 2085119867, 2061061148, 2054743481, 2126262598, 2085291272]
+	},
+	"Citation": "This flower consists of 8 articles and four research papers that make up a <a href=\"https://www.nature.com/collections/pbcbgmkdtl\">collection of Innovations in the Microbiome</a> published by Nature in 2015. The colletion distils the most critical insights from the explosion in microbiome research at the time."
+}, {
+	"Type": "nature_collections",
+	"DisplayName": "Intestinal microbiota in health and disease",
+	"EntityIds": {
+		"PaperIds": [2469986620, 2463118776, 2463836225, 2467200611, 2469323929, 2471627592, 2465534016]
+	},
+	"Citation": "This flower consists of 6 review or comment papers and an editorial introduction that make up a <a href=\"https://www.nature.com/collections/tkvchpdxzg\">collection of Intestinal microbiota in health and disease</a> insights published by Nature in 2016. The collection explores the role of intestinal microbiota in human development, digestion, immunity and applications for precision medicine."
+}]

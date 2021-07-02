@@ -1,0 +1,79 @@
+[{
+	"Type": "projects",
+	"DisplayName": "DaCapo Programming Language Benchmark",
+	"EntityIds": {
+		"PaperIds": [2112847033, 2126415451, 2129304537, 2095063920, 2112832394, 2047791971, 2152814480, 2095825766, 2153530968, 2171264329, 2038897371, 2111946621, 2166091242, 2166034429, 2146766856, 2223702412]
+	}
+}, {
+	"Type": "projects",
+	"DisplayName": "Emotions across Languages and Cultures: Diversity and Universals",
+	"EntityIds": {
+		"PaperIds": [1567569044]
+	}
+}, {
+	"Type": "projects",
+	"DisplayName": "Foundations of Logic Programming",
+	"EntityIds": {
+		"PaperIds": [1541434994]
+	}
+}, {
+	"Type": "projects",
+	"DisplayName": "Heat transfer from solar energy",
+	"EntityIds": {
+		"PaperIds": [2011093710, 1982531949, 2034751371, 2102257123]
+	}
+}, {
+	"Type": "projects",
+	"DisplayName": "Numerical methods for calculating convolutions and dependency bounds",
+	"EntityIds": {
+		"PaperIds": [2057656735]
+	}
+}, {
+	"Type": "projects",
+	"DisplayName": "One-class SVM",
+	"EntityIds": {
+		"PaperIds": [2132870739, 2105497548]
+	}
+}, {
+	"Type": "projects",
+	"DisplayName": "Plasmonic solar cells",
+	"EntityIds": {
+		"PaperIds": [2055702923, 2092961606, 2079452911, 1984771838, 2038504561, 2061571620, 1966159692, 1987701953]
+	}
+}, {
+	"Type": "projects",
+	"DisplayName": "Republicanism: A Theory of Freedom and Government",
+	"EntityIds": {
+		"PaperIds": [2568052681]
+	}
+}, {
+	"Type": "projects",
+	"DisplayName": "Retargetable compilers",
+	"EntityIds": {
+		"PaperIds": [2171072418, 2054572543, 2123022206, 2065496085]
+	}
+}, {
+	"Type": "projects",
+	"DisplayName": "Sound field reproduction",
+	"EntityIds": {
+		"PaperIds": [2110403504, 2155037147, 2158995216, 2141047270, 2115962195]
+	}
+}, {
+	"Type": "projects",
+	"DisplayName": "Tableau methods for logic",
+	"EntityIds": {
+		"PaperIds": [2130988355, 1554599886, 2759375909, 1481660686, 2127323984, 1483339275, 2094025748, 1498270679]
+	}
+}, {
+	"Type": "projects",
+	"DisplayName": "The Garbage Collection Handbook",
+	"EntityIds": {
+		"PaperIds": [1543830735]
+	}
+}, {
+	"Type": "projects",
+	"DisplayName": "Transactional Memory",
+	"EntityIds": {
+		"PaperIds": [2122139510, 2047791971, 2095825766, 2165825461]
+	}
+}]
