@@ -199,7 +199,7 @@ function handleSelectionTableRowClick(element){
 function getSelectedData(){
    var papers = [];
    var names  = [];
-   var entities = {"paper": [], "author": [], "conference": [], "journal": [], "institution": []};
+   var entities = {"paper": [], "author": [], "conference": [], "journal": [], "institution": [], "topic": []};
    var empty_query = true;
 
    // For each of the selected
@@ -226,7 +226,14 @@ function getSelectedData(){
      };
    });
 
-   var keyChange = {"paper":"PaperIds","author":"AuthorIds","conference":"ConferenceIds","journal":"JournalIds","institution":"AffiliationIds"}
+   var keyChange = {
+     "paper": "PaperIds",
+     "author": "AuthorIds",
+     "conference": "ConferenceIds",
+     "journal": "JournalIds",
+     "institution": "AffiliationIds",
+     "topic": "FieldOfStudyIds"
+   };
    for (key in keyChange){
      entities[keyChange[key]] = entities[key];
      delete entities[key];

@@ -210,7 +210,7 @@ def submit():
         conference_ids = list(map(int, entities['ConferenceIds']))
         journal_ids = list(map(int, entities['JournalIds']))
         paper_ids = list(map(int, entities['PaperIds']))
-        fos_ids = []
+        fos_ids = list(map(int, entities['FieldOfStudyIds']))
 
         entity_names = \
             get_all_normalised_names(data.get('entities')) or data["names"]
