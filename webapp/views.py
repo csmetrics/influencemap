@@ -13,7 +13,9 @@ from core.flower.high_level_get_flower import default_config, gen_flower_data
 from core.score.agg_paper_info import score_paper_info_list
 from core.score.agg_utils import get_coauthor_mapping
 from core.search.query_name import (
-    get_all_normalised_names, get_conf_journ_display_names)
+    affiliation_name_query, author_name_query, conference_name_query,
+    fos_name_query, get_conf_journ_display_names, journal_name_query,
+    paper_name_query)
 from core.search.query_paper import get_all_paper_ids
 from core.utils.get_stats import get_stats
 from core.utils.load_tsv import tsv_to_dict
@@ -201,18 +203,31 @@ def submit():
         paper_ids = list(map(int, entities['PaperIds']))
         fos_ids = list(map(int, entities['FieldOfStudyIds']))
 
-        # entity_names = \
-        #     get_all_normalised_names(data.get('entities')) or data["names"]
         flower_name = data.get('flower_name')
         doc_id = url_encode_info(
             author_ids=author_ids, affiliation_ids=affiliation_ids,
             conference_series_ids=conference_ids, field_of_study_ids=fos_ids,
             journal_ids=journal_ids, paper_ids=paper_ids, name=flower_name)
 
-    # if not flower_name:
-    #     flower_name = "" + entity_names[0]
-    #     if len(data["names"]) > 1:
-    #         flower_name += " +{} more".format(len(entity_names) - 1)
+    if not flower_name:
+        first_nonempty_id_list = (author_ids or affiliation_ids
+                                  or conference_ids or journal_ids
+                                  or paper_ids or fos_ids)
+        if not first_nonempty_id_list:
+            raise ValueError('no entities')
+        name_lookup_f = {
+            id(author_ids): author_name_query,
+            id(affiliation_ids): affiliation_name_query,
+            id(conference_ids): conference_name_query,
+            id(journal_ids): journal_name_query,
+            id(paper_ids): paper_name_query,
+            id(fos_ids): fos_name_query}[id(first_nonempty_id_list)]
+        flower_name = name_lookup_f([first_nonempty_id_list[0]])[0]
+        total_entities = (len(author_ids) + len(affiliation_ids)
+                          + len(conference_ids) + len(journal_ids)
+                          + len(paper_ids) + len(fos_ids))
+        if total_entities > 1:
+            flower_name += f" +{total_entities - 1} more"
 
     flower = kb_client.get_flower(
         author_ids=author_ids, affiliation_ids=affiliation_ids,
