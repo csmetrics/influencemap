@@ -50,11 +50,6 @@ def main():
     return flask.render_template("main.html")
 
 
-@blueprint.route('/redirect/<ident>')
-def redirect(ident):
-    return flask.redirect(unshorten_url_ext(request.full_path))
-
-
 @blueprint.route('/browse')
 def browse():
     browse_list = load_gallery()

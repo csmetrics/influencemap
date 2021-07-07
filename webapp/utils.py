@@ -6,7 +6,6 @@ from core.search.elastic import *
 from core.flower.high_level_get_flower import default_config
 from webapp.shortener import url_encode_info
 
-import matplotlib.pylab as plt
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 
 # option list for radios
@@ -61,6 +60,7 @@ def load_gallery():
                         subsubgroup["docs"] = read_gallery_group(group_file)
     return browse_list
 
+
 def loadList(entity):
     path = os.path.join(BASE_DIR, "webapp/cache/"+entity+"List.txt")
     if entity == 'paper':
@@ -71,6 +71,7 @@ def loadList(entity):
         autoCompleteLists[entity] = list(set(autoCompleteLists[entity]))
     return autoCompleteLists[entity]
 
+
 def get_navbar_option(keyword = "", option = ""):
     return {
         "optionlist": optionlist,
@@ -78,20 +79,6 @@ def get_navbar_option(keyword = "", option = ""):
         "selectedOption": [opt for opt in optionlist if opt['id'] == option][0] if option != "" else optionlist[0],
     }
 
-def get_url_config(query):
-    if "pmin" in query:
-        return {
-            "pub_lower": int(query.get("pmin")),
-            "pub_upper": int(query.get("pmax")),
-            "cit_lower": int(query.get("cmin")),
-            "cit_upper": int(query.get("cmax")),
-            "self_cite": query.get("selfcite") == "true",
-            "icoauthor": query.get("coauthor") == "true",
-            "num_leaves": int(query.get("node")),
-            "order": query.get("order"),
-            "cmp_ref": query.get("cmp_ref") == "true",
-        }
-    return None
 
 def add_author_order(paper_info):
     '''
