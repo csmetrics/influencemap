@@ -18,7 +18,7 @@ from core.search.query_paper import get_all_paper_ids
 from core.utils.get_stats import get_stats
 from core.utils.load_tsv import tsv_to_dict
 from webapp.graph import ReferenceFlower, compare_flowers
-from webapp.shortener import shorten_front, unshorten_url_ext
+from webapp.shortener import decode_filters, url_decode_info, url_encode_info
 from webapp.utils import *
 
 from webapp.front_end_helper import make_response_data
@@ -178,28 +178,22 @@ def submit():
     self_citations = False
     coauthors = True
     if request.method == "GET":
-        # from url e.g.
-        # /submit/?type=author_id&id=2146610949&name=stephen_m_blackburn
-        # /submit/?type=browse_author_group&name=lexing_xie
-        # data should be pre-processed and cached
-        curated_flag = True
-        data, option, config = get_url_query(request.args)
-        author_ids = data['EntityIds'].get('AuthorIds', [])
-        affiliation_ids = data['EntityIds'].get('AffiliationIds', [])
-        conference_ids = data['EntityIds'].get('ConferenceIds', [])
-        journal_ids = data['EntityIds'].get('JournalIds', [])
-        paper_ids = data['EntityIds'].get('PaperIds', [])
-        fos_ids = []
-        # selected_papers = get_all_paper_ids(data["EntityIds"])
-        flower_name = data.get('DisplayName')
         doc_id = request.args["id"]
-        if config is not None:
-            if 'pub_lower' in config and 'pub_upper' in config:
-                pub_years = config['pub_lower'], config['pub_upper']
-            if 'cit_lower' in config and 'cit_upper' in config:
-                cit_years = config['cit_lower'], config['cit_upper']
-            self_citations = config.get('self_cite', self_citations)
-            coauthors = config.get('icoauthor', coauthors)
+        ids, flower_name, curated_flag = url_decode_info(doc_id)
+        author_ids = ids.author_ids
+        affiliation_ids = ids.affiliation_ids
+        conference_ids = ids.conference_series_ids
+        journal_ids = ids.field_of_study_ids
+        paper_ids = ids.journal_ids
+        fos_ids = ids.paper_ids
+
+        encoded_filters = request.args.get("filters")
+        if encoded_filters is not None:
+            decoded_filters = decode_filters(encoded_filters)
+            pub_years = decoded_filters.pub_years
+            cit_years = decoded_filters.cit_years
+            self_citations = decoded_filters.self_citations
+            coauthors = decoded_filters.coauthors
     else:
         curated_flag = False
         data_str = request.form['data']
@@ -212,18 +206,18 @@ def submit():
         paper_ids = list(map(int, entities['PaperIds']))
         fos_ids = list(map(int, entities['FieldOfStudyIds']))
 
-        entity_names = \
-            get_all_normalised_names(data.get('entities')) or data["names"]
+        # entity_names = \
+        #     get_all_normalised_names(data.get('entities')) or data["names"]
         flower_name = data.get('flower_name')
-        if not flower_name:
-            flower_name = "" + entity_names[0]
-            if len(data["names"]) > 1:
-                flower_name += " +{} more".format(len(entity_names) - 1)
+        doc_id = url_encode_info(
+            author_ids=author_ids, affiliation_ids=affiliation_ids,
+            conference_series_ids=conference_ids, field_of_study_ids=fos_ids,
+            journal_ids=journal_ids, paper_ids=paper_ids, name=flower_name)
 
-        # doc_for_es_cache = dict(
-        #     DisplayName=flower_name, EntityIds=entities, Type=user_generated)
-        # doc_id = saveNewBrowseCache(doc_for_es_cache)
-        doc_id = 'foobar'
+    # if not flower_name:
+    #     flower_name = "" + entity_names[0]
+    #     if len(data["names"]) > 1:
+    #         flower_name += " +{} more".format(len(entity_names) - 1)
 
     flower = kb_client.get_flower(
         author_ids=author_ids, affiliation_ids=affiliation_ids,
@@ -237,7 +231,7 @@ def submit():
         conference_series_ids=conference_ids, field_of_study_ids=fos_ids,
         journal_ids=journal_ids, paper_ids=paper_ids)
 
-    url_base = shorten_front(f"http://influencemap.ml/submit/?id={doc_id}")
+    url_base = f"http://influencemap.ml/submit/?id={doc_id}"
 
     session = dict(
         author_ids=author_ids, affiliation_ids=affiliation_ids,

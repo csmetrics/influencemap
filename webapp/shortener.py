@@ -1,171 +1,106 @@
-'''
-Functions for shorterning urls
+import collections
+import itertools
+import string
+from base64 import urlsafe_b64decode, urlsafe_b64encode
 
-'''
-
-arg_tuples = ('pmin', 'pmax', 'cmin', 'cmax', 'selfcite', 'coauthor', 'node', 'order', 'cmp_ref')
-order_list = ["ratio", "blue", "red", "total"];
-
-BASE62 = "0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ"
-BASE37 = " 0123456789abcdefghijklmnopqrstuvwxyz"
+order_list = ("ratio", "blue", "red", "total")
+BASE62 = f'{string.digits}{string.ascii_lowercase}{string.ascii_uppercase}'
 
 
-def encode(num, alphabet=BASE62):
-    """
-    Encode a positive number in Base X
-    From Stack Overflow
-
-    Arguments:
-    - `num`: The number to encode
-    - `alphabet`: The alphabet to use for encoding
-    """
-    if num == 0:
-        return alphabet[0]
-    arr = []
-    base = len(alphabet)
-    while num:
-        num, rem = divmod(num, base)
-        arr.append(alphabet[rem])
-    arr.reverse()
-    return ''.join(arr)
-
-
-def decode(string, alphabet=BASE62):
-    """
-    Decode a Base X encoded string into the number
-    From Stack Overflow
-
-    Arguments:
-    - `string`: The encoded string
-    - `alphabet`: The alphabet to use for encoding
-    """
-    base = len(alphabet)
-    strlen = len(string)
-    num = 0
-
-    idx = 0
+def decode(string):
+    res = 0
     for char in string:
-        power = (strlen - (idx + 1))
-        num += alphabet.index(char) * (base ** power)
-        idx += 1
-
-    return num
+        res = res * len(BASE62) + BASE62.index(char)
+    return res
 
 
-def from_url_ext(url_ext_str):
-    '''
-    '''
-    url_arg_list = url_ext_str.split('&amp;')
-
-    arg_vals = list()
-    for arg in url_arg_list:
-        val = arg.split('=')[1]
-
-        arg_vals.append(val)
-
-    return tuple(arg_vals)
+Filters = collections.namedtuple(
+    'Filters',
+    ['pub_years', 'cit_years', 'self_citations', 'coauthors',
+     'num_nodes', 'order', 'cmp_ref'])
 
 
-def to_url_ext(url_ext_arg):
-    '''
-    '''
-    arg_str = list()
-    for arg_tuple in zip(arg_tuples, url_ext_arg):
-        arg_val = '='.join(arg_tuple)
-        arg_str.append(arg_val)
-
-    return '&'.join(arg_str)
-
-
-def hash_args(arg_tuple):
-    #hash_fn = basehash.base62()
-
-    a, b, c, d, e, f, g, h, i = arg_tuple
-    conv64list = [a, b, c, d]
-    conv2list = [e, f]
-    newlist = []
-    for arg in conv64list:
-        #newlist.append(str(hash_fn.hash(arg)))
-        newlist.append(str(encode(int(arg))))
-    for arg in conv2list:
-        if (arg == 'true'):
-            newlist.append('1')
-        else:
-            newlist.append('0')
-    newlist.append(str(encode(int(g))))
-    newlist.append(str(order_list.index(h)))
-    if (i == 'true'):
-        newlist.append('1')
-    else:
-        newlist.append('0')
-    return newlist
+def decode_filters(short_filters):
+    a, b, c, d, e, f, g, h, i = short_filters.split('_')
+    return Filters(pub_years=(decode(a), decode(b)),
+                   cit_years=(decode(c), decode(d)),
+                   self_citations=e == '1',
+                   coauthors=f == '1',
+                   num_nodes=decode(g),
+                   order=order_list[int(h)],
+                   cmp_ref=i == '1')
 
 
-def unhash_args(arg_tuple):
-    #hash_fn = basehash.base62()
-
-    a, b, c, d, e, f, g, h, i = arg_tuple
-    conv64list = [a, b, c, d]
-    conv2list = [e, f]
-    newlist = []
-    for arg in conv64list:
-        newlist.append(str(decode(arg)))
-    for arg in conv2list:
-        if (arg == '1'):
-            newlist.append('true')
-        else:
-            newlist.append('false')
-    newlist.append(str(decode(g)))
-    newlist.append(str(order_list[int(h)]))
-
-    if (i == '1'):
-        newlist.append('true')
-    else:
-        newlist.append('false')
-    return newlist
+KIND_BITS = 3
+ID_BITS = 32
+ID_MASK = (1 << ID_BITS) - 1
+ID_WITH_KIND_CHARS = (ID_BITS + KIND_BITS + 5) // 6
+ID_WITH_KIND_BYTES = (ID_BITS + KIND_BITS + 7) // 8
+PADDING = '=' * (-ID_WITH_KIND_CHARS % 4)
 
 
-def shorten_id(f_id):
-    '''
-    '''
-    print(decode(f_id[4:], BASE37))
-    return encode(decode(f_id[4:], BASE37))
+def url_decode_id(id_with_kind_b64):
+    id_with_kind_b64 = id_with_kind_b64 + PADDING
+    id_with_kind_bytes = urlsafe_b64decode(id_with_kind_b64)
+    id_with_kind = int.from_bytes(id_with_kind_bytes, 'little')
+    kind = id_with_kind >> ID_BITS
+    id_ = id_with_kind & ID_MASK
+    return kind, id_
 
 
-def unshorten_id(f_id):
-    '''
-    '''
-    print(decode(f_id))
-    print(encode(int(decode(f_id)), BASE37))
-    return '?id=' + str(encode(int(decode(f_id)), BASE37))
+def url_encode_id(kind, id_):
+    id_with_kind = (kind << ID_BITS) + id_
+    id_with_kind_bytes = id_with_kind.to_bytes(ID_WITH_KIND_BYTES, 'little')
+    id_with_kind_b64 = urlsafe_b64encode(id_with_kind_bytes)
+    return id_with_kind_b64[:ID_WITH_KIND_CHARS].decode()
 
 
-def shorten_front(url):
-    '''
-    '''
-    infmap, flower_url = url.split('/submit/')
-    flower_vals = flower_url.split('&amp;', 1)
+# Order matters here (e.g. author->0, affiliation->1, ..., paper->5)
+KINDS = ['author_ids', 'affiliation_ids', 'conference_series_ids',
+         'field_of_study_ids', 'journal_ids', 'paper_ids']
 
-    short_flower = shorten_id(flower_vals[0])
+IDs = collections.namedtuple('IDs', KINDS, defaults=(() for _ in KINDS))
 
-    return '/redirect/'.join([infmap, short_flower])
+BASE64_CHARS = f'{string.digits}{string.ascii_letters}-_'
+ALL_CHARS = BASE64_CHARS + '.~'
 
 
-def unshorten_url_ext(url):
-    '''
-    '''
-    _, flower_url = url.split('/redirect/')
-    flower_vals = flower_url.split('_')
+def make_b64_padding(b64str):
+    return b64str + '=' * (-len(b64str) % 4)
 
-    orig_flower = unshorten_id(flower_vals[0])
 
-    if len(flower_vals) > 1:
-        try:
-            flower_args = flower_vals[1:]
-            orig_args = to_url_ext(unhash_args(flower_args))
+def url_decode_info(url_str):
+    if not all(map(ALL_CHARS.__contains__, url_str)):
+        raise ValueError('found invalid characters')
+    encoded_ids, sep, encoded_name = url_str.partition('~')
+    if not sep:
+        encoded_ids, sep, encoded_name = url_str.partition('.')
+    curated = sep == '~'
+    encoded_name = make_b64_padding(encoded_name)
+    name = urlsafe_b64decode(encoded_name).decode()
+    if len(encoded_ids) % ID_WITH_KIND_CHARS:
+        raise ValueError('invalid length')
+    ids_res = IDs._make([] for _ in KINDS)
+    for start in range(0, len(encoded_ids), ID_WITH_KIND_CHARS):
+        kind, id_ = url_decode_id(
+            encoded_ids[start : start+ID_WITH_KIND_CHARS])
+        ids_res[kind].append(id_)
+    return ids_res, name, curated
 
-            orig_flower += '&' + orig_args
-        except Exception as e:
-            pass
 
-    return '/submit/' + orig_flower
+def url_encode_info(
+    *,
+    author_ids=(), affiliation_ids=(), conference_series_ids=(),
+    field_of_study_ids=(), journal_ids=(), paper_ids=(), name=None,
+    curated=False,
+):
+    locals_ = locals()
+    encoded_ids = ''.join(url_encode_id(i, id_)
+                          for i, lname in enumerate(KINDS)
+                          for id_ in locals_[lname])
+    name = name or ''
+    sep = '~' if curated else ('.' if name else '')
+    encoded_name = urlsafe_b64encode(name.encode()).decode().rstrip('=')
+    res = f'{encoded_ids}{sep}{encoded_name}'
+    assert all(map(ALL_CHARS.__contains__, res))
+    return res

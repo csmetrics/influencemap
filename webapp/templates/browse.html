@@ -52,14 +52,14 @@
             {% for entity in category.docs %}
               <div class="info-list col-xs-12 hidden">
                 <li>
-                  <a href="/submit/?id={{ entity.document_id }}"><b>{{entity.DisplayName}}</b></a>
+                  <a href="/submit/?id={{ entity.FlowerUrl }}"><b>{{entity.DisplayName}}</b></a>
                   {{entity.Year}}
                   {% for aff in entity.Affiliations %}
                     {{ aff }}
                   {% endfor %}
                 </li>
               </div>
-                <div class="info-box" onclick="document.location.href = '/submit/?id={{ entity.document_id }}'; return false">
+                <div class="info-box" onclick="document.location.href = '/submit/?id={{ entity.FlowerUrl }}'; return false">
                     {% if entity.PhotoUrl %}
                       <span class="info-box-icon" style="background-image: url('{{entity.PhotoUrl}}');"></span>
                     {% else %}
@@ -117,14 +117,14 @@
             {% for entity in subsubgroup.docs %}
               <div class="info-list col-xs-12 hidden">
                 <li>
-                  <a href="/submit/?id={{ entity.document_id }}"><b>{{entity.DisplayName}}</b></a>
+                  <a href="/submit/?id={{ entity.FlowerUrl }}"><b>{{entity.DisplayName}}</b></a>
                   {{entity.Year}}
                   {% for aff in entity.Affiliations %}
                     {{ aff }}
                   {% endfor %}
                 </li>
               </div>
-              <a href="/submit/?id={{ entity.document_id }}">
+              <a href="/submit/?id={{ entity.FlowerUrl }}">
                 <div class="info-box">
                     {% if entity.PhotoUrlFALSE %}
                       <span class="info-box-icon" style="background-image: '{{entity.PhotoUrl}}';"></span>
