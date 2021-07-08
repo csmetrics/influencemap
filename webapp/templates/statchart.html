@@ -42,15 +42,15 @@
     </div>
     <div style="padding-top:10px">
       <b>Include self citations</b>
-      <input class="self-cite" type="checkbox" onclick="updateConfigUrl()" style="float:left; margin:5 10 0 0" name="self-cite" id="self-cite" {% if yearSlider.selected.self_cite == 'true' %} checked="checked" {% endif %}/>
+      <input class="self-cite" type="checkbox" style="float:left; margin:5 10 0 0" name="self-cite" id="self-cite" {% if yearSlider.selected.self_cite == 'true' %} checked="checked" {% endif %}/>
     </div>
     <div>
       <b>Include coauthors</b>
-      <input class="coauthor" type="checkbox" onclick="updateConfigUrl()" style="float:left; margin:5 10 0 0" name="self-coauthor" id="coauthor" {% if yearSlider.selected.icoauthor == 'true' %} checked="checked" {% endif %}/>
+      <input class="coauthor" type="checkbox" style="float:left; margin:5 10 0 0" name="self-coauthor" id="coauthor" {% if yearSlider.selected.icoauthor == 'true' %} checked="checked" {% endif %}/>
     </div>
     <div style="padding-top:10px">
       <b>(Beta) Compare with anchor flower</b>
-      <input class="reference" type="checkbox" onclick="updateConfigUrl()" style="float:left; margin:5 10 0 0" name="cmp-reference" id="reference" {% if yearSlider.selected.cmp_ref == 'true' %} checked="checked" {% endif %}/>
+      <input class="reference" type="checkbox" style="float:left; margin:5 10 0 0" name="cmp-reference" id="reference" {% if yearSlider.selected.cmp_ref == 'true' %} checked="checked" {% endif %}/>
     </div>
     <div align=center style="padding-top:5px;">
       <button class="btn " id="resubmitButton">Update Flower</button>
@@ -70,14 +70,6 @@
         <option value="red">Influencing (Red)</option>
         <option value="total">Total Influence</option>
       </select>
-    </div>
-    <div class="row" style="padding-top:10px">
-      <div class="col-sm-7" style="padding-right:0">
-        <input style="width:100%;height:26px;" type="text" value="{{ request.build_absolute_uri }}" id="configuration">
-      </div>
-      <div class="col-sm-5">
-        <button style="width:100%;height:26px;" onclick="copyConfig()">Copy Config</button>
-      </div>
     </div>
   </div>
   {% endif %}
@@ -111,7 +103,6 @@ var chartoption = {
   width:380, height:h,
   top: 40, right: 25, bottom: 40, left: 50};
 
-var copyText = document.getElementById("configuration");
 var pubSlider = document.getElementById('publication-range');
 var citSlider = document.getElementById('citation-range');
 noUiSlider.create(pubSlider, {
@@ -232,20 +223,6 @@ function hash_args(arg_tuple) {
     return newlist;
 }
 
-function updateConfigUrl() {
-  if (copyText != null) {
-
-    copyText.value = "{{ session.url_base }}&filters="
-      + encode(handles[0].innerText) + "_" + encode(handles[1].innerText)
-      + "_" + encode(handles[2].innerText) + "_" + encode(handles[3].innerText)
-      + "_" + encode2($("#self-cite").is(":checked"))
-      + "_" + encode2($("#coauthor").is(":checked"))
-      + "_" + encode($("#num-petals").val())
-      + "_" + encodeOrder($("#petal-order").val())
-      + "_" + encode2($("#reference").is(":checked"));
-  }
-}
-
 function updateNumbers() {
   p_min = parseInt(handles[0].innerText)
   p_max = parseInt(handles[1].innerText)
@@ -253,7 +230,6 @@ function updateNumbers() {
   c_max = parseInt(handles[3].innerText)
   updatePubNumbers(yearcounter, p_min, p_max);
   updateCiteNumbers(citationcounter, p_min, p_max, c_min, c_max);
-  updateConfigUrl();
 }
 
 function updatePubNumbers(data, min, max){
@@ -320,12 +296,6 @@ function updateStats(stats){
   });
 }
 
-function copyConfig() {
-  copyText.select();
-  /* Copy the text inside the text field */
-  document.execCommand("copy");
-  alert("Copied current configuration");
-}
 
 resubmitButton.addEventListener('click', function(){
   resubmitButton.className = "btn btn-primary flower-loading";
@@ -454,7 +424,6 @@ function populatePapersContent(papers, title, entity_names){
 function orderChange() {
   cur_num_petals = parseInt($("#num-petals").val());
   reorder_all_flowers_grow(cur_num_petals, $("#petal-order").val(), 1500);
-  updateConfigUrl();
 }
 
 var prev_num_petals = parseInt($("#num-petals").val());
@@ -471,7 +440,6 @@ function petalChange() {
   }
 
   prev_num_petals = new_num_petals;
-  updateConfigUrl();
 }
 
 </script>
