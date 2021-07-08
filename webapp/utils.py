@@ -1,8 +1,11 @@
-import os, json
+import json
+import os
+import pathlib
+
 from core.search.elastic import *
 from core.flower.high_level_get_flower import default_config
+from webapp.shortener import url_encode_info
 
-import matplotlib.pylab as plt
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 
 # option list for radios
@@ -16,28 +19,47 @@ optionlist = [  # option list
 # initialise as no autocomplete lists yet (wait until needed)
 autoCompleteLists = {}
 
+GALLERY_DATA_PATH = pathlib.Path("webapp/data")
+
+
 def read_gallery_group(filename):
-    if not os.path.exists(filename):
+    try:
+        f = open(filename)
+    except FileNotFoundError:
         return []
-    else:
-        group_list = json.load(open(filename, "r"))
-        return sorted(group_list, key=lambda x: (x["Year"], x["DisplayName"]) if ("Year" in x) else (0, x["DisplayName"]))
+    with f:
+        group_list = json.load(f)
+    for entry in group_list:
+        entity_ids = entry['EntityIds']
+        entry['FlowerUrl'] = url_encode_info(
+            author_ids=entity_ids.get('AuthorIds', ()),
+            affiliation_ids=entity_ids.get('AffiliationIds', ()),
+            conference_series_ids=entity_ids.get('ConferenceIds', ()),
+            field_of_study_ids=entity_ids.get('FieldOfStudyIds', ()),
+            journal_ids=entity_ids.get('JournalIds', ()),
+            paper_ids=entity_ids.get('PaperIds', ()),
+            name=entry['DisplayName'],
+            curated=True)
+    return sorted(
+        group_list, key=lambda x: (x.get("Year", 0), x["DisplayName"]))
 
 
 def load_gallery():
-    with open("webapp/static/gallery/browse_list.json", "r") as fh:
+    with open(GALLERY_DATA_PATH / "browse_list.json") as fh:
         browse_list = json.load(fh)
     for group in browse_list:
         for subgroup in group["subgroups"]:
             if subgroup["type"] == "inner":
-                group_file = "webapp/static/gallery/{}.json".format(subgroup["tag"])
+                group_file = GALLERY_DATA_PATH / (subgroup["tag"] + ".json")
                 subgroup["docs"] = read_gallery_group(group_file)
             else: # subgroup["type"] == "outer":
                 for subsubgroup in subgroup["subgroups"]:
                     if subsubgroup["type"] == "inner":
-                        group_file = "webapp/static/gallery/{}.json".format(subsubgroup["tag"])
+                        group_file_name = subsubgroup["tag"] + ".json"
+                        group_file = GALLERY_DATA_PATH / group_file_name
                         subsubgroup["docs"] = read_gallery_group(group_file)
     return browse_list
+
 
 def loadList(entity):
     path = os.path.join(BASE_DIR, "webapp/cache/"+entity+"List.txt")
@@ -49,6 +71,7 @@ def loadList(entity):
         autoCompleteLists[entity] = list(set(autoCompleteLists[entity]))
     return autoCompleteLists[entity]
 
+
 def get_navbar_option(keyword = "", option = ""):
     return {
         "optionlist": optionlist,
@@ -56,24 +79,6 @@ def get_navbar_option(keyword = "", option = ""):
         "selectedOption": [opt for opt in optionlist if opt['id'] == option][0] if option != "" else optionlist[0],
     }
 
-def get_url_query(query):
-    config = None
-    if "pmin" in query:
-        config = {
-            "pub_lower": int(query.get("pmin")),
-            "pub_upper": int(query.get("pmax")),
-            "cit_lower": int(query.get("cmin")),
-            "cit_upper": int(query.get("cmax")),
-            "self_cite": query.get("selfcite") == "true",
-            "icoauthor": query.get("coauthor") == "true",
-            "num_leaves": int(query.get("node")),
-            "order": query.get("order"),
-            "cmp_ref": query.get("cmp_ref") == "true",
-        }
-
-    document_id = query.get("id")
-    document = query_browse_group(document_id)
-    return document, "author", config
 
 def add_author_order(paper_info):
     '''
