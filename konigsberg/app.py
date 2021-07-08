@@ -33,10 +33,9 @@ def _get_range_from_request(argname):
 
 
 def result_arrays_as_dict(result_arrays):
-    id_arr, score_arr, coauthor_arr = result_arrays
-    id_list = list(map(int, id_arr))
-    score_list = list(map(float, score_arr))
-    coauthor_list = list(map(bool, coauthor_arr))
+    id_list = list(map(int, result_arrays.ids))
+    score_list = list(map(float, result_arrays.scores))
+    coauthor_list = list(map(bool, result_arrays.coauthors))
     return dict(ids=id_list, scores=score_list, coauthors=coauthor_list)
 
 

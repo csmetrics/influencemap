@@ -34,16 +34,18 @@ def _make_one_response_flower(
 ):
     subflower_dfs = []
     for i, subflower in enumerate(subflowers):
-        influencers_df = pd.DataFrame(
-            subflower['influencers'].values(),
-            index=map(int, subflower['influencers'].keys()),
-            columns=['influenced'])
-        influencees_df = pd.DataFrame(
-            subflower['influencees'].values(),
-            index=map(int, subflower['influencees'].keys()),
-            columns=['influencing'])
-        subflower_df = influencers_df.join(influencees_df, how='outer')
-        subflower_df.fillna(0., inplace=True)
+        influencers_df = pd.DataFrame(subflower['influencers'])
+        influencers_df.set_index('ids', inplace=True)
+        influencers_df.rename(columns={'scores': 'influenced'}, inplace=True)
+        influencees_df = pd.DataFrame(subflower['influencees'])
+        influencees_df.set_index('ids', inplace=True)
+        influencees_df.rename(columns={'scores': 'influencing'}, inplace=True)
+
+        subflower_df = influencers_df.join(
+            influencees_df, how='outer', rsuffix='_r')
+        subflower_df.fillna(0, inplace=True)
+        subflower_df['coauthors'] |= subflower_df['coauthors_r']
+        del subflower_df['coauthors_r']
         subflower_df['type'] = i
         subflower_dfs.append(subflower_df)
     df = pd.concat(subflower_dfs)
@@ -83,7 +85,7 @@ def _make_one_response_flower(
         dict(name=row.name, weight=row.normed_ratio, id=row[0], gtype=gtype,
              size=row.normed_sum, inf_in=row.influenced,
              inf_out=row.influencing, dif=row.dif, ratio=row.ratio,
-             coauthor=str(False), bloom_order=row.bloom_order)
+             coauthor=str(row.coauthors), bloom_order=row.bloom_order)
         for row in df.itertuples()
     )
 

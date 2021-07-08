@@ -1,6 +1,7 @@
 import json
 import mmap
 import pathlib
+from itertools import starmap
 
 import numba as nb
 import numpy as np
@@ -389,9 +390,16 @@ def res_lists_append(res_lists, id_, score, coauthor):
 @nb.njit(nogil=True)
 def res_lists_to_arrs(res_lists):
     id_list, score_list, coauthor_list = res_lists
-    return (np.array(id_list, dtype=np.uint32),
-            np.array(score_list, dtype=np.float32),
-            np.array(coauthor_list, dtype=np.uint8))
+    id_arr = np.empty(len(id_list), dtype=np.uint32)
+    for i, id_ in enumerate(id_list):
+        id_arr[i] = id_
+    score_arr = np.empty(len(score_list), dtype=np.float32)
+    for i, score in enumerate(score_list):
+        score_arr[i] = score
+    coauthor_arr = np.empty(len(coauthor_list), dtype=np.uint8)
+    for i, coauthor in enumerate(coauthor_list):
+        coauthor_arr[i] = coauthor
+    return id_arr, score_arr, coauthor_arr
 
 
 @nb.njit(nogil=True)
@@ -652,9 +660,9 @@ def _make_flower(
     citor_coauthors = np.zeros(len(citor_entities), dtype=np.uint8)
     citee_coauthors = np.zeros(len(citee_entities), dtype=np.uint8)
     if coauthors:
-        for i, id_ in citor_ids:
+        for i, id_ in enumerate(citor_ids):
             citor_coauthors[i] = id_ in coauthor_ids
-        for i, id_ in citee_ids:
+        for i, id_ in enumerate(citee_ids):
             citee_coauthors[i] = id_ in coauthor_ids
 
     return ((citor_ids, citor_scores, citor_coauthors),
