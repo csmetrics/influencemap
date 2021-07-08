@@ -10,18 +10,25 @@ mapping_arrs = nb.types.Tuple([mmapped_arr, mmapped_arr])
 id_mapping_arrs = nb.types.Tuple([mmapped_arr, mmapped_arr, nb.u4])
 
 
-class ResultArrays:
+class ResArrs:
     """Holder for ID and score arrays."""
-    __slots__ = ['ids', 'scores']
-    def __init__(self, ids, scores):
+    __slots__ = ['ids', 'scores', 'coauthors']
+    def __init__(self, ids, scores, coauthors):
         self.ids = ids
         self.scores = scores
+        self.coauthors = coauthors
 
 
 class PartFlower:
     """Result for a particular entity type."""
     __slots__ = ['influencers', 'influencees']
-    def __init__(self, *, influencers, influencees):
+    def __init__(self, res=None, *, influencers=None, influencees=None):
+        if ((res is None, influencers is None, influencees is None)
+                not in ((True, False, False), (False, True, True))):
+            raise ValueError('either res or influencers and '
+                             'must be provided')
+        if res is not None:
+            influencers, influencees = res
         self.influencers = influencers
         self.influencees = influencees
 
@@ -233,46 +240,32 @@ class Florist:
             if row[:-1].any()
         }
 
-    def _make_flower_from_dicts(
+    def _make_flower_from_res(
         self,
         influencers, influencees,
     ):
         """Turn result dicts returned by _make_flower into a Flower."""
-        (infcer_author_res, infcer_aff_res, infcer_fos_res,
-         infcer_journal_res, infcer_cs_res) = split_results_dict(
+        split_influencers = split_res(
             influencers, self.author_range, self.aff_range, self.fos_range,
             self.journal_range, self.cs_range, self.fos_l1_start)
-        (infcee_author_res, infcee_aff_res, infcee_fos_res,
-         infcee_journal_res, infcee_cs_res) = split_results_dict(
+        split_influencees = split_res(
             influencees, self.author_range, self.aff_range, self.fos_range,
             self.journal_range, self.cs_range, self.fos_l1_start)
 
         ind2id = self.entity_ind2id_map.arrs
-        author_part = PartFlower(
-            influencers=ResultArrays(
-                *result_list_to_arr(infcer_author_res, ind2id)),
-            influencees=ResultArrays(
-                *result_list_to_arr(infcee_author_res, ind2id)))
-        aff_part = PartFlower(
-            influencers=ResultArrays(
-                *result_list_to_arr(infcer_aff_res, ind2id)),
-            influencees=ResultArrays(
-                *result_list_to_arr(infcee_aff_res, ind2id)))
-        fos_part = PartFlower(
-            influencers=ResultArrays(
-                *result_list_to_arr(infcer_fos_res, ind2id)),
-            influencees=ResultArrays(
-                *result_list_to_arr(infcee_fos_res, ind2id)))
-        journal_part = PartFlower(
-            influencers=ResultArrays(
-                *result_list_to_arr(infcer_journal_res, ind2id)),
-            influencees=ResultArrays(
-                *result_list_to_arr(infcee_journal_res, ind2id)))
-        cs_part = PartFlower(
-            influencers=ResultArrays(
-                *result_list_to_arr(infcer_cs_res, ind2id)),
-            influencees=ResultArrays(
-                *result_list_to_arr(infcee_cs_res, ind2id)))
+        for res_arrs in split_influencers:
+            _indices_to_ids(res_arrs, ind2id)
+        for res_arrs in split_influencees:
+            _indices_to_ids(res_arrs, ind2id)
+
+        author_res, aff_res, fos_res, journal_res, cs_res = zip(
+            split_influencers, split_influencees)
+
+        author_part = PartFlower(starmap(ResArrs, author_res))
+        aff_part = PartFlower(starmap(ResArrs, aff_res))
+        fos_part = PartFlower(starmap(ResArrs, fos_res))
+        journal_part = PartFlower(starmap(ResArrs, journal_res))
+        cs_part = PartFlower(starmap(ResArrs, cs_res))
 
         return Flower(author_part=author_part,
                       affiliation_part=aff_part,
@@ -347,7 +340,7 @@ class Florist:
             coauthors=nb.literally(bool(coauthors)),
             author_range=nb.literally(self.author_range),
             aff_range=nb.literally(self.aff_range))
-        return self._make_flower_from_dicts(influencers, influencees)
+        return self._make_flower_from_res(influencers, influencees)
 
     def get_stats(
         self,
@@ -378,47 +371,66 @@ class Florist:
             pub_year_counts, cit_year_counts, ref_count)
 
 
-score_tuple_t = nb.types.Tuple([nb.u4, nb.f4])
+@nb.njit(nogil=True)
+def empty_res_lists():
+    return (nb.typed.List.empty_list(nb.u4),
+            nb.typed.List.empty_list(nb.f4),
+            nb.typed.List.empty_list(nb.u1))
 
 
 @nb.njit(nogil=True)
-def split_results_dict(
+def res_lists_append(res_lists, id_, score, coauthor):
+    id_list, score_list, coauthor_list = res_lists
+    id_list.append(id_)
+    score_list.append(score)
+    coauthor_list.append(coauthor)
+
+
+@nb.njit(nogil=True)
+def res_lists_to_arrs(res_lists):
+    id_list, score_list, coauthor_list = res_lists
+    return (np.array(id_list, dtype=np.uint32),
+            np.array(score_list, dtype=np.float32),
+            np.array(coauthor_list, dtype=np.uint8))
+
+
+@nb.njit(nogil=True)
+def split_res(
     res,
     author_range, aff_range, fos_range, journal_range, cs_range,
     fos_l1_start,
 ):
     """Split a dict of indices and scores by entity type."""
-    author_res = nb.typed.List.empty_list(score_tuple_t)
-    aff_res = nb.typed.List.empty_list(score_tuple_t)
-    fos_res = nb.typed.List.empty_list(score_tuple_t)
-    journals_res = nb.typed.List.empty_list(score_tuple_t)
-    cs_res = nb.typed.List.empty_list(score_tuple_t)
-    for index, score in res.items():
+    author_res = empty_res_lists()
+    aff_res = empty_res_lists()
+    fos_res = empty_res_lists()
+    journals_res = empty_res_lists()
+    cs_res = empty_res_lists()
+    for index, score, coauthor in zip(*res):
         if index < author_range:
-            author_res.append((index, score))
+            res_lists_append(author_res, index, score, coauthor)
         elif index < aff_range:
-            aff_res.append((index, score))
+            res_lists_append(aff_res, index, score, coauthor)
+        elif index < fos_l1_start:
+            pass  # Skip l0 fields of study.
         elif index < fos_range:
-            if index >= fos_l1_start:
-                fos_res.append((index, score))
+            res_lists_append(fos_res, index, score, coauthor)
         elif index < journal_range:
-            journals_res.append((index, score))
+            res_lists_append(journals_res, index, score, coauthor)
         elif index < cs_range:
-            cs_res.append((index, score))
+            res_lists_append(cs_res, index, score, coauthor)
         else:
             raise IndexError('entity index out of range')
-    return author_res, aff_res, fos_res, journals_res, cs_res
+    return (res_lists_to_arrs(author_res), res_lists_to_arrs(aff_res),
+            res_lists_to_arrs(fos_res), res_lists_to_arrs(journals_res),
+            res_lists_to_arrs(cs_res))
 
 
 @nb.njit(nogil=True)
-def result_list_to_arr(res, ind2id):
-    """Unzip list of indices and scores, replacing indices with IDs."""
-    res_ids = np.empty(len(res), dtype=np.uint32)
-    res_scores = np.empty(len(res), dtype=np.float32)
-    for i, (index, score) in enumerate(res):
+def _indices_to_ids(res, ind2id):
+    res_ids, _, _ = res
+    for i, index in enumerate(res_ids):
         res_ids[i] = ind2id[index]
-        res_scores[i] = score
-    return res_ids, res_scores
 
 
 @nb.njit(nb.u4(id_mapping_arrs, nb.u4[::1]), nogil=True)
@@ -538,27 +550,13 @@ def _make_flower(
     pub_ids, cit_ids, self_citations, coauthors,
     author_range, aff_range,
 ):
-    ego_papers = set()  # Papers written by ego. Set needed to
-                        # deduplicate, as ego may be multiple entities.
-    ego_entities = set()  # Entities forming the ego, as a set for fast
-                          # membership checking.
-    for entity_id in entity_ids:
-        for paper_id in _traverse_one(entity2paper_map, entity_id):
-            # TODO: It may be faster to do something more clever, since
-            # the papers are sorted chronologically, e.g. binary search
-            # to find the start index. This sounds tricky because it may
-            # only be faster for large arrays, and actually slower for
-            # small arrays because of branch prediction and nonlinear
-            # memory accesses.
-            if _is_in_range(pub_ids, paper_id):
-                ego_papers.add(paper_id)
-        ego_entities.add(entity_id)
-    for paper_id in paper_ids:
-        if _is_in_range(pub_ids, paper_id):
-            ego_papers.add(paper_id)
+    ego_entities = set(entity_ids)  # Entities forming the ego.
+    ego_papers = set(paper_ids)  # All papers written by ego.
+    coauthor_ids = set()  # All coauthors of ego.
 
-    # Entities to exclude from the flower.
-    excluded_entities = ego_entities if coauthors else ego_entities.copy()
+    for entity_id in ego_entities:
+        ego_papers.update(_traverse_one(entity2paper_map, entity_id))
+
     # Track influence on citor papers. Need weighted and unweighted
     # citation counts. Weighting affects authors and affiliations,
     # whereas unweighted scores are for venues and fields of study.
@@ -568,14 +566,17 @@ def _make_flower(
     citee_papers = nb.typed.Dict.empty(key_type=nb.u4, value_type=nb.u4)
     for paper_id in ego_papers:
         paper_entities = _traverse_one(paper2entity_map, paper_id)
+        coauthor_ids.update(paper_entities)
+
+        if not _is_in_range(pub_ids, paper_id):
+            continue
+
         num_authors = 0
         for entity_id in paper_entities:
-            author = _is_author(author_range, entity_id)
-            num_authors += author
-            if not coauthors:
-                excluded_entities.add(entity_id)
-            elif not author:
+            if not _is_author(author_range, entity_id):
                 break  # Entity indices are sorted.
+            num_authors += 1
+
         recip_weight = nb.f4(1) / nb.f4(max(num_authors, 1))
         citors, citees = _traverse_citations(citation_maps, paper_id)
         for citor_id in citors:
@@ -630,11 +631,34 @@ def _make_flower(
                    else nb.f4(count)))
 
     # Remove ego. Also remove coauthors if necessary.
+    excluded_entities = ego_entities if coauthors else coauthor_ids
     for entity_id in excluded_entities:
         citor_entities.pop(entity_id, None)
         citee_entities.pop(entity_id, None)
 
-    return citor_entities, citee_entities
+    citor_ids = np.empty(len(citor_entities), dtype=np.uint32)
+    citor_scores = np.empty(len(citor_entities), dtype=np.float32)
+    for i, (id_, score) in enumerate(citor_entities.items()):
+        citor_ids[i] = id_
+        citor_scores[i] = score
+
+    citee_ids = np.empty(len(citee_entities), dtype=np.uint32)
+    citee_scores = np.empty(len(citee_entities), dtype=np.float32)
+    for i, (id_, score) in enumerate(citee_entities.items()):
+        citee_ids[i] = id_
+        citee_scores[i] = score
+
+    # Could make these bitfields.
+    citor_coauthors = np.zeros(len(citor_entities), dtype=np.uint8)
+    citee_coauthors = np.zeros(len(citee_entities), dtype=np.uint8)
+    if coauthors:
+        for i, id_ in citor_ids:
+            citor_coauthors[i] = id_ in coauthor_ids
+        for i, id_ in citee_ids:
+            citee_coauthors[i] = id_ in coauthor_ids
+
+    return ((citor_ids, citor_scores, citor_coauthors),
+            (citee_ids, citee_scores, citee_coauthors))
 
 
 @nb.njit(nogil=True)

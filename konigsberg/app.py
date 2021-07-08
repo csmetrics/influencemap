@@ -33,10 +33,11 @@ def _get_range_from_request(argname):
 
 
 def result_arrays_as_dict(result_arrays):
-    return {
-        str(id_): float(score)
-        for id_, score in zip(result_arrays.ids, result_arrays.scores)
-    }
+    id_arr, score_arr, coauthor_arr = result_arrays
+    id_list = list(map(int, id_arr))
+    score_list = list(map(float, score_arr))
+    coauthor_list = list(map(bool, coauthor_arr))
+    return dict(ids=id_list, scores=score_list, coauthors=coauthor_list)
 
 
 def part_flower_as_dict(part_flower):
