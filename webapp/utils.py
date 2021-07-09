@@ -3,7 +3,6 @@ import os
 import pathlib
 
 from core.search.elastic import *
-from core.flower.high_level_get_flower import default_config
 from webapp.shortener import url_encode_info
 
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))

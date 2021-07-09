@@ -9,9 +9,6 @@ from flask import request
 
 import core.utils.entity_type as ent
 from core.search.query_info import paper_info_db_check_multiquery
-from core.flower.high_level_get_flower import default_config, gen_flower_data
-from core.score.agg_paper_info import score_paper_info_list
-from core.score.agg_utils import get_coauthor_mapping
 from core.search.query_name import (
     affiliation_name_query, author_name_query, conference_name_query,
     fos_name_query, get_conf_journ_display_names, journal_name_query,
