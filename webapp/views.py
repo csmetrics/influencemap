@@ -29,6 +29,14 @@ flower_leaves = [ ('author', [ent.Entity_type.AUTH])
                 , ('conf'  , [ent.Entity_type.CONF, ent.Entity_type.JOUR])
                 , ('inst'  , [ent.Entity_type.AFFI])
                 , ('fos'   , [ent.Entity_type.FSTD]) ]
+id_helper_dict = {
+    "conference": "ConferenceSeriesId",
+    "journal": "JournalId",
+    "institution": "AffiliationId",
+    "paper": "PaperId",
+    "author": "AuthorId",
+    "topic": "FieldOfStudyId"
+}
 
 NUM_THREADS = 8
 NUM_NODE_INFO = 5
@@ -42,6 +50,25 @@ def autocomplete():
     entity_type = request.args.get('option')
     data = loadList(entity_type)
     return flask.jsonify(data)
+
+
+@blueprint.route('/query')
+def query():
+    entity_type = request.args.get('type')
+    entity_title = request.args.get('title')
+    data = query_entity([entity_type], entity_title)
+    paper_ids = [p[0][id_helper_dict[entity_type]] for p in data]
+    doc_id = url_encode_info(
+        author_ids=[], affiliation_ids=[],
+        conference_series_ids=[], field_of_study_ids=[],
+        journal_ids=[], paper_ids=paper_ids, name=entity_title)
+    url_base = f"http://influencemap.ml/submit/?id={doc_id}"
+    res = {
+        "search_result": data,
+        "paper_ids": paper_ids,
+        "flower_url": url_base
+    }
+    return flask.jsonify(res)
 
 
 @blueprint.route('/')
@@ -128,14 +155,6 @@ def search():
     keyword = ''.join(ch for ch in keyword if ch not in exclude)
     keyword = keyword.lower()
     keyword = " ".join(keyword.split())
-    id_helper_dict = {
-        "conference": "ConferenceSeriesId",
-        "journal": "JournalId",
-        "institution": "AffiliationId",
-        "paper": "PaperId",
-        "author": "AuthorId",
-        "topic": "FieldOfStudyId"
-    }
 
     print(entityType, keyword)
     data = query_entity(entityType, keyword)
