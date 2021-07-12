@@ -54,14 +54,11 @@ def autocomplete():
 
 @blueprint.route('/query')
 def query():
-    entity_type = request.args.get('type')
+    entity_type = "paper" # support paper search only
     entity_title = request.args.get('title')
     data = query_entity([entity_type], entity_title)
     paper_ids = [p[0][id_helper_dict[entity_type]] for p in data]
-    doc_id = url_encode_info(
-        author_ids=[], affiliation_ids=[],
-        conference_series_ids=[], field_of_study_ids=[],
-        journal_ids=[], paper_ids=paper_ids, name=entity_title)
+    doc_id = url_encode_info(paper_ids=paper_ids, name=entity_title)
     url_base = f"http://influencemap.ml/submit/?id={doc_id}"
     res = {
         "search_result": data,
