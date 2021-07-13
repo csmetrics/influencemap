@@ -193,9 +193,9 @@ def submit():
         author_ids = ids.author_ids
         affiliation_ids = ids.affiliation_ids
         conference_ids = ids.conference_series_ids
-        journal_ids = ids.field_of_study_ids
-        paper_ids = ids.journal_ids
-        fos_ids = ids.paper_ids
+        fos_ids = ids.field_of_study_ids
+        journal_ids = ids.journal_ids
+        paper_ids = ids.paper_ids
 
         encoded_filters = request.args.get("filters")
         if encoded_filters is not None:

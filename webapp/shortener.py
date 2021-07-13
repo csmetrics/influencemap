@@ -31,18 +31,21 @@ def decode_filters(short_filters):
                    cmp_ref=i == '1')
 
 
-KIND_BITS = 3
+KIND_BITS = 4
 ID_BITS = 32
 ID_MASK = (1 << ID_BITS) - 1
 ID_WITH_KIND_CHARS = (ID_BITS + KIND_BITS + 5) // 6
 ID_WITH_KIND_BYTES = (ID_BITS + KIND_BITS + 7) // 8
-PADDING = '=' * (-ID_WITH_KIND_CHARS % 4)
+BIT_PADDING = ID_WITH_KIND_BYTES * 8 - (ID_BITS + KIND_BITS)
+PARTIAL_BYTE = bool(BIT_PADDING)
+PADDING = ('A' * PARTIAL_BYTE) + '=' * (-ID_WITH_KIND_CHARS % 4 - PARTIAL_BYTE)
 
 
 def url_decode_id(id_with_kind_b64):
     id_with_kind_b64 = id_with_kind_b64 + PADDING
     id_with_kind_bytes = urlsafe_b64decode(id_with_kind_b64)
-    id_with_kind = int.from_bytes(id_with_kind_bytes, 'little')
+    id_with_kind = int.from_bytes(id_with_kind_bytes, 'big')
+    id_with_kind >>= BIT_PADDING
     kind = id_with_kind >> ID_BITS
     id_ = id_with_kind & ID_MASK
     return kind, id_
@@ -50,7 +53,8 @@ def url_decode_id(id_with_kind_b64):
 
 def url_encode_id(kind, id_):
     id_with_kind = (kind << ID_BITS) + id_
-    id_with_kind_bytes = id_with_kind.to_bytes(ID_WITH_KIND_BYTES, 'little')
+    id_with_kind <<= BIT_PADDING
+    id_with_kind_bytes = id_with_kind.to_bytes(ID_WITH_KIND_BYTES, 'big')
     id_with_kind_b64 = urlsafe_b64encode(id_with_kind_bytes)
     return id_with_kind_b64[:ID_WITH_KIND_CHARS].decode()
 
