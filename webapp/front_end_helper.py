@@ -43,7 +43,10 @@ def _make_one_response_flower(
 
         subflower_df = influencers_df.join(
             influencees_df, how='outer', rsuffix='_r')
-        subflower_df.fillna(0, inplace=True)
+        subflower_df.fillna(
+            dict(influenced=0., influencing=0.,
+                 coauthors=False, coauthors_r=False),
+            inplace=True)
         subflower_df['coauthors'] |= subflower_df['coauthors_r']
         del subflower_df['coauthors_r']
         subflower_df['type'] = i
