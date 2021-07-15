@@ -21,6 +21,16 @@ autoCompleteLists = {}
 GALLERY_DATA_PATH = pathlib.Path("webapp/data")
 
 
+def filter_papers(search_title, data):
+    search_title_arr = [t.strip() for t in search_title.lower().split(' ')]
+    filtered_data = []
+    for p in data:
+        title = p[0]["OriginalTitle"]
+        title_arr = [t.strip() for t in title.lower().split(' ')]
+        if search_title_arr == title_arr:
+            filtered_data.append(p)
+    return filtered_data
+
 def read_gallery_group(filename):
     try:
         f = open(filename)

@@ -56,7 +56,7 @@ def autocomplete():
 def query():
     entity_type = "paper" # support paper search only
     entity_title = request.args.get('title')
-    data = query_entity([entity_type], entity_title)
+    data = filter_papers(entity_title, query_entity([entity_type], entity_title))
     paper_ids = [p[0][id_helper_dict[entity_type]] for p in data]
     doc_id = url_encode_info(paper_ids=paper_ids, name=entity_title)
     url_base = f"http://influencemap.ml/submit/?id={doc_id}"
