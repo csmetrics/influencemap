@@ -6,6 +6,7 @@ from collections import Counter
 
 import flask
 from flask import request
+from flask_cors import CORS, cross_origin
 
 import core.utils.entity_type as ent
 from core.search.query_info import paper_info_db_check_multiquery
@@ -53,6 +54,7 @@ def autocomplete():
 
 
 @blueprint.route('/query')
+@cross_origin()
 def query():
     entity_type = "paper" # support paper search only
     entity_title = request.args.get('title')
