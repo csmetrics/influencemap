@@ -32,18 +32,25 @@ def _get_range_from_request(argname):
     return start_year, end_year
 
 
+def _get_int_from_request(argname):
+    int_str = flask.request.args.get(argname, '')
+    if not int_str:
+        return None
+    try:
+        return int(int_str)
+    except ValueError:
+        flask.abort(400)
+
+
 def result_arrays_as_dict(result_arrays):
-    id_list = list(map(int, result_arrays.ids))
-    score_list = list(map(float, result_arrays.scores))
-    coauthor_list = list(map(bool, result_arrays.coauthors))
-    return dict(ids=id_list, scores=score_list, coauthors=coauthor_list)
-
-
-def part_flower_as_dict(part_flower):
-    return {
-        'influencers': result_arrays_as_dict(part_flower.influencers),
-        'influencees': result_arrays_as_dict(part_flower.influencees),
-    }
+    ids = tuple(map(int, result_arrays.ids))
+    citor_scores = tuple(map(float, result_arrays.citor_scores))
+    citee_scores = tuple(map(float, result_arrays.citee_scores))
+    coauthors = tuple(map(bool, result_arrays.coauthors))
+    kinds = tuple(map(int, result_arrays.kinds))
+    total = int(result_arrays.total)
+    return dict(ids=ids, citor_scores=citor_scores, citee_scores=citee_scores,
+                coauthors=coauthors, kinds=kinds, total=total)
 
 
 def stringify_keys(d):
@@ -62,12 +69,10 @@ def cit_year_counts_as_json_dict(cit_year_counts):
 
 def flower_as_dict(flower):
     return dict(
-        author_part=part_flower_as_dict(flower.author_part),
-        affiliation_part=part_flower_as_dict(flower.affiliation_part),
-        field_of_study_part=part_flower_as_dict(flower.field_of_study_part),
-        journal_part=part_flower_as_dict(flower.journal_part),
-        conference_series_part=part_flower_as_dict(
-            flower.conference_series_part))
+        author=result_arrays_as_dict(flower.author),
+        affiliation=result_arrays_as_dict(flower.affiliation),
+        field_of_study=result_arrays_as_dict(flower.field_of_study),
+        venue=result_arrays_as_dict(flower.venue))
 
 
 def stats_as_dict(stats):
@@ -94,13 +99,15 @@ def get_flower():
     pub_years = _get_range_from_request('pub-years')
     cit_years = _get_range_from_request('cit-years')
 
+    max_results = _get_int_from_request('max-results')
+
     flower = florist.get_flower(
         author_ids=author_ids, affiliation_ids=affiliation_ids,
         field_of_study_ids=field_of_study_ids, journal_ids=journal_ids,
         conference_series_ids=conference_series_ids, paper_ids=paper_ids,
         self_citations=self_citations, coauthors=not exclude_coauthors,
         pub_years=pub_years, cit_years=cit_years,
-        allow_not_found=True)
+        allow_not_found=True, max_results=max_results)
 
     return flask.jsonify(flower_as_dict(flower))
 

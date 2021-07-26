@@ -30,6 +30,7 @@ class KonigsbergClient:
         cit_years=None,
         coauthors=True,
         self_citations=False,
+        max_results=None,
     ):
         params = {}
         params.update(get_ids(locals()))
@@ -45,6 +46,9 @@ class KonigsbergClient:
         if cit_years is not None:
             start_year, end_year = cit_years
             params['cit-years'] = f'{start_year},{end_year}'
+
+        if max_results is not None:
+            params['max-results'] = str(max_results)
 
         response = self.session.get(self.url + '/get-flower', params=params)
         response.raise_for_status()

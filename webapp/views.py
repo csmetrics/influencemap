@@ -247,7 +247,7 @@ def submit():
         conference_series_ids=conference_ids, field_of_study_ids=fos_ids,
         journal_ids=journal_ids, paper_ids=paper_ids, pub_years=pub_years,
         cit_years=cit_years, coauthors=coauthors,
-        self_citations=self_citations)
+        self_citations=self_citations, max_results=50)
 
     stats = kb_client.get_stats(
         author_ids=author_ids, affiliation_ids=affiliation_ids,
@@ -299,7 +299,7 @@ def resubmit():
         conference_series_ids=conference_ids, field_of_study_ids=fos_ids,
         journal_ids=journal_ids, paper_ids=paper_ids,
         pub_years=(pub_lower, pub_upper), cit_years=(cit_lower, cit_upper),
-        coauthors=coauthors, self_citations=self_citations)
+        coauthors=coauthors, self_citations=self_citations, max_results=50)
 
     rdata = make_response_data(
         flower, flower_name=flower_name, session=session)

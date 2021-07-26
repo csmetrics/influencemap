@@ -1,7 +1,10 @@
+import heapq
+import itertools
 import json
 import mmap
+import operator
 import pathlib
-from itertools import starmap
+from itertools import chain, starmap
 
 import numba as nb
 import numpy as np
@@ -11,44 +14,31 @@ mapping_arrs = nb.types.Tuple([mmapped_arr, mmapped_arr])
 id_mapping_arrs = nb.types.Tuple([mmapped_arr, mmapped_arr, nb.u4])
 
 
-class ResArrs:
-    """Holder for ID and score arrays."""
-    __slots__ = ['ids', 'scores', 'coauthors']
-    def __init__(self, ids, scores, coauthors):
+class Subflower:
+    __slots__ = ['ids', 'citor_scores', 'citee_scores', 'coauthors',
+                 'kinds', 'total']
+    def __init__(
+            self, ids, citor_scores, citee_scores, coauthors, kinds, total):
         self.ids = ids
-        self.scores = scores
+        self.citor_scores = citor_scores
+        self.citee_scores = citee_scores
         self.coauthors = coauthors
-
-
-class PartFlower:
-    """Result for a particular entity type."""
-    __slots__ = ['influencers', 'influencees']
-    def __init__(self, res=None, *, influencers=None, influencees=None):
-        if ((res is None, influencers is None, influencees is None)
-                not in ((True, False, False), (False, True, True))):
-            raise ValueError('either res or influencers and '
-                             'must be provided')
-        if res is not None:
-            influencers, influencees = res
-        self.influencers = influencers
-        self.influencees = influencees
+        self.kinds = kinds
+        self.total = total
 
 
 class Flower:
     """Full result."""
-    __slots__ = ['author_part', 'affiliation_part', 'field_of_study_part',
-                 'journal_part', 'conference_series_part']
+    __slots__ = ['author', 'affiliation', 'field_of_study', 'venue']
     def __init__(
         self,
         *,
-        author_part, affiliation_part, field_of_study_part,
-        journal_part, conference_series_part,
+        author, affiliation, field_of_study, venue,
     ):
-        self.author_part = author_part
-        self.affiliation_part = affiliation_part
-        self.field_of_study_part = field_of_study_part
-        self.journal_part = journal_part
-        self.conference_series_part = conference_series_part
+        self.author = author
+        self.affiliation = affiliation
+        self.field_of_study = field_of_study
+        self.venue = venue
 
 
 class Stats:
@@ -241,38 +231,32 @@ class Florist:
             if row[:-1].any()
         }
 
-    def _make_flower_from_res(
-        self,
-        influencers, influencees,
-    ):
-        """Turn result dicts returned by _make_flower into a Flower."""
-        split_influencers = split_res(
-            influencers, self.author_range, self.aff_range, self.fos_range,
-            self.journal_range, self.cs_range, self.fos_l1_start)
-        split_influencees = split_res(
-            influencees, self.author_range, self.aff_range, self.fos_range,
+    def _make_flower_from_res(self, raw_result, max_results):
+        split_res = get_split_res(
+            raw_result, self.author_range, self.aff_range, self.fos_range,
             self.journal_range, self.cs_range, self.fos_l1_start)
 
-        ind2id = self.entity_ind2id_map.arrs
-        for res_arrs in split_influencers:
-            _indices_to_ids(res_arrs, ind2id)
-        for res_arrs in split_influencees:
-            _indices_to_ids(res_arrs, ind2id)
+        author_tot, aff_tot, fos_tot, venue_tot = map(len, split_res)
 
-        author_res, aff_res, fos_res, journal_res, cs_res = zip(
-            split_influencers, split_influencees)
+        if max_results is None:
+            for kind_res in split_res:
+                _sort(kind_res)
+        else:
+            for kind_res in split_res:
+                _select_top_n(kind_res, max_results)
 
-        author_part = PartFlower(starmap(ResArrs, author_res))
-        aff_part = PartFlower(starmap(ResArrs, aff_res))
-        fos_part = PartFlower(starmap(ResArrs, fos_res))
-        journal_part = PartFlower(starmap(ResArrs, journal_res))
-        cs_part = PartFlower(starmap(ResArrs, cs_res))
+        for kind_res in split_res:
+            _indices_to_ids(kind_res, self.entity_ind2id_map.arrs)
 
-        return Flower(author_part=author_part,
-                      affiliation_part=aff_part,
-                      field_of_study_part=fos_part,
-                      journal_part=journal_part,
-                      conference_series_part=cs_part)
+        author_res, aff_res, fos_res, venue_res = split_res
+
+        author_flwr = Subflower(*_to_arrs(author_res), author_tot)
+        aff_flwr = Subflower(*_to_arrs(aff_res), aff_tot)
+        fos_flwr = Subflower(*_to_arrs(fos_res), fos_tot)
+        venue_flwr = Subflower(*_to_arrs(venue_res), venue_tot)
+
+        return Flower(author=author_flwr, affiliation=aff_flwr,
+                      field_of_study=fos_flwr, venue=venue_flwr)
 
     def _make_stats_from_arrs(
         self,
@@ -301,6 +285,7 @@ class Florist:
         self_citations=False, coauthors=True,
         pub_years=None, cit_years=None,
         allow_not_found=False,
+        max_results=None,
     ):
         """Get the flower for the given entity indices.
 
@@ -331,7 +316,7 @@ class Florist:
 
         # nb.literally makes it a compile-time constant. This does
         # require one compilation per value.
-        influencers, influencees = _make_flower(
+        raw_result = _make_flower(
             entity_indices, paper_indices,
             self.entity2paper_map.arrs,
             self.paper2entity_map.arrs,
@@ -341,7 +326,7 @@ class Florist:
             coauthors=nb.literally(bool(coauthors)),
             author_range=nb.literally(self.author_range),
             aff_range=nb.literally(self.aff_range))
-        return self._make_flower_from_res(influencers, influencees)
+        return self._make_flower_from_res(raw_result, max_results)
 
     def get_stats(
         self,
@@ -361,8 +346,6 @@ class Florist:
         paper_indices = self._get_paper_indices(
             paper_ids, allow_not_found=allow_not_found)
 
-        # nb.literally makes it a compile-time constant. This does
-        # require one compilation per value.
         pub_year_counts, cit_year_counts, ref_count = _make_stats(
             entity_indices, paper_indices,
             self.entity2paper_map.arrs,
@@ -372,73 +355,88 @@ class Florist:
             pub_year_counts, cit_year_counts, ref_count)
 
 
-@nb.njit(nogil=True)
-def empty_res_lists():
-    return (nb.typed.List.empty_list(nb.u4),
-            nb.typed.List.empty_list(nb.f4),
-            nb.typed.List.empty_list(nb.u1))
+split_result_val_t = nb.types.Tuple([nb.u4, nb.f4, nb.f4, nb.u1, nb.u1])
 
 
 @nb.njit(nogil=True)
-def res_lists_append(res_lists, id_, score, coauthor):
-    id_list, score_list, coauthor_list = res_lists
-    id_list.append(id_)
-    score_list.append(score)
-    coauthor_list.append(coauthor)
-
-
-@nb.njit(nogil=True)
-def res_lists_to_arrs(res_lists):
-    id_list, score_list, coauthor_list = res_lists
-    id_arr = np.empty(len(id_list), dtype=np.uint32)
-    for i, id_ in enumerate(id_list):
-        id_arr[i] = id_
-    score_arr = np.empty(len(score_list), dtype=np.float32)
-    for i, score in enumerate(score_list):
-        score_arr[i] = score
-    coauthor_arr = np.empty(len(coauthor_list), dtype=np.uint8)
-    for i, coauthor in enumerate(coauthor_list):
-        coauthor_arr[i] = coauthor
-    return id_arr, score_arr, coauthor_arr
-
-
-@nb.njit(nogil=True)
-def split_res(
+def get_split_res(
     res,
     author_range, aff_range, fos_range, journal_range, cs_range,
     fos_l1_start,
 ):
     """Split a dict of indices and scores by entity type."""
-    author_res = empty_res_lists()
-    aff_res = empty_res_lists()
-    fos_res = empty_res_lists()
-    journals_res = empty_res_lists()
-    cs_res = empty_res_lists()
-    for index, score, coauthor in zip(*res):
+    author_res = nb.typed.List.empty_list(split_result_val_t)
+    aff_res = nb.typed.List.empty_list(split_result_val_t)
+    fos_res = nb.typed.List.empty_list(split_result_val_t)
+    venues_res = nb.typed.List.empty_list(split_result_val_t)
+    for index, citor_score, citee_score, coauthor in res:
         if index < author_range:
-            res_lists_append(author_res, index, score, coauthor)
+            author_res.append(
+                (index, citor_score, citee_score, coauthor, nb.u1(0)))
         elif index < aff_range:
-            res_lists_append(aff_res, index, score, coauthor)
+            aff_res.append(
+                (index, citor_score, citee_score, coauthor, nb.u1(1)))
         elif index < fos_l1_start:
             pass  # Skip l0 fields of study.
         elif index < fos_range:
-            res_lists_append(fos_res, index, score, coauthor)
-        elif index < journal_range:
-            res_lists_append(journals_res, index, score, coauthor)
+            fos_res.append(
+                (index, citor_score, citee_score, coauthor, nb.u1(3)))
         elif index < cs_range:
-            res_lists_append(cs_res, index, score, coauthor)
+            venues_res.append((index, citor_score, citee_score, coauthor,
+                               nb.u1(4 if index < journal_range else 2)))
         else:
             raise IndexError('entity index out of range')
-    return (res_lists_to_arrs(author_res), res_lists_to_arrs(aff_res),
-            res_lists_to_arrs(fos_res), res_lists_to_arrs(journals_res),
-            res_lists_to_arrs(cs_res))
+    return author_res, aff_res, fos_res, venues_res
+
+
+@nb.njit(nogil=True)
+def _sort(res_list):
+    res_list.sort(key=lambda r: (-max(r[1], r[2]), -r[1] - r[2], r[0]))
+
+
+@nb.njit(nogil=True)
+def _select_top_n(res_list, max_results):
+    # if len(res_list) > max_results:
+    #     smallest = heapq.nsmallest(
+    #         max_results,
+    #         map(lambda r, i: (-max(r[1], r[2]), -r[1] - r[2],
+    #                        r[0], i),
+    #             res_list, itertools.count()))
+    #     indices = sorted(map(operator.itemgetter(3), smallest))
+    #     for i, j in enumerate(indices):
+    #         # i <= j at all times
+    #         res_list[i] = res_list[j]
+    #     del res_list[max_results:]
+    # res_list.sort(key=lambda r: (-max(r[1], r[2]), -r[1] - r[2], r[0]))
+    res_list.sort(key=lambda r: (-max(r[1], r[2]), -r[1] - r[2], r[0]))
+    if len(res_list) > max_results:
+        del res_list[max_results:]
+
+
+@nb.njit(nogil=True)
+def _to_arrs(res_list):
+    n = len(res_list)
+    id_arr = np.empty(n, dtype=np.uint32)
+    citor_score_arr = np.empty(n, dtype=np.float32)
+    citee_score_arr = np.empty(n, dtype=np.float32)
+    coauthor_arr = np.empty(n, dtype=np.uint8)
+    kind_arr = np.empty(n, dtype=np.uint8)
+    for i, (id_, citor_score, citee_score, coauthor, kind) \
+            in enumerate(res_list):
+        id_arr[i] = id_
+        citor_score_arr[i] = citor_score
+        citee_score_arr[i] = citee_score
+        coauthor_arr[i] = coauthor
+        kind_arr[i] = kind
+    return id_arr, citor_score_arr, citee_score_arr, coauthor_arr, kind_arr
 
 
 @nb.njit(nogil=True)
 def _indices_to_ids(res, ind2id):
-    res_ids, _, _ = res
-    for i, index in enumerate(res_ids):
-        res_ids[i] = ind2id[index]
+    for i in range(len(res)):
+        index, citor_score, citee_score, coauthor, kind = res[i]
+        id_ = ind2id[index]
+        res[i] = id_, citor_score, citee_score, coauthor, kind
 
 
 @nb.njit(nb.u4(id_mapping_arrs, nb.u4[::1]), nogil=True)
@@ -549,6 +547,7 @@ def _get_year(paper_id, paper_year_map):
 
 
 dict_val = nb.types.Tuple([nb.u4, nb.f4])
+result_val_t = nb.types.Tuple([nb.u4, nb.f4, nb.f4, nb.u1])
 
 @nb.njit(nogil=True)
 def _make_flower(
@@ -644,29 +643,15 @@ def _make_flower(
         citor_entities.pop(entity_id, None)
         citee_entities.pop(entity_id, None)
 
-    citor_ids = np.empty(len(citor_entities), dtype=np.uint32)
-    citor_scores = np.empty(len(citor_entities), dtype=np.float32)
-    for i, (id_, score) in enumerate(citor_entities.items()):
-        citor_ids[i] = id_
-        citor_scores[i] = score
-
-    citee_ids = np.empty(len(citee_entities), dtype=np.uint32)
-    citee_scores = np.empty(len(citee_entities), dtype=np.float32)
-    for i, (id_, score) in enumerate(citee_entities.items()):
-        citee_ids[i] = id_
-        citee_scores[i] = score
-
-    # Could make these bitfields.
-    citor_coauthors = np.zeros(len(citor_entities), dtype=np.uint8)
-    citee_coauthors = np.zeros(len(citee_entities), dtype=np.uint8)
-    if coauthors:
-        for i, id_ in enumerate(citor_ids):
-            citor_coauthors[i] = id_ in coauthor_ids
-        for i, id_ in enumerate(citee_ids):
-            citee_coauthors[i] = id_ in coauthor_ids
-
-    return ((citor_ids, citor_scores, citor_coauthors),
-            (citee_ids, citee_scores, citee_coauthors))
+    result = nb.typed.List.empty_list(result_val_t)
+    for entity_id, citor_score in citor_entities.items():
+        citee_score = citee_entities.pop(entity_id, nb.f4(0.))
+        is_coauthor = nb.u1(entity_id in coauthor_ids)
+        result.append((entity_id, citor_score, citee_score, is_coauthor))
+    for entity_id, citee_score in citee_entities.items():
+        is_coauthor = nb.u1(entity_id in coauthor_ids)
+        result.append((entity_id, nb.f4(0.), citee_score, is_coauthor))
+    return result
 
 
 @nb.njit(nogil=True)

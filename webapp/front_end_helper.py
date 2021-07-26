@@ -28,30 +28,17 @@ def _normalize_double_log(series1, series2):
 
 
 def _make_one_response_flower(
-    subflowers, name_lookup_fs,
+    subflower, name_lookup_fs,
     *,
     gtype, flower_name,
 ):
-    subflower_dfs = []
-    for i, subflower in enumerate(subflowers):
-        influencers_df = pd.DataFrame(subflower['influencers'])
-        influencers_df.set_index('ids', inplace=True)
-        influencers_df.rename(columns={'scores': 'influenced'}, inplace=True)
-        influencees_df = pd.DataFrame(subflower['influencees'])
-        influencees_df.set_index('ids', inplace=True)
-        influencees_df.rename(columns={'scores': 'influencing'}, inplace=True)
-
-        subflower_df = influencers_df.join(
-            influencees_df, how='outer', rsuffix='_r')
-        subflower_df.fillna(
-            dict(influenced=0., influencing=0.,
-                 coauthors=False, coauthors_r=False),
-            inplace=True)
-        subflower_df['coauthors'] |= subflower_df['coauthors_r']
-        del subflower_df['coauthors_r']
-        subflower_df['type'] = i
-        subflower_dfs.append(subflower_df)
-    df = pd.concat(subflower_dfs)
+    df = pd.DataFrame(dict(
+        ids=subflower['ids'],
+        influencing=subflower['citee_scores'],
+        influenced=subflower['citor_scores'],
+        coauthors=subflower['coauthors'],
+        type=subflower['kinds']))
+    df.set_index('ids', inplace=True)
     df['sum'] = df['influencing'] + df['influenced']
     df['dif'] = df['influencing'] - df['influenced']
     df['ratio'] = df['dif'] / df['sum']
@@ -59,18 +46,10 @@ def _make_one_response_flower(
     df['normed_ratio'] = _make_normed_ratio(df['ratio'])
     df['normed_influenced'], df['normed_influencing'] = _normalize_double_log(
         df['influenced'], df['influencing'])
-
-    # df.sort_values('sum', inplace=True, ascending=False)
-    df['sort_tmp'] = np.maximum(df['influencing'], df['influenced'])
-    df.sort_values('sort_tmp', inplace=True, ascending=False, kind='mergesort')
-    del df['sort_tmp']    
-    
-    total = len(df)
-
-    df = df.head(n=50)
+    total = subflower['total']
 
     df['name'] = None
-    for i, name_lookup_f in enumerate(name_lookup_fs):
+    for i, name_lookup_f in name_lookup_fs.items():
         mask = df['type'] == i
         if mask.any():
             ids = tuple(df[mask].index)
@@ -240,21 +219,21 @@ def make_response_data(
     res['navbarOption'] = NAVBAR_OPTIONS
     
     res['conf'] = _make_one_response_flower(
-        [flower['journal_part'], flower['conference_series_part']],
-        [get_display_names_from_journal_ids,
-         get_display_names_from_conference_ids],
+        flower['venue'],
+        {4: get_display_names_from_journal_ids,
+         2: get_display_names_from_conference_ids},
         gtype='conf', flower_name=flower_name)
     res['inst'] = _make_one_response_flower(
-        [flower['affiliation_part']],
-        [partial(get_names_from_affiliation_ids, with_id=True)],
+        flower['affiliation'],
+        {1: partial(get_names_from_affiliation_ids, with_id=True)},
         gtype='inst', flower_name=flower_name)
     res['fos'] = _make_one_response_flower(
-        [flower['field_of_study_part']],
-        [partial(get_display_names_from_fos_ids, with_id=True)],
+        flower['field_of_study'],
+        {3: partial(get_display_names_from_fos_ids, with_id=True)},
         gtype='fos', flower_name=flower_name)
     res['author'] = _make_one_response_flower(
-        [flower['author_part']],
-        [partial(get_display_names_from_author_ids, with_id=True)],
+        flower['author'],
+        {0: partial(get_display_names_from_author_ids, with_id=True)},
         gtype='author', flower_name=flower_name)
 
     if stats is not None:
