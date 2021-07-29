@@ -53,6 +53,27 @@ def autocomplete():
     return flask.jsonify(data)
 
 
+@blueprint.route('/query_about')
+@cross_origin()
+def query_about():
+    entity_type = "paper" # support paper search only
+    entity_title = request.args.get('title')
+    data = filter_papers(entity_title, query_entity([entity_type], entity_title))
+    paper_ids = [p[0][id_helper_dict[entity_type]] for p in data]
+    status_msg = "Success"
+    if len(paper_ids) == 0:
+        status_msg = "No matching paper found"
+    doc_id = url_encode_info(paper_ids=paper_ids, name=entity_title)
+    url_base = f"http://influencemap.ml/submit/?id={doc_id}"
+    res = {
+        "status": status_msg,
+        "search_result": data,
+        "paper_ids": paper_ids,
+        "flower_url": url_base
+    }
+    return flask.jsonify(res)
+
+
 @blueprint.route('/query')
 @cross_origin()
 def query():
@@ -60,14 +81,17 @@ def query():
     entity_title = request.args.get('title')
     data = filter_papers(entity_title, query_entity([entity_type], entity_title))
     paper_ids = [p[0][id_helper_dict[entity_type]] for p in data]
-    doc_id = url_encode_info(paper_ids=paper_ids, name=entity_title)
-    url_base = f"http://influencemap.ml/submit/?id={doc_id}"
-    res = {
-        "search_result": data,
-        "paper_ids": paper_ids,
-        "flower_url": url_base
-    }
-    return flask.jsonify(res)
+
+    flower = kb_client.get_flower(
+        paper_ids=paper_ids, pub_years=None, cit_years=None,
+        coauthors=True, self_citations=False, max_results=50)
+
+    rdata = make_response_data(
+        flower, None, is_curated=False, flower_name=entity_title,
+        selection=dict(pub_years=None, cit_years=None, coauthors=True, self_citations=False))
+
+    return flask.jsonify(rdata)
+    # return flask.render_template("arxiv/arXivFlower.html", data=rdata)
 
 
 @blueprint.route('/')
