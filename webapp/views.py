@@ -81,6 +81,9 @@ def query():
     entity_title = request.args.get('title')
     data = filter_papers(entity_title, query_entity([entity_type], entity_title))
     paper_ids = [p[0][id_helper_dict[entity_type]] for p in data]
+    status_msg = "Success"
+    if len(paper_ids) == 0:
+        status_msg = "No matching paper found."
 
     flower = kb_client.get_flower(
         paper_ids=paper_ids, pub_years=None, cit_years=None,
@@ -90,8 +93,11 @@ def query():
         flower, None, is_curated=False, flower_name=entity_title,
         selection=dict(pub_years=None, cit_years=None, coauthors=True, self_citations=False))
 
+    doc_id = url_encode_info(paper_ids=paper_ids, name=entity_title)
+    url_base = f"http://influencemap.ml/submit/?id={doc_id}"
+    rdata["status"] = status_msg
+    rdata["url_base"] = url_base
     return flask.jsonify(rdata)
-    # return flask.render_template("arxiv/arXivFlower.html", data=rdata)
 
 
 @blueprint.route('/')
