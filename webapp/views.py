@@ -97,6 +97,15 @@ def query():
     url_base = f"http://influencemap.ml/submit/?id={doc_id}"
     rdata["status"] = status_msg
     rdata["url_base"] = url_base
+
+    #generate URLs for alter nodes
+    for flower_type, _ in flower_leaves:
+        for node in rdata[flower_type][0]["nodes"]:
+            if flower_type == "author": node["url"] = url_encode_info(author_ids=[node["id"]], name=node["name"])
+            if flower_type == "conf": node["url"] = url_encode_info(conference_series_ids=[node["id"]], name=node["name"])
+            if flower_type == "inst": node["url"] = url_encode_info(affiliation_ids=[node["id"]], name=node["name"])
+            if flower_type == "fos": node["url"] = url_encode_info(field_of_study_ids=[node["id"]], name=node["name"])
+
     return flask.jsonify(rdata)
 
 
