@@ -42,7 +42,8 @@ function drawLegend() {
 }
 
 function drawFlower(svg_id, data, idx, w, num, order) {
-    var compare_ref = referenceCheckbox.checked;
+    // var compare_ref = referenceCheckbox.checked;
+    var compare_ref = false;
 
     var total_entity_num = data["total"];
     var nodes = data["nodes"];

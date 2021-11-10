@@ -48,10 +48,10 @@
       <b>Include coauthors</b>
       <input class="coauthor" type="checkbox" style="float:left; margin:5 10 0 0" name="self-coauthor" id="coauthor" {% if yearSlider.selected.icoauthor == 'true' %} checked="checked" {% endif %}/>
     </div>
-    <div style="padding-top:10px">
+    <!-- <div style="padding-top:10px">
       <b>(Beta) Compare with anchor flower</b>
       <input class="reference" type="checkbox" style="float:left; margin:5 10 0 0" name="cmp-reference" id="reference" {% if yearSlider.selected.cmp_ref == 'true' %} checked="checked" {% endif %}/>
-    </div>
+    </div> -->
     <div align=center style="padding-top:5px;">
       <button class="btn " id="resubmitButton">Update Flower</button>
     </div>
@@ -326,7 +326,8 @@ resubmitButton.addEventListener('click', function(){
       option: option,
       selfcite: selfCiteCheckbox.checked,
       coauthor: coauthorCheckbox.checked,
-      cmp_ref: referenceCheckbox.checked,
+      // cmp_ref: referenceCheckbox.checked,
+      cmp_ref: false,
       keyword: keyword,
       numpetals: document.getElementById('num-petals').value,
       petalorder: document.getElementById('petal-order').value,
