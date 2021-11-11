@@ -32,13 +32,34 @@ def _make_one_response_flower(
     *,
     gtype, flower_name,
 ):
-    df = pd.DataFrame(dict(
+    df_original = pd.DataFrame(dict(
         ids=subflower['ids'],
         influencing=subflower['citee_scores'],
         influenced=subflower['citor_scores'],
         coauthors=subflower['coauthors'],
         type=subflower['kinds']))
+
+    df_original['name'] = None
+    for i, name_lookup_f in name_lookup_fs.items():
+        mask = df_original['type'] == i
+        if mask.any():
+            ids = tuple(df_original[mask]['ids'])
+            ids_to_name = name_lookup_f(ids)
+            names = tuple(map(ids_to_name.__getitem__, ids))
+            df_original.loc[mask, 'name'] = names
+
+    # Name deduplication
+    # IDs with the same names are grouped and stored in allids (array)
+    # min(IDs) is used as the unique ID
+    df = df_original.groupby('name', as_index=False).agg(
+            influencing=('influencing', 'sum'),
+            influenced=('influenced', 'sum'),
+            type=('type', 'min'),
+            coauthors=('coauthors', 'any'),
+            ids=('ids', 'min'),
+            allids=('ids', lambda tdf: tdf.unique().tolist()))
     df.set_index('ids', inplace=True)
+
     df['sum'] = df['influencing'] + df['influenced']
     df['dif'] = df['influencing'] - df['influenced']
     df['ratio'] = df['dif'] / df['sum']
@@ -48,15 +69,7 @@ def _make_one_response_flower(
         df['influenced'], df['influencing'])
     total = subflower['total']
 
-    df['name'] = None
-    for i, name_lookup_f in name_lookup_fs.items():
-        mask = df['type'] == i
-        if mask.any():
-            ids = tuple(df[mask].index)
-            ids_to_name = name_lookup_f(ids)
-            names = tuple(map(ids_to_name.__getitem__, ids))
-            df.loc[mask, 'name'] = names
-
+    df = df.sort_values(by=['sum'], ascending=False)
     df['bloom_order'] = range(1, len(df) + 1)
 
     nodes = [
@@ -217,7 +230,7 @@ def make_response_data(
     if is_curated is not None:
         res['curated'] = is_curated
     res['navbarOption'] = NAVBAR_OPTIONS
-    
+
     res['conf'] = _make_one_response_flower(
         flower['venue'],
         {4: get_display_names_from_journal_ids,
