@@ -301,7 +301,8 @@ def submit():
         author_ids=author_ids, affiliation_ids=affiliation_ids,
         conference_ids=conference_ids, journal_ids=journal_ids,
         fos_ids=fos_ids, paper_ids=paper_ids, flower_name=flower_name,
-        url_base=url_base, icoauthor=coauthors, self_cite=self_citations)
+        url_base=url_base, icoauthor=coauthors, self_cite=self_citations,
+        year_ranges=None)
 
     rdata = make_response_data(
         flower, stats, is_curated=curated_flag, flower_name=flower_name,
@@ -334,6 +335,12 @@ def resubmit():
     pub_upper = int(request.form.get('to_pub_year'))
     cit_lower = int(request.form.get('from_cit_year'))
     cit_upper = int(request.form.get('to_cit_year'))
+    session['year_ranges'] = {
+        'pub_lower': pub_lower,
+        'pub_upper': pub_upper,
+        'cit_lower': cit_lower,
+        'cit_upper': cit_upper
+    }
 
     flower = kb_client.get_flower(
         author_ids=author_ids, affiliation_ids=affiliation_ids,
@@ -413,15 +420,17 @@ NODE_INFO_FIELDS = ["PaperTitle", "Authors", "PaperId", "Year", "ConferenceName"
 
 def get_node_info_single(entity, entity_type, year_ranges):
     # Determine the citation range
-    pub_lower = year_ranges["pub_lower"]
-    pub_upper = year_ranges["pub_upper"]
-    cit_lower = year_ranges["cit_lower"]
-    cit_upper = year_ranges["cit_upper"]
+    pub_lower = cit_lower = pub_upper = cit_upper = None
+    if year_ranges:
+        pub_lower = year_ranges["pub_lower"]
+        pub_upper = year_ranges["pub_upper"]
+        cit_lower = year_ranges["cit_lower"]
+        cit_upper = year_ranges["cit_upper"]
 
     # Get paper to get information from
     request_data = json.loads(request.form.get("data_string"))
     session = request_data.get("session")
-    papers = paper_info_db_check_multiquery(session["cache"])
+    papers = paper_info_db_check_multiquery(session["paper_ids"])
 
     # Get coauthors list to filter
     if session['icoauthor'] == 'false':
@@ -441,14 +450,16 @@ def get_node_info_single(entity, entity_type, year_ranges):
 
     for paper in papers:
         # Publication range filter
-        if paper["Year"] < pub_lower or paper["Year"] > pub_upper:
+        if (pub_lower and paper["Year"] < pub_lower) or \
+            (pub_upper and paper["Year"] > pub_upper):
             continue
 
         for link_type in ["References", "Citations"]:
             for rel_paper in paper[link_type]:
                 # Citation range filter
                 if link_type == "Citations" and \
-                        (rel_paper["Year"] < cit_lower or rel_paper["Year"] > cit_upper):
+                    ((cit_lower and rel_paper["Year"] < cit_lower) or \
+                    (cit_upper and rel_paper["Year"] > cit_upper)):
                                 continue
 
                 # Get fields

@@ -77,8 +77,8 @@ def _make_one_response_flower(
              bloom_order=0, coauthor=str(False))
     ]
     nodes.extend(
-        dict(name=row.name, weight=row.normed_ratio, id=row[0], gtype=gtype,
-             size=row.normed_sum, inf_in=row.influenced,
+        dict(name=row.name, weight=row.normed_ratio, id=row[0], ids=row.allids,
+             gtype=gtype, size=row.normed_sum, inf_in=row.influenced,
              inf_out=row.influencing, dif=row.dif, ratio=row.ratio,
              coauthor=str(row.coauthors), bloom_order=row.bloom_order)
         for row in df.itertuples()

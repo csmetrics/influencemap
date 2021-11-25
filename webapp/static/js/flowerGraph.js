@@ -173,6 +173,7 @@ function drawFlower(svg_id, data, idx, w, num, order) {
         .data(nodes)
       .enter().append("circle")
         .attr("id", function(d) { return d.id; })
+        .attr("allids", function(d) { return d.ids; })
         .attr("name", function(d) { return d.name; })
         .attr("class", "hl-circle")
         .attr("xpos", function(d) {
@@ -220,6 +221,7 @@ function drawFlower(svg_id, data, idx, w, num, order) {
           .data(nodes)
         .enter().append("circle")
           .attr("id", function(d) { return d.id; })
+          .attr("allids", function(d) { return d.ids; })
           .attr("name", function(d) { return d.name; })
           .attr("class", "hl-circle-new")
           .attr("xpos", function(d) {
@@ -793,10 +795,12 @@ function populateNodeInfoContent(data){
 
 function getData(param){
   node_info_name = param['name'].toLowerCase();
+  node_info_ids = param['ids'];
   node_info_type = param['gtype'];
   console.log(node_info_name);
   var data_dict = { // input to the views.py - search()
       "name": node_info_name,
+      "ids": node_info_ids,
       "node_type": node_info_type,
       "session": session
     };
@@ -838,7 +842,11 @@ function getNodeName(e){
 
 function showNodeData(idx, selected){
     var name = getNodeName(selected);
-    var data = getData({"name": name, 'gtype': selected.getAttribute('gtype')});
+    var data = getData({
+      'name': name,
+      'ids': selected.getAttribute('allids'),
+      'gtype': selected.getAttribute('gtype')
+    });
 }
 
 function hideNodeData(){
