@@ -1,6 +1,7 @@
 import json
 import os
 import pathlib
+import string
 
 from core.search.elastic import *
 from webapp.shortener import url_encode_info
@@ -19,6 +20,13 @@ optionlist = [  # option list
 autoCompleteLists = {}
 
 GALLERY_DATA_PATH = pathlib.Path("webapp/data")
+
+def normalize_title(keyword):
+    exclude = set(string.punctuation)
+    keyword = ''.join(ch if ch not in exclude else ' ' for ch in keyword)
+    keyword = keyword.lower()
+    keyword = " ".join(keyword.split())
+    return keyword
 
 
 def filter_papers(search_title, data):

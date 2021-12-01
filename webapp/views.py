@@ -1,7 +1,6 @@
 import copy
 import json
 import math
-import string
 from collections import Counter
 
 import flask
@@ -58,6 +57,7 @@ def autocomplete():
 def query_about():
     entity_type = "paper" # support paper search only
     entity_title = request.args.get('title')
+    entity_title = normalize_title(entity_title)
     data = filter_papers(entity_title, query_entity([entity_type], entity_title))
     paper_ids = [p[0][id_helper_dict[entity_type]] for p in data]
     status_msg = "Success"
@@ -79,6 +79,7 @@ def query_about():
 def query():
     entity_type = "paper" # support paper search only
     entity_title = request.args.get('title')
+    entity_title = normalize_title(entity_title)
     data = filter_papers(entity_title, query_entity([entity_type], entity_title))
     paper_ids = [p[0][id_helper_dict[entity_type]] for p in data]
     status_msg = "Success"
@@ -189,10 +190,7 @@ def search():
     request_data = json.loads(request.form.get("data"))
     keyword = request_data.get("keyword")
     entityType = request_data.get("option")
-    exclude = set(string.punctuation)
-    keyword = ''.join(ch for ch in keyword if ch not in exclude)
-    keyword = keyword.lower()
-    keyword = " ".join(keyword.split())
+    keyword = normalize_title(keyword)
 
     print(entityType, keyword)
     data = query_entity(entityType, keyword)
