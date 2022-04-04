@@ -42,6 +42,15 @@ class PubChart {
       .call(d3.axisLeft(pub_y)
         .tickSize(-width).tickFormat("").ticks(opt.yticks));
 
+    if (data.length == 1 && data[0]["year"] == 0) {
+      this.g.append("g")
+        .append("text")
+        .attr("x", width/2)
+        .attr("y", height/2+5)
+        .attr("text-anchor", "middle")
+        .text("No publication record");
+    }
+
     this.g.selectAll(".bar-pub")
       .data(data)
       .enter().append("rect")
@@ -118,6 +127,15 @@ class CiteChart {
       .attr("class", "grid")
       .call(d3.axisLeft(cit_y)
         .tickSize(-width).tickFormat("").ticks(opt.yticks));
+
+    if (data.length == 1 && data[0]["year"] == 0) {
+      this.g.append("g")
+        .append("text")
+        .attr("x", width/2)
+        .attr("y", height/2+5)
+        .attr("text-anchor", "middle")
+        .text("No citation record");
+    }
 
     this.g.selectAll(".bar-cite")
       .data(data)
