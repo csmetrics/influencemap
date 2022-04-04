@@ -24,6 +24,11 @@ The colour of the outer nodes signifies the ratio of influence in and out. A blu
 
 We define two entities to be coauthors if the entities have contributed to the same paper. Coauthors of the ego are signified by nodes with greyed out names.
 
+
+## Citation Information
+Minjeong Shin, Alexander Soen, Benjamin T. Readshaw, Stephen M. Blackburn, Mitchell Whitelaw, Lexing Xie. Influence Flowers of Academic Entities. IEEE Conference on Visual Analytics Science & Technology (VAST), 2019
+
+
 ## Data
 
 We use the [microsoft academic graph (MAG)](https://www.microsoft.com/en-us/research/project/microsoft-academic-graph/) dataset for our visualisation. The dataset is a large curation of publication indexed by Bing. From MAG, we use the following fields of the paper entries in the dataset,
