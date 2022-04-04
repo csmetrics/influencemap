@@ -147,22 +147,22 @@ def make_year_slider_and_stats(
                        for year, year_counts in cit_year_counts.items()
                        if any(year_counts.values())}
 
-    pub_range_start = min(pub_year_counts)
-    pub_range_end = max(pub_year_counts)
+    pub_range_start = min(pub_year_counts) if pub_year_counts else 0
+    pub_range_end = max(pub_year_counts) if pub_year_counts else 0
     pub_range_len = pub_range_end - pub_range_start + 1
-    cit_range_start = min(map(min, cit_year_counts.values()))
-    cit_range_end = max(map(max, cit_year_counts.values()))
+    cit_range_start = min(map(min, cit_year_counts.values())) if cit_year_counts else 0
+    cit_range_end = max(map(max, cit_year_counts.values())) if cit_year_counts else 0
     cit_range_len = cit_range_end - cit_range_start + 1
 
     stats = dict(
         min_year=pub_range_start,
         max_year=pub_range_end,
         num_papers=pub_count,
-        avg_papers=round(pub_count / pub_range_len, 1),
+        avg_papers=round(pub_count / pub_range_len, 1) if pub_range_len > 0 else 0,
         num_refs=ref_count,
-        avg_refs=round(ref_count / pub_count, 1),
+        avg_refs=round(ref_count / pub_count, 1) if pub_count > 0 else 0,
         num_cites=cit_count,
-        avg_cites=round(cit_count / pub_count, 1))
+        avg_cites=round(cit_count / pub_count, 1) if pub_count > 0 else 0)
 
     chart_start = min(pub_range_start, cit_range_start)
     chart_end = max(pub_range_end, cit_range_end)
