@@ -4,22 +4,13 @@
 		"subgroups": [{
 				"display": "Turing Award Winners",
 				"type": "inner",
+				"info": "The ACM A. M. Turing Award is an annual prize given by the Association for Computing Machinery for contributions of lasting and major technical importance to computer science.",
 				"tag": "turing_award_winners"
 			},
 			{
 				"display": "ANU Researchers",
 				"type": "inner",
 				"tag": "anu_researchers"
-			},
-			{
-				"display": "Fields Medalists",
-				"type": "inner",
-				"tag": "#"
-			},
-			{
-				"display": "Nobel Prize Winners",
-				"type": "inner",
-				"tag": "#"
 			}
 		]
 	},
@@ -58,15 +49,6 @@
 						"tag": "sigmm_toppapers"
 					}
 				]
-			},
-			{
-				"display": "SIG PLAN",
-				"type": "outer",
-				"subgroups": [{
-					"display": "SIG PLAN Conferences",
-					"type": "inner",
-					"tag": "#"
-				}]
 			}
 		]
 	},

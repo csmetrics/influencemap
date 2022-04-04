@@ -1,35 +1,41 @@
 [{
 	"Type": "sigmm_journals",
+	"Icon_type": "journals",
 	"DisplayName": "ACM Transactions on Multimedia Computing, Communications, and Applications",
 	"EntityIds": {
 		"JournalIds": [19610489]
 	}
 }, {
 	"Type": "sigmm_journals",
+	"Icon_type": "journals",
 	"DisplayName": "International Journal of Multimedia Data Engineering and Management",
 	"EntityIds": {
 		"JournalIds": [87630009]
 	}
 }, {
 	"Type": "sigmm_journals",
+	"Icon_type": "journals",
 	"DisplayName": "International Journal of Multimedia Information Retrieval",
 	"EntityIds": {
 		"JournalIds": [2496055428]
 	}
 }, {
 	"Type": "sigmm_journals",
+	"Icon_type": "journals",
 	"DisplayName": "Journal of Multimedia",
 	"EntityIds": {
 		"JournalIds": [16006927]
 	}
 }, {
 	"Type": "sigmm_journals",
+	"Icon_type": "journals",
 	"DisplayName": "Multimedia Systems Journal",
 	"EntityIds": {
 		"JournalIds": [112262039]
 	}
 }, {
 	"Type": "sigmm_journals",
+	"Icon_type": "journals",
 	"DisplayName": "Multimedia Tools and Applications",
 	"EntityIds": {
 		"JournalIds": [110206669]

@@ -27,15 +27,14 @@
         <ul class="treeview-menu">
           {% for subgroup in group.subgroups %}
           <li class="treeview">
-              {% if subgroup.type == "inner" %}
+            {% if subgroup.type == "inner" %}
               <a href="#" class="nav-item" data-displayname="{{subgroup.display}}" data-level="sg" data-g="{{group.display}}">
-                <i class="fa fa-user"></i>
+                <i class="fa fa-circle-o"></i>
                 <span>{{ subgroup.display }}</span>
               </a>
             {% endif %}
             {% if subgroup.type == "outer" %}
             <a href="#" class="nav-item" data-displayname="{{subgroup.display}}" data-level="sg" data-g="{{group.display}}">
-              <i class="fa fa-circle-o"></i>
               {{ subgroup.display }}
               <span class="pull-right-container">
                 <i class="fa fa-angle-left pull-right"></i>
@@ -43,7 +42,8 @@
             </a>
             <ul class="treeview-menu">
               {% for subsubgroup in subgroup.subgroups %}
-                <li><a href="#" class="nav-item" data-displayname="{{subsubgroup.display}}" data-level="ssg" data-g="{{group.display}}" data-sg="{{subgroup.display}}"><i class="fa fa-user"></i>{{ subsubgroup.display }}</a></li>
+                <li><a href="#" class="nav-item" data-displayname="{{subsubgroup.display}}" data-level="ssg" data-g="{{group.display}}" data-sg="{{subgroup.display}}">
+                  <i class="fa fa-circle-o"></i>{{ subsubgroup.display }}</a></li>
               {% endfor %}
             </ul>
            {% endif %}

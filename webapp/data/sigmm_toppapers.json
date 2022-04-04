@@ -1,59 +1,69 @@
 [{
 	"Type": "sigmm_toppapers",
+	"Icon_type": "papers",
 	"DisplayName": "A Dataset and Taxonomy for Urban Sound Research",
 	"EntityIds": {
 		"PaperIds": [2038484192, 2155893237, 2075456404, 2159373756, 1963882359, 2161565164, 2090777335, 2105516263]
 	}
 }, {
 	"Type": "sigmm_toppapers",
+	"Icon_type": "papers",
 	"DisplayName": "Caffe: Convolutional Architecture for Fast Feature Embedding",
 	"EntityIds": {
 		"PaperIds": [2155893237]
 	}
 }, {
 	"Type": "sigmm_toppapers",
+	"Icon_type": "papers",
 	"DisplayName": "Deep Learning for Content-Based Image Retrieval: A Comprehensive Study",
 	"EntityIds": {
 		"PaperIds": [2123229215, 2155893237, 1963882359, 2090777335]
 	}
 }, {
 	"Type": "sigmm_toppapers",
+	"Icon_type": "papers",
 	"DisplayName": "Large-scale visual sentiment ontology and detectors using adjective noun pairs",
 	"EntityIds": {
 		"PaperIds": [2155893237, 2075456404, 1963882359, 2090777335]
 	}
 }, {
 	"Type": "sigmm_toppapers",
+	"Icon_type": "papers",
 	"DisplayName": "Linear cross-modal hashing for efficient multimedia search",
 	"EntityIds": {
 		"PaperIds": [2155893237, 2075456404, 2159373756, 1963882359, 2161565164, 2090777335, 2105516263]
 	}
 }, {
 	"Type": "sigmm_toppapers",
+	"Icon_type": "papers",
 	"DisplayName": "MatConvNet: Convolutional Neural Networks for MATLAB",
 	"EntityIds": {
 		"PaperIds": [2155893237, 1963882359]
 	}
 }, {
 	"Type": "sigmm_toppapers",
+	"Icon_type": "papers",
 	"DisplayName": "Modeling Spatial-Temporal Clues in a Hybrid Deep Learning Framework for Video Classification",
 	"EntityIds": {
 		"PaperIds": [2155893237, 2075456404, 1963882359, 2161565164, 2090777335, 2105516263]
 	}
 }, {
 	"Type": "sigmm_toppapers",
+	"Icon_type": "papers",
 	"DisplayName": "RAPID: Rating Pictorial Aesthetics using Deep Learning",
 	"EntityIds": {
 		"PaperIds": [2038484192, 2155893237, 2075456404, 2159373756, 1963882359, 2161565164, 2009678853, 2090777335, 2105516263]
 	}
 }, {
 	"Type": "sigmm_toppapers",
+	"Icon_type": "papers",
 	"DisplayName": "Recent developments in openSMILE, the munich open-source multimedia feature extractor",
 	"EntityIds": {
 		"PaperIds": [2155893237, 1963882359, 2090777335]
 	}
 }, {
 	"Type": "sigmm_toppapers",
+	"Icon_type": "papers",
 	"DisplayName": "Revisiting the VLAD image representation",
 	"EntityIds": {
 		"PaperIds": [2155893237, 2075456404, 1963882359, 2090777335, 2105516263]

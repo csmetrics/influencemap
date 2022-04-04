@@ -38,7 +38,7 @@
 
     <section class="content-header">
       <h4>
-        {{ category.display }}<br>
+        {{ category.display }}<br><br>
         <small>{{category.info}}</small>
       </h4>
     </section>
@@ -63,26 +63,34 @@
                     {% if entity.PhotoUrl %}
                       <span class="info-box-icon" style="background-image: url('{{entity.PhotoUrl}}');"></span>
                     {% else %}
-                      <span class="info-box-icon bg-gray">
-                      {% if entity.icon_type == "projects" %}<i class="fa fa-rocket"></i>
-                      {% elif entity.icon_type == "conferences" or entity.icon_type == "journals" or entity.icon_type == "venues" %}<i class="fa fa-university"></i>
+                      <span class="info-box-icon">
+                      {% if entity.Icon_type == "projects" %}<i class="fa fa-rocket"></i>
+                      {% elif entity.Icon_type == "papers" %}<i class="fa fa-book"></i>
+                      {% elif entity.Icon_type == "conferences" or entity.Icon_type == "journals" or entity.Icon_type == "venues" %}<i class="fa fa-university"></i>
                       {% else %}<i class="fa fa-user"></i>
                       {% endif %}
                       </span>
                     {% endif %}
                   <div class="info-box-content">
                     <span class="info-box-text text-truncate">
-                      <b>{{entity.DisplayName}}</b><br/>{{entity.Year}}
+                      <b>{{entity.DisplayName}}</b>
+                    </span>
+                    <span class="info-box-text text-truncate">
+                      {{entity.Year}}
                     </span>
                   </div>
                   <div class="info-box-more hidden">
+                    <small>
                     {% for aff in entity.Affiliations %}
                       <li>{{ aff }}</li>
                     {% endfor %}
+                    {% if entity.Affiliations %}<br/>{% endif %}
                     {% for keyword in entity.Keywords %}
                       <li>{{ keyword }}</li>
-                    {% endfor %} <br/>
-                    <small>{{entity.Citation | safe}}</small>
+                    {% endfor %}
+                    {% if entity.Keywords %}<br/>{% endif %}
+                    {{entity.Citation | safe}}
+                    </small>
                   </div>
                 </div>
             {% endfor %}
@@ -105,10 +113,14 @@
     {% for subsubgroup in category.subgroups %}
     <div class="content_section" data-displayname="{{subsubgroup.display}}" data-level="ssg" data-g="{{group.display}}" data-sg="{{category.display}}">
     <section class="content-header">
-      <h5>
+      <h4>
         {{ subsubgroup.display }}<br>
-        <small>{{subsubgroup.info}}</small>
-      </h5>
+        {% if subsubgroup.info %}
+        <div style="padding: 10px 0px">
+          <small>{{subsubgroup.info}}</small>
+        </div>
+        {% endif %}
+      </h4>
     </section>
     <section class="content">
       <div class="row">
@@ -117,7 +129,6 @@
             {% for entity in subsubgroup.docs %}
               <div class="info-list col-xs-12 hidden">
                 <li>
-                  <a href="/submit/?id={{ entity.FlowerUrl }}"><b>{{entity.DisplayName}}</b></a>
                   {{entity.Year}}
                   {% for aff in entity.Affiliations %}
                     {{ aff }}
@@ -126,29 +137,37 @@
               </div>
               <a href="/submit/?id={{ entity.FlowerUrl }}">
                 <div class="info-box">
-                    {% if entity.PhotoUrlFALSE %}
+                    {% if entity.PhotoUrl %}
                       <span class="info-box-icon" style="background-image: '{{entity.PhotoUrl}}';"></span>
                     {% else %}
-                      <span class="info-box-icon bg-gray">
-                      {% if entity.icon_type == "projects" %}<i class="fa fa-rocket"></i>
-                      {% elif entity.icon_type == "conferences" or entity.icon_type == "journals" or entity.icon_type == "venues" %}<i class="fa fa-university"></i>
+                      <span class="info-box-icon">
+                      {% if entity.Icon_type == "projects" %}<i class="fa fa-rocket"></i>
+                      {% elif entity.Icon_type == "papers" %}<i class="fa fa-book"></i>
+                      {% elif entity.Icon_type == "conferences" or entity.Icon_type == "journals" or entity.Icon_type == "venues" %}<i class="fa fa-university"></i>
                       {% else %}<i class="fa fa-user"></i>
                       {% endif %}
                       </span>
                     {% endif %}
                   <div class="info-box-content">
                     <span class="info-box-text text-truncate">
-                      <b>{{entity.DisplayName}}</b><br/>{{entity.Year}}
+                      <b>{{entity.DisplayName}}</b>
+                    </span>
+                    <span class="info-box-text text-truncate">
+                      {{entity.Year}}
                     </span>
                   </div>
                   <div class="info-box-more hidden">
+                    <small>
                     {% for aff in entity.Affiliations %}
                       <li>{{ aff }}</li>
                     {% endfor %}
+                    {% if entity.Affiliations %}<br/>{% endif %}
                     {% for keyword in entity.Keywords %}
                       <li>{{ keyword }}</li>
-                    {% endfor %} <br/>
-                    <small>{{entity.Citation}}</small>
+                    {% endfor %}
+                    {% if entity.Keywords %}<br/>{% endif %}
+                    {{entity.Citation}}
+                    </small>
                   </div>
                 </div>
               </a>

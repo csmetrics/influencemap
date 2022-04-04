@@ -20,6 +20,7 @@ a {
 .content {
   padding-top: 0;
   padding-bottom: 0;
+  min-height: 100px;
   font-size: 18px;
   font-family: 'Lato', Helvetica, Arial, Verdana;
 }
@@ -400,31 +401,35 @@ text {
 
 /*    ------ Stylesheet for browse.html ------    */
 .info-box {
-  min-height: 60px;
+  min-height: 75px;
   max-height: auto;
-  border: 1px solid gray;
+  border: 1px solid #ddd;
   width: 260px;
   float: left;
   margin: 5px 0px 5px 20px;
   color: black;
+  cursor: pointer;
 }
 .info-box-icon {
   width: 58px;
-  height: 58px;
-  padding: 5px;
+  height: 75px;
+  padding: 20px 5px;
+  font-size: 32px;
   background-repeat: no-repeat;
   background-position: center;
   background-size: cover;
+  border-radius: 0;
+  background-color: #efefef;
 }
 .info-box-img {
   width: 58px;
-  height: 58px;
+  height: 75px;
   padding: 2px;
   display: inline;
 }
 .info-box-content {
   margin-left: 65px;
-  height: 58px;
+  height: 75px;
   padding: 9px 5px;
 }
 .info-box-text {
@@ -436,13 +441,14 @@ text {
 .info-box-more {
   position: absolute;
   z-index: 900;
-  padding: 3px 10px;
+  padding: 15px 10px;
   margin: -1px;
   width: 260px;
   overflow-y: scroll;
-  border: 1px solid gray;
+  border: 1px solid #ddd;
   border-top: 1px solid #ddd;
-  background-color: white;
+  border-radius: 0 0 2px 2px;
+  background-color: #efefef;
 }
 .align-buttons {
   position: fixed;
