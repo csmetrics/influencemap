@@ -428,14 +428,15 @@ text {
   display: inline;
 }
 .info-box-content {
-  margin-left: 65px;
+  margin-left: 60px;
   height: 75px;
-  padding: 9px 5px;
+  padding: 7px 10px;
 }
 .info-box-text {
   white-space: normal;
+  text-transform: none;
   display: -webkit-box;
-  -webkit-line-clamp: 2;
+  -webkit-line-clamp: 3;
   -webkit-box-orient: vertical;
 }
 .info-box-more {
