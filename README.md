@@ -26,7 +26,7 @@ We define two entities to be coauthors if the entities have contributed to the s
 
 
 ## Citation Information
-Minjeong Shin, Alexander Soen, Benjamin T. Readshaw, Stephen M. Blackburn, Mitchell Whitelaw, Lexing Xie. Influence Flowers of Academic Entities. IEEE Conference on Visual Analytics Science & Technology (VAST), 2019
+Minjeong Shin, Alexander Soen, Benjamin T. Readshaw, Stephen M. Blackburn, Mitchell Whitelaw, Lexing Xie. [Influence Flowers of Academic Entities.](https://ieeexplore.ieee.org/document/8986934) IEEE Conference on Visual Analytics Science & Technology (VAST), 2019
 
 
 ## Data
