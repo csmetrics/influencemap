@@ -3,7 +3,8 @@
     "hostname":"localhost:9200",
   },
   "data":{
-    "filedir":"/graph/data/graph",
-    "version":"2019-11-08"
+    "filedir":"/data/u1033719/graph",
+    "version":"mag-2021-12-06"
+    "tag":"new"
   }
 }

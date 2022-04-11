@@ -12,9 +12,16 @@ def init_es():
     print("Elasticsearch connections initialized")
 
 
+def tagged_index(name):
+    index_name = name
+    if conf.get("data.tag"):
+        index_name = "_".join([name, conf.get("data.tag")])
+    return index_name.lower()
+
+
 def import_Authors(r):
     doc = Authors()
-    doc.meta.index = "Authors".lower()
+    doc.meta.index = tagged_index("Authors")
     doc.meta.id = doc.AuthorId = int(r[0])
     doc.Rank = int(r[1])
     doc.NormalizedName = r[2]
@@ -29,7 +36,7 @@ def import_Authors(r):
 
 def import_Affiliations(r):
     doc = Affiliations()
-    doc.meta.index = "Affiliations".lower()
+    doc.meta.index = tagged_index("Affiliations")
     doc.meta.id = doc.AffiliationId = int(r[0])
     doc.Rank = int(r[1])
     doc.NormalizedName = r[2]
@@ -49,7 +56,7 @@ def import_Affiliations(r):
 
 def import_Papers(r):
     doc = Papers()
-    doc.meta.index = "Papers".lower()
+    doc.meta.index = tagged_index("Papers")
     doc.meta.id = doc.PaperId = int(r[0])
     doc.Rank = int(r[1])
     doc.Doi = r[2]
@@ -87,7 +94,7 @@ def import_Papers(r):
 
 def import_PaperReferences(r):
     doc = PaperReferences()
-    doc.meta.index = "PaperReferences".lower()
+    doc.meta.index = tagged_index("PaperReferences")
     doc.PaperId = int(r[0])
     doc.PaperReferenceId = int(r[1])
     doc.meta.id = "{}_{}".format(doc.PaperId, doc.PaperReferenceId)
@@ -96,7 +103,7 @@ def import_PaperReferences(r):
 
 def import_PaperAuthorAffiliations(r):
     doc = PaperAuthorAffiliations()
-    doc.meta.index = "PaperAuthorAffiliations".lower()
+    doc.meta.index = tagged_index("PaperAuthorAffiliations")
     doc.PaperId = int(r[0])
     doc.AuthorId = int(r[1])
     doc.AffiliationId = int(r[2]) if r[2] != "" else None
@@ -109,7 +116,7 @@ def import_PaperAuthorAffiliations(r):
 
 def import_ConferenceInstances(r):
     doc = ConferenceInstances()
-    doc.meta.index = "ConferenceInstances".lower()
+    doc.meta.index = tagged_index("ConferenceInstances")
     doc.meta.id = doc.ConferenceInstanceId = int(r[0])
     # doc.Rank = int(r[1]) # removed attr ver.2019-01-01
     doc.NormalizedName = r[1]
@@ -134,7 +141,7 @@ def import_ConferenceInstances(r):
 
 def import_ConferenceSeries(r):
     doc = ConferenceSeries()
-    doc.meta.index = "ConferenceSeries".lower()
+    doc.meta.index = tagged_index("ConferenceSeries")
     doc.meta.id = doc.ConferenceSeriesId = int(r[0])
     doc.Rank = int(r[1])
     doc.NormalizedName = r[2]
@@ -148,7 +155,7 @@ def import_ConferenceSeries(r):
 
 def import_Journals(r):
     doc = Journals()
-    doc.meta.index = "Journals".lower()
+    doc.meta.index = tagged_index("Journals")
     doc.meta.id = doc.JournalId = int(r[0])
     doc.Rank = int(r[1])
     doc.NormalizedName = r[2]
@@ -165,7 +172,7 @@ def import_Journals(r):
 
 def import_FieldsOfStudy(r):
     doc = FieldsOfStudy()
-    doc.meta.index = "FieldsOfStudy".lower()
+    doc.meta.index = tagged_index("FieldsOfStudy")
     doc.meta.id = doc.FieldOfStudyId = int(r[0])
     doc.Rank = int(r[1])
     doc.NormalizedName = r[2]
@@ -181,7 +188,7 @@ def import_FieldsOfStudy(r):
 
 def import_FieldOfStudyChildren(r):
     doc = FieldOfStudyChildren()
-    doc.meta.index = "FieldOfStudyChildren".lower()
+    doc.meta.index = tagged_index("FieldOfStudyChildren")
     doc.FieldOfStudyId = int(r[0])
     doc.ChildFieldOfStudyId = int(r[1])
     doc.meta.id = "{}_{}".format(doc.FieldOfStudyId, doc.ChildFieldOfStudyId)
@@ -190,7 +197,7 @@ def import_FieldOfStudyChildren(r):
 
 def import_PaperFieldsOfStudy(r):
     doc = PaperFieldsOfStudy()
-    doc.meta.index = "PaperFieldsOfStudy".lower()
+    doc.meta.index = tagged_index("PaperFieldsOfStudy")
     doc.PaperId = int(r[0])
     doc.FieldOfStudyId = int(r[1])
     doc.Similarity = float(r[2])
