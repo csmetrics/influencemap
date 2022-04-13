@@ -40,6 +40,10 @@ function formatJournal(journal_name) {
 }
 
 
+function formatPaper(paper) {
+  return toTitleCase(paper);
+}
+
 function formatCitation(paper, authorsToHighlight=[], node_name){
   var authors = paper["Authors"];
   authors = authors.sort(function(a, b) {return a['AuthorOrder'] - b['AuthorOrder']});

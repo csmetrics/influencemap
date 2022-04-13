@@ -182,9 +182,26 @@ class Florist:
         """Convert IDs to indices."""
         indices = np.array(ids, dtype=np.uint32)
         length = _ids_to_ind(mapper.arrs, indices)
-        if not allow_not_found and lenth < len(indices):
+        if not allow_not_found and length < len(indices):
             raise KeyError('id not found')
         return indices[:length]
+
+    def _id_to_index(self, type, id, allow_not_found):
+        in2ind_maps = [
+            self.author_id2ind_map,
+            self.journal_id2ind_map,
+            self.aff_id2ind_map,
+            self.fos_id2ind_map
+        ]
+        if type == 1:
+            try:
+                index = self._ids_to_indices([id], self.journal_id2ind_map, allow_not_found)[0]
+            except:
+                index = self._ids_to_indices([id], self.cs_id2ind_map, allow_not_found)[0]
+        else:
+            index = self._ids_to_indices(
+                [id], in2ind_maps[type], allow_not_found)[0]
+        return index
 
     def _get_entity_indices(
         self,
@@ -355,8 +372,81 @@ class Florist:
             pub_year_counts, cit_year_counts, ref_count)
 
 
-split_result_val_t = nb.types.Tuple([nb.u4, nb.f4, nb.f4, nb.u1, nb.u1])
+    def get_node_info(
+        self,
+        *,
+        node_id=None,
+        node_type=None,
+        author_ids=[],
+        affiliation_ids=[],
+        field_of_study_ids=[],
+        journal_ids=[],
+        conference_series_ids=[],
+        paper_ids=[],
+        self_citations=False, coauthors=True,
+        pub_years=None, cit_years=None,
+        allow_not_found=False,
+        max_results=None,
+    ):
+        """Get the list of papers between the given entity and the ego.
 
+        Returns a 2-tuple of dictionaries (influencers, influencees)
+        of the paper indices.
+        """
+        # TODO: if coauthors=False, self_citations has no effect on the
+        # result, but may affect the speed of the computation. Figure
+        # out whether it's faster to include or exclude them and set it
+        # to that.
+
+        # convert node_id to node_index.
+        node_index = self._id_to_index(
+            type=node_type, id=node_id, allow_not_found=allow_not_found)
+
+        entity_indices = self._get_entity_indices(
+            author_ids=author_ids, aff_ids=affiliation_ids,
+            fos_ids=field_of_study_ids, journal_ids=journal_ids,
+            cs_ids=conference_series_ids, allow_not_found=allow_not_found)
+        paper_indices = self._get_paper_indices(
+            paper_ids, allow_not_found=allow_not_found)
+
+        pub_ids = self._get_id_year_range(pub_years)
+        cit_ids = self._get_id_year_range(cit_years)
+
+        # nb.literally makes it a compile-time constant. This does
+        # require one compilation per value.
+        citor_papers, citee_papers = _make_node_info(
+            node_index,
+            entity_indices, paper_indices,
+            self.entity2paper_map.arrs,
+            self.paper2entity_map.arrs,
+            self.citation_maps.arrs,
+            pub_ids=pub_ids, cit_ids=cit_ids,
+            self_citations=nb.literally(bool(self_citations)),
+            coauthors=nb.literally(bool(coauthors)),
+            author_range=nb.literally(self.author_range),
+            aff_range=nb.literally(self.aff_range))
+
+        # convert paper indices to paper ids
+        # return [int(self.paper_ind2id_map.arrs[idx]) for idx in citor_papers]
+        return _summarize_node_info(citor_papers, citee_papers, self.paper_ind2id_map.arrs)
+
+
+def _summarize_node_info(citor_papers, citee_papers, ind2id):
+    node_info = {}
+    for citee_idx, paper_idx in citee_papers:
+        paper_id = str(ind2id[paper_idx])
+        if paper_id not in node_info:
+            node_info[paper_id] = {"reference": [], "citation": []}
+        node_info[paper_id]["citation"].append(str(ind2id[citee_idx]))
+    for paper_idx, citor_idx in citor_papers:
+        paper_id = str(ind2id[paper_idx])
+        if paper_id not in node_info:
+            node_info[paper_id] = {"reference": [], "citation": []}
+        node_info[paper_id]["reference"].append(str(ind2id[citor_idx]))
+    return node_info
+
+
+split_result_val_t = nb.types.Tuple([nb.u4, nb.f4, nb.f4, nb.u1, nb.u1])
 
 @nb.njit(nogil=True)
 def get_split_res(
@@ -602,7 +692,7 @@ def _make_flower(
                     citee_papers.get(citee_id, nb.u4(0)) + nb.u4(1))
 
     # Map entity index to score (influencees).
-    citor_entities = nb.typed.Dict.empty(key_type=nb.u4, value_type=nb.f4)    
+    citor_entities = nb.typed.Dict.empty(key_type=nb.u4, value_type=nb.f4)
     for paper_id, (count, weight) in citor_papers.items():
         entity_ids = _traverse_one(paper2entity_map, paper_id)
         if not self_citations and _is_self_citation(ego_entities, entity_ids):
@@ -616,7 +706,7 @@ def _make_flower(
                    else nb.f4(count)))
 
     # Map entity index to score (influencers).
-    citee_entities = nb.typed.Dict.empty(key_type=nb.u4, value_type=nb.f4)    
+    citee_entities = nb.typed.Dict.empty(key_type=nb.u4, value_type=nb.f4)
     for paper_id, count in citee_papers.items():
         entity_ids = _traverse_one(paper2entity_map, paper_id)
         if not self_citations and _is_self_citation(ego_entities, entity_ids):
@@ -678,3 +768,56 @@ def _make_stats(
         ref_count += len(citees)
 
     return pub_year_counts, cit_year_counts, ref_count
+
+
+cite_map = nb.types.Tuple([nb.u4, nb.u4])
+
+@nb.njit(nogil=True)
+def _make_node_info(
+    node_id,
+    entity_ids, paper_ids,
+    entity2paper_map, paper2entity_map, citation_maps,
+    *,
+    pub_ids, cit_ids, self_citations, coauthors,
+    author_range, aff_range,
+):
+    ego_entities = set(entity_ids)  # Entities forming the ego.
+    ego_papers = set(paper_ids)  # All papers written by ego.
+    coauthor_ids = set()  # All coauthors of ego.
+
+    for entity_id in ego_entities:
+        ego_papers.update(_traverse_one(entity2paper_map, entity_id))
+
+    # key_type = citor/citee_paper_id, value = paper_id
+    citor_papers = nb.typed.List.empty_list(cite_map)
+    citee_papers = nb.typed.List.empty_list(cite_map)
+    for paper_id in ego_papers:
+        paper_entities = _traverse_one(paper2entity_map, paper_id)
+        coauthor_ids.update(paper_entities)
+
+        if not _is_in_range(pub_ids, paper_id):
+            continue
+
+        citors, citees = _traverse_citations(citation_maps, paper_id)
+        for citor_id in citors:
+            entity_ids = _traverse_one(paper2entity_map, citor_id)
+            if not self_citations and _is_self_citation(ego_entities, entity_ids):
+                continue
+            if node_id not in entity_ids:
+                continue
+            if _is_in_range(cit_ids, citor_id):
+                citor_papers.append((citor_id, paper_id))
+
+        for citee_id in citees:
+            entity_ids = _traverse_one(paper2entity_map, citee_id)
+            if not self_citations and _is_self_citation(ego_entities, entity_ids):
+                continue
+            if node_id not in entity_ids:
+                continue
+            if _is_in_range(pub_ids, citee_id):
+                citee_papers.append((paper_id, citee_id))
+
+    # print("citor_papers", citor_papers)
+    # print("citee_papers", citee_papers)
+
+    return citor_papers, citee_papers

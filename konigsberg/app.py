@@ -15,6 +15,10 @@ def _get_ids_from_request(argname):
         flask.abort(400)
 
 
+def _get_id_from_request(argname):
+    return int(flask.request.args.get(argname, ''))
+
+
 def _get_bool_from_request(argname):
     return bool(flask.request.args.get(argname, ''))
 
@@ -128,6 +132,38 @@ def get_stats():
         allow_not_found=True)
 
     return flask.jsonify(stats_as_dict(stats))
+
+
+@app.route('/get-node-info')
+def get_node_info():
+    node_id = _get_id_from_request('node-id')
+    node_type = _get_int_from_request('node-type')
+
+    author_ids = _get_ids_from_request('author-ids')
+    affiliation_ids = _get_ids_from_request('affiliation-ids')
+    field_of_study_ids = _get_ids_from_request('field-of-study-ids')
+    journal_ids = _get_ids_from_request('journal-ids')
+    conference_series_ids = _get_ids_from_request('conference-series-ids')
+    paper_ids = _get_ids_from_request('paper-ids')
+
+    self_citations = _get_bool_from_request('self-citations')
+    exclude_coauthors = _get_bool_from_request('exclude-coauthors')
+
+    pub_years = _get_range_from_request('pub-years')
+    cit_years = _get_range_from_request('cit-years')
+
+    max_results = _get_int_from_request('max-results')
+
+    node_info = florist.get_node_info(
+        node_id=node_id, node_type=node_type,
+        author_ids=author_ids, affiliation_ids=affiliation_ids,
+        field_of_study_ids=field_of_study_ids, journal_ids=journal_ids,
+        conference_series_ids=conference_series_ids, paper_ids=paper_ids,
+        self_citations=self_citations, coauthors=not exclude_coauthors,
+        pub_years=pub_years, cit_years=cit_years,
+        allow_not_found=True, max_results=max_results)
+
+    return flask.jsonify(node_info)
 
 
 if __name__ == '__main__':

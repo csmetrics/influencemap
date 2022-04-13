@@ -68,3 +68,27 @@ class KonigsbergClient:
         response = self.session.get(self.url + '/get-stats', params=params)
         response.raise_for_status()
         return response.json()
+
+    def get_node_info(
+        self,
+        *,
+        node_id=None,
+        node_type=None,
+        author_ids=(),
+        affiliation_ids=(),
+        conference_series_ids=(),
+        journal_ids=(),
+        field_of_study_ids=(),
+        paper_ids=(),
+        pub_years=None,
+        cit_years=None,
+        coauthors=True,
+        self_citations=False,
+        max_results=None,
+    ):
+        params = get_ids(locals())
+        params['node-id'] = int(node_id)
+        params['node-type'] = node_type
+        response = self.session.get(self.url + '/get-node-info', params=params)
+        response.raise_for_status()
+        return response.json()
