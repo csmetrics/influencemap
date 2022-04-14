@@ -41,7 +41,11 @@ function formatJournal(journal_name) {
 
 
 function formatPaper(paper) {
-  return toTitleCase(paper);
+  paper_str = paper["OriginalTitle"] + ", " + paper["Year"];
+  if (paper["OriginalVenue"] != "") {
+    paper_str += ", " + paper["OriginalVenue"];
+  }
+  return paper_str;
 }
 
 function formatCitation(paper, authorsToHighlight=[], node_name){
