@@ -8,7 +8,7 @@ from flask import request
 from flask_cors import CORS, cross_origin
 
 import core.utils.entity_type as ent
-from core.search.query_info import paper_info_db_check_multiquery
+from core.search.query_info import paper_info_db_check_multiquery, papers_prop_query
 from core.search.query_name import (
     affiliation_name_query, author_name_query, conference_name_query,
     fos_name_query, get_conf_journ_display_names, journal_name_query,
@@ -519,6 +519,13 @@ def get_node_info_single(entity_id, entity_type, year_ranges):
     return {"node_links": links}
 
 
+def get_paper_info(data):
+    papers = set()
+    for d in data:
+        papers.update(set([d["ego_paper"]] + d["citation"] + d["reference"]))
+    paper_info = papers_prop_query(list(papers))
+    return paper_info
+
 
 @blueprint.route('/get_node_info/', methods=['POST'])
 def get_node_info():
@@ -535,6 +542,7 @@ def get_node_info():
     data["flower_name"] = flower_name
     data["max_page"] = math.ceil(len(data["node_links"]) / 5)
     data["node_links"] = data["node_links"][0:min(5, len(data["node_links"]))]
+    data["paper_info"] = get_paper_info(data["node_links"])
     return flask.jsonify(data)
 
 
@@ -544,11 +552,13 @@ def get_next_node_info_page():
     request_data = json.loads(request.form.get("data_string"))
     node_name = request_data.get("name")
     node_type = request_data.get("node_type")
+    node_ids = request_data.get("ids")
     session = request_data.get("session")
     year_ranges = session["year_ranges"]
     page = int(request_data.get("page"))
 
-    node_info = get_node_info_single(node_name, node_type, year_ranges)
+    node_info = get_node_info_single(node_ids, node_type, year_ranges)
     page_length = 5
-    page_info = {"node_links": node_info["node_links"][0+page_length*(page-1):min(page_length*page, len(node_info["node_links"]))]}
-    return flask.jsonify(page_info)
+    data = {"node_links": node_info["node_links"][0+page_length*(page-1):min(page_length*page, len(node_info["node_links"]))]}
+    data["paper_info"] = get_paper_info(data["node_links"])
+    return flask.jsonify(data)

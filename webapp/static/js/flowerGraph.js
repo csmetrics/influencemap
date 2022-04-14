@@ -855,6 +855,7 @@ function nextPage() {
   if (page_counter != max_page_num) {
     var data_dict = { // input to the views.py - search()
         "name": node_info_name,
+        "ids": node_info_ids,
         "node_type": node_info_type,
         "page": page_counter + 1,
         "session": session
@@ -889,6 +890,7 @@ function prevPage() {
   if (page_counter != 1) {
     var data_dict = { // input to the views.py - search()
         "name": node_info_name,
+        "ids": node_info_ids,
         "node_type": node_info_type,
         "page": page_counter - 1,
         "session": session

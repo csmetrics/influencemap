@@ -64,10 +64,10 @@ def papers_prop_query(paper_ids):
     ''' Get properties of a paper.
     '''
     # Targets
-    papers_targets = ['PaperTitle', 'ConferenceSeriesId', 'JournalId', 'Year']
+    papers_targets = ['DocType', 'OriginalTitle', 'OriginalVenue', 'Year']
 
     # Query for papers
-    papers_s = Search(index = 'papers', using = client)
+    papers_s = Search(index = 'papers_new', using = client)
     papers_s = papers_s.query('terms', PaperId=paper_ids)
     papers_s = papers_s.source(papers_targets)
     papers_s = papers_s.params(request_timeout=TIMEOUT)
@@ -80,32 +80,10 @@ def papers_prop_query(paper_ids):
         # Get properties for papers
         paper_res = paper.to_dict()
         p_id = int(paper.meta.id)
-
-        # Rename Conference
-        if 'ConferenceSeriesId' in paper_res:
-            conf_ids.add(paper_res['ConferenceSeriesId'])
-
-        # Journal
-        if 'JournalId' in paper_res:
-            jour_ids.add(paper_res['JournalId'])
-
         paper_res['PaperId'] = p_id
         results[p_id] = paper_res
 
-    conf_names = conference_name_dict_query(list(conf_ids))
-    jour_names = journal_name_dict_query(list(jour_ids))
-
-    res = dict()
-    for p_id, paper_info in results.items():
-        if 'ConferenceSeriesId' in paper_info:
-            paper_info['ConferenceName'] = conf_names[paper_info['ConferenceSeriesId']]
-
-        if 'JournalId' in paper_info:
-            paper_info['JournalName'] = jour_names[paper_info['JournalId']]
-
-        res[p_id] = paper_info
-
-    return res
+    return results
 
 
 def paa_prop_query(paper_ids):
