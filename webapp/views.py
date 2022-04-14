@@ -516,7 +516,7 @@ def get_node_info_single(entity_id, entity_type, year_ranges):
 
     links = [{"ego_paper": id, "reference": v["reference"], "citation": v["citation"]} for id, v in node_info.items()]
 
-    return {"node_links": links, "paper_info": {}}
+    return {"node_links": links}
 
 
 
@@ -550,5 +550,5 @@ def get_next_node_info_page():
 
     node_info = get_node_info_single(node_name, node_type, year_ranges)
     page_length = 5
-    page_info = {"paper_info": node_info["paper_info"], "node_links": node_info["node_links"][0+page_length*(page-1):min(page_length*page, len(node_info["node_links"]))]}
+    page_info = {"node_links": node_info["node_links"][0+page_length*(page-1):min(page_length*page, len(node_info["node_links"]))]}
     return flask.jsonify(page_info)

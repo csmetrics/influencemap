@@ -16,7 +16,10 @@ def _get_ids_from_request(argname):
 
 
 def _get_id_from_request(argname):
-    return int(flask.request.args.get(argname, ''))
+    try:
+        return int(flask.request.args.get(argname, ''))
+    except ValueError:
+        flask.abort(400)
 
 
 def _get_bool_from_request(argname):

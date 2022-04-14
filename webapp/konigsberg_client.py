@@ -87,8 +87,10 @@ class KonigsbergClient:
         max_results=None,
     ):
         params = get_ids(locals())
-        params['node-id'] = int(node_id)
-        params['node-type'] = node_type
+        params.update({
+            'node-id': int(node_id),
+            'node-type': node_type
+        })
         response = self.session.get(self.url + '/get-node-info', params=params)
         response.raise_for_status()
         return response.json()

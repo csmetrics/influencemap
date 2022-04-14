@@ -193,6 +193,7 @@ class Florist:
             self.aff_id2ind_map,
             self.fos_id2ind_map
         ]
+        # There should be better way to find whether it is journal or conference type
         if type == 1:
             try:
                 index = self._ids_to_indices([id], self.journal_id2ind_map, allow_not_found)[0]
