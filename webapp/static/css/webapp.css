@@ -243,6 +243,162 @@ table {
   background-color: rgba(0,0,0,0.5);
 }
 
+/* search table style */
+.searchtables-container {
+  height: 100%;
+  width: 100%;
+  background-color: #fff;
+}
+
+#searchtable td,
+#selectiontable td {
+  font-size: 16px;
+}
+#searchtable td i,
+#selectiontable td i {
+  font-size: 20px;
+  float: left;
+  padding: 10px;
+}
+#searchtable td p,
+#selectiontable td p {
+  padding: 2px 10px;
+}
+
+.right-col {
+  height: 100%;
+  border-left: 1px solid #ddd;
+}
+
+.left-col {
+  height: 100%;
+  padding: 0px;
+}
+
+div.searchbar {
+  background-color: #fff;
+  border-radius: 10px;
+  height: 46px;
+  border: 1px solid #ccc;
+}
+
+.searchbar input {
+  float: left;
+  font-size: 16px;
+  background: #fff;
+  padding: 10px;
+  height: 100%;
+  border-radius: 10px 0 0 10px;
+  border: none;
+}
+
+/* Form submit button */
+.searchbar button {
+  background: #fff;
+}
+
+#search-btn {
+  background: transparent;
+}
+
+.search-div {
+  padding: 10px;
+  background-color: #fff;
+  border-bottom: 1px solid #ddd;
+}
+
+.grey-theme-inverse, .entity-type-btn {
+  border-radius: 10px;
+  background-color: #fff;
+  font-size: 16px;
+  height: 46px;
+  border: 1px solid #ccc;
+  /* color: #999; */
+}
+
+.grey-theme, .selected-entity {
+  border-radius: 10px;
+  background-color: #49DCB1;
+  border: 1px solid #ddd;
+  /* color: #fff; */
+}
+
+.btn:focus, .btn.focus {
+}
+
+table.dataTable thead {
+  display: none;
+}
+
+table.dataTable.no-footer {
+  border-bottom: 0px solid #fff;
+}
+
+
+.dataTables_wrapper.no-footer .dataTables_scrollBody {
+  border-bottom: 0px solid #111;
+}
+
+.inputbar {
+  padding: 5px 10px;
+  border-radius: 10px;
+  border: 1px solid #ccc;
+  font-size: 16px;
+  height: 46px;
+  width: 100%;
+}
+
+#continue-btn {
+  background-color: #EEB868;
+  width: 240px;
+  font-size: 16px;
+  height: 46px;
+  border-radius: 10px;
+  font-weight: bold;
+}
+
+/* The Modal (background) */
+.modal {
+    display: none; /* Hidden by default */
+    position: fixed; /* Stay in place */
+    z-index: 300; /* Sit on top */
+    left: 0;
+    top: 0;
+    width: 100%; /* Full width */
+    height: 100%; /* Full height */
+    overflow: auto; /* Enable scroll if needed */
+    background-color: rgb(0,0,0); /* Fallback color */
+    background-color: rgba(0,0,0,0.4); /* Black w/ opacity */
+}
+
+/* Modal Content/Box */
+.modal-content {
+    z-index: 300;
+    background-color: #fefefe;
+    margin: 5% auto; /* 15% from the top and centered */
+    padding: 20px;
+    border: 1px solid #888;
+    width: 950px; /* Could be more or less, depending on screen size */
+}
+.modal-content img {
+  border: 1px solid #bbb;
+}
+
+/* The Close Button */
+.close-modal {
+    color: #aaa;
+    float: right;
+    font-size: 28px;
+    font-weight: bold;
+}
+
+.close-modal:hover,
+.close-modal:focus {
+    color: black;
+    text-decoration: none;
+    cursor: pointer;
+}
+
 .flower-loading{
   background: url('../images/button_loading.gif') no-repeat center center;
   background-size: 160px 20px;
@@ -375,11 +531,19 @@ text {
   font-style: italic;
 }
 
-.label-as-badge {
+.label-as-badge,
+button {
   border-radius: 4px;
   padding: 2px 4px;
-  background-color: rgb(245, 245, 245);
-  border: 1px solid #e5e5e5;
+  background-color: #f4f4f4;
+  border: 1px solid #ccc;
+}
+
+input, select {
+  border-radius: 4px;
+  padding: 2px 4px;
+  background-color: #ffffff;
+  border: 1px solid #ccc;
 }
 
 .custom-text-box {
@@ -403,7 +567,7 @@ text {
 .info-box {
   min-height: 75px;
   max-height: auto;
-  border: 1px solid #ddd;
+  border: 1px solid #ccc;
   width: 260px;
   float: left;
   margin: 5px 0px 5px 20px;
@@ -446,10 +610,10 @@ text {
   margin: -1px;
   width: 260px;
   overflow-y: scroll;
-  border: 1px solid #ddd;
-  border-top: 1px solid #ddd;
+  border: 1px solid #ccc;
+  border-top: 1px solid #ccc;
   border-radius: 0 0 2px 2px;
-  background-color: #efefef;
+  background-color: #f4f4f4;
 }
 .align-buttons {
   position: fixed;
@@ -461,26 +625,22 @@ text {
 /* The Close Button */
 .close {
     color: #aaa;
-    float: right;
-    font-size: 28px;
-    font-weight: bold;
+  float: right;
+  font-size: 28px;
+  font-weight: bold;
 }
-
 .close:hover,
 .close:focus {
-    color: black;
-    text-decoration: none;
-    cursor: pointer;
+  color: black;
+  text-decoration: none;
+  cursor: pointer;
 }
-
-
 
 /*    ---     Misc.     ---     */
 .cntr{
   justify-content: center;
   display: flex;
 }
-
 
 td{
   cursor: pointer;
@@ -492,38 +652,83 @@ tr:hover td{
   background: none;
 }
 
+hr {
+  margin-top: 0px;
+  margin-bottom: 0px;
+  border: 0;
+  border-top: 1px solid #ddd;
+}
+
+/* The popup on node click */
+.node_info_selection {
+  display: none; /* Hidden by default */
+  position: fixed; /* Stay in place */
+  z-index: 1000; /* Sit on top */
+  left: 0;
+  top: 0;
+  width: 180px; /* Full width */
+  overflow: auto; /* Enable scroll if needed */
+  background-color: #f4f4f4;
+  color: #000;
+  text-align: center;
+  border-radius: 6px;
+  border: 1px solid #ddd;
+}
+.node_info_selection .node_info_button {
+  padding: 8px;
+  width: 100%;
+  border: none;
+  background-color: transparent;
+}
+button:hover,
+button:active,
+.node_info_button:hover,
+.node_info_button:active {
+  background-color: #ddd;
+}
+.node_info_selection::after {
+  content: " ";
+  position: absolute;
+  bottom: 100%;  /* At the top of the tooltip */
+  left: 50%;
+  margin-left: -5px;
+  border-width: 5px;
+  border-style: solid;
+  border-color: transparent transparent black transparent;
+}
+
 /* The node info modal (background) */
 .node_info_modal {
-    display: none; /* Hidden by default */
-    position: fixed; /* Stay in place */
-    z-index: 1000; /* Sit on top */
-    left: 0;
-    top: 0;
-    width: 100%; /* Full width */
-    height: 100%; /* Full height */
-    overflow: auto; /* Enable scroll if needed */
-    background-color: rgba(0,0,0,0.2); /* Black background with opacity */
+  display: none; /* Hidden by default */
+  position: fixed; /* Stay in place */
+  z-index: 1000; /* Sit on top */
+  left: 0;
+  top: 0;
+  width: 100%; /* Full width */
+  height: 100%; /* Full height */
+  overflow: auto; /* Enable scroll if needed */
+  background-color: rgba(0,0,0,0.2); /* Black background with opacity */
 }
 
 /* Node info Content/Box */
 .node_info_container {
-    background-color: #fefefe;
-    margin: 5% auto; /* 15% from the top and centered */
-    padding: 20px;
-    border: 1px solid #888;
-    width: 80%; /* Could be more or less, depending on screen size
+  background-color: #fefefe;
+  margin: 5% auto; /* 15% from the top and centered */
+  padding: 20px;
+  border: 1px solid #888;
+  width: 80%; /* Could be more or less, depending on screen size
    /* float: right;*/
 }
 
 .node_info_header {
-    margin-bottom: 10px;
-    }
+  margin-bottom: 10px;
+}
 
 .node_info_lower {
-    margin-bottom: -10px;
-    display: flex;
-    justify-content: right;
-    }
+  margin-bottom: -10px;
+  display: flex;
+  justify-content: right;
+}
 
 .node_info_a {
     color: black;
@@ -531,46 +736,12 @@ tr:hover td{
 
 /* Flower text */
 .node-text {
-    font-size: 14px;
-    /* font-family: Times; */
+  font-size: 14px;
+  /* font-family: Times; */
 }
 .node-ego-text {
-    font-weight: bold;
-    font-size: 18px;
-    /* font-family: Courier New; */
-    /* text-decoration: underline; */
-}
-
-
-/* Tooltip container */
-.hoverinfo {
-    position: relative;
-    display: inline-block;
-    border-bottom: 1px dotted black; /* If you want dots under the hoverable text */
-}
-
-/* Tooltip text */
-.hoverinfo .hoverinfotext {
-    visibility: hidden;
-    background-color: rgba(23, 23, 23, 0.5) ;
-    color: #fff;
-    text-align: center;
-    padding: 5px 0;
-    border-radius: 6px;
-
-    /* Position the tooltip text - see examples below! */
-    position: absolute;
-    z-index: 1;
-
-    /* position at bottom of text*/
-    width: 180px;
-    top: 100%;
-    left: 50%;
-    margin-left: -90px; /* Use half of the width (120/2 = 60), to center the tooltip */
-
-}
-
-/* Show the tooltip text when you mouse over the tooltip container */
-.hoverinfo:hover .hoverinfotext {
-    visibility: visible;
+  font-weight: bold;
+  font-size: 18px;
+  /* font-family: Courier New; */
+  /* text-decoration: underline; */
 }
