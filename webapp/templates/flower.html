@@ -50,7 +50,12 @@
     </div>
   </div>
 </div>
-
+<!-- Node information tooltip -->
+<div id="node_info_selection" class="node_info_selection">
+  <button id="node_info_paper" class="node_info_button">Show papers of the node</button>
+  <hr/>
+  <button id="node_info_flower" class="node_info_button">Go to influence flower</button>
+</div>
 <!-- Node information popup -->
 <div id="node_info_modal" class="node_info_modal">
   <div id="node_info_container" class="node_info_container">
@@ -95,8 +100,8 @@ reorder_all_layering(start_order);
 disableBloomNumBars(start_petals, 2000);
 
 // Get the modal
-var  node_info_modal = document.getElementById('node_info_modal');
-
+var node_info_selection = document.getElementById('node_info_selection');
+var node_info_modal = document.getElementById('node_info_modal');
 
 // Get the <span> element that closes the modal
 var node_info_close = document.getElementsByClassName("close")[0];
@@ -104,13 +109,16 @@ var node_info_close = document.getElementsByClassName("close")[0];
 
 // When the user clicks on <span> (x), close the modal
 node_info_close.onclick = function() {
-    node_info_modal.style.display = "none";
+  node_info_modal.style.display = "none";
 }
 
 // When the user clicks anywhere outside of the modal, close it
 window.onclick = function(event) {
-    if (event.target == node_info_modal) {
-        node_info_modal.style.display = "none";
-    }
+  if (event.target == node_info_modal) {
+      node_info_modal.style.display = "none";
+  }
+  if (event.target.tagName != "circle") {
+      node_info_selection.style.display = "none";
+  }
 }
 </script>
