@@ -60,8 +60,9 @@
 <div id="node_info_modal" class="node_info_modal">
   <div id="node_info_container" class="node_info_container">
     <span class="close">&times;</span>
-    <div id="node_info_content">
-    </div>
+    <div id='node_info_header' class='node_info_header'></div>
+    <div id="node_info_content"></div>
+    <div id='node_info_lower' class='node_info_lower'></div>
   </div>
 </div>
 </body>
@@ -115,10 +116,10 @@ node_info_close.onclick = function() {
 // When the user clicks anywhere outside of the modal, close it
 window.onclick = function(event) {
   if (event.target == node_info_modal) {
-      node_info_modal.style.display = "none";
+    node_info_modal.style.display = "none";
   }
   if (event.target.tagName != "circle") {
-      node_info_selection.style.display = "none";
+    node_info_selection.style.display = "none";
   }
 }
 </script>

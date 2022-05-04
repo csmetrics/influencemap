@@ -666,11 +666,10 @@ var node_info_type = '';
 var display_name   = '';
 var flower_name    = '';
 
-
 function formatNodeInfoHeader(data) {
+  var header_div = document.getElementById("node_info_header");
   var title = "<h3 style='display: inline;margin-right: 10px;'>"+display_name+"</h3>";
-
-  return "<div id='node_info_header' class='node_info_header'>"+title+"</div>";
+  header_div.innerHTML = title;
 }
 
 
@@ -682,7 +681,8 @@ function formatNodeInfoLower(data) {
   var prev_button = "<button id='prev_node_page' onclick='prevPage()'>Prev</button>";
   var page_indicate = "<p id='page_indicate' style='display: inline; margin: 5px;'>" + page_counter + "/" + max_page_num + "</p>";
 
-  return "<div id='node_info_lower' class='node_info_lower'>"+prev_button+page_indicate+next_button+"</div>";
+  var lower_div = document.getElementById("node_info_lower");
+  lower_div.innerHTML = prev_button+page_indicate+next_button;
 }
 
 
@@ -758,54 +758,38 @@ function formatNodeInfoTable(data) {
   link_table += table_str;
   link_table += "</table>";
 
-  return "<div id='node_info_content'>"+link_table+"</div>";
+  var content_div = document.getElementById("node_info_content");
+  content_div.innerHTML = link_table;
 }
 
 
-function populateNodeInfoContent(data){
-  var container_div = document.getElementById("node_info_container");
+function resetNodeInfoContent(){
   var content_div = document.getElementById("node_info_content");
   var header_div = document.getElementById("node_info_header");
   var lower_div = document.getElementById("node_info_lower");
 
-  if (content_div) {
-      container_div.removeChild(content_div);
-  }
-  if (header_div) {
-      container_div.removeChild(header_div);
-  }
-  if (lower_div) {
-      container_div.removeChild(lower_div);
-  }
-
-  // Make header
-  var header_string = formatNodeInfoHeader(data);
-  var html_elem = new DOMParser().parseFromString(header_string, 'text/html').body.childNodes;
-  container_div.appendChild(html_elem[0]);
-
-  // Make content
-  var html_string = formatNodeInfoTable(data);
-  var html_elem = new DOMParser().parseFromString(html_string, 'text/html').body.childNodes;
-  container_div.appendChild(html_elem[0]);
-  $(function () {
-    $('[data-toggle="tooltip"]').tooltip()
-  })
-
-  // Make lower
-  var lower_string = formatNodeInfoLower(data);
-  var html_elem = new DOMParser().parseFromString(lower_string, 'text/html').body.childNodes;
-  container_div.appendChild(html_elem[0]);
+  content_div.replaceChildren();
+  header_div.replaceChildren();
+  lower_div.replaceChildren();
 }
 
+function populateNodeInfoContent(data){
+  // Make header
+  formatNodeInfoHeader(data);
+  // Make content
+  formatNodeInfoTable(data);
+  // Make lower
+  formatNodeInfoLower(data);
+}
 
-// rgb(107, 172, 208); blue
-//  rgb(228, 130, 104);oranger
 
 function getData(param){
   node_info_name = param['name'].toLowerCase();
   node_info_ids = param['ids'];
   node_info_type = param['gtype'];
   console.log(node_info_name);
+  resetNodeInfoContent();
+
   var data_dict = { // input to the views.py - search()
       "name": node_info_name,
       "ids": node_info_ids,
@@ -854,12 +838,10 @@ function showNodeOption(top, left, idx, selected){
   document.getElementById("node_info_selection").style.left = left+465-180/2;
   document.getElementById("node_info_selection").style.display = "block";
 
-  document.getElementById("node_info_paper").addEventListener("click", function() {
+  document.getElementById("node_info_paper").onclick = function() {
     showNodeData(idx, selected);
-  });
-  // document.getElementById("node_info_flower").addEventListener("click", function() {
-  //   showNodeData(idx, selected);
-  // });
+  };
+  document.getElementById("node_info_flower").onclick = "location.href='pageurl.html';"
 }
 
 function showNodeData(idx, selected){
@@ -892,10 +874,7 @@ function nextPage() {
         var content_div = document.getElementById("node_info_content");
 
         // Make content
-        var html_string = formatNodeInfoTable(result);
-        var html_elem = new DOMParser().parseFromString(html_string, 'text/html').body.childNodes;
-        content_div.replaceWith(html_elem[0]);
-
+        formatNodeInfoTable(result);
         document.getElementById("node_info_modal").style.display = "block";
 
         // Set the page number
@@ -927,10 +906,7 @@ function prevPage() {
         var content_div = document.getElementById("node_info_content");
 
         // Make content
-        var html_string = formatNodeInfoTable(result);
-        var html_elem = new DOMParser().parseFromString(html_string, 'text/html').body.childNodes;
-        content_div.replaceWith(html_elem[0]);
-
+        formatNodeInfoTable(result);
         document.getElementById("node_info_modal").style.display = "block";
 
         // Set the page number
