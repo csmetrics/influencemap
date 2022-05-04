@@ -787,7 +787,7 @@ function getData(param){
   node_info_name = param['name'].toLowerCase();
   node_info_ids = param['ids'];
   node_info_type = param['gtype'];
-  console.log(node_info_name);
+  console.log("getData", node_info_name);
   resetNodeInfoContent();
 
   var data_dict = { // input to the views.py - search()
@@ -810,6 +810,31 @@ function getData(param){
       document.getElementById("prev_node_page").disabled=true;
       if (result['max_page']===1){document.getElementById("next_node_page").disabled=true}
       document.getElementById("node_info_modal").style.display = "block";
+    },
+    error: function (result) {
+    }
+  });
+}
+
+function getFlowerUrl(param){
+  node_info_name = param['name'].toLowerCase();
+  node_info_ids = param['ids'];
+  node_info_type = param['gtype'];
+  console.log("getFlowerUrl", node_info_name);
+
+  var data_dict = { // input to the views.py - search()
+      "name": node_info_name,
+      "ids": node_info_ids,
+      "node_type": node_info_type,
+    };
+    var t0 = performance.now();
+  $.ajax({
+    type: "POST",
+    url: "/get_node_flower/",
+    data: {"data_string": JSON.stringify(data_dict)},
+    success: function (result) { // return data if success
+      console.log(result);
+      window.open(result["flower_url"]);
     },
     error: function (result) {
     }
@@ -841,7 +866,13 @@ function showNodeOption(top, left, idx, selected){
   document.getElementById("node_info_paper").onclick = function() {
     showNodeData(idx, selected);
   };
-  document.getElementById("node_info_flower").onclick = "location.href='pageurl.html';"
+  document.getElementById("node_info_flower").onclick = function() {
+    console.log("flower_url", getFlowerUrl({
+      'name': name,
+      'ids': selected.getAttribute('allids'),
+      'gtype': selected.getAttribute('gtype')
+    }));
+  };
 }
 
 function showNodeData(idx, selected){

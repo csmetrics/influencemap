@@ -527,6 +527,26 @@ def get_paper_info(data):
     return paper_info
 
 
+@blueprint.route('/get_node_flower/', methods=['POST'])
+def get_node_flower():
+    request_data = json.loads(request.form.get("data_string"))
+
+    flower_name = request_data.get("name")
+    flower_type = request_data.get("node_type")
+    node_ids = request_data.get("ids")
+    id_list = [int(id) for id in node_ids.split(',')]
+
+    if flower_type == "author": doc_id = url_encode_info(author_ids=id_list, name=flower_name)
+    if flower_type == "conf": doc_id = url_encode_info(conference_series_ids=id_list, name=flower_name)
+    if flower_type == "inst": doc_id = url_encode_info(affiliation_ids=id_list, name=flower_name)
+    if flower_type == "fos": doc_id = url_encode_info(field_of_study_ids=id_list, name=flower_name)
+
+    data = dict()
+    data["flower_url"] = f"http://influencemap.ml/submit/?id={doc_id}"
+    data["flower_name"] = flower_name
+    return flask.jsonify(data)
+
+
 @blueprint.route('/get_node_info/', methods=['POST'])
 def get_node_info():
     request_data = json.loads(request.form.get("data_string"))
