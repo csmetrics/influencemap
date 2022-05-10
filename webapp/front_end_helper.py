@@ -45,7 +45,7 @@ def _make_one_response_flower(
         if mask.any():
             ids = tuple(df_original[mask]['ids'])
             ids_to_name = name_lookup_f(ids)
-            names = tuple(map(ids_to_name.__getitem__, ids))
+            names = tuple([ids_to_name[id] if id in ids_to_name else 'none' for id in ids])
             df_original.loc[mask, 'name'] = names
 
     # Name deduplication
