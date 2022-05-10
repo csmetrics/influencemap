@@ -43,7 +43,6 @@ function drawLegend() {
 
 function xPos(num, ordered_id) {
   var [xpos, ypos] = gen_pos(num);
-  console.log("xPos", num, center[0], magf, ordered_id, xpos);
   return center[0]+magf*xpos[ordered_id];
 }
 function yPos(num, ordered_id) {
