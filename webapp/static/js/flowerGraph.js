@@ -41,10 +41,13 @@ function drawLegend() {
     .style("fill", function(d, i ) { return colorScale(d); })
 }
 
-function xPos(ordered_id) {
+function xPos(num, ordered_id) {
+  var [xpos, ypos] = gen_pos(num);
+  console.log("xPos", num, center[0], magf, ordered_id, xpos);
   return center[0]+magf*xpos[ordered_id];
 }
-function yPos(ordered_id) {
+function yPos(num, ordered_id) {
+  var [xpos, ypos] = gen_pos(num);
   return center[1]-magf*ypos[ordered_id];
 }
 
@@ -73,7 +76,7 @@ function drawFlower(svg_id, data, idx, w, num, order) {
 
     // Ordering
     var ordering = reorder(num, order, data);
-        [xpos, ypos] = gen_pos(num);
+    var [xpos, ypos] = gen_pos(num);
 
     // bar location
     bar_width_ratio = 0.6,
@@ -185,10 +188,10 @@ function drawFlower(svg_id, data, idx, w, num, order) {
         .attr("class", "hl-circle")
         .attr("xpos", function(d) {
           if (ordering[d.id] == undefined) return center[0];
-          else return xPos(ordering[d.id]); })
+          else return xPos(num, ordering[d.id]); })
         .attr("ypos", function(d) {
           if (ordering[d.id] == undefined) return center[1];
-          else return yPos(ordering[d.id]); })
+          else return yPos(num, ordering[d.id]); })
         .attr("cx", function(d) {
           if (d.id > 0) return center[0];
           else return center[0]; })
@@ -213,15 +216,15 @@ function drawFlower(svg_id, data, idx, w, num, order) {
         .on("mouseover", function() { highlight_on(idx, this, compare_ref); })
         .on("mouseout", function() { highlight_off(idx, compare_ref); })
         .on("click", function(d) { if (d.id != 0) {
-          showNodeOption(yPos(ordering[d.id]), xPos(ordering[d.id]), idx, this);} })
+          showNodeOption(yPos(num, ordering[d.id]), xPos(num, ordering[d.id]), idx, this);} })
       .transition()
         .duration(2000)
         .attr("cx", function(d) {
           if (ordering[d.id] == undefined) return center[0];
-          else return xPos(ordering[d.id]); })
+          else return xPos(num, ordering[d.id]); })
         .attr("cy", function(d) {
           if (ordering[d.id] == undefined) return center[1];
-          else return yPos(ordering[d.id]); })
+          else return yPos(num, ordering[d.id]); })
 
     if (compare_ref) {
       // flower graph nodes - new node size
@@ -234,10 +237,10 @@ function drawFlower(svg_id, data, idx, w, num, order) {
           .attr("class", "hl-circle-new")
           .attr("xpos", function(d) {
             if (ordering[d.id] == undefined) return center[0];
-            else return xPos(ordering[d.id]); })
+            else return xPos(num, ordering[d.id]); })
           .attr("ypos", function(d) {
             if (ordering[d.id] == undefined) return center[1];
-            else return yPos(ordering[d.id]); })
+            else return yPos(num, ordering[d.id]); })
           .attr("cx", function(d) {
             if (d.id > 0) return center[0];
             else return center[0]; })
@@ -261,15 +264,15 @@ function drawFlower(svg_id, data, idx, w, num, order) {
           .on("mouseover", function() { highlight_on(idx, this, compare_ref); })
           .on("mouseout", function() { highlight_off(idx, compare_ref); })
           .on("click", function(d) { if (d.id != 0) {
-            showNodeOption(yPos(ordering[d.id]), xPos(ordering[d.id]), idx, this);} })
+            showNodeOption(yPos(num, ordering[d.id]), xPos(num, ordering[d.id]), idx, this);} })
         .transition()
           .duration(2000)
           .attr("cx", function(d) {
             if (ordering[d.id] == undefined) return center[0];
-            else return xPos(ordering[d.id]); })
+            else return xPos(num, ordering[d.id]); })
           .attr("cy", function(d) {
             if (ordering[d.id] == undefined) return center[1];
-            else return yPos(ordering[d.id]); })
+            else return yPos(num, ordering[d.id]); })
     }
 
     // flower graph node text
@@ -1292,10 +1295,10 @@ function reorder_flower_grow(idx, num, order, duration) {
     .interrupt()
     .transition()
     .duration(duration)
-    .attr("cx", function(d) { return xPos(ordering[d.id]); })
-    .attr("cy", function(d) { return yPos(ordering[d.id]); })
-    .attr("xpos", function(d) { return xPos(ordering[d.id]); })
-    .attr("ypos", function(d) { return yPos(ordering[d.id]); })
+    .attr("cx", function(d) { return xPos(num, ordering[d.id]); })
+    .attr("cy", function(d) { return yPos(num, ordering[d.id]); })
+    .attr("xpos", function(d) { return xPos(num, ordering[d.id]); })
+    .attr("ypos", function(d) { return yPos(num, ordering[d.id]); })
     .transition()
     .duration(duration)
     .style("opacity", 1.0);
@@ -1341,10 +1344,10 @@ function reorder_flower_shrink(idx, num, order, duration) {
     .transition()
     .delay(duration)
     .duration(duration)
-    .attr("cx", function(d) { return xPos(ordering[d.id]); })
-    .attr("cy", function(d) { return yPos(ordering[d.id]); })
-    .attr("xpos", function(d) { return xPos(ordering[d.id]); })
-    .attr("ypos", function(d) { return yPos(ordering[d.id]); })
+    .attr("cx", function(d) { return xPos(num, ordering[d.id]); })
+    .attr("cy", function(d) { return yPos(num, ordering[d.id]); })
+    .attr("xpos", function(d) { return xPos(num, ordering[d.id]); })
+    .attr("ypos", function(d) { return yPos(num, ordering[d.id]); })
     .style("opacity", 1.0);
 
   d3.selectAll("text")
