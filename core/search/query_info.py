@@ -19,6 +19,7 @@ from core.search.query_utility    import chunker
 from itertools import zip_longest
 
 from elasticsearch_dsl import Search, Q
+from graph.config import conf
 
 TIMEOUT = 60
 
@@ -67,7 +68,7 @@ def papers_prop_query(paper_ids):
     papers_targets = ['DocType', 'OriginalTitle', 'OriginalVenue', 'Year']
 
     # Query for papers
-    papers_s = Search(index = 'papers_new', using = client)
+    papers_s = Search(index = conf.get('index.paper'), using = client)
     papers_s = papers_s.query('terms', PaperId=paper_ids)
     papers_s = papers_s.source(papers_targets)
     papers_s = papers_s.params(request_timeout=TIMEOUT)
@@ -93,7 +94,7 @@ def paa_prop_query(paper_ids):
     paa_targets = ['PaperId', 'AuthorId', 'AffiliationId']
 
     # Query for paper affiliation
-    paa_s = Search(index = 'paperauthoraffiliations', using = client)
+    paa_s = Search(index = conf.get('index.paa'), using = client)
     paa_s = paa_s.query('terms', PaperId=paper_ids)
     paa_s = paa_s.source(paa_targets)
     paa_s = paa_s.params(request_timeout=TIMEOUT)
@@ -157,7 +158,7 @@ def pfos_prop_query(paper_ids):
     pfos_targets = ['PaperId', 'FieldOfStudyId']
 
     # Query for paper affiliation
-    pfos_s = Search(index = 'paperfieldsofstudy', using = client)
+    pfos_s = Search(index = conf.get('index.pfos'), using = client)
     pfos_s = pfos_s.query('terms', PaperId=paper_ids)
     pfos_s = pfos_s.source(pfos_targets)
     pfos_s = pfos_s.params(request_timeout=TIMEOUT)
@@ -220,7 +221,7 @@ def pr_links_query(paper_ids):
         results[paper_id] = {'References': [], 'Citations': [], 'FieldsOfStudy': []}
 
     # Query for paper references
-    ref_s = Search(index = 'paperreferences', using = client)
+    ref_s = Search(index = conf.get('index.pref'), using = client)
     ref_s = ref_s.query('terms', PaperId=paper_ids)
     ref_s = ref_s.params(request_timeout=TIMEOUT)
 
@@ -229,7 +230,7 @@ def pr_links_query(paper_ids):
         results[ref_info[pr_targets[0]]]['References'].append(ref_info[pr_targets[1]])
 
     # Query for paper citations
-    cit_s = Search(index = 'paperreferences', using = client)
+    cit_s = Search(index = conf.get('index.pref'), using = client)
     cit_s = cit_s.query('terms', PaperReferenceId=paper_ids)
     cit_s = cit_s.params(request_timeout=TIMEOUT)
 
@@ -238,7 +239,7 @@ def pr_links_query(paper_ids):
         results[cit_info[pr_targets[1]]]['Citations'].append(cit_info[pr_targets[0]])
 
     # Query for paper fields of study
-    fos_s = Search(index = 'paperfieldsofstudy', using = client)
+    fos_s = Search(index = conf.get('index.pfos'), using = client)
     fos_s = fos_s.query('terms', PaperId=paper_ids)
     fos_s = fos_s.params(request_timeout=TIMEOUT)
 
