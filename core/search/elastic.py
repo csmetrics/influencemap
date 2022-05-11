@@ -82,17 +82,17 @@ def query_names_with_exact_matches(index, field, search_phrase, max_return=30):
 
 
 def query_conference_series(search_phrase):
-    return query_names_with_matches("conferenceseries", ["DisplayName","NormalizedName"] , search_phrase)
+    return query_names_with_matches(conf.get('index.conf_s'), ["DisplayName","NormalizedName"] , search_phrase)
 
 def query_journal(search_phrase):
-    return query_names_with_matches("journals", ["DisplayName", "NormalizedName"], search_phrase)
+    return query_names_with_matches(conf.get('index.journal'), ["DisplayName", "NormalizedName"], search_phrase)
 
 def query_affiliation(search_phrase):
-    return query_names_with_matches("affiliations", ["DisplayName", "NormalizedName"], search_phrase)
+    return query_names_with_matches(conf.get('index.aff'), ["DisplayName", "NormalizedName"], search_phrase)
 
 def query_paper(search_phrase):
     # papers = query_names_with_matches("papers", ["PaperTitle", "OriginalTitle", "BookTitle"], search_phrase)
-    papers = query_names_with_exact_matches("papers", "PaperTitle", search_phrase)
+    papers = query_names_with_exact_matches(conf.get('index.paper'), "PaperTitle", search_phrase)
     for paper in papers:
         author_ids = get_authors_from_paper(paper["PaperId"])
         paper["Authors"] = get_display_names_from_author_ids(author_ids)
@@ -100,7 +100,7 @@ def query_paper(search_phrase):
 
 def query_author(search_phrase):
     # authors = query_names_with_matches("authors", ["DisplayName", "NormalizedName"], search_phrase)
-    authors = query_names_with_exact_matches("authors", "NormalizedName", search_phrase)
+    authors = query_names_with_exact_matches(conf.get('index.author'), "NormalizedName", search_phrase)
     for author in authors:
         if "LastKnownAffiliationId" in author:
             author["Affiliation"] = get_names_from_affiliation_ids([author["LastKnownAffiliationId"]])[0]
