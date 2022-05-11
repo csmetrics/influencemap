@@ -103,7 +103,7 @@ def query():
     for flower_type, _ in flower_leaves:
         for node in rdata[flower_type][0]["nodes"]:
             if flower_type == "author": node["url"] = url_encode_info(author_ids=[node["id"]], name=node["name"])
-            if flower_type == "conf": node["url"] = url_encode_info(conference_series_ids=[node["id"]], name=node["name"])
+            if flower_type == "conf": node["url"] = url_encode_info(conference_series_ids=[node["id"]], journal_ids=[node["id"]], name=node["name"])
             if flower_type == "inst": node["url"] = url_encode_info(affiliation_ids=[node["id"]], name=node["name"])
             if flower_type == "fos": node["url"] = url_encode_info(field_of_study_ids=[node["id"]], name=node["name"])
 
@@ -537,7 +537,7 @@ def get_node_flower():
     id_list = [int(id) for id in node_ids.split(',')]
 
     if flower_type == "author": doc_id = url_encode_info(author_ids=id_list, name=flower_name)
-    if flower_type == "conf": doc_id = url_encode_info(conference_series_ids=id_list, name=flower_name)
+    if flower_type == "conf": doc_id = url_encode_info(conference_series_ids=id_list, journal_ids=id_list, name=flower_name)
     if flower_type == "inst": doc_id = url_encode_info(affiliation_ids=id_list, name=flower_name)
     if flower_type == "fos": doc_id = url_encode_info(field_of_study_ids=id_list, name=flower_name)
 
