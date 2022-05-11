@@ -6,11 +6,11 @@ RUN pip install --no-cache-dir -r /requirements.txt
 RUN pip install --no-cache-dir gunicorn
 RUN rm /requirements.txt
 
-RUN mkdir -p infuencemap/webapp/
-COPY webapp /infuencemap/webapp/
-COPY core /infuencemap/core/
-COPY graph /infuencemap/graph/
+RUN mkdir -p /influencemap
+COPY webapp /influencemap/webapp/
+COPY core /influencemap/core/
+COPY graph /influencemap/graph/
 
-WORKDIR /infuencemap/
+WORKDIR /influencemap/
 EXPOSE 8001
 ENTRYPOINT ["gunicorn", "-w 8", "-b 0.0.0.0:8001", "webapp:flask_app"]
