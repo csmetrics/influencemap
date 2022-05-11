@@ -12,6 +12,7 @@
     "conf_s":"conferenceseries_new",
     "pref":"paperreferences_new",
     "fos":"fieldsofstudy_new",
+    "pfos":"paperfieldsofstudy_new",
     "paa":"paperauthoraffiliations_new",
   },
   "data":{
