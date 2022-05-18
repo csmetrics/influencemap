@@ -1,6 +1,6 @@
 import flask
 
-import flowers
+from . import flowers
 
 app = flask.Flask(__name__)
 
