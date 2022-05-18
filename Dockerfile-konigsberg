@@ -7,7 +7,7 @@ RUN pip install --no-cache-dir gunicorn
 RUN rm /requirements.txt
 
 RUN mkdir -p /influencemap
-COPY webapp /influencemap/konigsberg/
+COPY konigsberg /influencemap/konigsberg/
 COPY core /influencemap/core/
 COPY graph /influencemap/graph/
 
