@@ -13,4 +13,4 @@ COPY graph /influencemap/graph/
 
 WORKDIR /influencemap/
 EXPOSE 8002
-ENTRYPOINT ["gunicorn", "-w 8", "-b 0.0.0.0:8002", "webapp:app"]
+ENTRYPOINT ["gunicorn", "-w 8", "-b 0.0.0.0:8002", "konigsberg:app"]
