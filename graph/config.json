@@ -1,10 +1,10 @@
 {
-  "elasticsearch":{
-    "hostname":"localhost:9200",
+  "elasticsearch": {
+    "hostname": "localhost:9200"
   },
-  "data":{
-    "filedir":"/data/u1033719/graph",
-    "version":"mag-2021-12-06"
-    "tag":"new"
+  "data": {
+    "filedir": "/data/u1033719/graph",
+    "version": "mag-2021-12-06",
+    "tag": "new"
   }
 }

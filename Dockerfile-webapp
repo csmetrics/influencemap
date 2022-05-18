@@ -1,8 +1,6 @@
 FROM python:3.9.12
 LABEL maintainer="Jiahao Zhang <jiahao.zhang@anu.edu.au>"
 
-ENV KONIGSBERG_URL="url_to_konigsberg"
-
 COPY requirements.txt /requirements.txt
 RUN pip install --no-cache-dir -r /requirements.txt
 RUN pip install --no-cache-dir gunicorn
@@ -15,4 +13,6 @@ COPY graph /influencemap/graph/
 
 WORKDIR /influencemap/
 EXPOSE 8001
+ENV KONIGSBERG_URL="url_to_konigsberg"
+ENV ELASTICSEARCH_URL="url_to_elasticsearch"
 ENTRYPOINT ["gunicorn", "-w 8", "-b 0.0.0.0:8001", "webapp:flask_app"]
