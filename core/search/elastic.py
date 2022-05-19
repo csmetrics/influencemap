@@ -82,17 +82,17 @@ def query_names_with_exact_matches(index, field, search_phrase, max_return=30):
 
 
 def query_conference_series(search_phrase):
-    return query_names_with_matches("conferenceseries", ["DisplayName","NormalizedName"] , search_phrase)
+    return query_names_with_matches(conf.get('index.conf_s'), ["DisplayName","NormalizedName"] , search_phrase)
 
 def query_journal(search_phrase):
-    return query_names_with_matches("journals", ["DisplayName", "NormalizedName"], search_phrase)
+    return query_names_with_matches(conf.get('index.journal'), ["DisplayName", "NormalizedName"], search_phrase)
 
 def query_affiliation(search_phrase):
-    return query_names_with_matches("affiliations", ["DisplayName", "NormalizedName"], search_phrase)
+    return query_names_with_matches(conf.get('index.aff'), ["DisplayName", "NormalizedName"], search_phrase)
 
 def query_paper(search_phrase):
     # papers = query_names_with_matches("papers", ["PaperTitle", "OriginalTitle", "BookTitle"], search_phrase)
-    papers = query_names_with_exact_matches("papers", "PaperTitle", search_phrase)
+    papers = query_names_with_exact_matches(conf.get('index.paper'), "PaperTitle", search_phrase)
     for paper in papers:
         author_ids = get_authors_from_paper(paper["PaperId"])
         paper["Authors"] = get_display_names_from_author_ids(author_ids)
@@ -100,7 +100,7 @@ def query_paper(search_phrase):
 
 def query_author(search_phrase):
     # authors = query_names_with_matches("authors", ["DisplayName", "NormalizedName"], search_phrase)
-    authors = query_names_with_exact_matches("authors", "NormalizedName", search_phrase)
+    authors = query_names_with_exact_matches(conf.get('index.author'), "NormalizedName", search_phrase)
     for author in authors:
         if "LastKnownAffiliationId" in author:
             author["Affiliation"] = get_names_from_affiliation_ids([author["LastKnownAffiliationId"]])[0]
@@ -108,7 +108,7 @@ def query_author(search_phrase):
     return authors
 
 def query_topic(search_phrase):
-    topics = query_names_with_matches("fieldsofstudy", ["DisplayName", "NormalizedName"], search_phrase)
+    topics = query_names_with_matches(conf.get('index.fos'), ["DisplayName", "NormalizedName"], search_phrase)
     return [t for t in topics if t["Level"] < 2] # only returns level 0 or 1 topics
 
 
@@ -139,7 +139,7 @@ def get_authors_from_paper(paper_id):
         "term": {"PaperId": paper_id}
       }
     }
-    s = Search(using=client, index="paperauthoraffiliations")
+    s = Search(using=client, index=conf.get('index.paa'))
     s.update_from_dict(q)
     response = s.execute()
     data = response.to_dict()["hits"]["hits"]
@@ -170,25 +170,25 @@ def get_names_from_entity(entity_ids, index, id_field, name_field, with_id=False
 
 
 def get_names_from_conference_ids(entity_ids):
-    return get_names_from_entity(entity_ids, "conferenceseries", "ConferenceSeriesId", "NormalizedName")
+    return get_names_from_entity(entity_ids, conf.get('index.conf_s'), "ConferenceSeriesId", "NormalizedName")
 
 def get_names_from_affiliation_ids(entity_ids, with_id=False):
-    return get_names_from_entity(entity_ids, "affiliations", "AffiliationId", "DisplayName", with_id=with_id)
+    return get_names_from_entity(entity_ids, conf.get('index.aff'), "AffiliationId", "DisplayName", with_id=with_id)
 
 def get_names_from_journal_ids(entity_ids):
-    return get_names_from_entity(entity_ids, "journals", "JournalId", "NormalizedName")
+    return get_names_from_entity(entity_ids, conf.get('index.journal'), "JournalId", "NormalizedName")
 
 def get_display_names_from_conference_ids(entity_ids):
-    return get_names_from_entity(entity_ids, "conferenceseries", "ConferenceSeriesId", "DisplayName", with_id=True)
+    return get_names_from_entity(entity_ids, conf.get('index.conf_s'), "ConferenceSeriesId", "DisplayName", with_id=True)
 
 def get_display_names_from_journal_ids(entity_ids):
-    return get_names_from_entity(entity_ids, "journals", "JournalId", "DisplayName", with_id=True)
+    return get_names_from_entity(entity_ids, conf.get('index.journal'), "JournalId", "DisplayName", with_id=True)
 
 def get_display_names_from_author_ids(entity_ids, with_id=False):
-    return get_names_from_entity(entity_ids, "authors", "AuthorId", "DisplayName", with_id=with_id)
+    return get_names_from_entity(entity_ids, conf.get('index.author'), "AuthorId", "DisplayName", with_id=with_id)
 
 def get_display_names_from_fos_ids(entity_ids, with_id=False):
-    return get_names_from_entity(entity_ids, "fieldsofstudy", "FieldOfStudyId", "DisplayName", with_id=with_id)
+    return get_names_from_entity(entity_ids, conf.get('index.fos'), "FieldOfStudyId", "DisplayName", with_id=with_id)
 
 
 

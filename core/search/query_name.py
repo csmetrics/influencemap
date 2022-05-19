@@ -4,6 +4,7 @@ from core.search.elastic import client
 from core.utils.entity_type import Entity_type
 
 from elasticsearch_dsl import Search
+from graph.config import conf
 
 def author_name_query(author_ids):
     if not author_ids:
@@ -13,7 +14,7 @@ def author_name_query(author_ids):
     authors_target = 'NormalizedName'
 
     # Query for paa
-    authors_s = Search(index = 'authors', using = client)
+    authors_s = Search(index = conf.get('index.author'), using = client)
     authors_s = authors_s.query('terms', AuthorId=author_ids)
     authors_s = authors_s.source([authors_target])
     authors_s = authors_s.params(request_timeout=30)
@@ -28,7 +29,7 @@ def author_name_dict_query(author_ids):
     authors_target = 'NormalizedName'
 
     # Query for paa
-    authors_s = Search(index = 'authors', using = client)
+    authors_s = Search(index = conf.get('index.author'), using = client)
     authors_s = authors_s.query('terms', AuthorId=author_ids)
     authors_s = authors_s.source([authors_target])
     authors_s = authors_s.params(request_timeout=30)
@@ -48,7 +49,7 @@ def fos_name_level_dict_query(fos_ids):
     fos_target = ['NormalizedName', 'Level']
 
     # Query for paa
-    fos_s = Search(index = 'fieldsofstudy', using = client)
+    fos_s = Search(index = conf.get('index.fos'), using = client)
     fos_s = fos_s.query('terms', FieldOfStudyId=fos_ids)
     fos_s = fos_s.source(fos_target)
     fos_s = fos_s.params(request_timeout=30)
@@ -66,11 +67,11 @@ def fos_name_level_dict_query(fos_ids):
 def fos_name_query(fos_ids):
     if not fos_ids:
         return []
-    
+
     fos_target = 'NormalizedName'
 
     # Query for paa
-    fos_s = Search(index='fieldsofstudy', using=client)
+    fos_s = Search(index = conf.get('index.fos'), using=client)
     fos_s = fos_s.query('terms', FieldOfStudyId=fos_ids)
     fos_s = fos_s.source(fos_target)
     fos_s = fos_s.params(request_timeout=30)
@@ -86,7 +87,7 @@ def affiliation_name_query(affiliation_ids):
     affi_target = 'NormalizedName'
 
     # Query for paa
-    affi_s = Search(index = 'affiliations', using = client)
+    affi_s = Search(index = conf.get('index.aff'), using = client)
     affi_s = affi_s.query('terms', AffiliationId=affiliation_ids)
     affi_s = affi_s.source([affi_target])
     affi_s = affi_s.params(request_timeout=30)
@@ -101,7 +102,7 @@ def affiliation_name_dict_query(affiliation_ids):
     affi_target = 'NormalizedName'
 
     # Query for paa
-    affi_s = Search(index = 'affiliations', using = client)
+    affi_s = Search(index = conf.get('index.aff'), using = client)
     affi_s = affi_s.query('terms', AffiliationId=affiliation_ids)
     affi_s = affi_s.source([affi_target])
     affi_s = affi_s.params(request_timeout=30)
@@ -122,7 +123,7 @@ def conference_name_query(conference_ids):
     conf_target = 'NormalizedName'
 
     # Query for paa
-    conf_s = Search(index = 'conferenceseries', using = client)
+    conf_s = Search(index = conf.get('index.conf_s'), using = client)
     conf_s = conf_s.query('terms', ConferenceSeriesId=conference_ids)
     conf_s = conf_s.source([conf_target])
     conf_s = conf_s.params(request_timeout=30)
@@ -137,7 +138,7 @@ def conference_name_dict_query(conference_ids):
     conf_target = 'NormalizedName'
 
     # Query for paa
-    conf_s = Search(index = 'conferenceseries', using = client)
+    conf_s = Search(index = conf.get('index.conf_s'), using = client)
     conf_s = conf_s.query('terms', ConferenceSeriesId=conference_ids)
     conf_s = conf_s.source([conf_target])
     conf_s = conf_s.params(request_timeout=30)
@@ -158,7 +159,7 @@ def journal_name_query(journal_ids):
     jour_target = 'NormalizedName'
 
     # Query for paa
-    jour_s = Search(index = 'journals', using = client)
+    jour_s = Search(index = conf.get('index.journal'), using = client)
     jour_s = jour_s.query('terms', JournalId=journal_ids)
     jour_s = jour_s.source([jour_target])
     jour_s = jour_s.params(request_timeout=30)
@@ -173,7 +174,7 @@ def journal_name_dict_query(journal_ids):
     jour_target = 'NormalizedName'
 
     # Query for paa
-    jour_s = Search(index = 'journals', using = client)
+    jour_s = Search(index = conf.get('index.journal'), using = client)
     jour_s = jour_s.query('terms', JournalId=journal_ids)
     jour_s = jour_s.source([jour_target])
     jour_s = jour_s.params(request_timeout=30)
@@ -190,7 +191,7 @@ def paper_name_query(paper_ids):
     if not paper_ids:
         return []
     target = 'PaperTitle'
-    paper_s = Search(index='papers', using=client) \
+    paper_s = Search(index = conf.get('index.paper'), using=client) \
                   .query('terms', PaperId=paper_ids) \
                   .source([target]) \
                   .params(request_timeout=30)

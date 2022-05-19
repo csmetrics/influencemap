@@ -1,6 +1,7 @@
 from core.search.elastic import client
 from core.utils.entity_type import Entity_type
 from elasticsearch_dsl import Search
+from graph.config import conf
 
 
 def author_paper_query(author_ids):
@@ -13,7 +14,7 @@ def author_paper_query(author_ids):
     auth_paper_res = list()
 
     # Query for paa
-    paa_s = Search(index = 'paperauthoraffiliations', using = client)
+    paa_s = Search(index = conf.get('index.paa'), using = client)
     paa_s = paa_s.query('terms', AuthorId=author_ids)
     paa_s = paa_s.source([paa_target])
 
@@ -34,7 +35,7 @@ def affiliation_paper_query(affi_ids):
     affi_paper_res = list()
 
     # Query for paa
-    paa_s = Search(index = 'paperauthoraffiliations', using = client)
+    paa_s = Search(index = conf.get('index.paa'), using = client)
     paa_s = paa_s.query('terms',  AffiliationId=affi_ids)
     paa_s = paa_s.source([paa_target])
 
@@ -55,7 +56,7 @@ def conference_paper_query(conf_ids):
     conf_paper_res = list()
 
     # Query for papers
-    papers_s = Search(index = 'papers', using = client)
+    papers_s = Search(index = conf.get('index.paper'), using = client)
     papers_s = papers_s.query('terms', ConferenceSeriesId=conf_ids)
     papers_s = papers_s.source([papers_target])
     papers_s = papers_s.params(request_timeout=30)
@@ -77,7 +78,7 @@ def journal_paper_query(jour_ids):
     jour_paper_res = list()
 
     # Query for papers
-    papers_s = Search(index = 'papers', using = client)
+    papers_s = Search(index = conf.get('index.paper'), using = client)
     papers_s = papers_s.query('terms', JournalId=jour_ids)
     papers_s = papers_s.source([papers_target])
     papers_s = papers_s.params(request_timeout=30)

@@ -436,14 +436,16 @@ def _summarize_node_info(citor_papers, citee_papers, ind2id):
     node_info = {}
     for citee_idx, paper_idx in citee_papers:
         paper_id = str(ind2id[paper_idx])
-        if paper_id not in node_info:
-            node_info[paper_id] = {"reference": [], "citation": []}
-        node_info[paper_id]["citation"].append(str(ind2id[citee_idx]))
+        citee_id = str(ind2id[citee_idx])
+        if citee_id not in node_info:
+            node_info[citee_id] = {"reference": [], "citation": []}
+        node_info[citee_id]["citation"].append(paper_id)
     for paper_idx, citor_idx in citor_papers:
         paper_id = str(ind2id[paper_idx])
-        if paper_id not in node_info:
-            node_info[paper_id] = {"reference": [], "citation": []}
-        node_info[paper_id]["reference"].append(str(ind2id[citor_idx]))
+        citor_id = str(ind2id[citor_idx])
+        if citor_id not in node_info:
+            node_info[citor_id] = {"reference": [], "citation": []}
+        node_info[citor_id]["reference"].append(paper_id)
     return node_info
 
 
