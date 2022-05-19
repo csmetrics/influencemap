@@ -1,4 +1,4 @@
-import os, sys, json
+import os
 from pyhocon import ConfigFactory
 
 conf = None
