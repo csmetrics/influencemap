@@ -12,5 +12,5 @@ COPY core /influencemap/core/
 COPY graph /influencemap/graph/
 
 WORKDIR /influencemap/
-EXPOSE 8002
-ENTRYPOINT ["gunicorn", "-w 8", "-b 0.0.0.0:8002", "konigsberg:app"]
+ENV GUNICORN_CMD_ARGS="--workers 32 --timeout 90 --graceful-timeout 90 --bind 0.0.0.0:8002"
+ENTRYPOINT ["gunicorn", "$GUNICORN_CMD_ARGS", "konigsberg:app"]
