@@ -12,7 +12,6 @@ COPY core /influencemap/core/
 COPY graph /influencemap/graph/
 
 WORKDIR /influencemap/
-EXPOSE 8001
 ENV KONIGSBERG_URL="url_to_konigsberg"
 ENV ELASTICSEARCH_URL="url_to_elasticsearch"
 ENV GUNICORN_CMD_ARGS="--workers 32 --timeout 90 --graceful-timeout 90 --bind 0.0.0.0:8001"
