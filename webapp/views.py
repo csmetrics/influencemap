@@ -64,7 +64,7 @@ def query_about():
     if len(paper_ids) == 0:
         status_msg = "No matching paper found"
     doc_id = url_encode_info(paper_ids=paper_ids, name=entity_title)
-    url_base = f"http://influencemap.ml/submit/?id={doc_id}"
+    url_base = f"https://influencemap.cmlab.dev/submit/?id={doc_id}"
     res = {
         "status": status_msg,
         "search_result": data,
@@ -95,7 +95,7 @@ def query():
         selection=dict(pub_years=None, cit_years=None, coauthors=True, self_citations=False))
 
     doc_id = url_encode_info(paper_ids=paper_ids, name=entity_title)
-    url_base = f"http://influencemap.ml/submit/?id={doc_id}"
+    url_base = f"https://influencemap.cmlab.dev/submit/?id={doc_id}"
     rdata["status"] = status_msg
     rdata["url_base"] = url_base
 
@@ -293,7 +293,7 @@ def submit():
         conference_series_ids=conference_ids, field_of_study_ids=fos_ids,
         journal_ids=journal_ids, paper_ids=paper_ids)
 
-    url_base = f"http://influencemap.ml/submit/?id={doc_id}"
+    url_base = f"https://influencemap.cmlab.dev/submit/?id={doc_id}"
 
     session = dict(
         author_ids=author_ids, affiliation_ids=affiliation_ids,
@@ -542,7 +542,7 @@ def get_node_flower():
     if flower_type == "fos": doc_id = url_encode_info(field_of_study_ids=id_list, name=flower_name)
 
     data = dict()
-    data["flower_url"] = f"http://influencemap.ml/submit/?id={doc_id}"
+    data["flower_url"] = f"https://influencemap.cmlab.dev/submit/?id={doc_id}"
     data["flower_name"] = flower_name
     return flask.jsonify(data)
 
