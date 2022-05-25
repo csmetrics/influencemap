@@ -27,8 +27,8 @@ services:
     restart: unless-stopped
     volumes:
       - /data/elasticsearch/data:/usr/share/elasticsearch/data
-      - elasticsearch-config:/usr/share/elasticsearch/config
-      - elasticsearch-log:/usr/share/elasticsearch/logs
+      - elasticsearch_config:/usr/share/elasticsearch/config
+      - elasticsearch_log:/usr/share/elasticsearch/logs
     environment:
       - "discovery.type=single-node"
       - "cluster.name=elasticsearch"
@@ -41,16 +41,16 @@ services:
     ports:
       - "8014:5601"
     volumes:
-      - kibana-config:/usr/share/kibana/config
-      - kibana-data:/usr/share/kibana/data
-      - kibana-log:/usr/share/kibana/logs
+      - kibana_config:/usr/share/kibana/config
+      - kibana_data:/usr/share/kibana/data
+      - kibana_log:/usr/share/kibana/logs
     environment:
       ELASTICSEARCH_URL: http://elasticsearch:9200
     depends_on:
       - elasticsearch
 volumes:
-  elasticsearch-config:
-  elasticsearch-log:
-  kibana-config:
-  kibana-data:
-  kibana-log:
+  elasticsearch_config:
+  elasticsearch_log:
+  kibana_config:
+  kibana_data:
+  kibana_log:
