@@ -4,8 +4,6 @@ services:
       context: .
       dockerfile: konigsberg.dockerfile
     restart: unless-stopped
-    ports:
-      - "8002:8002"
     volumes:
       - /data/bingraph:/influencemap/bingraph
     environment:
@@ -20,8 +18,8 @@ services:
     volumes:
       - .:/code
     environment:
-      KONIGSBERG_URL: http://172.17.0.1:8002
-      ELASTICSEARCH_URL: 172.17.0.1:9200
+      KONIGSBERG_URL: http://konigsberg:8002
+      ELASTICSEARCH_URL: elasticsearch:9200
       GUNICORN_CMD_ARGS: --workers 32 --timeout 90 --graceful-timeout 90 --bind 0.0.0.0:8001
     depends_on:
       - konigsberg
@@ -29,9 +27,6 @@ services:
   elasticsearch:
     image: elasticsearch:6.8.23
     restart: unless-stopped
-    ports:
-      - "9200:9200"
-      - "9300:9300"
     volumes:
       - /home/ubuntu/app/elasticsearch/config:/usr/share/elasticsearch/config
       - /data/elasticsearch/data:/usr/share/elasticsearch/data
@@ -49,6 +44,6 @@ services:
       - /home/ubuntu/app/kibana/data:/usr/share/kibana/data
       - /home/ubuntu/app/kibana/logs:/usr/share/kibana/logs
     environment:
-      ELASTICSEARCH_URL: http://172.17.0.1:9200
+      ELASTICSEARCH_URL: http://elasticsearch:9200
     depends_on:
       - elasticsearch
