@@ -7,20 +7,18 @@ services:
     volumes:
       - /data/bingraph:/influencemap/bingraph
     environment:
-      GUNICORN_CMD_ARGS: --workers 32 --timeout 90 --graceful-timeout 90 --bind 0.0.0.0:8002
+      GUNICORN_CMD_ARGS: --workers 32 --timeout 90 --graceful-timeout 90 --bind 0.0.0.0:8000
   webapp:
     build:
       context: .
       dockerfile: webapp.dockerfile
     restart: unless-stopped
     ports:
-      - "8001:8001"
-    volumes:
-      - .:/code
+      - "8001:8000"
     environment:
-      KONIGSBERG_URL: http://konigsberg:8002
+      KONIGSBERG_URL: http://konigsberg:8000
       ELASTICSEARCH_URL: elasticsearch:9200
-      GUNICORN_CMD_ARGS: --workers 32 --timeout 90 --graceful-timeout 90 --bind 0.0.0.0:8001
+      GUNICORN_CMD_ARGS: --workers 32 --timeout 90 --graceful-timeout 90 --bind 0.0.0.0:8000
     depends_on:
       - konigsberg
       - elasticsearch
@@ -28,22 +26,28 @@ services:
     image: elasticsearch:6.8.23
     restart: unless-stopped
     volumes:
-      - /home/ubuntu/app/elasticsearch/config:/usr/share/elasticsearch/config
       - /data/elasticsearch/data:/usr/share/elasticsearch/data
-      - /data/elasticsearch/logs:/usr/share/elasticsearch/logs
+      - elasticsearch-data/config:/usr/share/elasticsearch/config
+      - elasticsearch-data/logs:/usr/share/elasticsearch/logs
     environment:
       - "discovery.type=single-node"
       - "cluster.name=elasticsearch"
+      - "network.host=0.0.0.0"
+      - "node.master=true"
+      - "node.data=true"
   kibana:
     image: kibana:6.8.23
     restart: unless-stopped
     ports:
       - "8014:5601"
     volumes:
-      - /home/ubuntu/app/kibana/config:/usr/share/kibana/config
-      - /home/ubuntu/app/kibana/data:/usr/share/kibana/data
-      - /home/ubuntu/app/kibana/logs:/usr/share/kibana/logs
+      - kibana-data/config:/usr/share/kibana/config
+      - kibana-data/data:/usr/share/kibana/data
+      - kibana-data/logs:/usr/share/kibana/logs
     environment:
       ELASTICSEARCH_URL: http://elasticsearch:9200
     depends_on:
       - elasticsearch
+volumes:
+  elasticsearch-data:
+  kibana-data:
