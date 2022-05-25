@@ -35,6 +35,7 @@ services:
       - "network.host=0.0.0.0"
       - "node.master=true"
       - "node.data=true"
+      - "ES_JAVA_OPTS=-Xms32g -Xmx32g"
   kibana:
     image: kibana:6.8.23
     restart: unless-stopped
