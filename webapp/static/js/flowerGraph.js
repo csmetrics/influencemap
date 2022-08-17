@@ -861,8 +861,10 @@ function getNodeName(e){
 
 function showNodeOption(top, left, idx, selected){
   var name = getNodeName(selected);
-  document.getElementById("node_info_selection").style.top = top+120;
-  document.getElementById("node_info_selection").style.left = left+465-180/2;
+  var cx = selected.getAttribute("cx");
+  var cy = selected.getAttribute("cy");
+  document.getElementById("node_info_selection").style.top = parseFloat(cy)+120;
+  document.getElementById("node_info_selection").style.left = parseFloat(cx)+465-180/2;
   document.getElementById("node_info_selection").style.display = "block";
 
   document.getElementById("node_info_paper").onclick = function() {
