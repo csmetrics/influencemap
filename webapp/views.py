@@ -23,7 +23,7 @@ from webapp.utils import *
 from webapp.front_end_helper import make_response_data
 from webapp.konigsberg_client import KonigsbergClient
 
-kb_client = KonigsbergClient('http://localhost:8081')
+kb_client = KonigsbergClient(os.getenv('KONIGSBERG_URL', 'http://localhost:8081'))
 
 flower_leaves = [ ('author', [ent.Entity_type.AUTH])
                 , ('conf'  , [ent.Entity_type.CONF, ent.Entity_type.JOUR])

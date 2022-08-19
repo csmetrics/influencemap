@@ -5,3 +5,5 @@
 __pycache__
 MSAPIKEYS.txt
 .DS_Store
+.idea
+.vscode

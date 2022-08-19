@@ -1,0 +1,57 @@
+services:
+  konigsberg:
+    build:
+      context: .
+      dockerfile: konigsberg.dockerfile
+    restart: unless-stopped
+    volumes:
+      - /data/bingraph:/influencemap/bingraph
+    environment:
+      GUNICORN_CMD_ARGS: --workers 32 --timeout 90 --graceful-timeout 90 --bind 0.0.0.0:8000
+  webapp:
+    build:
+      context: .
+      dockerfile: webapp.dockerfile
+    restart: unless-stopped
+    ports:
+      - "8001:8000"
+    environment:
+      KONIGSBERG_URL: http://konigsberg:8000
+      ELASTICSEARCH_URL: elasticsearch:9200
+      GUNICORN_CMD_ARGS: --workers 32 --timeout 90 --graceful-timeout 90 --bind 0.0.0.0:8000
+    depends_on:
+      - konigsberg
+      - elasticsearch
+  elasticsearch:
+    image: elasticsearch:6.8.23
+    restart: unless-stopped
+    volumes:
+      - /data/elasticsearch/data:/usr/share/elasticsearch/data
+      - elasticsearch_config:/usr/share/elasticsearch/config
+      - elasticsearch_log:/usr/share/elasticsearch/logs
+    environment:
+      - "discovery.type=single-node"
+      - "cluster.name=elasticsearch"
+      - "network.host=0.0.0.0"
+      - "node.master=true"
+      - "node.data=true"
+      - "ES_JAVA_OPTS=-Xms32g -Xmx32g"
+  kibana:
+    image: kibana:6.8.23
+    restart: unless-stopped
+    ports:
+      - "8014:5601"
+    volumes:
+      - kibana_config:/usr/share/kibana/config
+      - kibana_data:/usr/share/kibana/data
+      - kibana_log:/usr/share/kibana/logs
+    environment:
+      ELASTICSEARCH_URL: http://elasticsearch:9200
+    depends_on:
+      - elasticsearch
+volumes:
+  elasticsearch_config:
+  elasticsearch_log:
+  kibana_config:
+  kibana_data:
+  kibana_log:
