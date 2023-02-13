@@ -66,6 +66,13 @@ def query_about():
     status_msg = "Success"
     if len(paper_ids) == 0:
         status_msg = "No matching paper found"
+
+    num_refs = sum([p[0]["ReferenceCount"] for p in papers])
+    num_cits = sum([p[0]["CitationCount"] for p in papers])
+    summary = "The Influence Flowers are generated from {} matching papers ({} references and {} citations), from academic data as of December 2021.".format(
+        len(paper_ids), num_refs, num_cits
+    )
+
     doc_id = url_encode_info(paper_ids=paper_ids, name=entity_title)
     url_base = f"https://influencemap.cmlab.dev/submit/?id={doc_id}"
     res = {
@@ -74,7 +81,8 @@ def query_about():
         "search_result": data,
         "filtered_result": papers,
         "paper_ids": paper_ids,
-        "flower_url": url_base
+        "flower_url": url_base,
+        "summary": summary
     }
     return flask.jsonify(res)
 
@@ -91,6 +99,12 @@ def query():
     if len(paper_ids) == 0:
         status_msg = "No matching paper found."
 
+    num_refs = sum([p[0]["ReferenceCount"] for p in data])
+    num_cits = sum([p[0]["CitationCount"] for p in data])
+    summary = "The Influence Flowers are generated from {} matching papers ({} references and {} citations), from academic data as of December 2021.".format(
+        len(paper_ids), num_refs, num_cits
+    )
+
     flower = kb_client.get_flower(
         paper_ids=paper_ids, pub_years=None, cit_years=None,
         coauthors=True, self_citations=False, max_results=50)
@@ -103,6 +117,7 @@ def query():
     url_base = f"https://influencemap.cmlab.dev/submit/?id={doc_id}"
     rdata["status"] = status_msg
     rdata["url_base"] = url_base
+    rdata["summary"] = summary
 
     #generate URLs for alter nodes
     for flower_type, _ in flower_leaves:
