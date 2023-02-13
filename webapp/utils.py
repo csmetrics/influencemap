@@ -34,6 +34,7 @@ def filter_papers(search_title, data):
     filtered_data = []
     for p in data:
         title = p[0]["OriginalTitle"]
+        title = normalize_title(title)
         title_arr = [t.strip() for t in title.lower().split(' ')]
         if search_title_arr == title_arr:
             filtered_data.append(p)
