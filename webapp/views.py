@@ -58,16 +58,21 @@ def query_about():
     entity_type = "paper" # support paper search only
     entity_title = request.args.get('title')
     entity_title = normalize_title(entity_title)
-    data = filter_papers(entity_title, query_entity([entity_type], entity_title))
-    paper_ids = [p[0][id_helper_dict[entity_type]] for p in data]
+    print("query_about", entity_type, entity_title)
+
+    data = query_entity([entity_type], entity_title)
+    papers = filter_papers(entity_title, data)
+    paper_ids = [p[0][id_helper_dict[entity_type]] for p in papers]
     status_msg = "Success"
     if len(paper_ids) == 0:
         status_msg = "No matching paper found"
     doc_id = url_encode_info(paper_ids=paper_ids, name=entity_title)
     url_base = f"https://influencemap.cmlab.dev/submit/?id={doc_id}"
     res = {
+        "searched_title": entity_title,
         "status": status_msg,
         "search_result": data,
+        "filtered_result": papers,
         "paper_ids": paper_ids,
         "flower_url": url_base
     }
@@ -192,7 +197,7 @@ def search():
     entityType = request_data.get("option")
     keyword = normalize_title(keyword)
 
-    print(entityType, keyword)
+    print("search", entityType, keyword)
     data = query_entity(entityType, keyword)
     for i in range(len(data)):
         entity = {'data': data[i][0]}
