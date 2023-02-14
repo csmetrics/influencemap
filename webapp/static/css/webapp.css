@@ -125,7 +125,7 @@ a {
   padding: 10px 15%;
   text-align: justify;
 }
-.project-info .logo img { float:right; width: 80px; margin-top: 20px;}
+.project-info .logo img { float:right; width: 80px; margin-left:20px;}
 
 .dataset {
   padding: 15px 10%;
@@ -156,7 +156,7 @@ a {
   vertical-align: top;
   display: inline-block;
   text-align: left;
-  padding: 0 0 10px 0;
+  padding: 15px 0 15px 0;
   font-size: 16px;
 }
 .detail-box a, .detail-box h4 { color: white; }
