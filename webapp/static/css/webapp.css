@@ -118,11 +118,11 @@ a {
   text-align: justify;
 }
 .project-info h3 {
-  padding: 0 0 0 15%;
+  padding: 0 0 0 12%;
   font-size: 28px;
 }
 .project-info .project-detail {
-  padding: 10px 15%;
+  padding: 10px 12%;
   text-align: justify;
 }
 .project-info .logo img { float:right; width: 80px; margin-left:20px;}
