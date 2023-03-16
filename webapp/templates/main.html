@@ -46,21 +46,7 @@ Licence URI: http://www.os-templates.com/template-terms
       </div>
 
       <a name=about></a>
-      <div class="project-info">
-        <h3><b>Dataset</b></h3>
-        <div class="project-detail">
-          Influence statistics are computed from
-          <a href="https://www.microsoft.com/en-us/research/project/microsoft-academic-graph/">Microsoft Academic Graph (MAG)</a>
-          indexing data about scientific publication records, citation relationships,
-          as well as authors, institutions, journals, conferences, and fields of study.
-          <!--<br>MAG is a heterogeneous graph containing scientific publication records, citation relationships,
-          as well as authors, institutions, journals and conferences.-->
-          The current influencemap is based on a MAG graph snapshot from 2021-12-06.
-          As MAG has been deprecated by Microsoft,
-          we are working on replacing the data source from the combination of <a href=https://www.semanticscholar.org/>SemanticSchorlar</a> and <a href=https://openalex.org/>OpenAlex</a>.
-          The new update will be release soon and will include later publications.
-        </div>
-      </div>
+      
 
       <!-- <div class="project-info">
         <h3><b>Understanding influence flower</b></h3>
@@ -92,17 +78,32 @@ Licence URI: http://www.os-templates.com/template-terms
           Likewise, a red node indicates the center has influenced the node's entity more than it has influenced the center.
           </li>
           </ul>
-          <div align="center">
+          <!-- <div align="center">
             <div style="padding: 15px 0; width:60%; min-width:600px">
               <img width="55%" src="{{ url_for('static', filename='images/influence_weight.svg') }}">
             </div>
-          </div>
-          We normalize the influence contribution by the number of authors in the cited paper,
+          </div> -->
+          We normalize the influence contribution by the number of entities in the cited paper,
           to prevent papers associated with a large number of entities from creating an overwhelming amount of influence.
           Check <a href="https://ieeexplore.ieee.org/document/8986934" target="_blank"><u>our paper</u></a> for more information.
         </div>
       </div>
 
+      <div class="project-info">
+        <h3><b>Dataset</b></h3>
+        <div class="project-detail">
+          Influence statistics are computed from
+          <a href="https://www.microsoft.com/en-us/research/project/microsoft-academic-graph/">Microsoft Academic Graph (MAG)</a>
+          indexing data about scientific publication records, citation relationships,
+          as well as authors, institutions, journals, conferences, and fields of study.
+          <!--<br>MAG is a heterogeneous graph containing scientific publication records, citation relationships,
+          as well as authors, institutions, journals and conferences.-->
+          The current influencemap is based on a MAG graph snapshot from 2021-12-06.
+          As MAG has been deprecated by Microsoft,
+          we are working on replacing the data source from the combination of <a href=https://www.semanticscholar.org/>SemanticSchorlar</a> and <a href=https://openalex.org/>OpenAlex</a>.
+          The new update will be release soon and will include later publications.
+        </div>
+      </div>
 
       <div class="project-info" style="margin-top: 30;padding-bottom:0">
         <div class="row detail">
@@ -139,6 +140,7 @@ Licence URI: http://www.os-templates.com/template-terms
                   <li><a href=https://users.cecs.anu.edu.au/~xlx/>Lexing Xie</a></li>
                   <li><a href=https://mtchl.net/>Mitchell Whitelaw</a></li>
                   <li><a href=https://users.cecs.anu.edu.au/~steveb/>Stephen Blackburn</a></li>
+                  <li><a href=https://users.cecs.anu.edu.au/~kee/>Kee Siong Ng</a></li>
                 </ul>
               </div>
               <div class="col-md-6 detail-box">
