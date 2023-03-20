@@ -29,15 +29,6 @@ We define two entities to be coauthors if the entities have contributed to the s
 Minjeong Shin, Alexander Soen, Benjamin T. Readshaw, Stephen M. Blackburn, Mitchell Whitelaw, Lexing Xie. [Influence Flowers of Academic Entities.](https://ieeexplore.ieee.org/document/8986934) IEEE Conference on Visual Analytics Science & Technology (VAST), 2019
 
 
-## Data
-
-We use the [microsoft academic graph (MAG)](https://www.microsoft.com/en-us/research/project/microsoft-academic-graph/) dataset for our visualisation. The dataset is a large curation of publication indexed by Bing. From MAG, we use the following fields of the paper entries in the dataset,
-
-- Citation links
-- Authors
-- Conferences
-- Journals
-- Author Affiliations
 
 ## Influence
 
@@ -88,3 +79,16 @@ We have described influence as the sum of citations from one person (or venue or
 Due to the lack of a ground truth value of influence to compare these definitions to, we evaluated the eight combinations of these weightings empirically by discussing with researchers which of the definitions produced flowers that most accurately reflected their opinions of who they have influenced and been influenced by.
 
 Other definitions of influence which have not yet been explored with this data include existing measures for node centrality in graphs. By using citation data from MAG to define a directed graph where nodes represent authors, venues or affiliations, and edges are derived from citations between nodes, we could explore using metrics such as closeness, betweenness and eigenvector centrality. These metrics are more appropriate for defining the influence of an entity relative to the whole network.
+
+
+## Data
+
+We use the [microsoft academic graph (MAG)](https://www.microsoft.com/en-us/research/project/microsoft-academic-graph/) dataset for our visualisation. The dataset is a large curation of publication indexed by Bing. From MAG, we use the following fields of the paper entries in the dataset,
+
+- Citation links
+- Authors
+- Conferences
+- Journals
+- Author Affiliations
+
+The current influencemap is based on a MAG graph snapshot from 2021-12-06. As MAG has been deprecated by Microsoft, we are working on replacing the data source from the combination of [SemanticSchorlar](https://www.semanticscholar.org/) and [OpenAlex](https://openalex.org/). The new update will be release soon and will include later publications.
