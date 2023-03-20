@@ -28,6 +28,7 @@ Licence URI: http://www.os-templates.com/template-terms
             <ul>
             <li class="arrow-blue">Blue arcs denote incoming influence, with their thickness proportional to the number of references made.</li>
             <li class="arrow-red">Red arcs denote outgoing influence, with their thickness proportional to the number of citations received.</li>
+            <li >Node sizes and colors reflect the volume and composition of incoming and outgoing influence, see "<a href="#about">Computing influence scores</a>".</li>
             </ul>
             <a href="#about">more info<a>
 
@@ -58,17 +59,17 @@ Licence URI: http://www.os-templates.com/template-terms
       <div class="project-info">
         <h3><b>Computing influence scores</b></h3>
         <div class="project-detail">
-          We compute influence as a function of paper citations.
+          Influence scores is a function of paper citations.
           <!-- <br>Each citation which the ego is apart of contributes to the overall influence map of an ego. -->
           <div align="center">
             <div style="padding: 15px 0; width:60%; min-width:600px">
               <img width="100%" src="{{ url_for('static', filename='images/influence_flow.svg') }}">
             </div>
           </div>
-          Each of the edges of the graph signifies the flow of influence to and from the center node,
+          Each edge signifies the flow of influence to and from the center node (which could be a researcher, a publication venue, an insitution, or a research field),
           the strength of this relation is reflected in the thickness of the edge.
           <ul>
-          <li>The red edges denote the influence the center has towards the outer entities,
+          <li>The red edges denote the influence the center has towards the outer entities (which can be the same types),
           i.e., an outer entity citing a paper by the center.
           The blue edges denote the influence the outer entities have towards the center,
           i.e., the center cites a paper by an outer entity.
@@ -77,31 +78,40 @@ Licence URI: http://www.os-templates.com/template-terms
           A blue node indicates that the associated entity has influenced the center more than the center has influenced itself.
           Likewise, a red node indicates the center has influenced the node's entity more than it has influenced the center.
           </li>
+          <li>The size of the nodes reflect the total amount of incoming and outgoing influences it has with the center node.
+          </li>
           </ul>
           <!-- <div align="center">
             <div style="padding: 15px 0; width:60%; min-width:600px">
               <img width="55%" src="{{ url_for('static', filename='images/influence_weight.svg') }}">
             </div>
           </div> -->
+          <p>
           We normalize the influence contribution by the number of entities in the cited paper,
-          to prevent papers associated with a large number of entities from creating an overwhelming amount of influence.
-          Check <a href="https://ieeexplore.ieee.org/document/8986934" target="_blank"><u>our paper</u></a> for more information.
+          to prevent papers associated with a large number of entities (e.g. authors) from creating an overwhelming amount of influence.
+          </p>
+          Details about influence scores and normalisation choices can be found in Section 4.2 and Appendix B of the <a href="https://arxiv.org/abs/1907.12748" target="_blank"><u>Influence Flower paper</u></a>.
         </div>
       </div>
 
       <div class="project-info">
-        <h3><b>Dataset</b></h3>
+        <h3><b>Data source and profile</b></h3>
         <div class="project-detail">
-          Influence statistics are computed from
+          The current influence statistics are computed from 
           <a href="https://www.microsoft.com/en-us/research/project/microsoft-academic-graph/">Microsoft Academic Graph (MAG)</a>
-          indexing data about scientific publication records, citation relationships,
+          containing scientific publication records, citation relationships,
           as well as authors, institutions, journals, conferences, and fields of study.
           <!--<br>MAG is a heterogeneous graph containing scientific publication records, citation relationships,
           as well as authors, institutions, journals and conferences.-->
-          The current influencemap is based on a MAG graph snapshot from 2021-12-06.
-          As MAG has been deprecated by Microsoft,
-          we are working on replacing the data source from the combination of <a href=https://www.semanticscholar.org/>SemanticSchorlar</a> and <a href=https://openalex.org/>OpenAlex</a>.
-          The new update will be release soon and will include later publications.
+          The current influencemap is based on the last available MAG graph snapshot from 2021-12-06. In a nutshell, the whole dataset contains:
+          <li>XXX million scientific publications from year 1xxx to 2021.</li>
+          <li>XXX author IDs and xxxx institutions identified by MAG.</li>
+          <li>XXX top-level academic research fields labeled by MAG, such as "labour economics" and "algorithms".</li>
+          <li>Latest paper indexed: December 2021 -- which means some arxiv papers in 2112.xxxxx is indexed, some are not. One of the latest papers with an influence flower is <a href=https://arxiv.org/abs/2112.03000>2112.03000</a>, any paper after that will almost surely return a "no matching paper found" due to lack of data.</li>
+          <p></p>
+          After the retirement of MAG, 
+          we are working on integrating the new data sources from <a href=https://www.semanticscholar.org/>SemanticSchorlar</a> and <a href=https://openalex.org/>OpenAlex</a>.
+          The new update will be released soon with later publications.
         </div>
       </div>
 
