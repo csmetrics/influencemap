@@ -7,8 +7,6 @@ author: Alexander Soen
 '''
 
 from core.search.elastic import client
-from core.search.query_name import *
-
 from elasticsearch_dsl import Search, Q
 from graph.config import conf
 
