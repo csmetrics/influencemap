@@ -5,7 +5,7 @@ from functools import partial
 import numpy as np
 import pandas as pd
 
-from core.search.elastic import (
+from core.search.openalex import (
     get_display_names_from_author_ids, get_display_names_from_conference_ids,
     get_display_names_from_fos_ids, get_display_names_from_journal_ids,
     get_names_from_affiliation_ids)
