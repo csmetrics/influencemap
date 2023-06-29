@@ -1,22 +1,13 @@
-import copy
 import json
 import math
-from collections import Counter
 
 import flask
 from flask import request
 from flask_cors import CORS, cross_origin
 
 import core.utils.entity_type as ent
-from core.search.query_info import paper_info_db_check_multiquery, papers_prop_query
-from core.search.query_name import (
-    affiliation_name_query, author_name_query, conference_name_query,
-    fos_name_query, get_conf_journ_display_names, journal_name_query,
-    paper_name_query)
-from core.search.query_paper import get_all_paper_ids
-from core.utils.get_stats import get_stats
+from core.search.query_info import papers_prop_query
 from core.utils.load_tsv import tsv_to_dict
-from webapp.graph import ReferenceFlower, compare_flowers
 from webapp.shortener import decode_filters, url_decode_info, url_encode_info
 from webapp.utils import *
 
@@ -249,14 +240,7 @@ def submit():
                                   or paper_ids or fos_ids)
         if not first_nonempty_id_list:
             raise ValueError('no entities')
-        name_lookup_f = {
-            id(author_ids): author_name_query,
-            id(affiliation_ids): affiliation_name_query,
-            id(conference_ids): conference_name_query,
-            id(journal_ids): journal_name_query,
-            id(paper_ids): paper_name_query,
-            id(fos_ids): fos_name_query}[id(first_nonempty_id_list)]
-        flower_name = name_lookup_f([first_nonempty_id_list[0]])[0]
+        flower_name = first_nonempty_id_list[0]
         total_entities = (len(author_ids) + len(affiliation_ids)
                           + len(conference_ids) + len(journal_ids)
                           + len(paper_ids) + len(fos_ids))
@@ -340,7 +324,7 @@ def conf_journ_to_display_names(papers):
     for paper in papers.values():
         if "ConferenceSeriesId" in paper: conf_journ_ids["ConferenceSeriesIds"].append(paper["ConferenceSeriesId"])
         if "JournalId" in paper: conf_journ_ids["JournalIds"].append(paper["JournalId"])
-    conf_journ_display_names = get_conf_journ_display_names(conf_journ_ids)
+    conf_journ_display_names = conf_journ_ids
     for paper in papers.values():
         if "ConferenceSeriesId" in paper:
             paper["ConferenceName"] = conf_journ_display_names["Conference"][paper["ConferenceSeriesId"]]
@@ -357,7 +341,7 @@ def get_publication_papers():
     pub_year_min = int(request.form.get("pub_year_min"))
     pub_year_max = int(request.form.get("pub_year_max"))
     paper_ids = session['cache']
-    papers = paper_info_db_check_multiquery(paper_ids)
+    papers = papers_prop_query(paper_ids)
     papers = [paper for paper in papers if (paper["Year"] >= pub_year_min and paper["Year"] <= pub_year_max)]
     papers = conf_journ_to_display_names({paper["PaperId"]: paper for paper in papers})
     return flask.jsonify({"papers": papers, "names": session["entity_names"]+ session["node_info"]})
@@ -374,7 +358,7 @@ def get_citation_papers():
     pub_year_min = int(request.form.get("pub_year_min"))
     pub_year_max = int(request.form.get("pub_year_max"))
     paper_ids = session['cache']
-    papers = paper_info_db_check_multiquery(paper_ids)
+    papers = papers_prop_query(paper_ids)
     cite_papers = [[citation for citation in paper["Citations"] if (citation["Year"] >= cite_year_min and citation["Year"] <= cite_year_max)] for paper in papers if (paper["Year"] >= pub_year_min and paper["Year"] <= pub_year_max)]
     citations = sum(cite_papers,[])
     citations = conf_journ_to_display_names({paper["PaperId"]: paper for paper in citations})
