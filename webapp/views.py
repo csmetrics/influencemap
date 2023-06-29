@@ -283,38 +283,42 @@ def resubmit():
     # flower_config['reference'] = request.form.get('cmp_ref') == 'true'
     # flower_config['num_leaves'] = int(request.form.get('numpetals'))
     # flower_config['order'] = request.form.get('petalorder')
+    try:
+        session = json.loads(request.form.get("session"))
+        flower_name  = session['flower_name']
+        author_ids = session['author_ids']
+        affiliation_ids = session['affiliation_ids']
+        conference_ids = session['conference_ids']
+        journal_ids = session['journal_ids']
+        fos_ids = session['fos_ids']
+        paper_ids = session['paper_ids']
 
-    session = json.loads(request.form.get("session"))
-    flower_name  = session['flower_name']
-    author_ids = session['author_ids']
-    affiliation_ids = session['affiliation_ids']
-    conference_ids = session['conference_ids']
-    journal_ids = session['journal_ids']
-    fos_ids = session['fos_ids']
-    paper_ids = session['paper_ids']
+        self_citations = request.form.get('selfcite') == 'true'
+        coauthors = request.form.get('coauthor') == 'true'
+        
+        pub_lower = int(request.form.get('from_pub_year'))
+        pub_upper = int(request.form.get('to_pub_year'))
+        cit_lower = int(request.form.get('from_cit_year'))
+        cit_upper = int(request.form.get('to_cit_year'))
+        session['year_ranges'] = {
+            'pub_lower': pub_lower,
+            'pub_upper': pub_upper,
+            'cit_lower': cit_lower,
+            'cit_upper': cit_upper
+        }
+    
+        flower = kb_client.get_flower(
+            author_ids=author_ids, affiliation_ids=affiliation_ids,
+            conference_series_ids=conference_ids, field_of_study_ids=fos_ids,
+            journal_ids=journal_ids, paper_ids=paper_ids,
+            pub_years=(pub_lower, pub_upper), cit_years=(cit_lower, cit_upper),
+            coauthors=coauthors, self_citations=self_citations, max_results=50)
 
-    self_citations = request.form.get('selfcite') == 'true'
-    coauthors = request.form.get('coauthor') == 'true'
-    pub_lower = int(request.form.get('from_pub_year'))
-    pub_upper = int(request.form.get('to_pub_year'))
-    cit_lower = int(request.form.get('from_cit_year'))
-    cit_upper = int(request.form.get('to_cit_year'))
-    session['year_ranges'] = {
-        'pub_lower': pub_lower,
-        'pub_upper': pub_upper,
-        'cit_lower': cit_lower,
-        'cit_upper': cit_upper
-    }
+        rdata = make_response_data(
+            flower, flower_name=flower_name, session=session)
 
-    flower = kb_client.get_flower(
-        author_ids=author_ids, affiliation_ids=affiliation_ids,
-        conference_series_ids=conference_ids, field_of_study_ids=fos_ids,
-        journal_ids=journal_ids, paper_ids=paper_ids,
-        pub_years=(pub_lower, pub_upper), cit_years=(cit_lower, cit_upper),
-        coauthors=coauthors, self_citations=self_citations, max_results=50)
-
-    rdata = make_response_data(
-        flower, flower_name=flower_name, session=session)
+    except Exception:
+        return {}
 
     return flask.jsonify(rdata)
 
