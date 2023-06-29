@@ -159,29 +159,6 @@ def create():
         search=search)
 
 
-
-@blueprint.route('/curate')
-def curate():
-    types = get_cache_types()
-    data = json.loads(request.form.get('data'))
-    keyword = data.get('keyword', '')
-    search = data.get('search') == 'true'
-    option = data.get('option')
-
-    # render page with data
-    return flask.render_template(
-        "curate.html",
-        navbarOption=get_navbar_option(keyword, option),
-        search=search,
-        types=types)
-
-
-@blueprint.route('/check_record')
-def check_record():
-    exists, names = check_browse_record_exists(request.form.get("type"), request.form.get("name"))
-    return flask.jsonify({"exists": exists, "names": names})
-
-
 @blueprint.route('/crate_load_file')
 def curate_load_file():
     filename = request.form.get("filename")
@@ -223,21 +200,6 @@ def search():
         data[i] = entity
     return flask.jsonify({'entities': data})
 
-
-
-@blueprint.route('/manualcache', methods=['POST'])
-def manualcache():
-    cache_dictionary = (json.loads(request.form.get('cache')))
-    paper_action = request.form.get('paperAction')
-    #saveNewBrowseCache(cache_dictionary)
-
-    if paper_action == "batch":
-        paper_ids = get_all_paper_ids(cache_dictionary["EntityIds"])
-        addToBatch(paper_ids)
-    if paper_action == "cache":
-        paper_ids = get_all_paper_ids(cache_dictionary["EntityIds"])
-        paper_info_db_check_multiquery(paper_ids)
-    return flask.jsonify({})
 
 
 @blueprint.route('/submit/', methods=['GET', 'POST'])
