@@ -8,7 +8,7 @@ from flask import request
 from flask_cors import CORS, cross_origin
 
 import core.utils.entity_type as ent
-from core.search.query_info import paper_info_db_check_multiquery, papers_prop_query
+from core.search.query_info import papers_prop_query
 from core.search.query_name import (
     affiliation_name_query, author_name_query, conference_name_query,
     fos_name_query, get_conf_journ_display_names, journal_name_query,
@@ -357,7 +357,7 @@ def get_publication_papers():
     pub_year_min = int(request.form.get("pub_year_min"))
     pub_year_max = int(request.form.get("pub_year_max"))
     paper_ids = session['cache']
-    papers = paper_info_db_check_multiquery(paper_ids)
+    papers = papers_prop_query(paper_ids)
     papers = [paper for paper in papers if (paper["Year"] >= pub_year_min and paper["Year"] <= pub_year_max)]
     papers = conf_journ_to_display_names({paper["PaperId"]: paper for paper in papers})
     return flask.jsonify({"papers": papers, "names": session["entity_names"]+ session["node_info"]})
@@ -374,7 +374,7 @@ def get_citation_papers():
     pub_year_min = int(request.form.get("pub_year_min"))
     pub_year_max = int(request.form.get("pub_year_max"))
     paper_ids = session['cache']
-    papers = paper_info_db_check_multiquery(paper_ids)
+    papers = papers_prop_query(paper_ids)
     cite_papers = [[citation for citation in paper["Citations"] if (citation["Year"] >= cite_year_min and citation["Year"] <= cite_year_max)] for paper in papers if (paper["Year"] >= pub_year_min and paper["Year"] <= pub_year_max)]
     citations = sum(cite_papers,[])
     citations = conf_journ_to_display_names({paper["PaperId"]: paper for paper in citations})
