@@ -2,7 +2,11 @@ import re
 from graph.config import conf
 
 def get_names_from_entity(entity_ids, index, id_field, name_field, with_id=False):
-    return entity_ids
+    id_name_dict = {eid: str(eid) for eid in entity_ids}
+    if with_id:
+        return id_name_dict
+    ids = [id_name_dict[eid] for eid in entity_ids]
+    return ids
 
 
 def get_names_from_conference_ids(entity_ids):
