@@ -9,7 +9,7 @@ import mmap
 import numba as nb
 import numpy as np
 
-SENTINEL = np.uint32(-1)
+SENTINEL = np.uint64(-1)
 
 
 @nb.njit(nogil=True)

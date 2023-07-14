@@ -11,7 +11,7 @@ import hashutil
 import sparseutil
 
 YEAR_SENTINEL = np.uint16(-1)  # Denotes missing year
-INDEX_SENTINEL = np.uint32(-1)  # Denotes deleted entity
+INDEX_SENTINEL = np.uint64(-1)  # Denotes deleted entity
 
 logger = logging.getLogger(__name__)
 logger.setLevel(logging.INFO)
@@ -63,9 +63,7 @@ def load_entity_df(path, meta_func=None, filter_column=None, sort_column=None):
             except json.JSONDecodeError:
                 print(f"Error parsing JSON: {line}")
         df_part = pd.DataFrame(data)[names]
-        df_part['extracted_id'] = df_part['id'].str.extract(r'[A-Z](\d+)$').astype(np.uint64)
-        df_part['id'] = df_part['extracted_id']
-        del df_part['extracted_id']
+        df_part['id'] = df_part['id'].str.extract(r'[A-Z](\d+)$').astype(np.uint64)
         # print(df_part)
         df_list.append(df_part)
     df = pd.concat(df_list, ignore_index=True)
@@ -468,7 +466,7 @@ def main():
     stream_handler = logging.StreamHandler()  # Log to stderr.
     try:
         logger.addHandler(stream_handler)
-        make_dataset('/Users/minjeong.shin/Work/openalex/openalex-snapshot/data/', 'bingraph-openalex')
+        make_dataset('/esdata/openalex/openalex-snapshot/data/', 'bingraph-openalex')
     finally:
         logger.removeHandler(stream_handler)
 
