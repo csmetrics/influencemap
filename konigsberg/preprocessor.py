@@ -117,8 +117,8 @@ def main():
     stream_handler = logging.StreamHandler()  # Log to stderr.
     try:
         logger.addHandler(stream_handler)
-        # generate_text_files('/esdata/openalex/openalex-snapshot/data/')
-        generate_text_files('/Users/minjeong.shin/Work/openalex/openalex-snapshot/data/')
+        generate_text_files('/esdata/openalex/openalex-snapshot/data/')
+        # generate_text_files('/Users/minjeong.shin/Work/openalex/openalex-snapshot/data/')
     finally:
         logger.removeHandler(stream_handler)
 
