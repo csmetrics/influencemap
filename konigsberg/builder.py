@@ -56,8 +56,8 @@ def load_entity_df(path, meta_func=None, filter_column=None, sort_column=None):
     Entity id range for OpenAlex changes to {0, ..., 2^64 - 1})
     """
     indices = [0, 1]
-    names = ['id', 'rank']
-    dtypes = {'id': np.uint64, 'rank': np.uint16}
+    names = ['id', 'works_count']
+    dtypes = {'id': np.uint64, 'works_count': np.uint16}
     if filter_column:
         filter_col_i, filter_col_name, filter_col_dtype, _ = filter_column
         indices.append(filter_col_i)
@@ -76,8 +76,8 @@ def load_entity_df(path, meta_func=None, filter_column=None, sort_column=None):
         df = df[filter_f(df[filter_col_name])]
         df.reset_index(drop=True, inplace=True)  # Save memory.
         del df[filter_col_name]
-    df.sort_values('rank', inplace=True, ignore_index=True, kind='mergesort')
-    del df['rank']
+    df.sort_values('works_count', inplace=True, ignore_index=True, kind='mergesort')
+    del df['works_count']
     return df, meta
 
 
