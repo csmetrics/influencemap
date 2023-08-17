@@ -186,7 +186,7 @@ def load_authorships_df(path):
     """
     df = pd.read_csv(
         path,
-        dialect=OpenAlexDialect(), engine='c',
+        engine='c',
         usecols=[0, 1, 2], names=['paper_id', 'author_id', 'affiliation_id'],
         dtype={'paper_id': np.uint64, 'author_id': np.uint64,
                'affiliation_id': pd.UInt64Dtype()},
@@ -216,7 +216,7 @@ def load_many_to_many_mapping(path, colname1, colname2):
     """
     return pd.read_csv(
         path,
-        dialect=OpenAlexDialect(), engine='c', na_filter=False,
+        engine='c', na_filter=False,
         usecols=[0, 1], names=[colname1, colname2],
         dtype={colname1: np.uint64, colname2: np.uint64})
 
