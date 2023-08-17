@@ -64,7 +64,7 @@ def load_entity_df(path, meta_func=None, filter_column=None, sort_column=None):
         names.append(filter_col_name)
         dtypes[filter_col_name] = filter_col_dtype
     df = pd.read_csv(
-        path,
+        path, header=1,
         dialect=OpenAlexDialect(), engine='c', na_filter=False,
         usecols=indices, names=names, dtype=dtypes)
     meta = None if meta_func is None else meta_func(df)
