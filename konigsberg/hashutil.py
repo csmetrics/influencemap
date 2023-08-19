@@ -51,7 +51,7 @@ class Ind2IdMap:
     def __init__(self, path):
         with open(path, 'rb') as f:
             self.ind2id_mmap = mmap.mmap(f.fileno(), 0, prot=mmap.PROT_READ)
-        self.ind2id = np.frombuffer(self.ind2id_mmap, dtype=np.uint32)
+        self.ind2id = np.frombuffer(self.ind2id_mmap, dtype=np.uint64)
 
     def __del__(self):
         self.ind2id_mmap.close()
@@ -66,7 +66,7 @@ class Id2IndHashMap:
     def __init__(self, path, ind2id_map):
         with open(path, 'rb') as f:
             self.id2ind_mmap = mmap.mmap(f.fileno(), 0, prot=mmap.PROT_READ)
-        self.id2ind = np.frombuffer(self.id2ind_mmap, dtype=np.uint32)
+        self.id2ind = np.frombuffer(self.id2ind_mmap, dtype=np.uint64)
         self.ind2id_map = ind2id_map
 
     def __del__(self):
@@ -141,12 +141,12 @@ def make_id_hash_map(ids, path, offset=0):
     with open(path, 'wb+') as f:
         # Trick: seek past the end of file and write one byte to
         # efficiently zero-fill up to that point.
-        f.seek(get_hash_map_size(len(ids)) * np.uint32().nbytes - 1)
+        f.seek(get_hash_map_size(len(ids)) * np.uint64().nbytes - 1)
         f.write(b'\x00')
         f.flush()
         id2ind_mmap = mmap.mmap(f.fileno(), 0)
     with id2ind_mmap:
-        id2ind = np.frombuffer(id2ind_mmap, dtype=np.uint32)
+        id2ind = np.frombuffer(id2ind_mmap, dtype=np.uint64)
         id2ind[...] = SENTINEL  # Important detail: set all to SENTINEL.
         arr_size = len(id2ind)
         # nb.literally causes Numba to compile the function once for

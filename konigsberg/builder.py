@@ -169,10 +169,13 @@ def load_papers_df(path):
                 data.append(filtered_data)
             except json.JSONDecodeError:
                 print(f"Error parsing JSON: {line}")
-        df_part = pd.DataFrame(data)[names]
-        df_part['paper_id'] = df_part['paper_id'].str.extract(r'[A-Z](\d+)$').astype(np.uint64)
-        # print(df_part)
-        df_list.append(df_part)
+        try:
+            df_part = pd.DataFrame(data)[names]
+            df_part['paper_id'] = df_part['paper_id'].str.extract(r'[A-Z](\d+)$').astype(np.uint64)
+            # print(df_part)
+            df_list.append(df_part)
+        except:
+            pass
     df = pd.concat(df_list, ignore_index=True)
 
     # Make separate tables for paper-journal/conference series mappings.
