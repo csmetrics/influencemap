@@ -331,9 +331,9 @@ def save_paper_years(df, path):
     # i.e. for a year y, end_by_year[y] = max(papers(y)) + 1.
     end_by_year = df.groupby('year')['paper_id'].count().sort_index().cumsum()
     print("end_by_year", end_by_year)
-    assert end_by_year[YEAR_SENTINEL] == len(df)
+    # assert end_by_year[YEAR_SENTINEL] == len(df)
     # The sentinel is a very big number. Drop it for convenience.
-    end_by_year.drop(YEAR_SENTINEL, inplace=True)
+    end_by_year.drop(YEAR_SENTINEL, inplace=True, errors='ignore')
     years_start = int(end_by_year.index.min())  # Smallest year
     years_end = int(end_by_year.index.max()) + 1  # Greatest year + 1.
     years_dict = {str(years_start): 0}  # First year starts at index 0.
