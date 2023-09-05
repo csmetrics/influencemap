@@ -3,6 +3,7 @@ import json
 import logging
 import pathlib
 import re
+import time
 
 import numpy as np
 import pandas as pd
@@ -211,7 +212,8 @@ def load_authorships_df(path):
     """
     part_files = path.glob('updated_date=*/part_*')
     df_list = []
-    for file in part_files:
+    for i, file in enumerate(part_files):
+        print("load_authorships_df {} {}".format(i, file))
         for line in open(file, 'r'):
             try:
                 json_data = json.loads(line)
@@ -265,7 +267,8 @@ def load_citations_df(path):
     """Load table of citations."""
     part_files = path.glob('updated_date=*/part_*')
     df_list = []
-    for file in part_files:
+    for i, file in enumerate(part_files):
+        print("load_citations_df {} {}".format(i, file))
         for line in open(file, 'r'):
             try:
                 json_data = json.loads(line)
@@ -290,7 +293,8 @@ def load_paper_fos_df(path):
     """Load table of paper fields of study."""
     part_files = path.glob('updated_date=*/part_*')
     df_list = []
-    for file in part_files:
+    for i, file in enumerate(part_files):
+        print("load_paper_fos_df {} {}".format(i, file))
         for line in open(file, 'r'):
             try:
                 json_data = json.loads(line)
@@ -326,6 +330,7 @@ def save_paper_years(df, path):
     # Find smallest index greater than any index in a particular year;
     # i.e. for a year y, end_by_year[y] = max(papers(y)) + 1.
     end_by_year = df.groupby('year')['paper_id'].count().sort_index().cumsum()
+    print("end_by_year", end_by_year)
     assert end_by_year[YEAR_SENTINEL] == len(df)
     # The sentinel is a very big number. Drop it for convenience.
     end_by_year.drop(YEAR_SENTINEL, inplace=True)
@@ -387,6 +392,7 @@ def make_dataset(in_path, out_path):
     in_path = pathlib.Path(in_path)
     out_path = pathlib.Path(out_path)
 
+    time0 = time.time()
     logger.info('(0/7) making entity id to index map')
     # Looks convoluted, but see `process_entity_listings` docstring.
     entities_id2ind_maps, entities_counts = process_entity_listings(
@@ -400,6 +406,8 @@ def make_dataset(in_path, out_path):
     save_entity_counts(entities_counts, out_path / 'entity-counts.json')
     authors_id2ind, aff_id2ind, fos_id2ind, journals_id2ind \
         = entities_id2ind_maps
+    time1 = time.time()
+    logger.info('Done {}'.format(time1-time0))
 
     logger.info('(1/7) making paper id to index map')
     papers_id2ind, paper_journals_df, papers_count \
@@ -407,11 +415,19 @@ def make_dataset(in_path, out_path):
                                  out_path / 'paper-id2ind.bin',
                                  out_path / 'paper-ind2id.bin',
                                  out_path / 'paper-years.json')
+    time2 = time.time()
+    logger.info('Done {}'.format(time2-time1))
 
     logger.info('(2/7) loading MAG graph')
     citations_df = load_citations_df(in_path / 'works')
+    time3_1 = time.time()
+    print("Done generating citations_df", time3_1-time2)
     authorships_df, paper_aff_df = load_authorships_df(in_path / 'works')
+    time3_2 = time.time()
+    print("Done generating authorships_df and paper_aff_df", time3_2-time3_1)
     paper_fos_df = load_paper_fos_df(in_path / 'works')
+    time3_3 = time.time()
+    print("Done generating load_paper_fos_df", time3_3-time3_2)
 
     logger.info('(3/7) converting MAG IDs to internal indices')
     with authors_id2ind, aff_id2ind, fos_id2ind, journals_id2ind:
@@ -432,6 +448,8 @@ def make_dataset(in_path, out_path):
 
         papers_id2ind.convert_inplace(citations_df['citor_id'])
         papers_id2ind.convert_inplace(citations_df['citee_id'])
+    time4 = time.time()
+    logger.info('Done {}'.format(time4-time3_3))
 
     logger.info('(4/7) writing edges: entities -> papers')
     # See `make_sparse_matrix` docstring.
@@ -442,6 +460,8 @@ def make_dataset(in_path, out_path):
           (paper_journals_df['journal_id'], paper_journals_df['paper_id']),
           (paper_fos_df['fos_id'], paper_fos_df['paper_id'])]],
         out_path / 'entity2paper-ptr.bin', out_path / 'entity2paper-ind.bin')
+    time5 = time.time()
+    logger.info('Done {}'.format(time5-time4))
 
     logger.info('(5/7) writing edges: papers -> entities')
     sparseutil.make_sparse_matrix(
@@ -452,6 +472,8 @@ def make_dataset(in_path, out_path):
           (paper_fos_df['paper_id'], paper_fos_df['fos_id'])]],
         out_path / 'paper2entity-ptr.bin',
         out_path / 'paper2entity-ind.bin')
+    time6 = time.time()
+    logger.info('Done {}'.format(time6-time5))
 
     logger.info('(6/7) writing edges: papers -> citors, citees')
     sparseutil.make_sparse_matrix(
@@ -460,7 +482,9 @@ def make_dataset(in_path, out_path):
          [(citations_df['citor_id'], citations_df['citee_id'])]],
         out_path / 'paper2citor-citee-ptr.bin',
         out_path / 'paper2citor-citee-ind.bin')
-    
+    time7 = time.time()
+    logger.info('Done {}'.format(time7-time6))
+
     logger.info('(7/7) done')
 
 
@@ -469,7 +493,7 @@ def main():
     stream_handler = logging.StreamHandler()  # Log to stderr.
     try:
         logger.addHandler(stream_handler)
-        make_dataset('/esdata/openalex/openalex-snapshot/data/', 'bingraph-openalex')
+        make_dataset('/Users/minjeong.shin/Work/openalex/openalex-snapshot/data/', 'bingraph-openalex')
     finally:
         logger.removeHandler(stream_handler)
 
