@@ -2,7 +2,6 @@ import csv
 import json
 import logging
 import pathlib
-import re
 import time
 
 import numpy as np
@@ -17,6 +16,11 @@ INDEX_SENTINEL = np.uint64(-1)  # Denotes deleted entity
 logger = logging.getLogger(__name__)
 logger.setLevel(logging.INFO)
 
+PREFIX_WORK = "https://openalex.org/W"
+PREFIX_AUTHOR = "https://openalex.org/A"
+PREFIX_INST = "https://openalex.org/I"
+PREFIX_FOS = "https://openalex.org/C"
+PREFIX_SOURCE = "https://openalex.org/S"
 
 def load_entity_df(path, meta_func=None, filter_column=None, sort_column=None):
     """Load a table listing non-paper entities.
@@ -138,7 +142,6 @@ def load_papers_df(path):
     Returns:
     1. a DataFrame of all paper IDs,
     2. a DataFrame of paper, journal ID, where the Journal ID exists,
-    3. a DataFrame of paper, conference series ID, where exists.
 
     The papers are sorted by year. Within each year, they are sorted by
     rank.
@@ -156,13 +159,13 @@ def load_papers_df(path):
             try:
                 json_data = json.loads(line)
                 filtered_data = {
-                    'paper_id': json_data['id'],
+                    'paper_id': json_data['id'][len(PREFIX_WORK):],
                     'rank': json_data['cited_by_count'],
                     'year': json_data['publication_year']
                 }
                 try:
                     source_str = json_data['primary_location']['source']['id']
-                    source_id = int(re.search(r"\d+", source_str).group())
+                    source_id = int(source_str[len(PREFIX_SOURCE):])
                 except:
                     source_id = np.nan
                 filtered_data['journal_id'] = source_id
@@ -172,12 +175,11 @@ def load_papers_df(path):
                 print(f"Error parsing JSON: {line}")
         try:
             df_part = pd.DataFrame(data)[names]
-            df_part['paper_id'] = df_part['paper_id'].str.extract(r'[A-Z](\d+)$').astype(np.uint64)
-            # print(df_part)
             df_list.append(df_part)
         except:
             pass
     df = pd.concat(df_list, ignore_index=True)
+    df['paper_id'] = df['paper_id'].astype(np.uint64)
 
     # Make separate tables for paper-journal/conference series mappings.
     paper_journals_df = df.loc[df['journal_id'].notna(),
@@ -211,17 +213,17 @@ def load_authorships_df(path):
     Duplicate entries are permitted. Null affiliations are not returned.
     """
     part_files = path.glob('updated_date=*/part_*')
-    df_list = []
+
+    author_df_list = []
+    aff_df_list = []
     for i, file in enumerate(part_files):
         print("load_authorships_df {} {}".format(i, file))
         for line in open(file, 'r'):
             try:
                 json_data = json.loads(line)
-                filtered_data = {
-                    'paper_id': json_data['id'],
-                }
+                paper_id = json_data['id'][len(PREFIX_WORK):]
                 try:
-                    authors = [a['author']['id'] for a in json_data['authorships']]
+                    authors = [a['author']['id'][len(PREFIX_AUTHOR):] for a in json_data['authorships']]
                 except:
                     authors = []
                 if len(authors) == 0:
@@ -229,38 +231,35 @@ def load_authorships_df(path):
 
                 institutions = []
                 for a in json_data['authorships']:
-                    inst = None
                     try:
-                        inst = re.search(r"\d+", a['institutions'][0]['id']).group()
+                        inst = a['institutions'][0]['id'][len(PREFIX_INST):]
+                        institutions.append(inst)
                     except:
                         pass
-                    institutions.append(inst)
 
-                filtered_data['authors'] = authors
-                filtered_data['institutions'] = institutions
-
-                df_id = pd.DataFrame({'paper_id': [filtered_data['paper_id']]})
-                df_referenced = pd.DataFrame({
-                    'author_id': filtered_data['authors'],
-                    'affiliation_id': filtered_data['institutions']
+                author_df_part = pd.DataFrame({
+                    'paper_id': [paper_id]*len(authors),
+                    'author_id': authors,
                 })
-                df_part = pd.merge(df_id, df_referenced, how='cross')
+                aff_df_part = pd.DataFrame({
+                    'paper_id': [paper_id]*len(institutions),
+                    'affiliation_id': institutions
+                })
+                author_df_list.append(author_df_part)
+                aff_df_list.append(aff_df_part)
 
-                df_part['paper_id'] = df_part['paper_id'].str.extract(r'[A-Z](\d+)$').astype(np.uint64)
-                df_part['author_id'] = df_part['author_id'].str.extract(r'[A-Z](\d+)$').astype(np.uint64)
-                # print(df_part)
             except Exception as e:
                 print(f"Error parsing JSON: {line}")
-        df_list.append(df_part)
-    df = pd.concat(df_list, ignore_index=True)
-    # print(df)
 
-    paper_affiliations_df = df.loc[df['affiliation_id'].notna(),
-                                   ['paper_id', 'affiliation_id']]
-    paper_affiliations_df.reset_index(drop=True, inplace=True)
+    paper_author_df = pd.concat(author_df_list, ignore_index=True)
+    paper_affiliations_df = pd.concat(aff_df_list, ignore_index=True)
+
+    paper_author_df['paper_id'] = paper_author_df['paper_id'].astype(np.uint64)
+    paper_author_df['author_id'] = paper_author_df['author_id'].astype(np.uint64)
+    paper_affiliations_df['paper_id'] = paper_affiliations_df['paper_id'].astype(np.uint64)
     paper_affiliations_df['affiliation_id'] = paper_affiliations_df['affiliation_id'].astype(np.uint64)
-    del df['affiliation_id']
-    return df, paper_affiliations_df
+
+    return paper_author_df, paper_affiliations_df
 
 
 def load_citations_df(path):
@@ -274,17 +273,19 @@ def load_citations_df(path):
                 json_data = json.loads(line)
                 if len(json_data['referenced_works']) == 0:
                     continue
-                df_id = pd.DataFrame({'citor_id': [json_data['id']]})
-                df_referenced = pd.DataFrame({'citee_id': json_data['referenced_works']})
-                df_part = pd.merge(df_id, df_referenced, how='cross')
 
-                df_part['citor_id'] = df_part['citor_id'].str.extract(r'[A-Z](\d+)$').astype(np.uint64)
-                df_part['citee_id'] = df_part['citee_id'].str.extract(r'[A-Z](\d+)$').astype(np.uint64)
-                # print(df_part)
+                referenced = [rw[len(PREFIX_AUTHOR):] for rw in json_data['referenced_works']]
+                df_part = pd.DataFrame({
+                    'citor_id': [json_data['id'][len(PREFIX_AUTHOR):]]*len(referenced),
+                    'citee_id': referenced
+                })
+                df_list.append(df_part)
             except json.JSONDecodeError:
                 print(f"Error parsing JSON: {line}")
-        df_list.append(df_part)
+            
     df = pd.concat(df_list, ignore_index=True)
+    df['citor_id'] = df['citor_id'].astype(np.uint64)
+    df['citee_id'] = df['citee_id'].astype(np.uint64)
     # print(df)
     return df
 
@@ -298,24 +299,21 @@ def load_paper_fos_df(path):
         for line in open(file, 'r'):
             try:
                 json_data = json.loads(line)
-                concepts = []
-                for c in json_data['concepts']:
-                    if c['level'] <= 1:
-                        concepts.append(c['id'])
+                paper_id = json_data['id'][len(PREFIX_WORK):]
+                concepts = [c['id'][len(PREFIX_FOS):] for c in json_data['concepts'] if c['level'] <= 1]
                 if len(concepts) == 0:
                     continue
-                df_id = pd.DataFrame({'paper_id': [json_data['id']]})
-                df_referenced = pd.DataFrame({'fos_id': concepts})
-                df_part = pd.merge(df_id, df_referenced, how='cross')
-
-                df_part['paper_id'] = df_part['paper_id'].str.extract(r'[A-Z](\d+)$').astype(np.uint64)
-                df_part['fos_id'] = df_part['fos_id'].str.extract(r'[A-Z](\d+)$').astype(np.uint64)
-                # print(df_part)
+                df_part = pd.DataFrame({
+                    'paper_id': [paper_id]*len(concepts),
+                    'fos_id': concepts
+                })
+                df_list.append(df_part)
             except json.JSONDecodeError:
                 print(f"Error parsing JSON: {line}")
-        df_list.append(df_part)
+       
     df = pd.concat(df_list, ignore_index=True)
-    # print(df)
+    df['paper_id'] = df['paper_id'].astype(np.uint64)
+    df['fos_id'] = df['fos_id'].astype(np.uint64)
     return df
 
 
