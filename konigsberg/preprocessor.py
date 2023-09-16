@@ -15,6 +15,11 @@ INDEX_SENTINEL = np.uint64(-1)  # Denotes deleted entity
 logger = logging.getLogger(__name__)
 logger.setLevel(logging.INFO)
 
+PREFIX_WORK = "https://openalex.org/W"
+PREFIX_AUTHOR = "https://openalex.org/A"
+PREFIX_INST = "https://openalex.org/I"
+PREFIX_FOS = "https://openalex.org/C"
+PREFIX_SOURCE = "https://openalex.org/S"
 
 class OpenAlexDialect(csv.Dialect):
     """Open Alex Graph table file format."""
@@ -76,13 +81,13 @@ def generate_works_file(data_path):
                 try:
                     json_data = json.loads(line)
                     filtered_data = {
-                        'paper_id': json_data['id'].split(split_char)[1],
+                        'paper_id': json_data['id'][len(PREFIX_WORK):],
                         'rank': json_data['cited_by_count'],
                         'year': json_data['publication_year'],
                         'journal_id': ''
                     }
                     try:
-                        filtered_data['journal_id'] = json_data['primary_location']['source']['id'].split('S')[1]
+                        filtered_data['journal_id'] = json_data['primary_location']['source']['id'][len(PREFIX_SOURCE):]
                     except:
                         pass
                     # print(filtered_data)
@@ -102,19 +107,22 @@ def generate_paper_references(data_path):
     logger.info('...generating PaperReferences')
     # names=['citor_id', 'citee_id']
     part_files = path.glob('updated_date=*/part_*')
-
     for file in part_files:
         for line in open(file, 'r'):
             try:
                 json_data = json.loads(line)
                 if len(json_data['referenced_works']) == 0:
                     continue
-                df_id = pd.DataFrame({'citor_id': [json_data['id'].split('W')[1]]})
-                df_referenced = pd.DataFrame({'citee_id': [ref.split('W')[1] for ref in json_data['referenced_works']]})
-                df_part = pd.merge(df_id, df_referenced, how='cross')
-                df_part.to_csv(outfile, mode='a', index=False, header=False)
+
+                referenced = [rw[len(PREFIX_AUTHOR):] for rw in json_data['referenced_works']]
+                df_part = pd.DataFrame({
+                    'citor_id': [json_data['id'][len(PREFIX_AUTHOR):]]*len(referenced),
+                    'citee_id': referenced
+                })
+                df_part.to_csv(outfile, mode='w', index=False, header=False)
             except json.JSONDecodeError:
                 print(f"Error parsing JSON: {line}")
+
     logger.info('...done')
 
 
@@ -132,11 +140,9 @@ def generate_paper_authorships(data_path):
         for line in open(file, 'r'):
             try:
                 json_data = json.loads(line)
-                filtered_data = {
-                    'paper_id': json_data['id'].split('W')[1],
-                }
+                paper_id = json_data['id'][len(PREFIX_WORK):]
                 try:
-                    authors = [a['author']['id'].split('A')[1] for a in json_data['authorships']]
+                    authors = [a['author']['id'][len(PREFIX_AUTHOR):] for a in json_data['authorships']]
                 except:
                     authors = []
                 if len(authors) == 0:
@@ -146,20 +152,16 @@ def generate_paper_authorships(data_path):
                 for a in json_data['authorships']:
                     inst = None
                     try:
-                        inst = a['institutions'][0]['id'].split('I')[1]
+                        inst = a['institutions'][0]['id'][len(PREFIX_INST):]
                     except:
                         pass
                     institutions.append(inst)
 
-                filtered_data['authors'] = authors
-                filtered_data['institutions'] = institutions
-
-                df_id = pd.DataFrame({'paper_id': [filtered_data['paper_id']]})
-                df_referenced = pd.DataFrame({
-                    'author_id': filtered_data['authors'],
-                    'affiliation_id': filtered_data['institutions']
+                df_part = pd.DataFrame({
+                    'paper_id': [paper_id]*len(authors),
+                    'author_id': authors,
+                    'affiliation_id': institutions
                 })
-                df_part = pd.merge(df_id, df_referenced, how='cross')
                 df_part.to_csv(outfile, mode='a', index=False, header=False)
             except Exception as e:
                 print(f"Error parsing JSON: {line}")
@@ -180,15 +182,14 @@ def generate_paper_fos(data_path):
         for line in open(file, 'r'):
             try:
                 json_data = json.loads(line)
-                concepts = []
-                for c in json_data['concepts']:
-                    if c['level'] <= 1:
-                        concepts.append(c['id'].split('C')[1])
+                paper_id = json_data['id'][len(PREFIX_WORK):]
+                concepts = [c['id'][len(PREFIX_FOS):] for c in json_data['concepts'] if c['level'] <= 1]
                 if len(concepts) == 0:
                     continue
-                df_id = pd.DataFrame({'paper_id': [json_data['id'].split('W')[1]]})
-                df_referenced = pd.DataFrame({'fos_id': concepts})
-                df_part = pd.merge(df_id, df_referenced, how='cross')
+                df_part = pd.DataFrame({
+                    'paper_id': [paper_id]*len(concepts),
+                    'fos_id': concepts
+                })
                 df_part.to_csv(outfile, mode='a', index=False, header=False)
             except json.JSONDecodeError:
                 print(f"Error parsing JSON: {line}")
@@ -228,7 +229,7 @@ def main():
     stream_handler = logging.StreamHandler()  # Log to stderr.
     try:
         logger.addHandler(stream_handler)
-        generate_text_files('/esdata/openalex/openalex-snapshot/data/')
+        generate_text_files('/data_seoul/openalex/openalex-snapshot/data/')
         # generate_text_files('/Users/minjeong.shin/Work/openalex/openalex-snapshot/data/')
     finally:
         logger.removeHandler(stream_handler)
