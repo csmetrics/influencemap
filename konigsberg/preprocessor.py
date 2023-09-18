@@ -119,7 +119,7 @@ def generate_paper_references(data_path):
                     'citor_id': [json_data['id'][len(PREFIX_AUTHOR):]]*len(referenced),
                     'citee_id': referenced
                 })
-                df_part.to_csv(outfile, mode='w', index=False, header=False)
+                df_part.to_csv(outfile, mode='a', index=False, header=False)
             except json.JSONDecodeError:
                 print(f"Error parsing JSON: {line}")
 
