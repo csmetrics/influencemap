@@ -23,8 +23,7 @@ def _convert_in2ind_inplace(id2ind, ind2id, id2ind_len, arr, allow_missing):
     SENTINEL.
     """
     for i, id_ in enumerate(arr):
-        # hash_ = nb.u4(id_ * nb.u4(0x9e3779b1)) % id2ind_len
-        hash_ = id_ % id2ind_len
+        hash_ = nb.u4(id_ * nb.u4(0x9e3779b1)) % id2ind_len
         while True:
             index = id2ind[hash_]
             if index == SENTINEL:
@@ -49,7 +48,6 @@ class Ind2IdMap:
     This is a plain NumPy array, where we retrieve the ID as
     self.ind2id[index]. The entity type is not stored.
     """
-
     def __init__(self, path):
         with open(path, 'rb') as f:
             self.ind2id_mmap = mmap.mmap(f.fileno(), 0, prot=mmap.PROT_READ)
@@ -57,7 +55,7 @@ class Ind2IdMap:
 
     def __del__(self):
         self.ind2id_mmap.close()
-
+    
 
 class Id2IndHashMap:
     """Map from IDs to indices.
@@ -65,7 +63,6 @@ class Id2IndHashMap:
     A hash map maps IDs to _candidate_ indices. ind2id_map is needed to
     check whether a candidate index is the correct result.
     """
-
     def __init__(self, path, ind2id_map):
         with open(path, 'rb') as f:
             self.id2ind_mmap = mmap.mmap(f.fileno(), 0, prot=mmap.PROT_READ)
@@ -117,9 +114,7 @@ def _make_hash_map(ids, id2ind, arr_size, offset):
     for i, id_ in enumerate(ids):
         # Pretty bad hashing method (by Knuth), but our IDs are already
         # almost uniform, they just need a little bit of help :)
-
-        hash_ = id_ % arr_size
-        # hash_ = nb.u4(id_ * nb.u4(0x9e3779b1)) % arr_size
+        hash_ = nb.u4(id_ * nb.u4(0x9e3779b1)) % arr_size
         while id2ind[hash_] != SENTINEL:  # Cell not free.
             hash_ += 1
             if hash_ >= arr_size:
