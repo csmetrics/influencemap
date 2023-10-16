@@ -65,7 +65,6 @@ def generate_works_file(data_path):
     data_type = 'works'
     split_char = 'W'
     path = data_path / data_type
-    part_files = path.glob('updated_date=*/part_*')
     outfile = data_path / (data_type + OUT_SUFF)
 
     logger.info('...generating {} {}'.format(data_type, split_char))
@@ -101,7 +100,6 @@ def generate_works_file(data_path):
 def generate_paper_references(data_path):
     data_type = 'works'
     path = data_path / data_type
-    part_files = path.glob('updated_date=*/part_*')
     outfile = data_path / ("PaperReferences" + OUT_SUFF)
 
     logger.info('...generating PaperReferences')
@@ -129,7 +127,6 @@ def generate_paper_references(data_path):
 def generate_paper_authorships(data_path):
     data_type = 'works'
     path = data_path / data_type
-    part_files = path.glob('updated_date=*/part_*')
     outfile = data_path / ("PaperAuthorAffiliations" + OUT_SUFF)
 
     logger.info('...generating PaperAuthorAffiliations')
@@ -171,7 +168,6 @@ def generate_paper_authorships(data_path):
 def generate_paper_fos(data_path):
     data_type = 'works'
     path = data_path / data_type
-    part_files = path.glob('updated_date=*/part_*')
     outfile = data_path / ("PaperFieldsOfStudy" + OUT_SUFF)
 
     logger.info('...generating PaperFieldsOfStudy')
