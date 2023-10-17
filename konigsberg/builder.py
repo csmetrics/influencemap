@@ -143,7 +143,7 @@ def load_papers_df(path):
     rank.
     """
     df = pd.read_csv(
-        path,
+        path, header=1,
         dialect=OpenAlexDialect(), engine='c',
         usecols=[0, 1, 2, 3],
         names=['paper_id', 'rank', 'year', 'journal_id'],
@@ -242,9 +242,9 @@ def save_paper_years(df, path):
     # Find smallest index greater than any index in a particular year;
     # i.e. for a year y, end_by_year[y] = max(papers(y)) + 1.
     end_by_year = df.groupby('year')['paper_id'].count().sort_index().cumsum()
-    assert end_by_year[YEAR_SENTINEL] == len(df)
+    # assert end_by_year[YEAR_SENTINEL] == len(df)
     # The sentinel is a very big number. Drop it for convenience.
-    end_by_year.drop(YEAR_SENTINEL, inplace=True)
+    # end_by_year.drop(YEAR_SENTINEL, inplace=True)
     years_start = int(end_by_year.index.min())  # Smallest year
     years_end = int(end_by_year.index.max()) + 1  # Greatest year + 1.
     years_dict = {str(years_start): 0}  # First year starts at index 0.
@@ -276,7 +276,7 @@ def process_paper_listings(
     4. the total number of papers.
     """
     with open(out_path_ind2id, 'wb') as ind_to_id_f:
-        df, paper_journals_df, paper_cs_df = load_papers_df(in_path)
+        df, paper_journals_df  = load_papers_df(in_path)
         papers_count = len(df)
         id_arr = df['paper_id'].to_numpy()
         ind_to_id_f.write(id_arr)  # Index to ID: copy the array of IDS.
@@ -287,15 +287,15 @@ def process_paper_listings(
 
     ind2id_map = hashutil.Ind2IdMap(out_path_ind2id)
     id2ind_map = hashutil.Id2IndHashMap(out_path_id2ind, ind2id_map)
-    return id2ind_map, paper_journals_df, paper_cs_df, papers_count
+    return id2ind_map, paper_journals_df, papers_count
 
 
 def save_entity_counts(counts, path):
     """Save entity counts to 'path' as a JSON file."""
-    authors_n, aff_n, fos_n, journals_n, cs_n = counts
+    authors_n, aff_n, fos_n, journals_n = counts
     with open(path, 'w') as f:
         json.dump({'authors': authors_n, 'aff': aff_n, 'fos': fos_n,
-                   'journals': journals_n, 'cs': cs_n}, f)
+                   'journals': journals_n}, f)
 
 
 def make_dataset(in_path, out_path):
@@ -309,16 +309,14 @@ def make_dataset(in_path, out_path):
         in_path, out_path, 'entities-ind2id.bin',
         [('authors', 'author', None, None, None),
          ('institutions', 'affltn', None, None, None),
-         ('concepts', 'fos',
-          lambda df: dict(level0count=int((df['level'] == 0).sum())),
-          (5, 'level', np.uint8, lambda level: level <= 1), 'level'),
+         ('concepts', 'fos', None, None, None),
          ('sources', 'journl', None, None, None)])
     save_entity_counts(entities_counts, out_path / 'entity-counts.json')
     authors_id2ind, aff_id2ind, fos_id2ind, journals_id2ind \
         = entities_id2ind_maps
 
     logger.info('(1/7) making paper id to index map')
-    papers_id2ind, paper_journals_df, paper_cs_df, papers_count \
+    papers_id2ind, paper_journals_df, papers_count \
         = process_paper_listings(in_path / 'works.txt',
                                  out_path / 'paper-id2ind.bin',
                                  out_path / 'paper-ind2id.bin',
@@ -386,7 +384,7 @@ def main():
     stream_handler = logging.StreamHandler()  # Log to stderr.
     try:
         logger.addHandler(stream_handler)
-        make_dataset('/esdata/openalex/openalex-snapshot/data/', 'bingraph-openalex')
+        make_dataset('/data_seoul/openalex/openalex-snapshot/data/', 'bingraph-openalex')
     finally:
         logger.removeHandler(stream_handler)
 

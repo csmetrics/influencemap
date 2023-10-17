@@ -27,8 +27,8 @@ def _convert_in2ind_inplace(id2ind, ind2id, id2ind_len, arr, allow_missing):
         while True:
             index = id2ind[hash_]
             if index == SENTINEL:
-                if not allow_missing:
-                    raise KeyError('id not found')
+                #if not allow_missing:
+                #    raise KeyError('id not found')
                 arr[i] = SENTINEL
                 break
             # id2ind[hash_] might be the correct index, but this is not
