@@ -30,6 +30,7 @@ class Subflower:
 class Flower:
     """Full result."""
     __slots__ = ['author', 'affiliation', 'field_of_study', 'venue']
+
     def __init__(
         self,
         *,
@@ -44,6 +45,7 @@ class Flower:
 class Stats:
     __slots__ = ['pub_year_counts', 'cit_year_counts', 'pub_count',
                  'cit_count', 'ref_count']
+
     def __init__(
         self,
         *,
@@ -64,10 +66,10 @@ class Mapping:
         """Initialize from files."""
         with open(ptr_path, 'rb') as f:
             self.ptr_mmap = mmap.mmap(f.fileno(), 0, prot=mmap.PROT_READ)
-        self.ptr = np.frombuffer(self.ptr_mmap, dtype=np.uint32)
+        self.ptr = np.frombuffer(self.ptr_mmap, dtype=np.uint64)
         with open(ind_path, 'rb') as f:
             self.ind_mmap = mmap.mmap(f.fileno(), 0, prot=mmap.PROT_READ)
-        self.ind = np.frombuffer(self.ind_mmap, dtype=np.uint32)
+        self.ind = np.frombuffer(self.ind_mmap, dtype=np.uint64)
 
     def __del__(self):
         self.ptr_mmap.close()
@@ -86,7 +88,7 @@ class IndToIdMapper:
     def __init__(self, ind2id_path):
         with open(ind2id_path, 'rb') as f:
             self.ind2id_mmap = mmap.mmap(f.fileno(), 0, prot=mmap.PROT_READ)
-        self.ind2id = np.frombuffer(self.ind2id_mmap, dtype=np.uint32)
+        self.ind2id = np.frombuffer(self.ind2id_mmap, dtype=np.uint64)
 
     def __del__(self):
         self.ind2id_mmap.close()
@@ -103,7 +105,7 @@ class IdToIndMapper:
     def __init__(self, id2ind_path, ind2id_mapper):
         with open(id2ind_path, 'rb') as f:
             self.id2ind_mmap = mmap.mmap(f.fileno(), 0, prot=mmap.PROT_READ)
-        self.id2ind = np.frombuffer(self.id2ind_mmap, dtype=np.uint32)
+        self.id2ind = np.frombuffer(self.id2ind_mmap, dtype=np.uint64)
         self.ind2id_mapper = ind2id_mapper
 
     def __del__(self):
@@ -117,6 +119,7 @@ class IdToIndMapper:
 
 class Florist:
     """Makes flowers."""
+
     def __init__(self, path):
         """Initialize from files written by the builder to path."""
         path = pathlib.Path(path)
@@ -151,7 +154,7 @@ class Florist:
                 for year, start in json.load(f).items()}
         paper_year_map = [self.year_starts[year]
                           for year in sorted(self.year_starts)]
-        self.paper_year_map = np.array(paper_year_map, dtype=np.uint32)
+        self.paper_year_map = np.array(paper_year_map, dtype=np.uint64)
         with open(path / 'entity-counts.json') as f:
             # Distinguish entity types, i.e., author, affiliation,
             # conference series, journal, and field of study.
@@ -169,7 +172,7 @@ class Florist:
         """Get range of paper indices corresponding to a range of years.
 
         years is None or a 2-tuple of ints. Returns a 2-tuple of Numpy
-        uint32s.
+        uint64s.
         """
         if years is None:
             return None
@@ -180,7 +183,7 @@ class Florist:
 
     def _ids_to_indices(self, ids, mapper, allow_not_found):
         """Convert IDs to indices."""
-        indices = np.array(ids, dtype=np.uint32)
+        indices = np.array(ids, dtype=np.uint64)
         length = _ids_to_ind(mapper.arrs, indices)
         if not allow_not_found and length < len(indices):
             raise KeyError('id not found')
@@ -196,9 +199,11 @@ class Florist:
         # There should be better way to find whether it is journal or conference type
         if type == 1:
             try:
-                index = self._ids_to_indices([id], self.journal_id2ind_map, allow_not_found)[0]
+                index = self._ids_to_indices(
+                    [id], self.journal_id2ind_map, allow_not_found)[0]
             except:
-                index = self._ids_to_indices([id], self.cs_id2ind_map, allow_not_found)[0]
+                index = self._ids_to_indices(
+                    [id], self.cs_id2ind_map, allow_not_found)[0]
         else:
             index = self._ids_to_indices(
                 [id], in2ind_maps[type], allow_not_found)[0]
@@ -372,7 +377,6 @@ class Florist:
         return self._make_stats_from_arrs(
             pub_year_counts, cit_year_counts, ref_count)
 
-
     def get_node_info(
         self,
         *,
@@ -451,6 +455,7 @@ def _summarize_node_info(citor_papers, citee_papers, ind2id):
 
 split_result_val_t = nb.types.Tuple([nb.u4, nb.f4, nb.f4, nb.u1, nb.u1])
 
+
 @nb.njit(nogil=True)
 def get_split_res(
     res,
@@ -509,7 +514,7 @@ def _select_top_n(res_list, max_results):
 @nb.njit(nogil=True)
 def _to_arrs(res_list):
     n = len(res_list)
-    id_arr = np.empty(n, dtype=np.uint32)
+    id_arr = np.empty(n, dtype=np.uint64)
     citor_score_arr = np.empty(n, dtype=np.float32)
     citee_score_arr = np.empty(n, dtype=np.float32)
     coauthor_arr = np.empty(n, dtype=np.uint8)
@@ -631,7 +636,7 @@ def _is_author_or_aff(aff_range, i):
     return i < aff_range
 
 
-@nb.njit(nb.uint32(nb.uint32, nb.uint32[::1]), nogil=True)
+@nb.njit(nb.uint64(nb.uint64, nb.uint64[::1]), nogil=True)
 def _get_year(paper_id, paper_year_map):
     for i, start in enumerate(paper_year_map):
         if paper_id < start:
@@ -641,6 +646,7 @@ def _get_year(paper_id, paper_year_map):
 
 dict_val = nb.types.Tuple([nb.u4, nb.f4])
 result_val_t = nb.types.Tuple([nb.u4, nb.f4, nb.f4, nb.u1])
+
 
 @nb.njit(nogil=True)
 def _make_flower(
@@ -755,8 +761,8 @@ def _make_stats(
     paper_year_map,
 ):
     num_years, = paper_year_map.shape
-    pub_year_counts = np.zeros(num_years, dtype=np.uint32)
-    cit_year_counts = np.zeros((num_years, num_years), dtype=np.uint32)
+    pub_year_counts = np.zeros(num_years, dtype=np.uint64)
+    cit_year_counts = np.zeros((num_years, num_years), dtype=np.uint64)
     ref_count = 0
     ego_papers = set(paper_ids)
     for entity_id in entity_ids:
@@ -774,6 +780,7 @@ def _make_stats(
 
 
 cite_map = nb.types.Tuple([nb.u4, nb.u4])
+
 
 @nb.njit(nogil=True)
 def _make_node_info(
