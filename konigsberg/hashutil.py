@@ -9,7 +9,7 @@ import mmap
 import numba as nb
 import numpy as np
 
-SENTINEL = np.uint64(-1)
+SENTINEL = np.uint32(-1)
 
 
 @nb.njit(nogil=True)
@@ -27,8 +27,8 @@ def _convert_in2ind_inplace(id2ind, ind2id, id2ind_len, arr, allow_missing):
         while True:
             index = id2ind[hash_]
             if index == SENTINEL:
-                #if not allow_missing:
-                #    raise KeyError('id not found')
+                if not allow_missing:
+                    raise KeyError('id not found')
                 arr[i] = SENTINEL
                 break
             # id2ind[hash_] might be the correct index, but this is not
@@ -48,6 +48,7 @@ class Ind2IdMap:
     This is a plain NumPy array, where we retrieve the ID as
     self.ind2id[index]. The entity type is not stored.
     """
+
     def __init__(self, path):
         with open(path, 'rb') as f:
             self.ind2id_mmap = mmap.mmap(f.fileno(), 0, prot=mmap.PROT_READ)
@@ -55,7 +56,7 @@ class Ind2IdMap:
 
     def __del__(self):
         self.ind2id_mmap.close()
-    
+
 
 class Id2IndHashMap:
     """Map from IDs to indices.
@@ -63,10 +64,11 @@ class Id2IndHashMap:
     A hash map maps IDs to _candidate_ indices. ind2id_map is needed to
     check whether a candidate index is the correct result.
     """
+
     def __init__(self, path, ind2id_map):
         with open(path, 'rb') as f:
             self.id2ind_mmap = mmap.mmap(f.fileno(), 0, prot=mmap.PROT_READ)
-        self.id2ind = np.frombuffer(self.id2ind_mmap, dtype=np.uint64)
+        self.id2ind = np.frombuffer(self.id2ind_mmap, dtype=np.uint32)
         self.ind2id_map = ind2id_map
 
     def __del__(self):

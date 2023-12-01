@@ -10,7 +10,7 @@ import hashutil
 import sparseutil
 
 YEAR_SENTINEL = np.uint16(-1)  # Denotes missing year
-INDEX_SENTINEL = np.uint64(-1)  # Denotes deleted entity
+INDEX_SENTINEL = np.uint32(-1)  # Denotes deleted entity
 
 logger = logging.getLogger(__name__)
 logger.setLevel(logging.INFO)
@@ -84,12 +84,14 @@ def load_entity_df(path, meta_func=None, filter_column=None, sort_column=None):
 IN_SUFF = '.txt'
 ID2IND_SUFF = '-id2ind.bin'
 META_SUFF = '-meta.json'
+
+
 def process_entity_listings(in_dir, out_dir, out_fname_ind2id, entity_infos):
     """Load entity tables and make ID-index mappings.
 
     This function takes multiple entity tables and assigns them
     consecutive indices.
-    
+
     ### caution: below docs are slightly out of date
     entity_path is an iterable of 3-tuples: path to table (read), path
     to the ID-to-index map (written), and an optional row filter (see 
@@ -133,7 +135,7 @@ def load_papers_df(path):
     """Load table listing papers.
 
     The table is in MAG format at `path`.
-    
+
     Returns:
     1. a DataFrame of all paper IDs,
     2. a DataFrame of paper, journal ID, where the Journal ID exists,
@@ -252,7 +254,7 @@ def save_paper_years(df, path):
     for year in range(years_start, years_end):
         # JSON needs the key to be a string.
         # The end of year y is the start of year y + 1.
-        years_dict[str(year + 1)] = last = int(end_by_year.get(year, last)) 
+        years_dict[str(year + 1)] = last = int(end_by_year.get(year, last))
     with open(path, 'w') as f:
         json.dump(years_dict, f)
 
@@ -276,11 +278,11 @@ def process_paper_listings(
     4. the total number of papers.
     """
     with open(out_path_ind2id, 'wb') as ind_to_id_f:
-        df, paper_journals_df  = load_papers_df(in_path)
+        df, paper_journals_df = load_papers_df(in_path)
         papers_count = len(df)
         id_arr = df['paper_id'].to_numpy()
         ind_to_id_f.write(id_arr)  # Index to ID: copy the array of IDS.
-    
+
     hashutil.make_id_hash_map(id_arr, out_path_id2ind)
     save_paper_years(df, out_path_year_bounds)
     del df  # Free memory.
@@ -375,7 +377,7 @@ def make_dataset(in_path, out_path):
          [(citations_df['citor_id'], citations_df['citee_id'])]],
         out_path / 'paper2citor-citee-ptr.bin',
         out_path / 'paper2citor-citee-ind.bin')
-    
+
     logger.info('(7/7) done')
 
 
@@ -384,7 +386,8 @@ def main():
     stream_handler = logging.StreamHandler()  # Log to stderr.
     try:
         logger.addHandler(stream_handler)
-        make_dataset('/data_seoul/openalex/openalex-snapshot/data/', 'bingraph-openalex')
+        make_dataset('/data_seoul/openalex/openalex-snapshot/data/',
+                     'bingraph-openalex')
     finally:
         logger.removeHandler(stream_handler)
 
