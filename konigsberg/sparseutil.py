@@ -107,19 +107,19 @@ def make_sparse_matrix(n_from_ind, maps, ptr_path, ind_path):
     with open(ptr_path, 'wb+') as f_ptr:
         # Trick: seek past the end of file and write one byte to
         # efficiently zero-fill up to that point.
-        f_ptr.seek((n_maps * n_from_ind + 1) * np.uint64().nbytes - 1)
+        f_ptr.seek((n_maps * n_from_ind + 1) * np.uint32().nbytes - 1)
         f_ptr.write(b'\x00')
         f_ptr.flush()
         map_ptr = mmap.mmap(f_ptr.fileno(), 0)
     with map_ptr:
-        arr_ptr = np.frombuffer(map_ptr, dtype=np.uint64)
+        arr_ptr = np.frombuffer(map_ptr, dtype=np.uint32)
         make_counts(maps, arr_ptr)
         with open(ind_path, 'wb+') as f_ind:
             # Same trick.
-            f_ind.seek(n_links * np.uint64().nbytes - 1)
+            f_ind.seek(n_links * np.uint32().nbytes - 1)
             f_ind.write(b'\x00')
             f_ind.flush()
             map_ind = mmap.mmap(f_ind.fileno(), 0)
         with map_ind:
-            arr_ind = np.frombuffer(map_ind, dtype=np.uint64)
+            arr_ind = np.frombuffer(map_ind, dtype=np.uint32)
             place_indices(maps, arr_ptr, arr_ind)
