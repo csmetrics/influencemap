@@ -9,7 +9,8 @@ import mmap
 import numba as nb
 import numpy as np
 
-SENTINEL = np.uint32(-1)
+SENTINEL = np.uint64(-1)
+HASH_PRIME = 11400714819323198549
 
 
 @nb.njit(nogil=True)
@@ -23,7 +24,7 @@ def _convert_in2ind_inplace(id2ind, ind2id, id2ind_len, arr, allow_missing):
     SENTINEL.
     """
     for i, id_ in enumerate(arr):
-        hash_ = nb.u4(id_ * nb.u4(0x9e3779b1)) % id2ind_len
+        hash_ = nb.u8(id_ * nb.u8(HASH_PRIME)) % id2ind_len
         while True:
             index = id2ind[hash_]
             if index == SENTINEL:
@@ -68,7 +69,7 @@ class Id2IndHashMap:
     def __init__(self, path, ind2id_map):
         with open(path, 'rb') as f:
             self.id2ind_mmap = mmap.mmap(f.fileno(), 0, prot=mmap.PROT_READ)
-        self.id2ind = np.frombuffer(self.id2ind_mmap, dtype=np.uint32)
+        self.id2ind = np.frombuffer(self.id2ind_mmap, dtype=np.uint64)
         self.ind2id_map = ind2id_map
 
     def __del__(self):
@@ -116,7 +117,7 @@ def _make_hash_map(ids, id2ind, arr_size, offset):
     for i, id_ in enumerate(ids):
         # Pretty bad hashing method (by Knuth), but our IDs are already
         # almost uniform, they just need a little bit of help :)
-        hash_ = nb.u4(id_ * nb.u4(0x9e3779b1)) % arr_size
+        hash_ = nb.u8(id_ * nb.u8(HASH_PRIME)) % arr_size
         while id2ind[hash_] != SENTINEL:  # Cell not free.
             hash_ += 1
             if hash_ >= arr_size:

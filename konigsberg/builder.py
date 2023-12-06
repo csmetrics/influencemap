@@ -10,7 +10,7 @@ import hashutil
 import sparseutil
 
 YEAR_SENTINEL = np.uint16(-1)  # Denotes missing year
-INDEX_SENTINEL = np.uint32(-1)  # Denotes deleted entity
+INDEX_SENTINEL = np.uint64(-1)  # Denotes deleted entity
 
 logger = logging.getLogger(__name__)
 logger.setLevel(logging.INFO)
