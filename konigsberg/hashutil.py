@@ -9,8 +9,7 @@ import mmap
 import numba as nb
 import numpy as np
 
-SENTINEL = np.uint64(-1)
-HASH_PRIME = 11400714819323198549
+SENTINEL = np.uint32(-1)
 
 
 @nb.njit(nogil=True)
@@ -24,7 +23,7 @@ def _convert_in2ind_inplace(id2ind, ind2id, id2ind_len, arr, allow_missing):
     SENTINEL.
     """
     for i, id_ in enumerate(arr):
-        hash_ = nb.u8(id_ * nb.u8(HASH_PRIME)) % id2ind_len
+        hash_ = nb.u4(id_ * nb.u4(0x9e3779b1)) % id2ind_len
         while True:
             index = id2ind[hash_]
             if index == SENTINEL:
@@ -53,7 +52,7 @@ class Ind2IdMap:
     def __init__(self, path):
         with open(path, 'rb') as f:
             self.ind2id_mmap = mmap.mmap(f.fileno(), 0, prot=mmap.PROT_READ)
-        self.ind2id = np.frombuffer(self.ind2id_mmap, dtype=np.uint64)
+        self.ind2id = np.frombuffer(self.ind2id_mmap, dtype=np.uint32)
 
     def __del__(self):
         self.ind2id_mmap.close()
@@ -69,7 +68,7 @@ class Id2IndHashMap:
     def __init__(self, path, ind2id_map):
         with open(path, 'rb') as f:
             self.id2ind_mmap = mmap.mmap(f.fileno(), 0, prot=mmap.PROT_READ)
-        self.id2ind = np.frombuffer(self.id2ind_mmap, dtype=np.uint64)
+        self.id2ind = np.frombuffer(self.id2ind_mmap, dtype=np.uint32)
         self.ind2id_map = ind2id_map
 
     def __del__(self):
@@ -117,7 +116,7 @@ def _make_hash_map(ids, id2ind, arr_size, offset):
     for i, id_ in enumerate(ids):
         # Pretty bad hashing method (by Knuth), but our IDs are already
         # almost uniform, they just need a little bit of help :)
-        hash_ = nb.u8(id_ * nb.u8(HASH_PRIME)) % arr_size
+        hash_ = nb.u4(id_ * nb.u4(0x9e3779b1)) % arr_size
         while id2ind[hash_] != SENTINEL:  # Cell not free.
             hash_ += 1
             if hash_ >= arr_size:
@@ -144,12 +143,12 @@ def make_id_hash_map(ids, path, offset=0):
     with open(path, 'wb+') as f:
         # Trick: seek past the end of file and write one byte to
         # efficiently zero-fill up to that point.
-        f.seek(get_hash_map_size(len(ids)) * np.uint64().nbytes - 1)
+        f.seek(get_hash_map_size(len(ids)) * np.uint32().nbytes - 1)
         f.write(b'\x00')
         f.flush()
         id2ind_mmap = mmap.mmap(f.fileno(), 0)
     with id2ind_mmap:
-        id2ind = np.frombuffer(id2ind_mmap, dtype=np.uint64)
+        id2ind = np.frombuffer(id2ind_mmap, dtype=np.uint32)
         id2ind[...] = SENTINEL  # Important detail: set all to SENTINEL.
         arr_size = len(id2ind)
         # nb.literally causes Numba to compile the function once for
