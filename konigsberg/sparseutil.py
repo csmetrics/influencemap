@@ -16,6 +16,8 @@ import numba as nb
 import numpy as np
 from numba.types import List, Tuple
 
+SENTINEL = np.uint64(-1)
+
 
 @nb.njit(nogil=True)
 def make_counts(maps, ptr_arr):
@@ -37,6 +39,7 @@ def make_counts(maps, ptr_arr):
     maps must have the same domain, but they don't necessarily have to
     have the same codomain.
     """
+
     number_maps = len(maps)
     # Account for multiple maps. ptr_arr_2d[domain_index, map_index].
     ptr_arr_2d = ptr_arr[:-1].reshape(-1, number_maps)
@@ -45,8 +48,9 @@ def make_counts(maps, ptr_arr):
         for from_arr, _ in map_:
             # As if all arrays in map_ were concatenated.
             for j in from_arr:
+                if j == SENTINEL:
+                    continue
                 map_ptr[j] += 1
-
     cumul = 0
     for i in range(len(ptr_arr)):
         ptr_arr[i] = cumul = ptr_arr[i] + cumul
@@ -66,6 +70,8 @@ def place_indices(maps, ptr_arr, ind_arr):
         for from_arr, to_arr in map_:
             # Treat all arrays in map_ as concatenated.
             for j, k in zip(from_arr, to_arr):
+                if j == SENTINEL:
+                    continue
                 # It's not obvious that this gives the correct result,
                 # but try it on a piece of paper. map_ptr[j] - 1 is the
                 # last free spot. Decrement map_ptr[j] in-place by 1.

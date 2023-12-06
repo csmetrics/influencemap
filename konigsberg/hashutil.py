@@ -75,7 +75,7 @@ class Id2IndHashMap:
     def __del__(self):
         self.id2ind_mmap.close()
 
-    def convert_inplace(self, series, allow_missing=False):
+    def convert_inplace(self, series, allow_missing=True):
         """Convert IDs to indices in-place.
 
         series is a Pandas series of indices. If allow_missing is set to
@@ -118,6 +118,7 @@ def _make_hash_map(ids, id2ind, arr_size, offset):
         # Pretty bad hashing method (by Knuth), but our IDs are already
         # almost uniform, they just need a little bit of help :)
         hash_ = nb.u8(id_ * nb.u8(HASH_PRIME)) % arr_size
+
         while id2ind[hash_] != SENTINEL:  # Cell not free.
             hash_ += 1
             if hash_ >= arr_size:
