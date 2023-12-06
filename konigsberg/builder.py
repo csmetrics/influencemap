@@ -10,7 +10,7 @@ import hashutil
 import sparseutil
 
 YEAR_SENTINEL = np.uint16(-1)  # Denotes missing year
-INDEX_SENTINEL = np.uint32(-1)  # Denotes deleted entity
+INDEX_SENTINEL = np.uint64(-1)  # Denotes deleted entity
 
 logger = logging.getLogger(__name__)
 logger.setLevel(logging.INFO)
@@ -57,7 +57,7 @@ def load_entity_df(path, meta_func=None, filter_column=None, sort_column=None):
     """
     indices = [0, 1]
     names = ['id', 'rank']
-    dtypes = {'id': np.uint32, 'rank': np.uint16}
+    dtypes = {'id': np.uint64, 'rank': np.uint16}
     if filter_column:
         filter_col_i, filter_col_name, filter_col_dtype, _ = filter_column
         indices.append(filter_col_i)
@@ -149,8 +149,8 @@ def load_papers_df(path):
         dialect=OpenAlexDialect(), engine='c',
         usecols=[0, 1, 2, 3],
         names=['paper_id', 'rank', 'year', 'journal_id'],
-        dtype={'paper_id': np.uint32, 'rank': np.uint16,
-               'year': pd.UInt16Dtype(), 'journal_id': pd.UInt32Dtype()},
+        dtype={'paper_id': np.uint64, 'rank': np.uint16,
+               'year': pd.UInt16Dtype(), 'journal_id': pd.UInt64Dtype()},
         keep_default_na=False,
         na_values={'year': [''], 'journal_id': ['']})
 
@@ -159,7 +159,7 @@ def load_papers_df(path):
                                ['paper_id', 'journal_id']]
     paper_journals_df.reset_index(drop=True, inplace=True)  # Memory.
     paper_journals_df['journal_id'] \
-        = paper_journals_df['journal_id'].astype(np.uint32)
+        = paper_journals_df['journal_id'].astype(np.uint64)
     del df['journal_id']
 
     df['year'].fillna(YEAR_SENTINEL, inplace=True)  # NaN -> sentinel.
@@ -190,15 +190,15 @@ def load_authorships_df(path):
         path,
         engine='c',
         usecols=[0, 1, 2], names=['paper_id', 'author_id', 'affiliation_id'],
-        dtype={'paper_id': np.uint32, 'author_id': np.uint32,
-               'affiliation_id': pd.UInt32Dtype()},
+        dtype={'paper_id': np.uint64, 'author_id': np.uint64,
+               'affiliation_id': pd.UInt64Dtype()},
         keep_default_na=False, na_values={'affiliation_id': ['']})
 
     paper_affiliations_df = df.loc[df['affiliation_id'].notna(),
                                    ['paper_id', 'affiliation_id']]
     paper_affiliations_df.reset_index(drop=True, inplace=True)
     paper_affiliations_df['affiliation_id'] \
-        = paper_affiliations_df['affiliation_id'].astype(np.uint32)
+        = paper_affiliations_df['affiliation_id'].astype(np.uint64)
     del df['affiliation_id']
     return df, paper_affiliations_df
 
@@ -220,7 +220,7 @@ def load_many_to_many_mapping(path, colname1, colname2):
         path,
         engine='c', na_filter=False,
         usecols=[0, 1], names=[colname1, colname2],
-        dtype={colname1: np.uint32, colname2: np.uint32})
+        dtype={colname1: np.uint64, colname2: np.uint64})
 
 
 def load_citations_df(path):
