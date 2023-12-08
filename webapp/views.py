@@ -14,14 +14,16 @@ from webapp.utils import *
 from webapp.front_end_helper import make_response_data
 from webapp.konigsberg_client import KonigsbergClient
 
-kb_client = KonigsbergClient(os.getenv('KONIGSBERG_URL', 'http://localhost:8081'))
+kb_client = KonigsbergClient(
+    os.getenv('KONIGSBERG_URL', 'http://localhost:8081'))
 
-flower_leaves = [ ('author', [ent.Entity_type.AUTH])
-                , ('conf'  , [ent.Entity_type.CONF, ent.Entity_type.JOUR])
-                , ('inst'  , [ent.Entity_type.AFFI])
-                , ('fos'   , [ent.Entity_type.FSTD]) ]
+flower_leaves = [
+    ('author', [ent.Entity_type.AUTH]),
+    ('conf', [ent.Entity_type.JOUR]),
+    ('inst', [ent.Entity_type.AFFI]),
+    ('fos', [ent.Entity_type.FSTD])
+]
 id_helper_dict = {
-    "conference": "ConferenceSeriesId",
     "journal": "JournalId",
     "institution": "AffiliationId",
     "paper": "PaperId",
@@ -46,7 +48,7 @@ def autocomplete():
 @blueprint.route('/query_about')
 @cross_origin()
 def query_about():
-    entity_type = "paper" # support paper search only
+    entity_type = "paper"  # support paper search only
     entity_title = request.args.get('title')
     entity_title = normalize_title(entity_title)
     print("query_about", entity_type, entity_title)
@@ -81,10 +83,11 @@ def query_about():
 @blueprint.route('/query')
 @cross_origin()
 def query():
-    entity_type = "paper" # support paper search only
+    entity_type = "paper"  # support paper search only
     entity_title = request.args.get('title')
     entity_title = normalize_title(entity_title)
-    data = filter_papers(entity_title, query_entity([entity_type], entity_title))
+    data = filter_papers(entity_title, query_entity(
+        [entity_type], entity_title))
     paper_ids = [p[0][id_helper_dict[entity_type]] for p in data]
     status_msg = "Success"
     if len(paper_ids) == 0:
@@ -110,13 +113,21 @@ def query():
     rdata["url_base"] = url_base
     rdata["summary"] = summary
 
-    #generate URLs for alter nodes
+    # generate URLs for alter nodes
     for flower_type, _ in flower_leaves:
         for node in rdata[flower_type][0]["nodes"]:
-            if flower_type == "author": node["url"] = url_encode_info(author_ids=[node["id"]], name=node["name"])
-            if flower_type == "conf": node["url"] = url_encode_info(conference_series_ids=[node["id"]], journal_ids=[node["id"]], name=node["name"])
-            if flower_type == "inst": node["url"] = url_encode_info(affiliation_ids=[node["id"]], name=node["name"])
-            if flower_type == "fos": node["url"] = url_encode_info(field_of_study_ids=[node["id"]], name=node["name"])
+            if flower_type == "author":
+                node["url"] = url_encode_info(
+                    author_ids=[node["id"]], name=node["name"])
+            if flower_type == "conf":
+                node["url"] = url_encode_info(
+                    journal_ids=[node["id"]], name=node["name"])
+            if flower_type == "inst":
+                node["url"] = url_encode_info(
+                    affiliation_ids=[node["id"]], name=node["name"])
+            if flower_type == "fos":
+                node["url"] = url_encode_info(
+                    field_of_study_ids=[node["id"]], name=node["name"])
 
     return flask.jsonify(rdata)
 
@@ -162,10 +173,8 @@ def curate_load_file():
     return flask.jsonify({'data': data, 'success': success})
 
 
-
 s = {
     'author': ('<i class="fa fa-user""></i><h4>{DisplayName}</h4><p>Papers: {PaperCount}, Citations: {CitationCount}</p>'),
-    'conference': ('<i class="fa fa-building"></i><h4>{DisplayName}</h4><p>Papers: {PaperCount}, Citations: {CitationCount}</p>'),
     'institution': ('<i class="fa fa-university"></i><h4>{DisplayName}</h4><p>Papers: {PaperCount}, Citations: {CitationCount}</p>'),
     'journal': ('<i class="fa fa-book"></i><h4>{DisplayName}</h4><p>Papers: {PaperCount}, Citations: {CitationCount}</p>'),
     'paper': ('<i class="fa fa-file"></i><h4>{OriginalTitle}</h4><p>Citations: {CitationCount}</p>'),
@@ -185,12 +194,16 @@ def search():
     for i in range(len(data)):
         entity = {'data': data[i][0]}
         entity['display-info'] = s[data[i][1]].format(**entity['data'])
-        if "Affiliation" in entity['data']: entity['display-info'] = entity['display-info'][0:-4] + ", Institution: {}</p>".format(entity['data']["Affiliation"])
-        if "Authors" in entity['data']: entity['display-info'] += "<p>Authors: {}</p>".format(", ".join(entity['data']["Authors"]))
-        entity['table-id'] = "{}_{}".format(data[i][1], entity['data'][id_helper_dict[data[i][1]]])
+        if "Affiliation" in entity['data']:
+            entity['display-info'] = entity['display-info'][0:-4] + \
+                ", Institution: {}</p>".format(entity['data']["Affiliation"])
+        if "Authors" in entity['data']:
+            entity['display-info'] += "<p>Authors: {}</p>".format(
+                ", ".join(entity['data']["Authors"]))
+        entity['table-id'] = "{}_{}".format(data[i][1],
+                                            entity['data'][id_helper_dict[data[i][1]]])
         data[i] = entity
     return flask.jsonify({'entities': data})
-
 
 
 @blueprint.route('/submit/', methods=['GET', 'POST'])
@@ -204,7 +217,6 @@ def submit():
         ids, flower_name, curated_flag = url_decode_info(doc_id)
         author_ids = ids.author_ids
         affiliation_ids = ids.affiliation_ids
-        conference_ids = ids.conference_series_ids
         fos_ids = ids.field_of_study_ids
         journal_ids = ids.journal_ids
         paper_ids = ids.paper_ids
@@ -223,7 +235,6 @@ def submit():
         entities = data['entities']
         author_ids = list(map(int, entities['AuthorIds']))
         affiliation_ids = list(map(int, entities['AffiliationIds']))
-        conference_ids = list(map(int, entities['ConferenceIds']))
         journal_ids = list(map(int, entities['JournalIds']))
         paper_ids = list(map(int, entities['PaperIds']))
         fos_ids = list(map(int, entities['FieldOfStudyIds']))
@@ -231,39 +242,38 @@ def submit():
         flower_name = data.get('flower_name')
         doc_id = url_encode_info(
             author_ids=author_ids, affiliation_ids=affiliation_ids,
-            conference_series_ids=conference_ids, field_of_study_ids=fos_ids,
-            journal_ids=journal_ids, paper_ids=paper_ids, name=flower_name)
+            field_of_study_ids=fos_ids, journal_ids=journal_ids,
+            paper_ids=paper_ids, name=flower_name)
 
     if not flower_name:
         first_nonempty_id_list = (author_ids or affiliation_ids
-                                  or conference_ids or journal_ids
+                                  or journal_ids
                                   or paper_ids or fos_ids)
         if not first_nonempty_id_list:
             raise ValueError('no entities')
         flower_name = first_nonempty_id_list[0]
         total_entities = (len(author_ids) + len(affiliation_ids)
-                          + len(conference_ids) + len(journal_ids)
-                          + len(paper_ids) + len(fos_ids))
+                          + len(journal_ids) + len(paper_ids) + len(fos_ids))
         if total_entities > 1:
             flower_name += f" +{total_entities - 1} more"
 
     flower = kb_client.get_flower(
         author_ids=author_ids, affiliation_ids=affiliation_ids,
-        conference_series_ids=conference_ids, field_of_study_ids=fos_ids,
+        field_of_study_ids=fos_ids,
         journal_ids=journal_ids, paper_ids=paper_ids, pub_years=pub_years,
         cit_years=cit_years, coauthors=coauthors,
         self_citations=self_citations, max_results=50)
 
     stats = kb_client.get_stats(
         author_ids=author_ids, affiliation_ids=affiliation_ids,
-        conference_series_ids=conference_ids, field_of_study_ids=fos_ids,
+        field_of_study_ids=fos_ids,
         journal_ids=journal_ids, paper_ids=paper_ids)
 
     url_base = f"https://influencemap.cmlab.dev/submit/?id={doc_id}"
 
     session = dict(
         author_ids=author_ids, affiliation_ids=affiliation_ids,
-        conference_ids=conference_ids, journal_ids=journal_ids,
+        journal_ids=journal_ids,
         fos_ids=fos_ids, paper_ids=paper_ids, flower_name=flower_name,
         url_base=url_base, icoauthor=coauthors, self_cite=self_citations,
         year_ranges=None)
@@ -285,17 +295,16 @@ def resubmit():
     # flower_config['order'] = request.form.get('petalorder')
     try:
         session = json.loads(request.form.get("session"))
-        flower_name  = session['flower_name']
+        flower_name = session['flower_name']
         author_ids = session['author_ids']
         affiliation_ids = session['affiliation_ids']
-        conference_ids = session['conference_ids']
         journal_ids = session['journal_ids']
         fos_ids = session['fos_ids']
         paper_ids = session['paper_ids']
 
         self_citations = request.form.get('selfcite') == 'true'
         coauthors = request.form.get('coauthor') == 'true'
-        
+
         pub_lower = int(request.form.get('from_pub_year'))
         pub_upper = int(request.form.get('to_pub_year'))
         cit_lower = int(request.form.get('from_cit_year'))
@@ -306,10 +315,10 @@ def resubmit():
             'cit_lower': cit_lower,
             'cit_upper': cit_upper
         }
-    
+
         flower = kb_client.get_flower(
             author_ids=author_ids, affiliation_ids=affiliation_ids,
-            conference_series_ids=conference_ids, field_of_study_ids=fos_ids,
+            field_of_study_ids=fos_ids,
             journal_ids=journal_ids, paper_ids=paper_ids,
             pub_years=(pub_lower, pub_upper), cit_years=(cit_lower, cit_upper),
             coauthors=coauthors, self_citations=self_citations, max_results=50)
@@ -326,8 +335,11 @@ def resubmit():
 def conf_journ_to_display_names(papers):
     conf_journ_ids = {"ConferenceSeriesIds": [], "JournalIds": []}
     for paper in papers.values():
-        if "ConferenceSeriesId" in paper: conf_journ_ids["ConferenceSeriesIds"].append(paper["ConferenceSeriesId"])
-        if "JournalId" in paper: conf_journ_ids["JournalIds"].append(paper["JournalId"])
+        if "ConferenceSeriesId" in paper:
+            conf_journ_ids["ConferenceSeriesIds"].append(
+                paper["ConferenceSeriesId"])
+        if "JournalId" in paper:
+            conf_journ_ids["JournalIds"].append(paper["JournalId"])
     conf_journ_display_names = conf_journ_ids
     for paper in papers.values():
         if "ConferenceSeriesId" in paper:
@@ -346,9 +358,11 @@ def get_publication_papers():
     pub_year_max = int(request.form.get("pub_year_max"))
     paper_ids = session['cache']
     papers = papers_prop_query(paper_ids)
-    papers = [paper for paper in papers if (paper["Year"] >= pub_year_min and paper["Year"] <= pub_year_max)]
-    papers = conf_journ_to_display_names({paper["PaperId"]: paper for paper in papers})
-    return flask.jsonify({"papers": papers, "names": session["entity_names"]+ session["node_info"]})
+    papers = [paper for paper in papers if (
+        paper["Year"] >= pub_year_min and paper["Year"] <= pub_year_max)]
+    papers = conf_journ_to_display_names(
+        {paper["PaperId"]: paper for paper in papers})
+    return flask.jsonify({"papers": papers, "names": session["entity_names"] + session["node_info"]})
 
 
 @blueprint.route('/get_citation_papers')
@@ -363,27 +377,30 @@ def get_citation_papers():
     pub_year_max = int(request.form.get("pub_year_max"))
     paper_ids = session['cache']
     papers = papers_prop_query(paper_ids)
-    cite_papers = [[citation for citation in paper["Citations"] if (citation["Year"] >= cite_year_min and citation["Year"] <= cite_year_max)] for paper in papers if (paper["Year"] >= pub_year_min and paper["Year"] <= pub_year_max)]
-    citations = sum(cite_papers,[])
-    citations = conf_journ_to_display_names({paper["PaperId"]: paper for paper in citations})
+    cite_papers = [[citation for citation in paper["Citations"] if (citation["Year"] >= cite_year_min and citation["Year"] <= cite_year_max)] for paper in papers if (
+        paper["Year"] >= pub_year_min and paper["Year"] <= pub_year_max)]
+    citations = sum(cite_papers, [])
+    citations = conf_journ_to_display_names(
+        {paper["PaperId"]: paper for paper in citations})
 
-    return flask.jsonify({"papers": citations, "names": session["entity_names"] + session["node_info"],"node_info": session["node_information_store"]})
+    return flask.jsonify({"papers": citations, "names": session["entity_names"] + session["node_info"], "node_info": session["node_information_store"]})
 
 
 def get_entities(paper):
     ''' Gets the entities of a paper
     '''
-    authors      = [author["AuthorName"] for author in paper["Authors"]]
-    affiliations = [author["AffiliationName"] for author in paper["Authors"] if "AffiliationName" in author]
-    conferences = [paper["ConferenceName"]] if ("ConferenceName" in paper) else []
+    authors = [author["AuthorName"] for author in paper["Authors"]]
+    affiliations = [author["AffiliationName"]
+                    for author in paper["Authors"] if "AffiliationName" in author]
     journals = [paper["JournalName"]] if ("JournalName" in paper) else []
-    fieldsofstudy = [fos["FieldOfStudyName"] for fos in paper["FieldsOfStudy"] if fos["FieldOfStudyLevel"] == 1] if ("FieldsOfStudy" in paper) else []
+    fieldsofstudy = [fos["FieldOfStudyName"] for fos in paper["FieldsOfStudy"]
+                     if fos["FieldOfStudyLevel"] == 1] if ("FieldsOfStudy" in paper) else []
 
-    return authors, affiliations, conferences, journals, fieldsofstudy
+    return authors, affiliations, journals, fieldsofstudy
 
 
 NODE_INFO_FIELDS = ["PaperTitle", "Authors", "PaperId", "Year", "ConferenceName",
-        "ConferenceSeriesId", "JournalName", "JournalId"]
+                    "ConferenceSeriesId", "JournalName", "JournalId"]
 
 
 def get_node_info_single(entity_id, entity_type, year_ranges):
@@ -416,7 +433,7 @@ def get_node_info_single(entity_id, entity_type, year_ranges):
     node_info = kb_client.get_node_info(
         node_id=entity_id, node_type=node_type_id,
         author_ids=session["author_ids"], affiliation_ids=session["affiliation_ids"],
-        conference_series_ids=session["conference_ids"], field_of_study_ids=session["fos_ids"],
+        field_of_study_ids=session["fos_ids"],
         journal_ids=session["journal_ids"], paper_ids=session["paper_ids"],
         pub_years=(pub_lower, pub_upper), cit_years=(cit_lower, cit_upper),
         coauthors=coauthors, self_citations=self, max_results=50)
@@ -484,7 +501,8 @@ def get_node_info_single(entity_id, entity_type, year_ranges):
     # paper_sort_func = lambda x: -papers_to_send[x]["Year"]
     # links = sorted([{"citation": sorted(link["citation"],key=paper_sort_func), "reference": sorted(link["reference"],key=paper_sort_func), "ego_paper": key} for key, link in links.items()], key=lambda x: paper_sort_func(x["ego_paper"]))
 
-    links = [{"ego_paper": id, "reference": v["reference"], "citation": v["citation"]} for id, v in node_info.items()]
+    links = [{"ego_paper": id, "reference": v["reference"],
+              "citation": v["citation"]} for id, v in node_info.items()]
 
     return {"node_links": links}
 
@@ -506,10 +524,15 @@ def get_node_flower():
     node_ids = request_data.get("ids")
     id_list = [int(id) for id in node_ids.split(',')]
 
-    if flower_type == "author": doc_id = url_encode_info(author_ids=id_list, name=flower_name)
-    if flower_type == "conf": doc_id = url_encode_info(conference_series_ids=id_list, journal_ids=id_list, name=flower_name)
-    if flower_type == "inst": doc_id = url_encode_info(affiliation_ids=id_list, name=flower_name)
-    if flower_type == "fos": doc_id = url_encode_info(field_of_study_ids=id_list, name=flower_name)
+    print("get_node_flower", flower_type)
+    if flower_type == "author":
+        doc_id = url_encode_info(author_ids=id_list, name=flower_name)
+    if flower_type == "conf":
+        doc_id = url_encode_info(journal_ids=id_list, name=flower_name)
+    if flower_type == "inst":
+        doc_id = url_encode_info(affiliation_ids=id_list, name=flower_name)
+    if flower_type == "fos":
+        doc_id = url_encode_info(field_of_study_ids=id_list, name=flower_name)
 
     data = dict()
     data["flower_url"] = f"https://influencemap.cmlab.dev/submit/?id={doc_id}"
@@ -536,7 +559,6 @@ def get_node_info():
     return flask.jsonify(data)
 
 
-
 @blueprint.route('/get_next_node_info_page/', methods=['POST'])
 def get_next_node_info_page():
     request_data = json.loads(request.form.get("data_string"))
@@ -549,6 +571,7 @@ def get_next_node_info_page():
 
     node_info = get_node_info_single(node_ids, node_type, year_ranges)
     page_length = 5
-    data = {"node_links": node_info["node_links"][0+page_length*(page-1):min(page_length*page, len(node_info["node_links"]))]}
+    data = {"node_links": node_info["node_links"][0+page_length *
+                                                  (page-1):min(page_length*page, len(node_info["node_links"]))]}
     data["paper_info"] = get_paper_info(data["node_links"])
     return flask.jsonify(data)
