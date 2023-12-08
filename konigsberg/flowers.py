@@ -9,6 +9,7 @@ from itertools import chain, starmap
 import numba as nb
 import numpy as np
 
+SENTINEL = np.uint64(-1)
 HASH_PRIME = 11400714819323198549
 
 mmapped_arr = nb.types.Array(nb.u8, 1, 'C', readonly=True)
@@ -140,8 +141,6 @@ class Florist:
             path / 'fos-id2ind.bin', self.entity_ind2id_map)
         self.journal_id2ind_map = IdToIndMapper(
             path / 'journl-id2ind.bin', self.entity_ind2id_map)
-        self.cs_id2ind_map = IdToIndMapper(
-            path / 'cs-id2ind.bin', self.entity_ind2id_map)
 
         self.paper_ind2id_map = IndToIdMapper(path / 'paper-ind2id.bin')
         self.paper_id2ind_map = IdToIndMapper(
@@ -165,10 +164,6 @@ class Florist:
         self.aff_range = self.author_range + entity_counts_data['aff']
         self.fos_range = self.aff_range + entity_counts_data['fos']
         self.journal_range = self.fos_range + entity_counts_data['journals']
-        self.cs_range = self.journal_range + entity_counts_data['cs']
-        with open(path / 'fos-meta.json') as f:
-            fos_meta = json.load(f)
-        self.fos_l1_start = self.aff_range + fos_meta['level0count']
 
     def _get_id_year_range(self, years):
         """Get range of paper indices corresponding to a range of years.
@@ -198,23 +193,14 @@ class Florist:
             self.aff_id2ind_map,
             self.fos_id2ind_map
         ]
-        # There should be better way to find whether it is journal or conference type
-        if type == 1:
-            try:
-                index = self._ids_to_indices(
-                    [id], self.journal_id2ind_map, allow_not_found)[0]
-            except:
-                index = self._ids_to_indices(
-                    [id], self.cs_id2ind_map, allow_not_found)[0]
-        else:
-            index = self._ids_to_indices(
-                [id], in2ind_maps[type], allow_not_found)[0]
+        index = self._ids_to_indices(
+            [id], in2ind_maps[type], allow_not_found)[0]
         return index
 
     def _get_entity_indices(
         self,
         *,
-        author_ids, aff_ids, fos_ids, journal_ids, cs_ids, allow_not_found
+        author_ids, aff_ids, fos_ids, journal_ids, allow_not_found
     ):
         """Convert IDs to indices and concatenate."""
         author_indices = self._ids_to_indices(
@@ -225,10 +211,8 @@ class Florist:
             fos_ids, self.fos_id2ind_map, allow_not_found)
         journal_indices = self._ids_to_indices(
             journal_ids, self.journal_id2ind_map, allow_not_found)
-        cs_indices = self._ids_to_indices(
-            cs_ids, self.cs_id2ind_map, allow_not_found)
         return np.concatenate([author_indices, aff_indices, fos_indices,
-                               journal_indices, cs_indices])
+                               journal_indices])
 
     def _get_paper_indices(self, paper_ids, *, allow_not_found):
         return self._ids_to_indices(
@@ -259,7 +243,7 @@ class Florist:
     def _make_flower_from_res(self, raw_result, max_results):
         split_res = get_split_res(
             raw_result, self.author_range, self.aff_range, self.fos_range,
-            self.journal_range, self.cs_range, self.fos_l1_start)
+            self.journal_range)
 
         author_tot, aff_tot, fos_tot, venue_tot = map(len, split_res)
 
@@ -332,7 +316,7 @@ class Florist:
         entity_indices = self._get_entity_indices(
             author_ids=author_ids, aff_ids=affiliation_ids,
             fos_ids=field_of_study_ids, journal_ids=journal_ids,
-            cs_ids=conference_series_ids, allow_not_found=allow_not_found)
+            allow_not_found=allow_not_found)
         paper_indices = self._get_paper_indices(
             paper_ids, allow_not_found=allow_not_found)
 
@@ -367,7 +351,7 @@ class Florist:
         entity_indices = self._get_entity_indices(
             author_ids=author_ids, aff_ids=affiliation_ids,
             fos_ids=field_of_study_ids, journal_ids=journal_ids,
-            cs_ids=conference_series_ids, allow_not_found=allow_not_found)
+            allow_not_found=allow_not_found)
         paper_indices = self._get_paper_indices(
             paper_ids, allow_not_found=allow_not_found)
 
@@ -412,7 +396,7 @@ class Florist:
         entity_indices = self._get_entity_indices(
             author_ids=author_ids, aff_ids=affiliation_ids,
             fos_ids=field_of_study_ids, journal_ids=journal_ids,
-            cs_ids=conference_series_ids, allow_not_found=allow_not_found)
+            allow_not_found=allow_not_found)
         paper_indices = self._get_paper_indices(
             paper_ids, allow_not_found=allow_not_found)
 
@@ -461,8 +445,7 @@ split_result_val_t = nb.types.Tuple([nb.u8, nb.f4, nb.f4, nb.u1, nb.u1])
 @nb.njit(nogil=True)
 def get_split_res(
     res,
-    author_range, aff_range, fos_range, journal_range, cs_range,
-    fos_l1_start,
+    author_range, aff_range, fos_range, journal_range
 ):
     """Split a dict of indices and scores by entity type."""
     author_res = nb.typed.List.empty_list(split_result_val_t)
@@ -470,22 +453,23 @@ def get_split_res(
     fos_res = nb.typed.List.empty_list(split_result_val_t)
     venues_res = nb.typed.List.empty_list(split_result_val_t)
     for index, citor_score, citee_score, coauthor in res:
+        if index == SENTINEL:
+            continue
         if index < author_range:
             author_res.append(
                 (index, citor_score, citee_score, coauthor, nb.u1(0)))
         elif index < aff_range:
             aff_res.append(
                 (index, citor_score, citee_score, coauthor, nb.u1(1)))
-        elif index < fos_l1_start:
-            pass  # Skip l0 fields of study.
         elif index < fos_range:
             fos_res.append(
                 (index, citor_score, citee_score, coauthor, nb.u1(3)))
-        elif index < cs_range:
+        elif index < journal_range:
             venues_res.append((index, citor_score, citee_score, coauthor,
                                nb.u1(4 if index < journal_range else 2)))
         else:
-            raise IndexError('entity index out of range')
+            print("index error:", index)
+            raise IndexError('entity index out of range:')
     return author_res, aff_res, fos_res, venues_res
 
 
