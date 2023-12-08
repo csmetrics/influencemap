@@ -3,23 +3,23 @@ import os
 import pathlib
 import string
 
-from core.search.elastic import *
 from webapp.shortener import url_encode_info
 
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 
 # option list for radios
 optionlist = [  # option list
-    {"id":"author", "name":"Author"},
-    {"id":"conference", "name":"Conference"},
-    {"id":"journal", "name":"Journal"},
-    {"id":"institution", "name":"Institution"},
-    {"id":"paper", "name": "Paper"}]
+    {"id": "author", "name": "Author"},
+    {"id": "conference", "name": "Conference"},
+    {"id": "journal", "name": "Journal"},
+    {"id": "institution", "name": "Institution"},
+    {"id": "paper", "name": "Paper"}]
 
 # initialise as no autocomplete lists yet (wait until needed)
 autoCompleteLists = {}
 
 GALLERY_DATA_PATH = pathlib.Path("webapp/data")
+
 
 def normalize_title(keyword):
     exclude = set(string.punctuation)
@@ -39,6 +39,7 @@ def filter_papers(search_title, data):
         if search_title_arr == title_arr:
             filtered_data.append(p)
     return filtered_data
+
 
 def read_gallery_group(filename):
     try:
@@ -70,7 +71,7 @@ def load_gallery():
             if subgroup["type"] == "inner":
                 group_file = GALLERY_DATA_PATH / (subgroup["tag"] + ".json")
                 subgroup["docs"] = read_gallery_group(group_file)
-            else: # subgroup["type"] == "outer":
+            else:  # subgroup["type"] == "outer":
                 for subsubgroup in subgroup["subgroups"]:
                     if subsubgroup["type"] == "inner":
                         group_file_name = subsubgroup["tag"] + ".json"
@@ -90,22 +91,9 @@ def loadList(entity):
     return autoCompleteLists[entity]
 
 
-def get_navbar_option(keyword = "", option = ""):
+def get_navbar_option(keyword="", option=""):
     return {
         "optionlist": optionlist,
         "selectedKeyword": keyword,
         "selectedOption": [opt for opt in optionlist if opt['id'] == option][0] if option != "" else optionlist[0],
     }
-
-
-def add_author_order(paper_info):
-    '''
-    '''
-    author_order = author_order_query(paper_info['PaperId'])
-
-    for author in paper_info['Authors']:
-        if author['AuthorId'] not in author_order:
-            continue
-        author['AuthorOrder'] = author_order[author['AuthorId']]
-
-    return paper_info
