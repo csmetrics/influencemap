@@ -68,10 +68,10 @@ class Mapping:
         """Initialize from files."""
         with open(ptr_path, 'rb') as f:
             self.ptr_mmap = mmap.mmap(f.fileno(), 0, prot=mmap.PROT_READ)
-        self.ptr = np.frombuffer(self.ptr_mmap, dtype=np.uint32)
+        self.ptr = np.frombuffer(self.ptr_mmap, dtype=np.uint64)
         with open(ind_path, 'rb') as f:
             self.ind_mmap = mmap.mmap(f.fileno(), 0, prot=mmap.PROT_READ)
-        self.ind = np.frombuffer(self.ind_mmap, dtype=np.uint32)
+        self.ind = np.frombuffer(self.ind_mmap, dtype=np.uint64)
 
     def __del__(self):
         self.ptr_mmap.close()
