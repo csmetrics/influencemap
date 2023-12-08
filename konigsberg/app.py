@@ -97,7 +97,6 @@ def get_flower():
     affiliation_ids = _get_ids_from_request('affiliation-ids')
     field_of_study_ids = _get_ids_from_request('field-of-study-ids')
     journal_ids = _get_ids_from_request('journal-ids')
-    conference_series_ids = _get_ids_from_request('conference-series-ids')
     paper_ids = _get_ids_from_request('paper-ids')
 
     self_citations = _get_bool_from_request('self-citations')
@@ -111,7 +110,7 @@ def get_flower():
     flower = florist.get_flower(
         author_ids=author_ids, affiliation_ids=affiliation_ids,
         field_of_study_ids=field_of_study_ids, journal_ids=journal_ids,
-        conference_series_ids=conference_series_ids, paper_ids=paper_ids,
+        paper_ids=paper_ids,
         self_citations=self_citations, coauthors=not exclude_coauthors,
         pub_years=pub_years, cit_years=cit_years,
         allow_not_found=True, max_results=max_results)
@@ -125,13 +124,12 @@ def get_stats():
     affiliation_ids = _get_ids_from_request('affiliation-ids')
     field_of_study_ids = _get_ids_from_request('field-of-study-ids')
     journal_ids = _get_ids_from_request('journal-ids')
-    conference_series_ids = _get_ids_from_request('conference-series-ids')
     paper_ids = _get_ids_from_request('paper-ids')
 
     stats = florist.get_stats(
         author_ids=author_ids, affiliation_ids=affiliation_ids,
         field_of_study_ids=field_of_study_ids, journal_ids=journal_ids,
-        conference_series_ids=conference_series_ids, paper_ids=paper_ids,
+        paper_ids=paper_ids,
         allow_not_found=True)
 
     return flask.jsonify(stats_as_dict(stats))
@@ -146,7 +144,6 @@ def get_node_info():
     affiliation_ids = _get_ids_from_request('affiliation-ids')
     field_of_study_ids = _get_ids_from_request('field-of-study-ids')
     journal_ids = _get_ids_from_request('journal-ids')
-    conference_series_ids = _get_ids_from_request('conference-series-ids')
     paper_ids = _get_ids_from_request('paper-ids')
 
     self_citations = _get_bool_from_request('self-citations')
@@ -161,7 +158,7 @@ def get_node_info():
         node_id=node_id, node_type=node_type,
         author_ids=author_ids, affiliation_ids=affiliation_ids,
         field_of_study_ids=field_of_study_ids, journal_ids=journal_ids,
-        conference_series_ids=conference_series_ids, paper_ids=paper_ids,
+        paper_ids=paper_ids,
         self_citations=self_citations, coauthors=not exclude_coauthors,
         pub_years=pub_years, cit_years=cit_years,
         allow_not_found=True, max_results=max_results)
