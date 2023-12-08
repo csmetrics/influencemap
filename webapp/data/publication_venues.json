@@ -3,7 +3,7 @@
 	"Icon_type": "venues",
 	"DisplayName": "Programming Language Design and Implementation",
 	"EntityIds": {
-		"ConferenceIds": [1127352206]
+		"JournalIds": [4306420747]
 	},
 	"Url": "http://www.sigplan.org/Conferences/PLDI/"
 }, {
@@ -11,7 +11,7 @@
 	"Icon_type": "venues",
 	"DisplayName": "Visual Analytics Science and Technology",
 	"EntityIds": {
-		"ConferenceIds": [1161805661]
+		"JournalIds": [4306421153]
 	},
 	"Url": "http://ieeevis.org"
 }]

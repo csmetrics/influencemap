@@ -3,68 +3,68 @@
 	"Affiliations": ["School of Literature", "Language and Linguistics"],
 	"DisplayName": "Anna Wierzbicka",
 	"EntityIds": {
-		"AuthorIds": [1899979098]
+		"AuthorIds": [5025200643]
 	}
 }, {
 	"Type": "anu_researchers",
 	"Affiliations": ["Research School of Astronomy and Astrophysics"],
 	"DisplayName": "Brian Paul Schmidt",
 	"EntityIds": {
-		"AuthorIds": [2114532821]
+		"AuthorIds": [5046241181, 5023063594]
 	}
 }, {
 	"Type": "anu_researchers",
 	"Affiliations": ["Research School of Physics and Engineering"],
 	"DisplayName": "Chennupati Jagadish",
 	"EntityIds": {
-		"AuthorIds": [1974910167]
+		"AuthorIds": [5033971536]
 	}
 }, {
 	"Type": "anu_researchers",
 	"Affiliations": ["Centre for Mental Health Research"],
 	"DisplayName": "Helen Christensen",
 	"EntityIds": {
-		"AuthorIds": [1965953510]
+		"AuthorIds": [5009347799, 5077917659]
 	}
 }, {
 	"Type": "anu_researchers",
 	"Affiliations": ["Centre for Research on Ageing Health and Wellbeing"],
 	"DisplayName": "Kaarin J. Anstey",
 	"EntityIds": {
-		"AuthorIds": [612724871]
+		"AuthorIds": [5069166766]
 	}
 }, {
 	"Type": "anu_researchers",
 	"Affiliations": ["Research School of Engineering"],
 	"DisplayName": "Kylie Catchpole",
 	"EntityIds": {
-		"AuthorIds": [1990885502]
+		"AuthorIds": [5076140093]
 	}
 }, {
 	"Type": "anu_researchers",
 	"DisplayName": "Lexing Xie",
 	"EntityIds": {
-		"AuthorIds": [2100918400]
+		"AuthorIds": [5049449495]
 	}
 }, {
 	"Type": "anu_researchers",
 	"Affiliations": ["Research School of Computer Science", "Data61"],
 	"DisplayName": "Michael Norrish",
 	"EntityIds": {
-		"AuthorIds": [2103706242]
+		"AuthorIds": [5056365707]
 	}
 }, {
 	"Type": "anu_researchers",
 	"DisplayName": "Nick Birbilis",
 	"EntityIds": {
-		"AuthorIds": [1988665910]
+		"AuthorIds": [5049001467]
 	}
 }, {
 	"Type": "anu_researchers",
 	"Affiliations": ["Research School of Chemistry"],
 	"DisplayName": "Peter M. W. Gill",
 	"EntityIds": {
-		"AuthorIds": [2104025784]
+		"AuthorIds": [5048687133, 5085554535]
 	}
 }, {
 	"Type": "anu_researchers",
@@ -75,16 +75,9 @@
 	}
 }, {
 	"Type": "anu_researchers",
-	"Affiliations": ["Research School of Computer Science"],
-	"DisplayName": "Robert Williamson",
-	"EntityIds": {
-		"AuthorIds": [2122328552]
-	}
-}, {
-	"Type": "anu_researchers",
 	"Affiliations": ["National Centre for Epidemiology and Population Health", "ANU Medical School"],
 	"DisplayName": "Robyn M. Lucas",
 	"EntityIds": {
-		"AuthorIds": [2166335365]
+		"AuthorIds": [5089070827]
 	}
 }]
