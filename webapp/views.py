@@ -6,7 +6,7 @@ from flask import request
 from flask_cors import CORS, cross_origin
 
 import core.utils.entity_type as ent
-from core.search.query_info import papers_prop_query
+from core.search.query_info import papers_prop_query, query_entity_by_keyword
 from core.utils.load_tsv import tsv_to_dict
 from webapp.shortener import decode_filters, url_decode_info, url_encode_info
 from webapp.utils import *
@@ -48,12 +48,12 @@ def autocomplete():
 @blueprint.route('/query_about')
 @cross_origin()
 def query_about():
-    entity_type = "paper"  # support paper search only
+    entity_type = "works"  # support paper search only
     entity_title = request.args.get('title')
     entity_title = normalize_title(entity_title)
     print("query_about", entity_type, entity_title)
 
-    data = query_entity([entity_type], entity_title)
+    data = query_entity_by_keyword([entity_type], entity_title)
     papers = filter_papers(entity_title, data)
     paper_ids = [p[0][id_helper_dict[entity_type]] for p in papers]
     status_msg = "Success"
@@ -83,10 +83,10 @@ def query_about():
 @blueprint.route('/query')
 @cross_origin()
 def query():
-    entity_type = "paper"  # support paper search only
+    entity_type = "works"  # support paper search only
     entity_title = request.args.get('title')
     entity_title = normalize_title(entity_title)
-    data = filter_papers(entity_title, query_entity(
+    data = filter_papers(entity_title, query_entity_by_keyword(
         [entity_type], entity_title))
     paper_ids = [p[0][id_helper_dict[entity_type]] for p in data]
     status_msg = "Success"
@@ -174,11 +174,21 @@ def curate_load_file():
 
 
 s = {
-    'author': ('<i class="fa fa-user""></i><h4>{DisplayName}</h4><p>Papers: {PaperCount}, Citations: {CitationCount}</p>'),
-    'institution': ('<i class="fa fa-university"></i><h4>{DisplayName}</h4><p>Papers: {PaperCount}, Citations: {CitationCount}</p>'),
-    'journal': ('<i class="fa fa-book"></i><h4>{DisplayName}</h4><p>Papers: {PaperCount}, Citations: {CitationCount}</p>'),
-    'paper': ('<i class="fa fa-file"></i><h4>{OriginalTitle}</h4><p>Citations: {CitationCount}</p>'),
-    'topic': ('<i class="fa fa-flask"></i><h4>{DisplayName} (Level {Level})</h4><p>Papers: {PaperCount}, Citations: {CitationCount}</p>')
+    'authors': ('<i class="fa fa-user""></i><h4>{DisplayName}</h4><p>Papers: {PaperCount}, Citations: {CitationCount}</p>'),
+    'institutions': ('<i class="fa fa-university"></i><h4>{DisplayName}</h4><p>Papers: {PaperCount}, Citations: {CitationCount}</p>'),
+    'sources': ('<i class="fa fa-book"></i><h4>{DisplayName}</h4><p>Papers: {PaperCount}, Citations: {CitationCount}</p>'),
+    'works': ('<i class="fa fa-file"></i><h4>{DisplayName}</h4><p>Citations: {CitationCount}</p>'),
+    'concepts': ('<i class="fa fa-flask"></i><h4>{DisplayName} (Level {Level})</h4><p>Papers: {PaperCount}, Citations: {CitationCount}</p>')
+}
+
+
+openalex_type_map = {
+    'author': 'authors',
+    'institution': 'institutions',
+    'conference': 'sources',
+    'journal': 'sources',
+    'paper': 'works',
+    'topic': 'concepts',
 }
 
 
@@ -190,19 +200,30 @@ def search():
     keyword = normalize_title(keyword)
 
     print("search", entityType, keyword)
-    data = query_entity(entityType, keyword)
+    entityType_openalex = [openalex_type_map[t] for t in entityType]
+    data = query_entity_by_keyword(entityType_openalex, keyword)
     for i in range(len(data)):
-        entity = {'data': data[i][0]}
-        entity['display-info'] = s[data[i][1]].format(**entity['data'])
-        if "Affiliation" in entity['data']:
+        entity_data = data[i][0]
+        entity_type = data[i][1]
+        entity = {'data': {
+            'DisplayName': entity_data['display_name'],
+            'CitationCount': entity_data['cited_by_count'],
+            'PaperCount': entity_data['works_count'] if 'works_count' in entity_data else None,
+            'Level': entity_data['level'] if 'level' in entity_data else None,
+        }}
+        entity['display-info'] = s[entity_type].format(**entity['data'])
+
+        if 'last_known_institution' in entity_data and entity_data['last_known_institution'] != None:
             entity['display-info'] = entity['display-info'][0:-4] + \
-                ", Institution: {}</p>".format(entity['data']["Affiliation"])
-        if "Authors" in entity['data']:
+                ", Institution: {}</p>".format(
+                    entity_data['last_known_institution']['display_name'])
+        if "authorships" in entity_data and len(entity_data['authorships']) > 0:
             entity['display-info'] += "<p>Authors: {}</p>".format(
-                ", ".join(entity['data']["Authors"]))
-        entity['table-id'] = "{}_{}".format(data[i][1],
-                                            entity['data'][id_helper_dict[data[i][1]]])
+                ", ".join([a['author']['display_name'] for a in entity_data['authorships']]))
+
+        entity['table-id'] = "{}_{}".format(data[i][1], entity_data['id'])
         data[i] = entity
+
     return flask.jsonify({'entities': data})
 
 
