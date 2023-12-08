@@ -4,7 +4,7 @@ from . import flowers
 
 app = flask.Flask(__name__)
 
-florist = flowers.Florist('bingraph')
+florist = flowers.Florist('bingraph-openalex')
 
 
 def _get_ids_from_request(argname):
