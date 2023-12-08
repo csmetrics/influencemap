@@ -2,6 +2,18 @@ import requests
 
 OPENALEX_URL = "https://api.openalex.org"
 
+openalex_splitter = {
+    'authors': 'A',
+    'institutions': 'I',
+    'sources': 'S',
+    'works': 'W',
+    'concepts': 'C',
+}
+
+
+def convert_id(id, type):
+    return int(id.split(openalex_splitter[type])[-1])
+
 
 def query_entity_by_keyword(entity_types, entity_title):
     res = []
@@ -27,9 +39,10 @@ def query_entity_by_keyword(entity_types, entity_title):
     return res
 
 
-def query_entities_by_list(type, type_str, eids):
+def query_entities_by_list(type, eids):
     params = {
-        'filter': 'ids.openalex:'+'|'.join(['https://openalex.org/{}{}'.format(type_str, eid) for eid in eids]),
+        'filter': 'ids.openalex:'+'|'.join(['https://openalex.org/{}{}'.format(
+            openalex_splitter[type], eid) for eid in eids]),
         'per-page': len(eids),
         'mailto': 'minjeong.shin@anu.edu.au'
     }
@@ -47,9 +60,10 @@ def query_entities_by_list(type, type_str, eids):
     return []
 
 
-def query_entity_by_id(type, type_str, id):  # For test purpose
+def query_entity_by_id(type, id):  # For test purpose
     try:
-        path = "{}/{}/{}{}".format(OPENALEX_URL, type, type_str, str(id))
+        path = "{}/{}/{}{}".format(OPENALEX_URL, type,
+                                   openalex_splitter[type], str(id))
         print(path)
         response = requests.get(path)
         if response.status_code == 200:
