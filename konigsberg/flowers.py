@@ -9,9 +9,11 @@ from itertools import chain, starmap
 import numba as nb
 import numpy as np
 
-mmapped_arr = nb.types.Array(nb.u4, 1, 'C', readonly=True)
+HASH_PRIME = 11400714819323198549
+
+mmapped_arr = nb.types.Array(nb.u8, 1, 'C', readonly=True)
 mapping_arrs = nb.types.Tuple([mmapped_arr, mmapped_arr])
-id_mapping_arrs = nb.types.Tuple([mmapped_arr, mmapped_arr, nb.u4])
+id_mapping_arrs = nb.types.Tuple([mmapped_arr, mmapped_arr, nb.u8])
 
 
 class Subflower:
@@ -113,7 +115,7 @@ class IdToIndMapper:
 
     @property
     def arrs(self):
-        mask = nb.u4(len(self.id2ind) - 1)
+        mask = nb.u8(len(self.id2ind) - 1)
         return self.id2ind, self.ind2id_mapper.arrs, mask
 
 
@@ -179,7 +181,7 @@ class Florist:
         start_year, end_year = years
         start_id = self.year_starts[start_year]
         end_id = self.year_starts[end_year]
-        return nb.u4(start_id), nb.u4(end_id)
+        return nb.u8(start_id), nb.u8(end_id)
 
     def _ids_to_indices(self, ids, mapper, allow_not_found):
         """Convert IDs to indices."""
@@ -453,7 +455,7 @@ def _summarize_node_info(citor_papers, citee_papers, ind2id):
     return node_info
 
 
-split_result_val_t = nb.types.Tuple([nb.u4, nb.f4, nb.f4, nb.u1, nb.u1])
+split_result_val_t = nb.types.Tuple([nb.u8, nb.f4, nb.f4, nb.u1, nb.u1])
 
 
 @nb.njit(nogil=True)
@@ -537,17 +539,17 @@ def _indices_to_ids(res, ind2id):
         res[i] = id_, citor_score, citee_score, coauthor, kind
 
 
-@nb.njit(nb.u4(id_mapping_arrs, nb.u4[::1]), nogil=True)
+@nb.njit(nb.u8(id_mapping_arrs, nb.u8[::1]), nogil=True)
 def _ids_to_ind(mapping, arr):
     """Replace all IDs in arr with indices in-place."""
     id2ind, ind2id, mask = mapping
     i = 0
     for id_ in arr:
         # Size is a power of 2, so (& mask) == (% len(id2ind)).
-        hash_ = nb.u4(id_ * nb.u4(0x9e3779b1)) & mask
+        hash_ = nb.u8(id_ * nb.u8(HASH_PRIME)) & mask
         while True:
             index = id2ind[hash_]
-            if index == nb.u4(-1):
+            if index == nb.u8(-1):
                 break
             # id2ind[hash_] might be the correct index, but this is not
             # guaranteed due to collisions. Look it up in ind2id to make
@@ -556,11 +558,11 @@ def _ids_to_ind(mapping, arr):
                 arr[i] = index
                 i += 1
                 break
-            hash_ = nb.u4(hash_ + 1) & mask
+            hash_ = nb.u8(hash_ + 1) & mask
     return i
 
 
-@nb.njit(mmapped_arr(mapping_arrs, nb.u4), nogil=True)
+@nb.njit(mmapped_arr(mapping_arrs, nb.u8), nogil=True)
 def _traverse_one(mapping, i):
     """Given an index i, return the indices i maps tp.
 
@@ -573,7 +575,7 @@ def _traverse_one(mapping, i):
     return ind[start:end]
 
 
-@nb.njit(mapping_arrs(mapping_arrs, nb.u4), nogil=True)
+@nb.njit(mapping_arrs(mapping_arrs, nb.u8), nogil=True)
 def _traverse_citations(mapping, i):
     """Given a paper index i, return the citors and citees of i.
 
@@ -644,8 +646,8 @@ def _get_year(paper_id, paper_year_map):
     raise RuntimeError()
 
 
-dict_val = nb.types.Tuple([nb.u4, nb.f4])
-result_val_t = nb.types.Tuple([nb.u4, nb.f4, nb.f4, nb.u1])
+dict_val = nb.types.Tuple([nb.u8, nb.f4])
+result_val_t = nb.types.Tuple([nb.u8, nb.f4, nb.f4, nb.u1])
 
 
 @nb.njit(nogil=True)
@@ -666,10 +668,10 @@ def _make_flower(
     # Track influence on citor papers. Need weighted and unweighted
     # citation counts. Weighting affects authors and affiliations,
     # whereas unweighted scores are for venues and fields of study.
-    citor_papers = nb.typed.Dict.empty(key_type=nb.u4, value_type=dict_val)
+    citor_papers = nb.typed.Dict.empty(key_type=nb.u8, value_type=dict_val)
     # Track influence on citee papers. Only need unweighted citation
     # counts: weights are computed later.
-    citee_papers = nb.typed.Dict.empty(key_type=nb.u4, value_type=nb.u4)
+    citee_papers = nb.typed.Dict.empty(key_type=nb.u8, value_type=nb.u8)
     for paper_id in ego_papers:
         paper_entities = _traverse_one(paper2entity_map, paper_id)
         coauthor_ids.update(paper_entities)
@@ -691,17 +693,17 @@ def _make_flower(
                 # Numba can't inline dictionary accesses, so this is two
                 # function calls lol.
                 count, score = citor_papers.get(citor_id,
-                                                (nb.u4(0), nb.f4(0.)))
+                                                (nb.u8(0), nb.f4(0.)))
                 citor_papers[citor_id] = count + 1, score + recip_weight
         for citee_id in citees:
             # TODO: Same optimization opportunity.
             if _is_in_range(pub_ids, citee_id):
                 # Another two calls.
-                citee_papers[citee_id] = nb.u4(
-                    citee_papers.get(citee_id, nb.u4(0)) + nb.u4(1))
+                citee_papers[citee_id] = nb.u8(
+                    citee_papers.get(citee_id, nb.u8(0)) + nb.u8(1))
 
     # Map entity index to score (influencees).
-    citor_entities = nb.typed.Dict.empty(key_type=nb.u4, value_type=nb.f4)
+    citor_entities = nb.typed.Dict.empty(key_type=nb.u8, value_type=nb.f4)
     for paper_id, (count, weight) in citor_papers.items():
         entity_ids = _traverse_one(paper2entity_map, paper_id)
         if not self_citations and _is_self_citation(ego_entities, entity_ids):
@@ -715,7 +717,7 @@ def _make_flower(
                    else nb.f4(count)))
 
     # Map entity index to score (influencers).
-    citee_entities = nb.typed.Dict.empty(key_type=nb.u4, value_type=nb.f4)
+    citee_entities = nb.typed.Dict.empty(key_type=nb.u8, value_type=nb.f4)
     for paper_id, count in citee_papers.items():
         entity_ids = _traverse_one(paper2entity_map, paper_id)
         if not self_citations and _is_self_citation(ego_entities, entity_ids):
@@ -779,7 +781,7 @@ def _make_stats(
     return pub_year_counts, cit_year_counts, ref_count
 
 
-cite_map = nb.types.Tuple([nb.u4, nb.u4])
+cite_map = nb.types.Tuple([nb.u8, nb.u8])
 
 
 @nb.njit(nogil=True)
