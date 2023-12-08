@@ -31,8 +31,8 @@ def decode_filters(short_filters):
                    cmp_ref=i == '1')
 
 
-KIND_BITS = 4
-ID_BITS = 32
+KIND_BITS = 8  # KIND_BITS * 8 = ID_BITS
+ID_BITS = 64
 ID_MASK = (1 << ID_BITS) - 1
 ID_WITH_KIND_CHARS = (ID_BITS + KIND_BITS + 5) // 6
 ID_WITH_KIND_BYTES = (ID_BITS + KIND_BITS + 7) // 8
@@ -87,7 +87,7 @@ def url_decode_info(url_str):
     ids_res = IDs._make([] for _ in KINDS)
     for start in range(0, len(encoded_ids), ID_WITH_KIND_CHARS):
         kind, id_ = url_decode_id(
-            encoded_ids[start : start+ID_WITH_KIND_CHARS])
+            encoded_ids[start: start+ID_WITH_KIND_CHARS])
         ids_res[kind].append(id_)
     return ids_res, name, curated
 
