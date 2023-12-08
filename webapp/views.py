@@ -6,7 +6,7 @@ from flask import request
 from flask_cors import CORS, cross_origin
 
 import core.utils.entity_type as ent
-from core.search.query_info import papers_prop_query, query_entity_by_keyword
+from core.search.query_info import papers_prop_query, query_entity_by_keyword, query_entity_by_id, convert_id
 from core.utils.load_tsv import tsv_to_dict
 from webapp.shortener import decode_filters, url_decode_info, url_encode_info
 from webapp.utils import *
@@ -181,7 +181,6 @@ s = {
     'concepts': ('<i class="fa fa-flask"></i><h4>{DisplayName} (Level {Level})</h4><p>Papers: {PaperCount}, Citations: {CitationCount}</p>')
 }
 
-
 openalex_type_map = {
     'author': 'authors',
     'institution': 'institutions',
@@ -205,7 +204,9 @@ def search():
     for i in range(len(data)):
         entity_data = data[i][0]
         entity_type = data[i][1]
+        entity_id = convert_id(entity_data['id'], entity_type)
         entity = {'data': {
+            'id': entity_id,
             'DisplayName': entity_data['display_name'],
             'CitationCount': entity_data['cited_by_count'],
             'PaperCount': entity_data['works_count'] if 'works_count' in entity_data else None,
@@ -221,7 +222,7 @@ def search():
             entity['display-info'] += "<p>Authors: {}</p>".format(
                 ", ".join([a['author']['display_name'] for a in entity_data['authorships']]))
 
-        entity['table-id'] = "{}_{}".format(data[i][1], entity_data['id'])
+        entity['table-id'] = "{}_{}".format(entity_type, entity_id)
         data[i] = entity
 
     return flask.jsonify({'entities': data})
@@ -254,11 +255,11 @@ def submit():
         data_str = request.form['data']
         data = json.loads(data_str)
         entities = data['entities']
-        author_ids = list(map(int, entities['AuthorIds']))
-        affiliation_ids = list(map(int, entities['AffiliationIds']))
-        journal_ids = list(map(int, entities['JournalIds']))
-        paper_ids = list(map(int, entities['PaperIds']))
-        fos_ids = list(map(int, entities['FieldOfStudyIds']))
+        author_ids = list(map(int, entities['authors']))
+        affiliation_ids = list(map(int, entities['institutions']))
+        journal_ids = list(map(int, entities['sources']))
+        paper_ids = list(map(int, entities['works']))
+        fos_ids = list(map(int, entities['concepts']))
 
         flower_name = data.get('flower_name')
         doc_id = url_encode_info(
@@ -267,14 +268,23 @@ def submit():
             paper_ids=paper_ids, name=flower_name)
 
     if not flower_name:
-        first_nonempty_id_list = (author_ids or affiliation_ids
-                                  or journal_ids
-                                  or paper_ids or fos_ids)
-        if not first_nonempty_id_list:
-            raise ValueError('no entities')
-        flower_name = first_nonempty_id_list[0]
         total_entities = (len(author_ids) + len(affiliation_ids)
                           + len(journal_ids) + len(paper_ids) + len(fos_ids))
+        if total_entities == 0:
+            raise ValueError('no entities')
+
+        if len(fos_ids) > 0:
+            flower_name = query_entity_by_id('concepts', fos_ids[0])
+        elif len(journal_ids) > 0:
+            flower_name = query_entity_by_id('sources', journal_ids[0])
+        elif len(affiliation_ids) > 0:
+            flower_name = query_entity_by_id(
+                'institutions', affiliation_ids[0])
+        elif len(author_ids) > 0:
+            flower_name = query_entity_by_id('authors', author_ids[0])
+        else:
+            flower_name = query_entity_by_id('works', paper_ids[0])
+
         if total_entities > 1:
             flower_name += f" +{total_entities - 1} more"
 

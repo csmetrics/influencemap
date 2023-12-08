@@ -957,7 +957,7 @@ function prevPage() {
 }
 
 function capitalizeString(entity_type, string) {
-    var words = string.split(' ');
+    var words = string.toString().split(' ');
     var res = [];
     // console.log(entity_type, string, words.length)
     if ((entity_type == "conf" && words.length == 1 && string.length < 8) // for conf names

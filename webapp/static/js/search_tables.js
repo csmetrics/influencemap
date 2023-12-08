@@ -199,7 +199,7 @@ function handleSelectionTableRowClick(element){
 function getSelectedData(){
    var papers = [];
    var names  = [];
-   var entities = {"paper": [], "author": [], "conference": [], "journal": [], "institution": [], "topic": []};
+   var entities = {"works": [], "authors": [], "sources": [], "institutions": [], "concepts": []};
    var empty_query = true;
 
    // For each of the selected
@@ -212,32 +212,20 @@ function getSelectedData(){
      row_data['entity-type'] = type_and_id[0];
 
      // If not a paper
-     if (row_data['entity-type'] != 'paper') {
+     if (row_data['entity-type'] != 'works') {
        // Add names and papers
-       names.push(row_data['normalisedName']);
-       if ('papers' in row_data) {for (var i = 0; i < row_data['papers'].length; i++) {
-         papers.push(row_data['papers'][i]['eid']);
+       names.push(row_data['DisplayName']);
+       if ('works' in row_data) {for (var i = 0; i < row_data['works'].length; i++) {
+         papers.push(row_data['works'][i]['id']);
        }}
      }
      // Otherwise just pass id
      else {
-       names.push(row_data['OriginalTitle']);
-       papers.push(row_data['eid']);
+       names.push(row_data['DisplayName']);
+       papers.push(row_data['id']);
      };
    });
 
-   var keyChange = {
-     "paper": "PaperIds",
-     "author": "AuthorIds",
-     "conference": "ConferenceIds",
-     "journal": "JournalIds",
-     "institution": "AffiliationIds",
-     "topic": "FieldOfStudyIds"
-   };
-   for (key in keyChange){
-     entities[keyChange[key]] = entities[key];
-     delete entities[key];
-   }
    var flower_name = document.getElementById("flowername").value;
    return {'papers': papers, 'flower_name': flower_name, 'names': names, 'entities': entities, 'empty_query': empty_query}
 }
