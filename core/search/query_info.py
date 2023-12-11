@@ -100,23 +100,19 @@ def papers_prop_query(paper_ids):
     ''' Get properties of a paper.
     '''
 
-    # Targets
-    papers_targets = ['DocType', 'OriginalTitle', 'OriginalVenue', 'Year']
-
-    # raise Exception(len(paper_ids), paper_ids)
     # Query for papers
-    papers_s = {mag_id: query_openalex_by_mag_id(
-        mag_id) for mag_id in paper_ids}
+    papers_s = query_entities_by_list("works", paper_ids)
 
     # Convert papers into dictionary format
     results = dict()
-    for p_id, paper in papers_s.items():
+    for paper in papers_s:
         try:
             try:
                 venue = paper['primary_location']['source']['host_organization_name']
             except Exception:
                 venue = None
 
+            p_id = convert_id(paper['id'], "works")
             results[p_id] = {
                 'PaperId': p_id,
                 'OriginalTitle': paper['title'],
@@ -124,6 +120,6 @@ def papers_prop_query(paper_ids):
                 'Year': paper['publication_year']
             }
         except Exception:
-            raise Exception(p_id, paper)
+            raise Exception(paper)
 
     return results
