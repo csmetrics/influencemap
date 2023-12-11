@@ -55,13 +55,13 @@ def query_about():
 
     data = query_entity_by_keyword([entity_type], entity_title)
     papers = filter_papers(entity_title, data)
-    paper_ids = [p[0][id_helper_dict[entity_type]] for p in papers]
+    paper_ids = [convert_id(p[0]['id'], entity_type) for p in papers]
     status_msg = "Success"
     if len(paper_ids) == 0:
         status_msg = "No matching paper found"
 
-    num_refs = sum([p[0]["ReferenceCount"] for p in papers])
-    num_cits = sum([p[0]["CitationCount"] for p in papers])
+    num_refs = sum([p[0]['referenced_works_count'] for p in papers])
+    num_cits = sum([p[0]['cited_by_count'] for p in papers])
     summary = "The Influence Flowers are generated from {} matching papers ({} references and {} citations), from academic data as of December 2021.".format(
         len(paper_ids), num_refs, num_cits
     )
@@ -88,13 +88,13 @@ def query():
     entity_title = normalize_title(entity_title)
     data = filter_papers(entity_title, query_entity_by_keyword(
         [entity_type], entity_title))
-    paper_ids = [p[0][id_helper_dict[entity_type]] for p in data]
+    paper_ids = [convert_id(p[0]['id'], entity_type) for p in data]
     status_msg = "Success"
     if len(paper_ids) == 0:
         status_msg = "No matching paper found."
 
-    num_refs = sum([p[0]["ReferenceCount"] for p in data])
-    num_cits = sum([p[0]["CitationCount"] for p in data])
+    num_refs = sum([p[0]["referenced_works_count"] for p in data])
+    num_cits = sum([p[0]["cited_by_count"] for p in data])
     summary = "The Influence Flowers are generated from {} matching papers ({} references and {} citations), from academic data as of December 2021.".format(
         len(paper_ids), num_refs, num_cits
     )
