@@ -108,9 +108,9 @@ def papers_prop_query(paper_ids):
     for paper in papers_s:
         try:
             try:
-                venue = paper['primary_location']['source']['host_organization_name']
+                venue = paper['primary_location']['source']['display_name']
             except Exception:
-                venue = None
+                venue = ''
 
             p_id = convert_id(paper['id'], "works")
             results[p_id] = {
