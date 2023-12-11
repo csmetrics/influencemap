@@ -45,14 +45,8 @@ def autocomplete():
     return flask.jsonify(data)
 
 
-@blueprint.route('/query_about')
-@cross_origin()
-def query_about():
-    entity_type = "works"  # support paper search only
-    entity_title = request.args.get('title')
+def query_res(entity_type, entity_title):
     entity_title = normalize_title(entity_title)
-    print("query_about", entity_type, entity_title)
-
     data = query_entity_by_keyword([entity_type], entity_title)
     papers = filter_papers(entity_title, data)
     paper_ids = [convert_id(p[0]['id'], entity_type) for p in papers]
@@ -62,7 +56,7 @@ def query_about():
 
     num_refs = sum([p[0]['referenced_works_count'] for p in papers])
     num_cits = sum([p[0]['cited_by_count'] for p in papers])
-    summary = "The Influence Flowers are generated from {} matching papers ({} references and {} citations), from academic data as of December 2021.".format(
+    summary = "The Influence Flowers are generated from {} matching papers ({} references and {} citations), from academic data as of August 2023.".format(
         len(paper_ids), num_refs, num_cits
     )
 
@@ -77,6 +71,17 @@ def query_about():
         "flower_url": url_base,
         "summary": summary
     }
+    return res
+
+
+@blueprint.route('/query_about')
+@cross_origin()
+def query_about():
+    entity_type = "works"  # support paper search only
+    entity_title = request.args.get("title")
+    print("query_about", entity_type, entity_title)
+
+    res = query_res(entity_type, entity_title)
     return flask.jsonify(res)
 
 
@@ -84,34 +89,22 @@ def query_about():
 @cross_origin()
 def query():
     entity_type = "works"  # support paper search only
-    entity_title = request.args.get('title')
-    entity_title = normalize_title(entity_title)
-    data = filter_papers(entity_title, query_entity_by_keyword(
-        [entity_type], entity_title))
-    paper_ids = [convert_id(p[0]['id'], entity_type) for p in data]
-    status_msg = "Success"
-    if len(paper_ids) == 0:
-        status_msg = "No matching paper found."
-
-    num_refs = sum([p[0]["referenced_works_count"] for p in data])
-    num_cits = sum([p[0]["cited_by_count"] for p in data])
-    summary = "The Influence Flowers are generated from {} matching papers ({} references and {} citations), from academic data as of December 2021.".format(
-        len(paper_ids), num_refs, num_cits
-    )
+    entity_title = request.args.get("title")
+    res = query_res(entity_type, entity_title)
 
     flower = kb_client.get_flower(
-        paper_ids=paper_ids, pub_years=None, cit_years=None,
+        paper_ids=res["paper_ids"], pub_years=None, cit_years=None,
         coauthors=True, self_citations=False, max_results=50)
 
     rdata = make_response_data(
         flower, None, is_curated=False, flower_name=entity_title,
         selection=dict(pub_years=None, cit_years=None, coauthors=True, self_citations=False))
 
-    doc_id = url_encode_info(paper_ids=paper_ids, name=entity_title)
+    doc_id = url_encode_info(paper_ids=res["paper_ids"], name=entity_title)
     url_base = f"https://influencemap.cmlab.dev/submit/?id={doc_id}"
-    rdata["status"] = status_msg
+    rdata["status"] = res["status"]
     rdata["url_base"] = url_base
-    rdata["summary"] = summary
+    rdata["summary"] = res["summary"]
 
     # generate URLs for alter nodes
     for flower_type, _ in flower_leaves:
