@@ -1,16 +1,15 @@
 import itertools
-import operator
 from functools import partial
 
 import numpy as np
 import pandas as pd
 
+from concurrent.futures import ThreadPoolExecutor, as_completed
+
 from core.search.openalex import (
     get_display_names_from_author_ids, get_display_names_from_conference_ids,
     get_display_names_from_fos_ids, get_display_names_from_journal_ids,
     get_names_from_affiliation_ids)
-
-
 
 
 def _make_normed_ratio(series):
@@ -45,19 +44,20 @@ def _make_one_response_flower(
         if mask.any():
             ids = tuple(df_original[mask]['ids'])
             ids_to_name = name_lookup_f(ids)
-            names = tuple([ids_to_name[id] if id in ids_to_name else 'none' for id in ids])
+            names = tuple(
+                [ids_to_name[id] if id in ids_to_name else 'none' for id in ids])
             df_original.loc[mask, 'name'] = names
 
     # Name deduplication
     # IDs with the same names are grouped and stored in allids (array)
     # min(IDs) is used as the unique ID
     df = df_original.groupby('name', as_index=False).agg(
-            influencing=('influencing', 'sum'),
-            influenced=('influenced', 'sum'),
-            type=('type', 'min'),
-            coauthors=('coauthors', 'any'),
-            ids=('ids', 'min'),
-            allids=('ids', lambda tdf: tdf.unique().tolist()))
+        influencing=('influencing', 'sum'),
+        influenced=('influenced', 'sum'),
+        type=('type', 'min'),
+        coauthors=('coauthors', 'any'),
+        ids=('ids', 'min'),
+        allids=('ids', lambda tdf: tdf.unique().tolist()))
     df.set_index('ids', inplace=True)
 
     df['sum'] = df['influencing'] + df['influenced']
@@ -150,15 +150,18 @@ def make_year_slider_and_stats(
     pub_range_start = min(pub_year_counts) if pub_year_counts else 0
     pub_range_end = max(pub_year_counts) if pub_year_counts else 0
     pub_range_len = pub_range_end - pub_range_start + 1
-    cit_range_start = min(map(min, cit_year_counts.values())) if cit_year_counts else 0
-    cit_range_end = max(map(max, cit_year_counts.values())) if cit_year_counts else 0
+    cit_range_start = min(map(min, cit_year_counts.values())
+                          ) if cit_year_counts else 0
+    cit_range_end = max(map(max, cit_year_counts.values())
+                        ) if cit_year_counts else 0
     cit_range_len = cit_range_end - cit_range_start + 1
 
     stats = dict(
         min_year=pub_range_start,
         max_year=pub_range_end,
         num_papers=pub_count,
-        avg_papers=round(pub_count / pub_range_len, 1) if pub_range_len > 0 else 0,
+        avg_papers=round(pub_count / pub_range_len,
+                         1) if pub_range_len > 0 else 0,
         num_refs=ref_count,
         avg_refs=round(ref_count / pub_count, 1) if pub_count > 0 else 0,
         num_cites=cit_count,
@@ -174,9 +177,9 @@ def make_year_slider_and_stats(
     cit_chart = [
         dict(year=year,
              value=[
-                dict(year=year_,
-                     value=cit_year_counts.get(year, {}).get(year_, 0))
-                for year_ in range(chart_start, chart_end + 1)
+                 dict(year=year_,
+                      value=cit_year_counts.get(year, {}).get(year_, 0))
+                 for year_ in range(chart_start, chart_end + 1)
              ])
         for year in range(chart_start, chart_end + 1)
     ]
@@ -216,6 +219,11 @@ def make_year_slider_and_stats(
     return stats, year_slider
 
 
+def execute_parallel(args):
+    gtype, flower_data, func_dict, flower_name = args
+    return gtype, _make_one_response_flower(flower_data, func_dict, gtype=gtype, flower_name=flower_name)
+
+
 def make_response_data(
     flower,
     stats=None,
@@ -225,29 +233,31 @@ def make_response_data(
     session={},
     selection=None,
 ):
+
+    functions = [
+        ('conf', flower['venue'], {
+         4: get_display_names_from_journal_ids, 2: get_display_names_from_conference_ids}, flower_name),
+        ('inst', flower['affiliation'], {
+         1: partial(get_names_from_affiliation_ids, with_id=True)}, flower_name),
+        ('fos', flower['field_of_study'], {
+         3: partial(get_display_names_from_fos_ids, with_id=True)}, flower_name),
+        ('author', flower['author'], {
+         0: partial(get_display_names_from_author_ids, with_id=True)}, flower_name)
+    ]
+
     res = {}
 
     if is_curated is not None:
         res['curated'] = is_curated
     res['navbarOption'] = NAVBAR_OPTIONS
 
-    res['conf'] = _make_one_response_flower(
-        flower['venue'],
-        {4: get_display_names_from_journal_ids,
-         2: get_display_names_from_conference_ids},
-        gtype='conf', flower_name=flower_name)
-    res['inst'] = _make_one_response_flower(
-        flower['affiliation'],
-        {1: partial(get_names_from_affiliation_ids, with_id=True)},
-        gtype='inst', flower_name=flower_name)
-    res['fos'] = _make_one_response_flower(
-        flower['field_of_study'],
-        {3: partial(get_display_names_from_fos_ids, with_id=True)},
-        gtype='fos', flower_name=flower_name)
-    res['author'] = _make_one_response_flower(
-        flower['author'],
-        {0: partial(get_display_names_from_author_ids, with_id=True)},
-        gtype='author', flower_name=flower_name)
+    # Execute in parallel
+    with ThreadPoolExecutor() as executor:
+        futures = {executor.submit(
+            execute_parallel, func): func for func in functions}
+        for future in as_completed(futures):
+            gtype, result = future.result()
+            res[gtype] = result
 
     if stats is not None:
         res['stats'], res['yearSlider'] = make_year_slider_and_stats(
