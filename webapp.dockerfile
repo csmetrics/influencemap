@@ -9,7 +9,6 @@ RUN rm /requirements.txt
 RUN mkdir -p /influencemap
 COPY webapp /influencemap/webapp/
 COPY core /influencemap/core/
-COPY graph /influencemap/graph/
 
 WORKDIR /influencemap/
 ENV KONIGSBERG_URL="url_to_konigsberg"
