@@ -12,6 +12,5 @@ COPY core /influencemap/core/
 
 WORKDIR /influencemap/
 ENV KONIGSBERG_URL="url_to_konigsberg"
-ENV ELASTICSEARCH_URL="url_to_elasticsearch"
 ENV GUNICORN_CMD_ARGS="--workers 32 --timeout 90 --graceful-timeout 90 --bind 0.0.0.0:8001"
 ENTRYPOINT gunicorn $GUNICORN_CMD_ARGS webapp:flask_app
