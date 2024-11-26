@@ -177,8 +177,7 @@ s = {
 openalex_type_map = {
     'author': 'authors',
     'institution': 'institutions',
-    'conference': 'sources',
-    'journal': 'sources',
+    'source': 'sources',
     'paper': 'works',
     'topic': 'concepts',
 }
