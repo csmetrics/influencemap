@@ -1,10 +1,11 @@
+import html
 from core.search.query_info import query_entity_by_id, query_entities_by_list, convert_id
 
 
 def get_names_from_entity(entity_ids, id_field, with_id=False):
     # print("get_names_from_entity", id_field, id_str, entity_ids)
     entities = query_entities_by_list(id_field, entity_ids)
-    result = {convert_id(e['id'], id_field): e['display_name']
+    result = {convert_id(e['id'], id_field): html.escape(e['display_name'], quote=True)
               for e in entities}
     id_name_dict = {eid: result[eid] if eid in result else query_entity_by_id(id_field, eid)
                     for eid in entity_ids}
