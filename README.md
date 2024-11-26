@@ -83,7 +83,7 @@ Other definitions of influence which have not yet been explored with this data i
 
 ## Data
 
-We use the [microsoft academic graph (MAG)](https://www.microsoft.com/en-us/research/project/microsoft-academic-graph/) dataset for our visualisation. The dataset is a large curation of publication indexed by Bing. From MAG, we use the following fields of the paper entries in the dataset,
+We use the [OpenAlex](https://openalex.org/) dataset for our visualization. OpenAlex is a comprehensive and open dataset for scholarly publications, offering extensive metadata and citation relationships. From this dataset, we utilize the following fields:
 
 - Citation links
 - Authors
@@ -91,4 +91,6 @@ We use the [microsoft academic graph (MAG)](https://www.microsoft.com/en-us/rese
 - Journals
 - Author Affiliations
 
-The current influencemap is based on a MAG graph snapshot from 2021-12-06. As MAG has been deprecated by Microsoft, we are working on replacing the data source from the combination of [SemanticSchorlar](https://www.semanticscholar.org/) and [OpenAlex](https://openalex.org/). The new update will be release soon and will include later publications.
+The current InfluenceMap is based on the OpenAlex 2023-08-18 release. Entity names are directly retrieved from the OpenAlex API.
+
+Previously, we used the [Microsoft Academic Graph (MAG)](https://www.microsoft.com/en-us/research/project/microsoft-academic-graph/) dataset from the 2021-12-06 snapshot. As MAG has been deprecated by Microsoft, we have transitioned to OpenAlex to support more recent publications and ensure the continued growth and relevance of the InfluenceMap project.
