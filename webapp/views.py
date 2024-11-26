@@ -167,11 +167,11 @@ def curate_load_file():
 
 
 s = {
-    'authors': ('<i class="fa fa-user""></i><h4>{DisplayName}</h4><p>Papers: {PaperCount}, Citations: {CitationCount}</p>'),
-    'institutions': ('<i class="fa fa-university"></i><h4>{DisplayName}</h4><p>Papers: {PaperCount}, Citations: {CitationCount}</p>'),
-    'sources': ('<i class="fa fa-book"></i><h4>{DisplayName}</h4><p>Papers: {PaperCount}, Citations: {CitationCount}</p>'),
-    'works': ('<i class="fa fa-file"></i><h4>{DisplayName}</h4><p>Citations: {CitationCount}</p>'),
-    'concepts': ('<i class="fa fa-flask"></i><h4>{DisplayName} (Level {Level})</h4><p>Papers: {PaperCount}, Citations: {CitationCount}</p>')
+    'authors': ('<i class="fa fa-user""></i><h4>{DisplayName}</h4><p class="compact-text">Papers: {PaperCount}, Citations: {CitationCount}</p>'),
+    'institutions': ('<i class="fa fa-university"></i><h4>{DisplayName}</h4><p class="compact-text">Papers: {PaperCount}, Citations: {CitationCount}</p>'),
+    'sources': ('<i class="fa fa-book"></i><h4>{DisplayName}</h4><p class="compact-text">Papers: {PaperCount}, Citations: {CitationCount}</p>'),
+    'works': ('<i class="fa fa-file"></i><h4>{DisplayName}</h4><p class="compact-text">Citations: {CitationCount}</p>'),
+    'concepts': ('<i class="fa fa-flask"></i><h4>{DisplayName} (Level {Level})</h4><p class="compact-text">Papers: {PaperCount}, Citations: {CitationCount}</p>')
 }
 
 openalex_type_map = {
@@ -206,12 +206,11 @@ def search():
         }}
         entity['display-info'] = s[entity_type].format(**entity['data'])
 
-        if 'last_known_institutions' in entity_data and len(entity_data['last_known_institutions']) > 0:
-            entity['display-info'] = entity['display-info'][0:-4] + \
-                ", Institution: {}</p>".format(
-                    entity_data['last_known_institutions'][0]['display_name'])
+        if 'affiliations' in entity_data and len(entity_data['affiliations']) > 0:
+            recent_inst_names = [inst['institution']['display_name'] for inst in entity_data['affiliations']]
+            entity['display-info'] += "<p class='compact-text'>Institution: {}</p>".format(", ".join(recent_inst_names[:2]))
         if "authorships" in entity_data and len(entity_data['authorships']) > 0:
-            entity['display-info'] += "<p>Authors: {}</p>".format(
+            entity['display-info'] += "<p class='compact-text'>Authors: {}</p>".format(
                 ", ".join([a['author']['display_name'] for a in entity_data['authorships']]))
 
         entity['table-id'] = "{}_{}".format(entity_type, entity_id)

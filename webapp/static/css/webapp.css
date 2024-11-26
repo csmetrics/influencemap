@@ -659,6 +659,11 @@ hr {
   border-top: 1px solid #ddd;
 }
 
+.compact-text {
+  margin: 0;
+  line-height: 1.2;
+}
+
 /* The popup on node click */
 .node_info_selection {
   display: none; /* Hidden by default */
