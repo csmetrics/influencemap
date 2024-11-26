@@ -207,10 +207,10 @@ def search():
         }}
         entity['display-info'] = s[entity_type].format(**entity['data'])
 
-        if 'last_known_institution' in entity_data and entity_data['last_known_institution'] != None:
+        if 'last_known_institutions' in entity_data and len(entity_data['last_known_institutions']) > 0:
             entity['display-info'] = entity['display-info'][0:-4] + \
                 ", Institution: {}</p>".format(
-                    entity_data['last_known_institution']['display_name'])
+                    entity_data['last_known_institutions'][0]['display_name'])
         if "authorships" in entity_data and len(entity_data['authorships']) > 0:
             entity['display-info'] += "<p>Authors: {}</p>".format(
                 ", ".join([a['author']['display_name'] for a in entity_data['authorships']]))
