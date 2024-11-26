@@ -97,21 +97,21 @@ Licence URI: http://www.os-templates.com/template-terms
       <div class="project-info">
         <h3><b>Data source and profile</b></h3>
         <div class="project-detail">
-          The current influence statistics are computed from 
-          <a href="https://www.microsoft.com/en-us/research/project/microsoft-academic-graph/">Microsoft Academic Graph (MAG)</a>
-          containing scientific publication records, citation relationships,
-          as well as authors, institutions, journals, conferences, and fields of study.
-          <!--<br>MAG is a heterogeneous graph containing scientific publication records, citation relationships,
-          as well as authors, institutions, journals and conferences.-->
-          The current influencemap is based on the last available MAG graph snapshot from 2021-12-06. In a nutshell, the whole dataset contains:
-          <li>271 million scientific publications from year 1800 to 2021.</li>
-          <li>281 million author IDs and 27 thousand institutions identified by MAG.</li>
-          <li>292 top-level academic research fields labeled by MAG, such as "labour economics" and "algorithms".</li>
-          <li>Latest paper indexed: December 2021 -- which means some arxiv papers in 2112.xxxxx is indexed, some are not. One of the latest papers with an influence flower is <a href=https://arxiv.org/abs/2112.03000>2112.03000</a>, any paper after that will almost surely return a "no matching paper found" due to lack of data.</li>
+          The current influence statistics are computed using the
+          <a href="https://openalex.org/">OpenAlex</a> dataset,
+          which contains comprehensive scientific publication records, citation relationships, as well as metadata about authors, institutions, journals, conferences, and fields of study.
+          The current InfluenceMap is based on the OpenAlex 2023-08-18 release, replacing the previously used <a href="https://www.microsoft.com/en-us/research/project/microsoft-academic-graph/">Microsoft Academic Graph (MAG)</a>, which was retired in December 2021.
           <p></p>
-          After the retirement of MAG, 
-          we are working on integrating the new data sources from <a href=https://www.semanticscholar.org/>SemanticScholar</a> and <a href=https://openalex.org/>OpenAlex</a>.
-          The new update will be released soon with later publications.
+          In a nutshell, the whole dataset contains:
+          <li>243 million scientific publications from as early as the 1800s.</li>
+          <li>92 million authors and 102 thousand institutions identified by OpenAlex.</li>
+          <li>65 thousand concepts (fields of study), such as "labour economics" and "algorithms".</li>
+          <li>1.85 billion citation links between publications.</li>
+          <p></p>
+          The transition to OpenAlex offers access to an expanded dataset, enhancing the availability and accuracy of influence statistics.
+          However, some papers and authors may have missing data due to indexing delays or challenges with name entity resolution.
+          Additionally, scoring is based on a dataset snapshot, while entity names are retrieved directly from the OpenAlex API,
+          potentially causing occasional discrepancies between API results and scoring data.
         </div>
       </div>
 
