@@ -23,6 +23,12 @@ var link = [], flower_split = [], bar = [], numnodes = [], cnode = [],
     = [];
 var node_max_area = 1000.0;
 
+function decodeHTML(encodedString) {
+  const tempDiv = document.createElement('div');
+  tempDiv.innerHTML = encodedString;
+  return tempDiv.textContent || tempDiv.innerText || '';
+}
+
 function drawLegend() {
   var colorScale = d3.scaleSequential(colors).domain([0, 500]);
   var svg = d3.select("#flower-legend")
@@ -979,7 +985,8 @@ function capitalizeString(entity_type, string) {
         res.push(fwords);
     }
 
-    return res.join(' ');
+    str = res.join(' ');
+    return decodeHTML(str);
 }
 
 function barText(e_id, string) {
