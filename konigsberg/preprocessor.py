@@ -1,16 +1,10 @@
+import os
 import csv
 import json
 import logging
 import pathlib
 
-import numpy as np
 import pandas as pd
-
-import hashutil
-import sparseutil
-
-YEAR_SENTINEL = np.uint16(-1)  # Denotes missing year
-INDEX_SENTINEL = np.uint64(-1)  # Denotes deleted entity
 
 logger = logging.getLogger(__name__)
 logger.setLevel(logging.INFO)
@@ -32,32 +26,59 @@ class OpenAlexDialect(csv.Dialect):
     skipinitialspace = False
     strict = True
 
+
+def load_merged_ids(data_path, data_type, split_char):
+    path = data_path / 'merged_ids' / data_type
+    if not os.path.exists(path):
+        return {}
+
+    id_list = []
+    for file_name in os.listdir(path):
+        if file_name.endswith('.csv'):
+            file_path = os.path.join(path, file_name)
+            try:
+                df = pd.read_csv(file_path)
+                id_list.extend(df['id'].str.lstrip(split_char).tolist())
+            except Exception as e:
+                print(f"Error reading file {file_name}: {e}")
+
+    id_set = set(id_list)
+    logger.info('...merged_ids {} {}'.format(data_type, len(id_set)))
+    return id_set
+
+
 OUT_SUFF = '.txt'
 def generate_entity_files(data_path, data_type, split_char):
+    merged_ids = load_merged_ids(data_path, data_type, split_char)
+
     path = data_path / data_type
     part_files = path.glob('updated_date=*/part_*')
     outfile = data_path / (data_type + OUT_SUFF)
 
     logger.info('...generating {} {}'.format(data_type, split_char))
     names = ['id', 'works_count']
-    with open(outfile, 'a') as csvfile:
+    with open(outfile, 'w') as csvfile:
         csvwriter = csv.writer(csvfile, dialect=OpenAlexDialect())
         csvwriter.writerow(names)
         for file in part_files:
-            data = []
-            for line in open(file, 'r'):
-                try:
-                    json_data = json.loads(line)
-                    datum = []
-                    for n in names:
-                        if n == 'id':
-                            datum.append(json_data[n].split(split_char)[1])
-                        else:
-                            datum.append(json_data[n])
-                    data.append(datum)
-                except json.JSONDecodeError:
-                    print(f"Error parsing JSON: {line}")
-            csvwriter.writerows(data)
+            try:
+                # Read and process each file
+                with open(file, 'r', encoding='utf-8') as f:
+                    data = [
+                        [
+                            json_data['id'].split(split_char)[1] if 'id' in json_data and json_data['id'].split(split_char)[1] not in merged_ids else None,
+                            json_data['works_count']
+                        ]
+                        for line in f
+                        if (json_data := json.loads(line))  # Parse JSON
+                    ]
+                    # Filter out rows with None values
+                    data = [row for row in data if row[0] is not None]
+                    csvwriter.writerows(data)
+            except json.JSONDecodeError as e:
+                print(f"Error parsing JSON in file {file}: {e}")
+            except Exception as e:
+                print(f"Error processing file {file}: {e}")
     logger.info('...done {} {}'.format(data_type, split_char))
 
 
@@ -66,129 +87,178 @@ def generate_works_file(data_path):
     split_char = 'W'
     path = data_path / data_type
     outfile = data_path / (data_type + OUT_SUFF)
+    merged_ids = load_merged_ids(data_path, data_type, split_char)
 
     logger.info('...generating {} {}'.format(data_type, split_char))
     names=['paper_id', 'rank', 'year', 'journal_id']
     part_files = path.glob('updated_date=*/part_*')
 
-    with open(outfile, 'a') as csvfile:
+    with open(outfile, 'w') as csvfile:
         csvwriter = csv.writer(csvfile, dialect=OpenAlexDialect())
         csvwriter.writerow(names)
+
         for file in part_files:
-            data = []
-            for line in open(file, 'r'):
-                try:
-                    json_data = json.loads(line)
-                    filtered_data = {
-                        'paper_id': json_data['id'][len(PREFIX_WORK):],
-                        'rank': json_data['cited_by_count'],
-                        'year': json_data['publication_year'],
-                        'journal_id': ''
-                    }
-                    try:
-                        filtered_data['journal_id'] = json_data['primary_location']['source']['id'][len(PREFIX_SOURCE):]
-                    except:
-                        pass
-                    # print(filtered_data)
-                    data.append(list(filtered_data.values()))
-                except json.JSONDecodeError:
-                    print(f"Error parsing JSON: {line}")
-            csvwriter.writerows(data)
+            with open(file, 'r', encoding='utf-8') as f:
+                data = [
+                    [
+                        json_data['id'][len(PREFIX_WORK):],
+                        json_data['cited_by_count'],
+                        json_data['publication_year'],
+                        (
+                            json_data.get('primary_location', {})
+                            .get('source', {})
+                            .get('id', '')
+                        )[len(PREFIX_SOURCE):] if json_data.get('primary_location') and json_data.get('primary_location').get('source') else ''
+                    ]
+                    for line in f
+                    if (json_data := json.loads(line)) and 
+                    json_data['id'][len(PREFIX_WORK):] not in merged_ids
+                ]
+                csvwriter.writerows(data)
+        
     logger.info('...done {} {}'.format(data_type, split_char))
 
 
 def generate_paper_references(data_path):
     data_type = 'works'
+    split_char = 'W'
     path = data_path / data_type
     outfile = data_path / ("PaperReferences" + OUT_SUFF)
+    merged_ids = load_merged_ids(data_path, data_type, split_char)
 
     logger.info('...generating PaperReferences')
     # names=['citor_id', 'citee_id']
+
     part_files = path.glob('updated_date=*/part_*')
     for file in part_files:
-        for line in open(file, 'r'):
-            try:
-                json_data = json.loads(line)
-                if len(json_data['referenced_works']) == 0:
-                    continue
+        batch_data = []  # Accumulate rows to minimize I/O operations
+        
+        with open(file, 'r', encoding='utf-8') as f:
+            for line in f:
+                try:
+                    json_data = json.loads(line)
+                    # Skip if there are no references or the ID is in merged_ids
+                    citor_id = json_data['id'][len(PREFIX_AUTHOR):]
+                    if len(json_data['referenced_works']) == 0 or citor_id in merged_ids:
+                        continue
+                    
+                    # Extract referenced works
+                    referenced = [rw[len(PREFIX_AUTHOR):] for rw in json_data['referenced_works']]
+                    
+                    # Prepare rows for DataFrame
+                    batch_data.extend({'citor_id': citor_id, 'citee_id': citee_id} for citee_id in referenced)
+                except json.JSONDecodeError:
+                    print(f"Error parsing JSON in file {file}: {line.strip()}")
+                except Exception as e:
+                    print(f"Unexpected error in file {file}: {e}")
 
-                referenced = [rw[len(PREFIX_AUTHOR):] for rw in json_data['referenced_works']]
-                df_part = pd.DataFrame({
-                    'citor_id': [json_data['id'][len(PREFIX_AUTHOR):]]*len(referenced),
-                    'citee_id': referenced
-                })
-                df_part.to_csv(outfile, mode='a', index=False, header=False)
-            except json.JSONDecodeError:
-                print(f"Error parsing JSON: {line}")
+        # Write accumulated rows to CSV in one go
+        if batch_data:
+            df_part = pd.DataFrame(batch_data)
+            df_part.to_csv(outfile, mode='a', index=False, header=False)
 
     logger.info('...done')
 
 
 def generate_paper_authorships(data_path):
     data_type = 'works'
+    split_char = 'W'
     path = data_path / data_type
     outfile = data_path / ("PaperAuthorAffiliations" + OUT_SUFF)
+    merged_ids = load_merged_ids(data_path, data_type, split_char)
 
     logger.info('...generating PaperAuthorAffiliations')
     # names=['paper_id', 'author_id', 'affiliation_id']
     part_files = path.glob('updated_date=*/part_*')
-
     for file in part_files:
-        for line in open(file, 'r'):
-            try:
-                json_data = json.loads(line)
-                paper_id = json_data['id'][len(PREFIX_WORK):]
+        batch_data = []
+
+        with open(file, 'r', encoding='utf-8') as f:
+            for line in f:
                 try:
-                    authors = [a['author']['id'][len(PREFIX_AUTHOR):] for a in json_data['authorships']]
-                except:
-                    authors = []
-                if len(authors) == 0:
-                    continue
+                    json_data = json.loads(line)
 
-                institutions = []
-                for a in json_data['authorships']:
-                    inst = None
-                    try:
-                        inst = a['institutions'][0]['id'][len(PREFIX_INST):]
-                    except:
-                        pass
-                    institutions.append(inst)
+                    # Extract paper ID
+                    paper_id = json_data['id'][len(PREFIX_WORK):]
+                    if paper_id in merged_ids:
+                        continue
 
-                df_part = pd.DataFrame({
-                    'paper_id': [paper_id]*len(authors),
-                    'author_id': authors,
-                    'affiliation_id': institutions
-                })
-                df_part.to_csv(outfile, mode='a', index=False, header=False)
-            except Exception as e:
-                print(f"Error parsing JSON: {line}")
+                    # Extract authors and institutions
+                    authors = [
+                        a['author']['id'][len(PREFIX_AUTHOR):]
+                        for a in json_data.get('authorships', [])
+                        if 'author' in a and 'id' in a['author']
+                    ]
+                    if not authors:
+                        continue
+
+                    institutions = [
+                        (a.get('institutions', [{}])[0].get('id', '')[len(PREFIX_INST):]
+                         if a.get('institutions') else None)
+                        for a in json_data.get('authorships', [])
+                    ]
+
+                    # Add rows to batch
+                    batch_data.extend([
+                        {'paper_id': paper_id, 'author_id': author, 'affiliation_id': inst}
+                        for author, inst in zip(authors, institutions)
+                    ])
+                except json.JSONDecodeError:
+                    print(f"Error parsing JSON in file {file}: {line.strip()}")
+                except Exception as e:
+                    print(f"Unexpected error in file {file}: {e}")
+
+        # Write batch to CSV
+        if batch_data:
+            df_part = pd.DataFrame(batch_data)
+            df_part.to_csv(outfile, mode='a', index=False, header=False)
+
     logger.info('...done')
 
 
 def generate_paper_fos(data_path):
     data_type = 'works'
+    split_char = 'W'
     path = data_path / data_type
     outfile = data_path / ("PaperFieldsOfStudy" + OUT_SUFF)
+    merged_ids = load_merged_ids(data_path, data_type, split_char)
 
     logger.info('...generating PaperFieldsOfStudy')
     # names=['paper_id', 'fos_id']
     part_files = path.glob('updated_date=*/part_*')
-
     for file in part_files:
-        for line in open(file, 'r'):
-            try:
-                json_data = json.loads(line)
-                paper_id = json_data['id'][len(PREFIX_WORK):]
-                concepts = [c['id'][len(PREFIX_FOS):] for c in json_data['concepts'] if c['level'] <= 1]
-                if len(concepts) == 0:
-                    continue
-                df_part = pd.DataFrame({
-                    'paper_id': [paper_id]*len(concepts),
-                    'fos_id': concepts
-                })
-                df_part.to_csv(outfile, mode='a', index=False, header=False)
-            except json.JSONDecodeError:
-                print(f"Error parsing JSON: {line}")
+        batch_data = []
+
+        with open(file, 'r', encoding='utf-8') as f:
+            for line in f:
+                try:
+                    json_data = json.loads(line)
+
+                    # Extract paper ID
+                    paper_id = json_data['id'][len(PREFIX_WORK):]
+                    if paper_id in merged_ids:
+                        continue
+
+                    # Extract relevant concepts (level <= 1)
+                    concepts = [
+                        c['id'][len(PREFIX_FOS):]
+                        for c in json_data.get('concepts', [])
+                        if c.get('level', float('inf')) <= 1
+                    ]
+                    if not concepts:
+                        continue
+
+                    # Prepare rows for batch
+                    batch_data.extend({'paper_id': paper_id, 'fos_id': fos_id} for fos_id in concepts)
+                except json.JSONDecodeError:
+                    print(f"Error parsing JSON in file {file}: {line.strip()}")
+                except Exception as e:
+                    print(f"Unexpected error in file {file}: {e}")
+
+        # Write accumulated rows to CSV
+        if batch_data:
+            df_part = pd.DataFrame(batch_data)
+            df_part.to_csv(outfile, mode='a', index=False, header=False)
     logger.info('...done')
 
 
