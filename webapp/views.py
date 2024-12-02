@@ -56,7 +56,7 @@ def query_res(entity_type, entity_title):
 
     num_refs = sum([p[0]['referenced_works_count'] for p in papers])
     num_cits = sum([p[0]['cited_by_count'] for p in papers])
-    summary = "The Influence Flowers are generated from {} matching papers ({} references and {} citations), from academic data as of August 2023.".format(
+    summary = "The Influence Flowers are generated from {} matching papers ({} references and {} citations), from academic data as of November 2024.".format(
         len(paper_ids), num_refs, num_cits
     )
 
