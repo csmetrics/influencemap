@@ -16,45 +16,34 @@ Licence URI: http://www.os-templates.com/template-terms
   <div class="content-wrapper content-wrapper-home">
     <!-- Main content -->
     <section class="content">
-      <div class="top-panel">
-        <div class="project-intro">
-          <!-- <h3><b>About Influence Map</b></h3> -->
-            <h3><b>
-            Influence flower visualizes citation influences among academic entities, including papers, authors, institutions, and research topics.
-            </b>
-            </h3>
-            <br/>
-
-            <ul>
-            <li class="arrow-blue">Blue arcs denote incoming influence, with their thickness proportional to the number of references made.</li>
-            <li class="arrow-red">Red arcs denote outgoing influence, with their thickness proportional to the number of citations received.</li>
-            <li >Node sizes and colors reflect the volume and composition of incoming and outgoing influence, see "<a href="#about">Computing influence scores</a>".</li>
-            </ul>
-            <a href="#about">more info<a>
-
-          <div class="main-menu">
-            <a href="/browse" class="btn btn-main btn-main-primary">
-              Flower Gallery
-            </a>
-            <a href="/create" class="btn btn-main btn-main-white">
-              Create new flowers
-            </a>
-          </div>
-        </div>
+      <div class="top-panel" style="padding-top: 50px;">
+        <h3><b>
+          Influence flower visualizes citation influences among academic entities, including papers, authors, institutions, and research topics.
+          </b>
+        </h3>
+      </div>
+      <div class="top-panel" style="padding: 10px 12%">
         <div class="background-image">
           <img src="{{ url_for('static', filename='js/maindata/figure_H_Alter.png') }}"></img>
         </div>
       </div>
-
-      <a name=about></a>
-      
-
-      <!-- <div class="project-info">
-        <h3><b>Understanding influence flower</b></h3>
-        <div class="project-detail">
-          We compute influence as a function of paper citations.
+      <div class="top-panel">
+        <div class="project-intro">
+          <ul>
+          <li class="arrow-blue">Blue arcs denote incoming influence, with their thickness proportional to the number of references made.</li>
+          <li class="arrow-red">Red arcs denote outgoing influence, with their thickness proportional to the number of citations received.</li>
+          <li class="node">Node sizes and colors reflect the volume and composition of incoming and outgoing influence, see "<a href="#about">Computing influence scores</a>".</li>
+          </ul>
         </div>
-      </div> -->
+      </div>
+      <div class="btn-panel">
+        <a href="/browse" class="btn btn-main">
+          <i class="fa fa-image"></i> Visit Flower Gallery
+        </a>
+        <a href="/create" class="btn btn-main">
+            <i class="fa fa-pencil"></i> Create New Flowers
+        </a>
+      </div>
 
       <div class="project-info">
         <h3><b>Computing influence scores</b></h3>
@@ -117,22 +106,22 @@ Licence URI: http://www.os-templates.com/template-terms
 
       <div class="project-info" style="margin-top: 30;padding-bottom:0">
         <div class="row detail">
-          <div class="col-sm-5" style="padding-top: 30px">
+          <div class="col-md-5 col-sm-12" style="padding: 10px 25px;">
             <iframe width="100%" height="330" src="https://www.youtube.com/embed/uZDJe0EZEjM" frameborder="0" allow="autoplay; encrypted-media" allowfullscreen></iframe>
           </div>
-          <div class="col-sm-7" style="padding-left: 10%">
-            <div class="row">
-              <div class="col-md-12 detail-box" style="padding-bottom: 20px; border-bottom: 1px solid #ddd">
-                <div class="logo">
-                  <img src="{{ url_for('static', filename='images/influencemap_logo_network.svg') }}">
-                </div>
-                The influencemap project is supported by
-                <a href=https://cecs.anu.edu.au/>ANU College of Engineering and Computer Science</a>,
-                and <a href=http://www.sigmm.org/>ACM SIGMM</a>.
-                We thank Microsoft, Semantic Scholar and OpenAlex for sharing the Academic Graph data,
-                and <a href=https://nectar.org.au/about/>NECTAR</a> for providing computing infrastructure.
+          <div class="col-md-7 col-sm-12" style="padding: 0px 40px;">
+            <div class="row detail-box" style="padding-bottom: 20px; border-bottom: 1px solid #ddd">
+              <div class="logo">
+                <img src="{{ url_for('static', filename='images/influencemap_logo_network.svg') }}">
               </div>
-              <div class="col-md-6 detail-box">
+              The influencemap project is supported by
+              <a href=https://cecs.anu.edu.au/>ANU College of Engineering and Computer Science</a>,
+              and <a href=http://www.sigmm.org/>ACM SIGMM</a>.
+              We thank Microsoft, Semantic Scholar and OpenAlex for sharing the Academic Graph data,
+              and <a href=https://nectar.org.au/about/>NECTAR</a> for providing computing infrastructure.
+            </div>
+            <div class="row">
+              <div class="col-sm-6 detail-box">
                 <h4><b>Our team</b></h4>
                 Lead developer:<br>
                 <ul>
@@ -153,7 +142,7 @@ Licence URI: http://www.os-templates.com/template-terms
                   <li><a href=https://users.cecs.anu.edu.au/~kee/>Kee Siong Ng</a></li>
                 </ul>
               </div>
-              <div class="col-md-6 detail-box">
+              <div class="col-sm-6 detail-box">
                 <h4><b><a href=http://cm.cecs.anu.edu.au/>ANU Computational Media Lab</a></b></h4>
                 Building 145, Science Rd<br>
                 College of Engineering and Computer Science<br>
