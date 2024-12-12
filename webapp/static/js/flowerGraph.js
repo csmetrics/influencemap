@@ -675,7 +675,7 @@ var display_name   = '';
 var flower_name    = '';
 
 function formatNodeInfoHeader(data) {
-  var header_div = document.getElementById("node_info_header");
+  var header_div = document.getElementById("node_info_title");
   var title = "<h3 style='display: inline;margin-right: 10px;'>"+display_name+"</h3>";
   header_div.innerHTML = title;
 }
@@ -685,16 +685,118 @@ function formatNodeInfoLower(data) {
   page_counter = 1;
   max_page_num = data["max_page"];
 
-  var next_button = "<button id='next_node_page' onclick='nextPage()'>Next</button>";
-  var prev_button = "<button id='prev_node_page' onclick='prevPage()'>Prev</button>";
+  var next_button = "<button id='next_node_page' onclick='nextPage()' class='node-info-btn'>Next</button>";
+  var prev_button = "<button id='prev_node_page' onclick='prevPage()' class='node-info-btn' disabled>Prev</button>";
   var page_indicate = "<p id='page_indicate' style='display: inline; margin: 5px;'>" + page_counter + "/" + max_page_num + "</p>";
 
   var lower_div = document.getElementById("node_info_lower");
   lower_div.innerHTML = prev_button+page_indicate+next_button;
 }
 
-
 function formatNodeInfoTable(data) {
+  const links = data["node_links"];
+  const node_name = data["node_name"];
+  const paper_info = data["paper_info"];
+
+  let bg_color_counter = 0;
+  let table_str = "";
+
+  // Helper functions to generate table cells
+  const createCell = (content, width, bgColor = "") => {
+    const style = content
+      ? `background-color:${bgColor};`
+      : ""; // Only add background color if content exists
+    return `<td width='${width}' style='${style} padding: 10px; text-align: center;'>${content || ""}</td>`;
+  };
+
+  const createArrow = (color) => {
+    return `
+      <td width='2%' style='text-align: center; vertical-align: middle;'>
+        <svg height="20" width="40">
+          <line x1="5" y1="10" x2="35" y2="10" style="stroke:${color};stroke-width:2" />
+          <polygon points="35,10 30,6 30,14" style="fill:${color};" />
+        </svg>
+      </td>
+    `;
+  };
+
+  const emptyCell = (width) => createCell("", width);
+
+  // Generate rows for each link
+  for (const link of links) {
+    const references = link["reference"];
+    const citations = link["citation"];
+    const link_length = Math.max(references.length, citations.length);
+
+    const ego_info = paper_info[link["ego_paper"]];
+    const ego_str = formatPaper(ego_info, data.entity_names, node_name);
+
+    for (let j = 0; j < link_length; j++) {
+      const isEvenRow = bg_color_counter % 2 === 0;
+      const ref_color = isEvenRow ? "#b8dcef" : "#d3e9f5";
+      const cit_color = isEvenRow ? "#f4b9ac" : "#f7d0c8";
+      const ego_color = "#f4f4f4"; // Default central column color
+
+      bg_color_counter++;
+
+      // Generate table row
+      table_str += "<tr>";
+
+      // Citations column
+      if (j < citations.length) {
+        const cit_info = paper_info[citations[j]];
+        const cit_str = formatPaper(cit_info, data.entity_names, node_name);
+        table_str += createCell(cit_str, "32%", cit_color);
+        table_str += createArrow("#e48268");
+      } else {
+        table_str += emptyCell("32%");
+        table_str += emptyCell("2%");
+      }
+
+      // Ego column
+      if (j === 0) {
+        table_str += createCell(ego_str, "32%", ego_color);
+      } else {
+        table_str += emptyCell("32%");
+      }
+
+      // References column
+      if (j < references.length) {
+        const ref_info = paper_info[references[j]];
+        const ref_str = formatPaper(ref_info, data.entity_names, node_name);
+        table_str += createArrow("#6bacd0");
+        table_str += createCell(ref_str, "32%", ref_color);
+      } else {
+        table_str += emptyCell("2%");
+        table_str += emptyCell("32%");
+      }
+
+      table_str += "</tr>";
+    }
+
+    // Spacer row for visual separation
+    table_str += `<tr class="spacer"><td colspan="5"></td></tr>`;
+  }
+
+  // Generate final table
+  const link_table = `
+    <table>
+      <tr>
+        <th>${display_name} has influenced</th>
+        <th style="width: 2%;"></th>
+        <th>${flower_name}</th>
+        <th style="width: 2%;"></th>
+        <th>influencing ${display_name}</th>
+      </tr>
+      ${table_str}
+    </table>
+  `;
+
+  document.getElementById("node_info_content").innerHTML = link_table;
+}
+
+
+function formatNodeInfoTable_back(data) {
   var links = data["node_links"];
   var node_name = data["node_name"];
   var paper_info = data["paper_info"];
@@ -773,7 +875,7 @@ function formatNodeInfoTable(data) {
 
 function resetNodeInfoContent(){
   var content_div = document.getElementById("node_info_content");
-  var header_div = document.getElementById("node_info_header");
+  var header_div = document.getElementById("node_info_title");
   var lower_div = document.getElementById("node_info_lower");
 
   content_div.replaceChildren();

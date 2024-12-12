@@ -52,15 +52,17 @@
 </div>
 <!-- Node information tooltip -->
 <div id="node_info_selection" class="node_info_selection">
-  <button id="node_info_paper" class="node_info_button">Show citing/cited papers</button>
+  <button id="node_info_paper" class="node_info_button node_info_button_top">Show citing/cited papers</button>
   <hr/>
-  <button id="node_info_flower" class="node_info_button">Go to influence flower</button>
+  <button id="node_info_flower" class="node_info_button node_info_button_bottom">Go to influence flower</button>
 </div>
 <!-- Node information popup -->
 <div id="node_info_modal" class="node_info_modal">
   <div id="node_info_container" class="node_info_container">
-    <span class="close">&times;</span>
-    <div id='node_info_header' class='node_info_header'></div>
+    <div class="node_info_header">
+      <div id="node_info_title" class="node_info_title"></div>
+      <span class="close">&times;</span>
+    </div>
     <div id="node_info_content"></div>
     <div id='node_info_lower' class='node_info_lower'></div>
   </div>
