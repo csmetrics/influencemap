@@ -226,14 +226,9 @@ a {
 }
 
 /* search page */
-.entity-type-div {
-  padding-left: 0;
-}
-
 .search-bar {
   padding: 2px 15%;
 }
-
 .btn.dropdown-toggle {
   width: 200px;
 }
@@ -244,6 +239,12 @@ a {
 .input-group .input-group-addon {
   border-top-left-radius: 6px;
   border-bottom-left-radius: 6px;
+}
+#instruction-activate {
+  font-style: normal;
+  font-size: 20px;
+  color: var(--primary-color);
+  cursor: pointer;
 }
 
 #statpane { font-size: 15px; }
@@ -262,7 +263,7 @@ a {
   padding: 20px; 
   border-radius: 8px;
   box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.2);
-  margin-top: 20px;
+  margin-top: 10px;
 }
 .searchtable-container th {
   color: var(--text-color);
@@ -275,27 +276,10 @@ a {
   background-color: rgba(0,0,0,0.5);
 }
 
-.loading i {
-  width: 100%;
-  height: 70%;
-  text-align: center;
+#loading i {
+  font-size: 40px;
+  padding: 20px;
   color: var(--primary-color);
-}
-
-table, th, td, table.dataTable thead th, table.dataTable thead td {
-  border: 0;
-}
-table {
-  font-size: 14px;
-
-}
-.emb-table {
-  text-align: left;
-  font-size: 18px;
-  padding-left: 20px;
-}
-.emb-table li {
-  padding-top: 5px;
 }
 
 #selectiontable tr {
@@ -338,79 +322,132 @@ table {
   box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.2);
 }
 .left-col {
+  display: flex;
+  flex-direction: column;
   height: 100%;
   padding: 0px;
-  background-color: #f9f9f9;
+  background-color: var(--background-color);
   border-radius: 8px;
 }
 
 div.searchbar {
   background-color: #fff;
   border-radius: 10px;
-  height: 46px;
+  min-width: 350px;
+  padding-bottom: 10px;
+  height: 56px;
 }
-
 .searchbar input {
   padding: 10px;
-  border: 1px solid #ddd;
-  border-radius: 5px;
+  border: 1px solid var(--border-color);
+  border-radius: 8px;
   flex-grow: 1;
   font-size: 16px;
   height: 100%;
 }
 
 /* Form submit button */
-.searchbar button {
-  background: #fff;
-}
-
 #search-btn {
   background-color: var(--primary-color);
   color: white;
-  border: none;
+  border: 1px solid var(--primary-color);
   padding: 10px 15px;
-  border-radius: 5px;
+  border-radius: 0 8px 8px 0;
   cursor: pointer;
 }
-
+.entity-type-div {
+  display: flex;
+  gap: 10px;
+  padding: 0 0 10px 0;
+  height: 56px;
+}
 .entity-type-btn {
-  background-color: #fff;
+  display: flex;
+  gap: 5px;
+  align-items: center;
+  justify-content: center;
+  padding: 0px 20px;
+  text-align: center;
   font-size: 16px;
-  height: 46px;
-  border: 1px solid #ddd;
-  padding: 10px 15px;
-  border-radius: 5px;
+  border-radius: 8px;
+  background-color: var(--primary-color);
+  border: 1px solid var(--primary-color);
+  color: white;
+  transition: all 0.3s ease;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
   cursor: pointer;
+}
+.entity-type-btn i {
+  font-size: 16px;
+  vertical-align: middle;
+}
+/* unselected status */
+.entity-type-btn:not(.selected-entity) {
+  background-color: #e0e0e0;
+  border-radius: 8px;
+  color: var(--text-color);
+  border: 1px solid var(--border-color);
+}
+.entity-type-btn:not(.selected-entity):hover {
+  background-color: #d6d6d6;
+  color: var(--text-color);
+}
+/*  selected status */
+.entity-type-btn.selected-entity {
+  background-color: var(--primary-color);
+  border-radius: 8px;
+  color: white;
+}
+.entity-type-btn.selected-entity:hover {
+  background-color: var(--secondary-color);
+  border: 1px solid var(--secondary-color);
+  color: white;
 }
 
 table.dataTable thead {
   display: none;
 }
-
 table.dataTable.no-footer {
   border-bottom: 0px solid #fff;
 }
-
 
 .dataTables_wrapper.no-footer .dataTables_scrollBody {
   border-bottom: 0px solid #111;
 }
 
+#empty_selection_alert {
+  display: none;
+  background-color: #f8f9fa;
+  padding: 10px;
+  border: 1px solid var(--border-color);
+  border-radius: 8px;
+  margin-top: -100px;
+  font-size: 14px;
+  position: relative;
+  color: var(--text-color);
+}
+.bottom-fixed {
+  position: absolute;
+  width: calc(100% - 40px);
+  display: flex;
+  flex-direction: column;
+  bottom: 50px;
+  gap: 10px;
+}
 .inputbar {
-  padding: 5px 10px;
-  border-radius: 10px;
-  border: 1px solid #ccc;
+  padding: 10px;
+  border-radius: 8px;
+  border: 1px solid var(--border-color);
   font-size: 16px;
   height: 46px;
   width: 100%;
 }
-
 #continue-btn {
   background-color: var(--highlight-color);
-  width: 100%;
+  color: white;
   font-size: 16px;
   height: 46px;
-  border-radius: 5px;
+  border-radius: 8px;
   font-weight: bold;
   cursor: pointer;
 }
@@ -466,16 +503,15 @@ table.dataTable.no-footer {
   margin: 10px 0;
   width: 70%;
   height: 50px;
-  border-radius: 15px;
+  border-radius: 8px;
   font-size: 16px;
   font-weight: bold;
-  text-shadow:
-   -1px -1px 0 var(--secondary-color),
-    1px -1px 0 var(--secondary-color),
-    -1px 1px 0 var(--secondary-color),
-     1px 1px 0 var(--secondary-color);
-  background-color: var(--secondary-color);
+  background-color: var(--primary-color);
   color: #fff;
+}
+#resubmitButton:hover {
+  background-color: var(--secondary-color);
+  color: white;
 }
 
 .yearslider {
@@ -510,7 +546,7 @@ div#citation-range .noUi-connect {
   padding: 8px 0;
   border-radius: 0 0 5px 5px;
   color:#000; background-color:transparent;
-  border-left: 1px solid #ddd;
+  border-left: 1px solid var(--border-color);
   border-bottom: 5px var(--primary-color) solid;
   border-top: none;
   text-align: center;
@@ -601,7 +637,7 @@ input, select {
   border-radius: 4px;
   padding: 2px 4px;
   background-color: #ffffff;
-  border: 1px solid #ccc;
+  border: 1px solid var(--border-color);
 }
 
 .custom-text-box {
@@ -610,7 +646,6 @@ input, select {
   text-align: left;
   padding-bottom: 20;
 }
-
 .custom-text-box h1 {
   text-align: left;
   color: rgba(77, 77, 77, 1);
@@ -727,9 +762,6 @@ td{
   cursor: pointer;
 }
 tr:hover td{
-/*
-  background: #ddd;
-  */
   background: none;
 }
 

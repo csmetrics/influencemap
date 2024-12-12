@@ -1,39 +1,66 @@
-<div class="searchtables-container">
-  <div class="left-col col-sm-9">
-    <div class="search-div">
-      <div class="entity-type-div col-md-8">
-          <button class="btn-sm entity-type-btn"  data-entitytype="author"><i class="fa fa-user"></i>  Authors</button>
-          <button class="btn-sm entity-type-btn"  data-entitytype="institution"><i class="fa fa-university"></i>  Institutions</button>
-          <button class="btn-sm entity-type-btn"  data-entitytype="source"><i class="fa fa-book"></i>  Sources</button>
-          <button class="btn-sm entity-type-btn"  data-entitytype="paper"><i class="fa fa-file"></i>  Papers</button>
-          <!-- <button class="btn-sm entity-type-btn"  data-entitytype="topic"><i class="fa fa fa-flask"></i>  Topics</button> -->
+<div class="search-page" style="display: flex; gap: 20px; padding: 20px;">
+  <!-- Left Column -->
+  <div class="left-col col-sm-9" style="background-color: #f9f9f9; border-radius: 8px;">
+    <div class="search-div row" style="margin: 0;">
+      <div class="entity-type-div col-md-8 col-sm-12">
+        <!-- Entity Buttons -->
+        <button class="btn-sm entity-type-btn selected-entity" data-entitytype="author">
+          <i class="fa fa-user"></i> Authors
+        </button>
+        <button class="btn-sm entity-type-btn" data-entitytype="institution">
+          <i class="fa fa-university"></i> Institutions
+        </button>
+        <button class="btn-sm entity-type-btn" data-entitytype="source">
+          <i class="fa fa-book"></i> Sources
+        </button>
+        <button class="btn-sm entity-type-btn" data-entitytype="paper">
+          <i class="fa fa-file"></i> Papers
+        </button>
       </div>
-      <div class="input-group searchbar">
-        <input autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false" id="name-search-bar" type="text" class="form-control" value="" placeholder="Search">
-        <span class="input-group-btn">
-          <button id="search-btn" type="button" class="btn btn-flat">
-            <i class="fa fa-search"></i>
-          </button>
-        </span>
+
+      <!-- Search Bar -->
+      <div class="input-group searchbar col-md-4 col-sm-12" style="display: flex; gap: 5px;">
+        <input autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false" id="name-search-bar" 
+          type="text" class="form-control" 
+          placeholder="Search for entities...">
+        <button id="search-btn" type="button" class="btn btn-flat" >
+          <i class="fa fa-search"></i>
+        </button>
       </div>
     </div>
-    <div id="searchtable-container" style="padding: 0px 30px">
-      <div style="float:right;padding:15px 0">
-        <i id="instruction-activate" class="far fa-question-circle" style="font-size:20px;font-style:normal;"></i>
+
+    <!-- Search Table -->
+    <div class="searchtable-container">
+      <div style="float: right; margin-bottom: 15px;">
+        <i id="instruction-activate" class="far fa-question-circle"></i>
       </div>
-      <div id="loading" style="display: none"></div>
+      <div id="loading" style="display: none; text-align: center;">
+        <i class="fa fa-spinner fa-spin"></i>
+      </div>
       <table id="searchtable" class="row-border hover order-column" cellspacing="0" width="100%"></table>
     </div>
   </div>
+
+  <!-- Right Column -->
   <div class="right-col col-sm-3">
-    <table id="selectiontable" class="row-border"></table>
-    <input id="flowername" class="inputbar" type="text" placeholder="Name your flower..."/>
-    <input id="continue-btn" class="btn btn-warning" type="submit" value="Go" float="bottom" style="width:100%; margin-top:10px" />
-    <div id="empty_selection_alert" class="alert alert-info" style="display: none; z-index: 1000;">
-      Unable to make a flower before making one or more selections. Click on <i class="far fa-question-circle" style="font-style: normal;"></i> to see how to search!
+    <!-- Selection Table -->
+    <table id="selectiontable" class="row-border" style="width: 100%; margin-bottom: 20px;"></table>
+
+    <!-- Empty Selection Alert -->
+    <div id="empty_selection_alert" class="alert">
+      Unable to make a flower before making one or more selections. Click on 
+      <i class="far fa-question-circle" style="font-style: normal;"></i> to see how to search!
+    </div>
+
+    <div class="bottom-fixed">
+      <!-- Name Input -->
+      <input id="flowername" class="inputbar" type="text" placeholder="Name your flower...">
+      <!-- Submit Button -->
+      <input id="continue-btn" class="btn" type="submit" value="Go" >
     </div>
   </div>
 </div>
+
 
 <!-- The Modal -->
 <div id="instructionModal" class="modal">

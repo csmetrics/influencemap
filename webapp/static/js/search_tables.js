@@ -108,6 +108,13 @@ function searchTableEventHandling() {
     var select = this.checked;
     toggleParentRowSelection(row, select);
   })
+  $('#searchtable tbody').on('click', 'tr', function (e) {
+    if (!$(e.target).is('.papers-outer-checkbox')) {
+      var checkbox = $(this).find('.papers-outer-checkbox');
+      checkbox.prop('checked', !checkbox.prop('checked')); // 체크 상태 토글
+      checkbox.trigger('change'); // 변경 이벤트 트리거
+    }
+  });
 }
 
 function toggleParentRowSelection(row, select){
