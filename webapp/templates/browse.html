@@ -17,182 +17,159 @@
     </td></tr></table>
   </div>
 
-  <div style="min-height: 100%" class="content-wrapper content-wrapper-browse">
+  <div class="content-wrapper content-wrapper-browse">
 
-    <!-- Groups-->
+  <!-- Groups-->
   {% for group in browse_groups %}
   <div style="display: none;" class="content_section" data-displayname="{{group.display}}" data-level="g">
     <section class="content-header">
-      <h2>
-        {{ group.display }}<br>
-        <small>{{group.info}}</small>
-      </h2>
+      <h2>{{ group.display }}</h2>
+      <small>{{group.info}}</small>
     </section>
 
-
-   <!-- Sub groups-->
-  {% for category in group.subgroups %}
-   <div class="content_section" data-displayname="{{category.display}}" data-level="sg" data-g="{{group.display}}">
-
-   {% if not category.subgroups %}
-
-    <section class="content-header">
-      <h4>
-        {{ category.display }}<br><br>
-        <small>{{category.info}}</small>
-      </h4>
-    </section>
-
-
-
-    <section class="content">
-      <div class="row">
-        <div class="col-xs-12">
-          <div class="row">
-            {% for entity in category.docs %}
-              <div class="info-list col-xs-12 hidden">
-                <li>
-                  <a href="/submit/?id={{ entity.FlowerUrl }}"><b>{{entity.DisplayName}}</b></a>
-                  {{entity.Year}}
-                  {% for aff in entity.Affiliations %}
-                    {{ aff }}
-                  {% endfor %}
-                </li>
-              </div>
-                <div class="info-box" onclick="document.location.href = '/submit/?id={{ entity.FlowerUrl }}'; return false">
-                    {% if entity.PhotoUrl %}
-                      <span class="info-box-icon" style="background-image: url('{{entity.PhotoUrl}}');"></span>
-                    {% else %}
-                      <span class="info-box-icon">
-                      {% if entity.Icon_type == "projects" %}<i class="fa fa-rocket"></i>
-                      {% elif entity.Icon_type == "papers" %}<i class="fa fa-book"></i>
-                      {% elif entity.Icon_type == "conferences" or entity.Icon_type == "journals" or entity.Icon_type == "venues" %}<i class="fa fa-university"></i>
-                      {% else %}<i class="fa fa-user"></i>
-                      {% endif %}
-                      </span>
-                    {% endif %}
-                  <div class="info-box-content">
-                    <span class="info-box-text text-truncate">
-                      <b>{{entity.DisplayName}}</b>
-                    </span>
-                    <span class="info-box-text text-truncate">
-                      {{entity.Year}}
-                    </span>
-                  </div>
-                  <div class="info-box-more hidden">
-                    <small>
+    <!-- Sub groups-->
+    {% for category in group.subgroups %}
+    <div class="content_section" data-displayname="{{category.display}}" data-level="sg" data-g="{{group.display}}">
+      {% if not category.subgroups %}
+      <section class="content-header">
+        <h4>{{ category.display }}</h4>
+        <div style="padding: 5px 0px 10px 0px">
+          <small>{{category.info}}</small>
+        </div>
+      </section>
+      <section class="content">
+        <div class="row">
+          <div class="col-xs-12">
+            <div class="row">
+              {% for entity in category.docs %}
+                <div class="info-list col-xs-12 hidden">
+                  <li>
+                    <a href="/submit/?id={{ entity.FlowerUrl }}"><b>{{entity.DisplayName}}</b></a>
+                    {{entity.Year}}
                     {% for aff in entity.Affiliations %}
-                      <li>{{ aff }}</li>
+                      {{ aff }}
                     {% endfor %}
-                    {% if entity.Affiliations %}<br/>{% endif %}
-                    {% for keyword in entity.Keywords %}
-                      <li>{{ keyword }}</li>
-                    {% endfor %}
-                    {% if entity.Keywords %}<br/>{% endif %}
-                    {{entity.Citation | safe}}
-                    </small>
-                  </div>
+                  </li>
                 </div>
-            {% endfor %}
+                  <div class="info-box" onclick="document.location.href = '/submit/?id={{ entity.FlowerUrl }}'; return false">
+                      {% if entity.PhotoUrl %}
+                        <span class="info-box-icon" style="background-image: url('{{entity.PhotoUrl}}');"></span>
+                      {% else %}
+                        <span class="info-box-icon">
+                        {% if entity.Icon_type == "projects" %}<i class="fa fa-rocket"></i>
+                        {% elif entity.Icon_type == "papers" %}<i class="fa fa-book"></i>
+                        {% elif entity.Icon_type == "conferences" or entity.Icon_type == "journals" or entity.Icon_type == "venues" %}<i class="fa fa-university"></i>
+                        {% else %}<i class="fa fa-user"></i>
+                        {% endif %}
+                        </span>
+                      {% endif %}
+                    <div class="info-box-content">
+                      <span class="info-box-text text-truncate">
+                        <b>{{entity.DisplayName}}</b>
+                      </span>
+                      <span class="info-box-text text-truncate">
+                        {{entity.Year}}
+                      </span>
+                    </div>
+                    <div class="info-box-more hidden">
+                      <small>
+                      {% for aff in entity.Affiliations %}
+                        <li>{{ aff }}</li>
+                      {% endfor %}
+                      {% if entity.Affiliations %}<br/>{% endif %}
+                      {% for keyword in entity.Keywords %}
+                        <li>{{ keyword }}</li>
+                      {% endfor %}
+                      {% if entity.Keywords %}<br/>{% endif %}
+                      {{entity.Citation | safe}}
+                      </small>
+                    </div>
+                  </div>
+              {% endfor %}
+            </div>
           </div>
         </div>
-      </div>
-    </section>
+      </section>
 
-    {% else %}
-
-    <section class="content-header">
-      <h4>
-        {{ category.display }}<br>
+      {% else %}
+      <section class="content-header">
+        <h4>{{ category.display }}</h4>
         <small>{{category.info}}</small>
-      </h4>
-    </section>
+      </section>
 
-
-    <!-- Subsubgroups  -->
-    {% for subsubgroup in category.subgroups %}
-    <div class="content_section" data-displayname="{{subsubgroup.display}}" data-level="ssg" data-g="{{group.display}}" data-sg="{{category.display}}">
-    <section class="content-header">
-      <h4>
-        {{ subsubgroup.display }}<br>
+      <!-- Subsubgroups  -->
+      {% for subsubgroup in category.subgroups %}
+      <div class="content_section" data-displayname="{{subsubgroup.display}}" data-level="ssg" data-g="{{group.display}}" data-sg="{{category.display}}">
+      <section class="content-header">
+        <h4> {{ subsubgroup.display }}</h4>
         {% if subsubgroup.info %}
-        <div style="padding: 10px 0px">
+        <div style="padding: 5px 0px 10px 0px">
           <small>{{subsubgroup.info}}</small>
         </div>
         {% endif %}
-      </h4>
-    </section>
-    <section class="content">
-      <div class="row">
-        <div class="col-xs-12">
-          <div class="row">
-            {% for entity in subsubgroup.docs %}
-              <div class="info-list col-xs-12 hidden">
-                <li>
-                  {{entity.Year}}
-                  {% for aff in entity.Affiliations %}
-                    {{ aff }}
-                  {% endfor %}
-                </li>
-              </div>
-              <a href="/submit/?id={{ entity.FlowerUrl }}">
-                <div class="info-box">
-                    {% if entity.PhotoUrl %}
-                      <span class="info-box-icon" style="background-image: '{{entity.PhotoUrl}}';"></span>
-                    {% else %}
-                      <span class="info-box-icon">
-                      {% if entity.Icon_type == "projects" %}<i class="fa fa-rocket"></i>
-                      {% elif entity.Icon_type == "papers" %}<i class="fa fa-book"></i>
-                      {% elif entity.Icon_type == "conferences" or entity.Icon_type == "journals" or entity.Icon_type == "venues" %}<i class="fa fa-university"></i>
-                      {% else %}<i class="fa fa-user"></i>
-                      {% endif %}
-                      </span>
-                    {% endif %}
-                  <div class="info-box-content">
-                    <span class="info-box-text text-truncate">
-                      <b>{{entity.DisplayName}}</b>
-                    </span>
-                    <span class="info-box-text text-truncate">
-                      {{entity.Year}}
-                    </span>
-                  </div>
-                  <div class="info-box-more hidden">
-                    <small>
+      </section>
+      <section class="content">
+        <div class="row">
+          <div class="col-xs-12">
+            <div class="row">
+              {% for entity in subsubgroup.docs %}
+                <div class="info-list col-xs-12 hidden">
+                  <li>
+                    {{entity.Year}}
                     {% for aff in entity.Affiliations %}
-                      <li>{{ aff }}</li>
+                      {{ aff }}
                     {% endfor %}
-                    {% if entity.Affiliations %}<br/>{% endif %}
-                    {% for keyword in entity.Keywords %}
-                      <li>{{ keyword }}</li>
-                    {% endfor %}
-                    {% if entity.Keywords %}<br/>{% endif %}
-                    {{entity.Citation}}
-                    </small>
-                  </div>
+                  </li>
                 </div>
-              </a>
-            {% endfor %}
+                <a href="/submit/?id={{ entity.FlowerUrl }}">
+                  <div class="info-box">
+                      {% if entity.PhotoUrl %}
+                        <span class="info-box-icon" style="background-image: '{{entity.PhotoUrl}}';"></span>
+                      {% else %}
+                        <span class="info-box-icon">
+                        {% if entity.Icon_type == "projects" %}<i class="fa fa-rocket"></i>
+                        {% elif entity.Icon_type == "papers" %}<i class="fa fa-book"></i>
+                        {% elif entity.Icon_type == "conferences" or entity.Icon_type == "journals" or entity.Icon_type == "venues" %}<i class="fa fa-university"></i>
+                        {% else %}<i class="fa fa-user"></i>
+                        {% endif %}
+                        </span>
+                      {% endif %}
+                    <div class="info-box-content">
+                      <span class="info-box-text text-truncate">
+                        <b>{{entity.DisplayName}}</b>
+                      </span>
+                      <span class="info-box-text text-truncate">
+                        {{entity.Year}}
+                      </span>
+                    </div>
+                    <div class="info-box-more hidden">
+                      <small>
+                      {% for aff in entity.Affiliations %}
+                        <li>{{ aff }}</li>
+                      {% endfor %}
+                      {% if entity.Affiliations %}<br/>{% endif %}
+                      {% for keyword in entity.Keywords %}
+                        <li>{{ keyword }}</li>
+                      {% endfor %}
+                      {% if entity.Keywords %}<br/>{% endif %}
+                      {{entity.Citation}}
+                      </small>
+                    </div>
+                  </div>
+                </a>
+              {% endfor %}
+            </div>
           </div>
         </div>
+      </section>
       </div>
-    </section>
-    </div>
-     {% endfor %}
-
+      {% endfor %}
 
     {% endif %}
-
-  </div>
-
-
+    </div>
   {% endfor %}
-
-
-
   </div>
-
-  {% endfor %}
-
+{% endfor %}
 </div>
 </body>
 
@@ -200,13 +177,13 @@
 
 <script type="text/javascript">
 var aligntype = "small";
-$(".info-box")
-  .mouseover(function() {
-    if (aligntype == "small") $(this).find(".info-box-more").removeClass("hidden");
-  })
-  .mouseout(function() {
-    if (aligntype == "small") $(this).find(".info-box-more").addClass("hidden");
-  })
+// $(".info-box")
+//   .mouseover(function() {
+//     if (aligntype == "small") $(this).find(".info-box-more").removeClass("hidden");
+//   })
+//   .mouseout(function() {
+//     if (aligntype == "small") $(this).find(".info-box-more").addClass("hidden");
+//   })
 
 $("#btn-align-list").click(function() {
   aligntype = "list";
@@ -225,7 +202,7 @@ $("#btn-align-big").click(function() {
   $(".info-list").addClass("hidden");
   $(".info-box").removeClass("hidden");
   $(".info-box-more").removeClass("hidden");
-  $(".info-box-more").css({"position":"relative", "height":"210px"});
+  $(".info-box-more").css({"position":"relative", "height":"150px"});
 })
 
 function clear_content(){

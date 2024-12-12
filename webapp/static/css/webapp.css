@@ -1,21 +1,34 @@
+/* Common color variables */
+:root {
+  --primary-color: #189AB4; /* Main button and primary highlight color */
+  --secondary-color: #456990; /* Logo and general text color */
+  --navbar-color: #F2F2F2; /* Background color for the navigation bar */
+  --highlight-color: #EEB868; /* Highlight color for interactive elements */
+  --text-color: #333333; /* General text color */
+  --border-color: #CCCCCC; /* Border color */
+  --background-color: #FFFFFF; /* Page background color */
+  --background-dark-color: #222d32; /* Page background color */
+}
+
 .content-wrapper-home { background-color: #fff; }
 .content-wrapper-home,
 .main-footer-home {
   margin-left: 0;
 }
-.main-sidebar-wide { width: 440px; background-color: #fff; }
-.main-sidebar-dark { width: 270px; background-color: #222d32; }
+.main-sidebar-wide { width: 440px; background-color: var(--background-color); }
+.main-sidebar-dark { width: 270px; background-color: var(--background-dark-color); }
 .content-wrapper-narrow { margin-left: 440px; }
 .content-wrapper-browse {
   min-height: 0;
   margin-left: 270px;
+  padding: 20px;
   z-index: 800;
 }
 .content-wrapper-doc {
   margin: 0 10%;
 }
 a {
-  color: #456990;
+  color: var(--secondary-color);
 }
 .content {
   padding-top: 0;
@@ -26,7 +39,7 @@ a {
 }
 .skin-custom .main-header .navbar,
 .skin-custom .main-header .logo {
-  background-color: #F2F2F2;
+  background-color: var(--navbar-color);
 }
 
 /* logo and navbar */
@@ -36,10 +49,10 @@ a {
   margin-right: 10px;
 }
 .navbar .pull-right a {
-  color: #456990;
+  color: var(--secondary-color);
   display: inline-block;
   margin-right: 30px;
-  padding: 15px;
+  padding: 13px 15px;
   font-size: 16px;
   text-decoration: none;
   text-transform: uppercase;
@@ -65,7 +78,7 @@ a {
   text-align: left;
   margin: 0 -80px 15px -20px;
   font-size: 26px;
-  color: #000;
+  color: var(--text-color);
 }
 .project-intro ul {
   list-style: none;
@@ -88,7 +101,7 @@ a {
   color: #e48268;
 }
 .project-intro li.node:before {
-  color: black;
+  color: #666;
   content: "\f111";
 }
 .background-image {
@@ -113,7 +126,7 @@ a {
   font-size: 18px;
   font-weight: 600;
   border-radius: 30px;
-  background-color: #189ab4;
+  background-color: var(--primary-color);
   border: none;
   color: white;
   transition: all 0.3s ease;
@@ -125,7 +138,7 @@ a {
   vertical-align: middle;
 }
 .btn-main:hover {
-  background-color: #107b92;
+  background-color: var(--primary-color);
   color: white;
   transform: translateY(-3px);
   box-shadow: 0 6px 12px rgba(0, 0, 0, 0.3);
@@ -147,7 +160,7 @@ a {
 
 .detail {
   padding: 50px 12% 100px 12%;
-  background-color: #222d32;
+  background-color: var(--background-dark-color);
   text-align: left;
 }
 
@@ -160,7 +173,57 @@ a {
   font-size: 16px;
 }
 .detail-box a, .detail-box h4 { color: white; }
-.detail-box a:hover {color: #189ab4; }
+.detail-box a:hover {color: var(--primary-color); }
+
+
+/* sidebar menu style */
+.sidebar-menu {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+.sidebar-menu .treeview > a {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 12px 15px;
+  color: #ECF0F1;
+  text-decoration: none;
+  font-size: 18px;
+  padding: 15px;
+}
+.sidebar-menu .treeview-menu {
+  padding-left: 20px;
+  display: none;
+}
+.sidebar-menu .treeview-menu a {
+  padding: 10px 12px;
+  color: #ECF0F1;
+  text-decoration: none;
+  font-size: 14px;
+}
+.treeview.active > .treeview-menu {
+  display: block;
+}
+/* sidebar icon */
+.sidebar-menu .fa {
+  font-size: 18px;
+  font-weight: 600;
+}
+
+@media (max-width: 768px) {
+  .main-sidebar {
+      width: 200px;
+  }
+
+  .sidebar-menu .treeview > a {
+      font-size: 14px;
+  }
+
+  .sidebar-form .form-control {
+      font-size: 12px;
+  }
+}
 
 /* search page */
 .entity-type-div {
@@ -202,7 +265,7 @@ a {
   margin-top: 20px;
 }
 .searchtable-container th {
-  color: black;
+  color: var(--text-color);
   font-size: 16px;
 }
 
@@ -216,7 +279,7 @@ a {
   width: 100%;
   height: 70%;
   text-align: center;
-  color: #189ab4;
+  color: var(--primary-color);
 }
 
 table, th, td, table.dataTable thead th, table.dataTable thead td {
@@ -236,7 +299,7 @@ table {
 }
 
 #selectiontable tr {
-  color: black;
+  color: var(--text-color);
   background: none;
 }
 #selectiontable-container th {
@@ -302,7 +365,7 @@ div.searchbar {
 }
 
 #search-btn {
-  background-color: #189ab4;
+  background-color: var(--primary-color);
   color: white;
   border: none;
   padding: 10px 15px;
@@ -343,7 +406,7 @@ table.dataTable.no-footer {
 }
 
 #continue-btn {
-  background-color: #EEB868;
+  background-color: var(--highlight-color);
   width: 100%;
   font-size: 16px;
   height: 46px;
@@ -397,7 +460,7 @@ table.dataTable.no-footer {
 .flower-loading{
   background: url('../images/button_loading.gif') no-repeat center center;
   background-size: 160px 20px;
-  background-color: #456990;
+  background-color: var(--secondary-color);
 }
 #resubmitButton {
   margin: 10px 0;
@@ -407,11 +470,11 @@ table.dataTable.no-footer {
   font-size: 16px;
   font-weight: bold;
   text-shadow:
-   -1px -1px 0 #456990,
-    1px -1px 0 #456990,
-    -1px 1px 0 #456990,
-     1px 1px 0 #456990;
-  background-color: #456990;
+   -1px -1px 0 var(--secondary-color),
+    1px -1px 0 var(--secondary-color),
+    -1px 1px 0 var(--secondary-color),
+     1px 1px 0 var(--secondary-color);
+  background-color: var(--secondary-color);
   color: #fff;
 }
 
@@ -448,7 +511,7 @@ div#citation-range .noUi-connect {
   border-radius: 0 0 5px 5px;
   color:#000; background-color:transparent;
   border-left: 1px solid #ddd;
-  border-bottom: 5px #189ab4 solid;
+  border-bottom: 5px var(--primary-color) solid;
   border-top: none;
   text-align: center;
   width: 140px;
@@ -461,7 +524,7 @@ div#citation-range .noUi-connect {
 .nav-tabs>li.active>a.tab-btn,
 .nav-tabs>li>a.tab-btn:hover{
   color:#000; background-color:#f4f4f4;
-  border-bottom: 5px #189ab4 solid;
+  border-bottom: 5px var(--primary-color) solid;
 }
 
 img.fit-wrapper {
@@ -561,35 +624,55 @@ input, select {
 /*    ------ Stylesheet for browse.html ------    */
 .info-box {
   min-height: 75px;
-  max-height: auto;
-  border: 1px solid #ccc;
   width: 260px;
   float: left;
   margin: 5px 0px 5px 20px;
-  color: black;
+  flex-direction: column;
+  align-items: center;
+  justify-content: flex-start;
+  background-color: #ffffff;
+  border: 1px solid var(--border-color);
+  border-radius: 8px;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+  text-align: center;
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
   cursor: pointer;
 }
+.info-box:hover {
+  transform: translateY(-5px);
+  box-shadow: 0 8px 16px rgba(0, 0, 0, 0.2);
+}
 .info-box-icon {
+  margin: 10px;
   width: 58px;
   height: 75px;
-  padding: 20px 5px;
   font-size: 32px;
   background-repeat: no-repeat;
   background-position: center;
   background-size: cover;
-  border-radius: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 5px;
   background-color: #efefef;
+  color: var(--text-color);
 }
 .info-box-img {
+  margin: 10px;
   width: 58px;
   height: 75px;
   padding: 2px;
   display: inline;
 }
 .info-box-content {
-  margin-left: 60px;
-  height: 75px;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  text-align: left;
+  margin-left: 40px;
+  height: 92px;
   padding: 7px 10px;
+  color: var(--text-color);
 }
 .info-box-text {
   white-space: normal;
@@ -597,19 +680,22 @@ input, select {
   display: -webkit-box;
   -webkit-line-clamp: 3;
   -webkit-box-orient: vertical;
+  color: var(--text-color);
 }
 .info-box-more {
   position: absolute;
   z-index: 900;
   padding: 15px 10px;
-  margin: -1px;
-  width: 260px;
+  margin: 5px 0 0 0;
+  width: 258px;
   overflow-y: scroll;
-  border: 1px solid #ccc;
-  border-top: 1px solid #ccc;
-  border-radius: 0 0 2px 2px;
-  background-color: #f4f4f4;
+  border-radius: 0 0 8px 8px;
+  background-color: #fff;
+  text-align: left;
+  transition: max-height 0.3s ease;
+  color: var(--text-color);
 }
+
 .align-buttons {
   position: fixed;
   z-index: 1000;
@@ -619,7 +705,7 @@ input, select {
 
 /* The Close Button */
 .close {
-    color: #aaa;
+  color: #aaa;
   float: right;
   font-size: 28px;
   font-weight: bold;
@@ -692,8 +778,8 @@ hr {
 }
 .selected-entity {
   border-radius: 5px;
-  background-color: #189ab4;
-  border: 1px solid #189ab4;
+  background-color: var(--primary-color);
+  border: 1px solid var(--primary-color);
   /* color: #fff; */
 }
 
