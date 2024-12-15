@@ -15,7 +15,7 @@
 	"Affiliations": ["Olivetti"],
 	"DisplayName": "Maurice V. Wilkes",
 	"EntityIds": {
-		"AuthorIds": [5031015797]
+		"AuthorIds": [5112193140]
 	},
 	"Citation": "Professor Wilkes is best known as the builder and designer of the EDSAC, the first computer with an internally stored program. Built in 1949, the EDSAC used a mercury delay line memory. He is also known as the author, with Wheeler and Gill, of a volume on \"Preparation of Programs for Electronic Digital Computers\" in 1951, in which program libraries were effectively introduced.",
 	"PhotoUrl": "https://amturing.acm.org/images/lg_aw/1001395.jpg",
@@ -37,7 +37,7 @@
 	"DisplayName": "Marvin Minsky",
   	"Affiliations": ["Massachusetts Institute of Technology"],
 	"EntityIds": {
-		"AuthorIds": [5089826363]
+		"AuthorIds": [5108662140]
 	},
 	"Citation": "For his central role in creating, shaping, promoting, and advancing the field of Artificial Intelligence.",
 	"PhotoUrl": "https://amturing.acm.org/images/lg_aw/7440781.jpg",
@@ -48,7 +48,7 @@
 	"DisplayName": "James Hardy Wilkinson",
   "Affiliations": ["National Physical Laboratory"],
 	"EntityIds": {
-		"AuthorIds": [5009324994]
+		"AuthorIds": [5110085538]
 	},
 	"Citation": "For his research in numerical analysis to facilitiate the use of the high-speed digital computer, having received special recognition for his work in computations in linear algebra and backward error analysis.",
 	"PhotoUrl": "https://amturing.acm.org/images/lg_aw/0671216.jpg",
@@ -68,7 +68,7 @@
 	"Year": 1972,
 	"DisplayName": "Edsger Wybe Dijkstra",
 	"EntityIds": {
-		"AuthorIds": [2137842401]
+		"AuthorIds": [5103596518]
 	},
 	"Citation": "For fundamental contributions to programming as a high, intellectual challenge; for eloquent insistence and practical demonstration that programs should be composed correctly, not just debugged into correctness; for illuminating perception of problems at the foundations of program design.",
 	"PhotoUrl": "https://amturing.acm.org/images/lg_aw/1053701.jpg",
@@ -78,7 +78,7 @@
 	"Year": 1973,
 	"DisplayName": "Charles William Bachman",
 	"EntityIds": {
-		"AuthorIds": [5013796684]
+		"AuthorIds": [5109135099]
 	},
 	"Citation": "For his outstanding contributions to database technology.",
 	"PhotoUrl": "https://amturing.acm.org/images/lg_aw/9385610.jpg",
@@ -88,7 +88,7 @@
 	"Year": 1974,
 	"DisplayName": "Donald Ervin Knuth",
 	"EntityIds": {
-		"AuthorIds": [5034753985]
+		"AuthorIds": [5110826490]
 	},
 	"Citation": "For his major contributions to the analysis of algorithms and the design of programming languages, and in particular for his contributions to the art of computer programming through his well-known books in a continuous series by this title.",
 	"PhotoUrl": "https://amturing.acm.org/images/lg_aw/1013846.jpg",
@@ -99,7 +99,7 @@
 	"DisplayName": "Allen Newell",
   "Affiliations": ["Carnegie Mellon University"],
 	"EntityIds": {
-		"AuthorIds": [5072179394]
+		"AuthorIds": [5111461011]
 	},
 	"Citation": "In joint scientific efforts extending over twenty years, initially in collaboration with J. C. Shaw at the RAND Corporation, and subsequentially with numerous faculty and student collegues at Carnegie-Mellon University, Newell and co-recipient Herbert A. Simon made basic contributions to artificial intelligence, the psychology of human cognition, and list processing.",
 	"PhotoUrl": "https://amturing.acm.org/images/lg_aw/3167755.jpg",
@@ -109,7 +109,7 @@
 	"Year": 1975,
 	"DisplayName": "Herbert Alexander Simon",
 	"EntityIds": {
-		"AuthorIds": [5047565935]
+		"AuthorIds": [5108357701]
 	},
 	"Citation": "In joint scientific efforts extending over twenty years, initially in collaboration with J. C. Shaw at the RAND Corporation, and subsequentially with numerous faculty and student collegues at Carnegie-Mellon University, Simon and co-recipient Allen Newell made basic contributions to artificial intelligence, the psychology of human cognition, and list processing.",
 	"PhotoUrl": "https://amturing.acm.org/images/lg_aw/1031467.jpg",
@@ -119,7 +119,7 @@
 	"Year": 1976,
 	"DisplayName": "Dana Stewart Scott",
 	"EntityIds": {
-		"AuthorIds": [5059068538]
+		"AuthorIds": [5109213996]
 	},
 	"Citation": "Along with Michael O. Rabin, for their joint paper Finite Automata and Their Decision Problem, which introduced the idea of nondeterministic machines, which has proved to be an enormously valuable concept. Their (Scott & Rabin) classic paper has been a continuous source of inspiration for subsequent work in this field.",
 	"PhotoUrl": "https://amturing.acm.org/images/lg_aw/1193622.jpg",
@@ -129,7 +129,7 @@
 	"Year": 1976,
 	"DisplayName": "Michael O. Rabin",
 	"EntityIds": {
-		"AuthorIds": [5055112002]
+		"AuthorIds": [5110849557]
 	},
 	"Citation": "Along with Dana S. Scott, for their joint paper Finite Automata and Their Decision Problem, which introduced the idea of nondeterministic machines, which has proved to be an enormously valuable concept. Their (Scott & Rabin) classic paper has been a continuous source of inspiration for subsequent work in this field.",
 	"PhotoUrl": "https://amturing.acm.org/images/lg_aw/9681074.jpg",
@@ -149,7 +149,7 @@
 	"Year": 1978,
 	"DisplayName": "Robert W Floyd",
 	"EntityIds": {
-		"AuthorIds": [5057078342]
+		"AuthorIds": [5103503872]
 	},
 	"Citation": "For having a clear influence on methodologies for the creation of efficient and reliable software, and for helping to found the following important subfields of computer science: the theory of parsing, the semantics of programming languages, automatic program verification, automatic program synthesis, and analysis of algorithms.",
 	"PhotoUrl": "https://amturing.acm.org/images/lg_aw/3720707.jpg",
@@ -169,7 +169,7 @@
 	"Year": 1980,
 	"DisplayName": "C. Antony R. Hoare",
 	"EntityIds": {
-		"AuthorIds": [5052847689]
+		"AuthorIds": [5112251780]
 	},
 	"Citation": "For his fundamental contributions to the definition and design of programming languages.",
 	"PhotoUrl": "https://amturing.acm.org/images/lg_aw/4622167.jpg",
@@ -199,7 +199,7 @@
 	"Year": 1983,
 	"DisplayName": "Kenneth Lane Thompson",
 	"EntityIds": {
-		"AuthorIds": [5044548747]
+		"AuthorIds": [5103632286]
 	},
 	"Citation": "With Dennis M. Ritchie, for their development of generic operating systems theory and specifically for the implementation of the UNIX operating system.",
 	"PhotoUrl": "https://amturing.acm.org/images/lg_aw/4588371.jpg",
@@ -219,7 +219,7 @@
 	"Year": 1984,
 	"DisplayName": "Niklaus E. Wirth",
 	"EntityIds": {
-		"AuthorIds": [5045306817]
+		"AuthorIds": [5109991476]
 	},
 	"Citation": "For developing a sequence of innovative computer languages, EULER, ALGOL-W, MODULA and PASCAL. PASCAL has become pedagogically significant and has provided a foundation for future computer language, systems, and architectural research.",
 	"PhotoUrl": "https://amturing.acm.org/images/lg_aw/1025774.jpg",
@@ -297,9 +297,9 @@
 }, {
 	"Type": "turing_award_winners",
 	"Year": 1991,
-	"DisplayName": "Arthur John Robin Gorell Milner",
+	"DisplayName": "Robin Milner",
 	"EntityIds": {
-		"AuthorIds": []
+		"AuthorIds": [5114258078]
 	},
 	"Citation": "For three distinct and complete achievements: LCF, the mechanization of Scotts Logic of Computable Functions, probably the first theoretically based yet practical tool for machine assisted proof construction;ML, the first language to include polymorphic type inference together with a type-safe exception-handling mechanism;CCS, a general theory of concurrency.In addition, he formulated and strongly advanced full abstraction, the study of the relationship between operational and denotational semantics.",
 	"PhotoUrl": "https://amturing.acm.org/images/lg_aw/1569367.jpg",
@@ -319,7 +319,7 @@
 	"Year": 1993,
 	"DisplayName": "Juris Hartmanis",
 	"EntityIds": {
-		"AuthorIds": [5055669926]
+		"AuthorIds": [5110601185]
 	},
 	"Citation": "With Richard E. Stearns, in recognition of their seminal paper which established the foundations for the field of computational complexity theory.",
 	"PhotoUrl": "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcSJ89x984yN1C1fXbHAiE9U7_UAYQ2x9QrLYCnw-7n7ngYl6g9kvwQ",
@@ -338,9 +338,9 @@
 	"Type": "turing_award_winners",
 	"Year": 1994,
 	"DisplayName": "Edward A Feigenbaum",
-  "Affiliations": ["Stanford University"],
+  	"Affiliations": ["Stanford University"],
 	"EntityIds": {
-		"AuthorIds": [5052827274]
+		"AuthorIds": [5112798728]
 	},
 	"Citation": "For pioneering the design and construction of large scale artificial intelligence systems, demonstrating the practical importance and potential commercial impact of artificial intelligence technology.",
 	"PhotoUrl": "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcRyLS6lXUZxr-bo0xivPCl1144v-cvwvLHYb1HEuEcc2yc9NyHLrQvSn8nKo1QmcDrKa1M",
@@ -360,7 +360,7 @@
 	"Year": 1995,
 	"DisplayName": "Manuel Blum",
 	"EntityIds": {
-		"AuthorIds": [5009742083]
+		"AuthorIds": [5102766796]
 	},
 	"Citation": "In recognition of his contributions to the foundations of computational complexity theory and its application to cryptography and program checking.",
 	"PhotoUrl": "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcShx-M_cFPNRSUAo9FkeKAWtaAOfXNXecOMl3Xtzze2RBJxCVYlrf8peyFWYuMsH20OcHE",
@@ -370,7 +370,7 @@
 	"Year": 1996,
 	"DisplayName": "Amir Pnueli",
 	"EntityIds": {
-		"AuthorIds": [5078214635]
+		"AuthorIds": [5109219790]
 	},
 	"Citation": "For seminal work introducing temporal logic into computing science and for outstanding contributions to program and system verification.",
 	"PhotoUrl": "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcRnErkXf20nO1qd0Gkkh1vYMnVjk9-Gvyeodbshft5uRMj9gTw7aFTu4MyyOYh9Q04cFS0",
@@ -390,7 +390,7 @@
 	"Year": 1998,
 	"DisplayName": "James Nicholas Gray",
 	"EntityIds": {
-		"AuthorIds": [5081219839]
+		"AuthorIds": [5106823925]
 	},
 	"Citation": "For seminal contributions to database and transaction processing research and technical leadership in system implementation.",
 	"PhotoUrl": "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcS_Lcg4e2ANSm9GxcVvyqUry4MEWwhmoM74k8SRskpvJlYK6ZxeZw9U7lqQoTHqrtoYNPo",
@@ -430,7 +430,7 @@
 	"Year": 2001,
 	"DisplayName": "Ole-Johan Dahl",
 	"EntityIds": {
-		"AuthorIds": [5002456034]
+		"AuthorIds": [5112302549]
 	},
 	"Citation": "With Kristen Nygaard, for ideas fundamental to the emergence of object oriented programming, through their design of the programming languages Simula I and Simula 67.",
 	"PhotoUrl": "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcSHbNs9KFgQhFEmT1n8oQvbnWSRjkHmkW0SIop8YU4z5V4hwM6_ud64izIT6ymcCwh7oR8",
@@ -470,7 +470,7 @@
 	"Year": 2003,
 	"DisplayName": "Alan Kay",
 	"EntityIds": {
-		"AuthorIds": [5031492059]
+		"AuthorIds": [5080963753]
 	},
 	"Citation": "For pioneering many of the ideas at the root of contemporary object-oriented programming languages, leading the team that developed Smalltalk, and for fundamental contributions to personal computing.",
 	"PhotoUrl": "https://amturing.acm.org/images/lg_aw/3972189.jpg",
@@ -490,7 +490,7 @@
 	"Year": 2004,
 	"DisplayName": "Robert Elliot Kahn",
 	"EntityIds": {
-		"AuthorIds": [5030564197]
+		"AuthorIds": [5113732030]
 	},
 	"Citation": "With Vinton Cerf, for pioneering work on internetworking, including the design and implementation of the Internets basic communications protocols, TCP/IP, and for inspired leadership in networking.",
 	"PhotoUrl": "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcRIRwWy0fh53sZJgnchuXyjq5b_IBP4128ShFLHPnNLEKF4IEu8XV1MwPJp1KwgXKAd5-k",
@@ -510,7 +510,7 @@
 	"Year": 2006,
 	"DisplayName": "Frances Elizabeth Allen",
 	"EntityIds": {
-		"AuthorIds": [5011307354]
+		"AuthorIds": [5109834348]
 	},
 	"Citation": "For pioneering contributions to the theory and practice of optimizing compiler techniques that laid the foundation for modern optimizing compilers and automatic parallel execution. press release",
 	"PhotoUrl": "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcS3oUZWm4GRNaZk6ufxNLZIWi-_i9H7N8lWRp2EMINRlAioOWHAVSM",
@@ -541,7 +541,7 @@
 	"DisplayName": "Edmund M Clarke",
   	"Affiliations": ["Carnegie Mellon University"],
 	"EntityIds": {
-		"AuthorIds": [5090974026]
+		"AuthorIds": [5110048758]
 	},
 	"Citation": "Together with E. Allen Emerson and Joseph Sifakis, for their role in developing Model-Checking into a highly effective verification technology that is widely adopted in the hardware and software industries.",
 	"PhotoUrl": "https://amturing.acm.org/images/lg_aw/1167964.jpg",
@@ -584,7 +584,7 @@
 	"DisplayName": "Judea Pearl",
   	"Affiliations": ["University of California, Los Angeles"],
 	"EntityIds": {
-		"AuthorIds": [5045809047]
+		"AuthorIds": [5108208924]
 	},
 	"CreatedDate": "2018-09-19T12:55:32.387122",
 	"Citation": "For fundamental contributions to artificial intelligence through the development of a calculus for probabilistic and causal reasoning.",
@@ -608,7 +608,7 @@
 	"DisplayName": "Shafi Goldwasser",
   	"Affiliations": ["Massachusetts Institute of Technology"],
 	"EntityIds": {
-		"AuthorIds": [5070011898]
+		"AuthorIds": [5110776230]
 	},
 	"Citation": "Along with Silvio Micali, for transformative work that laid the complexity-theoretic foundations for the science of cryptography, and in the process pioneered new methods for efficient verification of mathematical proofs in complexity theory.",
 	"PhotoUrl": "https://amturing.acm.org/images/lg_aw/8627889.jpg",
@@ -674,7 +674,7 @@
 	"Affiliations": ["University of California Berkeley"],
 	"DisplayName": "David Patterson",
 	"EntityIds": {
-		"AuthorIds": []
+		"AuthorIds": [5101927146]
 	},
 	"Citation": "For pioneering a systematic, quantitative approach to the design and evaluation of computer architectures with enduring impact on the microprocessor industry.",
 	"PhotoUrl": "https://amturing.acm.org/images/lg_aw/2316693.jpg",
@@ -707,7 +707,7 @@
 	"DisplayName": "Geoffrey E Hinton",
   "Affiliations": ["Google"],
 	"EntityIds": {
-		"AuthorIds": [5024209719]
+		"AuthorIds": [5108093963]
 	},
 	"Citation": "For conceptual and engineering breakthroughs that have made deep neural networks a critical component of computing.",
 	"PhotoUrl": "https://amturing.acm.org/images/lg_aw/4791679.jpg",
@@ -740,7 +740,7 @@
 	"DisplayName": "Patrick M Hanrahan",
   "Affiliations": ["Stanford University"],
 	"EntityIds": {
-		"AuthorIds": [5059712309]
+		"AuthorIds": [5111907242]
 	},
 	"Citation": "For fundamental contributions to 3D computer graphics, and the impact of computer-generated imagery (CGI) in filmmaking and other applications.",
 	"PhotoUrl": "https://amturing.acm.org/images/lg_aw/4652251.jpg",

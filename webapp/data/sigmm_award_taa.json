@@ -4,7 +4,7 @@
 	"Affiliations": ["Technische Iniversitat Darmstadt"],
 	"DisplayName": "Ralf Steinmetz",
 	"EntityIds": {
-		"AuthorIds": [2238793978]
+		"AuthorIds": [5004933128]
 	},
 	"Citation": "For pioneering work in multimedia communications and the fundamentals of multimedia synchronization"
 }, {
@@ -13,7 +13,7 @@
 	"Affiliations": ["University of California Berkeley"],
 	"DisplayName": "Lawrence A. Rowe",
 	"EntityIds": {
-		"AuthorIds": [2242628833]
+		"AuthorIds": [5113735960]
 	},
 	"Citation": "For pioneering research in continuous media software systems and visionary leadership of the multimedia research community"
 }, {
@@ -22,7 +22,7 @@
 	"Affiliations": ["University of California Irvine"],
 	"DisplayName": "Ramesh Jain",
 	"EntityIds": {
-		"AuthorIds": [2133201272]
+		"AuthorIds": [5010478919]
 	},
 	"Citation": "For pioneering research and inspiring leadership that transformed multimedia information processing to enhance the quality of life and visionary leadership of the multimedia community"
 }, {
@@ -31,7 +31,7 @@
 	"Affiliations": ["Columbia University"],
 	"DisplayName": "Shih-Fu Chang",
 	"EntityIds": {
-		"AuthorIds": [2149341496]
+		"AuthorIds": [5037340457]
 	},
 	"Citation": "For pioneering research and inspiring contributions in multimedia analysis and retrieval"
 }, {
@@ -40,7 +40,7 @@
 	"Affiliations": ["Microsoft"],
 	"DisplayName": "Hong-Jiang Zhang",
 	"EntityIds": {
-		"AuthorIds": [2107003637]
+		"AuthorIds": [5108376821]
 	},
 	"Citation": "For pioneering contributions to and leadership in media computing including content-based media analysis and retrieval, and their applications"
 }, {
@@ -49,7 +49,7 @@
 	"Affiliations": ["Centrum Wiskunde & Informatica"],
 	"DisplayName": "Dick Bulterman",
 	"EntityIds": {
-		"AuthorIds": [320529561]
+		"AuthorIds": [5111469748]
 	},
 	"Citation": "For outstanding technical contributions in multimedia authoring through research, standardization, and entrepreneurship"
 }, {
@@ -58,7 +58,7 @@
 	"Affiliations": ["University of Illinois at Urbana-Champaign"],
 	"DisplayName": "Klara Nahrstedt",
 	"EntityIds": {
-		"AuthorIds": [159144305]
+		"AuthorIds": [5074224097]
 	},
 	"Citation": "For pioneering contributions in Quality of Service for MM systems and networking and for visionary leadership of the MM community"
 }, {
@@ -67,7 +67,7 @@
 	"Affiliations": ["National University of Singapore"],
 	"DisplayName": "Tat-Seng Chua",
 	"EntityIds": {
-		"AuthorIds": [2160663097]
+		"AuthorIds": [5089404640]
 	},
 	"Citation": "For pioneering contributions to multimedia, text and social media processing"
 }, {
@@ -76,7 +76,7 @@
 	"Affiliations": ["University of Florence"],
 	"DisplayName": "Alberto del Bimbo",
 	"EntityIds": {
-		"AuthorIds": [691928724]
+		"AuthorIds": [5081506611]
 	},
 	"Citation": "For outstanding, pioneering and continued research contributions in the areas of multimedia processing, multimedia content analysis, and multimedia applications, his leadership in multimedia education, and his outstanding and continued service to the community"
 }, {
@@ -85,7 +85,7 @@
 	"Affiliations": ["University of Amsterdam"],
 	"DisplayName": "Arnold Smeulders",
 	"EntityIds": {
-		"AuthorIds": [92229816]
+		"AuthorIds": [5052299650]
 	},
 	"Citation": "For outstanding and pioneering contributions to defining and bridging the semantic gap in content-based image retrieval"
 }, {
@@ -93,7 +93,7 @@
 	"Year": 2018,
 	"DisplayName": "Yong Rui",
 	"EntityIds": {
-		"AuthorIds": [2130014478]
+		"AuthorIds": [5100728762]
 	},
 	"Citation": "For pioneering contributions to multimedia analysis, retrieval and understanding"
 }]

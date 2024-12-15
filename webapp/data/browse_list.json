@@ -22,14 +22,14 @@
 				"display": "SIG Multimedia",
 				"type": "outer",
 				"subgroups": [{
-						"display": "Multimedia Conferences",
-						"type": "inner",
-						"tag": "sigmm_conferences"
-					},
-					{
 						"display": "Multimedia Journals",
 						"type": "inner",
 						"tag": "sigmm_journals"
+					},
+					{
+						"display": "Multimedia Conferences",
+						"type": "inner",
+						"tag": "sigmm_conferences"
 					},
 					{
 						"display": "Technical Achievement Award",

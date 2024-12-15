@@ -15,13 +15,6 @@
 }, {
 	"Type": "sigmm_conferences",
 	"Icon_type": "conferences",
-	"DisplayName": "ACM Multimedia Systems Conference",
-	"EntityIds": {
-		"JournalIds": [4306417574]
-	}
-}, {
-	"Type": "sigmm_conferences",
-	"Icon_type": "conferences",
 	"DisplayName": "ACM Workshop on Multimedia and Security",
 	"EntityIds": {
 		"JournalIds": [4306417590]

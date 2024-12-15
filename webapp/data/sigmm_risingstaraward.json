@@ -4,7 +4,7 @@
 	"Affiliations": ["Hefei University of Technology"],
 	"DisplayName": "Meng Wang",
 	"EntityIds": {
-		"AuthorIds": [2300598665]
+		"AuthorIds": [5100377147]
 	},
 	"Citation": "For pioneering work on multimedia tagging and intelligent processing"
 }, {
@@ -13,7 +13,7 @@
 	"Affiliations": ["Fudan University"],
 	"DisplayName": "Yu-Gang Jiang",
 	"EntityIds": {
-		"AuthorIds": [2143115300]
+		"AuthorIds": [5047962986]
 	},
 	"Citation": "For significant contributions in the areas of video content recognition and search"
 }, {
@@ -22,7 +22,7 @@
 	"Affiliations": ["Google"],
 	"DisplayName": "Bart Thomee",
 	"EntityIds": {
-		"AuthorIds": [114219197]
+		"AuthorIds": [5015683164]
 	},
 	"Citation": "For significant contributions in the areas of geo-multimedia computing, media evaluation, and open datasets for research"
 }, {
@@ -31,7 +31,7 @@
 	"Affiliations": ["IBM"],
 	"DisplayName": "Liangliang Cao",
 	"EntityIds": {
-		"AuthorIds": [2165330392]
+		"AuthorIds": [5103187717]
 	},
 	"Citation": "For significant contributions in large-scale multimedia recognition and social media mining"
 }, {
@@ -39,7 +39,7 @@
 	"Year": 2018,
 	"DisplayName": "Xavier Alameda-Pineda",
 	"EntityIds": {
-		"AuthorIds": [310258847]
+		"AuthorIds": [5066621495]
 	},
 	"Citation": "For contribution to multimodal social behavior understanding"
 }]

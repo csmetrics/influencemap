@@ -10,21 +10,21 @@
 	"Affiliations": ["Research School of Astronomy and Astrophysics"],
 	"DisplayName": "Brian Paul Schmidt",
 	"EntityIds": {
-		"AuthorIds": [5046241181, 5023063594]
+		"AuthorIds": [5023063594]
 	}
 }, {
 	"Type": "anu_researchers",
 	"Affiliations": ["Research School of Physics and Engineering"],
 	"DisplayName": "Chennupati Jagadish",
 	"EntityIds": {
-		"AuthorIds": [5033971536]
+		"AuthorIds": [5030770813]
 	}
 }, {
 	"Type": "anu_researchers",
 	"Affiliations": ["Centre for Mental Health Research"],
 	"DisplayName": "Helen Christensen",
 	"EntityIds": {
-		"AuthorIds": [5009347799, 5077917659]
+		"AuthorIds": [5009347799]
 	}
 }, {
 	"Type": "anu_researchers",
@@ -57,21 +57,21 @@
 	"Type": "anu_researchers",
 	"DisplayName": "Nick Birbilis",
 	"EntityIds": {
-		"AuthorIds": [5049001467]
+		"AuthorIds": [5065706557]
 	}
 }, {
 	"Type": "anu_researchers",
 	"Affiliations": ["Research School of Chemistry"],
 	"DisplayName": "Peter M. W. Gill",
 	"EntityIds": {
-		"AuthorIds": [5048687133, 5085554535]
+		"AuthorIds": [5048687133]
 	}
 }, {
 	"Type": "anu_researchers",
 	"Affiliations": ["Crawford School of Public Policy"],
 	"DisplayName": "Robert Costanza",
 	"EntityIds": {
-		"AuthorIds": [2346401459]
+		"AuthorIds": [5091724650]
 	}
 }, {
 	"Type": "anu_researchers",

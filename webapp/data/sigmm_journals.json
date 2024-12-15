@@ -5,7 +5,8 @@
 	"EntityIds": {
 		"JournalIds": [19610489]
 	}
-}, {
+}, 
+{
 	"Type": "sigmm_journals",
 	"Icon_type": "journals",
 	"DisplayName": "International Journal of Multimedia Data Engineering and Management",
