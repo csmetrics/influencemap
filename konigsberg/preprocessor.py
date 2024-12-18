@@ -35,10 +35,10 @@ def load_merged_ids(data_path, data_type, split_char):
 
     id_list = []
     for file_name in os.listdir(path):
-        if file_name.endswith('.csv'):
+        if file_name.endswith('.csv.gz'):
             file_path = os.path.join(path, file_name)
             try:
-                df = pd.read_csv(file_path)
+                df = pd.read_csv(file_path, compression='gzip')
                 id_list.extend(df['id'].str.lstrip(split_char).tolist())
             except Exception as e:
                 print(f"Error reading file {file_name}: {e}")
