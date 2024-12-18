@@ -1,6 +1,7 @@
 import os
 import csv
 import json
+import gzip
 import logging
 import pathlib
 
@@ -52,7 +53,7 @@ def generate_entity_files(data_path, data_type, split_char):
     merged_ids = load_merged_ids(data_path, data_type, split_char)
 
     path = data_path / data_type
-    part_files = path.glob('updated_date=*/part_*')
+    part_files = path.glob('updated_date=*/part_*.gz')
     outfile = data_path / (data_type + OUT_SUFF)
 
     logger.info('...generating {} {}'.format(data_type, split_char))
@@ -63,7 +64,7 @@ def generate_entity_files(data_path, data_type, split_char):
         for file in part_files:
             try:
                 # Read and process each file
-                with open(file, 'r', encoding='utf-8') as f:
+                with gzip.open(file, 'rt', encoding='utf-8') as f:
                     data = [
                         [
                             json_data['id'].split(split_char)[1] if 'id' in json_data and json_data['id'].split(split_char)[1] not in merged_ids else None,
@@ -91,14 +92,14 @@ def generate_works_file(data_path):
 
     logger.info('...generating {} {}'.format(data_type, split_char))
     names=['paper_id', 'rank', 'year', 'journal_id']
-    part_files = path.glob('updated_date=*/part_*')
+    part_files = path.glob('updated_date=*/part_*.gz')
 
     with open(outfile, 'w') as csvfile:
         csvwriter = csv.writer(csvfile, dialect=OpenAlexDialect())
         csvwriter.writerow(names)
 
         for file in part_files:
-            with open(file, 'r', encoding='utf-8') as f:
+            with gzip.open(file, 'rt', encoding='utf-8') as f:
                 data = [
                     [
                         json_data['id'][len(PREFIX_WORK):],
@@ -129,11 +130,11 @@ def generate_paper_references(data_path):
     logger.info('...generating PaperReferences')
     # names=['citor_id', 'citee_id']
 
-    part_files = path.glob('updated_date=*/part_*')
+    part_files = path.glob('updated_date=*/part_*.gz')
     for file in part_files:
         batch_data = []  # Accumulate rows to minimize I/O operations
         
-        with open(file, 'r', encoding='utf-8') as f:
+        with gzip.open(file, 'rt', encoding='utf-8') as f:
             for line in f:
                 try:
                     json_data = json.loads(line)
@@ -169,11 +170,11 @@ def generate_paper_authorships(data_path):
 
     logger.info('...generating PaperAuthorAffiliations')
     # names=['paper_id', 'author_id', 'affiliation_id']
-    part_files = path.glob('updated_date=*/part_*')
+    part_files = path.glob('updated_date=*/part_*.gz')
     for file in part_files:
         batch_data = []
 
-        with open(file, 'r', encoding='utf-8') as f:
+        with gzip.open(file, 'rt', encoding='utf-8') as f:
             for line in f:
                 try:
                     json_data = json.loads(line)
@@ -225,11 +226,11 @@ def generate_paper_fos(data_path):
 
     logger.info('...generating PaperFieldsOfStudy')
     # names=['paper_id', 'fos_id']
-    part_files = path.glob('updated_date=*/part_*')
+    part_files = path.glob('updated_date=*/part_*.gz')
     for file in part_files:
         batch_data = []
 
-        with open(file, 'r', encoding='utf-8') as f:
+        with gzip.open(file, 'rt', encoding='utf-8') as f:
             for line in f:
                 try:
                     json_data = json.loads(line)
