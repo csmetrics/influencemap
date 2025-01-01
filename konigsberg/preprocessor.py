@@ -147,7 +147,9 @@ def generate_paper_references(data_path):
                     referenced = [rw[len(PREFIX_AUTHOR):] for rw in json_data['referenced_works']]
                     
                     # Prepare rows for DataFrame
-                    batch_data.extend({'citor_id': citor_id, 'citee_id': citee_id} for citee_id in referenced)
+                    batch_data.extend(
+                        {'citor_id': citor_id, 'citee_id': citee_id}
+                        for citee_id in referenced if citee_id not in merged_ids)
                 except json.JSONDecodeError:
                     print(f"Error parsing JSON in file {file}: {line.strip()}")
                 except Exception as e:
