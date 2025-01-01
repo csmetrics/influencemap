@@ -22,13 +22,6 @@ https://docs.openalex.org/download-all-data/download-to-your-machine
     openalex-snapshot/data$ ls
     authors  concepts  funders  institutions  merged_ids  publishers  sources  works
     ```
-- Decompress the downloaded files.
-    ```
-    # ex. all files below author directory
-    openalex-snapshot/data/authors$ gunzip */*.gz
-    ```
-    *Future Improvement*: The `.gz` files could be read directly from memory without decompression, but this has not been implemented yet.
-
 
 ### Generate CSV files from OpenAlex snapshot
 
@@ -60,28 +53,28 @@ https://docs.openalex.org/download-all-data/download-to-your-machine
     (7/7) done
     ```
 
-The resulting binary graph consists of 15 files, as listed below, with a total size of approximately 60GB.
+The resulting binary graph consists of 15 files, as listed below, with a total size of approximately 88GB.
 
     ```
     ~/influencemap/konigsberg/bingraph-openalex$ ll -lh
-    total 60G
-    drwxrwxr-x 2 minjeong minjeong 4.0K Dec  2 02:07 ./
-    drwxrwxr-x 4 minjeong minjeong 4.0K Dec  2 08:13 ../
-    -rw-rw-r-- 1 minjeong minjeong 2.0M Dec  2 01:23 affltn-id2ind.bin
-    -rw-rw-r-- 1 minjeong minjeong 2.0G Dec  2 01:23 author-id2ind.bin
-    -rw-rw-r-- 1 minjeong minjeong 775M Dec  2 01:23 entities-ind2id.bin
-    -rw-rw-r-- 1 minjeong minjeong  15G Dec  2 02:04 entity2paper-ind.bin
-    -rw-rw-r-- 1 minjeong minjeong 775M Dec  2 02:01 entity2paper-ptr.bin
-    -rw-rw-r-- 1 minjeong minjeong   71 Dec  2 01:23 entity-counts.json
-    -rw-rw-r-- 1 minjeong minjeong 1.0M Dec  2 01:23 fos-id2ind.bin
-    -rw-rw-r-- 1 minjeong minjeong 4.0M Dec  2 01:23 journl-id2ind.bin
-    -rw-rw-r-- 1 minjeong minjeong  23G Dec  2 02:13 paper2citor-citee-ind.bin
-    -rw-rw-r-- 1 minjeong minjeong 3.3G Dec  2 02:12 paper2citor-citee-ptr.bin
-    -rw-rw-r-- 1 minjeong minjeong  15G Dec  2 02:07 paper2entity-ind.bin
-    -rw-rw-r-- 1 minjeong minjeong 1.7G Dec  2 02:05 paper2entity-ptr.bin
-    -rw-rw-r-- 1 minjeong minjeong 4.0G Dec  2 01:29 paper-id2ind.bin
-    -rw-rw-r-- 1 minjeong minjeong 1.7G Dec  2 01:29 paper-ind2id.bin
-    -rw-rw-r-- 1 minjeong minjeong  25K Dec  2 01:29 paper-years.json
+    total 88G
+    drwxrwxr-x 2 dongwoo dongwoo 4.0K Dec  2 02:07 ./
+    drwxrwxr-x 4 dongwoo dongwoo 4.0K Dec 25 12:52 ../
+    -rw-rw-r-- 1 dongwoo dongwoo 2.0M Jan  1 13:57 affltn-id2ind.bin
+    -rw-rw-r-- 1 dongwoo dongwoo 2.0G Jan  1 13:57 author-id2ind.bin
+    -rw-rw-r-- 1 dongwoo dongwoo 777M Jan  1 13:57 entities-ind2id.bin
+    -rw-rw-r-- 1 dongwoo dongwoo  20G Jan  1 15:03 entity2paper-ind.bin
+    -rw-rw-r-- 1 dongwoo dongwoo 777M Jan  1 14:59 entity2paper-ptr.bin
+    -rw-rw-r-- 1 dongwoo dongwoo   71 Jan  1 13:57 entity-counts.json
+    -rw-rw-r-- 1 dongwoo dongwoo 1.0M Jan  1 13:57 fos-id2ind.bin
+    -rw-rw-r-- 1 dongwoo dongwoo 4.0M Jan  1 13:57 journl-id2ind.bin
+    -rw-rw-r-- 1 dongwoo dongwoo  39G Jan  1 15:12 paper2citor-citee-ind.bin
+    -rw-rw-r-- 1 dongwoo dongwoo 3.9G Jan  1 15:12 paper2citor-citee-ptr.bin
+    -rw-rw-r-- 1 dongwoo dongwoo  20G Jan  1 15:06 paper2entity-ind.bin
+    -rw-rw-r-- 1 dongwoo dongwoo 2.0G Jan  1 15:04 paper2entity-ptr.bin
+    -rw-rw-r-- 1 dongwoo dongwoo 4.0G Jan  1 14:03 paper-id2ind.bin
+    -rw-rw-r-- 1 dongwoo dongwoo 2.0G Jan  1 14:03 paper-ind2id.bin
+    -rw-rw-r-- 1 dongwoo dongwoo  25K Jan  1 14:03 paper-years.json
     ```
 
 
