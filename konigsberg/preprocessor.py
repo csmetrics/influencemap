@@ -198,9 +198,9 @@ def generate_paper_authorships(data_path):
                     # Handle institutions with multiple entries
                     institutions = [
                         [
-                            inst['institution_ids'][len(PREFIX_INST):]  # Extract institution ID
-                            for inst in a.get('affiliations', [])  # Iterate over affiliations
-                            if 'institution_ids' in inst
+                            inst_id[len(PREFIX_INST):]  # Extract institution ID
+                            for aff in a.get('affiliations', [])  # Iterate over affiliations
+                            for inst_id in aff.get('institution_ids', [])  # Extract institution IDs
                         ]
                         for a in json_data.get('authorships', [])
                     ]
@@ -208,7 +208,7 @@ def generate_paper_authorships(data_path):
                     # Add rows to batch, creating a row for each author-institution pair
                     for author, inst_list in zip(authors, institutions):
                         if not inst_list:  # If no institutions, add a row with None
-                            batch_data.append({'paper_id': paper_id, 'author_id': author, 'affiliation_id': ''})
+                            batch_data.append({'paper_id': paper_id, 'author_id': author, 'affiliation_id': None})
                         else:  # Add rows for each institution
                             batch_data.extend([
                                 {'paper_id': paper_id, 'author_id': author, 'affiliation_id': inst}
