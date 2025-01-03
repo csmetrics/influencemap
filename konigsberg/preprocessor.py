@@ -180,10 +180,6 @@ def generate_paper_authorships(data_path):
             for line in f:
                 try:
                     # Initialize variables for each loop iteration
-                    paper_id = None
-                    authors = []
-                    institutions = []
-
                     json_data = json.loads(line)
 
                     # Extract paper ID
@@ -191,40 +187,30 @@ def generate_paper_authorships(data_path):
                     if paper_id in merged_ids:
                         continue
 
-                    # Extract authors and institutions
-                    authors = [
-                        a['author']['id'][len(PREFIX_AUTHOR):]
-                        for a in json_data.get('authorships', [])
-                        if 'author' in a and 'id' in a['author']
-                    ]
-                    if not authors:
-                        continue
+                    # Process authors and institutions together from authorships
+                    for a in json_data.get('authorships', []):
+                        if 'author' in a and 'id' in a['author']:
+                            author_id = a['author']['id'][len(PREFIX_AUTHOR):]
+                            institution_ids = [
+                                inst['id'][len(PREFIX_INST):]  # Extract institution ID
+                                for inst in a.get('institutions', [])  # Iterate over institutions
+                                if 'id' in inst
+                            ]
 
-                    # Handle institutions with multiple entries
-                    institutions = [
-                        [
-                            inst['id'][len(PREFIX_INST):]  # Extract institution ID
-                            for inst in a.get('institutions', [])  # Iterate over institutions
-                            if 'id' in inst
-                        ]
-                        for a in json_data.get('authorships', [])
-                    ]
+                            # Add rows to batch for each institution
+                            if not institution_ids:  # If no institutions, add a row with None
+                                batch_data.append({'paper_id': paper_id, 'author_id': author_id, 'affiliation_id': ''})
+                            else:  # Add rows for each institution
+                                batch_data.extend([
+                                    {'paper_id': paper_id, 'author_id': author_id, 'affiliation_id': inst}
+                                    for inst in institution_ids
+                                ])
 
-                    # Add rows to batch, creating a row for each author-institution pair
-                    for author, inst_list in zip(authors, institutions):
-                        if not inst_list:  # If no institutions, add a row with None
-                            batch_data.append({'paper_id': paper_id, 'author_id': author, 'affiliation_id': None})
-                        else:  # Add rows for each institution
-                            batch_data.extend([
-                                {'paper_id': paper_id, 'author_id': author, 'affiliation_id': inst}
-                                for inst in inst_list
-                            ])
                 except json.JSONDecodeError:
                     print(f"Error parsing JSON in file {file}: {line.strip()}")
                 except Exception as e:
                     # Use safe fallback for variables in case of an error
-                    print(f"Unexpected error in file {file}: {e}")
-                    print(f"Details: paper_id={paper_id}, authors={authors}, institutions={institutions}")
+                    print(f"Unexpected error in file {file}: {e} in paper {paper_id}")
 
 
         # Write batch to CSV
