@@ -203,9 +203,9 @@ def generate_paper_authorships(data_path):
                     # Handle institutions with multiple entries
                     institutions = [
                         [
-                            inst_id[len(PREFIX_INST):]  # Extract institution ID
-                            for aff in a.get('affiliations', [])  # Iterate over affiliations
-                            for inst_id in aff.get('institution_ids', [])  # Extract institution IDs
+                            inst['id'][len(PREFIX_INST):]  # Extract institution ID
+                            for inst in a.get('institutions', [])  # Iterate over institutions
+                            if 'id' in inst
                         ]
                         for a in json_data.get('authorships', [])
                     ]
