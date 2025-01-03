@@ -179,6 +179,11 @@ def generate_paper_authorships(data_path):
         with gzip.open(file, 'rt', encoding='utf-8') as f:
             for line in f:
                 try:
+                    # Initialize variables for each loop iteration
+                    paper_id = None
+                    authors = []
+                    institutions = []
+
                     json_data = json.loads(line)
 
                     # Extract paper ID
@@ -217,7 +222,10 @@ def generate_paper_authorships(data_path):
                 except json.JSONDecodeError:
                     print(f"Error parsing JSON in file {file}: {line.strip()}")
                 except Exception as e:
-                    print(f"Unexpected error in file {file}: {e} in paper {paper_id}, {authors}, {institutions}")
+                    # Use safe fallback for variables in case of an error
+                    print(f"Unexpected error in file {file}: {e}")
+                    print(f"Details: paper_id={paper_id}, authors={authors}, institutions={institutions}")
+
 
         # Write batch to CSV
         if batch_data:
