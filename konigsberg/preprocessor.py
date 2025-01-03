@@ -195,21 +195,29 @@ def generate_paper_authorships(data_path):
                     if not authors:
                         continue
 
+                    # Handle institutions with multiple entries
                     institutions = [
-                        (a.get('institutions', [{}])[0].get('id', '')[len(PREFIX_INST):]
-                         if a.get('institutions') else None)
+                        [
+                            inst['institution_ids'][len(PREFIX_INST):]  # Extract institution ID
+                            for inst in a.get('affiliations', [])  # Iterate over affiliations
+                            if 'institution_ids' in inst
+                        ]
                         for a in json_data.get('authorships', [])
                     ]
 
-                    # Add rows to batch
-                    batch_data.extend([
-                        {'paper_id': paper_id, 'author_id': author, 'affiliation_id': inst}
-                        for author, inst in zip(authors, institutions)
-                    ])
+                    # Add rows to batch, creating a row for each author-institution pair
+                    for author, inst_list in zip(authors, institutions):
+                        if not inst_list:  # If no institutions, add a row with None
+                            batch_data.append({'paper_id': paper_id, 'author_id': author, 'affiliation_id': ''})
+                        else:  # Add rows for each institution
+                            batch_data.extend([
+                                {'paper_id': paper_id, 'author_id': author, 'affiliation_id': inst}
+                                for inst in inst_list
+                            ])
                 except json.JSONDecodeError:
                     print(f"Error parsing JSON in file {file}: {line.strip()}")
                 except Exception as e:
-                    print(f"Unexpected error in file {file}: {e} in paper {paper_id}")
+                    print(f"Unexpected error in file {file}: {e} in paper {paper_id}, {authors}, {institutions}")
 
         # Write batch to CSV
         if batch_data:
