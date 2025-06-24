@@ -91,6 +91,6 @@ We use the [OpenAlex](https://openalex.org/) dataset for our visualization. Open
 - Journals
 - Author Affiliations
 
-The current InfluenceMap is based on the OpenAlex 2023-08-18 release. Entity names are directly retrieved from the OpenAlex API.
+The current InfluenceMap is based on the OpenAlex 2025-05-30 release. Entity names are directly retrieved from the OpenAlex API.
 
 Previously, we used the [Microsoft Academic Graph (MAG)](https://www.microsoft.com/en-us/research/project/microsoft-academic-graph/) dataset from the 2021-12-06 snapshot. As MAG has been deprecated by Microsoft, we have transitioned to OpenAlex to support more recent publications and ensure the continued growth and relevance of the InfluenceMap project.
