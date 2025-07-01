@@ -61,7 +61,7 @@ def query_res(entity_type, entity_title):
     )
 
     doc_id = url_encode_info(paper_ids=paper_ids, name=entity_title)
-    url_base = f"https://influencemap.cmlab.dev/submit/?id={doc_id}"
+    url_base = f"https://influenceflower.cmlab.dev/submit/?id={doc_id}"
     res = {
         "searched_title": entity_title,
         "status": status_msg,
@@ -101,7 +101,7 @@ def query():
         selection=dict(pub_years=None, cit_years=None, coauthors=True, self_citations=False))
 
     doc_id = url_encode_info(paper_ids=res["paper_ids"], name=entity_title)
-    url_base = f"https://influencemap.cmlab.dev/submit/?id={doc_id}"
+    url_base = f"https://influenceflower.cmlab.dev/submit/?id={doc_id}"
     rdata["status"] = res["status"]
     rdata["url_base"] = url_base
     rdata["summary"] = res["summary"]
@@ -291,7 +291,7 @@ def submit():
         field_of_study_ids=fos_ids,
         journal_ids=journal_ids, paper_ids=paper_ids)
 
-    url_base = f"https://influencemap.cmlab.dev/submit/?id={doc_id}"
+    url_base = f"https://influenceflower.cmlab.dev/submit/?id={doc_id}"
 
     session = dict(
         author_ids=author_ids, affiliation_ids=affiliation_ids,
@@ -557,7 +557,7 @@ def get_node_flower():
         doc_id = url_encode_info(field_of_study_ids=id_list, name=flower_name)
 
     data = dict()
-    data["flower_url"] = f"https://influencemap.cmlab.dev/submit/?id={doc_id}"
+    data["flower_url"] = f"https://influenceflower.cmlab.dev/submit/?id={doc_id}"
     data["flower_name"] = flower_name
     return flask.jsonify(data)
 
