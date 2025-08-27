@@ -527,22 +527,27 @@ def _indices_to_ids(res, ind2id):
 def _ids_to_ind(mapping, arr):
     """Replace all IDs in arr with indices in-place."""
     id2ind, ind2id, mask = mapping
+    size = nb.u8(id2ind.shape[0])
+    use_mask = (size & (size - 1)) == 0  # 2의 거듭제곱 여부
+
     i = 0
     for id_ in arr:
-        # Size is a power of 2, so (& mask) == (% len(id2ind)).
-        hash_ = nb.u8(id_ * nb.u8(HASH_PRIME)) & mask
+        base = nb.u8(id_ * nb.u8(HASH_PRIME))
+        idx = (base & nb.u8(size - 1)) if use_mask else (base % size)
+
+        probes = 0
         while True:
-            index = id2ind[hash_]
+            index = id2ind[idx]
             if index == nb.u8(-1):
                 break
-            # id2ind[hash_] might be the correct index, but this is not
-            # guaranteed due to collisions. Look it up in ind2id to make
-            # sure.
             if ind2id[index] == id_:
                 arr[i] = index
                 i += 1
                 break
-            hash_ = nb.u8(hash_ + 1) & mask
+            idx = ((idx + 1) & nb.u8(size - 1)) if use_mask else ((idx + 1) % size)
+            probes += 1
+            if probes > size:
+                break  # 비정상 순환 방지
     return i
 
 
@@ -554,8 +559,17 @@ def _traverse_one(mapping, i):
     paper index, and this function returns an array of author indices.
     """
     ptr, ind = mapping
+    n_ptr = ptr.shape[0]
+    if i < 0 or i + 1 >= n_ptr:
+        return ind[0:0]  # safely return to empty array
     start = ptr[i]
     end = ptr[i + 1]
+    if end < start:
+        return ind[0:0]
+    if start < 0:
+        start = 0
+    if end > ind.shape[0]:
+        end = ind.shape[0]
     return ind[start:end]
 
 
@@ -569,9 +583,23 @@ def _traverse_citations(mapping, i):
     Returns a 2-tuple of arrays (citor indices, citee indices).
     """
     ptr, ind = mapping
-    start_citors = ptr[2 * i]
-    start_citees = ptr[2 * i + 1]
-    end = ptr[2 * i + 2]
+    idx = 2 * i
+    n_ptr = ptr.shape[0]
+    if i < 0 or idx + 2 >= n_ptr:
+        return ind[0:0], ind[0:0]
+    start_citors = ptr[idx]
+    start_citees = ptr[idx + 1]
+    end = ptr[idx + 2]
+
+    if start_citors < 0:
+        start_citors = 0
+    if start_citees < start_citors:
+        return ind[0:0], ind[0:0]
+    if end < start_citees:
+        return ind[0:0], ind[0:0]
+    if end > ind.shape[0]:
+        end = ind.shape[0]
+
     return ind[start_citors:start_citees], ind[start_citees:end]
 
 
