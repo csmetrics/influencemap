@@ -624,10 +624,14 @@ def _is_author_or_aff(aff_range, i):
 
 @nb.njit(nb.uint64(nb.uint64, nb.uint64[::1]), nogil=True)
 def _get_year(paper_id, paper_year_map):
-    for i, start in enumerate(paper_year_map):
+    n = paper_year_map.shape[0]
+    prev = nb.u8(0)
+    for i in range(n):
+        start = paper_year_map[i]
         if paper_id < start:
-            return i - 1
-    raise RuntimeError()
+            return nb.u8(i - 1) if i > 0 else nb.u8(0)
+        prev = nb.u8(i)
+    return prev
 
 
 dict_val = nb.types.Tuple([nb.u8, nb.f4])
@@ -676,9 +680,10 @@ def _make_flower(
             if _is_in_range(cit_ids, citor_id):
                 # Numba can't inline dictionary accesses, so this is two
                 # function calls lol.
-                count, score = citor_papers.get(citor_id,
-                                                (nb.u8(0), nb.f4(0.)))
-                citor_papers[citor_id] = count + 1, score + recip_weight
+                count, score = citor_papers.get(citor_id, (nb.u8(0), nb.f4(0.)))
+                count = nb.u8(count) + nb.u8(1)
+                score = nb.f4(score) + nb.f4(recip_weight)
+                citor_papers[citor_id] = (count, score)
         for citee_id in citees:
             # TODO: Same optimization opportunity.
             if _is_in_range(pub_ids, citee_id):
