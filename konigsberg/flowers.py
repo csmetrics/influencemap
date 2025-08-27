@@ -526,28 +526,40 @@ def _indices_to_ids(res, ind2id):
 @nb.njit(nb.u8(id_mapping_arrs, nb.u8[::1]), nogil=True)
 def _ids_to_ind(mapping, arr):
     """Replace all IDs in arr with indices in-place."""
-    id2ind, ind2id, mask = mapping
-    size = nb.u8(id2ind.shape[0])
-    use_mask = (size & (size - 1)) == 0  # 2의 거듭제곱 여부
+    id2ind, ind2id, _mask = mapping
+
+    size_i = id2ind.shape[0]                 # intp
+    size_u = nb.u8(size_i)                   # uint64 for bit ops
+    use_mask = (size_i & (size_i - 1)) == 0  # 2^k 여부
 
     i = 0
     for id_ in arr:
         base = nb.u8(id_ * nb.u8(HASH_PRIME))
-        idx = (base & nb.u8(size - 1)) if use_mask else (base % size)
+
+        # 초기 인덱스 계산 (uint64로 유지)
+        idx_u = (base & nb.u8(size_u - 1)) if use_mask else (base % size_u)
 
         probes = 0
         while True:
-            index = id2ind[idx]
+            j = int(idx_u)                  # ★ 배열 인덱싱 직전 signed int로 캐스팅
+            index = id2ind[j]               # OK: j는 intp
+
             if index == nb.u8(-1):
                 break
+
             if ind2id[index] == id_:
                 arr[i] = index
                 i += 1
                 break
-            idx = ((idx + 1) & nb.u8(size - 1)) if use_mask else ((idx + 1) % size)
+
+            # 선형 탐색 진행 (여기는 다시 uint64)
+            idx_u = nb.u8(idx_u + 1)
+            idx_u = (idx_u & nb.u8(size_u - 1)) if use_mask else (idx_u % size_u)
+
             probes += 1
-            if probes > size:
-                break  # 비정상 순환 방지
+            if probes > size_i:
+                # 비정상 순환 방지: 실패로 간주
+                break
     return i
 
 
