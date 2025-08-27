@@ -700,6 +700,11 @@ def _make_flower(
     # Track influence on citee papers. Only need unweighted citation
     # counts: weights are computed later.
     citee_papers = nb.typed.Dict.empty(key_type=nb.u8, value_type=nb.u8)
+
+    # paper2entity 포인터 길이를 미리 구해 둠
+    p2e_ptr, _p2e_ind = paper2entity_map
+    p2e_ptr_len = p2e_ptr.shape[0]
+
     for paper_id in ego_papers:
         paper_entities = _traverse_one(paper2entity_map, paper_id)
         coauthor_ids.update(paper_entities)
@@ -716,18 +721,23 @@ def _make_flower(
         recip_weight = nb.f4(1) / nb.f4(max(num_authors, 1))
         citors, citees = _traverse_citations(citation_maps, paper_id)
         for citor_id in citors:
-            # TODO: Again, this filtering can be more clever.
+            # SENTINEL 필터와 범위 가드
+            if citor_id == SENTINEL:
+                continue
+            if int(citor_id) + 1 >= p2e_ptr_len:
+                continue
             if _is_in_range(cit_ids, citor_id):
-                # Numba can't inline dictionary accesses, so this is two
-                # function calls lol.
                 count, score = citor_papers.get(citor_id, (nb.u8(0), nb.f4(0.)))
                 count = nb.u8(count) + nb.u8(1)
                 score = nb.f4(score) + nb.f4(recip_weight)
                 citor_papers[citor_id] = (count, score)
+
         for citee_id in citees:
-            # TODO: Same optimization opportunity.
+            if citee_id == SENTINEL:
+                continue
+            if int(citee_id) + 1 >= p2e_ptr_len:
+                continue
             if _is_in_range(pub_ids, citee_id):
-                # Another two calls.
                 citee_papers[citee_id] = nb.u8(
                     citee_papers.get(citee_id, nb.u8(0)) + nb.u8(1))
 
@@ -832,6 +842,10 @@ def _make_node_info(
     # key_type = citor/citee_paper_id, value = paper_id
     citor_papers = nb.typed.List.empty_list(cite_map)
     citee_papers = nb.typed.List.empty_list(cite_map)
+
+    p2e_ptr, _p2e_ind = paper2entity_map
+    p2e_ptr_len = p2e_ptr.shape[0]
+
     for paper_id in ego_papers:
         paper_entities = _traverse_one(paper2entity_map, paper_id)
         coauthor_ids.update(paper_entities)
@@ -841,6 +855,8 @@ def _make_node_info(
 
         citors, citees = _traverse_citations(citation_maps, paper_id)
         for citor_id in citors:
+            if citor_id == SENTINEL or int(citor_id) + 1 >= p2e_ptr_len:
+                continue
             entity_ids = _traverse_one(paper2entity_map, citor_id)
             if not self_citations and _is_self_citation(ego_entities, entity_ids):
                 continue
@@ -850,6 +866,8 @@ def _make_node_info(
                 citor_papers.append((citor_id, paper_id))
 
         for citee_id in citees:
+            if citee_id == SENTINEL or int(citee_id) + 1 >= p2e_ptr_len:
+                continue
             entity_ids = _traverse_one(paper2entity_map, citee_id)
             if not self_citations and _is_self_citation(ego_entities, entity_ids):
                 continue
