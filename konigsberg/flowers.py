@@ -737,9 +737,8 @@ def _make_flower(
                 continue
             if int(citee_id) + 1 >= p2e_ptr_len:
                 continue
-            if _is_in_range(pub_ids, citee_id):
-                citee_papers[citee_id] = nb.u8(
-                    citee_papers.get(citee_id, nb.u8(0)) + nb.u8(1))
+            citee_papers[citee_id] = nb.u8(
+                citee_papers.get(citee_id, nb.u8(0)) + nb.u8(1))
 
     # Map entity index to score (influencees).
     citor_entities = nb.typed.Dict.empty(key_type=nb.u8, value_type=nb.f4)
@@ -873,8 +872,7 @@ def _make_node_info(
                 continue
             if node_id not in entity_ids:
                 continue
-            if _is_in_range(pub_ids, citee_id):
-                citee_papers.append((paper_id, citee_id))
+            citee_papers.append((paper_id, citee_id))
 
     # print("citor_papers", citor_papers)
     # print("citee_papers", citee_papers)
