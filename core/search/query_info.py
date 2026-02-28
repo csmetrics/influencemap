@@ -1,4 +1,44 @@
 import requests
+import os
+import pathlib
+
+# Try to load OPENALEX_KEY from a .env file (use python-dotenv if available,
+# otherwise search up from this file's directory).
+def _load_openalex_key():
+    try:
+        from dotenv import load_dotenv
+        load_dotenv()
+    except Exception:
+        p = pathlib.Path(__file__).resolve()
+        for _ in range(6):
+            env_file = p.parent / '.env'
+            if env_file.exists():
+                with env_file.open() as f:
+                    for line in f:
+                        line = line.strip()
+                        if not line or line.startswith('#'):
+                            continue
+                        if '=' in line:
+                            k, v = line.split('=', 1)
+                            k = k.strip()
+                            v = v.strip().strip('"').strip("'")
+                            os.environ.setdefault(k, v)
+                break
+            if p.parent == p:
+                break
+            p = p.parent
+
+_load_openalex_key()
+OPENALEX_KEY = os.environ.get('OPENALEX_KEY')
+
+def _params_with_key(params=None):
+    params = dict(params) if params else {}
+    if OPENALEX_KEY:
+        params['api_key'] = OPENALEX_KEY
+    return params
+
+def _get(url, params=None, **kwargs):
+    return requests.get(url, params=_params_with_key(params), **kwargs)
 
 OPENALEX_URL = "https://api.openalex.org"
 
@@ -25,7 +65,7 @@ def query_entity_by_keyword(entity_types, entity_title):
             }
             if etype == 'works':
                 params['filter'] = "title.search:{}".format(entity_title)
-            response = requests.get(OPENALEX_URL+"/"+etype, params=params)
+            response = _get(OPENALEX_URL+"/"+etype, params=params)
             # print(response.url)
             if response.status_code == 200:
                 data = response.json()
@@ -47,7 +87,7 @@ def query_entities_by_list(type, eids):
         'mailto': 'minjeong.shin@anu.edu.au'
     }
     try:
-        response = requests.get(OPENALEX_URL+"/"+type, params=params)
+        response = _get(OPENALEX_URL+"/"+type, params=params)
         # print(response.url)
         if response.status_code == 200:
             data = response.json()
@@ -65,7 +105,7 @@ def query_entity_by_id(type, id):  # For test purpose
         path = "{}/{}/{}{}".format(OPENALEX_URL, type,
                                    openalex_splitter[type], str(id))
         print(path)
-        response = requests.get(path)
+        response = _get(path)
         if response.status_code == 200:
             data = response.json()
             print("query_entity_by_id", id, data['display_name'])
@@ -75,25 +115,7 @@ def query_entity_by_id(type, id):  # For test purpose
                   response.status_code)
     except requests.exceptions.RequestException as e:
         print("[query_entity_by_id] An error occurred:", e)
-    return None
-
-
-def query_openalex_by_mag_id(mag_id):
-    params = {
-        'filter': 'ids.mag:'+mag_id,
-        'mailto': 'minjeong.shin@anu.edu.au'
-    }
-    try:
-        response = requests.get(OPENALEX_URL+"/works", params=params)
-        if response.status_code == 200:
-            data = response.json()
-            return data['results'][0]
-        else:
-            print("[query_openalex_by_mag_id] Request failed with status code:",
-                  response.status_code)
-    except requests.exceptions.RequestException as e:
-        print("[query_openalex_by_mag_id] An error occurred:", e)
-    return {}
+    return None 
 
 
 def papers_prop_query(paper_ids):
