@@ -30,7 +30,7 @@ try:
         THREADS = config['threads']
         BATCH_SIZE = config['batch_size']
         print(BATCH_SIZE)
-except FileExistsError:
+except FileNotFoundError:
     pass
 
 #%%

@@ -1,10 +1,6 @@
-import heapq
-import itertools
 import json
 import mmap
-import operator
 import pathlib
-from itertools import chain, starmap
 
 import numba as nb
 import numpy as np
@@ -480,18 +476,6 @@ def _sort(res_list):
 
 @nb.njit(nogil=True)
 def _select_top_n(res_list, max_results):
-    # if len(res_list) > max_results:
-    #     smallest = heapq.nsmallest(
-    #         max_results,
-    #         map(lambda r, i: (-max(r[1], r[2]), -r[1] - r[2],
-    #                        r[0], i),
-    #             res_list, itertools.count()))
-    #     indices = sorted(map(operator.itemgetter(3), smallest))
-    #     for i, j in enumerate(indices):
-    #         # i <= j at all times
-    #         res_list[i] = res_list[j]
-    #     del res_list[max_results:]
-    # res_list.sort(key=lambda r: (-max(r[1], r[2]), -r[1] - r[2], r[0]))
     res_list.sort(key=lambda r: (-max(r[1], r[2]), -r[1] - r[2], r[0]))
     if len(res_list) > max_results:
         del res_list[max_results:]

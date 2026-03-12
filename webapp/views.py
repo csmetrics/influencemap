@@ -154,7 +154,7 @@ def create():
         search=search)
 
 
-@blueprint.route('/crate_load_file')
+@blueprint.route('/curate_load_file')
 def curate_load_file():
     filename = request.form.get("filename")
     try:
@@ -459,69 +459,6 @@ def get_node_info_single(entity_id, entity_type, year_ranges):
         journal_ids=session["journal_ids"], paper_ids=session["paper_ids"],
         pub_years=(pub_lower, pub_upper), cit_years=(cit_lower, cit_upper),
         coauthors=coauthors, self_citations=self, max_results=50)
-
-    # Results
-    # papers_to_send = dict()
-    # links = dict()
-    #
-    # for paper in papers:
-    #     # Publication range filter
-    #     if (pub_lower and paper["Year"] < pub_lower) or \
-    #         (pub_upper and paper["Year"] > pub_upper):
-    #         continue
-    #
-    #     for link_type in ["References", "Citations"]:
-    #         for rel_paper in paper[link_type]:
-    #             # Citation range filter
-    #             if link_type == "Citations" and \
-    #                 ((cit_lower and rel_paper["Year"] < cit_lower) or \
-    #                 (cit_upper and rel_paper["Year"] > cit_upper)):
-    #                             continue
-    #
-    #             # Get fields
-    #             auth, inst, conf, jour, fos = get_entities(rel_paper)
-    #             fields = dict()
-    #             fields['author'] = set(auth)
-    #             fields['inst'] = set(inst)
-    #             fields['conf'] = set(conf + jour)
-    #             fields['fos']  = set(fos)
-    #
-    #             check = dict()
-    #             check['author'] = coauthors + self
-    #             check['inst'] = coauthors + self
-    #             check['conf'] = coauthors
-    #             check['fos']  = list()
-    #
-    #             skip = False
-    #             for n_type, check_val in check.items():
-    #                 if not set(check_val).isdisjoint(fields[entity_type]):
-    #                     skip = True
-    #                     break
-    #             if skip:
-    #                 continue
-    #
-    #             if entity not in fields[entity_type]:
-    #                 continue
-    #
-    #             papers_to_send[paper["PaperId"]] = {k:v for k,v in paper.items() if k in NODE_INFO_FIELDS}
-    #             papers_to_send[paper["PaperId"]] = add_author_order(papers_to_send[paper["PaperId"]])
-    #
-    #             papers_to_send[rel_paper["PaperId"]] = {k:v for k,v in rel_paper.items() if k in NODE_INFO_FIELDS}
-    #             papers_to_send[rel_paper["PaperId"]] = add_author_order(papers_to_send[rel_paper["PaperId"]])
-    #
-    #             if link_type == "Citations":
-    #                 if paper["PaperId"] in links:
-    #                     links[paper["PaperId"]]["reference"].append(rel_paper["PaperId"])
-    #                 else:
-    #                     links[paper["PaperId"]] = {"reference": [rel_paper["PaperId"]], "citation": list()}
-    #             else:
-    #                 if paper["PaperId"] in links:
-    #                     links[paper["PaperId"]]["citation"].append(rel_paper["PaperId"])
-    #                 else:
-    #                     links[paper["PaperId"]] = {"citation": [rel_paper["PaperId"]], "reference": list()}
-    #
-    # paper_sort_func = lambda x: -papers_to_send[x]["Year"]
-    # links = sorted([{"citation": sorted(link["citation"],key=paper_sort_func), "reference": sorted(link["reference"],key=paper_sort_func), "ego_paper": key} for key, link in links.items()], key=lambda x: paper_sort_func(x["ego_paper"]))
 
     links = [{"ego_paper": id, "reference": v["reference"],
               "citation": v["citation"]} for id, v in node_info.items()]
