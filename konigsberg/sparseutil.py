@@ -16,7 +16,7 @@ import numba as nb
 import numpy as np
 from numba.types import List, Tuple
 
-SENTINEL = np.uint64(-1)
+SENTINEL = np.iinfo(np.uint64).max
 
 
 @nb.njit(nogil=True)

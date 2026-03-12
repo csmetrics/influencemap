@@ -9,7 +9,7 @@ import mmap
 import numba as nb
 import numpy as np
 
-SENTINEL = np.uint64(-1)
+SENTINEL = np.iinfo(np.uint64).max
 HASH_PRIME = 11400714819323198549
 
 

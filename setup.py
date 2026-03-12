@@ -4,7 +4,6 @@ setup(
     name='influence map',
     version='0.1',
     packages=find_packages(exclude=['assets', 'demos', 'misc']),
-    install_requires=['networkx', 'seaborn', 'requests',
-        'numpy', 'elasticsearch_dsl', 'pyhocon', 'unidecode',
-        'multiprocess', 'psycopg2']
+    install_requires=['requests', 'numpy', 'numba', 'pandas',
+        'flask', 'flask-cors', 'elasticsearch_dsl', 'unidecode']
 )

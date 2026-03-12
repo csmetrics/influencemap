@@ -5,7 +5,7 @@ import pathlib
 import numba as nb
 import numpy as np
 
-SENTINEL = np.uint64(-1)
+SENTINEL = np.iinfo(np.uint64).max
 HASH_PRIME = 11400714819323198549
 
 mmapped_arr = nb.types.Array(nb.u8, 1, 'C', readonly=True)
@@ -71,8 +71,10 @@ class Mapping:
         self.ind = np.frombuffer(self.ind_mmap, dtype=np.uint64)
 
     def __del__(self):
-        self.ptr_mmap.close()
-        self.ind_mmap.close()
+        if hasattr(self, 'ptr_mmap'):
+            self.ptr_mmap.close()
+        if hasattr(self, 'ind_mmap'):
+            self.ind_mmap.close()
 
     @property
     def arrs(self):
@@ -90,7 +92,8 @@ class IndToIdMapper:
         self.ind2id = np.frombuffer(self.ind2id_mmap, dtype=np.uint64)
 
     def __del__(self):
-        self.ind2id_mmap.close()
+        if hasattr(self, 'ind2id_mmap'):
+            self.ind2id_mmap.close()
 
     @property
     def arrs(self):
@@ -108,7 +111,8 @@ class IdToIndMapper:
         self.ind2id_mapper = ind2id_mapper
 
     def __del__(self):
-        self.id2ind_mmap.close()
+        if hasattr(self, 'id2ind_mmap'):
+            self.id2ind_mmap.close()
 
     @property
     def arrs(self):
@@ -599,13 +603,15 @@ def _traverse_citations(mapping, i):
     return ind[start_citors:start_citees], ind[start_citees:end]
 
 
-@nb.generated_jit(nopython=True, nogil=True)
 def _is_in_range(range_, i):
-    """Check if integer i is in range_.
+    """Check if i is in range_. range_ is None (always True) or a 2-tuple."""
+    if range_ is None:
+        return True
+    return range_[0] <= i < range_[1]
 
-    range_ is None or a 2-tuple of ints, but the type must be a
-    compile-time constant. If range_ is None, returns True.
-    """
+
+@nb.extending.overload(_is_in_range)
+def _is_in_range_overload(range_, i):
     if isinstance(range_, nb.types.NoneType):
         return lambda range_, i: True
     else:

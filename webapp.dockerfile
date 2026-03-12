@@ -1,4 +1,4 @@
-FROM python:3.9.12
+FROM python:3.13.2
 LABEL maintainer="Jiahao Zhang <jiahao.zhang@anu.edu.au>"
 
 COPY requirements.txt /requirements.txt

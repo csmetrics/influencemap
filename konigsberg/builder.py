@@ -9,8 +9,8 @@ import pandas as pd
 import hashutil
 import sparseutil
 
-YEAR_SENTINEL = np.uint16(-1)  # Denotes missing year
-INDEX_SENTINEL = np.uint64(-1)  # Denotes deleted entity
+YEAR_SENTINEL = np.iinfo(np.uint16).max  # Denotes missing year
+INDEX_SENTINEL = np.iinfo(np.uint64).max  # Denotes deleted entity
 
 logger = logging.getLogger(__name__)
 logger.setLevel(logging.INFO)
