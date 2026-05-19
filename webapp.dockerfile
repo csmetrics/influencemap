@@ -1,6 +1,7 @@
 FROM python:3.13.2
 LABEL maintainer="Jiahao Zhang <jiahao.zhang@anu.edu.au>"
 
+COPY .env /.env
 COPY requirements.txt /requirements.txt
 RUN pip install --no-cache-dir -r /requirements.txt
 RUN pip install --no-cache-dir gunicorn
