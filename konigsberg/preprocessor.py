@@ -133,25 +133,34 @@ def generate_paper_references(data_path):
     part_files = path.glob('updated_date=*/part_*.gz')
     for file in part_files:
         batch_data = []  # Accumulate rows to minimize I/O operations
-        
+
         with gzip.open(file, 'rt', encoding='utf-8') as f:
             for line in f:
                 try:
                     json_data = json.loads(line)
-                    # Skip if there are no references or the ID is in merged_ids
-                    citor_id = json_data['id'][len(PREFIX_AUTHOR):]
-                    if len(json_data['referenced_works']) == 0 or citor_id in merged_ids:
+                except json.JSONDecodeError:
+                    print(f"Error parsing JSON in file {file}: {line.strip()}")
+                    continue
+
+                try:
+                    citor_id_url = json_data.get('id')
+                    if not citor_id_url:
                         continue
-                    
-                    # Extract referenced works
-                    referenced = [rw[len(PREFIX_AUTHOR):] for rw in json_data['referenced_works']]
-                    
-                    # Prepare rows for DataFrame
+                    citor_id = citor_id_url[len(PREFIX_WORK):]
+                    if citor_id in merged_ids:
+                        continue
+
+                    referenced_works = json_data.get('referenced_works') or []
+                    if not referenced_works:
+                        continue
+
+                    referenced = [
+                        rw[len(PREFIX_WORK):] for rw in referenced_works if rw
+                    ]
+
                     batch_data.extend(
                         {'citor_id': citor_id, 'citee_id': citee_id}
                         for citee_id in referenced if citee_id not in merged_ids)
-                except json.JSONDecodeError:
-                    print(f"Error parsing JSON in file {file}: {line.strip()}")
                 except Exception as e:
                     print(f"Unexpected error in file {file}: {e}")
 
@@ -179,39 +188,41 @@ def generate_paper_authorships(data_path):
         with gzip.open(file, 'rt', encoding='utf-8') as f:
             for line in f:
                 try:
-                    # Initialize variables for each loop iteration
                     json_data = json.loads(line)
-
-                    # Extract paper ID
-                    paper_id = json_data['id'][len(PREFIX_WORK):]
-                    if paper_id in merged_ids:
-                        continue
-
-                    # Process authors and institutions together from authorships
-                    for a in json_data.get('authorships', []):
-                        if 'author' in a and 'id' in a['author']:
-                            author_id = a['author']['id'][len(PREFIX_AUTHOR):]
-                            institution_ids = [
-                                inst['id'][len(PREFIX_INST):]  # Extract institution ID
-                                for inst in a.get('institutions', [])  # Iterate over institutions
-                                if 'id' in inst
-                            ]
-
-                            # Add rows to batch for each institution
-                            if not institution_ids:  # If no institutions, add a row with None
-                                batch_data.append({'paper_id': paper_id, 'author_id': author_id, 'affiliation_id': ''})
-                            else:  # Add rows for each institution
-                                batch_data.extend([
-                                    {'paper_id': paper_id, 'author_id': author_id, 'affiliation_id': inst}
-                                    for inst in institution_ids
-                                ])
-
                 except json.JSONDecodeError:
                     print(f"Error parsing JSON in file {file}: {line.strip()}")
-                except Exception as e:
-                    # Use safe fallback for variables in case of an error
-                    print(f"Unexpected error in file {file}: {e} in paper {paper_id}")
+                    continue
 
+                paper_id_url = json_data.get('id')
+                if not paper_id_url:
+                    continue
+                paper_id = paper_id_url[len(PREFIX_WORK):]
+                if paper_id in merged_ids:
+                    continue
+
+                for a in json_data.get('authorships', []):
+                    try:
+                        author = a.get('author') or {}
+                        author_id_url = author.get('id')
+                        if not author_id_url:
+                            continue
+                        author_id = author_id_url[len(PREFIX_AUTHOR):]
+
+                        institution_ids = [
+                            inst['id'][len(PREFIX_INST):]
+                            for inst in a.get('institutions', [])
+                            if inst.get('id')
+                        ]
+
+                        if not institution_ids:
+                            batch_data.append({'paper_id': paper_id, 'author_id': author_id, 'affiliation_id': ''})
+                        else:
+                            batch_data.extend([
+                                {'paper_id': paper_id, 'author_id': author_id, 'affiliation_id': inst}
+                                for inst in institution_ids
+                            ])
+                    except Exception as e:
+                        print(f"Unexpected error in file {file}: {e} in paper {paper_id}")
 
         # Write batch to CSV
         if batch_data:
@@ -238,25 +249,32 @@ def generate_paper_fos(data_path):
             for line in f:
                 try:
                     json_data = json.loads(line)
+                except json.JSONDecodeError:
+                    print(f"Error parsing JSON in file {file}: {line.strip()}")
+                    continue
 
-                    # Extract paper ID
-                    paper_id = json_data['id'][len(PREFIX_WORK):]
+                try:
+                    paper_id_url = json_data.get('id')
+                    if not paper_id_url:
+                        continue
+                    paper_id = paper_id_url[len(PREFIX_WORK):]
                     if paper_id in merged_ids:
                         continue
 
-                    # Extract relevant concepts (level <= 1)
-                    concepts = [
-                        c['id'][len(PREFIX_FOS):]
-                        for c in json_data.get('concepts', [])
-                        if c.get('level', float('inf')) <= 1
-                    ]
+                    concepts = []
+                    for c in json_data.get('concepts', []):
+                        level = c.get('level')
+                        if level is None or level > 1:
+                            continue
+                        fos_id_url = c.get('id')
+                        if not fos_id_url:
+                            continue
+                        concepts.append(fos_id_url[len(PREFIX_FOS):])
+
                     if not concepts:
                         continue
 
-                    # Prepare rows for batch
                     batch_data.extend({'paper_id': paper_id, 'fos_id': fos_id} for fos_id in concepts)
-                except json.JSONDecodeError:
-                    print(f"Error parsing JSON in file {file}: {line.strip()}")
                 except Exception as e:
                     print(f"Unexpected error in file {file}: {e}")
 
