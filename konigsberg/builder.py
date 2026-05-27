@@ -162,8 +162,10 @@ def load_papers_df(path):
         = paper_journals_df['journal_id'].astype(np.uint64)
     del df['journal_id']
 
-    df['year'].fillna(YEAR_SENTINEL, inplace=True)  # NaN -> sentinel.
-    df['year'] = df['year'].astype(np.uint16)  # From masked type.
+    # NaN -> sentinel, then unmask. Assignment (not chained inplace) is
+    # required under pandas Copy-on-Write; ``df['year'].fillna(..., inplace=True)``
+    # silently operates on a copy and the NaNs survive the ``astype`` below.
+    df['year'] = df['year'].fillna(YEAR_SENTINEL).astype(np.uint16)
     # 'mergesort' is stable, unlike the other sorts. Remember that we
     # want to sort by year, then rank.
     df.sort_values('rank', inplace=True, ignore_index=True, kind='mergesort')
