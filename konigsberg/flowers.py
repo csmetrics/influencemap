@@ -71,6 +71,10 @@ class Mapping:
         self.ind = np.frombuffer(self.ind_mmap, dtype=np.uint64)
 
     def __del__(self):
+        # Release NumPy views before closing mmaps (Python 3.13 raises
+        # BufferError otherwise).
+        self.ptr = None
+        self.ind = None
         if hasattr(self, 'ptr_mmap'):
             self.ptr_mmap.close()
         if hasattr(self, 'ind_mmap'):
@@ -92,6 +96,8 @@ class IndToIdMapper:
         self.ind2id = np.frombuffer(self.ind2id_mmap, dtype=np.uint64)
 
     def __del__(self):
+        # Release NumPy view before closing mmap (Python 3.13+).
+        self.ind2id = None
         if hasattr(self, 'ind2id_mmap'):
             self.ind2id_mmap.close()
 
@@ -111,6 +117,8 @@ class IdToIndMapper:
         self.ind2id_mapper = ind2id_mapper
 
     def __del__(self):
+        # Release NumPy view before closing mmap (Python 3.13+).
+        self.id2ind = None
         if hasattr(self, 'id2ind_mmap'):
             self.id2ind_mmap.close()
 

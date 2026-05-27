@@ -56,7 +56,10 @@ class Ind2IdMap:
         self.ind2id = np.frombuffer(self.ind2id_mmap, dtype=np.uint64)
 
     def __del__(self):
-        self.ind2id_mmap.close()
+        # Release NumPy view before closing the mmap (Python 3.13+).
+        self.ind2id = None
+        if getattr(self, 'ind2id_mmap', None) is not None:
+            self.ind2id_mmap.close()
 
 
 class Id2IndHashMap:
@@ -93,10 +96,13 @@ class Id2IndHashMap:
         self.close()
 
     def close(self):
+        # Release NumPy view BEFORE closing the mmap. Python 3.13 raises
+        # BufferError if close() is called while a buffer export
+        # (np.frombuffer view) is still alive.
+        self.id2ind = None
         if self.id2ind_mmap:
             self.id2ind_mmap.close()
         self.id2ind_mmap = None
-        self.id2ind = None
         self.ind2id_map = None  # Decrease ind2id_map refcount.
 
     def __enter__(self):
@@ -149,10 +155,16 @@ def make_id_hash_map(ids, path, offset=0):
         f.write(b'\x00')
         f.flush()
         id2ind_mmap = mmap.mmap(f.fileno(), 0)
-    with id2ind_mmap:
+    try:
         id2ind = np.frombuffer(id2ind_mmap, dtype=np.uint64)
         id2ind[...] = SENTINEL  # Important detail: set all to SENTINEL.
         arr_size = len(id2ind)
         # nb.literally causes Numba to compile the function once for
         # every value. Avoids the CPU's slow division instruction.
         _make_hash_map(ids, id2ind, nb.literally(arr_size), offset)
+        # Release the NumPy view before closing the mmap. Python 3.13
+        # raises BufferError if mmap.close() is called while a buffer
+        # export (np.frombuffer view) is still alive.
+        del id2ind
+    finally:
+        id2ind_mmap.close()

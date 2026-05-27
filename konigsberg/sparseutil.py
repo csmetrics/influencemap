@@ -117,7 +117,7 @@ def make_sparse_matrix(n_from_ind, maps, ptr_path, ind_path):
         f_ptr.write(b'\x00')
         f_ptr.flush()
         map_ptr = mmap.mmap(f_ptr.fileno(), 0)
-    with map_ptr:
+    try:
         arr_ptr = np.frombuffer(map_ptr, dtype=np.uint64)
         make_counts(maps, arr_ptr)
         with open(ind_path, 'wb+') as f_ind:
@@ -126,6 +126,14 @@ def make_sparse_matrix(n_from_ind, maps, ptr_path, ind_path):
             f_ind.write(b'\x00')
             f_ind.flush()
             map_ind = mmap.mmap(f_ind.fileno(), 0)
-        with map_ind:
+        try:
             arr_ind = np.frombuffer(map_ind, dtype=np.uint64)
             place_indices(maps, arr_ptr, arr_ind)
+            # Release NumPy view before closing the mmap (Python 3.13+
+            # raises BufferError otherwise).
+            del arr_ind
+        finally:
+            map_ind.close()
+        del arr_ptr
+    finally:
+        map_ptr.close()
