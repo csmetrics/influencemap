@@ -1,6 +1,10 @@
+import time
+
 import requests
 import os
 import pathlib
+
+from core.search.api_logger import log_call
 
 # Try to load OPENALEX_KEY from a .env file (use python-dotenv if available,
 # otherwise search up from this file's directory).
@@ -38,7 +42,23 @@ def _params_with_key(params=None):
     return params
 
 def _get(url, params=None, **kwargs):
-    return requests.get(url, params=_params_with_key(params), **kwargs)
+    t0 = time.monotonic()
+    response = None
+    err = None
+    try:
+        response = requests.get(url, params=_params_with_key(params), **kwargs)
+        return response
+    except Exception as e:
+        err = e
+        raise
+    finally:
+        log_call(
+            url=url,
+            params=params,
+            response=response,
+            latency_ms=(time.monotonic() - t0) * 1000,
+            error=err,
+        )
 
 OPENALEX_URL = "https://api.openalex.org"
 

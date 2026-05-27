@@ -17,6 +17,8 @@ services:
     restart: unless-stopped
     ports:
       - "8001:8000"
+    volumes:
+      - ./logs:/influencemap/logs
     environment:
       KONIGSBERG_URL: http://konigsberg:8000
       GUNICORN_CMD_ARGS: --workers 32 --timeout 90 --graceful-timeout 90 --bind 0.0.0.0:8000

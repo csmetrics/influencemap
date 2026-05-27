@@ -7,3 +7,4 @@ MSAPIKEYS.txt
 .DS_Store
 .idea
 .vscode
+logs/
