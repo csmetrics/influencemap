@@ -335,22 +335,22 @@ def make_dataset(in_path, out_path):
     logger.info('(3/7) converting MAG IDs to internal indices')
     with authors_id2ind, aff_id2ind, fos_id2ind, journals_id2ind:
         # The context manager will close the mmaps for us.
-        authors_id2ind.convert_inplace(authorships_df['author_id'])
-        aff_id2ind.convert_inplace(paper_aff_df['affiliation_id'])
-        journals_id2ind.convert_inplace(paper_journals_df['journal_id'])
+        authors_id2ind.convert_inplace(authorships_df, 'author_id')
+        aff_id2ind.convert_inplace(paper_aff_df, 'affiliation_id')
+        journals_id2ind.convert_inplace(paper_journals_df, 'journal_id')
 
-        fos_id2ind.convert_inplace(paper_fos_df['fos_id'], allow_missing=True)
+        fos_id2ind.convert_inplace(paper_fos_df, 'fos_id', allow_missing=True)
         paper_fos_df = paper_fos_df[paper_fos_df['fos_id'] != INDEX_SENTINEL]
         paper_fos_df.reset_index(drop=True, inplace=True)
 
     with papers_id2ind:
-        papers_id2ind.convert_inplace(authorships_df['paper_id'])
-        papers_id2ind.convert_inplace(paper_aff_df['paper_id'])
-        papers_id2ind.convert_inplace(paper_journals_df['paper_id'])
-        papers_id2ind.convert_inplace(paper_fos_df['paper_id'])
+        papers_id2ind.convert_inplace(authorships_df, 'paper_id')
+        papers_id2ind.convert_inplace(paper_aff_df, 'paper_id')
+        papers_id2ind.convert_inplace(paper_journals_df, 'paper_id')
+        papers_id2ind.convert_inplace(paper_fos_df, 'paper_id')
 
-        papers_id2ind.convert_inplace(citations_df['citor_id'])
-        papers_id2ind.convert_inplace(citations_df['citee_id'])
+        papers_id2ind.convert_inplace(citations_df, 'citor_id')
+        papers_id2ind.convert_inplace(citations_df, 'citee_id')
 
     logger.info('(4/7) writing edges: entities -> papers')
     # See `make_sparse_matrix` docstring.

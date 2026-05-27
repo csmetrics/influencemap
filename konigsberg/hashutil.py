@@ -78,19 +78,24 @@ class Id2IndHashMap:
     def __del__(self):
         self.id2ind_mmap.close()
 
-    def convert_inplace(self, series, allow_missing=True):
-        """Convert IDs to indices in-place.
+    def convert_inplace(self, df, column, allow_missing=True):
+        """Convert IDs to indices in a DataFrame column.
 
-        series is a Pandas series of indices. If allow_missing is set to
-        True, then unrecognised IDs do not raise KeyError, but are
-        instead replaced with SENTINEL.
+        Mutates ``df[column]`` to contain index values instead of IDs.
+        If ``allow_missing`` is True, unrecognised IDs are replaced with
+        SENTINEL instead of raising KeyError.
+
+        Note: under pandas Copy-on-Write, ``series.to_numpy()`` returns
+        a read-only copy, so we must work on a writable copy and assign
+        the result back to ``df[column]`` for the mutation to stick.
         """
-        arr = series.to_numpy()
+        arr = df[column].to_numpy(copy=True)
         # nb.literally makes Numba compile once for every value.
         _convert_in2ind_inplace(
             self.id2ind, self.ind2id_map.ind2id,
             nb.literally(len(self.id2ind)),
             arr, nb.literally(allow_missing))
+        df[column] = arr
 
     def __del__(self):
         self.close()
