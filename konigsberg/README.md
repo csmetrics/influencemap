@@ -78,7 +78,36 @@ The resulting binary graph consists of 15 files, as listed below, with a total s
     ```
 
 
-## 3. Run the Scoring Engine
+## 3. Build the ID→Name Binary Files
+
+Run `id2name_builder.py` after `builder.py`. It reads the display-name/title columns added by the preprocessor and emits:
+
+- `entity-name-ptr.bin` + `entity-name-dat.bin` — display names for authors, institutions, concepts, and sources, concatenated in the same order as `entities-ind2id.bin`.
+- `paper-title-ptr.bin` + `paper-title-dat.bin` — paper titles in `paper-ind2id.bin` order.
+
+```
+~/influencemap/konigsberg$ python id2name_builder.py \
+    --csv-dir /data_seoul/openalex/openalex-snapshot/data \
+    --bingraph bingraph-openalex
+```
+
+Notes:
+- The works.txt for ~500M papers takes a few hours per pass (two passes total) on NVMe storage. Use `--chunksize` to tune memory vs. throughput; default is 1M rows.
+- `--skip-entities` / `--skip-papers` let you build one set at a time.
+- Idempotent: re-running overwrites the existing `*-name-*.bin` and `*-title-*.bin` files.
+
+Expected file sizes (full OpenAlex snapshot, ~500M works, ~95M authors):
+
+| File | Approx size |
+|---|---|
+| `entity-name-ptr.bin` | ~800 MB |
+| `entity-name-dat.bin` | ~5 GB |
+| `paper-title-ptr.bin` | ~4 GB |
+| `paper-title-dat.bin` | ~50 GB |
+
+After this step, copy/sync the entire `bingraph-openalex/` directory back to the deploy server.
+
+## 4. Run the Scoring Engine
 
 Run the konigsberg app on port 8081.
 ```

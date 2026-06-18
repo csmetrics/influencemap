@@ -28,6 +28,21 @@ class OpenAlexDialect(csv.Dialect):
     strict = True
 
 
+_SANITIZE_TABLE = str.maketrans({'\t': ' ', '\r': ' ', '\n': ' '})
+
+
+def _sanitize(value):
+    """Strip characters that conflict with the tab-delimited, QUOTE_NONE dialect.
+
+    Returns an empty string for None. Replaces tabs and line terminators with
+    a single space so the writer never has to escape and the builder's
+    column-position-based reads stay aligned.
+    """
+    if value is None:
+        return ''
+    return str(value).translate(_SANITIZE_TABLE).strip()
+
+
 def load_merged_ids(data_path, data_type, split_char):
     path = data_path / 'merged_ids' / data_type
     if not os.path.exists(path):
@@ -49,6 +64,32 @@ def load_merged_ids(data_path, data_type, split_char):
 
 
 OUT_SUFF = '.txt'
+
+
+# Per-entity extra columns extracted alongside id + works_count. Each entry is
+# (column_name, extractor_fn). The first two columns are always [id,
+# works_count] so builder.py (which reads usecols=[0,1]) keeps working.
+ENTITY_EXTRA_COLUMNS = {
+    'authors': [
+        ('display_name', lambda d: _sanitize(d.get('display_name'))),
+    ],
+    'institutions': [
+        ('display_name', lambda d: _sanitize(d.get('display_name'))),
+        ('country_code', lambda d: _sanitize(d.get('country_code'))),
+        ('ror', lambda d: _sanitize(d.get('ror'))),
+    ],
+    'sources': [
+        ('display_name', lambda d: _sanitize(d.get('display_name'))),
+        ('type', lambda d: _sanitize(d.get('type'))),
+        ('issn_l', lambda d: _sanitize(d.get('issn_l'))),
+    ],
+    'concepts': [
+        ('display_name', lambda d: _sanitize(d.get('display_name'))),
+        ('level', lambda d: '' if d.get('level') is None else d.get('level')),
+    ],
+}
+
+
 def generate_entity_files(data_path, data_type, split_char):
     merged_ids = load_merged_ids(data_path, data_type, split_char)
 
@@ -56,28 +97,36 @@ def generate_entity_files(data_path, data_type, split_char):
     part_files = path.glob('updated_date=*/part_*.gz')
     outfile = data_path / (data_type + OUT_SUFF)
 
+    extra_cols = ENTITY_EXTRA_COLUMNS.get(data_type, [])
+    extra_names = [name for name, _ in extra_cols]
+    extra_extractors = [fn for _, fn in extra_cols]
+
     logger.info('...generating {} {}'.format(data_type, split_char))
-    names = ['id', 'works_count']
+    names = ['id', 'works_count'] + extra_names
     with open(outfile, 'w') as csvfile:
         csvwriter = csv.writer(csvfile, dialect=OpenAlexDialect())
         csvwriter.writerow(names)
         for file in part_files:
             try:
-                # Read and process each file
                 with gzip.open(file, 'rt', encoding='utf-8') as f:
-                    data = [
-                        [
-                            json_data['id'].split(split_char)[1] if 'id' in json_data and json_data['id'].split(split_char)[1] not in merged_ids else None,
-                            json_data['works_count']
-                        ]
-                        for line in f
-                        if (json_data := json.loads(line))  # Parse JSON
-                    ]
-                    # Filter out rows with None values
-                    data = [row for row in data if row[0] is not None]
+                    data = []
+                    for line in f:
+                        try:
+                            json_data = json.loads(line)
+                        except json.JSONDecodeError as e:
+                            print(f"Error parsing JSON in file {file}: {e}")
+                            continue
+                        raw_id = json_data.get('id')
+                        if not raw_id:
+                            continue
+                        bare_id = raw_id.split(split_char)[1]
+                        if bare_id in merged_ids:
+                            continue
+                        row = [bare_id, json_data.get('works_count', 0)]
+                        for fn in extra_extractors:
+                            row.append(fn(json_data))
+                        data.append(row)
                     csvwriter.writerows(data)
-            except json.JSONDecodeError as e:
-                print(f"Error parsing JSON in file {file}: {e}")
             except Exception as e:
                 print(f"Error processing file {file}: {e}")
     logger.info('...done {} {}'.format(data_type, split_char))
@@ -91,7 +140,11 @@ def generate_works_file(data_path):
     merged_ids = load_merged_ids(data_path, data_type, split_char)
 
     logger.info('...generating {} {}'.format(data_type, split_char))
-    names=['paper_id', 'rank', 'year', 'journal_id']
+    # Columns 0-3 are read by builder.py (usecols=[0,1,2,3]). Columns 4-5
+    # (title, venue_display_name) are appended for the id2name builder and
+    # are ignored by builder.py.
+    names = ['paper_id', 'rank', 'year', 'journal_id',
+             'title', 'venue_display_name']
     part_files = path.glob('updated_date=*/part_*.gz')
 
     with open(outfile, 'w') as csvfile:
@@ -100,23 +153,39 @@ def generate_works_file(data_path):
 
         for file in part_files:
             with gzip.open(file, 'rt', encoding='utf-8') as f:
-                data = [
-                    [
-                        json_data['id'][len(PREFIX_WORK):],
-                        json_data['cited_by_count'],
-                        json_data['publication_year'],
-                        (
-                            json_data.get('primary_location', {})
-                            .get('source', {})
-                            .get('id', '')
-                        )[len(PREFIX_SOURCE):] if json_data.get('primary_location') and json_data.get('primary_location').get('source') else ''
-                    ]
-                    for line in f
-                    if (json_data := json.loads(line)) and 
-                    json_data['id'][len(PREFIX_WORK):] not in merged_ids
-                ]
+                data = []
+                for line in f:
+                    try:
+                        json_data = json.loads(line)
+                    except json.JSONDecodeError as e:
+                        print(f"Error parsing JSON in file {file}: {e}")
+                        continue
+                    raw_id = json_data.get('id')
+                    if not raw_id:
+                        continue
+                    paper_id = raw_id[len(PREFIX_WORK):]
+                    if paper_id in merged_ids:
+                        continue
+
+                    primary_location = json_data.get('primary_location') or {}
+                    source = primary_location.get('source') or {}
+                    source_url = source.get('id') or ''
+                    journal_id = (source_url[len(PREFIX_SOURCE):]
+                                  if source_url else '')
+                    venue_display_name = _sanitize(source.get('display_name'))
+
+                    title = _sanitize(json_data.get('title'))
+
+                    data.append([
+                        paper_id,
+                        json_data.get('cited_by_count', 0),
+                        json_data.get('publication_year', ''),
+                        journal_id,
+                        title,
+                        venue_display_name,
+                    ])
                 csvwriter.writerows(data)
-        
+
     logger.info('...done {} {}'.format(data_type, split_char))
 
 
