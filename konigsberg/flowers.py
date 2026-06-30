@@ -86,6 +86,58 @@ class Mapping:
         return self.ptr, self.ind
 
 
+class StringMapping:
+    """Pair of memory-mapped arrays representing variable-length UTF-8 strings.
+
+    ptr is a uint64 array of length N+1; dat is contiguous UTF-8 bytes.
+    The string at index ``i`` is ``dat[ptr[i]:ptr[i+1]].decode('utf-8')``.
+    """
+    __slots__ = ['ptr', 'dat', 'ptr_mmap', 'dat_mmap']
+
+    def __init__(self, ptr_path, dat_path):
+        with open(ptr_path, 'rb') as f:
+            self.ptr_mmap = mmap.mmap(f.fileno(), 0, prot=mmap.PROT_READ)
+        self.ptr = np.frombuffer(self.ptr_mmap, dtype=np.uint64)
+        # dat may legitimately be empty (e.g. when all strings are empty).
+        with open(dat_path, 'rb') as f:
+            size = f.seek(0, 2)
+            f.seek(0)
+            if size > 0:
+                self.dat_mmap = mmap.mmap(f.fileno(), 0, prot=mmap.PROT_READ)
+                self.dat = np.frombuffer(self.dat_mmap, dtype=np.uint8)
+            else:
+                self.dat_mmap = None
+                self.dat = np.empty(0, dtype=np.uint8)
+
+    def __del__(self):
+        # Release NumPy views before closing mmaps (Python 3.13+).
+        self.ptr = None
+        self.dat = None
+        if getattr(self, 'ptr_mmap', None) is not None:
+            self.ptr_mmap.close()
+        if getattr(self, 'dat_mmap', None) is not None:
+            self.dat_mmap.close()
+
+    def get(self, ind):
+        """Decode the string at index ``ind``."""
+        ind = int(ind)
+        start = int(self.ptr[ind])
+        end = int(self.ptr[ind + 1])
+        if end <= start:
+            return ''
+        return bytes(self.dat[start:end]).decode('utf-8', errors='replace')
+
+
+# OpenAlex-style entity-type names map to the per-type id->ind mapper attrs
+# on Florist. Used by Florist.get_names.
+_ENTITY_TYPE_TO_MAPPER_ATTR = {
+    'authors': 'author_id2ind_map',
+    'institutions': 'aff_id2ind_map',
+    'sources': 'journal_id2ind_map',
+    'concepts': 'fos_id2ind_map',
+}
+
+
 class IndToIdMapper:
     """Memory-mapped array mapping indices to MAG IDs."""
     __slots__ = ['ind2id_mmap', 'ind2id']
@@ -173,6 +225,20 @@ class Florist:
         self.fos_range = self.aff_range + entity_counts_data['fos']
         self.journal_range = self.fos_range + entity_counts_data['journals']
 
+        # Display names for the unified entity index. Required.
+        self.entity_names = StringMapping(
+            path / 'entity-name-ptr.bin', path / 'entity-name-dat.bin')
+
+        # Paper titles. Optional — these files are large (~54 GB) and may
+        # not have been transferred yet. When absent, get_paper_info returns
+        # empty titles.
+        title_ptr = path / 'paper-title-ptr.bin'
+        title_dat = path / 'paper-title-dat.bin'
+        if title_ptr.exists() and title_dat.exists():
+            self.paper_titles = StringMapping(title_ptr, title_dat)
+        else:
+            self.paper_titles = None
+
     def _get_id_year_range(self, years):
         """Get range of paper indices corresponding to a range of years.
 
@@ -225,6 +291,87 @@ class Florist:
     def _get_paper_indices(self, paper_ids, *, allow_not_found):
         return self._ids_to_indices(
             paper_ids, self.paper_id2ind_map, allow_not_found)
+
+    def get_names(self, entity_type, ids):
+        """Look up OpenAlex display names locally.
+
+        entity_type is one of 'authors', 'institutions', 'sources',
+        'concepts'. ids is an iterable of OpenAlex numeric ids (the suffix
+        after the type letter, e.g. ``A12345`` -> 12345). Returns a dict
+        mapping found ids to display names. IDs not in the index are
+        silently omitted.
+        """
+        mapper_attr = _ENTITY_TYPE_TO_MAPPER_ATTR.get(entity_type)
+        if mapper_attr is None:
+            raise ValueError(f'unknown entity_type: {entity_type!r}')
+        if not ids:
+            return {}
+        mapper = getattr(self, mapper_attr)
+        ind2id = self.entity_ind2id_map.arrs
+
+        arr = np.array(list(ids), dtype=np.uint64)
+        length = _ids_to_ind(mapper.arrs, arr)
+
+        result = {}
+        for j in range(length):
+            ind = int(arr[j])
+            orig_id = int(ind2id[ind])
+            result[orig_id] = self.entity_names.get(ind)
+        return result
+
+    def _year_for_paper_index(self, paper_ind):
+        """Year (int) of the paper at the given index, or None if unknown."""
+        if self.paper_year_map.size == 0:
+            return None
+        pos = int(np.searchsorted(
+            self.paper_year_map, np.uint64(paper_ind), side='right'))
+        if pos == 0:
+            return None
+        year = min(self.year_starts) + pos - 1
+        # The trailing sentinel slot is for the year after the last real year.
+        if year >= max(self.year_starts):
+            return None
+        return year
+
+    def _venue_for_paper_index(self, paper_ind):
+        """Display name of the first journal/source linked to this paper.
+
+        Walks paper2entity; filters entity indices to the journal range.
+        Returns '' if the paper has no source.
+        """
+        entities = _traverse_one(
+            self.paper2entity_map.arrs, np.uint64(paper_ind))
+        for ent in entities:
+            ent_i = int(ent)
+            if self.fos_range <= ent_i < self.journal_range:
+                return self.entity_names.get(ent_i)
+        return ''
+
+    def get_paper_info(self, paper_ids):
+        """Look up paper title/year/venue locally.
+
+        Returns ``{paper_id: {'title': str, 'year': int|None, 'venue': str}}``.
+        Title is '' if paper-title files were not loaded. Paper ids that
+        don't exist in the bingraph are omitted.
+        """
+        if not paper_ids:
+            return {}
+        paper_ind2id = self.paper_ind2id_map.arrs
+
+        arr = np.array(list(paper_ids), dtype=np.uint64)
+        length = _ids_to_ind(self.paper_id2ind_map.arrs, arr)
+
+        result = {}
+        for j in range(length):
+            ind = int(arr[j])
+            orig_id = int(paper_ind2id[ind])
+            title = self.paper_titles.get(ind) if self.paper_titles else ''
+            result[orig_id] = {
+                'title': title,
+                'year': self._year_for_paper_index(ind),
+                'venue': self._venue_for_paper_index(ind),
+            }
+        return result
 
     def _make_pub_year_count_dict(self, pub_year_counts):
         min_year = min(self.year_starts)

@@ -6,7 +6,8 @@ from flask import request
 from flask_cors import CORS, cross_origin
 
 import core.utils.entity_type as ent
-from core.search.query_info import papers_prop_query, query_entity_by_keyword, query_entity_by_id, convert_id
+from core.search.query_info import query_entity_by_keyword, convert_id
+from core.search.local import papers_prop_query, query_entity_by_id
 from core.utils.load_tsv import tsv_to_dict
 from webapp.shortener import decode_filters, url_decode_info, url_encode_info
 from webapp.utils import *
@@ -380,8 +381,9 @@ def get_publication_papers():
     pub_year_max = int(request.form.get("pub_year_max"))
     paper_ids = session['cache']
     papers = papers_prop_query(paper_ids)
-    papers = [paper for paper in papers if (
-        paper["Year"] >= pub_year_min and paper["Year"] <= pub_year_max)]
+    papers = [paper for paper in papers.values()
+              if paper["Year"] is not None
+              and pub_year_min <= paper["Year"] <= pub_year_max]
     papers = conf_journ_to_display_names(
         {paper["PaperId"]: paper for paper in papers})
     return flask.jsonify({"papers": papers, "names": session["entity_names"] + session["node_info"]})
@@ -399,8 +401,13 @@ def get_citation_papers():
     pub_year_max = int(request.form.get("pub_year_max"))
     paper_ids = session['cache']
     papers = papers_prop_query(paper_ids)
-    cite_papers = [[citation for citation in paper["Citations"] if (citation["Year"] >= cite_year_min and citation["Year"] <= cite_year_max)] for paper in papers if (
-        paper["Year"] >= pub_year_min and paper["Year"] <= pub_year_max)]
+    cite_papers = [
+        [citation for citation in paper.get("Citations", [])
+         if citation.get("Year") is not None
+         and cite_year_min <= citation["Year"] <= cite_year_max]
+        for paper in papers.values()
+        if paper["Year"] is not None
+        and pub_year_min <= paper["Year"] <= pub_year_max]
     citations = sum(cite_papers, [])
     citations = conf_journ_to_display_names(
         {paper["PaperId"]: paper for paper in citations})

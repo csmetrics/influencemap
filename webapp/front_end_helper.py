@@ -6,7 +6,7 @@ import pandas as pd
 
 from concurrent.futures import ThreadPoolExecutor, as_completed
 
-from core.search.openalex import (
+from core.search.local import (
     get_display_names_from_author_ids, get_display_names_from_conference_ids,
     get_display_names_from_fos_ids, get_display_names_from_journal_ids,
     get_names_from_affiliation_ids)

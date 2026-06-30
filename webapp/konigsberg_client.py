@@ -69,6 +69,33 @@ class KonigsbergClient:
         response.raise_for_status()
         return response.json()
 
+    def get_names(self, entity_type, ids):
+        """Look up display names for the given OpenAlex ids.
+
+        entity_type ∈ {'authors', 'institutions', 'sources', 'concepts'}.
+        Returns {int_id: display_name}. Unknown ids are omitted.
+        """
+        if not ids:
+            return {}
+        response = self.session.get(
+            self.url + '/get-names',
+            params={'type': entity_type, 'ids': ','.join(map(str, ids))})
+        response.raise_for_status()
+        return {int(k): v for k, v in response.json().items()}
+
+    def get_paper_info(self, paper_ids):
+        """Look up title/year/venue for the given paper ids.
+
+        Returns {int_id: {'title': str, 'year': int|None, 'venue': str}}.
+        """
+        if not paper_ids:
+            return {}
+        response = self.session.get(
+            self.url + '/get-paper-info',
+            params={'ids': ','.join(map(str, paper_ids))})
+        response.raise_for_status()
+        return {int(k): v for k, v in response.json().items()}
+
     def get_node_info(
         self,
         *,
