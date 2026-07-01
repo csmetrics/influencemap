@@ -9,12 +9,23 @@ services:
     volumes:
       - /data/bingraph-openalex:/influencemap/bingraph-openalex
     environment:
-      # --preload: JIT + mmap init happen once in the master; forked
-      #   workers inherit the compiled state via copy-on-write instead of
-      #   each of 32 workers redoing 30-90s of Numba compilation.
-      # --timeout 300: allow cold mmap page-in for the 33 GB paper-title
-      #   file on the very first request, in case warmup misses a path.
-      GUNICORN_CMD_ARGS: --workers 32 --preload --timeout 300 --graceful-timeout 300 --bind 0.0.0.0:8000
+      # Thread pinning: numpy/BLAS default to spawning one thread per
+      #   CPU core PER WORKER. With 32 workers on a 48-core box that
+      #   balloons to ~1500 threads and kills fork throughput. Cap them.
+      OMP_NUM_THREADS: "1"
+      OPENBLAS_NUM_THREADS: "1"
+      MKL_NUM_THREADS: "1"
+      NUMBA_NUM_THREADS: "1"
+      # --preload disabled: Numba JIT state does not always survive
+      #   gunicorn's fork boundary. Each worker JITs independently at
+      #   import time via _warmup() instead. Costs ~30-90s CPU per
+      #   worker at startup but avoids fork races.
+      # --timeout 300: cover cold mmap page-in for the 33 GB paper-title
+      #   file on the very first request per worker.
+      # --workers 8: was 32. Each worker keeps its own Numba-compiled
+      #   code (~hundreds of MB) plus Python heap. 32 workers add up
+      #   fast alongside the shared 121 GB of file-backed mmaps.
+      GUNICORN_CMD_ARGS: --workers 8 --timeout 300 --graceful-timeout 300 --bind 0.0.0.0:8000
   webapp:
     build:
       context: .
