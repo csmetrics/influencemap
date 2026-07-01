@@ -31,9 +31,22 @@ def _rss_gb():
         return -1.0
 
 
+def _cgroup_gb():
+    """Current cgroup memory usage in GB (container-wide, cgroup v2/v1)."""
+    for path in ('/sys/fs/cgroup/memory.current',
+                 '/sys/fs/cgroup/memory/memory.usage_in_bytes'):
+        try:
+            with open(path) as f:
+                return int(f.read().strip()) / (1024 ** 3)
+        except Exception:
+            continue
+    return -1.0
+
+
 def _memstamp(label, t0):
-    _memlog.info('%s: rss=%.2fGB dt=%.2fs',
-                 label, _rss_gb(), time.monotonic() - t0)
+    _memlog.info('%s: rss=%.2fGB cgroup=%.2fGB pid=%d dt=%.2fs',
+                 label, _rss_gb(), _cgroup_gb(), os.getpid(),
+                 time.monotonic() - t0)
 from core.utils.load_tsv import tsv_to_dict
 from webapp.shortener import decode_filters, url_decode_info, url_encode_info
 from webapp.utils import *
