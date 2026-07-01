@@ -1,3 +1,5 @@
+import logging
+
 import flask
 
 from . import flowers
@@ -5,6 +7,37 @@ from . import flowers
 app = flask.Flask(__name__)
 
 florist = flowers.Florist('bingraph-openalex')
+
+
+def _warmup():
+    """Trigger Numba JIT compilation on module import.
+
+    Without this, the first user request pays a 30-90s compile cost per
+    worker, which typically exceeds gunicorn's request timeout and kills
+    the worker. Runs synchronously so the worker only reports ready once
+    the JIT paths are hot.
+    """
+    if florist.author_range == 0:
+        return
+    log = logging.getLogger(__name__)
+    try:
+        # Pick real ids from the bingraph so the whole pipeline exercises.
+        first_entity_id = int(florist.entity_ind2id_map.arrs[0])
+        florist.get_flower(
+            author_ids=[first_entity_id],
+            allow_not_found=True, max_results=1)
+        florist.get_stats(
+            author_ids=[first_entity_id], allow_not_found=True)
+        if len(florist.paper_ind2id_map.arrs) > 0:
+            first_paper_id = int(florist.paper_ind2id_map.arrs[0])
+            florist.get_paper_citations([first_paper_id])
+            florist.get_paper_info([first_paper_id])
+        florist.get_names('authors', [first_entity_id])
+    except Exception as e:  # noqa: BLE001
+        log.warning('konigsberg warmup skipped: %s', e)
+
+
+_warmup()
 
 
 def _get_ids_from_request(argname):
