@@ -405,17 +405,31 @@ def get_citation_papers():
         "node_info": session["node_information_store"],
     }
 
+    # Guardrails against pathological fan-out for very heavily-cited
+    # papers. Without them a single ego paper with millions of citors
+    # blows webapp memory to tens of GB (huge JSON parsing).
+    MAX_EGO_PAPERS = 500
+    MAX_CITORS = 50_000
+
     ego_info = papers_prop_query(paper_ids)
     ego_in_range = [pid for pid, info in ego_info.items()
                     if info["Year"] is not None
                     and pub_year_min <= info["Year"] <= pub_year_max]
     if not ego_in_range:
         return flask.jsonify({"papers": {}, **response_extras})
+    if len(ego_in_range) > MAX_EGO_PAPERS:
+        ego_in_range = ego_in_range[:MAX_EGO_PAPERS]
 
     citors_per_ego = kb_client.get_paper_citations(ego_in_range)
-    citor_ids = {cid for cits in citors_per_ego.values() for cid in cits}
+    citor_ids = set()
+    for cits in citors_per_ego.values():
+        citor_ids.update(cits)
+        if len(citor_ids) >= MAX_CITORS:
+            break
     if not citor_ids:
         return flask.jsonify({"papers": {}, **response_extras})
+    if len(citor_ids) > MAX_CITORS:
+        citor_ids = set(list(citor_ids)[:MAX_CITORS])
 
     citor_info = papers_prop_query(list(citor_ids))
     citations = conf_journ_to_display_names({
