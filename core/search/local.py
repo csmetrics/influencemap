@@ -19,6 +19,9 @@ _KONIGSBERG_URL = os.getenv('KONIGSBERG_URL', 'http://localhost:8081')
 _session = requests.Session()
 
 
+_HTTP_TIMEOUT = (5, 120)  # (connect_s, read_s)
+
+
 def _fetch_names(entity_type, ids):
     """Call konigsberg /get-names. Returns {int_id: raw_name}."""
     if not ids:
@@ -28,7 +31,8 @@ def _fetch_names(entity_type, ids):
         params={
             'type': entity_type,
             'ids': ','.join(str(i) for i in ids),
-        })
+        },
+        timeout=_HTTP_TIMEOUT)
     response.raise_for_status()
     return {int(k): v for k, v in response.json().items()}
 
@@ -42,7 +46,8 @@ def _fetch_paper_info(ids):
         return {}
     response = _session.get(
         _KONIGSBERG_URL + '/get-paper-info',
-        params={'ids': ','.join(str(i) for i in ids)})
+        params={'ids': ','.join(str(i) for i in ids)},
+        timeout=_HTTP_TIMEOUT)
     response.raise_for_status()
     return {int(k): v for k, v in response.json().items()}
 
