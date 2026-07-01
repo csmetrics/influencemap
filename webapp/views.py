@@ -400,19 +400,31 @@ def get_citation_papers():
     pub_year_min = int(request.form.get("pub_year_min"))
     pub_year_max = int(request.form.get("pub_year_max"))
     paper_ids = session['cache']
-    papers = papers_prop_query(paper_ids)
-    cite_papers = [
-        [citation for citation in paper.get("Citations", [])
-         if citation.get("Year") is not None
-         and cite_year_min <= citation["Year"] <= cite_year_max]
-        for paper in papers.values()
-        if paper["Year"] is not None
-        and pub_year_min <= paper["Year"] <= pub_year_max]
-    citations = sum(cite_papers, [])
-    citations = conf_journ_to_display_names(
-        {paper["PaperId"]: paper for paper in citations})
+    response_extras = {
+        "names": session["entity_names"] + session["node_info"],
+        "node_info": session["node_information_store"],
+    }
 
-    return flask.jsonify({"papers": citations, "names": session["entity_names"] + session["node_info"], "node_info": session["node_information_store"]})
+    ego_info = papers_prop_query(paper_ids)
+    ego_in_range = [pid for pid, info in ego_info.items()
+                    if info["Year"] is not None
+                    and pub_year_min <= info["Year"] <= pub_year_max]
+    if not ego_in_range:
+        return flask.jsonify({"papers": {}, **response_extras})
+
+    citors_per_ego = kb_client.get_paper_citations(ego_in_range)
+    citor_ids = {cid for cits in citors_per_ego.values() for cid in cits}
+    if not citor_ids:
+        return flask.jsonify({"papers": {}, **response_extras})
+
+    citor_info = papers_prop_query(list(citor_ids))
+    citations = conf_journ_to_display_names({
+        info["PaperId"]: info for info in citor_info.values()
+        if info["Year"] is not None
+        and cite_year_min <= info["Year"] <= cite_year_max
+    })
+
+    return flask.jsonify({"papers": citations, **response_extras})
 
 
 def get_entities(paper):

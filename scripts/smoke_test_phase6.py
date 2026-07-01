@@ -98,6 +98,27 @@ def check_get_paper_info():
     return True
 
 
+def check_get_paper_citations():
+    print('\n[/get-paper-citations]')
+    try:
+        status, body = _get(
+            KB + '/get-paper-citations', {'ids': str(PAPER_ID)})
+    except Exception as e:
+        print(f'  {FAIL} request failed: {e}')
+        return False
+    citors = body.get(str(PAPER_ID))
+    if status != 200 or citors is None:
+        print(f'  {FAIL} status={status} body={body!r}')
+        return False
+    if not isinstance(citors, list):
+        print(f'  {FAIL} expected list of citor ids, got {type(citors)}')
+        return False
+    print(f'  {PASS} paper({PAPER_ID}) has {len(citors)} citor(s)')
+    if citors:
+        print(f'      first 3 citors: {citors[:3]}')
+    return True
+
+
 def check_batch():
     """Single round-trip with mixed valid+invalid ids; check unknowns drop."""
     print('\n[batch + unknown id handling]')
@@ -161,6 +182,7 @@ def main():
     results = [
         check_get_names(),
         check_get_paper_info(),
+        check_get_paper_citations(),
         check_batch(),
         check_webapp_submit(),
     ]

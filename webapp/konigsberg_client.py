@@ -96,6 +96,20 @@ class KonigsbergClient:
         response.raise_for_status()
         return {int(k): v for k, v in response.json().items()}
 
+    def get_paper_citations(self, paper_ids):
+        """Look up the citing papers for each given paper id.
+
+        Returns {int_id: [citor_paper_id, ...]}.
+        """
+        if not paper_ids:
+            return {}
+        response = self.session.get(
+            self.url + '/get-paper-citations',
+            params={'ids': ','.join(map(str, paper_ids))})
+        response.raise_for_status()
+        return {int(k): [int(x) for x in v]
+                for k, v in response.json().items()}
+
     def get_node_info(
         self,
         *,

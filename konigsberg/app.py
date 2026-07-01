@@ -184,5 +184,12 @@ def get_paper_info():
     return flask.jsonify(stringify_keys(result))
 
 
+@app.route('/get-paper-citations')
+def get_paper_citations():
+    ids = _get_ids_from_request('ids')
+    result = florist.get_paper_citations(ids)
+    return flask.jsonify(stringify_keys(result))
+
+
 if __name__ == '__main__':
     app.run('127.0.0.1', port=8081, debug=True)

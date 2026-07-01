@@ -347,6 +347,29 @@ class Florist:
                 return self.entity_names.get(ent_i)
         return ''
 
+    def get_paper_citations(self, paper_ids):
+        """Look up the citing papers for each given paper id.
+
+        Returns ``{paper_id: [citor_paper_id, ...]}``. "Citor" means
+        another paper that cites the given one. Walks the
+        paper2citor-citee table; unknown paper ids are omitted.
+        """
+        if not paper_ids:
+            return {}
+        paper_ind2id = self.paper_ind2id_map.arrs
+
+        arr = np.array(list(paper_ids), dtype=np.uint64)
+        length = _ids_to_ind(self.paper_id2ind_map.arrs, arr)
+
+        result = {}
+        for j in range(length):
+            ind = int(arr[j])
+            orig_id = int(paper_ind2id[ind])
+            citor_inds, _citee_inds = _traverse_citations(
+                self.citation_maps.arrs, np.uint64(ind))
+            result[orig_id] = [int(paper_ind2id[ci]) for ci in citor_inds]
+        return result
+
     def get_paper_info(self, paper_ids):
         """Look up paper title/year/venue locally.
 
