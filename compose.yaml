@@ -47,11 +47,14 @@ services:
       - ./logs:/influencemap/logs
     environment:
       KONIGSBERG_URL: http://konigsberg:8000
-      # 300s so a slow konigsberg first-request doesn't kill the webapp
-      # worker mid-flight.
-      # --workers 4: was 32. Frees ~15 GB of anon memory for konigsberg's
-      #   first-request JIT spike. Bump back up once the JIT problem is
-      #   handled via cache=True in flowers.py.
-      GUNICORN_CMD_ARGS: --workers 4 --timeout 300 --graceful-timeout 300 --bind 0.0.0.0:8000
+      # --workers 2: reduced from 4 while diagnosing a memory spike on
+      #   /submit/ (worker RSS grew past 20 GB per worker → 90 GB total
+      #   before OOM). Bump back to 4-8 once the growth source is found.
+      # --max-requests 50 + jitter: auto-recycle each worker after ~50
+      #   requests so any per-request memory the sync worker fails to
+      #   release doesn't accumulate indefinitely. Sync workers do NOT
+      #   return freed memory to the OS.
+      # --timeout 300: unchanged; covers slow konigsberg first request.
+      GUNICORN_CMD_ARGS: --workers 2 --max-requests 50 --max-requests-jitter 10 --timeout 300 --graceful-timeout 300 --bind 0.0.0.0:8000
     depends_on:
       - konigsberg

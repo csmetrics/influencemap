@@ -1,5 +1,10 @@
 import json
+import logging
 import math
+import os
+import resource
+import sys
+import time
 
 import flask
 from flask import request
@@ -8,6 +13,27 @@ from flask_cors import CORS, cross_origin
 import core.utils.entity_type as ent
 from core.search.query_info import query_entity_by_keyword, convert_id
 from core.search.local import papers_prop_query, query_entity_by_id
+
+_memlog = logging.getLogger('submit_memlog')
+_memlog.setLevel(logging.INFO)
+if not _memlog.handlers:
+    _h = logging.StreamHandler(sys.stderr)
+    _h.setFormatter(logging.Formatter('[%(asctime)s] [MEM] %(message)s'))
+    _memlog.addHandler(_h)
+
+
+def _rss_gb():
+    """Current process RSS in GB (Linux)."""
+    try:
+        rss_kb = resource.getrusage(resource.RUSAGE_SELF).ru_maxrss
+        return rss_kb / (1024 * 1024)
+    except Exception:
+        return -1.0
+
+
+def _memstamp(label, t0):
+    _memlog.info('%s: rss=%.2fGB dt=%.2fs',
+                 label, _rss_gb(), time.monotonic() - t0)
 from core.utils.load_tsv import tsv_to_dict
 from webapp.shortener import decode_filters, url_decode_info, url_encode_info
 from webapp.utils import *
@@ -222,6 +248,8 @@ def search():
 
 @blueprint.route('/submit/', methods=['GET', 'POST'])
 def submit():
+    _t0 = time.monotonic()
+    _memstamp('submit:start', _t0)
     pub_years = None
     cit_years = None
     self_citations = False
@@ -280,17 +308,22 @@ def submit():
         if total_entities > 1:
             flower_name += f" +{total_entities - 1} more"
 
+    _memstamp('before_get_flower', _t0)
     flower = kb_client.get_flower(
         author_ids=author_ids, affiliation_ids=affiliation_ids,
         field_of_study_ids=fos_ids,
         journal_ids=journal_ids, paper_ids=paper_ids, pub_years=pub_years,
         cit_years=cit_years, coauthors=coauthors,
         self_citations=self_citations, max_results=50)
+    _memstamp(
+        f'after_get_flower(response_bytes={len(json.dumps(flower))})', _t0)
 
     stats = kb_client.get_stats(
         author_ids=author_ids, affiliation_ids=affiliation_ids,
         field_of_study_ids=fos_ids,
         journal_ids=journal_ids, paper_ids=paper_ids)
+    _memstamp(
+        f'after_get_stats(response_bytes={len(json.dumps(stats))})', _t0)
 
     url_base = f"https://influenceflower.cmlab.dev/submit/?id={doc_id}"
 
@@ -306,7 +339,11 @@ def submit():
         session=session, selection=dict(
             pub_years=pub_years, cit_years=cit_years, coauthors=coauthors,
             self_citations=self_citations))
-    return flask.render_template("flower.html", **rdata)
+    _memstamp('after_make_response_data', _t0)
+
+    html = flask.render_template("flower.html", **rdata)
+    _memstamp(f'after_render(html_bytes={len(html)})', _t0)
+    return html
 
 
 @blueprint.route('/resubmit/', methods=['POST'])
