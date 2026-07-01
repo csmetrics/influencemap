@@ -167,14 +167,25 @@ def make_year_slider_and_stats(
     *,
     selection=None,
 ):
+    # Sentinel guard: konigsberg's paper-years.json ranges through the
+    # uint16 sentinel (65535) for "missing year" markers. A single
+    # sentinel key made cit_chart below iterate range(min_year, 65536) —
+    # tens of thousands of iterations each allocating an inner list of
+    # the same length. Filter unreasonable years before any range()
+    # computation.
+    _MAX_YEAR = 2200
     pub_year_counts = {int(year): count
                        for year, count in pub_year_counts.items()
-                       if count}
-    cit_year_counts = {int(year): {int(year_): count
-                                   for year_, count in year_counts.items()
-                                   if count}
-                       for year, year_counts in cit_year_counts.items()
-                       if any(year_counts.values())}
+                       if count and int(year) <= _MAX_YEAR}
+    _filtered_cit = {}
+    for year, year_counts in cit_year_counts.items():
+        if int(year) > _MAX_YEAR:
+            continue
+        inner = {int(y_): c for y_, c in year_counts.items()
+                 if c and int(y_) <= _MAX_YEAR}
+        if inner:
+            _filtered_cit[int(year)] = inner
+    cit_year_counts = _filtered_cit
 
     pub_range_start = min(pub_year_counts) if pub_year_counts else 0
     pub_range_end = max(pub_year_counts) if pub_year_counts else 0
@@ -300,11 +311,14 @@ def make_response_data(
     _stamp('make_response_data: all parallel tasks done')
 
     if stats is not None:
+        _stamp('make_response_data: calling make_year_slider_and_stats')
         res['stats'], res['yearSlider'] = make_year_slider_and_stats(
             stats['pub_year_counts'], stats['cit_year_counts'],
             stats['pub_count'], stats['cit_count'], stats['ref_count'],
             selection=selection)
+        _stamp('make_response_data: make_year_slider_and_stats done')
 
     res['session'] = session
 
+    _stamp('make_response_data: RETURN')
     return res

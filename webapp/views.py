@@ -352,8 +352,9 @@ def submit():
         session=session, selection=dict(
             pub_years=pub_years, cit_years=cit_years, coauthors=coauthors,
             self_citations=self_citations))
-    _memstamp('after_make_response_data', _t0)
+    _memstamp(f'after_make_response_data rdata_keys={sorted(rdata.keys())}', _t0)
 
+    _memstamp('before_render_template', _t0)
     html = flask.render_template("flower.html", **rdata)
     _memstamp(f'after_render(html_bytes={len(html)})', _t0)
     return html
