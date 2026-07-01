@@ -1,4 +1,29 @@
 services:
+  opensearch:
+    image: opensearchproject/opensearch:2.11.1
+    restart: unless-stopped
+    environment:
+      - discovery.type=single-node
+      # No auth — internal network only, not exposed to host by default.
+      - DISABLE_SECURITY_PLUGIN=true
+      - DISABLE_INSTALL_DEMO_CONFIG=true
+      - bootstrap.memory_lock=true
+      # 8 GB heap. Off-heap Lucene page cache is separately opportunistic.
+      # Bump to 12-16 GB after we see how big the works index becomes.
+      - "OPENSEARCH_JAVA_OPTS=-Xms8g -Xmx8g"
+      - cluster.routing.allocation.disk.watermark.low=95%
+      - cluster.routing.allocation.disk.watermark.high=97%
+      - cluster.routing.allocation.disk.watermark.flood_stage=98%
+    ulimits:
+      memlock: { soft: -1, hard: -1 }
+      nofile:  { soft: 65536, hard: 65536 }
+    volumes:
+      - /data/opensearch:/usr/share/opensearch/data
+    # No `ports:` — internal only. Uncomment to expose 9200 for admin
+    # queries from the host or an SSH tunnel:
+    # ports:
+    #   - "127.0.0.1:9200:9200"
+
   konigsberg:
     build:
       context: .
@@ -49,6 +74,7 @@ services:
       - ./logs:/influencemap/logs
     environment:
       KONIGSBERG_URL: http://konigsberg:8000
+      OPENSEARCH_URL: http://opensearch:9200
       # --workers 4: reasonable throughput now that the memory issues
       #   are fixed (sentinel year filter + response cache).
       # --max-requests + jitter: auto-recycle workers to release any
@@ -59,3 +85,4 @@ services:
       GUNICORN_CMD_ARGS: --workers 4 --max-requests 200 --max-requests-jitter 20 --timeout 300 --graceful-timeout 300 --bind 0.0.0.0:8000
     depends_on:
       - konigsberg
+      - opensearch

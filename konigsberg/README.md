@@ -108,7 +108,44 @@ Expected file sizes (full OpenAlex snapshot, ~500M works, ~95M authors):
 
 After this step, copy/sync the entire `bingraph-openalex/` directory back to the deploy server.
 
-## 4. Run the Scoring Engine
+## 4. Index Search Data into OpenSearch
+
+OpenSearch powers typeahead search (replaces the old OpenAlex `/search` API call) and paper-title lookups for tooltips (replaces the deprecated `paper-title-*.bin`).
+
+Start OpenSearch (defined in `compose.yaml` at repo root):
+
+```
+docker compose up -d opensearch
+docker compose exec webapp curl -s http://opensearch:9200/_cluster/health
+```
+
+Run the indexer from any host with the `.txt` files accessible and network reach to OpenSearch. From inside the webapp container is easiest — it already has `opensearch-py` installed:
+
+```
+docker compose exec webapp python -m scripts.index_to_opensearch \
+    --url http://opensearch:9200 \
+    --data-dir /path/to/openalex-snapshot/data
+```
+
+Per-entity sizing and expected duration on NVMe (rough):
+
+| Entity | Docs | Duration | On-disk index |
+|---|---|---|---|
+| `institutions` | ~110K | seconds | <100 MB |
+| `concepts`     | ~65K  | seconds | <100 MB |
+| `sources`      | ~250K | seconds | <100 MB |
+| `authors`      | ~95M  | 1–2 h   | ~30 GB |
+| `works`        | ~500M | 12–36 h | ~100–150 GB |
+
+Flags:
+- `--entity <type>` — index just one type (default: `all`).
+- `--chunk-size N` — bulk size (default 5000).
+- `--recreate` — delete the currently-aliased index for this entity before indexing.
+- `--delete-old` — after alias swap, remove previous versioned indexes.
+
+Indexer produces versioned index names (`authors_v20260701_140000`, …) and swaps a stable alias (`authors`, `works`, …) atomically on completion, so live queries never see a half-built index.
+
+## 5. Run the Scoring Engine
 
 Run the konigsberg app on port 8081.
 ```
