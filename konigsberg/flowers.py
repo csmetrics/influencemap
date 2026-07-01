@@ -620,7 +620,7 @@ def _summarize_node_info(citor_papers, citee_papers, ind2id):
 split_result_val_t = nb.types.Tuple([nb.u8, nb.f4, nb.f4, nb.u1, nb.u1])
 
 
-@nb.njit(nogil=True)
+@nb.njit(nogil=True, cache=True)
 def get_split_res(
     res,
     author_range, aff_range, fos_range, journal_range
@@ -651,19 +651,19 @@ def get_split_res(
     return author_res, aff_res, fos_res, venues_res
 
 
-@nb.njit(nogil=True)
+@nb.njit(nogil=True, cache=True)
 def _sort(res_list):
     res_list.sort(key=lambda r: (-max(r[1], r[2]), -r[1] - r[2], r[0]))
 
 
-@nb.njit(nogil=True)
+@nb.njit(nogil=True, cache=True)
 def _select_top_n(res_list, max_results):
     res_list.sort(key=lambda r: (-max(r[1], r[2]), -r[1] - r[2], r[0]))
     if len(res_list) > max_results:
         del res_list[max_results:]
 
 
-@nb.njit(nogil=True)
+@nb.njit(nogil=True, cache=True)
 def _to_arrs(res_list):
     n = len(res_list)
     id_arr = np.empty(n, dtype=np.uint64)
@@ -681,7 +681,7 @@ def _to_arrs(res_list):
     return id_arr, citor_score_arr, citee_score_arr, coauthor_arr, kind_arr
 
 
-@nb.njit(nogil=True)
+@nb.njit(nogil=True, cache=True)
 def _indices_to_ids(res, ind2id):
     for i in range(len(res)):
         index, citor_score, citee_score, coauthor, kind = res[i]
@@ -689,7 +689,7 @@ def _indices_to_ids(res, ind2id):
         res[i] = id_, citor_score, citee_score, coauthor, kind
 
 
-@nb.njit(nb.u8(id_mapping_arrs, nb.u8[::1]), nogil=True)
+@nb.njit(nb.u8(id_mapping_arrs, nb.u8[::1]), nogil=True, cache=True)
 def _ids_to_ind(mapping, arr):
     """Replace all IDs in arr with indices in-place."""
     id2ind, ind2id, _mask = mapping
@@ -729,7 +729,7 @@ def _ids_to_ind(mapping, arr):
     return i
 
 
-@nb.njit(mmapped_arr(mapping_arrs, nb.u8), nogil=True)
+@nb.njit(mmapped_arr(mapping_arrs, nb.u8), nogil=True, cache=True)
 def _traverse_one(mapping, i):
     """Given an index i, return the indices i maps tp.
 
@@ -751,7 +751,7 @@ def _traverse_one(mapping, i):
     return ind[start:end]
 
 
-@nb.njit(mapping_arrs(mapping_arrs, nb.u8), nogil=True)
+@nb.njit(mapping_arrs(mapping_arrs, nb.u8), nogil=True, cache=True)
 def _traverse_citations(mapping, i):
     """Given a paper index i, return the citors and citees of i.
 
@@ -796,7 +796,7 @@ def _is_in_range_overload(range_, i):
         return lambda range_, i: range_[0] <= i < range_[1]
 
 
-@nb.njit(nogil=True)
+@nb.njit(nogil=True, cache=True)
 def _is_self_citation(ego_entities, entity_ids):
     """Check if a paper is a self-citation.
 
@@ -810,7 +810,7 @@ def _is_self_citation(ego_entities, entity_ids):
     return False
 
 
-@nb.njit(nogil=True)
+@nb.njit(nogil=True, cache=True)
 def _is_author(author_range, i):
     """Check if entity i is an author.
 
@@ -820,7 +820,7 @@ def _is_author(author_range, i):
     return i < author_range
 
 
-@nb.njit(nogil=True)
+@nb.njit(nogil=True, cache=True)
 def _is_author_or_aff(aff_range, i):
     """Check if entity i is an affiliation.
 
@@ -830,7 +830,7 @@ def _is_author_or_aff(aff_range, i):
     return i < aff_range
 
 
-@nb.njit(nb.uint64(nb.uint64, nb.uint64[::1]), nogil=True)
+@nb.njit(nb.uint64(nb.uint64, nb.uint64[::1]), nogil=True, cache=True)
 def _get_year(paper_id, paper_year_map):
     n = paper_year_map.shape[0]
     prev = nb.u8(0)
@@ -846,7 +846,7 @@ dict_val = nb.types.Tuple([nb.u8, nb.f4])
 result_val_t = nb.types.Tuple([nb.u8, nb.f4, nb.f4, nb.u1])
 
 
-@nb.njit(nogil=True)
+@nb.njit(nogil=True, cache=True)
 def _make_flower(
     entity_ids, paper_ids,
     entity2paper_map, paper2entity_map, citation_maps,
@@ -961,7 +961,7 @@ def _make_flower(
     return result
 
 
-@nb.njit(nogil=True)
+@nb.njit(nogil=True, cache=True)
 def _make_stats(
     entity_ids, paper_ids,
     entity2paper_map, citation_maps,
@@ -990,7 +990,7 @@ def _make_stats(
 cite_map = nb.types.Tuple([nb.u8, nb.u8])
 
 
-@nb.njit(nogil=True)
+@nb.njit(nogil=True, cache=True)
 def _make_node_info(
     node_id,
     entity_ids, paper_ids,
