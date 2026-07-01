@@ -22,10 +22,20 @@ services:
       #   worker at startup but avoids fork races.
       # --timeout 300: cover cold mmap page-in for the 33 GB paper-title
       #   file on the very first request per worker.
-      # --workers 8: was 32. Each worker keeps its own Numba-compiled
-      #   code (~hundreds of MB) plus Python heap. 32 workers add up
-      #   fast alongside the shared 121 GB of file-backed mmaps.
-      GUNICORN_CMD_ARGS: --workers 8 --timeout 300 --graceful-timeout 300 --bind 0.0.0.0:8000
+      # KONIGSBERG_SKIP_WARMUP=1 skips _warmup() at import. Warmup was
+      #   OOMing (32 GB anon per worker) because flowers.py numba
+      #   functions with nb.typed.List compile with 20-60 GB of LLVM
+      #   state and none of them are cache=True. Deferring JIT to the
+      #   first user request spreads the memory spike out and lets other
+      #   init settle first. First request will still be slow.
+      KONIGSBERG_SKIP_WARMUP: "1"
+      # Persistent numba cache — once a compiled function is written
+      #   here, subsequent restarts skip the JIT step entirely (if we
+      #   later add cache=True to the flowers.py @nb.njit decorators).
+      NUMBA_CACHE_DIR: /influencemap/bingraph-openalex/.numba_cache
+      # --workers 1: single worker so only one 32 GB JIT can happen at
+      #   a time. Bump to 2-4 after cache=True is added in flowers.py.
+      GUNICORN_CMD_ARGS: --workers 1 --timeout 300 --graceful-timeout 300 --bind 0.0.0.0:8000
   webapp:
     build:
       context: .
@@ -38,8 +48,10 @@ services:
     environment:
       KONIGSBERG_URL: http://konigsberg:8000
       # 300s so a slow konigsberg first-request doesn't kill the webapp
-      # worker mid-flight (was 90s, which the flower render can exceed
-      # when konigsberg is still warming up).
-      GUNICORN_CMD_ARGS: --workers 32 --timeout 300 --graceful-timeout 300 --bind 0.0.0.0:8000
+      # worker mid-flight.
+      # --workers 4: was 32. Frees ~15 GB of anon memory for konigsberg's
+      #   first-request JIT spike. Bump back up once the JIT problem is
+      #   handled via cache=True in flowers.py.
+      GUNICORN_CMD_ARGS: --workers 4 --timeout 300 --graceful-timeout 300 --bind 0.0.0.0:8000
     depends_on:
       - konigsberg

@@ -1,43 +1,68 @@
 import logging
+import os
+import time
 
 import flask
 
 from . import flowers
 
+log = logging.getLogger(__name__)
+log.setLevel(logging.INFO)
+if not log.handlers:
+    _h = logging.StreamHandler()
+    _h.setFormatter(logging.Formatter(
+        '[%(asctime)s] [warmup] %(message)s'))
+    log.addHandler(_h)
+
 app = flask.Flask(__name__)
 
+log.info('instantiating Florist...')
+_t0 = time.monotonic()
 florist = flowers.Florist('bingraph-openalex')
+log.info('Florist ready in %.1fs', time.monotonic() - _t0)
 
 
 def _warmup():
     """Trigger Numba JIT compilation on module import.
 
-    Without this, the first user request pays a 30-90s compile cost per
-    worker, which typically exceeds gunicorn's request timeout and kills
-    the worker. Runs synchronously so the worker only reports ready once
-    the JIT paths are hot.
+    Each step is timed and logged so a worker OOM/timeout tells us
+    exactly which pipeline stage was in progress.
     """
     if florist.author_range == 0:
+        log.warning('empty author range; skipping warmup')
         return
-    log = logging.getLogger(__name__)
-    try:
-        # Pick real ids from the bingraph so the whole pipeline exercises.
-        first_entity_id = int(florist.entity_ind2id_map.arrs[0])
-        florist.get_flower(
-            author_ids=[first_entity_id],
-            allow_not_found=True, max_results=1)
-        florist.get_stats(
-            author_ids=[first_entity_id], allow_not_found=True)
-        if len(florist.paper_ind2id_map.arrs) > 0:
-            first_paper_id = int(florist.paper_ind2id_map.arrs[0])
-            florist.get_paper_citations([first_paper_id])
-            florist.get_paper_info([first_paper_id])
-        florist.get_names('authors', [first_entity_id])
-    except Exception as e:  # noqa: BLE001
-        log.warning('konigsberg warmup skipped: %s', e)
+    steps = []
+    first_entity_id = int(florist.entity_ind2id_map.arrs[0])
+    steps.append(('get_names', lambda: florist.get_names(
+        'authors', [first_entity_id])))
+    steps.append(('get_paper_info', lambda: (
+        len(florist.paper_ind2id_map.arrs) > 0
+        and florist.get_paper_info(
+            [int(florist.paper_ind2id_map.arrs[0])]))))
+    steps.append(('get_paper_citations', lambda: (
+        len(florist.paper_ind2id_map.arrs) > 0
+        and florist.get_paper_citations(
+            [int(florist.paper_ind2id_map.arrs[0])]))))
+    steps.append(('get_stats', lambda: florist.get_stats(
+        author_ids=[first_entity_id], allow_not_found=True)))
+    steps.append(('get_flower', lambda: florist.get_flower(
+        author_ids=[first_entity_id],
+        allow_not_found=True, max_results=1)))
+
+    for name, fn in steps:
+        t = time.monotonic()
+        try:
+            fn()
+            log.info('%s ok (%.1fs)', name, time.monotonic() - t)
+        except Exception as e:  # noqa: BLE001
+            log.warning('%s failed after %.1fs: %s',
+                        name, time.monotonic() - t, e)
 
 
-_warmup()
+if os.getenv('KONIGSBERG_SKIP_WARMUP') == '1':
+    log.info('KONIGSBERG_SKIP_WARMUP=1 set; skipping warmup')
+else:
+    _warmup()
 
 
 def _get_ids_from_request(argname):
