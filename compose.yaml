@@ -44,15 +44,18 @@ services:
     ports:
       - "8001:8000"
     volumes:
+      # logs/ mount also stores flower_cache/ — persistent /submit
+      #   response cache across container restarts.
       - ./logs:/influencemap/logs
     environment:
       KONIGSBERG_URL: http://konigsberg:8000
-      # --workers 1: DIAGNOSTIC — isolate whether a specific request
-      #   grows the worker, or whether another worker/pid is at fault.
-      #   ru_maxrss in _memstamp only shows the CALLING process; if the
-      #   instrumented worker stays small but container total balloons,
-      #   the memory is coming from something else. workers=1 makes it
-      #   impossible for a second worker to hide.
-      GUNICORN_CMD_ARGS: --workers 1 --max-requests 50 --max-requests-jitter 10 --timeout 300 --graceful-timeout 300 --bind 0.0.0.0:8000
+      # --workers 4: reasonable throughput now that the memory issues
+      #   are fixed (sentinel year filter + response cache).
+      # --max-requests + jitter: auto-recycle workers to release any
+      #   memory the sync worker fails to return to the OS.
+      # --timeout 300: covers slow konigsberg first-request on cold
+      #   page cache. Cached responses serve in ms so this only bites
+      #   on the very first hit of a new URL.
+      GUNICORN_CMD_ARGS: --workers 4 --max-requests 200 --max-requests-jitter 20 --timeout 300 --graceful-timeout 300 --bind 0.0.0.0:8000
     depends_on:
       - konigsberg

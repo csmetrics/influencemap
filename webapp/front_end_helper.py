@@ -1,9 +1,4 @@
 import itertools
-import logging
-import os
-import resource
-import sys
-import time
 from functools import partial
 
 import numpy as np
@@ -15,22 +10,6 @@ from core.search.local import (
     get_display_names_from_author_ids, get_display_names_from_conference_ids,
     get_display_names_from_fos_ids, get_display_names_from_journal_ids,
     get_names_from_affiliation_ids)
-
-
-_helper_log = logging.getLogger('helper_memlog')
-_helper_log.setLevel(logging.INFO)
-if not _helper_log.handlers:
-    _h = logging.StreamHandler(sys.stderr)
-    _h.setFormatter(logging.Formatter('[%(asctime)s] [HELPER] %(message)s'))
-    _helper_log.addHandler(_h)
-
-
-def _stamp(msg):
-    try:
-        rss = resource.getrusage(resource.RUSAGE_SELF).ru_maxrss / (1024 * 1024)
-    except Exception:
-        rss = -1.0
-    _helper_log.info('%s rss=%.2fGB pid=%d', msg, rss, os.getpid())
 
 
 def _make_normed_ratio(series):
@@ -52,26 +31,19 @@ def _make_one_response_flower(
     *,
     gtype, flower_name,
 ):
-    _stamp(f'{gtype} enter n_ids={len(subflower.get("ids", []))} '
-           f'total={subflower.get("total")}')
     df_original = pd.DataFrame(dict(
         ids=subflower['ids'],
         influencing=subflower['citee_scores'],
         influenced=subflower['citor_scores'],
         coauthors=subflower['coauthors'],
         type=subflower['kinds']))
-    _stamp(f'{gtype} df built rows={len(df_original)}')
 
     df_original['name'] = None
     for i, name_lookup_f in name_lookup_fs.items():
         mask = df_original['type'] == i
-        n = int(mask.sum())
         if mask.any():
             ids = tuple(df_original[mask]['ids'])
-            _stamp(f'{gtype} lookup type={i} n_ids={n} calling name_lookup_f')
             ids_to_name = name_lookup_f(ids)
-            _stamp(f'{gtype} lookup type={i} done '
-                   f'n_returned={len(ids_to_name)}')
             names = tuple(
                 [ids_to_name[id] if id in ids_to_name else 'none' for id in ids])
             df_original.loc[mask, 'name'] = names
@@ -148,7 +120,6 @@ def _make_one_response_flower(
         for i, row in enumerate(df.itertuples())
     )
     bars = list(itertools.chain.from_iterable(zip(bars_in, bars_out)))
-    _stamp(f'{gtype} return n_nodes={len(nodes)} n_links={len(links)}')
     return [dict(nodes=nodes, links=links, bars=bars, total=total)]
 
 
@@ -261,15 +232,8 @@ def make_year_slider_and_stats(
 
 def execute_parallel(args):
     gtype, flower_data, func_dict, flower_name = args
-    _stamp(f'execute_parallel enter gtype={gtype}')
-    try:
-        result = _make_one_response_flower(
-            flower_data, func_dict, gtype=gtype, flower_name=flower_name)
-    except Exception as e:
-        _stamp(f'execute_parallel EXCEPTION gtype={gtype}: {e!r}')
-        raise
-    _stamp(f'execute_parallel exit gtype={gtype}')
-    return gtype, result
+    return gtype, _make_one_response_flower(
+        flower_data, func_dict, gtype=gtype, flower_name=flower_name)
 
 
 def make_response_data(
@@ -300,25 +264,19 @@ def make_response_data(
     res['navbarOption'] = NAVBAR_OPTIONS
 
     # Execute in parallel
-    _stamp(f'make_response_data: submitting {len(functions)} parallel tasks')
     with ThreadPoolExecutor() as executor:
         futures = {executor.submit(
             execute_parallel, func): func for func in functions}
         for future in as_completed(futures):
             gtype, result = future.result()
-            _stamp(f'make_response_data: got result for {gtype}')
             res[gtype] = result
-    _stamp('make_response_data: all parallel tasks done')
 
     if stats is not None:
-        _stamp('make_response_data: calling make_year_slider_and_stats')
         res['stats'], res['yearSlider'] = make_year_slider_and_stats(
             stats['pub_year_counts'], stats['cit_year_counts'],
             stats['pub_count'], stats['cit_count'], stats['ref_count'],
             selection=selection)
-        _stamp('make_response_data: make_year_slider_and_stats done')
 
     res['session'] = session
 
-    _stamp('make_response_data: RETURN')
     return res

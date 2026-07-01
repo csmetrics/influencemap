@@ -91,10 +91,16 @@ class StringMapping:
 
     ptr is a uint64 array of length N+1; dat is contiguous UTF-8 bytes.
     The string at index ``i`` is ``dat[ptr[i]:ptr[i+1]].decode('utf-8')``.
+
+    When ``advise_random`` is set, hints the kernel that dat will be
+    accessed randomly and infrequently — disables readahead so the file
+    doesn't evict hot pages of other mmaps. Recommended for large dat
+    files whose working set is a tiny fraction of file size (e.g. paper
+    titles: 54 GB on disk, only tens of KB touched per request).
     """
     __slots__ = ['ptr', 'dat', 'ptr_mmap', 'dat_mmap']
 
-    def __init__(self, ptr_path, dat_path):
+    def __init__(self, ptr_path, dat_path, advise_random=False):
         with open(ptr_path, 'rb') as f:
             self.ptr_mmap = mmap.mmap(f.fileno(), 0, prot=mmap.PROT_READ)
         self.ptr = np.frombuffer(self.ptr_mmap, dtype=np.uint64)
@@ -105,6 +111,11 @@ class StringMapping:
             if size > 0:
                 self.dat_mmap = mmap.mmap(f.fileno(), 0, prot=mmap.PROT_READ)
                 self.dat = np.frombuffer(self.dat_mmap, dtype=np.uint8)
+                if advise_random and hasattr(self.dat_mmap, 'madvise'):
+                    try:
+                        self.dat_mmap.madvise(mmap.MADV_RANDOM)
+                    except (OSError, AttributeError):
+                        pass
             else:
                 self.dat_mmap = None
                 self.dat = np.empty(0, dtype=np.uint8)
@@ -235,7 +246,10 @@ class Florist:
         title_ptr = path / 'paper-title-ptr.bin'
         title_dat = path / 'paper-title-dat.bin'
         if title_ptr.exists() and title_dat.exists():
-            self.paper_titles = StringMapping(title_ptr, title_dat)
+            # 54 GB file; disable readahead so tooltip lookups don't
+            # displace hot pages of paper2entity / paper2citor-citee.
+            self.paper_titles = StringMapping(
+                title_ptr, title_dat, advise_random=True)
         else:
             self.paper_titles = None
 

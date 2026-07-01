@@ -82,19 +82,20 @@ The resulting binary graph consists of 15 files, as listed below, with a total s
 
 Run `id2name_builder.py` after `builder.py`. It reads the display-name/title columns added by the preprocessor and emits:
 
-- `entity-name-ptr.bin` + `entity-name-dat.bin` — display names for authors, institutions, concepts, and sources, concatenated in the same order as `entities-ind2id.bin`.
-- `paper-title-ptr.bin` + `paper-title-dat.bin` — paper titles in `paper-ind2id.bin` order.
+- `entity-name-ptr.bin` + `entity-name-dat.bin` — display names for authors, institutions, concepts, and sources, concatenated in the same order as `entities-ind2id.bin`. **Required** — used on every flower render.
+- `paper-title-ptr.bin` + `paper-title-dat.bin` — paper titles in `paper-ind2id.bin` order. **Deprecated**: skip with `--skip-papers`. Paper titles will move to OpenSearch; the 54 GB paper-title mmap put too much pressure on the page cache and slowed cold-cache flower requests. Florist tolerates missing files (returns empty title from `get_paper_info`).
 
 ```
 ~/influencemap/konigsberg$ python id2name_builder.py \
     --csv-dir /data_seoul/openalex/openalex-snapshot/data \
-    --bingraph bingraph-openalex
+    --bingraph bingraph-openalex \
+    --skip-papers
 ```
 
 Notes:
-- The works.txt for ~500M papers takes a few hours per pass (two passes total) on NVMe storage. Use `--chunksize` to tune memory vs. throughput; default is 1M rows.
+- With `--skip-papers` the entity name build finishes in minutes (small files). Full works.txt title indexing (if you re-enable it) takes hours.
 - `--skip-entities` / `--skip-papers` let you build one set at a time.
-- Idempotent: re-running overwrites the existing `*-name-*.bin` and `*-title-*.bin` files.
+- Idempotent: re-running overwrites existing `*-name-*.bin` and `*-title-*.bin` files.
 
 Expected file sizes (full OpenAlex snapshot, ~500M works, ~95M authors):
 

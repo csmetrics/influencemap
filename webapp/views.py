@@ -1,8 +1,10 @@
+import hashlib
 import json
 import logging
 import math
 import os
-import resource
+import pathlib
+import pickle
 import sys
 import time
 
@@ -14,39 +16,59 @@ import core.utils.entity_type as ent
 from core.search.query_info import query_entity_by_keyword, convert_id
 from core.search.local import papers_prop_query, query_entity_by_id
 
-_memlog = logging.getLogger('submit_memlog')
-_memlog.setLevel(logging.INFO)
-if not _memlog.handlers:
+
+# --- Response cache -------------------------------------------------------
+#
+# /submit is expensive on cold page cache (a productive author is ~120s of
+# random mmap reads in konigsberg — well past Cloudflare's 100s timeout).
+# Cache the rendered HTML per (doc_id, filters) so repeat visitors get an
+# instant response, and once the first visitor "warms" a URL every
+# subsequent hit serves from disk in ms.
+
+_CACHE_DIR = pathlib.Path(
+    os.getenv('WEBAPP_CACHE_DIR', '/influencemap/logs/flower_cache'))
+_CACHE_TTL_SECS = int(os.getenv('WEBAPP_CACHE_TTL_SECS', str(7 * 24 * 3600)))
+try:
+    _CACHE_DIR.mkdir(parents=True, exist_ok=True)
+except Exception:
+    pass
+
+_cache_log = logging.getLogger('webapp_cache')
+_cache_log.setLevel(logging.INFO)
+if not _cache_log.handlers:
     _h = logging.StreamHandler(sys.stderr)
-    _h.setFormatter(logging.Formatter('[%(asctime)s] [MEM] %(message)s'))
-    _memlog.addHandler(_h)
+    _h.setFormatter(logging.Formatter('[%(asctime)s] [CACHE] %(message)s'))
+    _cache_log.addHandler(_h)
 
 
-def _rss_gb():
-    """Current process RSS in GB (Linux)."""
+def _cache_key(*parts):
+    return hashlib.sha256('|'.join(map(str, parts)).encode()).hexdigest()
+
+
+def _cache_get(key):
+    path = _CACHE_DIR / (key + '.pkl')
     try:
-        rss_kb = resource.getrusage(resource.RUSAGE_SELF).ru_maxrss
-        return rss_kb / (1024 * 1024)
+        st = path.stat()
+    except FileNotFoundError:
+        return None
+    if time.time() - st.st_mtime > _CACHE_TTL_SECS:
+        return None
+    try:
+        with open(path, 'rb') as f:
+            return pickle.load(f)
     except Exception:
-        return -1.0
+        return None
 
 
-def _cgroup_gb():
-    """Current cgroup memory usage in GB (container-wide, cgroup v2/v1)."""
-    for path in ('/sys/fs/cgroup/memory.current',
-                 '/sys/fs/cgroup/memory/memory.usage_in_bytes'):
-        try:
-            with open(path) as f:
-                return int(f.read().strip()) / (1024 ** 3)
-        except Exception:
-            continue
-    return -1.0
-
-
-def _memstamp(label, t0):
-    _memlog.info('%s: rss=%.2fGB cgroup=%.2fGB pid=%d dt=%.2fs',
-                 label, _rss_gb(), _cgroup_gb(), os.getpid(),
-                 time.monotonic() - t0)
+def _cache_set(key, value):
+    path = _CACHE_DIR / (key + '.pkl')
+    tmp = path.with_suffix('.tmp')
+    try:
+        with open(tmp, 'wb') as f:
+            pickle.dump(value, f)
+        os.replace(tmp, path)
+    except Exception:
+        pass
 from core.utils.load_tsv import tsv_to_dict
 from webapp.shortener import decode_filters, url_decode_info, url_encode_info
 from webapp.utils import *
@@ -262,13 +284,25 @@ def search():
 @blueprint.route('/submit/', methods=['GET', 'POST'])
 def submit():
     _t0 = time.monotonic()
-    _memstamp('submit:start', _t0)
+    cache_key = None
     pub_years = None
     cit_years = None
     self_citations = False
     coauthors = True
     if request.method == "GET":
         doc_id = request.args["id"]
+        encoded_filters = request.args.get("filters")
+        # Cache is keyed on the encoded url only (GET path). Same URL =
+        # same flower every time. POST bodies are much more variable so
+        # we don't cache those.
+        cache_key = _cache_key('submit_get', doc_id, encoded_filters or '')
+        cached = _cache_get(cache_key)
+        if cached is not None:
+            _cache_log.info(
+                'HIT doc_id=%s dt=%.3fs', doc_id, time.monotonic() - _t0)
+            return cached
+        _cache_log.info('MISS doc_id=%s', doc_id)
+
         ids, flower_name, curated_flag = url_decode_info(doc_id)
         author_ids = ids.author_ids
         affiliation_ids = ids.affiliation_ids
@@ -276,7 +310,6 @@ def submit():
         journal_ids = ids.journal_ids
         paper_ids = ids.paper_ids
 
-        encoded_filters = request.args.get("filters")
         if encoded_filters is not None:
             decoded_filters = decode_filters(encoded_filters)
             pub_years = decoded_filters.pub_years
@@ -321,22 +354,17 @@ def submit():
         if total_entities > 1:
             flower_name += f" +{total_entities - 1} more"
 
-    _memstamp('before_get_flower', _t0)
     flower = kb_client.get_flower(
         author_ids=author_ids, affiliation_ids=affiliation_ids,
         field_of_study_ids=fos_ids,
         journal_ids=journal_ids, paper_ids=paper_ids, pub_years=pub_years,
         cit_years=cit_years, coauthors=coauthors,
         self_citations=self_citations, max_results=50)
-    _memstamp(
-        f'after_get_flower(response_bytes={len(json.dumps(flower))})', _t0)
 
     stats = kb_client.get_stats(
         author_ids=author_ids, affiliation_ids=affiliation_ids,
         field_of_study_ids=fos_ids,
         journal_ids=journal_ids, paper_ids=paper_ids)
-    _memstamp(
-        f'after_get_stats(response_bytes={len(json.dumps(stats))})', _t0)
 
     url_base = f"https://influenceflower.cmlab.dev/submit/?id={doc_id}"
 
@@ -352,11 +380,13 @@ def submit():
         session=session, selection=dict(
             pub_years=pub_years, cit_years=cit_years, coauthors=coauthors,
             self_citations=self_citations))
-    _memstamp(f'after_make_response_data rdata_keys={sorted(rdata.keys())}', _t0)
-
-    _memstamp('before_render_template', _t0)
     html = flask.render_template("flower.html", **rdata)
-    _memstamp(f'after_render(html_bytes={len(html)})', _t0)
+
+    if cache_key is not None:
+        _cache_set(cache_key, html)
+        _cache_log.info(
+            'STORE doc_id=%s bytes=%d dt=%.1fs',
+            doc_id, len(html), time.monotonic() - _t0)
     return html
 
 
