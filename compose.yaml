@@ -72,6 +72,10 @@ services:
       # logs/ mount also stores flower_cache/ — persistent /submit
       #   response cache across container restarts.
       - ./logs:/influencemap/logs
+      # OpenAlex snapshot .txt files for the OpenSearch indexer. Read-only
+      # so the container can't accidentally mutate the source data. Change
+      # the host path to wherever your snapshot lives.
+      - /data/tmp:/data/openalex-txt:ro
     environment:
       KONIGSBERG_URL: http://konigsberg:8000
       OPENSEARCH_URL: http://opensearch:9200
