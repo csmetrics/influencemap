@@ -233,17 +233,28 @@ def _create_index(client, entity_type, index_name):
 
 
 def _finalize_index(client, index_name):
-    """Post-bulk: flip refresh, force merge, refresh."""
-    log.info('finalizing %s: refresh_interval=1s + force_merge', index_name)
+    """Post-bulk: flip refresh, refresh, kick off async force_merge.
+
+    force_merge is a background query-performance optimization that can
+    take many hours on multi-hundred-million-doc indexes. We fire it
+    with wait_for_completion=false so the indexer script can proceed to
+    the alias swap immediately; OpenSearch keeps merging in the
+    background. Check status later via
+    ``GET _tasks?actions=*forcemerge*``.
+    """
+    log.info('finalizing %s: refresh_interval=1s + refresh', index_name)
     client.indices.put_settings(
         index=index_name,
         body={'index': {'refresh_interval': '1s'}})
     client.indices.refresh(index=index_name)
     try:
         client.indices.forcemerge(
-            index=index_name, max_num_segments=5, request_timeout=3600)
+            index=index_name, max_num_segments=5,
+            params={'wait_for_completion': 'false'})
+        log.info('force_merge submitted asynchronously; check '
+                 'GET _tasks?actions=*forcemerge* for progress')
     except Exception as e:
-        log.warning('force_merge failed (non-fatal): %s', e)
+        log.warning('force_merge submission failed (non-fatal): %s', e)
 
 
 def _swap_alias(client, alias, new_index, delete_old=False):
