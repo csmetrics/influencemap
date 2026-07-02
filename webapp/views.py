@@ -13,7 +13,7 @@ from flask import request
 from flask_cors import CORS, cross_origin
 
 import core.utils.entity_type as ent
-from core.search.query_info import query_entity_by_keyword, convert_id
+from core.search.opensearch_search import query_entity_by_keyword, convert_id
 from core.search.local import papers_prop_query, query_entity_by_id
 
 

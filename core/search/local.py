@@ -1,18 +1,22 @@
-"""Local name/title lookups, backed by konigsberg.
+"""Local name/title lookups, backed by konigsberg + OpenSearch.
 
-Drop-in replacement for the corresponding functions in
-``core.search.openalex`` and ``core.search.query_info``. No OpenAlex API
-calls. Public function names and return shapes match the originals so
-callers can swap with a one-line import change.
+Drop-in replacement for the corresponding functions in the retired
+``core.search.openalex`` and ``core.search.query_info`` modules. No
+OpenAlex API calls. Public function names and return shapes match the
+originals so callers can swap with a one-line import change.
 
-Typeahead search (``query_entity_by_keyword``) is intentionally **not**
-implemented here — it requires the OpenSearch index that will land in a
-later phase. Keep importing it from ``core.search.query_info`` for now.
+- Display names for authors/institutions/sources/concepts come from
+  konigsberg's ``/get-names`` (entity-name-*.bin mmap).
+- Paper metadata: year + venue from konigsberg's ``/get-paper-info``;
+  ``title`` from OpenSearch (paper-title-*.bin was retired to reclaim
+  55 GB of page cache).
 """
 import html
 import os
 
 import requests
+
+from core.search.opensearch_search import fetch_paper_titles
 
 
 _KONIGSBERG_URL = os.getenv('KONIGSBERG_URL', 'http://localhost:8081')
@@ -130,13 +134,18 @@ def query_entity_by_id(entity_type, entity_id):
 def papers_prop_query(paper_ids):
     """Return {paper_id: {'PaperId', 'OriginalTitle', 'OriginalVenue', 'Year'}}.
 
-    Matches the dict shape of core.search.query_info.papers_prop_query.
+    Matches the dict shape of the retired ``core.search.query_info``
+    ``papers_prop_query``. Year + venue come from konigsberg (via graph
+    walk); title comes from OpenSearch.
     """
     info = _fetch_paper_info(paper_ids)
+    if not info:
+        return {}
+    titles = fetch_paper_titles(list(info.keys()))
     return {
         pid: {
             'PaperId': pid,
-            'OriginalTitle': rec.get('title', ''),
+            'OriginalTitle': titles.get(pid) or rec.get('title', ''),
             'OriginalVenue': rec.get('venue', ''),
             'Year': rec.get('year'),
         }
