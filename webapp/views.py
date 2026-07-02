@@ -116,8 +116,11 @@ def query_res(entity_type, entity_title):
     if len(paper_ids) == 0:
         status_msg = "No matching paper found"
 
-    num_refs = sum([p[0]['referenced_works_count'] for p in papers])
-    num_cits = sum([p[0]['cited_by_count'] for p in papers])
+    # OpenSearch works index doesn't store 'referenced_works_count'
+    # (only 'cited_by_count' via the 'rank' column from preprocessor).
+    # Fall back to 0 for anything missing.
+    num_refs = sum(p[0].get('referenced_works_count', 0) for p in papers)
+    num_cits = sum(p[0].get('cited_by_count', 0) for p in papers)
     summary = "The Influence Flowers are generated from {} matching papers ({} references and {} citations), from academic data as of May 2025.".format(
         len(paper_ids), num_refs, num_cits
     )
