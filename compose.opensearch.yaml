@@ -1,0 +1,42 @@
+# Standalone OpenSearch for the dedicated search server.
+#
+# Deploy on the NEW server (not the webapp/konigsberg host):
+#   docker compose -f compose.opensearch.yaml up -d
+#
+# Binds 9200 to the Tailscale interface only, so the service is
+# reachable exclusively over the tailnet. Replace TAILSCALE_IP below
+# with this server's own `tailscale ip -4` address.
+#
+# Prerequisites on this host:
+#   - tailscale up (and connected)
+#   - sudo sysctl -w vm.max_map_count=262144   (persist in /etc/sysctl.d/)
+#   - mkdir -p /data/opensearch && chown -R 1000:1000 /data/opensearch
+
+services:
+  opensearch:
+    image: opensearchproject/opensearch:2.11.1
+    restart: unless-stopped
+    environment:
+      - discovery.type=single-node
+      # No auth — reachable only over the tailnet. Add security plugin
+      # config here if the tailnet is ever shared with untrusted nodes.
+      - DISABLE_SECURITY_PLUGIN=true
+      - DISABLE_INSTALL_DEMO_CONFIG=true
+      - bootstrap.memory_lock=true
+      # Dedicated server: heap can breathe. Leave the rest of RAM to
+      # the OS page cache for Lucene segments.
+      - "OPENSEARCH_JAVA_OPTS=-Xms8g -Xmx8g"
+      - cluster.routing.allocation.disk.watermark.low=95%
+      - cluster.routing.allocation.disk.watermark.high=97%
+      - cluster.routing.allocation.disk.watermark.flood_stage=98%
+    ulimits:
+      memlock: { soft: -1, hard: -1 }
+      nofile:  { soft: 65536, hard: 65536 }
+    volumes:
+      - /data/opensearch:/usr/share/opensearch/data
+    ports:
+      # Bind to the Tailscale IP only — NOT 0.0.0.0. Replace with this
+      # host's own tailscale address (run: tailscale ip -4).
+      # If Docker starts before tailscaled, the bind fails and Docker
+      # retries via restart policy; ensure tailscaled is enabled at boot.
+      - "TAILSCALE_IP:9200:9200"
