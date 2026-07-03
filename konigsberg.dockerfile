@@ -13,4 +13,4 @@ COPY core /influencemap/core/
 
 WORKDIR /influencemap/
 ENV GUNICORN_CMD_ARGS="--workers 32 --timeout 90 --graceful-timeout 90 --bind 0.0.0.0:8002"
-ENTRYPOINT gunicorn $GUNICORN_CMD_ARGS konigsberg:app
+ENTRYPOINT gunicorn $GUNICORN_CMD_ARGS konigsberg.app:app
