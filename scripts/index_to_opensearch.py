@@ -57,7 +57,7 @@ _TSV_KW = dict(delimiter='\t', quoting=csv.QUOTE_NONE, quotechar=None,
 ENTITY_CONFIG = {
     'authors': {
         'csv_name': 'authors.txt',
-        'columns': ['id', 'works_count', 'display_name'],
+        'columns': ['id', 'works_count', 'display_name', 'affiliations'],
         'id_field': 'id',
         'shards': 4,
     },
@@ -128,7 +128,12 @@ def _mapping_for(entity_type):
             },
             'works_count': {'type': 'integer'},
         }
-        if entity_type == 'institutions':
+        if entity_type == 'authors':
+            # Pipe-separated last_known_institutions display names, kept
+            # as a single text blob so the frontend can show them
+            # without requiring a nested mapping.
+            properties['affiliations'] = {'type': 'text'}
+        elif entity_type == 'institutions':
             properties['country_code'] = {'type': 'keyword'}
             properties['ror'] = {'type': 'keyword'}
         elif entity_type == 'sources':
@@ -200,7 +205,7 @@ def _stream_docs(csv_path, entity_type, index_name):
                 if wc is not None:
                     source['works_count'] = wc
                 for extra in ('country_code', 'ror', 'type',
-                              'issn_l', 'level'):
+                              'issn_l', 'level', 'affiliations'):
                     val = row.get(extra)
                     if val:
                         if extra == 'level':

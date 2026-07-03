@@ -69,9 +69,21 @@ OUT_SUFF = '.txt'
 # Per-entity extra columns extracted alongside id + works_count. Each entry is
 # (column_name, extractor_fn). The first two columns are always [id,
 # works_count] so builder.py (which reads usecols=[0,1]) keeps working.
+def _author_affiliations(d):
+    """Pipe-separated last_known_institutions display names (up to 3)."""
+    insts = d.get('last_known_institutions') or []
+    names = []
+    for inst in insts[:3]:
+        name = (inst or {}).get('display_name')
+        if name:
+            names.append(_sanitize(name))
+    return '|'.join(names)
+
+
 ENTITY_EXTRA_COLUMNS = {
     'authors': [
         ('display_name', lambda d: _sanitize(d.get('display_name'))),
+        ('affiliations', _author_affiliations),
     ],
     'institutions': [
         ('display_name', lambda d: _sanitize(d.get('display_name'))),

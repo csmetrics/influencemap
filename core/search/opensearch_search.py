@@ -151,10 +151,21 @@ def _hit_to_entity_data(hit, entity_type):
         entity_data['works_count'] = src.get('works_count')
     if entity_type == 'concepts':
         entity_data['level'] = src.get('level')
-    # 'affiliations' / 'authorships' — the old OpenAlex response included
-    # these for extra display info. Not indexed locally; consumers already
-    # guard with `if 'affiliations' in entity_data:` so leaving them out
-    # is safe.
+    if entity_type == 'authors':
+        # Restore the {"institution": {"display_name": ...}} shape the
+        # frontend expects. Preprocessor stores affiliations as a
+        # pipe-separated string of last_known_institutions display names.
+        aff_str = src.get('affiliations') or ''
+        aff_list = [name for name in aff_str.split('|') if name]
+        if aff_list:
+            entity_data['affiliations'] = [
+                {'institution': {'display_name': name}}
+                for name in aff_list
+            ]
+    # 'authorships' — the old OpenAlex response included these for
+    # works to display author names. Not indexed locally; consumers
+    # guard with `if 'authorships' in entity_data:` so leaving them
+    # out is safe.
     return entity_data
 
 
