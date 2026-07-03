@@ -90,6 +90,10 @@ services:
     environment:
       KONIGSBERG_URL: http://konigsberg:8000
       OPENSEARCH_URL: http://opensearch:9200
+      # DIAGNOSTIC: block /query + /query_about so external crawlers'
+      # paper-title searches don't pollute measurements. Set to "0" (or
+      # remove) to re-enable.
+      WEBAPP_DISABLE_QUERY: "1"
       # --workers 4: reasonable throughput now that the memory issues
       #   are fixed (sentinel year filter + response cache).
       # --max-requests + jitter: auto-recycle workers to release any

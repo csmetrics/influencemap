@@ -139,9 +139,18 @@ def query_res(entity_type, entity_title):
     return res
 
 
+# DIAGNOSTIC KILL SWITCH: set WEBAPP_DISABLE_QUERY=1 to make /query and
+# /query_about return 503 immediately. External traffic (crawlers, direct
+# links) was drowning out observation of real user behavior. Unset the
+# env var to re-enable.
+_QUERY_DISABLED = os.getenv('WEBAPP_DISABLE_QUERY') == '1'
+
+
 @blueprint.route('/query_about')
 @cross_origin()
 def query_about():
+    if _QUERY_DISABLED:
+        return flask.jsonify({'status': 'temporarily disabled'}), 503
     entity_type = "works"  # support paper search only
     entity_title = request.args.get("title")
     print("query_about", entity_type, entity_title)
@@ -153,6 +162,8 @@ def query_about():
 @blueprint.route('/query')
 @cross_origin()
 def query():
+    if _QUERY_DISABLED:
+        return flask.jsonify({'status': 'temporarily disabled'}), 503
     entity_type = "works"  # support paper search only
     entity_title = request.args.get("title")
     res = query_res(entity_type, entity_title)
