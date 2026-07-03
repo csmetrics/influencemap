@@ -100,16 +100,20 @@ services:
       # paper-title searches don't pollute measurements. Set to "0" (or
       # remove) to re-enable.
       WEBAPP_DISABLE_QUERY: "1"
-      # --workers 4: reasonable throughput now that the memory issues
-      #   are fixed (sentinel year filter + response cache).
+      # --timeout 120: webapp gives up after 2 min. Konigsberg keeps
+      #   computing in background and stores its own FLOWER-CACHE when
+      #   done, so we do NOT need webapp workers to wait 15 min for
+      #   giant computes to finish. Timing out webapp early frees the
+      #   worker to serve fast pages (`/`, `/browse`, `/search`) while
+      #   konigsberg finishes in background. Cloudflare timeout is
+      #   already 100s so waiting longer on webapp doesn't help
+      #   browser users anyway.
+      # --workers 8: was 4. With shorter timeout, workers get freed
+      #   more often, but headroom for concurrent long computes is
+      #   still useful.
       # --max-requests + jitter: auto-recycle workers to release any
       #   memory the sync worker fails to return to the OS.
-      # --timeout 900: 15 minutes. Cloudflare will still cut the browser
-      #   off at 100s but the webapp worker keeps waiting on konigsberg;
-      #   when konigsberg finishes, KB-CACHE stores the response so the
-      #   NEXT visitor to the same URL gets it instantly. Without this,
-      #   the compute silently vanishes when webapp is SIGABRT'd first.
-      GUNICORN_CMD_ARGS: --workers 4 --max-requests 200 --max-requests-jitter 20 --timeout 900 --graceful-timeout 900 --bind 0.0.0.0:8000
+      GUNICORN_CMD_ARGS: --workers 8 --max-requests 200 --max-requests-jitter 20 --timeout 120 --graceful-timeout 120 --bind 0.0.0.0:8000
     depends_on:
       - konigsberg
       - opensearch
