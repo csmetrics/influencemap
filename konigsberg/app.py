@@ -40,13 +40,19 @@ log.info('Florist ready in %.1fs', time.monotonic() - _t0)
 
 _FLOWER_CACHE_DIR = pathlib.Path(
     os.getenv('KONIGSBERG_CACHE_DIR',
-              'bingraph-openalex/.flower_cache'))
+              '/influencemap/bingraph-openalex/.flower_cache'))
 _FLOWER_CACHE_TTL_SECS = int(
     os.getenv('KONIGSBERG_CACHE_TTL_SECS', str(7 * 24 * 3600)))
 try:
     _FLOWER_CACHE_DIR.mkdir(parents=True, exist_ok=True)
-except Exception:
-    pass
+except Exception as _e:
+    # If cache dir can't be created (permission, mount issue), fall
+    # back to /tmp so at least the process runs. Logs the failure once
+    # at import.
+    print(f'[FLOWER-CACHE] mkdir {_FLOWER_CACHE_DIR} failed: {_e}; '
+          f'falling back to /tmp/flower_cache', flush=True)
+    _FLOWER_CACHE_DIR = pathlib.Path('/tmp/flower_cache')
+    _FLOWER_CACHE_DIR.mkdir(parents=True, exist_ok=True)
 
 _cache_log = logging.getLogger('konigsberg_cache')
 _cache_log.setLevel(logging.INFO)
@@ -81,13 +87,64 @@ def _flower_cache_get(key):
 
 def _flower_cache_set(key, value):
     path = _FLOWER_CACHE_DIR / (key + '.pkl')
-    tmp = path.with_suffix('.tmp')
+    # Per-writer temp filename so concurrent workers don't clobber each
+    # other's in-progress tmp files (the old shared name was the source
+    # of "No such file or directory" races).
+    tmp = _FLOWER_CACHE_DIR / f'{key}.{os.getpid()}.tmp'
     try:
+        _FLOWER_CACHE_DIR.mkdir(parents=True, exist_ok=True)
         with open(tmp, 'wb') as f:
             pickle.dump(value, f)
         os.replace(tmp, path)
     except Exception as e:
         _cache_log.warning('cache write failed: %s', e)
+        try:
+            tmp.unlink(missing_ok=True)
+        except Exception:
+            pass
+
+
+# --- In-flight dedup -------------------------------------------------------
+#
+# Without this, four concurrent webapp requests for the same
+# super-productive author cause four parallel computes in konigsberg,
+# each grabbing GBs of anon memory for typed-dict aggregation → OOM,
+# workers get SIGKILL'd, nothing ever completes. We serialize by
+# cache_key using a file lock so the second/third/fourth request wait
+# for the first to finish and then read from cache.
+
+import fcntl
+
+_INFLIGHT_DIR = _FLOWER_CACHE_DIR / '.inflight'
+try:
+    _INFLIGHT_DIR.mkdir(parents=True, exist_ok=True)
+except Exception as _e:
+    print(f'[FLOWER-CACHE] mkdir {_INFLIGHT_DIR} failed: {_e}',
+          flush=True)
+
+
+class _InflightLock:
+    """File lock keyed on cache_key. Blocks concurrent computes of the
+    same query across gunicorn workers (they share the volume)."""
+    def __init__(self, key):
+        self.path = _INFLIGHT_DIR / (key + '.lock')
+        self.fh = None
+
+    def __enter__(self):
+        self.fh = open(self.path, 'w')
+        fcntl.flock(self.fh, fcntl.LOCK_EX)
+        return self
+
+    def __exit__(self, exc_type, exc_val, exc_tb):
+        try:
+            fcntl.flock(self.fh, fcntl.LOCK_UN)
+        finally:
+            self.fh.close()
+            self.fh = None
+            try:
+                self.path.unlink()
+            except FileNotFoundError:
+                pass
 
 
 def _jit_warmup():
@@ -297,18 +354,25 @@ def get_flower():
         _cache_log.info('HIT get-flower')
         return flask.jsonify(cached)
 
-    t0 = time.monotonic()
-    flower = florist.get_flower(
-        author_ids=author_ids, affiliation_ids=affiliation_ids,
-        field_of_study_ids=field_of_study_ids, journal_ids=journal_ids,
-        paper_ids=paper_ids,
-        self_citations=self_citations, coauthors=not exclude_coauthors,
-        pub_years=pub_years, cit_years=cit_years,
-        allow_not_found=True, max_results=max_results)
-    payload = flower_as_dict(flower)
-    _flower_cache_set(cache_key, payload)
-    _cache_log.info(
-        'STORE get-flower dt=%.1fs', time.monotonic() - t0)
+    # Serialize: only one worker computes at a time. Recheck cache
+    # after acquiring lock in case an earlier waiter already stored.
+    with _InflightLock(cache_key):
+        cached = _flower_cache_get(cache_key)
+        if cached is not None:
+            _cache_log.info('HIT get-flower (after wait)')
+            return flask.jsonify(cached)
+        t0 = time.monotonic()
+        flower = florist.get_flower(
+            author_ids=author_ids, affiliation_ids=affiliation_ids,
+            field_of_study_ids=field_of_study_ids, journal_ids=journal_ids,
+            paper_ids=paper_ids,
+            self_citations=self_citations, coauthors=not exclude_coauthors,
+            pub_years=pub_years, cit_years=cit_years,
+            allow_not_found=True, max_results=max_results)
+        payload = flower_as_dict(flower)
+        _flower_cache_set(cache_key, payload)
+        _cache_log.info(
+            'STORE get-flower dt=%.1fs', time.monotonic() - t0)
     return flask.jsonify(payload)
 
 
@@ -333,16 +397,21 @@ def get_stats():
         _cache_log.info('HIT get-stats')
         return flask.jsonify(cached)
 
-    t0 = time.monotonic()
-    stats = florist.get_stats(
-        author_ids=author_ids, affiliation_ids=affiliation_ids,
-        field_of_study_ids=field_of_study_ids, journal_ids=journal_ids,
-        paper_ids=paper_ids,
-        allow_not_found=True)
-    payload = stats_as_dict(stats)
-    _flower_cache_set(cache_key, payload)
-    _cache_log.info(
-        'STORE get-stats dt=%.1fs', time.monotonic() - t0)
+    with _InflightLock(cache_key):
+        cached = _flower_cache_get(cache_key)
+        if cached is not None:
+            _cache_log.info('HIT get-stats (after wait)')
+            return flask.jsonify(cached)
+        t0 = time.monotonic()
+        stats = florist.get_stats(
+            author_ids=author_ids, affiliation_ids=affiliation_ids,
+            field_of_study_ids=field_of_study_ids, journal_ids=journal_ids,
+            paper_ids=paper_ids,
+            allow_not_found=True)
+        payload = stats_as_dict(stats)
+        _flower_cache_set(cache_key, payload)
+        _cache_log.info(
+            'STORE get-stats dt=%.1fs', time.monotonic() - t0)
     return flask.jsonify(payload)
 
 

@@ -8,10 +8,11 @@ services:
       - DISABLE_SECURITY_PLUGIN=true
       - DISABLE_INSTALL_DEMO_CONFIG=true
       - bootstrap.memory_lock=true
-      # 16 GB heap. Testing to see if larger heap helps under concurrent
-      # search load. Trade-off: more heap = less OS page cache for
-      # Lucene segments. Revisit after observing behavior.
-      - "OPENSEARCH_JAVA_OPTS=-Xms16g -Xmx16g"
+      # 4 GB heap. Observed actual heap use is only 3-6% of anything
+      # larger — this workload is disk-bound, not heap-bound. Shrinking
+      # heap frees ~12 GB of RAM for the Linux page cache, which is
+      # what konigsberg's bingraph mmap desperately needs to keep hot.
+      - "OPENSEARCH_JAVA_OPTS=-Xms4g -Xmx4g"
       - cluster.routing.allocation.disk.watermark.low=95%
       - cluster.routing.allocation.disk.watermark.high=97%
       - cluster.routing.allocation.disk.watermark.flood_stage=98%
