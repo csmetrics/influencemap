@@ -1,5 +1,10 @@
+import hashlib
+import json
 import logging
 import os
+import pathlib
+import pickle
+import sys
 import threading
 import time
 
@@ -21,6 +26,68 @@ log.info('instantiating Florist...')
 _t0 = time.monotonic()
 florist = flowers.Florist('bingraph-openalex')
 log.info('Florist ready in %.1fs', time.monotonic() - _t0)
+
+
+# --- Response cache --------------------------------------------------------
+#
+# Lives on the bingraph volume alongside .numba_cache so it survives
+# container restarts. The KEY guarantee: a slow compute writes its result
+# to disk before returning, so even if the webapp gunicorn worker gave
+# up (SIGABRT at its own --timeout) the next visitor gets the finished
+# result instantly. Without this, super-productive authors (Bengio,
+# Hinton...) would recompute on every visit and forever fail to succeed
+# under Cloudflare's 100s ceiling.
+
+_FLOWER_CACHE_DIR = pathlib.Path(
+    os.getenv('KONIGSBERG_CACHE_DIR',
+              'bingraph-openalex/.flower_cache'))
+_FLOWER_CACHE_TTL_SECS = int(
+    os.getenv('KONIGSBERG_CACHE_TTL_SECS', str(7 * 24 * 3600)))
+try:
+    _FLOWER_CACHE_DIR.mkdir(parents=True, exist_ok=True)
+except Exception:
+    pass
+
+_cache_log = logging.getLogger('konigsberg_cache')
+_cache_log.setLevel(logging.INFO)
+if not _cache_log.handlers:
+    _ch = logging.StreamHandler(sys.stderr)
+    _ch.setFormatter(logging.Formatter(
+        '[%(asctime)s] [FLOWER-CACHE] %(message)s'))
+    _cache_log.addHandler(_ch)
+
+
+def _flower_cache_key(endpoint, args_dict):
+    """Stable hash over sorted args."""
+    canonical = json.dumps(args_dict, sort_keys=True, separators=(',', ':'))
+    return hashlib.sha256(
+        f'{endpoint}|{canonical}'.encode()).hexdigest()
+
+
+def _flower_cache_get(key):
+    path = _FLOWER_CACHE_DIR / (key + '.pkl')
+    try:
+        st = path.stat()
+    except FileNotFoundError:
+        return None
+    if time.time() - st.st_mtime > _FLOWER_CACHE_TTL_SECS:
+        return None
+    try:
+        with open(path, 'rb') as f:
+            return pickle.load(f)
+    except Exception:
+        return None
+
+
+def _flower_cache_set(key, value):
+    path = _FLOWER_CACHE_DIR / (key + '.pkl')
+    tmp = path.with_suffix('.tmp')
+    try:
+        with open(tmp, 'wb') as f:
+            pickle.dump(value, f)
+        os.replace(tmp, path)
+    except Exception as e:
+        _cache_log.warning('cache write failed: %s', e)
 
 
 def _jit_warmup():
@@ -212,6 +279,25 @@ def get_flower():
 
     max_results = _get_int_from_request('max-results')
 
+    cache_args = dict(
+        author_ids=sorted(author_ids),
+        affiliation_ids=sorted(affiliation_ids),
+        field_of_study_ids=sorted(field_of_study_ids),
+        journal_ids=sorted(journal_ids),
+        paper_ids=sorted(paper_ids),
+        self_citations=bool(self_citations),
+        exclude_coauthors=bool(exclude_coauthors),
+        pub_years=pub_years,
+        cit_years=cit_years,
+        max_results=max_results,
+    )
+    cache_key = _flower_cache_key('get-flower', cache_args)
+    cached = _flower_cache_get(cache_key)
+    if cached is not None:
+        _cache_log.info('HIT get-flower')
+        return flask.jsonify(cached)
+
+    t0 = time.monotonic()
     flower = florist.get_flower(
         author_ids=author_ids, affiliation_ids=affiliation_ids,
         field_of_study_ids=field_of_study_ids, journal_ids=journal_ids,
@@ -219,8 +305,11 @@ def get_flower():
         self_citations=self_citations, coauthors=not exclude_coauthors,
         pub_years=pub_years, cit_years=cit_years,
         allow_not_found=True, max_results=max_results)
-
-    return flask.jsonify(flower_as_dict(flower))
+    payload = flower_as_dict(flower)
+    _flower_cache_set(cache_key, payload)
+    _cache_log.info(
+        'STORE get-flower dt=%.1fs', time.monotonic() - t0)
+    return flask.jsonify(payload)
 
 
 @app.route('/get-stats')
@@ -231,13 +320,30 @@ def get_stats():
     journal_ids = _get_ids_from_request('journal-ids')
     paper_ids = _get_ids_from_request('paper-ids')
 
+    cache_args = dict(
+        author_ids=sorted(author_ids),
+        affiliation_ids=sorted(affiliation_ids),
+        field_of_study_ids=sorted(field_of_study_ids),
+        journal_ids=sorted(journal_ids),
+        paper_ids=sorted(paper_ids),
+    )
+    cache_key = _flower_cache_key('get-stats', cache_args)
+    cached = _flower_cache_get(cache_key)
+    if cached is not None:
+        _cache_log.info('HIT get-stats')
+        return flask.jsonify(cached)
+
+    t0 = time.monotonic()
     stats = florist.get_stats(
         author_ids=author_ids, affiliation_ids=affiliation_ids,
         field_of_study_ids=field_of_study_ids, journal_ids=journal_ids,
         paper_ids=paper_ids,
         allow_not_found=True)
-
-    return flask.jsonify(stats_as_dict(stats))
+    payload = stats_as_dict(stats)
+    _flower_cache_set(cache_key, payload)
+    _cache_log.info(
+        'STORE get-stats dt=%.1fs', time.monotonic() - t0)
+    return flask.jsonify(payload)
 
 
 @app.route('/get-node-info')

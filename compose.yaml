@@ -71,7 +71,12 @@ services:
       # --workers 4: numba cache is warm, per-worker JIT cost is
       #   negligible now. 4 workers handle concurrent /get-flower calls
       #   without serializing behind one busy computation.
-      GUNICORN_CMD_ARGS: --workers 4 --timeout 300 --graceful-timeout 300 --bind 0.0.0.0:8000
+      # --timeout 1800: super-productive authors (Yoshua Bengio,
+      #   Geoffrey Hinton, ...) genuinely take 5-15 min on cold cache
+      #   because they have 1000+ papers each and get_flower is
+      #   O(#papers × #citors). Long timeout so one successful compute
+      #   fills webapp KB-CACHE forever. Normal authors return in <1min.
+      GUNICORN_CMD_ARGS: --workers 4 --timeout 1800 --graceful-timeout 1800 --bind 0.0.0.0:8000
   webapp:
     build:
       context: .
@@ -98,10 +103,12 @@ services:
       #   are fixed (sentinel year filter + response cache).
       # --max-requests + jitter: auto-recycle workers to release any
       #   memory the sync worker fails to return to the OS.
-      # --timeout 300: covers slow konigsberg first-request on cold
-      #   page cache. Cached responses serve in ms so this only bites
-      #   on the very first hit of a new URL.
-      GUNICORN_CMD_ARGS: --workers 4 --max-requests 200 --max-requests-jitter 20 --timeout 300 --graceful-timeout 300 --bind 0.0.0.0:8000
+      # --timeout 900: 15 minutes. Cloudflare will still cut the browser
+      #   off at 100s but the webapp worker keeps waiting on konigsberg;
+      #   when konigsberg finishes, KB-CACHE stores the response so the
+      #   NEXT visitor to the same URL gets it instantly. Without this,
+      #   the compute silently vanishes when webapp is SIGABRT'd first.
+      GUNICORN_CMD_ARGS: --workers 4 --max-requests 200 --max-requests-jitter 20 --timeout 900 --graceful-timeout 900 --bind 0.0.0.0:8000
     depends_on:
       - konigsberg
       - opensearch
