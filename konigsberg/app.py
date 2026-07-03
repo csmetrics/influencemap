@@ -62,27 +62,26 @@ def _jit_warmup():
 def _page_cache_warmup():
     """Prefault paper2entity + paper2citor-citee pages for popular authors.
 
-    Runs in a background thread so gunicorn workers start serving
-    immediately. Iterates the top-N most productive authors (highest
-    indices in the author range — builder.py sorts ascending by rank).
-    For each, calls get_flower + get_stats: this touches the pages that
-    the same author's real user request would need. Once these pages are
-    in the OS page cache, subsequent identical requests are ~0.3s
-    instead of 60-120s.
-
-    Configurable via KONIGSBERG_WARMUP_COUNT (default 20).
+    Runs in a background thread when KONIGSBERG_WARMUP_COUNT > 0.
+    Sleeps KONIGSBERG_WARMUP_DELAY_SECS between authors so live user
+    requests get their fair share of disk I/O. Disabled by default
+    because on cold cache each warmup step reads ~500 MB of random
+    pages, and running them back-to-back starves real requests enough
+    to trip webapp's 300 s timeout.
     """
-    n = int(os.getenv('KONIGSBERG_WARMUP_COUNT', '20'))
+    n = int(os.getenv('KONIGSBERG_WARMUP_COUNT', '0'))
     if n <= 0 or florist.author_range == 0:
         return
+    delay = int(os.getenv('KONIGSBERG_WARMUP_DELAY_SECS', '30'))
     ind2id = florist.entity_ind2id_map.arrs
     # Authors are at indices [0, author_range); rank ascending means the
     # last N are the most productive.
-    top_indices = range(
+    top_indices = list(range(
         max(0, int(florist.author_range) - n),
-        int(florist.author_range))
-    log.info('page-cache warmup: %d authors', len(list(top_indices)))
-    for i, ind in enumerate(reversed(list(top_indices))):
+        int(florist.author_range)))
+    log.info('page-cache warmup: %d authors, %ds between',
+             len(top_indices), delay)
+    for i, ind in enumerate(reversed(top_indices)):
         try:
             author_id = int(ind2id[ind])
         except Exception:
@@ -99,6 +98,8 @@ def _page_cache_warmup():
         except Exception as e:  # noqa: BLE001
             log.warning('page-cache warmup for %d failed: %s',
                         author_id, e)
+        if delay > 0 and i + 1 < len(top_indices):
+            time.sleep(delay)
 
 
 if os.getenv('KONIGSBERG_SKIP_WARMUP') == '1':

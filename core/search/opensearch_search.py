@@ -12,24 +12,86 @@ Public surface is intentionally compatible:
 - ``convert_id(url_id, entity_type)`` — strip the OpenAlex URL prefix
   letter and return an int, e.g. ``"https://openalex.org/A123" -> 123``.
 """
+import hashlib
 import logging
 import os
+import pathlib
+import pickle
+import sys
+import time
 
 from opensearchpy import OpenSearch
+
+
+# --- Response cache --------------------------------------------------------
+#
+# Cache msearch results per (types, keyword) so repeat searches for the
+# same query skip OpenSearch entirely. Helps when konigsberg saturates
+# disk I/O and Lucene reads queue up. TTL is short (a few hours) so new
+# entities from the next snapshot naturally appear.
+
+_OS_CACHE_DIR = pathlib.Path(
+    os.getenv('OS_CACHE_DIR', '/influencemap/logs/os_cache'))
+_OS_CACHE_TTL_SECS = int(
+    os.getenv('OS_CACHE_TTL_SECS', str(6 * 3600)))
+try:
+    _OS_CACHE_DIR.mkdir(parents=True, exist_ok=True)
+except Exception:
+    pass
+
+_os_cache_log = logging.getLogger('os_cache')
+_os_cache_log.setLevel(logging.INFO)
+if not _os_cache_log.handlers:
+    _h = logging.StreamHandler(sys.stderr)
+    _h.setFormatter(logging.Formatter('[%(asctime)s] [OS-CACHE] %(message)s'))
+    _os_cache_log.addHandler(_h)
+
+
+def _os_cache_key(*parts):
+    return hashlib.sha256('|'.join(map(str, parts)).encode()).hexdigest()
+
+
+def _os_cache_get(key):
+    path = _OS_CACHE_DIR / (key + '.pkl')
+    try:
+        st = path.stat()
+    except FileNotFoundError:
+        return None
+    if time.time() - st.st_mtime > _OS_CACHE_TTL_SECS:
+        return None
+    try:
+        with open(path, 'rb') as f:
+            return pickle.load(f)
+    except Exception:
+        return None
+
+
+def _os_cache_set(key, value):
+    path = _OS_CACHE_DIR / (key + '.pkl')
+    tmp = path.with_suffix('.tmp')
+    try:
+        with open(tmp, 'wb') as f:
+            pickle.dump(value, f)
+        os.replace(tmp, path)
+    except Exception:
+        pass
 
 
 log = logging.getLogger(__name__)
 
 
 _OPENSEARCH_URL = os.getenv('OPENSEARCH_URL', 'http://opensearch:9200')
+# 30s covers force_merge/heavy-indexing periods where searches queue up.
+# Under normal load queries return in <500ms; the ceiling is just to
+# avoid failing when the cluster is temporarily busy.
 _client = OpenSearch(
     hosts=[_OPENSEARCH_URL],
     http_compress=True,
     use_ssl=_OPENSEARCH_URL.startswith('https'),
     verify_certs=False,
-    timeout=15,
-    max_retries=2,
-    retry_on_timeout=True,
+    timeout=30,
+    max_retries=1,
+    retry_on_timeout=False,
 )
 
 
@@ -106,6 +168,13 @@ def query_entity_by_keyword(entity_types, keyword):
     if not entity_types or not keyword:
         return []
 
+    cache_key = _os_cache_key(
+        'search', ','.join(sorted(entity_types)), keyword)
+    cached = _os_cache_get(cache_key)
+    if cached is not None:
+        _os_cache_log.info('HIT search kw=%r', keyword[:40])
+        return cached
+
     body = []
     for etype in entity_types:
         body.append({'index': etype})
@@ -138,6 +207,9 @@ def query_entity_by_keyword(entity_types, keyword):
             continue
         for hit in resp.get('hits', {}).get('hits', []):
             results.append((_hit_to_entity_data(hit, etype), etype))
+    _os_cache_set(cache_key, results)
+    _os_cache_log.info(
+        'STORE search kw=%r hits=%d', keyword[:40], len(results))
     return results
 
 
