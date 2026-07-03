@@ -53,14 +53,19 @@ services:
       #   state and none of them are cache=True. Deferring JIT to the
       #   first user request spreads the memory spike out and lets other
       #   init settle first. First request will still be slow.
-      KONIGSBERG_SKIP_WARMUP: "1"
-      # Persistent numba cache — once a compiled function is written
-      #   here, subsequent restarts skip the JIT step entirely (if we
-      #   later add cache=True to the flowers.py @nb.njit decorators).
+      # Warmup on — with cache=True the numba compile is a cache LOAD
+      # (fast, tiny memory) instead of a re-JIT. Then a background
+      # thread warms the OS page cache for the top-N most productive
+      # authors.
+      KONIGSBERG_SKIP_WARMUP: "0"
+      KONIGSBERG_WARMUP_COUNT: "20"
+      # Persistent numba cache. First deploy compiled; subsequent
+      # restarts load from disk in seconds.
       NUMBA_CACHE_DIR: /influencemap/bingraph-openalex/.numba_cache
-      # --workers 1: single worker so only one 32 GB JIT can happen at
-      #   a time. Bump to 2-4 after cache=True is added in flowers.py.
-      GUNICORN_CMD_ARGS: --workers 1 --timeout 300 --graceful-timeout 300 --bind 0.0.0.0:8000
+      # --workers 4: numba cache is warm, per-worker JIT cost is
+      #   negligible now. 4 workers handle concurrent /get-flower calls
+      #   without serializing behind one busy computation.
+      GUNICORN_CMD_ARGS: --workers 4 --timeout 300 --graceful-timeout 300 --bind 0.0.0.0:8000
   webapp:
     build:
       context: .

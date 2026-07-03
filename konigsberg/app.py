@@ -1,5 +1,6 @@
 import logging
 import os
+import threading
 import time
 
 import flask
@@ -22,47 +23,92 @@ florist = flowers.Florist('bingraph-openalex')
 log.info('Florist ready in %.1fs', time.monotonic() - _t0)
 
 
-def _warmup():
+def _jit_warmup():
     """Trigger Numba JIT compilation on module import.
 
-    Each step is timed and logged so a worker OOM/timeout tells us
-    exactly which pipeline stage was in progress.
+    Uses author at index 0 (least prolific) so the compile step is fast
+    and touches every code path but only a tiny working set. Numba
+    cache=True means this is a load-from-disk on subsequent restarts.
     """
     if florist.author_range == 0:
         log.warning('empty author range; skipping warmup')
         return
-    steps = []
     first_entity_id = int(florist.entity_ind2id_map.arrs[0])
-    steps.append(('get_names', lambda: florist.get_names(
-        'authors', [first_entity_id])))
-    steps.append(('get_paper_info', lambda: (
-        len(florist.paper_ind2id_map.arrs) > 0
-        and florist.get_paper_info(
-            [int(florist.paper_ind2id_map.arrs[0])]))))
-    steps.append(('get_paper_citations', lambda: (
-        len(florist.paper_ind2id_map.arrs) > 0
-        and florist.get_paper_citations(
-            [int(florist.paper_ind2id_map.arrs[0])]))))
-    steps.append(('get_stats', lambda: florist.get_stats(
-        author_ids=[first_entity_id], allow_not_found=True)))
-    steps.append(('get_flower', lambda: florist.get_flower(
-        author_ids=[first_entity_id],
-        allow_not_found=True, max_results=1)))
-
+    steps = [
+        ('get_names', lambda: florist.get_names(
+            'authors', [first_entity_id])),
+        ('get_stats', lambda: florist.get_stats(
+            author_ids=[first_entity_id], allow_not_found=True)),
+        ('get_flower', lambda: florist.get_flower(
+            author_ids=[first_entity_id],
+            allow_not_found=True, max_results=1)),
+    ]
+    if len(florist.paper_ind2id_map.arrs) > 0:
+        first_paper_id = int(florist.paper_ind2id_map.arrs[0])
+        steps.append(('get_paper_info', lambda: florist.get_paper_info(
+            [first_paper_id])))
+        steps.append(('get_paper_citations',
+                      lambda: florist.get_paper_citations([first_paper_id])))
     for name, fn in steps:
         t = time.monotonic()
         try:
             fn()
-            log.info('%s ok (%.1fs)', name, time.monotonic() - t)
+            log.info('JIT %s ok (%.1fs)', name, time.monotonic() - t)
         except Exception as e:  # noqa: BLE001
-            log.warning('%s failed after %.1fs: %s',
+            log.warning('JIT %s failed after %.1fs: %s',
                         name, time.monotonic() - t, e)
+
+
+def _page_cache_warmup():
+    """Prefault paper2entity + paper2citor-citee pages for popular authors.
+
+    Runs in a background thread so gunicorn workers start serving
+    immediately. Iterates the top-N most productive authors (highest
+    indices in the author range — builder.py sorts ascending by rank).
+    For each, calls get_flower + get_stats: this touches the pages that
+    the same author's real user request would need. Once these pages are
+    in the OS page cache, subsequent identical requests are ~0.3s
+    instead of 60-120s.
+
+    Configurable via KONIGSBERG_WARMUP_COUNT (default 20).
+    """
+    n = int(os.getenv('KONIGSBERG_WARMUP_COUNT', '20'))
+    if n <= 0 or florist.author_range == 0:
+        return
+    ind2id = florist.entity_ind2id_map.arrs
+    # Authors are at indices [0, author_range); rank ascending means the
+    # last N are the most productive.
+    top_indices = range(
+        max(0, int(florist.author_range) - n),
+        int(florist.author_range))
+    log.info('page-cache warmup: %d authors', len(list(top_indices)))
+    for i, ind in enumerate(reversed(list(top_indices))):
+        try:
+            author_id = int(ind2id[ind])
+        except Exception:
+            continue
+        t = time.monotonic()
+        try:
+            florist.get_flower(
+                author_ids=[author_id], allow_not_found=True, max_results=50)
+            florist.get_stats(
+                author_ids=[author_id], allow_not_found=True)
+            log.info(
+                'page-cache %d/%d: author %d warmed in %.1fs',
+                i + 1, n, author_id, time.monotonic() - t)
+        except Exception as e:  # noqa: BLE001
+            log.warning('page-cache warmup for %d failed: %s',
+                        author_id, e)
 
 
 if os.getenv('KONIGSBERG_SKIP_WARMUP') == '1':
     log.info('KONIGSBERG_SKIP_WARMUP=1 set; skipping warmup')
 else:
-    _warmup()
+    _jit_warmup()
+    # Kick off page-cache warmup in background so container starts
+    # serving right away. Log progress.
+    threading.Thread(target=_page_cache_warmup, daemon=True,
+                     name='page-cache-warmup').start()
 
 
 def _get_ids_from_request(argname):

@@ -232,11 +232,15 @@ def curate_load_file():
 
 
 s = {
-    'authors': ('<i class="fa fa-user""></i><h4>{DisplayName}</h4><p class="compact-text">Papers: {PaperCount}, Citations: {CitationCount}</p>'),
-    'institutions': ('<i class="fa fa-university"></i><h4>{DisplayName}</h4><p class="compact-text">Papers: {PaperCount}, Citations: {CitationCount}</p>'),
-    'sources': ('<i class="fa fa-book"></i><h4>{DisplayName}</h4><p class="compact-text">Papers: {PaperCount}, Citations: {CitationCount}</p>'),
+    # cited_by_count for author/institution/source/concept isn't in the
+    # OpenSearch index (preprocessor only extracts works_count). Show
+    # papers only for those; keep Citations for works (we have it via
+    # the 'rank' column).
+    'authors': ('<i class="fa fa-user""></i><h4>{DisplayName}</h4><p class="compact-text">Papers: {PaperCount}</p>'),
+    'institutions': ('<i class="fa fa-university"></i><h4>{DisplayName}</h4><p class="compact-text">Papers: {PaperCount}</p>'),
+    'sources': ('<i class="fa fa-book"></i><h4>{DisplayName}</h4><p class="compact-text">Papers: {PaperCount}</p>'),
     'works': ('<i class="fa fa-file"></i><h4>{DisplayName}</h4><p class="compact-text">Citations: {CitationCount}</p>'),
-    'concepts': ('<i class="fa fa-flask"></i><h4>{DisplayName} (Level {Level})</h4><p class="compact-text">Papers: {PaperCount}, Citations: {CitationCount}</p>')
+    'concepts': ('<i class="fa fa-flask"></i><h4>{DisplayName} (Level {Level})</h4><p class="compact-text">Papers: {PaperCount}</p>')
 }
 
 openalex_type_map = {
