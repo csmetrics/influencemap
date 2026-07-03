@@ -599,10 +599,23 @@ def get_node_info_single(entity_id, entity_type, year_ranges):
 
 
 def get_paper_info(data):
-    papers = set()
+    # Cap total paper fetch to avoid 100s+ compute on Bengio-class nodes
+    # where one node_link can contribute hundreds of ego_paper + citation
+    # + reference IDs. Beyond ~100 papers, the response gets too big to
+    # display anyway. Prioritize ego papers, then trim.
+    MAX_PAPERS = 100
+    papers = []
+    seen = set()
     for d in data:
-        papers.update(set([d["ego_paper"]] + d["citation"] + d["reference"]))
-    paper_info = papers_prop_query(list(papers))
+        for pid in [d["ego_paper"]] + d["citation"] + d["reference"]:
+            if pid not in seen:
+                seen.add(pid)
+                papers.append(pid)
+                if len(papers) >= MAX_PAPERS:
+                    break
+        if len(papers) >= MAX_PAPERS:
+            break
+    paper_info = papers_prop_query(papers)
     return paper_info
 
 
