@@ -89,6 +89,10 @@ ENTITY_EXTRA_COLUMNS = {
         ('display_name', lambda d: _sanitize(d.get('display_name'))),
         ('country_code', lambda d: _sanitize(d.get('country_code'))),
         ('ror', lambda d: _sanitize(d.get('ror'))),
+        # Space-joined acronyms (e.g. "ANU") so institutions are
+        # findable by abbreviation in the search index.
+        ('acronyms', lambda d: _sanitize(
+            ' '.join(d.get('display_name_acronyms') or []))),
     ],
     'sources': [
         ('display_name', lambda d: _sanitize(d.get('display_name'))),

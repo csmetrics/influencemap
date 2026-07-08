@@ -226,12 +226,58 @@ def _page_cache_warmup():
             time.sleep(delay)
 
 
+def _prefault_bingraph():
+    """Stream every bingraph file through the page cache at startup.
+
+    With OpenSearch on its own server, the full bingraph (~95 GB
+    incl. entity names) fits in RAM. A sequential read loads it at
+    NVMe streaming speed (~30-60s total) instead of waiting days for
+    random-access traffic to warm it organically. After this completes,
+    every flower compute runs at memory speed — no cold-cache penalty,
+    ever.
+
+    Sequential streaming is disk-friendly: unlike the old random-access
+    warmup it doesn't seek-storm the disk, so live requests running
+    concurrently see little interference.
+
+    Controlled by KONIGSBERG_PREFAULT (default on). Runs once per
+    worker process but the page cache is shared, so the first worker
+    does the real I/O and the rest finish almost instantly.
+    """
+    bingraph = pathlib.Path('bingraph-openalex')
+    files = sorted(bingraph.glob('*.bin'))
+    if not files:
+        return
+    total_bytes = sum(f.stat().st_size for f in files)
+    log.info('prefault: streaming %d files (%.1f GB) into page cache',
+             len(files), total_bytes / 1e9)
+    t0 = time.monotonic()
+    done_bytes = 0
+    chunk = 1 << 25  # 32 MB
+    for f in files:
+        try:
+            with open(f, 'rb') as fh:
+                while fh.read(chunk):
+                    pass
+        except Exception as e:  # noqa: BLE001
+            log.warning('prefault %s failed: %s', f.name, e)
+            continue
+        done_bytes += f.stat().st_size
+        log.info('prefault: %s done (%.0f%%, %.0fs elapsed)',
+                 f.name, 100 * done_bytes / total_bytes,
+                 time.monotonic() - t0)
+    log.info('prefault: complete in %.0fs', time.monotonic() - t0)
+
+
 if os.getenv('KONIGSBERG_SKIP_WARMUP') == '1':
     log.info('KONIGSBERG_SKIP_WARMUP=1 set; skipping warmup')
 else:
     _jit_warmup()
-    # Kick off page-cache warmup in background so container starts
-    # serving right away. Log progress.
+    if os.getenv('KONIGSBERG_PREFAULT', '1') == '1':
+        threading.Thread(target=_prefault_bingraph, daemon=True,
+                         name='bingraph-prefault').start()
+    # Legacy random-access warmup — only if explicitly enabled via
+    # KONIGSBERG_WARMUP_COUNT. Prefault above supersedes it.
     threading.Thread(target=_page_cache_warmup, daemon=True,
                      name='page-cache-warmup').start()
 

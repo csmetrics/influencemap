@@ -64,7 +64,7 @@ ENTITY_CONFIG = {
     'institutions': {
         'csv_name': 'institutions.txt',
         'columns': ['id', 'works_count', 'display_name',
-                    'country_code', 'ror'],
+                    'country_code', 'ror', 'acronyms'],
         'id_field': 'id',
         'shards': 1,
     },
@@ -136,6 +136,12 @@ def _mapping_for(entity_type):
         elif entity_type == 'institutions':
             properties['country_code'] = {'type': 'keyword'}
             properties['ror'] = {'type': 'keyword'}
+            # search_as_you_type so bool_prefix typeahead matches
+            # acronyms like "ANU" the same way it matches names.
+            properties['acronyms'] = {
+                'type': 'search_as_you_type',
+                'max_shingle_size': 3,
+            }
         elif entity_type == 'sources':
             properties['type'] = {'type': 'keyword'}
             properties['issn_l'] = {'type': 'keyword'}
@@ -205,7 +211,8 @@ def _stream_docs(csv_path, entity_type, index_name):
                 if wc is not None:
                     source['works_count'] = wc
                 for extra in ('country_code', 'ror', 'type',
-                              'issn_l', 'level', 'affiliations'):
+                              'issn_l', 'level', 'affiliations',
+                              'acronyms'):
                     val = row.get(extra)
                     if val:
                         if extra == 'level':

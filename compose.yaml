@@ -42,6 +42,11 @@ services:
       # hours to preload popular authors.
       KONIGSBERG_SKIP_WARMUP: "0"
       KONIGSBERG_WARMUP_COUNT: "0"
+      # Stream the whole bingraph (~95 GB) into the page cache at boot
+      # (sequential read, ~1 min on NVMe). With OpenSearch on its own
+      # server the graph fits in RAM entirely — this removes the
+      # cold-cache penalty after every restart.
+      KONIGSBERG_PREFAULT: "1"
       # Sleep between page-cache warmups (seconds) — leaves I/O for
       # real requests when warmup IS enabled. Only used when
       # KONIGSBERG_WARMUP_COUNT > 0.

@@ -126,7 +126,11 @@ _HITS_PER_INDEX = 20
 def _search_fields(entity_type):
     """Which fields to run the typeahead bool_prefix query against."""
     base = 'title' if entity_type == 'works' else 'display_name'
-    return [base, f'{base}._2gram', f'{base}._3gram']
+    fields = [base, f'{base}._2gram', f'{base}._3gram']
+    if entity_type == 'institutions':
+        # Acronym matching: "ANU" -> Australian National University.
+        fields += ['acronyms', 'acronyms._2gram', 'acronyms._3gram']
+    return fields
 
 
 def _tiebreaker(entity_type):
