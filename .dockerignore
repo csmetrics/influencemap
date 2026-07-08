@@ -1,0 +1,18 @@
+# Keep the docker build context small — these are runtime data, not code.
+# Without this file, `docker compose build` ships the entire repo to the
+# docker daemon, INCLUDING any bingraph .bin files sitting under
+# konigsberg/bingraph-openalex/ (~88 GB) — which then get baked into the
+# image and fill the disk ("no space left on device" during COPY).
+
+.git
+.venv
+logs/
+konigsberg/bingraph-openalex/
+**/__pycache__/
+*.pyc
+assets/
+misc/
+scripts/test/
+scripts/twflower/
+*.log
+.DS_Store
