@@ -321,7 +321,18 @@ def submit():
             return cached
         _cache_log.info('MISS doc_id=%s', doc_id)
 
-        ids, flower_name, curated_flag = url_decode_info(doc_id)
+        try:
+            ids, flower_name, curated_flag = url_decode_info(doc_id)
+        except (ValueError, UnicodeDecodeError) as e:
+            # Stale links from the pre-OpenAlex era (old MAG id encoding)
+            # still circulate via search engines and bookmarks. Their
+            # doc_ids no longer decode — return a client error instead of
+            # crashing with a 500.
+            _cache_log.info('BAD doc_id=%s (%s)', doc_id, e)
+            return (
+                'This flower link uses an outdated format. '
+                'Please search for the entity again from the '
+                '<a href="/">main page</a>.', 400)
         author_ids = ids.author_ids
         affiliation_ids = ids.affiliation_ids
         fos_ids = ids.field_of_study_ids
