@@ -615,16 +615,30 @@ class Florist:
 
 
 def _summarize_node_info(citor_papers, citee_papers, ind2id):
+    # Dedupe: the citation table can contain repeated edges (historical
+    # preprocessor runs appended to PaperReferences.txt without
+    # truncating, so some bingraph builds have every edge duplicated).
+    # Flower scores normalise the inflation away but raw paper lists
+    # here would show each paper multiple times.
     node_info = {}
+    seen = set()
     for citee_idx, paper_idx in citee_papers:
         paper_id = str(ind2id[paper_idx])
         citee_id = str(ind2id[citee_idx])
+        key = (citee_id, paper_id, 'c')
+        if key in seen:
+            continue
+        seen.add(key)
         if citee_id not in node_info:
             node_info[citee_id] = {"reference": [], "citation": []}
         node_info[citee_id]["citation"].append(paper_id)
     for paper_idx, citor_idx in citor_papers:
         paper_id = str(ind2id[paper_idx])
         citor_id = str(ind2id[citor_idx])
+        key = (citor_id, paper_id, 'r')
+        if key in seen:
+            continue
+        seen.add(key)
         if citor_id not in node_info:
             node_info[citor_id] = {"reference": [], "citation": []}
         node_info[citor_id]["reference"].append(paper_id)

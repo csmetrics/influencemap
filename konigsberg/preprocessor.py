@@ -217,6 +217,11 @@ def generate_paper_references(data_path):
     split_char = 'W'
     path = data_path / data_type
     outfile = data_path / ("PaperReferences" + OUT_SUFF)
+    # This writer appends per part-file; remove any previous output
+    # first or a rerun silently duplicates every edge (which then bakes
+    # duplicated citations into the bingraph).
+    if os.path.exists(outfile):
+        os.remove(outfile)
     merged_ids = load_merged_ids(data_path, data_type, split_char)
 
     logger.info('...generating PaperReferences')
@@ -269,6 +274,8 @@ def generate_paper_authorships(data_path):
     split_char = 'W'
     path = data_path / data_type
     outfile = data_path / ("PaperAuthorAffiliations" + OUT_SUFF)
+    if os.path.exists(outfile):
+        os.remove(outfile)
     merged_ids = load_merged_ids(data_path, data_type, split_char)
 
     logger.info('...generating PaperAuthorAffiliations')
@@ -329,6 +336,8 @@ def generate_paper_fos(data_path):
     split_char = 'W'
     path = data_path / data_type
     outfile = data_path / ("PaperFieldsOfStudy" + OUT_SUFF)
+    if os.path.exists(outfile):
+        os.remove(outfile)
     merged_ids = load_merged_ids(data_path, data_type, split_char)
 
     logger.info('...generating PaperFieldsOfStudy')
