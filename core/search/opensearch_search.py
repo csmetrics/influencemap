@@ -136,6 +136,27 @@ def _tiebreaker(entity_type):
     return 'works_count'
 
 
+def _sort_spec(entity_type):
+    """Per-type sort order.
+
+    Authors: paper count first — every hit already matches the prefix
+    query, and users looking up a name almost always want the famous
+    (most prolific) profile at the top. OpenAlex's duplicate author
+    profiles also sink this way (dupes have few works).
+
+    Other types: relevance first, productivity as tiebreaker.
+    """
+    if entity_type == 'authors':
+        return [
+            {'works_count': {'order': 'desc', 'missing': '_last'}},
+            {'_score': 'desc'},
+        ]
+    return [
+        {'_score': 'desc'},
+        {_tiebreaker(entity_type): {'order': 'desc', 'missing': '_last'}},
+    ]
+
+
 def _hit_to_entity_data(hit, entity_type):
     """Reshape an OpenSearch hit into the dict shape that ``webapp/views.py``
     ``/search`` expects (compatible with the old OpenAlex response).
@@ -198,10 +219,7 @@ def query_entity_by_keyword(entity_types, keyword):
                     'fields': fields,
                 }
             },
-            'sort': [
-                {'_score': 'desc'},
-                {_tiebreaker(etype): {'order': 'desc', 'missing': '_last'}},
-            ],
+            'sort': _sort_spec(etype),
             'size': _HITS_PER_INDEX,
         })
 
