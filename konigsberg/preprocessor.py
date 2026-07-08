@@ -93,6 +93,13 @@ ENTITY_EXTRA_COLUMNS = {
         # findable by abbreviation in the search index.
         ('acronyms', lambda d: _sanitize(
             ' '.join(d.get('display_name_acronyms') or []))),
+        # Pipe-joined alternative names ("The Australian National
+        # University", localized spellings, ...) — extra search recall.
+        ('alternatives', lambda d: _sanitize(
+            '|'.join(d.get('display_name_alternatives') or []))),
+        ('cited_by_count',
+         lambda d: '' if d.get('cited_by_count') is None
+         else d.get('cited_by_count')),
     ],
     'sources': [
         ('display_name', lambda d: _sanitize(d.get('display_name'))),

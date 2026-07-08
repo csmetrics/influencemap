@@ -129,7 +129,10 @@ def _search_fields(entity_type):
     fields = [base, f'{base}._2gram', f'{base}._3gram']
     if entity_type == 'institutions':
         # Acronym matching: "ANU" -> Australian National University.
-        fields += ['acronyms', 'acronyms._2gram', 'acronyms._3gram']
+        # Alternatives: localized/legacy names.
+        fields += ['acronyms', 'acronyms._2gram', 'acronyms._3gram',
+                   'alternatives', 'alternatives._2gram',
+                   'alternatives._3gram']
     return fields
 
 

@@ -64,7 +64,8 @@ ENTITY_CONFIG = {
     'institutions': {
         'csv_name': 'institutions.txt',
         'columns': ['id', 'works_count', 'display_name',
-                    'country_code', 'ror', 'acronyms'],
+                    'country_code', 'ror', 'acronyms',
+                    'alternatives', 'cited_by_count'],
         'id_field': 'id',
         'shards': 1,
     },
@@ -137,11 +138,17 @@ def _mapping_for(entity_type):
             properties['country_code'] = {'type': 'keyword'}
             properties['ror'] = {'type': 'keyword'}
             # search_as_you_type so bool_prefix typeahead matches
-            # acronyms like "ANU" the same way it matches names.
+            # acronyms ("ANU") and alternative names ("The Australian
+            # National University") the same way it matches names.
             properties['acronyms'] = {
                 'type': 'search_as_you_type',
                 'max_shingle_size': 3,
             }
+            properties['alternatives'] = {
+                'type': 'search_as_you_type',
+                'max_shingle_size': 3,
+            }
+            properties['cited_by_count'] = {'type': 'integer'}
         elif entity_type == 'sources':
             properties['type'] = {'type': 'keyword'}
             properties['issn_l'] = {'type': 'keyword'}
@@ -212,10 +219,11 @@ def _stream_docs(csv_path, entity_type, index_name):
                     source['works_count'] = wc
                 for extra in ('country_code', 'ror', 'type',
                               'issn_l', 'level', 'affiliations',
-                              'acronyms'):
+                              'acronyms', 'alternatives',
+                              'cited_by_count'):
                     val = row.get(extra)
                     if val:
-                        if extra == 'level':
+                        if extra in ('level', 'cited_by_count'):
                             v = _int_or_none(val)
                             if v is not None:
                                 source[extra] = v
