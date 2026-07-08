@@ -1,4 +1,5 @@
 bingraph-openalex
+.env
 *.egg-info
 *.swp
 *.pyc

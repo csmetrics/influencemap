@@ -80,11 +80,13 @@ services:
       - /data/tmp:/data/openalex-txt:ro
     environment:
       KONIGSBERG_URL: http://konigsberg:8000
-      # OpenSearch now lives on the dedicated search server, reached
-      # over Tailscale. Replace with that server's `tailscale ip -4`.
-      # Port 9201 on the host (9200 was taken by another Elasticsearch
-      # instance on that machine).
-      OPENSEARCH_URL: http://OPENSEARCH_TAILSCALE_IP:9201
+      # OpenSearch lives on the dedicated search server, reached over
+      # Tailscale (port 9201 there; 9200 was taken by another ES).
+      # The actual address comes from the server-local `.env` file next
+      # to this compose.yaml — NOT hardcoded here, so `git pull` can
+      # never clobber it again. Example .env line:
+      #   OPENSEARCH_URL=http://100.73.104.52:9201
+      OPENSEARCH_URL: ${OPENSEARCH_URL:?set OPENSEARCH_URL in .env}
       # DIAGNOSTIC: block /query + /query_about so external crawlers'
       # paper-title searches don't pollute measurements. Set to "0" (or
       # remove) to re-enable.
