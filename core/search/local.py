@@ -121,6 +121,14 @@ def query_entity_by_id(entity_type, entity_id):
     Returns ``''`` if the id is unknown locally.
     """
     if entity_type == 'works':
+        # Titles live in OpenSearch (paper-title-*.bin was retired from
+        # the bingraph to reclaim page cache).
+        titles = fetch_paper_titles([entity_id])
+        title = titles.get(int(entity_id), '')
+        if title:
+            return title
+        # Fallback to konigsberg — returns '' unless paper-title files
+        # are present on that deployment.
         info = _fetch_paper_info([entity_id])
         rec = info.get(int(entity_id))
         return rec['title'] if rec else ''
