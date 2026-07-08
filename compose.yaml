@@ -77,7 +77,9 @@ services:
       KONIGSBERG_URL: http://konigsberg:8000
       # OpenSearch now lives on the dedicated search server, reached
       # over Tailscale. Replace with that server's `tailscale ip -4`.
-      OPENSEARCH_URL: http://OPENSEARCH_TAILSCALE_IP:9200
+      # Port 9201 on the host (9200 was taken by another Elasticsearch
+      # instance on that machine).
+      OPENSEARCH_URL: http://OPENSEARCH_TAILSCALE_IP:9201
       # DIAGNOSTIC: block /query + /query_about so external crawlers'
       # paper-title searches don't pollute measurements. Set to "0" (or
       # remove) to re-enable.

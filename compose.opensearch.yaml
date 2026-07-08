@@ -37,6 +37,8 @@ services:
     ports:
       # Bind to the Tailscale IP only — NOT 0.0.0.0. Replace with this
       # host's own tailscale address (run: tailscale ip -4).
+      # Host port is 9201 because another Elasticsearch instance on this
+      # server already occupies 9200. Container-internal port stays 9200.
       # If Docker starts before tailscaled, the bind fails and Docker
       # retries via restart policy; ensure tailscaled is enabled at boot.
-      - "TAILSCALE_IP:9200:9200"
+      - "TAILSCALE_IP:9201:9200"
