@@ -137,20 +137,13 @@ def _tiebreaker(entity_type):
 
 
 def _sort_spec(entity_type):
-    """Per-type sort order.
+    """Relevance first; productivity as tiebreaker.
 
-    Authors: paper count first — every hit already matches the prefix
-    query, and users looking up a name almost always want the famous
-    (most prolific) profile at the top. OpenAlex's duplicate author
-    profiles also sink this way (dupes have few works).
-
-    Other types: relevance first, productivity as tiebreaker.
+    Identical display_names produce identical BM25 scores, so among
+    duplicate/same-name profiles the most prolific one surfaces first.
+    (A works_count-primary sort was tried and reverted: it floated
+    barely-matching prolific names above exact matches.)
     """
-    if entity_type == 'authors':
-        return [
-            {'works_count': {'order': 'desc', 'missing': '_last'}},
-            {'_score': 'desc'},
-        ]
     return [
         {'_score': 'desc'},
         {_tiebreaker(entity_type): {'order': 'desc', 'missing': '_last'}},
