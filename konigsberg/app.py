@@ -244,8 +244,20 @@ def _prefault_bingraph():
     worker process but the page cache is shared, so the first worker
     does the real I/O and the rest finish almost instantly.
     """
+    # Only the graph-walk files need to be resident: they're touched
+    # millions of times per flower compute. The id<->ind hash maps are
+    # hit a handful of times per request and warm organically. The full
+    # bingraph (~183 GB) exceeds RAM, so streaming everything would
+    # LRU-evict the front before the tail finishes — prefault the hot
+    # set (~100 GB) only, which fits with room to spare.
+    _HOT = (
+        'entity2paper-ptr.bin', 'entity2paper-ind.bin',
+        'paper2entity-ptr.bin', 'paper2entity-ind.bin',
+        'paper2citor-citee-ptr.bin', 'paper2citor-citee-ind.bin',
+        'entity-name-ptr.bin', 'entity-name-dat.bin',
+    )
     bingraph = pathlib.Path('bingraph-openalex')
-    files = sorted(bingraph.glob('*.bin'))
+    files = [bingraph / name for name in _HOT if (bingraph / name).exists()]
     if not files:
         return
     total_bytes = sum(f.stat().st_size for f in files)
