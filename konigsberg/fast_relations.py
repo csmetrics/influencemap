@@ -91,7 +91,11 @@ def _process_part(args):
             if paper_id in _MERGED:
                 continue
 
-            for rw in d.get('referenced_works') or ():
+            # dict.fromkeys: dedupe while preserving order — OpenAlex
+            # records can list the same reference/concept multiple
+            # times inside one array, which multiplied every edge in
+            # the bingraph.
+            for rw in dict.fromkeys(d.get('referenced_works') or ()):
                 if not rw:
                     continue
                 citee = rw[_LW:]
@@ -100,21 +104,23 @@ def _process_part(args):
                 refs_buf.append(f'{paper_id},{citee}\n')
                 n_refs += 1
 
+            seen_auth = set()
             for a in d.get('authorships') or ():
                 author = (a.get('author') or {}).get('id')
                 if not author:
                     continue
                 author_id = author[_LA:]
                 insts = [i['id'][_LI:] for i in (a.get('institutions') or ())
-                         if i.get('id')]
-                if insts:
-                    for inst in insts:
-                        auth_buf.append(f'{paper_id},{author_id},{inst}\n')
-                        n_auth += 1
-                else:
-                    auth_buf.append(f'{paper_id},{author_id},\n')
+                         if i.get('id')] or ['']
+                for inst in insts:
+                    key = (author_id, inst)
+                    if key in seen_auth:
+                        continue
+                    seen_auth.add(key)
+                    auth_buf.append(f'{paper_id},{author_id},{inst}\n')
                     n_auth += 1
 
+            seen_fos = set()
             for c in d.get('concepts') or ():
                 level = c.get('level')
                 if level is None or level > 1:
@@ -122,7 +128,11 @@ def _process_part(args):
                 fid = c.get('id')
                 if not fid:
                     continue
-                fos_buf.append(f'{paper_id},{fid[_LC:]}\n')
+                fos_id = fid[_LC:]
+                if fos_id in seen_fos:
+                    continue
+                seen_fos.add(fos_id)
+                fos_buf.append(f'{paper_id},{fos_id}\n')
                 n_fos += 1
 
     with open(refs_path, 'w') as f:
