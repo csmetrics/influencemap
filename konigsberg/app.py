@@ -535,21 +535,37 @@ def get_paper_citations():
 def get_meta():
     """Dataset metadata derived from the loaded bingraph.
 
-    max_year = latest publication year that actually has papers,
-    ignoring the uint16 sentinel (65535 = unknown year) range that
-    paper-years.json includes.
+    max_year = latest publication year with a meaningful volume of
+    papers. Two guards against dirty publisher metadata:
+    - cap at the current calendar year (OpenAlex contains stray papers
+      dated 2050 etc.);
+    - require >= 1000 papers in the year, so a handful of mis-dated
+      records can't define the dataset recency.
     """
+    import datetime
     ys = florist.year_starts
     total = int(len(florist.paper_ind2id_map.arrs))
+    current_year = datetime.date.today().year
     max_year = None
-    for y in sorted((k for k in ys if k <= 2200), reverse=True):
+    for y in sorted((k for k in ys if k <= current_year), reverse=True):
         start = ys[y]
         end = ys.get(y + 1, total)
-        if end > start:
+        if end - start >= 1000:
             max_year = y
             break
+
+    # Month-precision snapshot date, if the meta file made it into the
+    # bingraph (written by fast_relations, copied by builder).
+    snapshot_date = None
+    try:
+        with open('bingraph-openalex/dataset-meta.json') as f:
+            snapshot_date = json.load(f).get('snapshot_date')
+    except Exception:
+        pass
+
     return flask.jsonify({
         'max_paper_year': max_year,
+        'snapshot_date': snapshot_date,
         'paper_count': total,
     })
 

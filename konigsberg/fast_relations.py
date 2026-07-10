@@ -225,6 +225,20 @@ def main():
         _concat(shard_dir, 'fos.*',
                 data_path / 'PaperFieldsOfStudy.txt')
 
+    # Record snapshot recency: the max updated_date partition IS the
+    # snapshot date. builder.py copies this into the bingraph so
+    # konigsberg /get-meta can report it (webapp shows "as of March
+    # 2026" fully automatically).
+    dates = sorted({p.parent.name.split('=', 1)[1]
+                    for p in part_files
+                    if '=' in p.parent.name})
+    if dates:
+        import json as _j
+        meta_path = data_path / 'dataset-meta.json'
+        with open(meta_path, 'w') as f:
+            _j.dump({'snapshot_date': dates[-1]}, f)
+        log.info('wrote %s (snapshot_date=%s)', meta_path, dates[-1])
+
     log.info('DONE in %.0fs: refs=%d auth=%d fos=%d',
              time.monotonic() - t0, *totals)
 

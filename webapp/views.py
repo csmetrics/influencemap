@@ -113,10 +113,11 @@ _dataset_asof_cache = None
 def _dataset_asof():
     """Human-readable dataset recency for user-facing text.
 
-    Priority: DATASET_ASOF env (e.g. "March 2026", set in .env at
-    data-refresh time for month precision) > konigsberg /get-meta
-    max_paper_year (fully automatic, year precision) > generic
-    fallback. Cached for the worker lifetime.
+    Priority: DATASET_ASOF env (manual override) > snapshot_date from
+    konigsberg /get-meta formatted as "March 2026" (fully automatic —
+    derived from the snapshot's updated_date partitions) >
+    max_paper_year ("2026") > generic fallback. Cached for the worker
+    lifetime.
     """
     global _dataset_asof_cache
     if _dataset_asof_cache is not None:
@@ -128,6 +129,12 @@ def _dataset_asof():
     try:
         meta = kb_client.session.get(
             kb_client.url + '/get-meta', timeout=10).json()
+        snap = meta.get('snapshot_date')
+        if snap:
+            import datetime
+            dt = datetime.datetime.strptime(snap, '%Y-%m-%d')
+            _dataset_asof_cache = dt.strftime('%B %Y')  # "March 2026"
+            return _dataset_asof_cache
         year = meta.get('max_paper_year')
         _dataset_asof_cache = str(year) if year else 'recently'
     except Exception:

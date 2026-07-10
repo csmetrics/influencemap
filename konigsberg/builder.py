@@ -380,6 +380,14 @@ def make_dataset(in_path, out_path):
         out_path / 'paper2citor-citee-ptr.bin',
         out_path / 'paper2citor-citee-ind.bin')
 
+    # Carry dataset recency (written by fast_relations.py from the max
+    # updated_date partition) into the bingraph so it deploys together.
+    meta_src = in_path / 'dataset-meta.json'
+    if meta_src.exists():
+        import shutil
+        shutil.copy(meta_src, out_path / 'dataset-meta.json')
+        logger.info('copied dataset-meta.json into bingraph')
+
     logger.info('(7/7) done')
 
 
