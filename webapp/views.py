@@ -107,6 +107,34 @@ def autocomplete():
     return flask.jsonify(data)
 
 
+_dataset_asof_cache = None
+
+
+def _dataset_asof():
+    """Human-readable dataset recency for user-facing text.
+
+    Priority: DATASET_ASOF env (e.g. "March 2026", set in .env at
+    data-refresh time for month precision) > konigsberg /get-meta
+    max_paper_year (fully automatic, year precision) > generic
+    fallback. Cached for the worker lifetime.
+    """
+    global _dataset_asof_cache
+    if _dataset_asof_cache is not None:
+        return _dataset_asof_cache
+    override = os.getenv('DATASET_ASOF')
+    if override:
+        _dataset_asof_cache = override
+        return _dataset_asof_cache
+    try:
+        meta = kb_client.session.get(
+            kb_client.url + '/get-meta', timeout=10).json()
+        year = meta.get('max_paper_year')
+        _dataset_asof_cache = str(year) if year else 'recently'
+    except Exception:
+        return 'recently'  # transient failure: don't cache, retry later
+    return _dataset_asof_cache
+
+
 def query_res(entity_type, entity_title):
     entity_title = normalize_title(entity_title)
     data = query_entity_by_keyword([entity_type], entity_title)
@@ -121,8 +149,10 @@ def query_res(entity_type, entity_title):
     # Fall back to 0 for anything missing.
     num_refs = sum(p[0].get('referenced_works_count', 0) for p in papers)
     num_cits = sum(p[0].get('cited_by_count', 0) for p in papers)
-    summary = "The Influence Flowers are generated from {} matching papers ({} references and {} citations), from academic data as of May 2025.".format(
-        len(paper_ids), num_refs, num_cits
+    summary = ("The Influence Flowers are generated from {} matching "
+               "papers ({} references and {} citations), from academic "
+               "data as of {}.").format(
+        len(paper_ids), num_refs, num_cits, _dataset_asof()
     )
 
     doc_id = url_encode_info(paper_ids=paper_ids, name=entity_title)

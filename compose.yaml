@@ -87,10 +87,16 @@ services:
       # never clobber it again. Example .env line:
       #   OPENSEARCH_URL=http://100.73.104.52:9201
       OPENSEARCH_URL: ${OPENSEARCH_URL:?set OPENSEARCH_URL in .env}
-      # DIAGNOSTIC: block /query + /query_about so external crawlers'
-      # paper-title searches don't pollute measurements. Set to "0" (or
-      # remove) to re-enable.
-      WEBAPP_DISABLE_QUERY: "1"
+      # Dataset recency shown in user-facing text ("as of March 2026").
+      # Optional: set in .env at data-refresh time for month precision;
+      # empty = webapp derives the year automatically from konigsberg
+      # /get-meta.
+      DATASET_ASOF: ${DATASET_ASOF:-}
+      # Kill switch for /query + /query_about (returns 503 when "1").
+      # Was used to block crawler traffic during performance debugging;
+      # re-enabled now that the bingraph rebuild + hot-set prefault
+      # landed. Flip back to "1" if external traffic needs muting again.
+      WEBAPP_DISABLE_QUERY: "0"
       # --timeout 120: webapp gives up after 2 min. Konigsberg keeps
       #   computing in background and stores its own FLOWER-CACHE when
       #   done, so we do NOT need webapp workers to wait 15 min for

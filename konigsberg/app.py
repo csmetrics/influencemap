@@ -244,14 +244,16 @@ def _prefault_bingraph():
     worker process but the page cache is shared, so the first worker
     does the real I/O and the rest finish almost instantly.
     """
-    # Only the graph-walk files need to be resident: they're touched
-    # millions of times per flower compute. The id<->ind hash maps are
-    # hit a handful of times per request and warm organically. The full
-    # bingraph (~183 GB) exceeds RAM, so streaming everything would
-    # LRU-evict the front before the tail finishes — prefault the hot
-    # set (~100 GB) only, which fits with room to spare.
+    # Only files that get MILLIONS of random reads per compute need to
+    # be resident. paper2entity is walked once per citor/citee paper and
+    # paper2citor-citee once per ego paper — those dominate. NOT hot:
+    # - entity2paper: ONE contiguous slice read per ego entity (a few
+    #   MB sequential — fine from disk);
+    # - id<->ind hash maps: a handful of lookups per request.
+    # The full bingraph (~183 GB) exceeds RAM and even the previous
+    # 8-file list (128.8 GB) overflowed the ~115 GB of usable page
+    # cache, self-evicting its own head. This trimmed set fits.
     _HOT = (
-        'entity2paper-ptr.bin', 'entity2paper-ind.bin',
         'paper2entity-ptr.bin', 'paper2entity-ind.bin',
         'paper2citor-citee-ptr.bin', 'paper2citor-citee-ind.bin',
         'entity-name-ptr.bin', 'entity-name-dat.bin',
@@ -527,6 +529,29 @@ def get_paper_citations():
     ids = _get_ids_from_request('ids')
     result = florist.get_paper_citations(ids)
     return flask.jsonify(stringify_keys(result))
+
+
+@app.route('/get-meta')
+def get_meta():
+    """Dataset metadata derived from the loaded bingraph.
+
+    max_year = latest publication year that actually has papers,
+    ignoring the uint16 sentinel (65535 = unknown year) range that
+    paper-years.json includes.
+    """
+    ys = florist.year_starts
+    total = int(len(florist.paper_ind2id_map.arrs))
+    max_year = None
+    for y in sorted((k for k in ys if k <= 2200), reverse=True):
+        start = ys[y]
+        end = ys.get(y + 1, total)
+        if end > start:
+            max_year = y
+            break
+    return flask.jsonify({
+        'max_paper_year': max_year,
+        'paper_count': total,
+    })
 
 
 if __name__ == '__main__':
