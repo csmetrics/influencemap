@@ -1,44 +1,48 @@
 # Standalone OpenSearch for the dedicated search server.
 #
-# Deploy on the NEW server (not the webapp/konigsberg host):
+# Deploy:
 #   docker compose -f compose.opensearch.yaml up -d
 #
-# Binds 9200 to the Tailscale interface only, so the service is
-# reachable exclusively over the tailnet. Replace TAILSCALE_IP below
-# with this server's own `tailscale ip -4` address.
+# All server-specific values come from a local `.env` file next to this
+# compose file (untracked — git pull can never clobber it):
 #
-# Prerequisites on this host:
-#   - tailscale up (and connected)
-#   - sudo sysctl -w vm.max_map_count=262144   (persist in /etc/sysctl.d/)
-#   - mkdir -p /data/opensearch && chown -R 1000:1000 /data/opensearch
+#   # .env example (sudo-less deployment on a shared server):
+#   OPENSEARCH_DATA=/data4/opensearch
+#   OPENSEARCH_BIND=127.0.0.1          # localhost-only + SSH tunnel from webapp
+#   OPENSEARCH_PORT=9201
+#   OPENSEARCH_UID=20143               # $(id -u) — run container as your own
+#   OPENSEARCH_GID=100                 # $(id -g)   account, no chown needed
+#   OPENSEARCH_ALLOW_MMAP=true         # set false if vm.max_map_count < 262144
+#                                      #   and you can't get an admin to raise it
+#
+# Prerequisites WITHOUT sudo:
+#   - membership in the `docker` group (ask admin — the one hard requirement)
+#   - vm.max_map_count >= 262144 (check: cat /proc/sys/vm/max_map_count;
+#     if too low and no admin: OPENSEARCH_ALLOW_MMAP=false)
+#   - mkdir -p $OPENSEARCH_DATA  (owned by your own account)
 
 services:
   opensearch:
     image: opensearchproject/opensearch:2.11.1
     restart: unless-stopped
+    user: "${OPENSEARCH_UID:-1000}:${OPENSEARCH_GID:-1000}"
     environment:
       - discovery.type=single-node
-      # No auth — reachable only over the tailnet. Add security plugin
-      # config here if the tailnet is ever shared with untrusted nodes.
+      # No auth — bind to localhost/tailnet only; never a public interface.
       - DISABLE_SECURITY_PLUGIN=true
       - DISABLE_INSTALL_DEMO_CONFIG=true
-      - bootstrap.memory_lock=true
-      # Dedicated server: heap can breathe. Leave the rest of RAM to
-      # the OS page cache for Lucene segments.
       - "OPENSEARCH_JAVA_OPTS=-Xms8g -Xmx8g"
+      - node.store.allow_mmap=${OPENSEARCH_ALLOW_MMAP:-true}
       - cluster.routing.allocation.disk.watermark.low=95%
       - cluster.routing.allocation.disk.watermark.high=97%
       - cluster.routing.allocation.disk.watermark.flood_stage=98%
     ulimits:
-      memlock: { soft: -1, hard: -1 }
-      nofile:  { soft: 65536, hard: 65536 }
+      nofile: { soft: 65536, hard: 65536 }
     volumes:
-      - /data/opensearch:/usr/share/opensearch/data
+      - ${OPENSEARCH_DATA:?set OPENSEARCH_DATA in .env}:/usr/share/opensearch/data
     ports:
-      # Bind to the Tailscale IP only — NOT 0.0.0.0. Replace with this
-      # host's own tailscale address (run: tailscale ip -4).
-      # Host port is 9201 because another Elasticsearch instance on this
-      # server already occupies 9200. Container-internal port stays 9200.
-      # If Docker starts before tailscaled, the bind fails and Docker
-      # retries via restart policy; ensure tailscaled is enabled at boot.
-      - "TAILSCALE_IP:9201:9200"
+      # Bind address decides exposure:
+      #   127.0.0.1  -> localhost only; reach it via SSH tunnel (no sudo,
+      #                 no firewall, no tailscale needed on this host)
+      #   <tailscale ip> -> tailnet only (needs tailscaled running)
+      - "${OPENSEARCH_BIND:?set OPENSEARCH_BIND in .env}:${OPENSEARCH_PORT:-9201}:9200"
