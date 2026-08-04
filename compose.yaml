@@ -22,7 +22,11 @@ services:
       - ${OPENSEARCH_SSH_KEY_DIR:?set OPENSEARCH_SSH_KEY_DIR in .env}:/root/.ssh:ro
     command: >
       ssh -o ServerAliveInterval=30 -o ServerAliveCountMax=3
-      -o StrictHostKeyChecking=accept-new -o ExitOnForwardFailure=yes
+      -o StrictHostKeyChecking=accept-new
+      -o UserKnownHostsFile=/tmp/known_hosts
+      -o IdentitiesOnly=yes
+      -i /root/.ssh/${OPENSEARCH_SSH_KEY:-opensearch_tunnel}
+      -o ExitOnForwardFailure=yes
       -N -L 0.0.0.0:9200:127.0.0.1:9201
       ${OPENSEARCH_SSH_TARGET:?set OPENSEARCH_SSH_TARGET in .env}
 
