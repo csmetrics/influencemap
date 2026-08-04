@@ -6,6 +6,26 @@
 # computes return to pre-refactor speed.
 
 services:
+  # SSH tunnel to the OpenSearch host. OpenSearch there binds to
+  # 127.0.0.1 only (its host is sudo-less: no firewall rules, no
+  # tailscale install possible), so we reach it through user-level SSH
+  # forwarding. webapp talks to http://opensearch-tunnel:9200.
+  #
+  # .env on THIS server must provide:
+  #   OPENSEARCH_SSH_TARGET=<user>@<new-server-ip>
+  #   OPENSEARCH_SSH_KEY_DIR=/home/<user>/.ssh   # key that authenticates
+  # and OPENSEARCH_URL=http://opensearch-tunnel:9200
+  opensearch-tunnel:
+    image: kroniak/ssh-client
+    restart: unless-stopped
+    volumes:
+      - ${OPENSEARCH_SSH_KEY_DIR:?set OPENSEARCH_SSH_KEY_DIR in .env}:/root/.ssh:ro
+    command: >
+      ssh -o ServerAliveInterval=30 -o ServerAliveCountMax=3
+      -o StrictHostKeyChecking=accept-new -o ExitOnForwardFailure=yes
+      -N -L 0.0.0.0:9200:127.0.0.1:9201
+      ${OPENSEARCH_SSH_TARGET:?set OPENSEARCH_SSH_TARGET in .env}
+
   konigsberg:
     build:
       context: .
