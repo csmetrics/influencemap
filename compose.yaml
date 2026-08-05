@@ -1,9 +1,9 @@
 # OpenSearch has moved to a dedicated server (see
-# compose.opensearch.yaml), reachable over Tailscale. Rationale: its
-# ~100GB Lucene index was competing with konigsberg's 88GB bingraph
-# mmap for this host's page cache, forcing every graph walk to disk.
-# With OpenSearch gone, the bingraph stays hot in RAM and flower
-# computes return to pre-refactor speed.
+# compose.opensearch.yaml), reached via the opensearch-tunnel SSH
+# sidecar below. Rationale: its ~100GB Lucene index was competing with
+# konigsberg's bingraph mmap for this host's page cache, forcing every
+# graph walk to disk. With OpenSearch gone, the bingraph stays hot in
+# RAM and flower computes return to pre-refactor speed.
 
 services:
   # SSH tunnel to the OpenSearch host. OpenSearch there binds to
@@ -12,9 +12,16 @@ services:
   # forwarding. webapp talks to http://opensearch-tunnel:9200.
   #
   # .env on THIS server must provide:
-  #   OPENSEARCH_SSH_TARGET=<user>@<new-server-ip>
-  #   OPENSEARCH_SSH_KEY_DIR=/home/<user>/.ssh   # key that authenticates
+  #   OPENSEARCH_SSH_TARGET=<user>@<opensearch-server-ip>
+  #   OPENSEARCH_SSH_KEY_DIR=<abs path to dir holding the key>
   # and OPENSEARCH_URL=http://opensearch-tunnel:9200
+  #
+  # Key setup: a dedicated passphrase-less key (default name
+  # "opensearch_tunnel", override with OPENSEARCH_SSH_KEY), copied into
+  # a local-disk dir such as ./tunnel-ssh (gitignored). Do NOT mount
+  # ~/.ssh directly: NFS homes with root_squash are unreadable to the
+  # docker daemon, and agent-held passphrase keys don't work in the
+  # container.
   opensearch-tunnel:
     image: kroniak/ssh-client
     restart: unless-stopped
@@ -104,12 +111,12 @@ services:
       - /data/tmp:/data/openalex-txt:ro
     environment:
       KONIGSBERG_URL: http://konigsberg:8000
-      # OpenSearch lives on the dedicated search server, reached over
-      # Tailscale (port 9201 there; 9200 was taken by another ES).
-      # The actual address comes from the server-local `.env` file next
-      # to this compose.yaml — NOT hardcoded here, so `git pull` can
-      # never clobber it again. Example .env line:
-      #   OPENSEARCH_URL=http://100.73.104.52:9201
+      # OpenSearch lives on the dedicated search server, reached via
+      # the opensearch-tunnel SSH sidecar. The actual address comes
+      # from the server-local `.env` file next to this compose.yaml —
+      # NOT hardcoded here, so `git pull` can never clobber it again.
+      # Example .env line:
+      #   OPENSEARCH_URL=http://opensearch-tunnel:9200
       OPENSEARCH_URL: ${OPENSEARCH_URL:?set OPENSEARCH_URL in .env}
       # Dataset recency shown in user-facing text ("as of March 2026").
       # Optional: set in .env at data-refresh time for month precision;

@@ -7,13 +7,20 @@
 # compose file (untracked — git pull can never clobber it):
 #
 #   # .env example (sudo-less deployment on a shared server):
-#   OPENSEARCH_DATA=/data4/opensearch
+#   OPENSEARCH_DATA=/data5/opensearch
 #   OPENSEARCH_BIND=127.0.0.1          # localhost-only + SSH tunnel from webapp
 #   OPENSEARCH_PORT=9201
-#   OPENSEARCH_UID=20143               # $(id -u) — run container as your own
-#   OPENSEARCH_GID=100                 # $(id -g)   account, no chown needed
 #   OPENSEARCH_ALLOW_MMAP=true         # set false if vm.max_map_count < 262144
 #                                      #   and you can't get an admin to raise it
+#
+# Leave OPENSEARCH_UID/GID unset: the image's entrypoint and config
+# files are owned by uid 1000 with 750 perms, so running as any other
+# uid fails with "Permission denied" (no group-0 convention in this
+# image). Instead run as the default 1000:1000 and make the data dir
+# accessible to it: chmod -R o+rwX $OPENSEARCH_DATA. Tradeoff on a
+# shared host: data is world-readable/writable, and files the
+# container creates are owned by uid 1000 (extract later via
+# docker-group tar streaming if needed).
 #
 # Prerequisites WITHOUT sudo:
 #   - membership in the `docker` group (ask admin — the one hard requirement)

@@ -4,10 +4,12 @@
 # What this does:
 #   - Fast-forward-only pull (fails loudly on merge conflicts instead of
 #     silently making them).
-#   - Rebuilds + recreates ONLY webapp and konigsberg. OpenSearch stays
-#     up so its indexes and page cache don't get lost.
-#   - Preserves persistent volumes: bingraph, OpenSearch data, numba
-#     cache, flower cache, kb cache, opensearch cache.
+#   - Rebuilds + recreates webapp and konigsberg.
+#   - Brings up opensearch-tunnel (no build — pulled image); it is only
+#     recreated when its compose config changed, so the SSH tunnel to
+#     the OpenSearch server stays connected across normal deploys.
+#   - Preserves persistent volumes: bingraph, numba cache, flower
+#     cache, kb cache, opensearch cache.
 #   - Shows post-deploy status.
 #
 # Usage:
@@ -33,6 +35,9 @@ echo "==> recreating webapp + konigsberg containers"
 # moved. Also picks up any compose.yaml env changes.
 sudo docker compose up -d --force-recreate webapp konigsberg
 
+echo "==> ensuring opensearch-tunnel is up"
+sudo docker compose up -d opensearch-tunnel
+
 echo "==> status"
 sudo docker compose ps
 
@@ -43,6 +48,10 @@ sudo docker compose logs --tail=20 konigsberg
 echo
 echo "==> webapp last 20 lines"
 sudo docker compose logs --tail=20 webapp
+
+echo
+echo "==> opensearch-tunnel last 5 lines (silence = healthy)"
+sudo docker compose logs --tail=5 opensearch-tunnel
 
 echo
 echo "Deploy complete. Tail live logs with:"

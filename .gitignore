@@ -10,3 +10,4 @@ MSAPIKEYS.txt
 .idea
 .vscode
 logs/
+tunnel-ssh/
