@@ -22,6 +22,14 @@ services:
   # ~/.ssh directly: NFS homes with root_squash are unreadable to the
   # docker daemon, and agent-held passphrase keys don't work in the
   # container.
+  #
+  # OpenSearch now runs as a Slurm job on dijkstra (slurm/opensearch.sbatch),
+  # still bound to 127.0.0.1:9201 there. If dijkstra stops admitting
+  # direct SSH, hop through the cray gateway by setting in .env:
+  #   OPENSEARCH_SSH_PROXYCMD=ssh -i /root/.ssh/opensearch_tunnel -o IdentitiesOnly=yes -o StrictHostKeyChecking=accept-new -o UserKnownHostsFile=/tmp/known_hosts -W %h:%p <user>@cray.comp.anu.edu.au
+  # (jump-host options must be spelled out here: ssh does not apply
+  # command-line -i/-o to a ProxyJump hop, and /root/.ssh/config is
+  # rejected because the mounted dir is not root-owned.)
   opensearch-tunnel:
     image: kroniak/ssh-client
     restart: unless-stopped
@@ -34,6 +42,7 @@ services:
       -o IdentitiesOnly=yes
       -i /root/.ssh/${OPENSEARCH_SSH_KEY:-opensearch_tunnel}
       -o ExitOnForwardFailure=yes
+      "-oProxyCommand=${OPENSEARCH_SSH_PROXYCMD:-none}"
       -N -L 0.0.0.0:9200:127.0.0.1:9201
       ${OPENSEARCH_SSH_TARGET:?set OPENSEARCH_SSH_TARGET in .env}
 

@@ -1,4 +1,8 @@
-# Standalone OpenSearch for the dedicated search server.
+# Standalone OpenSearch for a docker-capable search server.
+#
+# NOTE: on the CMLab cluster (dijkstra) docker is gone — use
+# slurm/opensearch.sbatch instead. This file stays for any host that
+# still has a docker group; the settings below are mirrored there.
 #
 # Deploy:
 #   docker compose -f compose.opensearch.yaml up -d
