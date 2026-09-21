@@ -8,39 +8,27 @@
 # --container-image). Same image, same settings, same data dir; only
 # the launcher changed.
 #
-# Why a chain of jobs: the CPU partition caps one job at 7 days, so a
-# 3-month service is ~13 back-to-back jobs. Each job resubmits its
-# successor when OpenSearch exits (normally: Slurm's TERM 3 min before
-# the time limit), until CHAIN_UNTIL (default: 90 days after the first
-# submission). The gap between jobs is the queue wait plus container
-# start, ~1-2 min when dijkstra is free; the webapp's opensearch-tunnel
-# sidecar reconnects by itself. The successor is submitted from the
-# ORIGINAL script path (scontrol Command=), so editing this file takes
-# effect at the next hand-over.
-#
-# First submission (on cray, from the repo checkout):
+# Submit (on cray, from the repo checkout):
 #   mkdir -p /data5/slurm/$USER/data/opensearch/logs
 #   sbatch slurm/opensearch.sbatch
 #     # or with the pre-Slurm index dir:
 #   OS_DATA=/data5/opensearch sbatch slurm/opensearch.sbatch
 #
-# Optional but recommended — import the image ONCE to a .sqsh so the
-# 7-day restarts never depend on Docker Hub being reachable:
+# Optional but recommended — import the image ONCE to a .sqsh so a
+# restart never depends on Docker Hub being reachable:
 #   srun --partition=cpu --nodelist=dijkstra --time=00:30:00 \
 #        --cpus-per-task=2 --mem=8G \
 #        enroot import -o /data5/slurm/$USER/data/opensearch/opensearch-2.11.1.sqsh \
 #        docker://opensearchproject/opensearch:2.11.1
 #   (the script picks the .sqsh up automatically when it exists)
 #
-# Stop for good (kills the running job; a killed job never resubmits):
-#   scancel --name=opensearch --user=$USER
-# Pause the chain without killing the current job:
-#   touch /data5/slurm/$USER/data/opensearch/STOP
-#
-# Check:
-#   squeue --me
-#   tail -f /data5/slurm/$USER/data/opensearch/logs/opensearch-<jobid>.out
-#   sacct -j <jobid> --format=JobID,State,ReqMem,MaxRSS,Elapsed
+# Stop:   scancel --name=opensearch --user=$USER
+#         (a cancelled job is not requeued; only node failure /
+#          maintenance triggers --requeue)
+# Check:  squeue --me
+#         sacctmgr show qos long-cpu format=Name,MaxWall   # confirm the QOS
+#         tail -f /data5/slurm/$USER/data/opensearch/logs/opensearch-<jobid>.out
+#         sacct -j <jobid> --format=JobID,State,ReqMem,MaxRSS,Elapsed
 #
 # Reaching it: OpenSearch binds 127.0.0.1:9201 on dijkstra only (no
 # auth, so never a real interface). The webapp's opensearch-tunnel
@@ -48,21 +36,31 @@
 # direct SSH, set OPENSEARCH_SSH_PROXYCMD in the webapp .env to hop via
 # cray (see compose.yaml).
 #
-# Tunables (environment at first submission; propagated to successors):
+# Tunables (environment at submission; sbatch exports it by default):
 #   OS_DATA      index directory   (default $OS_ROOT/data)
 #   OS_IMAGE     Pyxis image       (default: $OS_ROOT/opensearch-2.11.1.sqsh
 #                                   if present, else the docker.io URI)
 #   OS_HEAP      JVM heap          (default 8g; keep <= half of --mem)
-#   CHAIN_UNTIL  epoch seconds     (default now + 90 days)
 #
 #SBATCH --job-name=opensearch
 #SBATCH --partition=cpu
 #SBATCH --nodelist=dijkstra
-#SBATCH --time=7-00:00:00
+# The cpu partition caps ordinary jobs at 7 days; the cluster-wide
+# long-cpu QOS raises the ceiling to 731 days (sbatch only, no GPU,
+# same priority/fair-share). See compute.cmlab.dev/docs/resources.
+#SBATCH --qos=long-cpu
+#SBATCH --time=365-00:00:00
 #SBATCH --cpus-per-task=4
 #SBATCH --mem=32G
+# Come back after a node failure / maintenance reboot. Requeue reruns
+# this script from the top on the same job id; the index lives on
+# /data5 so there is nothing else to recover. --open-mode=append keeps
+# the earlier attempts' output instead of truncating the log.
+#SBATCH --requeue
+#SBATCH --open-mode=append
 # TERM to the job step (= the OpenSearch process) 3 min before the
-# limit; OpenSearch flushes and exits, then this script resubmits.
+# limit so it can flush and close the index cleanly instead of being
+# KILLed 30 s after the limit.
 #SBATCH --signal=TERM@180
 #SBATCH --output=/data5/slurm/%u/data/opensearch/logs/%x-%j.out
 
@@ -71,7 +69,6 @@ set -euo pipefail
 OS_ROOT="/data5/slurm/$USER/data/opensearch"
 OS_DATA="${OS_DATA:-$OS_ROOT/data}"
 OS_HEAP="${OS_HEAP:-8g}"
-CHAIN_UNTIL="${CHAIN_UNTIL:-$(( $(date +%s) + 90 * 24 * 3600 ))}"
 if [[ -z "${OS_IMAGE:-}" ]]; then
     if [[ -f "$OS_ROOT/opensearch-2.11.1.sqsh" ]]; then
         OS_IMAGE="$OS_ROOT/opensearch-2.11.1.sqsh"
@@ -79,19 +76,10 @@ if [[ -z "${OS_IMAGE:-}" ]]; then
         OS_IMAGE="docker.io#opensearchproject/opensearch:2.11.1"
     fi
 fi
-# An exit sooner than this means a broken config (bad mount, port in
-# use, corrupt index...). Do not chain then, or the job would crash-loop
-# for 90 days.
-MIN_UPTIME=600
 
 echo "job_id=$SLURM_JOB_ID node=$(hostname) started=$(date -Is)"
 echo "image=$OS_IMAGE data=$OS_DATA heap=$OS_HEAP cpus=$SLURM_CPUS_PER_TASK mem=${SLURM_MEM_PER_NODE:-?}M"
-echo "chain_until=$(date -Is -d "@$CHAIN_UNTIL")"
 
-if [[ -e "$OS_ROOT/STOP" ]]; then
-    echo "STOP file present ($OS_ROOT/STOP) — not starting. Remove it and resubmit."
-    exit 0
-fi
 mkdir -p "$OS_DATA"
 
 # vm.max_map_count is a host sysctl we cannot raise here; fall back to
@@ -111,7 +99,6 @@ ulimit -n 65536 2>/dev/null || echo "warning: could not raise nofile, now $(ulim
 #                              behaviour does not depend on the Pyxis default
 #   --container-writable       the entrypoint removes the security plugin
 #                              from the rootfs on start
-rc=0
 env \
     discovery.type=single-node \
     network.host=127.0.0.1 \
@@ -131,40 +118,6 @@ env \
         --container-writable \
         --no-container-remap-root \
         --no-container-entrypoint \
-        /usr/share/opensearch/opensearch-docker-entrypoint.sh opensearch \
-    || rc=$?
+        /usr/share/opensearch/opensearch-docker-entrypoint.sh opensearch
 
-uptime=$SECONDS
-echo "opensearch exited rc=$rc after ${uptime}s at $(date -Is)"
-
-# ---- hand over to the next 7-day job -------------------------------------
-if [[ -e "$OS_ROOT/STOP" ]]; then
-    echo "STOP file present — chain ends here."
-    exit "$rc"
-fi
-if (( $(date +%s) >= CHAIN_UNTIL )); then
-    echo "chain_until reached — chain ends here."
-    exit "$rc"
-fi
-if (( uptime < MIN_UPTIME )); then
-    echo "exited after <${MIN_UPTIME}s — assuming broken config, NOT resubmitting."
-    exit 1
-fi
-
-# Slurm runs a spooled copy of this file, so $0 is useless; resubmit the
-# path recorded at submission time.
-script=$(scontrol show job "$SLURM_JOB_ID" | sed -n 's/.*Command=\([^ ]*\).*/\1/p')
-if [[ ! -f "$script" ]]; then
-    echo "cannot find original script ($script) — NOT resubmitting."
-    exit 1
-fi
-# singleton: never two opensearch jobs on the same index at once.
-# Drop the parent job's SLURM_* variables so they cannot leak into the
-# successor's environment.
-next=$(
-    unset "${!SLURM_@}" "${!SLURMD_@}"
-    sbatch --parsable --dependency=singleton \
-        --export=ALL,CHAIN_UNTIL="$CHAIN_UNTIL",OS_DATA="$OS_DATA",OS_IMAGE="$OS_IMAGE",OS_HEAP="$OS_HEAP" \
-        "$script"
-)
-echo "submitted successor job $next"
+echo "opensearch exited after ${SECONDS}s at $(date -Is)"
