@@ -30,9 +30,19 @@ services:
   # (jump-host options must be spelled out here: ssh does not apply
   # command-line -i/-o to a ProxyJump hop, and /root/.ssh/config is
   # rejected because the mounted dir is not root-owned.)
+  #
+  # The healthcheck goes through the tunnel to OpenSearch itself, because
+  # "running" only means the ssh process is alive. `docker compose ps`
+  # shows (unhealthy) when search cannot work, whichever end is at fault.
   opensearch-tunnel:
     image: kroniak/ssh-client
     restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "wget", "-q", "-T", "5", "-O", "/dev/null", "http://127.0.0.1:9200/_cluster/health"]
+      interval: 60s
+      timeout: 10s
+      retries: 3
+      start_period: 30s
     volumes:
       - ${OPENSEARCH_SSH_KEY_DIR:?set OPENSEARCH_SSH_KEY_DIR in .env}:/root/.ssh:ro
     command: >

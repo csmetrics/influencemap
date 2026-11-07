@@ -8,11 +8,15 @@
 # --container-image). Same image, same settings, same data dir; only
 # the launcher changed.
 #
-# Submit (on cray, from the repo checkout):
+# Submit (on cray, using the copy on /data5 — scp it there after editing):
 #   mkdir -p /data5/slurm/$USER/data/opensearch/logs
-#   sbatch slurm/opensearch.sbatch
-#     # or with the pre-Slurm index dir:
-#   OS_DATA=/data5/opensearch sbatch slurm/opensearch.sbatch
+#   sbatch /data5/slurm/$USER/data/opensearch/opensearch.sbatch
+#
+# The job refuses to start when OS_DATA holds no index, or holds files
+# this user cannot write, and cancels itself when the HTTP port does
+# not open in time. A job still R after OS_START_TIMEOUT therefore has
+# HTTP up; before these checks, one sat R for 46 days on the wrong data
+# dir with 9201 closed while the webapp silently returned no results.
 #
 # Optional but recommended — import the image ONCE to a .sqsh so a
 # restart never depends on Docker Hub being reachable:
@@ -27,7 +31,8 @@
 #          maintenance triggers --requeue)
 # Check:  squeue --me
 #         sacctmgr show qos long-cpu format=Name,MaxWall   # confirm the QOS
-#         tail -f /data5/slurm/$USER/data/opensearch/logs/opensearch-<jobid>.out
+#         scontrol show job <jobid> | grep StdOut      # where the log went
+#         srun --jobid=<jobid> --overlap curl -s 'localhost:9201/_cat/indices?v'
 #         sacct -j <jobid> --format=JobID,State,ReqMem,MaxRSS,Elapsed
 #
 # Reaching it: OpenSearch binds 127.0.0.1:9201 on dijkstra only (no
@@ -37,7 +42,10 @@
 # cray (see compose.yaml).
 #
 # Tunables (environment at submission; sbatch exports it by default):
-#   OS_DATA      index directory   (default $OS_ROOT/data)
+#   OS_DATA      index directory   (default /data5/opensearch)
+#   OS_INIT      set to 1 to accept an empty OS_DATA (new index only)
+#   OS_START_TIMEOUT  seconds for the HTTP port to open before the job
+#                     cancels itself (default 1800)
 #   OS_IMAGE     Pyxis image       (default: $OS_ROOT/opensearch-2.11.1.sqsh
 #                                   if present, else the docker.io URI)
 #   OS_HEAP      JVM heap          (default 8g; keep <= half of --mem)
@@ -67,7 +75,8 @@
 set -euo pipefail
 
 OS_ROOT="/data5/slurm/$USER/data/opensearch"
-OS_DATA="${OS_DATA:-$OS_ROOT/data}"
+OS_DATA="${OS_DATA:-/data5/opensearch}"
+OS_START_TIMEOUT="${OS_START_TIMEOUT:-1800}"
 OS_HEAP="${OS_HEAP:-8g}"
 if [[ -z "${OS_IMAGE:-}" ]]; then
     if [[ -f "$OS_ROOT/opensearch-2.11.1.sqsh" ]]; then
@@ -80,7 +89,19 @@ fi
 echo "job_id=$SLURM_JOB_ID node=$(hostname) started=$(date -Is)"
 echo "image=$OS_IMAGE data=$OS_DATA heap=$OS_HEAP cpus=$SLURM_CPUS_PER_TASK mem=${SLURM_MEM_PER_NODE:-?}M"
 
-mkdir -p "$OS_DATA"
+# Fail here rather than come up on an empty or read-only index.
+if [[ "${OS_INIT:-}" == "1" ]]; then
+    mkdir -p "$OS_DATA"
+elif [[ ! -d "$OS_DATA/nodes" ]]; then
+    echo "FATAL: no index at $OS_DATA (missing nodes/). Set OS_DATA, or OS_INIT=1 for a new index." >&2
+    exit 1
+fi
+unwritable=$(find "$OS_DATA" ! -writable 2>/dev/null | head -5 || true)
+if [[ -n "$unwritable" ]]; then
+    echo "FATAL: not writable by $USER under $OS_DATA (first 5):" >&2
+    echo "$unwritable" >&2
+    exit 1
+fi
 
 # vm.max_map_count is a host sysctl we cannot raise here; fall back to
 # niofs when it is too low (same OPENSEARCH_ALLOW_MMAP switch compose had).
@@ -90,6 +111,20 @@ if (( $(cat /proc/sys/vm/max_map_count) < 262144 )); then
     allow_mmap=false
 fi
 ulimit -n 65536 2>/dev/null || echo "warning: could not raise nofile, now $(ulimit -n)"
+
+# The process staying alive proves nothing: the JVM can run for weeks
+# without ever opening HTTP. Cancel the job so that shows up in squeue.
+(
+    until curl -fs -m 5 -o /dev/null http://127.0.0.1:9201/_cluster/health; do
+        if (( SECONDS >= OS_START_TIMEOUT )); then
+            echo "FATAL: HTTP port 9201 not open after ${SECONDS}s; cancelling job" >&2
+            scancel "$SLURM_JOB_ID"
+            exit 1
+        fi
+        sleep 10
+    done
+    echo "opensearch http up after ${SECONDS}s"
+) &
 
 # Environment variables with a dot become -E settings via the image's
 # entrypoint — the same mechanism compose.opensearch.yaml relied on.

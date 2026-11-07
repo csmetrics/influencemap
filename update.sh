@@ -50,7 +50,7 @@ echo "==> webapp last 20 lines"
 sudo docker compose logs --tail=20 webapp
 
 echo
-echo "==> opensearch-tunnel last 5 lines (silence = healthy)"
+echo "==> opensearch-tunnel last 5 lines (health is in the status above)"
 sudo docker compose logs --tail=5 opensearch-tunnel
 
 echo
