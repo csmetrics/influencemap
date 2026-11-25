@@ -26,7 +26,8 @@ var selectionTableConfig = {
     "paging": false,
     "info": false,
     "language": {
-      "emptyTable": " "
+      "emptyTable": "<div class='table-hint'><b>Your selection</b><br>"
+        + "Results you tick appear here. Click one to remove it, then press <b>Go</b> to make the flower.</div>"
     },
       "scrollY": "75vh",
       "scrollCollapse": false

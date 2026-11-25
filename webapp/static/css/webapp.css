@@ -942,3 +942,38 @@ hr {
   /* font-family: Courier New; */
   /* text-decoration: underline; */
 }
+
+/* Helper text shown inside the search / selection tables while empty */
+td.dataTables_empty {
+  white-space: normal;
+  color: #777;
+  padding: 24px 16px !important;
+}
+
+.table-hint {
+  text-align: left;
+  line-height: 1.5;
+  max-width: 520px;
+  margin: 0 auto;
+}
+
+.table-hint ol {
+  margin: 8px 0 0;
+  padding-left: 20px;
+}
+
+.table-hint .open-instructions {
+  display: inline-block;
+  margin-top: 10px;
+}
+
+/* Icons inside links in the tables are inline text icons, not the big
+   floated entity icons that "#searchtable td i" styles. */
+#searchtable td a i,
+#selectiontable td a i {
+  float: none;
+  padding: 0;
+  font-size: inherit;
+  font-style: normal;
+  vertical-align: baseline;
+}

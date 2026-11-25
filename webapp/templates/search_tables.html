@@ -115,5 +115,12 @@ var modal = document.getElementById("instructionModal");
 
 make_modal(modal,btn);
 
+// The "Watch a step-by-step demo" link lives inside the DataTables
+// empty-table hint, which is re-rendered, so bind it by delegation.
+$(document).on('click', '.open-instructions', function(e) {
+  e.preventDefault();
+  modal.style.display = "block";
+});
+
 
 </script>

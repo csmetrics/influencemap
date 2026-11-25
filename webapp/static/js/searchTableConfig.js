@@ -26,7 +26,13 @@ var searchTableConfig = {
       //   "selector": 'td:last-child input[type="checkbox"]'
       // },
       "language": {
-        "emptyTable": ""
+        // Shown before the first search. search_tables.js swaps this for
+        // a "searching" / "no results" message once a search has run.
+        "emptyTable": "<div class='table-hint'><b>Search to get started</b>"
+          + "<ol><li>Choose what to search for above: authors, institutions, sources or papers.</li>"
+          + "<li>Type a name in the search bar and press Enter.</li>"
+          + "<li>Tick the results you want in your flower.</li></ol>"
+          + "<a href='#' class='open-instructions'><i class='far fa-question-circle'></i> Watch a step-by-step demo</a></div>"
       },
       "fixedColumns": true,
       "paging": false, // true,

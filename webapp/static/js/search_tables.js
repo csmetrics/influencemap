@@ -32,6 +32,7 @@ function setContinueFunction(func){
 
 // ---- Event handling to remove row from selection ---- //
 $('#selectiontable tbody').on('click', 'tr', function () {
+   if (!selectiontable.row(this).data()) { return; }  // empty-table hint row
    handleSelectionTableRowClick(this);
 });
 
@@ -72,6 +73,9 @@ function search(){
     },
     success: function (result) { // return data if success
       updateTable(result["entities"], searchtable);
+      if (!result["entities"] || result["entities"].length === 0) {
+        setSearchTableMessage('No results for "' + latestSearchTerm + '". Check the spelling or try another entity type.');
+      }
       searchTableEventHandling();
       checkSelectedRows();
       if (latestSearchOption === "author") {addNestedRows();}
@@ -79,6 +83,7 @@ function search(){
     },
     error: function (result) {
       console.log("searchButton error");
+      setSearchTableMessage('Search failed. Please try again.');
       $("#loading").hide();
     }
   });
@@ -89,8 +94,16 @@ function makeSearchTable(entityType){
     $('#searchtable').DataTable().clear().destroy();
     $('#searchtable').empty();
   }
-  var tableSettings = searchTableConfig['tableSettings'];
+  // Same settings, but the empty-table text is the "how to search" hint
+  // only before the first search; from here on it reports search state.
+  var tableSettings = $.extend({}, searchTableConfig['tableSettings'],
+    {"language": {"emptyTable": "Searching\u2026"}});
   return $('#searchtable').DataTable(tableSettings);
+}
+
+function setSearchTableMessage(message){
+  // .text() so the user's search term is never interpreted as HTML
+  $('#searchtable td.dataTables_empty').text(message);
 }
 
 function updateTable(data, table){
